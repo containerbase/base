@@ -13,7 +13,7 @@ if (r.code) {
   shell.exit(1);
 }
 
-r = shell.exec('docker buildx bake build --progress plain');
+r = shell.exec('docker buildx bake --progress plain');
 if (r.code) {
   shell.exit(1);
 }
