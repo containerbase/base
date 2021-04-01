@@ -19,7 +19,7 @@ env:
   NODE_VERSION: 14
 
 jobs:
-  test:
+  lang:
     runs-on: ubuntu-latest
 
     timeout-minutes: 15
@@ -54,6 +54,9 @@ jobs:
       - name: build
         run: docker buildx bake --progress plain
 
+      - name: images
+        run: docker image ls
+
       - name: test
         run: docker buildx build --progress plain ./test/${{ matrix.tag }}
 
@@ -81,7 +84,7 @@ jobs:
         run: docker buildx bake --progress plain test
 
   release:
-    needs: [test, distro]
+    needs: [lang, distro]
     runs-on: ubuntu-latest
 
     timeout-minutes: 15
