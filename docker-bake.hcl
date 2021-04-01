@@ -22,10 +22,10 @@ group "test" {
 
 
 target "settings" {
-  context  = "."
+  context = "."
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}"
+    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
   ]
 }
 
@@ -34,7 +34,7 @@ target "push_cache" {
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
-    "ghcr.io/${OWNER}/cache:${FILE}"
+    "ghcr.io/${OWNER}/cache:${FILE}",
   ]
   cache-to = ["type=inline,mode=max"]
 }
@@ -45,8 +45,8 @@ target "build_docker" {
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
-    "${OWNER}/${FILE}:${TAG}"
-    "${OWNER}/${FILE}"
+    "${OWNER}/${FILE}:${TAG}",
+    "${OWNER}/${FILE}",
   ]
 }
 
@@ -62,7 +62,7 @@ target "push_ghcr" {
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}"
+    "ghcr.io/${OWNER}/${FILE}:${TAG}",
   ]
 }
 
