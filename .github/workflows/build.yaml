@@ -46,11 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - name: docker-config
-        uses: renovatebot/internal-tools@v1.5.3
-        with:
-          command: docker-config
-
       - name: build
         run: docker buildx bake --progress plain
 
@@ -74,11 +69,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
-
-      - name: docker-config
-        uses: renovatebot/internal-tools@v1.5.3
-        with:
-          command: docker-config
 
       - name: test distro
         run: docker buildx bake --progress plain test
