@@ -86,7 +86,7 @@ RUN install-tool php 8.0.3
 # renovate: datasource=github-releases depName=composer/composer
 RUN install-tool composer 2.0.9
 
-USER ubuntu
+USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
