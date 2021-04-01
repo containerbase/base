@@ -7,7 +7,7 @@ ARG USER_NAME=user
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:bionic@sha256:4bc3ae6596938cb0d9e5ac51a1152ec9dcac2a1c50829c74abd9c4361e321b26 as base
+FROM ubuntu:bionic@sha256:122f506735a26c0a1aff2363335412cfc4f84de38326356d31ee00c2cbe52171 as base
 
 ARG USER_ID
 ARG USER_NAME
