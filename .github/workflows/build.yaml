@@ -66,6 +66,9 @@ jobs:
       matrix:
         distro: [bionic]
 
+    env:
+      TAG: ${{ matrix.distro }}
+
     steps:
       - uses: actions/checkout@v2.3.4
 
