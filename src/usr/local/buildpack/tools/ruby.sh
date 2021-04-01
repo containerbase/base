@@ -20,7 +20,7 @@ mkdir -p /usr/local/ruby
 
 ARCH=$(uname -p)
 CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
-RUBY_URL="https://github.com/containerbase/ruby/releases/download"
+RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 
 curl -sSfLo ruby.tar.xz ${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz || echo 'Ignore download error'
 
