@@ -88,5 +88,6 @@
       }
     ]
   },
-  "tagFormat": "${version}"
+  "tagFormat": "${version}",
+  "branches": ["main"]
 }
