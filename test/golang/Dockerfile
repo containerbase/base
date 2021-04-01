@@ -24,8 +24,8 @@ RUN set -ex; cd test/a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
 RUN set -ex; cd test/b; cat go.sum; go mod tidy; cat go.sum
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/gomod1; \
-    cd gomod1; \
+    git clone --depth=1 https://github.com/containerbase/test-golang1.git; \
+    cd test-golang1; \
     go get -d ./...; \
     git status -s; \
     git checkout -f; \
@@ -49,8 +49,8 @@ FROM build as testb
 RUN install-tool golang 1.11.0
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/gomod1; \
-    cd gomod1; \
+    git clone --depth=1 https://github.com/containerbase/test-golang1.git; \
+    cd test-golang1; \
     go get -d ./...; \
     git status -s; \
     git checkout -f; \

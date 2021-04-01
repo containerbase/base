@@ -1,4 +1,4 @@
-module github.com/renovate-tests/gomod1
+module github.com/containerbase/test-golang1
 
 go 1.14
 

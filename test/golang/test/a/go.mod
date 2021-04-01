@@ -1,4 +1,4 @@
-module github.com/renovate-tests/gomod1
+module github.com/containerbase/test-golang1
 
 require github.com/pkg/errors v0.9.1
 require github.com/aws/aws-sdk-go v1.15.21

@@ -16,7 +16,7 @@ WORKDIR /tmp
 USER 1000
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/swarm.git; \
-    cd swarm; \
+    git clone --depth=1 https://github.com/containerbase/test-erlang1.git; \
+    cd test-erlang1; \
     mix deps.update --all; \
     git status -s;
