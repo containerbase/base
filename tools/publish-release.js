@@ -14,7 +14,7 @@ if (dry) {
 
 shell.echo('Pushing docker images');
 
-r = shell.exec('docker buildx bake --progress plain push');
+const r = shell.exec('docker buildx bake --progress plain push');
 if (r.code) {
   shell.exit(1);
 }
