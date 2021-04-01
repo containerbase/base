@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/buildpack/util.sh
+
+require_tool $@
+check_command pip
+
+echo "Installing pip tool ${TOOL_NAME} v${TOOL_VERSION}"
+pip install --upgrade ${TOOL_NAME}==${TOOL_VERSION}
+
+# clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
+pip cache purge

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/buildpack/util.sh
+
+require_distro
+require_user
+require_tool $@
+
+TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
+if [[ ! -f "$TOOL" ]]; then
+  echo "No tool defined - skipping: ${TOOL_NAME}" >&2
+  exit 1;
+fi
+
+
+echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+. $TOOL
+
+# cleanup
+if [[ $EUID -eq 0 ]]; then
+  rm -rf /var/lib/apt/lists/*
+fi

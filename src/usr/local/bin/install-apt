@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/buildpack/util.sh
+
+require_root
+
+apt_install $@
+
+# cleanup
+rm -rf /var/lib/apt/lists/*

@@ -1,0 +1,22 @@
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+
+  listen 443 ssl default_server;
+  listen [::]:443 ssl default_server;
+
+  ssl_certificate /test/renovate-chain.pem;
+  ssl_certificate_key /test/renovate.key;
+
+  root /var/www/html;
+
+  # Add index.php to the list if you are using PHP
+  index index.html index.htm index.nginx-debian.html;
+
+  server_name _;
+
+  location / {
+    try_files $uri $uri/ =404;
+  }
+}

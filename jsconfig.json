@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "strict": true,
+    "target": "es2018",
+    "module": "esnext",
+    "lib": ["es2018"],
+    "types": ["node"]
+  }
+}
