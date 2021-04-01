@@ -9,7 +9,7 @@ process.env.TAG = version;
 
 if (dry) {
   shell.echo('DRY-RUN: done.');
-  return;
+  shell.exit(0);
 }
 
 shell.echo('Pushing docker images');
