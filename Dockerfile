@@ -17,7 +17,6 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
 
 #  autoloading buildpack env
 ENV BASH_ENV=/usr/local/etc/env
-ENV ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
