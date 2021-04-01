@@ -121,3 +121,5 @@ jobs:
 
       - name: semantic-release
         run: npx semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
