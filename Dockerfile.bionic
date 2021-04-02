@@ -55,7 +55,7 @@ RUN install-tool gradle 6.8.3
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.16.0
 # renovate: datasource=npm
-RUN install-tool pnpm 4.14.4
+RUN install-tool pnpm 5.18.9
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.10
 
