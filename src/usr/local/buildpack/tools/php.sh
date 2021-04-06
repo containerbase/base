@@ -22,6 +22,18 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
+  # TODO: extract to separate preparation tool
+  require_root
+  apt_install \
+    libjpeg-turbo8 \
+    libmcrypt4 \
+    libonig5 \
+    libpng16-16 \
+    libtidy5deb1 \
+    libxslt1.1 \
+    libzip5 \
+    ;
+
   mkdir -p ${base_path}
 
   file=/tmp/php.tar.xz
