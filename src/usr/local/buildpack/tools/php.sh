@@ -22,18 +22,6 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  # TODO: extract to separate preparation tool
-  require_root
-  apt_install \
-    libjpeg-turbo8 \
-    libmcrypt4 \
-    libonig5 \
-    libpng16-16 \
-    libtidy5deb1 \
-    libxslt1.1 \
-    libzip5 \
-    ;
-
   mkdir -p ${base_path}
 
   file=/tmp/php.tar.xz
@@ -41,6 +29,29 @@ if [[ -z "${tool_path}" ]]; then
   ARCH=$(uname -p)
   CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
   BASE_URL="https://github.com/containerbase/php-prebuild/releases/download"
+
+   # TODO: extract to separate preparation tool
+  require_root
+  case "$CODENAME" in
+    "bionic") apt_install \
+      libjpeg-turbo8 \
+      libmcrypt4 \
+      libonig4 \
+      libpng16-16 \
+      libtidy5 \
+      libxslt1.1 \
+      libzip4 \
+      ;;
+    "focal") apt_install \
+      libjpeg-turbo8 \
+      libmcrypt4 \
+      libonig5 \
+      libpng16-16 \
+      libtidy5deb1 \
+      libxslt1.1 \
+      libzip5 \
+      ;;
+  esac
 
   curl -sSfLo ${file} ${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz
 
