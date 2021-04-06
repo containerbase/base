@@ -11,7 +11,7 @@ WORKDIR /tmp
 FROM ${IMAGE} as build3
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.0.0
+RUN install-tool ruby 3.0.1
 
 RUN touch /.dummy
 
