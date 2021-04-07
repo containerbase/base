@@ -5,15 +5,18 @@ set -e
 
 check_command php
 
-if [[ "${TOOL_VERSION}" -ne "latest" ]]; then
-  check_semver ${TOOL_VERSION}
-
-
-  if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-    echo Invalid version: ${TOOL_VERSION}
-    exit 1
-  fi
+if [[ "${TOOL_VERSION}" -eq "latest" ]]; then
+  export "TOOL_VERSION=$(curl -s https://api.github.com/repos/composer/composer/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 fi
+
+check_semver ${TOOL_VERSION}
+
+
+if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
+  echo Invalid version: ${TOOL_VERSION}
+  exit 1
+fi
+
 
 tool_path=$(find_tool_path)
 
@@ -33,10 +36,10 @@ if [[ -z "${tool_path}" ]]; then
   # OpenShift
   chmod g+w ${base_path}
 
-  BASE_URL="https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer"
-  VERS_ARG=$([[ "${TOOL_VERSION}" -eq "latest" ]] && echo "" || echo "--version=${TOOL_VERSION}")
+  BASE_URL="https://github.com/composer/composer/releases/download"
 
-  curl -sSfL ${BASE_URL} | php -- $VERS_ARG --install-dir=${tool_path}/bin --filename=composer
+  curl -sSfLo ${tool_path}/bin/composer ${BASE_URL}/${TOOL_VERSION}/composer.phar
+  chmod +x ${tool_path}/bin/composer
 
   update_env ${tool_path}
   shell_wrapper composer
