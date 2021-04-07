@@ -1,0 +1,7 @@
+[package]
+name = "crate5"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+rodio = "0.3.0"

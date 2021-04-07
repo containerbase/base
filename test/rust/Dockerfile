@@ -9,20 +9,15 @@ RUN install-tool rust 1.51.0
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
+
 USER 1000
 
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/cargo1; \
-    cd cargo1; \
+    cd test/a; \
     cargo update; \
-    git status -s
-
-RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/tikv; \
-    cd tikv; \
-    cargo update --manifest-path Cargo.toml --package fail; \
-    git status -s
+    cargo update --manifest-path Cargo.toml --package serde;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN rustc --version
