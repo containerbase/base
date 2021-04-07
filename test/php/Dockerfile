@@ -84,7 +84,7 @@ FROM base as testc
 RUN install-tool php 8.0.3
 
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.0.9
+RUN install-tool composer 2.0.12
 
 USER 1000
 
