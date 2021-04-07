@@ -51,6 +51,7 @@ jobs:
             golang,
             java,
             helm,
+            nix,
             node,
             php,
             powershell,
