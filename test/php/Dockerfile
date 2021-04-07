@@ -89,7 +89,7 @@ RUN install-tool php 8.0.3
 USER 1000
 
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.0.9
+RUN install-tool composer 2.0.12
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
