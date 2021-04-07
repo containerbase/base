@@ -91,6 +91,8 @@ USER 1000
 # renovate: datasource=github-releases lookupName=composer/composer
 RUN install-tool composer 2.0.12
 
+RUN install-tool composer latest
+
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
 
