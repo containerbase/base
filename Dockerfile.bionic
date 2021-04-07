@@ -16,7 +16,7 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 
 #  autoloading buildpack env
-ENV BASH_ENV=/usr/local/etc/env HOME=/home/$USER_NAME PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /

@@ -15,7 +15,7 @@ ARG USER_ID=1000
 ARG APP_ROOT=/usr/src/app
 
 # Set env and shell
-ENV BASH_ENV=/usr/local/etc/env HOME=/home/$USER_NAME PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 # This entry point ensures that dumb-init is run
