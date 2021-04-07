@@ -4,7 +4,7 @@ set -e
 
 . /usr/local/buildpack/util.sh
 
-require_tool $@
+require_tool "$@"
 check_command gem
 
 if [[ $EUID -eq 0 ]]; then

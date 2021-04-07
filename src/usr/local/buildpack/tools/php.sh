@@ -14,7 +14,7 @@ tool_path=$(find_tool_path)
 
 function update_env () {
   reset_tool_env
-  export_tool_path "\$HOME/.local/bin:${1}/bin"
+  export_tool_path "${1}/bin"
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -65,13 +65,10 @@ if [[ -z "${tool_path}" ]]; then
   fi
 
   update_env ${tool_path}
+  shell_wrapper php
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
 fi
 
 php --version
-
-if [[ $EUID -eq 0 ]]; then
-  shell_wrapper php
-fi
