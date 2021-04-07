@@ -5,6 +5,8 @@ RUN touch /.dummy
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
+
 #--------------------------------------
 # test: php 7.4
 #--------------------------------------
@@ -38,11 +40,8 @@ RUN composer --version
 
 
 RUN set -ex; \
-  git clone https://github.com/containerbase/test-php1.git; \
-  cd test-php1/test1; \
-  composer install --no-ansi --no-interaction; \
-  cd ..; \
-  git status -s;
+  cd test/a; \
+  composer install --no-ansi --no-interaction
 
 #--------------------------------------
 # test: php 5.6
