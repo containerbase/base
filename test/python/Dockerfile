@@ -94,15 +94,7 @@ RUN set -ex; cd test/d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 FROM poetry as teste
 
-RUN set -ex; \
-  git clone --depth=1 https://github.com/renovate-tests/poetry1; \
-  cd poetry1; \
-  poetry update --lock --no-interaction pytest; \
-  git status -s; \
-  git checkout -f; \
-  git clean -fdx; \
-  poetry update --lock --no-interaction; \
-  git status -s;
+
 
 #--------------------------------------
 # test f: pip_requirements
@@ -156,6 +148,6 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
