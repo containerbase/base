@@ -16,7 +16,7 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 
 #  autoloading buildpack env
-ENV BASH_ENV=/usr/local/etc/env
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
@@ -51,6 +51,9 @@ RUN install-tool helm v3.5.3
 RUN install-tool java 11
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
 RUN install-tool gradle 6.8.3
+
+# renovate: datasource=github-releases lookupName=NixOS/nix
+RUN install-tool nix 2.3.10
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.16.0

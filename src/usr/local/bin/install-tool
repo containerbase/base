@@ -6,7 +6,7 @@ set -e
 
 require_distro
 require_user
-require_tool $@
+require_tool "$@"
 
 TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
 if [[ ! -f "$TOOL" ]]; then

@@ -38,8 +38,8 @@ RUN composer --version
 
 
 RUN set -ex; \
-  git clone https://github.com/renovate-tests/composerlock3.git; \
-  cd composerlock3/backend; \
+  git clone https://github.com/containerbase/test-php1.git; \
+  cd test-php1/test1; \
   composer install --no-ansi --no-interaction; \
   cd ..; \
   git status -s;
@@ -80,13 +80,18 @@ RUN composer --version
 #--------------------------------------
 FROM base as testc
 
-# renovate: datasource=docker versioning=docker
+# no auto env for testing
+SHELL [ "/bin/sh", "-c" ]
+
+# renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.0.3
 
-# renovate: datasource=github-releases depName=composer/composer
-RUN install-tool composer 2.0.9
-
 USER 1000
+
+# renovate: datasource=github-releases lookupName=composer/composer
+RUN install-tool composer 2.0.12
+
+RUN install-tool composer latest
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
