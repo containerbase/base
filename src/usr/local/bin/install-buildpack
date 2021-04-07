@@ -61,7 +61,7 @@ mkdir /usr/local/env.d
 su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/{env.d,bin}'
 
 # OpenShift
-chmod g+w /home/${USER_NAME}/{env.d,bin}
+chmod g+w /home/${USER_NAME}/{,env.d,bin}
 
 
 
