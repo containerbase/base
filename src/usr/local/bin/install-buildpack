@@ -25,10 +25,10 @@ if [[ -z "${BASH_ENV+x}" ]]; then
 fi
 
 
-export_env BUILDPACK 1
 
 # env helper, loads tool specific env
 cat >> $BASH_ENV <<- EOM
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}"
 if [ -d /usr/local/env.d ]; then
   for i in /usr/local/env.d/*.sh; do
     if [ -r \$i ]; then
@@ -37,8 +37,8 @@ if [ -d /usr/local/env.d ]; then
   done
   unset i
 fi
-if [ -d \$HOME/.local/env.d ]; then
-  for i in \$HOME/.local/env.d/*.sh; do
+if [ -d /home/${USER_NAME}/env.d ]; then
+  for i in /home/${USER_NAME}/env.d/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
@@ -58,14 +58,16 @@ useradd --uid ${USER_ID} --gid 0 --groups ${USER_NAME} --shell /bin/bash --creat
 
 # create env helper paths
 mkdir /usr/local/env.d
-su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/.local/env.d'
+su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/{env.d,bin}'
 
-export_env USER_NAME ${USER_NAME}
-export_env USER_ID ${USER_ID}
+# OpenShift
+chmod g+w /home/${USER_NAME}/{env.d,bin}
+
+
+
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
-
 # install basic required packages
 apt_install \
   ca-certificates \

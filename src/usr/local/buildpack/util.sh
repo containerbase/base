@@ -55,7 +55,8 @@ function export_tool_path () {
 
 # use this if custom env is required, creates a shell wrapper to /usr/local/bin
 function shell_wrapper () {
-  local FILE="/usr/local/bin/${1}"
+  local install_dir=$(get_install_dir)
+  local FILE="${install_dir}/bin/${1}"
   check_command $1
   cat > $FILE <<- EOM
 #!/bin/bash
@@ -70,14 +71,15 @@ if [[ "\$(command -v ${1})" == "$FILE" ]]; then
   exit 1
 fi
 
-${1} \${@}
+${1} "\$@"
 EOM
   chmod +x $FILE
 }
 
 # use this for simple symlink to /usr/local/bin
 function link_wrapper () {
-  local TARGET="/usr/local/bin/${1}"
+  local install_dir=$(get_install_dir)
+  local TARGET="${install_dir}/bin/${1}"
   local SOURCE=$(command -v ${1})
   check_command $1
   ln -sf $SOURCE $TARGET
@@ -120,7 +122,7 @@ function check_semver () {
 function apt_install () {
   echo "Installing apt packages: ${@}"
   apt-get update
-  apt-get install -y $@
+  apt-get install -y "$@"
 }
 
 function require_distro () {
@@ -188,14 +190,14 @@ function get_install_dir () {
   if [[ $EUID -eq 0 ]]; then
     echo /usr/local
   else
-    echo ${HOME}/.local
+    echo /home/${USER_NAME}
   fi
 }
 
 function find_tool_path () {
   if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
     echo /usr/local/${TOOL_NAME}/${TOOL_VERSION}
-  elif [[ -d "$HOME/.local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo $HOME/.local/${TOOL_NAME}/${TOOL_VERSION}
+  elif [[ -d "/home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
+    echo /home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}
   fi
 }

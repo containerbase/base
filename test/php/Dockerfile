@@ -80,13 +80,16 @@ RUN composer --version
 #--------------------------------------
 FROM base as testc
 
+# no auto env for testing
+SHELL [ "/bin/sh", "-c" ]
+
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.0.3
 
+USER 1000
+
 # renovate: datasource=github-releases lookupName=composer/composer
 RUN install-tool composer 2.0.9
-
-USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;

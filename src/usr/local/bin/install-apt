@@ -6,7 +6,7 @@ set -e
 
 require_root
 
-apt_install $@
+apt_install "$@"
 
 # cleanup
 rm -rf /var/lib/apt/lists/*
