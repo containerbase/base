@@ -1,10 +1,11 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
-
 RUN touch /.dummy
 
 WORKDIR /tmp
+
+COPY --chown=1000:0 test test
 
 #--------------------------------------
 # test: golang
@@ -16,22 +17,14 @@ RUN install-tool golang 1.16.3
 
 USER 1000
 
-COPY --chown=1000:0 test test
-
-
 RUN set -ex; cd test/a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
 
 RUN set -ex; cd test/b; cat go.sum; go mod tidy; cat go.sum
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/containerbase/test-golang1.git; \
-    cd test-golang1; \
+    cd test/d; \
     go get -d ./...; \
-    git status -s; \
-    git checkout -f; \
-    git clean -fdx; \
-    go mod tidy; \
-    git status -s;
+    go mod tidy;
 
 USER root
 RUN echo export "GOPATH=/home/${USER_NAME}/.go" | tee -a $BASH_ENV
@@ -49,14 +42,9 @@ FROM build as testb
 RUN install-tool golang 1.11.0
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/containerbase/test-golang1.git; \
-    cd test-golang1; \
+    cd test/d; \
     go get -d ./...; \
-    git status -s; \
-    git checkout -f; \
-    git clean -fdx; \
-    go mod tidy; \
-    git status -s;
+    go mod tidy;
 
 USER 1000
 
