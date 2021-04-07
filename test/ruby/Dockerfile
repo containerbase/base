@@ -19,6 +19,8 @@ RUN touch /.dummy
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
+
 #--------------------------------------
 # test: bundler
 #--------------------------------------
