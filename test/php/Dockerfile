@@ -38,8 +38,8 @@ RUN composer --version
 
 
 RUN set -ex; \
-  git clone https://github.com/renovate-tests/composerlock3.git; \
-  cd composerlock3/backend; \
+  git clone https://github.com/containerbase/test-php1.git; \
+  cd test-php1/test1; \
   composer install --no-ansi --no-interaction; \
   cd ..; \
   git status -s;
