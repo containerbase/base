@@ -54,4 +54,4 @@ if [[ $EUID -eq 0 ]]; then
   su -c 'flutter --version' ${USER_NAME}
 fi
 
-shell_wrapper python
+shell_wrapper flutter
