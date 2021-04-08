@@ -1,12 +1,13 @@
+
 [tool.poetry]
-name = "paranormal"
+name = "containerbase-test"
 version = "0.2.1"
-description = "Coherent management of large parameter lists in Python"
-authors = ["Schuyler Fried <schuylerfried@gmail.com>", "Steven Heidel <steven@heidel.ca"]
-license = "Apache-2.0"
+description = "Testing"
+authors = []
+license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">3.7"
+python = ">3.6"
 numpy = "^1.16"
 PyYAML = "^5.1"
 pampy = "^0.2.1"

@@ -8,6 +8,8 @@ RUN touch /.dummy
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
+
 FROM ${IMAGE} as build3
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
@@ -16,6 +18,8 @@ RUN install-tool ruby 3.0.1
 RUN touch /.dummy
 
 WORKDIR /tmp
+
+COPY --chown=1000:0 test test
 
 #--------------------------------------
 # test: bundler
@@ -41,10 +45,8 @@ RUN set -ex; \
   bundler env
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/bundler8; \
-    cd bundler8; \
-    bundle lock; \
-    git status -s
+    cd test/a; \
+    bundle lock
 
 #--------------------------------------
 # test: global bundler
@@ -60,10 +62,8 @@ RUN ruby --version
 RUN bundler env
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/bundler8; \
-    cd bundler8; \
-    bundle lock; \
-    git status -s
+    cd test/a; \
+    bundle lock;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN ruby --version
@@ -78,11 +78,9 @@ USER 1000
 RUN gem install cocoapods -v 1.9.1
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/cocoapods1; \
-    cd cocoapods1/Project; \
+    cd test/b/Project; \
     gem install cocoapods-acknowledgements; \
-    pod install; \
-    git status -s
+    pod install;
 
 #--------------------------------------
 # test: global cocoapods
@@ -95,11 +93,9 @@ RUN install-gem cocoapods 1.10.1
 USER 1000
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/renovate-tests/cocoapods1; \
-    cd cocoapods1/Project; \
+    cd test/b/Project; \
     gem install cocoapods-acknowledgements; \
-    pod install; \
-    git status -s
+    pod install;
 
 
 
