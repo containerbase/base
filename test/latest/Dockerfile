@@ -68,7 +68,7 @@ RUN set -ex; \
 FROM build as testc
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.0
+RUN install-tool node 14.16.1
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
