@@ -1,14 +1,14 @@
-ARG IMAGE=renovate/buildpack
+ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE}
 
 # Flutter
 
 RUN install-tool flutter 1.12.13+hotfix.9
 
-USER ubuntu
+USER 1000
 
 
-COPY --chown=ubuntu:0 test test
+COPY --chown=1000:0 test test
 
 
 RUN set -ex; \
