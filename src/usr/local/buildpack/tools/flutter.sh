@@ -4,12 +4,12 @@ set -e
 
 require_root
 
-if [[ -d "/usr/local/flutter" ]]; then
+if [[ -d "/usr/local/flutter/${TOOL_VERSION}" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
 
-export_env FLUTTER_ROOT "/usr/local/flutter"
+export_env FLUTTER_ROOT "/usr/local/flutter/${TOOL_VERSION}"
 
 mkdir $FLUTTER_ROOT
 
@@ -23,22 +23,21 @@ rm $FLUTTER_SDK_ARCHIVE
 
 export_path "${FLUTTER_ROOT}/bin"
 
-# required for upgrade lock
-#chmod g=u $FLUTTER_ROOT/bin/cache
+if [[ ! -f "/home/${USER_NAME}/.flutter" ]]; then
+  # we need write access to flutter :-(
+  chown -R root.root $FLUTTER_ROOT
+  chmod -R g=u $FLUTTER_ROOT
 
-# disable auto upgrade
-#sed -i 's/(upgrade_flutter)/# (upgrade_flutter)/' $FLUTTER_ROOT/bin/flutter
+  echo '{ "firstRun": false, "enabled": false }' > ~/.flutter
+  echo '{ "firstRun": false, "enabled": false }' > /home/${USER_NAME}/.flutter
+  chown ${USER_NAME} /home/${USER_NAME}/.flutter
+  chmod -R g=u /home/${USER_NAME}/.flutter
 
-# we need write access to flutter :-(
-chown -R root.root $FLUTTER_ROOT
-chmod -R g=u $FLUTTER_ROOT
+fi
 
-echo '{ "firstRun": false, "enabled": false }' > ~/.flutter
-echo '{ "firstRun": false, "enabled": false }' > /home/${USER_NAME}/.flutter
-chown ${USER_NAME} /home/${USER_NAME}/.flutter
-chmod -R g=u /home/${USER_NAME}/.flutter
 
 flutter --version
 
-
 su -c 'flutter --version' ${USER_NAME}
+
+shell_wrapper python
