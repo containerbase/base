@@ -78,7 +78,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testd
 
-# old php version, not for renovating
+# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
 
 RUN set -ex; \
