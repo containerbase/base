@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function refreshenv () {
   if [[ -r $BASH_ENV ]]; then
@@ -59,7 +59,7 @@ function shell_wrapper () {
   local FILE="${install_dir}/bin/${1}"
   check_command $1
   cat > $FILE <<- EOM
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -f "\$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
   . \$BASH_ENV

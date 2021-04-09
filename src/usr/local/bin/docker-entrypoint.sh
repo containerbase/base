@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -f "$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
   . $BASH_ENV
