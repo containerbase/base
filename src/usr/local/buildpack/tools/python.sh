@@ -44,6 +44,7 @@ if [[ -z "${tool_path}" ]]; then
       libbz2-dev \
       libffi-dev \
       liblzma-dev \
+      libpq-dev \
       libreadline-dev \
       libsqlite3-dev \
       libssl-dev \
