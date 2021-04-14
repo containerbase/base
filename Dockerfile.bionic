@@ -77,7 +77,7 @@ RUN install-pip pipenv 2020.11.15
 # renovate: datasource=pypi
 RUN install-pip hashin 0.15.0
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.5
+RUN install-tool poetry 1.1.6
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.0.1
