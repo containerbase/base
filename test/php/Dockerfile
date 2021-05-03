@@ -83,7 +83,7 @@ FROM base as testc
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-RUN install-tool php 8.0.3
+RUN install-tool php 8.0.5
 
 USER 1000
 
