@@ -1,0 +1,6 @@
+{
+  "require": {
+    "monolog/monolog": "1.0.2",
+    "symfony/console": "4.4.17"
+  }
+}

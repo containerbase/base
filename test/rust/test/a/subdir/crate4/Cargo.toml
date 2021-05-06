@@ -1,0 +1,7 @@
+[package]
+name = "crate4"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+gfx = "0.10.0"

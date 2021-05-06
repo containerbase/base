@@ -11,7 +11,7 @@ FROM base as build
 
 # Python
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.4
+RUN install-tool python 3.9.5
 
 
 FROM base as build-rootless
@@ -19,7 +19,7 @@ FROM base as build-rootless
 USER 1000
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.4
+RUN install-tool python 3.9.5
 
 #--------------------------------------
 # build: pipenv
@@ -38,7 +38,7 @@ USER 1000
 FROM build as poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.5
+RUN install-tool poetry 1.1.6
 
 USER 1000
 
@@ -49,10 +49,10 @@ FROM build as testa
 
 # try install again, sould skip
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.4
+RUN install-tool python 3.9.5
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.5
+RUN install-tool poetry 1.1.6
 
 USER 1000
 
@@ -94,15 +94,7 @@ RUN set -ex; cd test/d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 FROM poetry as teste
 
-RUN set -ex; \
-  git clone --depth=1 https://github.com/renovate-tests/poetry1; \
-  cd poetry1; \
-  poetry update --lock --no-interaction pytest; \
-  git status -s; \
-  git checkout -f; \
-  git clean -fdx; \
-  poetry update --lock --no-interaction; \
-  git status -s;
+
 
 #--------------------------------------
 # test f: pip_requirements
@@ -129,7 +121,7 @@ RUN set -ex; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.5
+RUN install-tool poetry 1.1.6
 
 RUN set -ex \
   && cd test/c-poetry \
@@ -156,6 +148,6 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy

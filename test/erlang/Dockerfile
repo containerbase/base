@@ -13,10 +13,10 @@ RUN install-tool elixir 1.11.4
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
+
 USER 1000
 
 RUN set -ex; \
-    git clone --depth=1 https://github.com/containerbase/test-erlang1.git; \
-    cd test-erlang1; \
-    mix deps.update --all; \
-    git status -s;
+    cd test/a; \
+    mix deps.update --all;
