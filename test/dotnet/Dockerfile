@@ -14,7 +14,7 @@ COPY --chown=1000:0 test test
 FROM base as net3
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 3.1.408
+RUN install-tool dotnet 5.0.202
 
 USER 1000
 
