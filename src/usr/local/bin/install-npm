@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/buildpack/util.sh
+
+require_root
+require_tool "$@"
+check_command npm
+
+echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
+npm install --global ${TOOL_NAME}@${TOOL_VERSION}
+
+# Clean download cache
+npm cache clean --force
