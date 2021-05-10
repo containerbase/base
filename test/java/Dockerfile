@@ -1,8 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
-# renovate: datasource=docker lookupName=openjdk versioning=java
-RUN install-tool java 11
+# renovate: datasource=docker lookupName=openjdk versioning=docker
+RUN install-tool java 11.0.11
 
 RUN touch /.dummy
 
@@ -32,8 +32,28 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
+# test: java 8
+#--------------------------------------
+FROM build as testb
+
+
+# renovate: datasource=docker lookupName=openjdk versioning=docker
+RUN install-tool java 8
+
+#--------------------------------------
+# test: java 16
+#--------------------------------------
+FROM build as testc
+
+
+# renovate: datasource=docker lookupName=openjdk versioning=docker
+RUN install-tool java 16.0.1
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
 
 COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
