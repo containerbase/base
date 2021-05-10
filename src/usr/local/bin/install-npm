@@ -12,4 +12,4 @@ echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
 npm install --global ${TOOL_NAME}@${TOOL_VERSION}
 
 # Clean download cache
-npm cache clean
+npm cache clean --force
