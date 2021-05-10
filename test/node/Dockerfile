@@ -60,6 +60,9 @@ USER root
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.10
 
+# renovate: datasource=npm
+RUN install-npm lerna 3.22.1
+
 USER 1000
 
 RUN set -ex; \
