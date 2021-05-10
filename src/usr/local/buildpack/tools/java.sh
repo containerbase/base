@@ -5,6 +5,7 @@ set -e
 require_root
 check_semver $TOOL_VERSION
 
+VERSION_CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
 
 echo "deb http://ppa.launchpad.net/openjdk-r/ppa/ubuntu ${VERSION_CODENAME} main" | tee -a /etc/apt/sources.list.d/java.list
 curl -sSL \
