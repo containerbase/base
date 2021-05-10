@@ -109,6 +109,13 @@ RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
 
 #--------------------------------------
+# test: terraform
+#--------------------------------------
+FROM build as testg
+# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
+RUN install-tool terraform 0.15.3
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -119,3 +126,4 @@ COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
