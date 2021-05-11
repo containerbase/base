@@ -1,6 +1,7 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+# TODO: only lts
 # renovate: datasource=docker lookupName=openjdk versioning=docker
 RUN install-tool java 11.0.11
 
@@ -37,7 +38,7 @@ RUN gradle --version
 FROM build as testb
 
 
-# renovate: datasource=docker lookupName=openjdk versioning=docker
+# need to stay old
 RUN install-tool java 8
 
 #--------------------------------------
