@@ -2,7 +2,7 @@ ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 11.0.11
+RUN install-tool java 16.0.1
 
 RUN touch /.dummy
 
