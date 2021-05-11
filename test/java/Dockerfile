@@ -38,7 +38,7 @@ FROM build as testb
 
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 8
+RUN install-tool java 17
 
 #--------------------------------------
 # test: java 16
