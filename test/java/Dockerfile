@@ -41,6 +41,9 @@ FROM build as testb
 # need to stay old
 RUN install-tool java 8
 
+# renovate: datasource=github-releases lookupName=scala/scala
+RUN install-tool scala v2.13.5
+
 #--------------------------------------
 # test: java 16
 #--------------------------------------
