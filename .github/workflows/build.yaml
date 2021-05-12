@@ -46,6 +46,7 @@ jobs:
 
     strategy:
       matrix:
+        platform: [linux/amd64, linux/arm64]
         tag:
           [
             dotnet,
@@ -76,7 +77,7 @@ jobs:
         run: docker image ls
 
       - name: test
-        run: docker buildx build --progress plain ./test/${{ matrix.tag }}
+        run: docker buildx build --progress plain --platform ${{ matrix.platform }} ./test/${{ matrix.tag }}
 
   release:
     needs: [lang, distro]
