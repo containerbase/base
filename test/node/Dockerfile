@@ -2,7 +2,7 @@ ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.1
+RUN install-tool node 14.17.0
 
 RUN touch /.dummy
 
