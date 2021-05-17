@@ -7,7 +7,7 @@ check_command erl
 
 curl -sSL https://github.com/elixir-lang/elixir/releases/download/v${TOOL_VERSION}/Precompiled.zip -o elixir.zip
 mkdir -p /usr/local/elixir/
-unzip elixir.zip -d /usr/local/elixir/
+unzip -q elixir.zip -d /usr/local/elixir/
 rm elixir.zip
 
 export_path "/usr/local/elixir/bin"
