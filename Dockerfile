@@ -11,6 +11,7 @@ FROM ubuntu:focal@sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da8
 
 ARG USER_ID
 ARG USER_NAME
+ARG APT_HTTP_PROXY
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"

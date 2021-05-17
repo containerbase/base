@@ -34,6 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
+      - name: init env
+        run: echo "APT_HTTP_PROXY=http://$(hostname -f):3142" >> $GITHUB_ENV
+
+      - name: start apt-cacher
+        run: docker buildx build --progress plain -t apt-cacher -f Dockerfile.apt-cacher && docker run -d -p 3142:3142 apt-cacher
+
       - name: test distro
         run: docker buildx bake --progress plain test
 

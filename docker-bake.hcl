@@ -8,6 +8,10 @@ variable "TAG" {
   default = "latest"
 }
 
+variable "APT_HTTP_PROXY" {
+  default = ""
+}
+
 group "default" {
   targets = ["build_docker"]
 }
@@ -52,6 +56,9 @@ target "build_docker" {
 
 target "build_distro" {
   dockerfile = "Dockerfile.${TAG}"
+  args = {
+    APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
+  }
   tags = [
     "${OWNER}/${FILE}:${TAG}"
   ]

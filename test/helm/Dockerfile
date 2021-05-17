@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 
 # renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm v3.5.4

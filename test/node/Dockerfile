@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.17.0
 

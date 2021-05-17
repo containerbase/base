@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
