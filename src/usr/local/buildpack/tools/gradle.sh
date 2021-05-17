@@ -6,7 +6,7 @@ require_root
 check_command java
 
 curl -sL -o gradle.zip https://services.gradle.org/distributions/gradle-${TOOL_VERSION}-bin.zip
-unzip -d /usr/local gradle.zip
+unzip -q -d /usr/local gradle.zip
 rm gradle.zip
 
 export_path "/usr/local/gradle-${TOOL_VERSION}/bin"
