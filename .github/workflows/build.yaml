@@ -66,6 +66,9 @@ jobs:
             latest,
           ]
 
+    env:
+      TAG: ${{ matrix.tag }}
+
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -79,7 +82,7 @@ jobs:
         run: docker image ls
 
       - name: test
-        run: docker buildx build --progress plain ./test/${{ matrix.tag }}
+        run: docker buildx bake --progress plain build_test
 
   release:
     needs: [lang, distro]

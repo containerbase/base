@@ -27,17 +27,20 @@ group "test" {
 
 target "settings" {
   context = "."
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
-  ]
   args = {
     APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
   }
 }
 
+target "cache" {
+  cache-from = [
+    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
+    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
+  ]
+}
+
 target "push_cache" {
-  inherits = ["settings"]
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
@@ -47,7 +50,7 @@ target "push_cache" {
 }
 
 target "build_docker" {
-  inherits = ["settings"]
+  inherits = ["settings", "cache"]
   output   = ["type=docker"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
@@ -58,14 +61,20 @@ target "build_docker" {
 }
 
 target "build_distro" {
+  inherits = ["settings"]
   dockerfile = "Dockerfile.${TAG}"
   tags = [
     "${OWNER}/${FILE}:${TAG}"
   ]
 }
 
-target "push_ghcr" {
+target "build_test" {
   inherits = ["settings"]
+  context ="./test/${TAG}"
+}
+
+target "push_ghcr" {
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
@@ -74,7 +83,7 @@ target "push_ghcr" {
 }
 
 target "push_hub" {
-  inherits = ["settings"]
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags     = ["${OWNER}/${FILE}", "${OWNER}/${FILE}:${TAG}"]
 }
