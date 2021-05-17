@@ -39,6 +39,7 @@ RUN gradle --version
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
 
 # need to stay old
 RUN install-tool java 8
@@ -48,6 +49,7 @@ RUN install-tool java 8
 #--------------------------------------
 FROM build as testc
 
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
 RUN install-tool java 16.0.1

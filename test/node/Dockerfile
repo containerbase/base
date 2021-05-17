@@ -38,6 +38,8 @@ RUN npm --version
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
+
 RUN npm install -g yarn
 
 RUN set -ex; \
@@ -77,6 +79,8 @@ RUN set -ex; \
 
 FROM build as testc
 
+ARG APT_HTTP_PROXY
+
 USER root
 
 # renovate: datasource=npm
@@ -102,6 +106,8 @@ RUN set -ex; \
 #--------------------------------------
 
 FROM ${IMAGE} as testd
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
 RUN install-tool node 15.0.1

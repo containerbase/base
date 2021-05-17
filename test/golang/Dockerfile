@@ -1,7 +1,6 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
-ARG APT_HTTP_PROXY
 
 RUN touch /.dummy
 

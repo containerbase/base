@@ -1,8 +1,6 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as base
 
-ARG APT_HTTP_PROXY
-
 RUN touch /.dummy
 
 WORKDIR /tmp
@@ -13,6 +11,8 @@ COPY --chown=1000:0 test test
 # test: php 7.4
 #--------------------------------------
 FROM base as testa
+
+ARG APT_HTTP_PROXY
 
 # old php version, not for renovating
 RUN install-tool php 7.4.14
@@ -50,6 +50,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as testb
 
+ARG APT_HTTP_PROXY
+
 # old php version, not for renovating
 RUN install-tool php 5.6.40
 
@@ -80,6 +82,8 @@ RUN composer --version
 # test: php 8.0
 #--------------------------------------
 FROM base as testc
+
+ARG APT_HTTP_PROXY
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]

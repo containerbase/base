@@ -14,6 +14,8 @@ COPY --chown=1000:0 test test
 
 FROM ${IMAGE} as build3
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.0.1
 

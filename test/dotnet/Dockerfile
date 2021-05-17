@@ -1,8 +1,6 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as base
 
-ARG APT_HTTP_PROXY
-
 RUN touch /.dummy
 
 WORKDIR /tmp
@@ -14,6 +12,8 @@ COPY --chown=1000:0 test test
 # net3: dotnet 3.1 base image
 #--------------------------------------
 FROM base as net3
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 3.1.409
@@ -44,6 +44,8 @@ RUN set -ex;  \
 # test: dotnet 5.0
 #--------------------------------------
 FROM base as testb
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 5.0.203

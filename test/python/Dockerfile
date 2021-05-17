@@ -1,9 +1,6 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as base
 
-ARG APT_HTTP_PROXY
-
-
 RUN touch /.dummy
 
 WORKDIR /tmp
@@ -11,12 +8,16 @@ COPY --chown=1000:0 test test
 
 FROM base as build
 
+ARG APT_HTTP_PROXY
+
 # Python
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool python 3.9.5
 
 
 FROM base as build-rootless
+
+ARG APT_HTTP_PROXY
 
 USER 1000
 

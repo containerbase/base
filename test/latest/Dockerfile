@@ -57,6 +57,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases depName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.9.5
 RUN install-tool python
@@ -69,6 +71,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testc
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.17.0
 
@@ -79,6 +83,8 @@ RUN set -ex; \
 # test: php
 #--------------------------------------
 FROM build as testd
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -92,6 +98,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as teste
 
+ARG APT_HTTP_PROXY
+
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
@@ -104,6 +112,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testf
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.1.3
 
@@ -114,6 +124,9 @@ RUN set -ex; cat /etc/hosts; \
 # test: terraform
 #--------------------------------------
 FROM build as testg
+
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 0.15.3
 

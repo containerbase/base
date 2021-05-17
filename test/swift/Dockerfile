@@ -42,6 +42,8 @@ RUN swift --version
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.4.0
 
