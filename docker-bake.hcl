@@ -31,6 +31,9 @@ target "settings" {
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
   ]
+  args = {
+    APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
+  }
 }
 
 target "push_cache" {
@@ -56,9 +59,6 @@ target "build_docker" {
 
 target "build_distro" {
   dockerfile = "Dockerfile.${TAG}"
-  args = {
-    APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
-  }
   tags = [
     "${OWNER}/${FILE}:${TAG}"
   ]
