@@ -7,6 +7,11 @@
 
 This repository is the source for the Docker Hub image `containerbase/buildpack`. Commits to `main` branch are automatically built and published.
 
+## Apt proxy
+
+You can pass a custom temporary Apt proxy at build or runtime when installing new packages via `APT_HTTP_PROXY` arg.
+All buildpack tool installer and the `install-apt` command will configure the Proxy for installation and remove it afterwards.
+
 ## Custom base image
 
 To use a custom base image with `containerbase/buildpack` checkout [custom-base-image](./docs/custom-base-image.md) docs.
