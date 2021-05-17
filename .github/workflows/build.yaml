@@ -38,7 +38,7 @@ jobs:
       - name: start apt-cacher
         run: docker buildx build --progress plain -t apt-cacher -f Dockerfile.apt-cacher . && docker run -d -p 3142:3142 apt-cacher
 
-      - run: docker ps
+      - run: docker info
 
       - name: test distro
         run: docker buildx bake --progress plain test
