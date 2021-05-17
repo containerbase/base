@@ -17,6 +17,7 @@ env:
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
+  APT_HTTP_PROXY: http://host.docker.internal:3142
 
 jobs:
   distro:
@@ -33,9 +34,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
-
-      - name: init env
-        run: echo "APT_HTTP_PROXY=http://$(hostname -I):3142" >> $GITHUB_ENV
 
       - name: start apt-cacher
         run: docker buildx build --progress plain -t apt-cacher -f Dockerfile.apt-cacher . && docker run -d -p 3142:3142 apt-cacher
