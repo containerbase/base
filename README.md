@@ -5,11 +5,14 @@
 
 # containerbase buildpack
 
-This repository is the source for the Docker Hub image `containerbase/buildpack`. Commits to `main` branch are automatically built and published.
+This repository is the source for the Docker Hub image `containerbase/buildpack`.
+Commits to `main` branch are automatically built and published.
 
 ## Local development
 
-You need a recent [docker](https://www.docker.com) version with [buildx](https://github.com/docker/buildx) [`>= v0.4.0`](https://github.com/docker/buildx/releases/tag/v0.4.0) plugin installed
+You need a recent [docker](https://www.docker.com) version with [buildx](https://github.com/docker/buildx) [`>= v0.4.0`](https://github.com/docker/buildx/releases/tag/v0.4.0) plugin installed.
+
+You should use
 
 ### Base image
 
@@ -21,15 +24,17 @@ docker buildx bake
 
 ### Test images
 
-To run one of the tests use the following command, it will run the java tests from [here](./test/java/).
+To run one of the tests use the following command, it will run the java tests from [`test/java`](./test/java/).
 
 ```sh
 TAG=java docker buildx bake test
 ```
 
-### Bionic image
+For other test images checkout [`test`](./test/) folder.
 
-To run one of the bionic test use the following command, it will run the test from [here](./Dockerfile.bionic).
+### Distro test images
+
+To run the bionic tests use the following command, it will run the test from [`Dockerfile.bionic`](./Dockerfile.bionic).
 
 ```sh
 TAG=bionic docker buildx bake test-distro
