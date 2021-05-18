@@ -59,6 +59,6 @@ RUN install-tool java 16.0.1
 #--------------------------------------
 FROM build
 
-COPY --from=testa /.dummy /.dummy
+#COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
+#COPY --from=testc /.dummy /.dummy
