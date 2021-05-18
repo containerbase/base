@@ -14,18 +14,18 @@ env:
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   APT_HTTP_PROXY: http://172.17.0.1:3142
-  SHOULD_SKIP: ${{ github.event_name == 'pull_request' &&  github.owner == github.event.pull_request.head.repo.owner.login }}
+  SHOULD_SKIP: ${{ github.event_name == 'pull_request' &&  github.repository_owner == github.event.pull_request.head.repo.owner.login }}
 
 jobs:
   init:
     runs-on: ubuntu-latest
     steps:
       - run: echo env.SHOULD_SKIP = ${{ env.SHOULD_SKIP }}
-      - run: echo github.owner = ${{ github.owner }}
+      - run: echo github.repository_owner = ${{ github.repository_owner }}
       - run: echo github.event.pull_request.head.repo.owner.login = ${{ github.event.pull_request.head.repo.owner.login }}
       - run: echo github.event_name = ${{ github.event_name }}
       - run: echo github.event_name == 'pull_request' = ${{ github.event_name == 'pull_request' }}
-      - run: echo github.owner == github.event.pull_request.head.repo.owner.login = ${{ github.owner == github.event.pull_request.head.repo.owner.login }}
+      - run: echo github.repository_owner == github.event.pull_request.head.repo.owner.login = ${{ github.repository_owner == github.event.pull_request.head.repo.owner.login }}
 
   # distro:
   #   runs-on: ubuntu-latest
