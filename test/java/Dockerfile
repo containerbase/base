@@ -13,7 +13,7 @@ WORKDIR /tmp
 
 
 #--------------------------------------
-# test: gradle
+# test: gradle 6
 #--------------------------------------
 FROM build as testa
 
@@ -36,9 +36,32 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
-# test: java 8
+# test: gradle 7
 #--------------------------------------
 FROM build as testb
+
+# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
+RUN install-tool gradle 7.0.2
+
+USER 1000
+
+RUN set -ex; \
+  gradle --version;
+
+RUN set -ex; \
+  git init .; \
+  touch settings.gradle; \
+  gradle wrapper; \
+  git diff; \
+  ./gradlew --version
+
+SHELL [ "/bin/sh", "-c" ]
+RUN gradle --version
+
+#--------------------------------------
+# test: java 8
+#--------------------------------------
+FROM build as testc
 
 ARG APT_HTTP_PROXY
 
@@ -52,7 +75,7 @@ RUN install-tool scala v2.13.5
 #--------------------------------------
 # test: java 16
 #--------------------------------------
-FROM build as testc
+FROM build as testd
 
 ARG APT_HTTP_PROXY
 
@@ -62,7 +85,7 @@ RUN install-tool java 16.0.1
 #--------------------------------------
 # test: maven
 #--------------------------------------
-FROM build as testd
+FROM build as teste
 
 # renovate: datasource=maven lookupName=org.apache.maven:maven
 RUN install-tool maven 3.6.3
@@ -80,7 +103,8 @@ RUN set -ex; env; ls -la $MAVEN_CONFIG; id -u; id -g;
 #--------------------------------------
 FROM build
 
-#COPY --from=testa /.dummy /.dummy
-#COPY --from=testb /.dummy /.dummy
-#COPY --from=testc /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
