@@ -14,12 +14,11 @@ env:
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   APT_HTTP_PROXY: http://172.17.0.1:3142
-  SHOULD_SKIP: ${{ github.event_name == 'pull_request' &&  github.repository_owner == github.event.pull_request.head.repo.owner.login }}
 
 jobs:
   distro:
     runs-on: ubuntu-latest
-    if: ${{ env.SHOULD_SKIP == false }}
+    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
 
     timeout-minutes: 15
 
@@ -41,7 +40,7 @@ jobs:
 
   lang:
     runs-on: ubuntu-latest
-    if: ${{ env.SHOULD_SKIP == false }}
+    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
 
     timeout-minutes: 15
 
@@ -86,7 +85,7 @@ jobs:
   release:
     needs: [lang, distro]
     runs-on: ubuntu-latest
-    if: ${{ env.SHOULD_SKIP == false }}
+    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
 
     timeout-minutes: 15
 
