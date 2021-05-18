@@ -25,7 +25,6 @@ if [[ -z "${BASH_ENV+x}" ]]; then
 fi
 
 
-
 # env helper, loads tool specific env
 cat >> $BASH_ENV <<- EOM
 export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
@@ -43,8 +42,8 @@ if [ -d /usr/local/env.d ]; then
   done
   unset i
 fi
-if [ -d ${USER_HOME}/env.d ]; then
-  for i in ${USER_HOME}/env.d/*.sh; do
+if [ -d /home/${USER_NAME}/env.d ]; then
+  for i in /home/${USER_NAME}/env.d/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
