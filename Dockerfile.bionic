@@ -11,6 +11,7 @@ FROM ubuntu:bionic@sha256:538529c9d229fb55f50e6746b119e899775205d62c0fc1b7e679b3
 
 ARG USER_ID
 ARG USER_NAME
+ARG APT_HTTP_PROXY
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
@@ -56,9 +57,9 @@ RUN install-tool gradle 6.9
 RUN install-tool nix 2.3.10
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.1
+RUN install-tool node 14.17.0
 # renovate: datasource=npm
-RUN install-tool pnpm 6.0.2
+RUN install-tool pnpm 6.3.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.10
 # renovate: datasource=npm

@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # TODO: only lts
 # renovate: datasource=docker lookupName=openjdk versioning=docker
 RUN install-tool java 11.0.11
@@ -37,6 +39,7 @@ RUN gradle --version
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
 
 # need to stay old
 RUN install-tool java 8
@@ -49,6 +52,7 @@ RUN install-tool scala v2.13.5
 #--------------------------------------
 FROM build as testc
 
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
 RUN install-tool java 16.0.1

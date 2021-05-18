@@ -5,7 +5,7 @@ set -e
 
 check_command php
 
-if [[ "${TOOL_VERSION}" -eq "latest" ]]; then
+if [[ "${TOOL_VERSION}" == "latest" ]]; then
   export "TOOL_VERSION=$(curl -s https://api.github.com/repos/composer/composer/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 fi
 

@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases lookupName=NixOS/nix
 RUN install-tool nix 2.3.10
 

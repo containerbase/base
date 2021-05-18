@@ -1,8 +1,10 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.1
+RUN install-tool node 14.17.0
 
 RUN touch /.dummy
 
@@ -35,6 +37,8 @@ RUN npm --version
 # test: yarn
 #--------------------------------------
 FROM build as testb
+
+ARG APT_HTTP_PROXY
 
 RUN npm install -g yarn
 
@@ -75,10 +79,12 @@ RUN set -ex; \
 
 FROM build as testc
 
+ARG APT_HTTP_PROXY
+
 USER root
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.0.2
+RUN install-tool pnpm 6.3.0
 
 USER 1000
 
@@ -100,6 +106,8 @@ RUN set -ex; \
 #--------------------------------------
 
 FROM ${IMAGE} as testd
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
 RUN install-tool node 15.0.1

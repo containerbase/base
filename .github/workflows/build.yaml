@@ -17,6 +17,7 @@ env:
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
+  APT_HTTP_PROXY: http://172.17.0.1:3142
 
 jobs:
   distro:
@@ -33,6 +34,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
+
+      - name: start apt-cacher
+        run: sudo apt-get install -y apt-cacher-ng
 
       - name: test distro
         run: docker buildx bake --progress plain test
@@ -62,8 +66,14 @@ jobs:
             latest,
           ]
 
+    env:
+      TAG: ${{ matrix.tag }}
+
     steps:
       - uses: actions/checkout@v2.3.4
+
+      - name: start apt-cacher
+        run: sudo apt-get install -y apt-cacher-ng
 
       - name: build
         run: docker buildx bake --progress plain
@@ -72,7 +82,7 @@ jobs:
         run: docker image ls
 
       - name: test
-        run: docker buildx build --progress plain ./test/${{ matrix.tag }}
+        run: docker buildx bake --progress plain build_test
 
   release:
     needs: [lang, distro]
@@ -82,7 +92,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@v1.6.4
+        uses: renovatebot/internal-tools@v1.6.6
         with:
           command: docker-config
 
@@ -104,6 +114,9 @@ jobs:
       - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
+
+      - name: start apt-cacher
+        run: sudo apt-get install -y apt-cacher-ng
 
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'

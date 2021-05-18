@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
@@ -11,6 +13,8 @@ WORKDIR /tmp
 COPY --chown=1000:0 test test
 
 FROM ${IMAGE} as build3
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.0.1

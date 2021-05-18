@@ -1,6 +1,7 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+
 RUN touch /.dummy
 
 WORKDIR /tmp
