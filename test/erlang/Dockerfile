@@ -15,9 +15,10 @@ RUN install-tool elixir 1.11.4
 
 WORKDIR /tmp
 
-COPY --chown=1000:0 test test
+# test openshift compatibility 1000<>1001
+COPY --chown=1001:0 test test
 
-USER 1000
+USER 1001
 
 RUN set -ex; \
     cd test/a; \

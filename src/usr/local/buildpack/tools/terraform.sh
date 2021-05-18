@@ -9,6 +9,11 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
+if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
+  echo "Skipping, already installed"
+  exit 0
+fi
+
 DISTRO=linux_amd64
 URL=https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${DISTRO}.zip
 
