@@ -47,6 +47,9 @@ RUN install-tool java 8
 # renovate: datasource=github-releases lookupName=scala/scala
 RUN install-tool scala v2.13.5
 
+# renovate: datasource=maven lookupName=org.apache.maven:maven
+RUN install-tool maven 3.6.3
+
 #--------------------------------------
 # test: java 16
 #--------------------------------------
@@ -62,6 +65,6 @@ RUN install-tool java 16.0.1
 #--------------------------------------
 FROM build
 
-COPY --from=testa /.dummy /.dummy
+#COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
+#COPY --from=testc /.dummy /.dummy
