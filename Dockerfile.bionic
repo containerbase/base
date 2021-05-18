@@ -11,6 +11,7 @@ FROM ubuntu:bionic@sha256:538529c9d229fb55f50e6746b119e899775205d62c0fc1b7e679b3
 
 ARG USER_ID
 ARG USER_NAME
+ARG APT_HTTP_PROXY
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"

@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE}
 
+ARG APT_HTTP_PROXY
+
 # Erlang
 
 #disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose

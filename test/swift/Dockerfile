@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.4.0
 
@@ -39,6 +41,8 @@ RUN swift --version
 # testb: swift 5.2.5
 #--------------------------------------
 FROM build as testb
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.4.0
