@@ -20,7 +20,12 @@ jobs:
   init:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ env.SHOULD_SKIP }}
+      - run: echo env.SHOULD_SKIP = ${{ env.SHOULD_SKIP }}
+      - run: echo github.owner = ${{ github.owner }}
+      - run: echo github.event.pull_request.head.repo.owner.login = ${{ github.event.pull_request.head.repo.owner.login }}
+      - run: echo github.event_name = ${{ github.event_name }}
+      - run: echo github.event_name == 'pull_request' = ${{ github.event_name == 'pull_request' }}
+      - run: echo github.owner == github.event.pull_request.head.repo.owner.login = ${{ github.owner == github.event.pull_request.head.repo.owner.login }}
 
   # distro:
   #   runs-on: ubuntu-latest
