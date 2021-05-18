@@ -39,7 +39,7 @@ jobs:
         run: sudo apt-get install -y apt-cacher-ng
 
       - name: test distro
-        run: docker buildx bake --progress plain test
+        run: docker buildx bake --progress plain test-distro
 
   lang:
     runs-on: ubuntu-latest
@@ -82,7 +82,7 @@ jobs:
         run: docker image ls
 
       - name: test
-        run: docker buildx bake --progress plain build_test
+        run: docker buildx bake --progress plain test
 
   release:
     needs: [lang, distro]
