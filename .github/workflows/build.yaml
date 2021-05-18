@@ -19,7 +19,7 @@ env:
 jobs:
   distro:
     runs-on: ubuntu-latest
-    if: env.SHOULD_SKIP == false
+    if: ${{ env.SHOULD_SKIP == false }}
 
     timeout-minutes: 15
 
@@ -41,7 +41,7 @@ jobs:
 
   lang:
     runs-on: ubuntu-latest
-    if: env.SHOULD_SKIP == false
+    if: ${{ env.SHOULD_SKIP == false }}
 
     timeout-minutes: 15
 
@@ -86,7 +86,7 @@ jobs:
   release:
     needs: [lang, distro]
     runs-on: ubuntu-latest
-    if: env.SHOULD_SKIP == false
+    if: ${{ env.SHOULD_SKIP == false }}
 
     timeout-minutes: 15
 
