@@ -33,7 +33,7 @@ ln -s /nix/var/nix/profiles/default/etc/profile.d/nix.sh /etc/profile.d/
 
 rm -r nix-${TOOL_VERSION}-x86_64-linux*
 
-export_path "/home/${USER_NAME}/.nix-profile/bin"
+export_path "${USER_HOME}/.nix-profile/bin"
 export_env NIX_PATH /nix/var/nix/profiles/per-user/${USER_NAME}/channels
 
 nix-collect-garbage --delete-old

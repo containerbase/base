@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
   exit 1
 fi
 
-SWIFT_INSTALL_DIR=/usr/local/swift/${TOOL_VERSION}
+SWIFT_INSTALL_DIR=/usr/local/${TOOL_NAME}/${TOOL_VERSION}
 
 if [[ -d "${SWIFT_INSTALL_DIR}" ]]; then
   echo "Skipping, already installed"

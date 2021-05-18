@@ -25,10 +25,15 @@ if [[ -z "${BASH_ENV+x}" ]]; then
 fi
 
 
-
 # env helper, loads tool specific env
 cat >> $BASH_ENV <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
+
+# openshift override unknown user home
+if [ "\${EUID}" != 0 ]; then
+  export HOME="\${USER_HOME}"
+fi
+
 if [ -d /usr/local/env.d ]; then
   for i in /usr/local/env.d/*.sh; do
     if [ -r \$i ]; then
@@ -64,10 +69,10 @@ su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/{env.d,bin}'
 chmod g+w /home/${USER_NAME}/{,env.d,bin}
 
 
-
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
+
 # install basic required packages
 apt_install \
   ca-certificates \

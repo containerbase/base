@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-DOTNET_INSTALL_DIR=/usr/local/dotnet/${TOOL_VERSION}
+DOTNET_INSTALL_DIR=/usr/local/${TOOL_NAME}/${TOOL_VERSION}
 
 if [[ -d "${DOTNET_INSTALL_DIR}" ]]; then
   echo "Skipping, already installed"

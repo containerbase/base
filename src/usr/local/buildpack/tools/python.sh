@@ -80,17 +80,24 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
+  # TODO: can be wrong pip if another python already exists
   pip install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
   pip cache purge
+
+  shell_wrapper python
+  shell_wrapper pip
+  # TODO: support multiple installed python versions
+  # shell_wrapper python${MAJOR}
+  # shell_wrapper python${MAJOR}.${MINOR}
+  # shell_wrapper pip${MAJOR}
+  # shell_wrapper pip${MAJOR}.${MINOR}
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
 fi
 
 python --version
+pip --version
 
-if [[ $EUID -eq 0 ]]; then
-  shell_wrapper python
-fi
