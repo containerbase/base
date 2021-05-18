@@ -22,14 +22,14 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${base_path}
+  mkdir -p ${tool_path}
 
   file=/tmp/${TOOL_NAME}.tgz
 
   URL='https://downloads.lightbend.com'
 
   curl -sSfLo ${file} ${URL}/${TOOL_NAME}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}.tgz
-  tar -C ${tool_path} -xf ${file}
+  tar --strip 1 -C ${tool_path} -xf ${file}
   rm ${file}
 
   update_env ${tool_path}
