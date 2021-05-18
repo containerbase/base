@@ -27,6 +27,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   git init .; \
+  touch settings.gradle; \
   gradle wrapper; \
   git diff; \
   ./gradlew --version

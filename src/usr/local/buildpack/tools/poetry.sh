@@ -36,6 +36,4 @@ update_env ${tool_path}
 
 poetry --version
 
-if [[ $EUID -eq 0 ]]; then
-  shell_wrapper poetry
-fi
+shell_wrapper poetry

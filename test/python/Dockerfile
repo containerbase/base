@@ -116,6 +116,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build-rootless as testg
 
+RUN set -ex; env; ls -la $HOME/bin; cat $BASH_ENV
+
 # renovate: datasource=pypi
 RUN install-pip pipenv 2020.11.15
 

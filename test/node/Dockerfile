@@ -65,7 +65,7 @@ USER root
 RUN install-tool yarn 1.22.10
 
 # renovate: datasource=npm
-RUN install-npm lerna 3.22.1
+RUN install-npm lerna 4.0.0
 
 USER 1000
 

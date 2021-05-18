@@ -36,7 +36,7 @@ fi
 echo node: $(node --version) $(command -v node)
 echo npm: $(npm --version)  $(command -v npm)
 
-NPM_CONFIG_PREFIX="/home/${USER_NAME}/.npm-global"
+NPM_CONFIG_PREFIX="${USER_HOME}/.npm-global"
 
 # npm 7 bug
 mkdir -p $NPM_CONFIG_PREFIX/{bin,lib}
