@@ -33,7 +33,7 @@ if [[ -z "${tool_path}" ]]; then
   rm ${file}
 
   update_env ${tool_path}
-
+  shell_wrapper scala
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
@@ -41,4 +41,3 @@ fi
 
 scala --version
 
-shell_wrapper scala
