@@ -42,8 +42,9 @@ TAG=bionic docker buildx bake test-distro
 
 ## Apt proxy
 
-You can pass a custom temporary Apt proxy at build or runtime when installing new packages via `APT_HTTP_PROXY` arg.
-All buildpack tool installer and the `install-apt` command will configure the Proxy for installation and remove it afterwards.
+You can configure an Apt proxy for the build by specifying an `APT_HTTP_PROXY` argument.
+
+Example: `docker build --build-arg APT_HTTP_PROXY=https://apt.company.com . -t my/image`
 
 You can simply export `APT_HTTP_PROXY` to your local env and our build tools will use your apt proxy for `http` sources.
 
