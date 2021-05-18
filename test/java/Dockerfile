@@ -11,6 +11,7 @@ RUN touch /.dummy
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
 
 #--------------------------------------
 # test: gradle 6
@@ -68,10 +69,6 @@ ARG APT_HTTP_PROXY
 # need to stay old
 RUN install-tool java 8
 
-# renovate: datasource=github-releases lookupName=scala/scala
-RUN install-tool scala v2.13.5
-
-
 #--------------------------------------
 # test: java 16
 #--------------------------------------
@@ -99,6 +96,28 @@ RUN set -ex; \
 RUN set -ex; env; ls -la $MAVEN_CONFIG; id -u; id -g;
 
 #--------------------------------------
+# test: scala / sbt
+#--------------------------------------
+FROM build as testf
+
+# not required / used for sbt
+# renovate: datasource=github-releases lookupName=scala/scala
+RUN install-tool scala v2.13.5
+
+# renovate: datasource=github-releases lookupName=sbt/sbt
+RUN install-tool sbt v1.5.2
+
+# doesn't work for arbitrary users
+USER 1000
+
+RUN set -ex; \
+  cd test/sbt; \
+  ls -la; env; \
+  sbt compile
+
+RUN ls -la ~
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
@@ -108,3 +127,4 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy

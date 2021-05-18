@@ -27,19 +27,22 @@ if [[ -z "${tool_path}" ]]; then
 
   file=/tmp/${TOOL_NAME}.tgz
 
-  # https://downloads.apache.org/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
-  URL='https://downloads.apache.org'
+  # https://github.com/sbt/sbt/releases/download/v1.5.2/sbt-1.5.2.tgz
+  URL='https://github.com'
 
-  curl -sSfLo ${file} "${URL}/${TOOL_NAME}/${TOOL_NAME}-${MAJOR}/${TOOL_VERSION}/binaries/apache-${TOOL_NAME}-${TOOL_VERSION}-bin.tar.gz"
+  curl -sSfLo ${file} "${URL}/${TOOL_NAME}/${TOOL_NAME}/releases/download/v${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}.tgz"
   tar --strip 1 -C ${tool_path} -xf ${file}
   rm ${file}
 
+  # saves 1/3 size
+  rm ${tool_path}/bin/*-darwin ${tool_path}/bin/*.exe ${tool_path}/bin/*.bat
+
   update_env ${tool_path}
-  shell_wrapper mvn
+  shell_wrapper ${TOOL_NAME}
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
 fi
 
-mvn --version
+sbt --version
 
