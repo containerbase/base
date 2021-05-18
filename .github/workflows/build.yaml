@@ -2,10 +2,6 @@ name: build
 
 on:
   push:
-    branches:
-      - main
-      - 'renovate/**'
-
   pull_request:
 
 env:
@@ -18,123 +14,130 @@ env:
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   APT_HTTP_PROXY: http://172.17.0.1:3142
+  SHOULD_SKIP: ${{ github.event_name == 'pull_request' &&  github.owner == github.event.pull_request.head.repo.owner.login }}
 
 jobs:
-  distro:
+  init:
     runs-on: ubuntu-latest
-
-    timeout-minutes: 15
-
-    strategy:
-      matrix:
-        distro: [bionic]
-
-    env:
-      TAG: ${{ matrix.distro }}
-
     steps:
-      - uses: actions/checkout@v2.3.4
+      - run: echo ${{ env.SHOULD_SKIP }}
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+  # distro:
+  #   runs-on: ubuntu-latest
+  #   if: env.IS_LOCAL_PR == false
 
-      - name: test distro
-        run: docker buildx bake --progress plain test-distro
+  #   timeout-minutes: 15
 
-  lang:
-    runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       distro: [bionic]
 
-    timeout-minutes: 15
+  #   env:
+  #     TAG: ${{ matrix.distro }}
 
-    strategy:
-      matrix:
-        tag:
-          [
-            dotnet,
-            erlang,
-            golang,
-            java,
-            helm,
-            nix,
-            node,
-            php,
-            powershell,
-            python,
-            ruby,
-            rust,
-            swift,
-            latest,
-          ]
+  #   steps:
+  #     - uses: actions/checkout@v2.3.4
 
-    env:
-      TAG: ${{ matrix.tag }}
+  #     - name: start apt-cacher
+  #       run: sudo apt-get install -y apt-cacher-ng
 
-    steps:
-      - uses: actions/checkout@v2.3.4
+  # - name: test distro
+  #   run: docker buildx bake --progress plain test-distro
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+  # lang:
+  #   runs-on: ubuntu-latest
 
-      - name: build
-        run: docker buildx bake --progress plain
+  #   timeout-minutes: 15
 
-      - name: images
-        run: docker image ls
+  #   strategy:
+  #     matrix:
+  #       tag:
+  #         [
+  #           dotnet,
+  #           erlang,
+  #           golang,
+  #           java,
+  #           helm,
+  #           nix,
+  #           node,
+  #           php,
+  #           powershell,
+  #           python,
+  #           ruby,
+  #           rust,
+  #           swift,
+  #           latest,
+  #         ]
 
-      - name: test
-        run: docker buildx bake --progress plain test
+  #   env:
+  #     TAG: ${{ matrix.tag }}
 
-  release:
-    needs: [lang, distro]
-    runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2.3.4
 
-    timeout-minutes: 15
+  #     - name: start apt-cacher
+  #       run: sudo apt-get install -y apt-cacher-ng
 
-    steps:
-      - name: docker-config
-        uses: renovatebot/internal-tools@v1.6.6
-        with:
-          command: docker-config
+  #     - name: build
+  #       run: docker buildx bake --progress plain
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+  #     - name: images
+  #       run: docker image ls
 
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          yarn config set version-git-tag false
-          npm config set scripts-prepend-node-path true
+  #     - name: test
+  #       run: docker buildx bake --progress plain test
 
-      # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 0
+  # release:
+  #   needs: [lang, distro]
+  #   runs-on: ubuntu-latest
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+  #   timeout-minutes: 15
 
-      - name: Docker registry login
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+  #   steps:
+  #     - name: docker-config
+  #       uses: renovatebot/internal-tools@v1.6.6
+  #       with:
+  #         command: docker-config
 
-      - name: Cache Yarn packages
-        uses: actions/cache@v2.1.5
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@v2.1.5
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
 
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+  #     - name: Init platform
+  #       run: |
+  #         git config --global core.autocrlf false
+  #         git config --global core.symlinks true
+  #         git config --global user.email 'renovate@whitesourcesoftware.com'
+  #         git config --global user.name  'Renovate Bot'
+  #         yarn config set version-git-tag false
+  #         npm config set scripts-prepend-node-path true
 
-      - name: semantic-release
-        if: github.event_name == 'push'
-        run: npx semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     # full checkout for semantic-release
+  #     - uses: actions/checkout@v2.3.4
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: start apt-cacher
+  #       run: sudo apt-get install -y apt-cacher-ng
+
+  #     - name: Docker registry login
+  #       if: github.ref == 'refs/heads/main'
+  #       run: |
+  #         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+  #         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+  #     - name: Cache Yarn packages
+  #       uses: actions/cache@v2.1.5
+  #       with:
+  #         path: ${{ env.YARN_CACHE_FOLDER }}
+  #         key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+  #     - name: Installing dependencies
+  #       run: yarn install --frozen-lockfile
+
+  #     - name: semantic-release
+  #       if: github.event_name == 'push'
+  #       run: npx semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
