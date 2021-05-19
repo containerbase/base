@@ -31,7 +31,7 @@ fi
 
 # env helper, loads tool specific env
 cat >> $BASH_ENV <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:${PATH}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:\${PATH}"
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then
