@@ -55,10 +55,10 @@ ARG APT_HTTP_PROXY
 # old php version, not for renovating
 RUN install-tool php 5.6.40
 
+USER 1000
+
 # old composer version, not for renovating
 RUN install-tool composer 1.10.20
-
-USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
@@ -91,12 +91,13 @@ SHELL [ "/bin/sh", "-c" ]
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.0.6
 
-USER 1000
 
 # renovate: datasource=github-releases lookupName=composer/composer
 RUN install-tool composer 2.0.13
 
 RUN install-tool composer latest
+
+USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
