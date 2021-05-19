@@ -142,6 +142,9 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-buildpack
 
+# Test start
+RUN touch /.dummy
+
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 0.15.3
 
