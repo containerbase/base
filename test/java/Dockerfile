@@ -11,6 +11,7 @@ RUN touch /.dummy
 
 WORKDIR /tmp
 
+COPY --chown=1000:0 test test
 
 #--------------------------------------
 # test: gradle 6
@@ -79,6 +80,44 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 16.0.1
 
 #--------------------------------------
+# test: maven
+#--------------------------------------
+FROM build as teste
+
+# renovate: datasource=maven lookupName=org.apache.maven:maven
+RUN install-tool maven 3.6.3
+
+# test openshift userid missmatch
+USER 1001
+
+RUN set -ex; \
+  mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false;
+
+RUN set -ex; env; ls -la $MAVEN_CONFIG; id -u; id -g;
+
+#--------------------------------------
+# test: scala / sbt
+#--------------------------------------
+FROM build as testf
+
+# not required / used for sbt
+# renovate: datasource=github-releases lookupName=scala/scala
+RUN install-tool scala v2.13.5
+
+# renovate: datasource=github-releases lookupName=sbt/sbt
+RUN install-tool sbt v1.5.2
+
+# doesn't work for arbitrary users
+USER 1000
+
+RUN set -ex; \
+  cd test/sbt; \
+  ls -la; env; \
+  sbt compile
+
+RUN ls -la ~
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
@@ -87,3 +126,5 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy

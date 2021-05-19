@@ -5,11 +5,16 @@ set -e
 require_root
 check_command java
 
+if [[ -d "/usr/local/${TOOL_NAME}-${TOOL_VERSION}" ]]; then
+  echo "Skipping, already installed"
+  exit 0
+fi
+
 curl -sL -o gradle.zip https://services.gradle.org/distributions/gradle-${TOOL_VERSION}-bin.zip
 unzip -q -d /usr/local gradle.zip
 rm gradle.zip
 
-export_path "/usr/local/gradle-${TOOL_VERSION}/bin"
+export_path "/usr/local/${TOOL_NAME}-${TOOL_VERSION}/bin"
 
 mkdir -p ${USER_HOME}/{.m2,.gradle}
 
