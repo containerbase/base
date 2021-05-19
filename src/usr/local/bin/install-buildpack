@@ -12,11 +12,15 @@ fi
 
 require_distro
 require_root
-require_user
+
+if [[ -z "${USER_NAME+x}" ]]; then
+  export USER_NAME=user
+  echo "No USER_NAME defined - using: ${USER_NAME}"
+fi
 
 if [[ -z "${USER_ID+x}" ]]; then
-  echo "No USER_ID defined - skipping: ${USER_ID}"
-  exit 1;
+  export USER_ID=1000
+  echo "No USER_ID defined - using: ${USER_ID}"
 fi
 
 if [[ -z "${BASH_ENV+x}" ]]; then
@@ -27,7 +31,7 @@ fi
 
 # env helper, loads tool specific env
 cat >> $BASH_ENV <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:\${PATH}"
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then
@@ -49,6 +53,12 @@ if [ -d /home/${USER_NAME}/env.d ]; then
     fi
   done
   unset i
+fi
+EOM
+
+cat >> /etc/bash.bashrc <<- EOM
+if [[ -f "$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
+  . $BASH_ENV
 fi
 EOM
 
