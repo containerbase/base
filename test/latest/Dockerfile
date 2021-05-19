@@ -123,12 +123,32 @@ RUN set -ex; cat /etc/hosts; \
 #--------------------------------------
 # test: terraform
 #--------------------------------------
-FROM build as testg
+FROM ubuntu:20.04@sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93 as testg
 
+ARG USER_NAME=terraform
+ARG USER_ID=1005
 ARG APT_HTTP_PROXY
+
+# Set env and shell
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+# This entry point ensures that dumb-init is run
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+CMD [ "bash" ]
+
+# Set up buildpack
+COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
+RUN install-buildpack
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 0.15.3
+
+USER ${USER_ID}
+
+WORKDIR /tmp
+RUN TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 
 #--------------------------------------
 # final
