@@ -125,8 +125,8 @@ function apt_install () {
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
     echo "Acquire::HTTPS::Proxy \"DIRECT\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
-  apt-get update
-  apt-get install -y "$@"
+  apt-get -qq update
+  apt-get -qq install -y "$@"
 
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
