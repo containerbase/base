@@ -67,9 +67,6 @@ target "build-docker" {
 target "build-distro" {
   inherits = ["settings"]
   dockerfile = "Dockerfile.${TAG}"
-  tags = [
-    "${OWNER}/${FILE}:${TAG}"
-  ]
 }
 
 target "build-test" {

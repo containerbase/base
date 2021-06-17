@@ -13,7 +13,7 @@ env:
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
-  APT_HTTP_PROXY: http://172.17.0.1:3142
+  APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
   distro:
@@ -32,8 +32,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+      - name: Cache Yarn packages
+        uses: actions/cache@v2.1.6
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: test distro
         run: docker buildx bake --progress plain test-distro
@@ -70,8 +79,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+      - name: Cache Yarn packages
+        uses: actions/cache@v2.1.6
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: build
         run: docker buildx bake --progress plain
@@ -114,9 +132,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
-
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'
         run: |
@@ -131,6 +146,9 @@ jobs:
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: semantic-release
         if: github.event_name == 'push'
