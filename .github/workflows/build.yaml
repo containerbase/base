@@ -70,8 +70,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+      - name: start squid-deb-proxy
+        run: sudo apt-get install -y squid-deb-proxy
 
       - name: build
         run: docker buildx bake --progress plain
@@ -114,8 +114,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: start apt-cacher
-        run: sudo apt-get install -y apt-cacher-ng
+      - name: start squid-deb-proxy
+        run: sudo apt-get install -y squid-deb-proxy
 
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'
