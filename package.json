@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "run-s release:prepare",
-    "prepare:proxy": "sudo node tools/prepare-proxy.js",
+    "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js"
   },
