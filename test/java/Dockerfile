@@ -18,7 +18,6 @@ COPY --chown=1000:0 test test
 #--------------------------------------
 FROM build as testa
 
-# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
 RUN install-tool gradle 6.9
 
 USER 1000
