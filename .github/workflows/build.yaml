@@ -132,9 +132,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
-
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'
         run: |
@@ -149,6 +146,9 @@ jobs:
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: semantic-release
         if: github.event_name == 'push'
