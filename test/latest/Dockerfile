@@ -60,7 +60,7 @@ FROM build as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases depName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.9.5
+ARG PYTHON_VERSION=3.9.6
 RUN install-tool python
 
 RUN set -ex; \
