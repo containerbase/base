@@ -41,7 +41,7 @@ RUN gradle --version
 FROM build as testb
 
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
-RUN install-tool gradle 7.1
+RUN install-tool gradle 7.1.1
 
 USER 1000
 
