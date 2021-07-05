@@ -44,7 +44,6 @@
     {
       "description": "Trigger fix release for ubuntu digest updates",
       "matchPackageNames": ["ubuntu"],
-      "matchFiles": ["Dockerfile"],
       "matchUpdateTypes": ["digest"],
       "semanticCommitType": "fix"
     }
