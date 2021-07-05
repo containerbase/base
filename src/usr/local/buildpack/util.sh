@@ -123,7 +123,6 @@ function apt_install () {
   echo "Installing apt packages: ${@}"
   if [[ "${APT_HTTP_PROXY}" ]]; then
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
-    echo "Acquire::HTTPS::Proxy \"DIRECT\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
   apt-get -qq update
   apt-get -qq install -y "$@"
