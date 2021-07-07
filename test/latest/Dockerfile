@@ -146,7 +146,7 @@ RUN install-buildpack
 RUN touch /.dummy
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.1
+RUN install-tool terraform 1.0.2
 
 USER ${USER_ID}
 
