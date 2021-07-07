@@ -90,4 +90,4 @@ RUN install-tool rust 1.53.0
 RUN install-tool swift 5.4.2
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.1
+RUN install-tool terraform 1.0.2
