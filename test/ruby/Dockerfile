@@ -17,7 +17,7 @@ FROM ${IMAGE} as build3
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.0.1
+RUN install-tool ruby 3.0.2
 
 RUN touch /.dummy
 
