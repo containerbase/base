@@ -104,7 +104,7 @@ FROM build as testf
 RUN install-tool scala v2.13.6
 
 # renovate: datasource=github-releases lookupName=sbt/sbt
-RUN install-tool sbt v1.5.4
+RUN install-tool sbt v1.5.5
 
 # doesn't work for arbitrary users
 USER 1000
