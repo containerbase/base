@@ -30,10 +30,10 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -77,10 +77,10 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
@@ -109,12 +109,12 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@v1.7.4
+        uses: renovatebot/internal-tools@25848ea5993239db66833ceea7c633d6fed2c821 # renovate: tag=v1.7.4
         with:
           command: docker-config
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.2.0
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f # renovate: tag=v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -128,7 +128,7 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
         with:
           fetch-depth: 0
 
@@ -139,7 +139,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
