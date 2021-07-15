@@ -18,7 +18,7 @@ RUN update-ca-certificates
 ## Runtime install
 
 Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environment for additional custom root ca files.
-We use `NODE_OPTIONS="--use-openssl-ca"`, so NodeJS is using the same certifacte options as OpenSSL.
+We use `NODE_OPTIONS="--use-openssl-ca"`, so NodeJS is using the same certificate options as OpenSSL.
 
 ```bash
 docker run --rm -it \
