@@ -28,6 +28,9 @@ SHELL ["/bin/bash" , "-c"]
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
+# Optional: Add custom root certificate, should come before `install-buildpack`
+COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
+
 # Set up buildpack
 COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
 COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
@@ -70,6 +73,9 @@ SHELL ["/bin/bash" , "-c"]
 # This entry point ensures that dumb-init is run
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
+
+# Optional: Add custom root certificate, should come before `install-buildpack`
+COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up buildpack
 COPY --from=buildpack /usr/local/bin/ /usr/local/bin/

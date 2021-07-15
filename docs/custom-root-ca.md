@@ -2,6 +2,8 @@
 
 Most tools support two ways to extend the default Root CA certificates list.
 
+If you are using a custom base image, checkout [Custom base image](./custom-base-image.md) docs.
+
 ## Buildtime install
 
 This is the easiest method.
