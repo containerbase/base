@@ -151,7 +151,7 @@ RUN install-tool terraform 1.0.2
 USER ${USER_ID}
 
 WORKDIR /tmp
-RUN TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
+RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 
 #--------------------------------------
 # test: ignore tools
