@@ -55,3 +55,25 @@ To use a custom base image with `containerbase/buildpack` checkout [custom-base-
 ### Custom Root CA Certificates
 
 To add custom root certifactes to the `containerbase/buildpack` base image checkout [custom-root-ca](./docs/custom-root-ca.md) docs.
+
+### Temporary disable tool installer
+
+To temporary disable / skip some tool installer set the build arg `IGNORED_TOOLS` to a comma separated case-insensitive tool names list.
+
+The following sample will skip the installation of `powershell` and `node`.
+
+```Dockerfile
+FROM containerbase/buildpack
+
+ARG IGNORED_TOOLS=powershell,node
+
+
+# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+RUN install-tool powershell v7.1.3
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool node 14.17.3
+
+# renovate: datasource=github-releases lookupName=moby/moby
+RUN install-tool docker 20.10.7
+```
