@@ -94,5 +94,12 @@ apt_install \
   xz-utils \
   ;
 
+# check for /usr/local/share/ca-certificates/*.crt
+
+if [[ "$(find /usr/local/share/ca-certificates/ -name *.crt -type f -printf '.' | wc -c)" -gt 0 ]]; then
+  echo "Found user certs, calling update-ca-certificates"
+  update-ca-certificates
+fi
+
 # cleanup
 rm -rf /var/lib/apt/lists/*

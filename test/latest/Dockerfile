@@ -133,14 +133,16 @@ ARG APT_HTTP_PROXY
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-# This entry point ensures that dumb-init is run
-ENTRYPOINT [ "docker-entrypoint.sh" ]
-CMD [ "bash" ]
+COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up buildpack
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-buildpack
+
+# validate custom cert
+COPY --from=build /test/renovate.pem /renovate.pem
+RUN openssl verify /renovate.pem
 
 # Test start
 RUN touch /.dummy
