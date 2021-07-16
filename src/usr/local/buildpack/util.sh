@@ -206,3 +206,8 @@ function find_tool_path () {
     echo ${USER_HOME}/${TOOL_NAME}/${TOOL_VERSION}
   fi
 }
+
+ignore_tool() {
+    local tools=${IGNORED_TOOLS,,}
+    [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0
+}

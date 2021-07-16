@@ -156,6 +156,24 @@ WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 
 #--------------------------------------
+# test: ignore tools
+#--------------------------------------
+FROM build as testh
+
+ARG APT_HTTP_PROXY
+
+ARG IGNORED_TOOLS=powershell,node
+
+# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+RUN install-tool powershell v7.1.3
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool node 14.17.3
+
+# renovate: datasource=github-releases lookupName=moby/moby
+RUN install-tool docker 20.10.7
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -167,3 +185,4 @@ COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
