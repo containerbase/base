@@ -5,7 +5,7 @@ ARG APT_HTTP_PROXY
 
 # TODO: only lts
 # renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 11.0.11
+RUN install-tool java 11.0.12
 
 RUN touch /.dummy
 
