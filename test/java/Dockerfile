@@ -76,7 +76,7 @@ FROM build as testd
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 16.0.1
+RUN install-tool java 16.0.2
 
 #--------------------------------------
 # test: maven
