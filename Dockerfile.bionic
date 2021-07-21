@@ -43,7 +43,7 @@ RUN install-tool golang 1.16.6
 RUN install-tool helm v3.6.3
 
 # renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 11.0.11
+RUN install-tool java 11.0.12
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
 RUN install-tool gradle 7.1.1
 
