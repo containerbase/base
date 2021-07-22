@@ -32,6 +32,11 @@ if [[ -z "${tool_path}" ]]; then
 
   curl -sSfLo ${file} ${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz || echo 'Ignore download error'
 
+  apt_install \
+    build-essential \
+    libmysqlclient-dev \
+    ;
+
   if [[ -f ${file} ]]; then
     echo 'Using prebuild python'
     tar -C ${base_path} -xf ${file}
@@ -40,7 +45,6 @@ if [[ -z "${tool_path}" ]]; then
     echo 'No prebuild python found, building from source'
     require_root
     apt_install \
-      build-essential \
       libbz2-dev \
       libffi-dev \
       liblzma-dev \
@@ -100,4 +104,3 @@ fi
 
 python --version
 pip --version
-
