@@ -84,7 +84,7 @@ ARG APT_HTTP_PROXY
 USER root
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.9.1
+RUN install-tool pnpm 6.10.3
 
 USER 1000
 
