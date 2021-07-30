@@ -91,3 +91,6 @@ RUN install-tool swift 5.4.2
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.0.3
+
+# renovate: datasource=github-releases lookupName=git-lfs/git-lfs
+RUN install-tool git-lfs v2.13.3
