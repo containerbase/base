@@ -4,10 +4,10 @@ FROM ${IMAGE} as build
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.53.0
+RUN install-tool rust 1.54.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.53.0
+RUN install-tool rust 1.54.0
 
 WORKDIR /tmp
 
