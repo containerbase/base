@@ -74,7 +74,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.3
+RUN install-tool node 14.17.4
 
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -171,7 +171,7 @@ RUN install-tool git-lfs v2.13.3
 RUN install-tool powershell v7.1.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.3
+RUN install-tool node 14.17.4
 
 # renovate: datasource=github-releases lookupName=moby/moby
 RUN install-tool docker 20.10.7
