@@ -15,12 +15,12 @@ if ! [ "$(command -v git-lfs)" ]; then
   exit 0
 fi
 
-LFS_FILE="git-lfs-linux-amd64-${TOOL_VERSION}.tar.gz"
-wget "https://github.com/git-lfs/git-lfs/releases/download/${TOOL_VERSION}/${LFS_FILE}"
+ARCH=linux-amd64
+LFS_FILE="git-lfs-${ARCH}-${TOOL_VERSION}.tar.gz"
 
-TMP_DIR=$(mktemp -d)
-tar -xf "${LFS_FILE}" -C "${TMP_DIR}" git-lfs install.sh
-"${TMP_DIR}"/install.sh
-rm -rd "${TMP_DIR}"
+curl -sSfLo git-lfs.tgz https://github.com/git-lfs/git-lfs/releases/download/${TOOL_VERSION}/${LFS_FILE}
+tar xzvf git-lfs.tgz -C /usr/local/bin git-lfs
+rm git-lfs.tgz
 
 git lfs version
+git lfs install
