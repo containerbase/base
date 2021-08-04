@@ -174,7 +174,7 @@ RUN install-tool powershell v7.1.3
 RUN install-tool node 14.17.4
 
 # renovate: datasource=github-releases lookupName=moby/moby
-RUN install-tool docker 20.10.7
+RUN install-tool docker v20.10.8
 
 #--------------------------------------
 # final
