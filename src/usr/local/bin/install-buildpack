@@ -89,6 +89,7 @@ apt_install \
   curl \
   dumb-init \
   gnupg \
+  jq \
   openssh-client \
   unzip \
   xz-utils \

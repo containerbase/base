@@ -4,8 +4,9 @@ FROM ${IMAGE} as build
 ARG APT_HTTP_PROXY
 
 # TODO: only lts
-# renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 11.0.12
+# renovate: datasource=adoptium-java
+RUN install-tool java 11.0.12+7
+
 
 RUN touch /.dummy
 
@@ -66,7 +67,8 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-RUN install-tool java 8
+# renovate: datasource=adoptium-java
+RUN install-tool java 8.0.302+8
 
 #--------------------------------------
 # test: java 16
@@ -75,8 +77,8 @@ FROM build as testd
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 16.0.2
+# renovate: datasource=adoptium-java
+RUN install-tool java 16.0.2+7
 
 #--------------------------------------
 # test: maven
