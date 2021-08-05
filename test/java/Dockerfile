@@ -33,7 +33,6 @@ RUN set -ex; \
   git diff; \
   ./gradlew --version
 
-SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
