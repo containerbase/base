@@ -2,23 +2,47 @@
 
 set -e
 
-require_root
 check_command java
+check_semver ${TOOL_VERSION}
 
-if [[ -d "/usr/local/${TOOL_NAME}-${TOOL_VERSION}" ]]; then
-  echo "Skipping, already installed"
-  exit 0
+if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
+  echo Invalid version: ${TOOL_VERSION}
+  exit 1
 fi
 
-curl -sL -o gradle.zip https://services.gradle.org/distributions/gradle-${TOOL_VERSION}-bin.zip
-unzip -q -d /usr/local gradle.zip
-rm gradle.zip
+tool_path=$(find_tool_path)
 
-export_path "/usr/local/${TOOL_NAME}-${TOOL_VERSION}/bin"
+function update_env () {
+  reset_tool_env
+  export_tool_path "${1}/bin"
+}
 
-mkdir -p ${USER_HOME}/{.m2,.gradle}
+function create_gradle_settings() {
+  if [[ -f ${USER_HOME}/.gradle/gradle.properties ]]; then
+    echo 'Gradle settings already found'
+    return
+  fi
+  echo 'Creating Gradle settings'
+  mkdir -p ${USER_HOME}/.gradle
 
-cat > ${USER_HOME}/.m2/settings.xml <<- EOM
+  cat > ${USER_HOME}/.gradle/gradle.properties <<- EOM
+org.gradle.parallel=true
+org.gradle.configureondemand=true
+org.gradle.daemon=false
+org.gradle.caching=false
+EOM
+
+  chown -R ${USER_ID} ${USER_HOME}/.gradle
+}
+
+function create_maven_settings() {
+  if [[ -f ${USER_HOME}/.m2/settings.xml ]]; then
+    echo 'Maven settings already found'
+    return
+  fi
+  echo 'Creating Maven settings'
+  mkdir -p ${USER_HOME}/.m2
+  cat > ${USER_HOME}/.m2/settings.xml <<- EOM
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -27,15 +51,33 @@ cat > ${USER_HOME}/.m2/settings.xml <<- EOM
 </settings>
 EOM
 
-cat > ${USER_HOME}/.gradle/gradle.properties <<- EOM
-org.gradle.parallel=true
-org.gradle.configureondemand=true
-org.gradle.daemon=false
-org.gradle.caching=false
-EOM
+  chown -R ${USER_ID} ${USER_HOME}/.m2
+}
 
-chown -R ${USER_ID} ${USER_HOME}/.m2 ${USER_HOME}/.gradle
+if [[ -z "${tool_path}" ]]; then
+  INSTALL_DIR=$(get_install_dir)
+  base_path=${INSTALL_DIR}/${TOOL_NAME}
+  tool_path=${base_path}/${TOOL_VERSION}
+
+  mkdir -p ${base_path}
+
+  create_maven_settings
+  create_gradle_settings
+
+  file=/tmp/gradle.zip
+
+  URL="https://services.gradle.org/distributions"
+
+  curl -sSfLo ${file} ${URL}/gradle-${TOOL_VERSION}-bin.zip
+  unzip -q -d ${base_path} ${file}
+  rm ${file}
+  mv ${base_path}/${TOOL_NAME}-${TOOL_VERSION} ${tool_path}
+
+  update_env ${tool_path}
+  shell_wrapper gradle
+else
+  echo "Already installed, resetting env"
+  update_env ${tool_path}
+fi
 
 gradle --version
-
-shell_wrapper gradle

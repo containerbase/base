@@ -18,9 +18,10 @@ COPY --chown=1000:0 test test
 #--------------------------------------
 FROM build as testa
 
+USER 1000
+
 RUN install-tool gradle 6.9
 
-USER 1000
 
 RUN set -ex; \
   gradle --version;
