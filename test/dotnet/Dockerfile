@@ -48,7 +48,7 @@ FROM base as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 5.0.303
+RUN install-tool dotnet 5.0.400
 
 USER 1000
 
