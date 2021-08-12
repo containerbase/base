@@ -51,7 +51,7 @@ RUN install-tool gradle 7.1.1
 RUN install-tool nix 2.3.10
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.4
+RUN install-tool node 14.17.5
 # renovate: datasource=npm
 RUN install-tool pnpm 6.11.5
 # renovate: datasource=npm
