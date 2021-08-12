@@ -115,7 +115,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.3
+RUN install-tool powershell v7.1.4
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -168,7 +168,7 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool git-lfs v2.13.3
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.3
+RUN install-tool powershell v7.1.4
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.17.5
