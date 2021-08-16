@@ -74,7 +74,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.4
+RUN install-tool node 14.17.5
 
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -115,7 +115,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.3
+RUN install-tool powershell v7.1.4
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -168,10 +168,10 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool git-lfs v2.13.3
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.3
+RUN install-tool powershell v7.1.4
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.4
+RUN install-tool node 14.17.5
 
 # renovate: datasource=github-releases lookupName=moby/moby
 RUN install-tool docker v20.10.8

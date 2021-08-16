@@ -86,7 +86,7 @@ RUN install-tool java 16.0.2+7
 FROM build as teste
 
 # renovate: datasource=maven lookupName=org.apache.maven:maven
-RUN install-tool maven 3.8.1
+RUN install-tool maven 3.8.2
 
 # test openshift userid missmatch
 USER 1001
