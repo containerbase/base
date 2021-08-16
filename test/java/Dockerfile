@@ -1,17 +1,22 @@
 ARG IMAGE=containerbase/buildpack
-FROM ${IMAGE} as build
-
-ARG APT_HTTP_PROXY
-
-# TODO: only lts
-# renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 11.0.12
+FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
 WORKDIR /tmp
 
 COPY --chown=1000:0 test test
+
+#--------------------------------------
+# build: Java LTS base
+#--------------------------------------
+FROM base as build
+
+ARG APT_HTTP_PROXY
+
+# TODO: only lts
+# renovate: datasource=adoptium-java
+RUN install-tool java 11.0.12+7
 
 #--------------------------------------
 # test: gradle 6
@@ -66,17 +71,29 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-RUN install-tool java 8
+# renovate: datasource=adoptium-java
+RUN install-tool java 8.0.302+8
 
 #--------------------------------------
-# test: java 16
+# test: java 16 (non-root)
 #--------------------------------------
-FROM build as testd
+FROM base as testd
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=docker lookupName=openjdk versioning=docker
-RUN install-tool java 16.0.2
+USER 1000
+
+# renovate: datasource=adoptium-java
+ARG JAVA_VERSION=16.0.2+7
+RUN install-tool java
+
+# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
+RUN install-tool gradle 7.1.1
+
+RUN gradle --version
+
+# fail if java version mismatch
+RUN gradle --version | grep "${JAVA_VERSION}"
 
 #--------------------------------------
 # test: maven
