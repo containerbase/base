@@ -1,18 +1,22 @@
 ARG IMAGE=containerbase/buildpack
-FROM ${IMAGE} as build
-
-ARG APT_HTTP_PROXY
-
-# TODO: only lts
-# renovate: datasource=adoptium-java
-RUN install-tool java 11.0.12+7
-
+FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
 WORKDIR /tmp
 
 COPY --chown=1000:0 test test
+
+#--------------------------------------
+# build: Java LTS base
+#--------------------------------------
+FROM base as build
+
+ARG APT_HTTP_PROXY
+
+# TODO: only lts
+# renovate: datasource=adoptium-java
+RUN install-tool java 11.0.12+7
 
 #--------------------------------------
 # test: gradle 6
@@ -73,7 +77,7 @@ RUN install-tool java 8.0.302+8
 #--------------------------------------
 # test: java 16 (non-root)
 #--------------------------------------
-FROM build as testd
+FROM base as testd
 
 ARG APT_HTTP_PROXY
 
