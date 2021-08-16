@@ -71,14 +71,25 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.302+8
 
 #--------------------------------------
-# test: java 16
+# test: java 16 (non-root)
 #--------------------------------------
 FROM build as testd
 
 ARG APT_HTTP_PROXY
 
+USER 1000
+
 # renovate: datasource=adoptium-java
-RUN install-tool java 16.0.2+7
+ARG JAVA_VERSION=16.0.2+7
+RUN install-tool java
+
+# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
+RUN install-tool gradle 7.1.1
+
+RUN gradle --version
+
+# fail if java version mismatch
+RUN gradle --version | grep "${JAVA_VERSION}"
 
 #--------------------------------------
 # test: maven
@@ -117,6 +128,7 @@ RUN set -ex; \
   sbt compile
 
 RUN ls -la ~
+
 
 #--------------------------------------
 # final
