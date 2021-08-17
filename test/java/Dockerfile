@@ -46,7 +46,7 @@ RUN gradle --version
 FROM build as testb
 
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
-RUN install-tool gradle 7.1.1
+RUN install-tool gradle 7.2
 
 USER 1000
 
@@ -88,7 +88,7 @@ ARG JAVA_VERSION=16.0.2+7
 RUN install-tool java
 
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
-RUN install-tool gradle 7.1.1
+RUN install-tool gradle 7.2
 
 RUN gradle --version
 
