@@ -14,7 +14,7 @@ COPY --chown=1000:0 test test
 FROM build as testa
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.16.7
+RUN install-tool golang 1.17.0
 
 USER 1000
 
