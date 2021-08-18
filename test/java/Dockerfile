@@ -15,7 +15,7 @@ FROM base as build
 ARG APT_HTTP_PROXY
 
 # TODO: only lts
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java depName=java
 RUN install-tool java 11.0.12+7
 
 #--------------------------------------
@@ -71,7 +71,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java depName=java
 RUN install-tool java 8.0.302+8
 
 #--------------------------------------
@@ -83,7 +83,7 @@ ARG APT_HTTP_PROXY
 
 USER 1000
 
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java depName=java
 ARG JAVA_VERSION=16.0.2+7
 RUN install-tool java
 
