@@ -9,7 +9,7 @@
       "dependencyDashboardApproval": false
     },
     {
-      "description": "Disable all managers for test/ by default",
+      "description": "Disable all managers in test/ by default",
       "matchPaths": ["test/"],
       "enabled": false
     },
@@ -32,7 +32,7 @@
       "automerge": false
     },
     {
-      "description": "use `test` semantic commit scope for test/",
+      "description": "Use `test` semantic commit scope for test/",
       "matchPaths": ["test/"],
       "semanticCommitType": "test"
     },
