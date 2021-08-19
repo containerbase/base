@@ -41,7 +41,7 @@ USER 1000
 FROM build as poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.7
+RUN install-tool poetry 1.1.8
 
 USER 1000
 
@@ -55,7 +55,7 @@ FROM build as testa
 RUN install-tool python 3.9.6
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.7
+RUN install-tool poetry 1.1.8
 
 USER 1000
 
@@ -126,7 +126,7 @@ RUN set -ex; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.7
+RUN install-tool poetry 1.1.8
 
 RUN set -ex \
   && cd test/c-poetry \
