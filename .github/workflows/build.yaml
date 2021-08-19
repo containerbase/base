@@ -49,7 +49,7 @@ jobs:
         run: sudo yarn prepare:proxy
 
       - name: test distro
-        run: docker buildx bake --progress plain test
+        run: docker buildx bake --progress plain test-distro
 
   lang:
     runs-on: ubuntu-latest

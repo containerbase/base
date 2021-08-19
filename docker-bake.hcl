@@ -24,6 +24,11 @@ group "test" {
   targets = ["build-test"]
 }
 
+group "test-distro" {
+  targets = ["build-distro"]
+}
+
+
 target "settings" {
   context = "."
   args = {
@@ -57,6 +62,11 @@ target "build-docker" {
     "${OWNER}/${FILE}:${TAG}",
     "${OWNER}/${FILE}",
   ]
+}
+
+target "build-distro" {
+  inherits = ["settings"]
+  dockerfile = "./test/Dockerfile.${TAG}"
 }
 
 target "build-test" {

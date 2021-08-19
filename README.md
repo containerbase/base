@@ -34,10 +34,10 @@ For other test images checkout [`test`](./test/) folder.
 
 ### Distro test images
 
-To run the bionic tests use the following command, it will run the test from [`test/bionic/Dockerfile`](./test/bionic/Dockerfile).
+To run the bionic tests use the following command, it will run the test from [`test/Dockerfile.bionic`](./test/Dockerfile.bionic).
 
 ```sh
-TAG=bionic docker buildx bake test
+TAG=bionic docker buildx bake test-distro
 ```
 
 ## Apt proxy
