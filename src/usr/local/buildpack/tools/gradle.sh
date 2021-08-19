@@ -3,6 +3,11 @@
 set -e
 
 check_command java
+
+if [[ "${TOOL_VERSION}" == "latest" ]]; then
+  export "TOOL_VERSION=$(curl -s https://services.gradle.org/versions/current | jq --raw-output '.version')"
+fi
+
 check_semver ${TOOL_VERSION}
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then

@@ -15,7 +15,7 @@ FROM base as build
 ARG APT_HTTP_PROXY
 
 # TODO: only lts
-# renovate: datasource=adoptium-java depName=java
+# renovate: datasource=adoptium-java
 RUN install-tool java 11.0.12+7
 
 #--------------------------------------
@@ -25,6 +25,8 @@ FROM build as testa
 
 USER 1000
 
+# stay on v6
+# renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 6.9
 
 
@@ -45,7 +47,7 @@ RUN gradle --version
 #--------------------------------------
 FROM build as testb
 
-# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
+# renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.2
 
 USER 1000
@@ -71,8 +73,11 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java depName=java
+# renovate: datasource=adoptium-java
 RUN install-tool java 8.0.302+8
+
+# renovate: datasource=gradle-version versioning=gradle
+RUN install-tool gradle 7.2
 
 #--------------------------------------
 # test: java 16 (non-root)
@@ -87,8 +92,8 @@ USER 1000
 ARG JAVA_VERSION=16.0.2+7
 RUN install-tool java
 
-# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
-RUN install-tool gradle 7.2
+# test latest gradle
+RUN install-tool gradle latest
 
 RUN gradle --version
 
