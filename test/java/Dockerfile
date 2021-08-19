@@ -16,7 +16,7 @@ ARG APT_HTTP_PROXY
 
 # TODO: only lts
 # renovate: datasource=adoptium-java
-RUN install-tool java 11.0.12+7
+RUN install-tool java 16.0.2+7
 
 #--------------------------------------
 # test: gradle 6
@@ -74,7 +74,7 @@ ARG APT_HTTP_PROXY
 
 # need to stay old
 # renovate: datasource=adoptium-java
-RUN install-tool java 8.0.302+8
+RUN install-tool java 16.0.2+7
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.2
