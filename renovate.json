@@ -23,8 +23,13 @@
       "description": "Separate patch updates in test/ so that we can automerge them",
       "matchPaths": ["test/"],
       "automergeType": "branch",
-      "separateMinorPatch": true,
-      "semanticCommitType": "test"
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Don't automerge test minor/major because we might want to retain old versions in tests too",
+      "matchPaths": ["test/"],
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false
     },
     {
       "description": "use `test` semantic commit scope for test/",
