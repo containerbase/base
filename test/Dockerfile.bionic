@@ -60,7 +60,7 @@ RUN install-tool yarn 1.22.11
 RUN install-npm lerna 4.0.0
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-RUN install-tool php 8.0.9
+RUN install-tool php 8.0.10
 # renovate: datasource=github-releases lookupName=composer/composer
 RUN install-tool composer 2.1.6
 
