@@ -93,11 +93,12 @@ RUN set -ex; cd test/d-poetry && poetry update --lock --no-interaction pytest
 
 
 #--------------------------------------
-# test e: poetry
+# test e: poetry (old versions)
 #--------------------------------------
-FROM poetry as teste
+FROM build as teste
 
-
+RUN install-tool poetry 0.12.17
+RUN install-tool poetry 1.1.0
 
 #--------------------------------------
 # test f: pip_requirements
@@ -153,6 +154,6 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
