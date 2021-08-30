@@ -10,11 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-# if [[ ${MAJOR} -gt 1 || (${MAJOR} -eq 1 && ${MINOR} -gt 1) || (${MAJOR} -eq 1 && ${MINOR} -eq 1 && ${PATCH} -gt 6) ]]; then
-  POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
-# else
-  # POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
-# fi
+POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
 
 tool_path=$(find_tool_path)
 
@@ -30,7 +26,7 @@ if [[ -z "${tool_path}" ]]; then
 
   mkdir -p ${tool_path}
 
-  curl -sSL $POETRY_URL | python - --version ${TOOL_VERSION} --no-modify-path
+  curl -sSL $POETRY_URL | python - --version ${TOOL_VERSION}
   unset POETRY_HOME
 
   # fix execute for all [#150]
