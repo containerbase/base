@@ -11,9 +11,9 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
 fi
 
 # if [[ ${MAJOR} -gt 1 || (${MAJOR} -eq 1 && ${MINOR} -gt 1) || (${MAJOR} -eq 1 && ${MINOR} -eq 1 && ${PATCH} -gt 6) ]]; then
-#   POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
+  POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
 # else
-  POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+  # POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
 # fi
 
 tool_path=$(find_tool_path)
