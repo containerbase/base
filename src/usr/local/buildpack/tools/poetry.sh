@@ -32,7 +32,7 @@ if [[ -z "${tool_path}" ]]; then
   # fix execute for all renovatebot/docker-buildpack#150
   chmod +x ${tool_path}/bin/poetry
 
-  # fix uid/ fid #124
+  # fix uid/ gid #124
   if [[ $UID -eq 0 ]]; then
     [ -f "${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py" ] \
       && chown 0:0 ${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py
