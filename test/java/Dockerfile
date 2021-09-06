@@ -48,7 +48,7 @@ RUN gradle --version
 FROM base as testb
 
 # renovate: datasource=adoptium-java
-RUN install-tool java-jre 11.0.12+7
+RUN install-tool java-jre 16.0.2+7
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.2
