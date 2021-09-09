@@ -42,7 +42,7 @@ RUN install-tool golang 1.17.0
 # renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm v3.6.3
 
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 11.0.12+7
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
 RUN install-tool gradle 7.2

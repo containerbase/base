@@ -15,7 +15,7 @@ FROM base as build
 ARG APT_HTTP_PROXY
 
 # TODO: only lts
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 11.0.12+7
 
 #--------------------------------------
