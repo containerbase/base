@@ -3,7 +3,7 @@ FROM ${IMAGE} as build
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=nodejs/node versioning=node
+# renovate: datasource=node
 RUN install-tool node 14.17.6
 
 RUN touch /.dummy
@@ -109,7 +109,7 @@ FROM ${IMAGE} as testd
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=nodejs/node
+# renovate: datasource=node
 RUN install-tool node 15.0.1
 
 RUN touch /.dummy
