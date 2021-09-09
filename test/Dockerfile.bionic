@@ -50,7 +50,7 @@ RUN install-tool gradle 7.2
 # renovate: datasource=github-releases lookupName=NixOS/nix
 RUN install-tool nix 2.3.10
 
-# renovate: datasource=github-releases lookupName=nodejs/node versioning=node
+# renovate: datasource=node
 RUN install-tool node 14.17.6
 # renovate: datasource=npm
 RUN install-tool pnpm 6.14.2
