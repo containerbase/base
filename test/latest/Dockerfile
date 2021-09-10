@@ -73,7 +73,7 @@ FROM build as testc
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=node
 RUN install-tool node 14.17.6
 
 RUN set -ex; \
@@ -170,7 +170,7 @@ RUN install-tool git-lfs v2.13.3
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.1.4
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=node
 RUN install-tool node 14.17.6
 
 # renovate: datasource=github-releases lookupName=moby/moby
