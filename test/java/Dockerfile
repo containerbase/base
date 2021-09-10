@@ -47,7 +47,7 @@ RUN gradle --version
 #--------------------------------------
 FROM base as testb
 
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java-jre 11.0.12+7
 
 # renovate: datasource=gradle-version versioning=gradle
@@ -76,7 +76,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java
+# renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 8.0.302+8
 
 # renovate: datasource=gradle-version versioning=gradle
