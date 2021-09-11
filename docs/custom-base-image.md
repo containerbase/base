@@ -12,10 +12,17 @@ You should always use a specific version which can be found at [docker hub](http
 Use this template for using a custom base image with our default user named `user` and userid `1000`.
 
 ```dockerfile
+# This default may be swapped for any compatible base image
+ARG BASE_IMAGE=amd64/ubuntu:20.04
+
 # This buildpack is used for tool intallation and user/directory setup
 FROM containerbase/buildpack AS buildpack
 
-FROM amd64/ubuntu:focal as base
+FROM ${BASE_IMAGE} as base
+
+ARG USER_NAME=ubuntu
+ARG USER_ID=1000
+ARG APP_ROOT=/usr/src/app
 
 # Allows custom apt proxy usage
 ARG APT_HTTP_PROXY
@@ -35,7 +42,6 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
 COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-buildpack
-
 
 # renovate: datasource=github-tags lookupName=git/git
 RUN install-tool git v2.30.0
