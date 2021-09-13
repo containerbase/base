@@ -92,7 +92,7 @@ RUN set -ex; \
 FROM build3 as testd
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.1
+RUN install-gem cocoapods 1.11.2
 
 USER 1000
 
