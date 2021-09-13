@@ -33,6 +33,9 @@ RUN set -ex; \
 RUN node --version
 RUN npm --version
 
+# renovate: datasource=npm
+RUN install-npm re2 1.16.0
+
 #--------------------------------------
 # test: yarn
 #--------------------------------------
