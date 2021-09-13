@@ -13,3 +13,8 @@ npm install -g yarn@${TOOL_VERSION}
 yarn --version
 
 shell_wrapper yarn
+
+# Clean download cache
+npm cache clean --force
+# Clean node-gyp cache
+rm -rf /root/.cache

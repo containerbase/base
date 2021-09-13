@@ -11,3 +11,8 @@ fi
 npm install -g npm@${TOOL_VERSION}
 
 npm --version
+
+# Clean download cache
+npm cache clean --force
+# Clean node-gyp cache
+rm -rf /root/.cache

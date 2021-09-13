@@ -25,5 +25,5 @@ echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
 
 # cleanup
 if [[ $EUID -eq 0 ]]; then
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/* /tmp/*
 fi

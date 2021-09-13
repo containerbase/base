@@ -52,3 +52,9 @@ export_env NODE_OPTIONS "--use-openssl-ca"
 
 shell_wrapper node
 shell_wrapper npm
+
+# Clean download cache
+npm cache clean --force
+
+# Clean node-gyp cache
+rm -rf /root/.cache
