@@ -87,7 +87,7 @@ RUN install-gem cocoapods 1.11.2
 RUN install-tool rust 1.55.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.4.2
+RUN install-tool swift 5.4.3
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.0.6
