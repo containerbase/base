@@ -5,6 +5,9 @@ FROM ubuntu:20.04@sha256:9d6a8699fb5c9c39cf08a0871bd6219f0400981c570894cd8cbea30
 
 ARG APT_HTTP_PROXY
 
+# Weekly cache buster
+ARG CACHE_WEEK
+
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 

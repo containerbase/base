@@ -130,6 +130,17 @@ function apt_install () {
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
+function apt_upgrade () {
+  echo "Upgrading apt packages"
+  if [[ "${APT_HTTP_PROXY}" ]]; then
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
+  fi
+  apt-get -qq update
+  apt-get upgrade
+
+  rm -f /etc/apt/apt.conf.d/buildpack-proxy
+}
+
 function require_distro () {
   local VERSION_CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
   case "$VERSION_CODENAME" in

@@ -12,6 +12,10 @@ variable "APT_HTTP_PROXY" {
   default = ""
 }
 
+variable "CACHE_WEEK" {
+  default = ""
+}
+
 group "default" {
   targets = ["build-docker"]
 }
@@ -65,13 +69,13 @@ target "build-docker" {
 }
 
 target "build-distro" {
-  inherits = ["settings"]
+  inherits   = ["settings"]
   dockerfile = "./test/Dockerfile.${TAG}"
 }
 
 target "build-test" {
   inherits = ["settings"]
-  context ="./test/${TAG}"
+  context  = "./test/${TAG}"
 }
 
 target "push-ghcr" {

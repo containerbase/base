@@ -83,6 +83,10 @@ export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
 
+
+# upgrade base packages
+apt_upgrade
+
 # install basic required packages
 apt_install \
   ca-certificates \
