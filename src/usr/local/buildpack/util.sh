@@ -136,7 +136,7 @@ function apt_upgrade () {
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
   apt-get -qq update
-  apt-get upgrade
+  apt-get upgrade -y
 
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
