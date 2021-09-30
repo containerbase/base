@@ -148,7 +148,7 @@ RUN openssl verify /renovate.pem
 RUN touch /.dummy
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.7
+RUN install-tool terraform 1.0.8
 
 USER ${USER_ID}
 
