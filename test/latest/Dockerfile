@@ -165,7 +165,7 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v2.13.3
+RUN install-tool git-lfs v3.0.1
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.1.4
