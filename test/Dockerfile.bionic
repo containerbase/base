@@ -65,7 +65,7 @@ RUN install-tool php 8.0.11
 RUN install-tool composer 2.1.9
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.4
+RUN install-tool powershell v7.1.5
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool python 3.9.7
