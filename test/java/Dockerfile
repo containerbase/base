@@ -109,7 +109,7 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 FROM build as teste
 
 # renovate: datasource=maven lookupName=org.apache.maven:maven
-RUN install-tool maven 3.8.2
+RUN install-tool maven 3.8.3
 
 # test openshift userid missmatch
 USER 1001

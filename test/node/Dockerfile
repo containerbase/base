@@ -69,7 +69,7 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.11
+RUN install-tool yarn 1.22.15
 
 # renovate: datasource=npm
 RUN install-npm lerna 4.0.0
@@ -91,7 +91,7 @@ ARG APT_HTTP_PROXY
 USER root
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.14.2
+RUN install-tool pnpm 6.16.1
 
 USER 1000
 
@@ -122,7 +122,7 @@ RUN install-tool node 15.0.1
 RUN touch /.dummy
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.11
+RUN install-tool yarn 1.22.15
 
 USER 1000
 

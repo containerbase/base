@@ -59,7 +59,7 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases depName=containerbase/python-prebuild
+# renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.9.7
 RUN install-tool python
 
@@ -115,7 +115,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.4
+RUN install-tool powershell v7.1.5
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -148,7 +148,7 @@ RUN openssl verify /renovate.pem
 RUN touch /.dummy
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.6
+RUN install-tool terraform 1.0.9
 
 USER ${USER_ID}
 
@@ -165,16 +165,16 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v2.13.3
+RUN install-tool git-lfs v3.0.1
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.4
+RUN install-tool powershell v7.1.5
 
 # renovate: datasource=node
 RUN install-tool node 14.17.6
 
 # renovate: datasource=github-releases lookupName=moby/moby
-RUN install-tool docker v20.10.8
+RUN install-tool docker v20.10.9
 
 #--------------------------------------
 # final

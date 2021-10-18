@@ -16,7 +16,7 @@ FROM base as net3
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 3.1.412
+RUN install-tool dotnet 3.1.414
 
 USER 1000
 
@@ -48,7 +48,7 @@ FROM base as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 5.0.400
+RUN install-tool dotnet 5.0.402
 
 USER 1000
 

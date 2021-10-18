@@ -58,7 +58,7 @@ RUN set -ex; \
 FROM build as testb
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.2.27
+RUN install-gem bundler 2.2.29
 
 USER 1000
 
@@ -92,7 +92,7 @@ RUN set -ex; \
 FROM build3 as testd
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.1
+RUN install-gem cocoapods 1.11.2
 
 USER 1000
 

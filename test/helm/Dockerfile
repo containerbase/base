@@ -2,7 +2,7 @@ ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.6.3
+RUN install-tool helm v3.7.1
 
 USER 1000
 
