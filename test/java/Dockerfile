@@ -112,7 +112,7 @@ FROM build as teste
 RUN install-tool maven 3.8.3
 
 # test openshift userid missmatch
-USER 1001
+USER 1001:0
 
 RUN set -ex; \
   mkdir mvn && cd mvn; \
