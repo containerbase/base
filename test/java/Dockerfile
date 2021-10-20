@@ -3,9 +3,9 @@ FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # build: Java LTS base
@@ -135,7 +135,7 @@ RUN install-tool sbt v1.5.5
 USER 1000
 
 RUN set -ex; \
-  cd test/sbt; \
+  cd sbt; \
   ls -la; env; \
   sbt compile
 

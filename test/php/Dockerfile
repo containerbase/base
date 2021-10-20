@@ -3,9 +3,9 @@ FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # test: php 7.4
@@ -42,7 +42,7 @@ RUN composer --version
 
 
 RUN set -ex; \
-  cd test/a; \
+  cd a; \
   composer install --no-ansi --no-interaction
 
 #--------------------------------------
