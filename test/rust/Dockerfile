@@ -9,15 +9,15 @@ RUN install-tool rust 1.55.0
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.55.0
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 USER 1000
 
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     cargo update; \
     cargo update --manifest-path Cargo.toml --package serde;
 
