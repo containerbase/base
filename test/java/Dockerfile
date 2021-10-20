@@ -115,6 +115,7 @@ RUN install-tool maven 3.8.3
 USER 1001
 
 RUN set -ex; \
+  mkdir mvn && cd mvn; \
   mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false;
 
 RUN set -ex; env; ls -la $MAVEN_CONFIG; id -u; id -g;
