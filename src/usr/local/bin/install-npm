@@ -8,8 +8,12 @@ require_root
 require_tool "$@"
 check_command npm
 
+unset NPM_CONFIG_PREFIX
+
 echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
-npm install --global ${TOOL_NAME}@${TOOL_VERSION}
+npm install --global ${TOOL_NAME}@${TOOL_VERSION} --unsafe
 
 # Clean download cache
 npm cache clean --force
+# Clean node-gyp cache
+rm -rf /root/.cache

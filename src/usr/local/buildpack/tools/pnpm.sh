@@ -15,3 +15,8 @@ pnpm --version
 if [[ $EUID -eq 0 ]]; then
   shell_wrapper pnpm
 fi
+
+# Clean download cache
+npm cache clean --force
+# Clean node-gyp cache
+rm -rf /root/.cache
