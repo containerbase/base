@@ -3,9 +3,9 @@ FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # build: Java LTS base
@@ -115,9 +115,9 @@ RUN install-tool maven 3.8.3
 USER 1001
 
 RUN set -ex; \
+  mkdir -p /tmp/mvn && cd /tmp/mvn; \
   mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false;
 
-RUN set -ex; env; ls -la $MAVEN_CONFIG; id -u; id -g;
 
 #--------------------------------------
 # test: scala / sbt
@@ -135,7 +135,7 @@ RUN install-tool sbt v1.5.5
 USER 1000
 
 RUN set -ex; \
-  cd test/sbt; \
+  cd sbt; \
   ls -la; env; \
   sbt compile
 

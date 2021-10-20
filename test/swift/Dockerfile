@@ -8,7 +8,9 @@ RUN install-tool swift 5.5.0
 
 RUN touch /.dummy
 
-WORKDIR /tmp
+COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 
 #--------------------------------------
@@ -20,22 +22,21 @@ USER 1000
 
 RUN swift --version
 
-COPY --chown=1000:0 test test
-
 RUN set -ex; \
-  cd test/a; \
+  cd a; \
   swift package resolve
 
 RUN set -ex; \
-  cd test/b; \
+  cd b; \
   swift package resolve
 
 RUN set -ex; \
-  cd test/c; \
+  cd c; \
   swift package resolve
 
 SHELL [ "/bin/sh", "-c" ]
 RUN swift --version
+
 
 #--------------------------------------
 # testb: swift 5.2.5
@@ -44,19 +45,18 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
+# Only patch updates!
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.5.0
+RUN install-tool swift 5.2.5
 
 USER 1000
 
 RUN swift --version
 
-COPY --chown=1000:0 test test
-
-
 RUN set -ex; \
-  cd test/c; \
+  cd c; \
   swift package resolve
+
 
 #--------------------------------------
 # final

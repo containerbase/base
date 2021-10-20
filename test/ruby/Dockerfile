@@ -8,9 +8,9 @@ RUN install-tool ruby 2.6.4
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 FROM ${IMAGE} as build3
 
@@ -21,9 +21,9 @@ RUN install-tool ruby 3.0.2
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # test: bundler
@@ -49,7 +49,7 @@ RUN set -ex; \
   bundler env
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     bundle lock
 
 #--------------------------------------
@@ -66,7 +66,7 @@ RUN ruby --version
 RUN bundler env
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     bundle lock;
 
 SHELL [ "/bin/sh", "-c" ]
@@ -82,7 +82,7 @@ USER 1000
 RUN gem install cocoapods -v 1.9.1
 
 RUN set -ex; \
-    cd test/b/Project; \
+    cd b/Project; \
     gem install cocoapods-acknowledgements; \
     pod install;
 
@@ -97,7 +97,7 @@ RUN install-gem cocoapods 1.11.2
 USER 1000
 
 RUN set -ex; \
-    cd test/b/Project; \
+    cd b/Project; \
     gem install cocoapods-acknowledgements; \
     pod install;
 
