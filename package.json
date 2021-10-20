@@ -39,6 +39,6 @@
     }
   },
   "resolutions": {
-    "ansi-regex": "5.0.1"
+    "ansi-regex": "6.0.1"
   }
 }
