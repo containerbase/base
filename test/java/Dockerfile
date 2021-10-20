@@ -114,6 +114,9 @@ RUN install-tool maven 3.8.3
 # test openshift userid missmatch
 USER 1001:0
 
+
+RUN set -ex; env; ls -la; id -u; id -g;
+
 RUN set -ex; \
   mkdir mvn && cd mvn; \
   mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false;
