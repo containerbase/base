@@ -55,7 +55,7 @@ RUN install-tool node v14.18.1
 # renovate: datasource=npm
 RUN install-tool pnpm 6.16.1
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.15
+RUN install-tool yarn 1.22.17
 # renovate: datasource=npm
 RUN install-npm lerna 4.0.0
 
