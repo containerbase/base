@@ -48,7 +48,7 @@ export_env NPM_CONFIG_PREFIX $NPM_CONFIG_PREFIX
 export_path "\$NPM_CONFIG_PREFIX/bin"
 
 # use openssl certificates
-export_env NODE_OPTIONS "--use-openssl-ca"
+#export_env NODE_OPTIONS "--use-openssl-ca"
 
 shell_wrapper node
 shell_wrapper npm
