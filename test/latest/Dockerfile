@@ -77,7 +77,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool node v14.18.1
 
 RUN set -ex; \
-  nginx && su -c 'SSL_CERT_FILE=/test/ca.pem node request.mjs' ${USER_NAME}
+  nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
 
 #--------------------------------------
 # test: php
