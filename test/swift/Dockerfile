@@ -47,7 +47,7 @@ ARG APT_HTTP_PROXY
 
 # Only patch updates!
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.2.5
+RUN install-tool swift 5.5.1
 
 USER 1000
 
