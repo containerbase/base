@@ -16,7 +16,7 @@ ARG APT_HTTP_PROXY
 
 # TODO: only lts
 # renovate: datasource=adoptium-java lookupName=java-jre
-RUN install-tool java 11.0.12+7
+RUN install-tool java 11.0.13+8
 
 #--------------------------------------
 # test: gradle 6
