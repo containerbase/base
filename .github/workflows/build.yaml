@@ -135,6 +135,11 @@ jobs:
         with:
           command: docker-config
 
+      # full checkout for semantic-release
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          fetch-depth: 0
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
         with:
@@ -150,11 +155,6 @@ jobs:
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
           echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
-
-      # full checkout for semantic-release
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
-        with:
-          fetch-depth: 0
 
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'
