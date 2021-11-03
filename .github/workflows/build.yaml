@@ -6,7 +6,9 @@ on:
       GITHUB_TOKEN:
         required: true
       DOCKER_USERNAME:
+        required: false
       DOCKER_PASSWORD:
+        required: false
 
 env:
   DRY_RUN: ${{ github.ref != 'refs/heads/main' }}
