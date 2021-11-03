@@ -13,7 +13,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 14
+  NODE_VERSION: v16.13.0 # renovate: datasource=node depName=node
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
