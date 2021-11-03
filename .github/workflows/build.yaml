@@ -1,15 +1,12 @@
 name: build
 
 on:
-  push:
   workflow_call:
     secrets:
       GITHUB_TOKEN:
         required: true
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+      DOCKER_USERNAME:
+      DOCKER_PASSWORD:
 
 env:
   DRY_RUN: ${{ github.ref != 'refs/heads/main' }}
