@@ -2,7 +2,10 @@ name: build
 
 on:
   push:
-  pull_request:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
