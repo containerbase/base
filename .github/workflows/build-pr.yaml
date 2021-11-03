@@ -10,6 +10,6 @@ concurrency:
 jobs:
   pr:
     if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-    uses: containerbase/buildpack/.github/workflows/build.yml@ci-refactor
+    uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
