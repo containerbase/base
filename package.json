@@ -31,7 +31,8 @@
     "build": "run-s release:prepare",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
-    "release:publish": "node tools/publish-release.js"
+    "release:publish": "node tools/publish-release.js",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
