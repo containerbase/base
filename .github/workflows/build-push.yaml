@@ -8,8 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr:
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
+  build:
     uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

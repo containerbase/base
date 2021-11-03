@@ -21,8 +21,6 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     steps:
@@ -42,8 +40,6 @@ jobs:
 
   distro:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     strategy:
@@ -73,8 +69,6 @@ jobs:
 
   lang:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     strategy:
@@ -127,8 +121,6 @@ jobs:
   release:
     needs: [lint, lang, distro]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     steps:
