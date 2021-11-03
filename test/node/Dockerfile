@@ -4,7 +4,7 @@ FROM ${IMAGE} as build
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v14.18.1
+RUN install-tool node v16.13.0
 
 RUN touch /.dummy
 
@@ -117,7 +117,7 @@ FROM ${IMAGE} as testd
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node 15.0.1
+RUN install-tool node v16.13.0
 
 RUN touch /.dummy
 
