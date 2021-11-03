@@ -6,6 +6,7 @@
       "@semantic-release/github",
       {
         "releasedLabels": false,
+        "successComment": false,
         "assets": [
           {
             "path": "bin/buildpack.tar.xz",

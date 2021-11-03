@@ -13,13 +13,31 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
+
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: lint
+        run: yarn lint
+
   distro:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
@@ -36,11 +54,11 @@ jobs:
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
-      - name: Cache Yarn packages
-        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
         with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -83,11 +101,11 @@ jobs:
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
-      - name: Cache Yarn packages
-        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
         with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -105,7 +123,7 @@ jobs:
         run: docker buildx bake --progress plain test
 
   release:
-    needs: [lang, distro]
+    needs: [lint, lang, distro]
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
 
@@ -121,6 +139,7 @@ jobs:
         uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -142,12 +161,6 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-
-      - name: Cache Yarn packages
-        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2.1.6
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
