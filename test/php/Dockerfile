@@ -93,7 +93,7 @@ RUN install-tool php 8.0.12
 
 
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.1.11
+RUN install-tool composer 2.1.12
 
 RUN install-tool composer latest
 
