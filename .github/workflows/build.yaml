@@ -1,12 +1,14 @@
 name: build
 
 on:
-  push:
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      DOCKER_USERNAME:
+        required: false
+      DOCKER_PASSWORD:
+        required: false
 
 env:
   DRY_RUN: ${{ github.ref != 'refs/heads/main' }}
@@ -19,8 +21,6 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     steps:
@@ -40,8 +40,6 @@ jobs:
 
   distro:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     strategy:
@@ -71,8 +69,6 @@ jobs:
 
   lang:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     strategy:
@@ -125,8 +121,6 @@ jobs:
   release:
     needs: [lint, lang, distro]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
-
     timeout-minutes: 15
 
     steps:
