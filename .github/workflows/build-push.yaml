@@ -9,16 +9,8 @@ concurrency:
 
 jobs:
   build:
-    if: github.ref != 'refs/heads/ci-refactor'
     uses: containerbase/buildpack/.github/workflows/build.yaml@main
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-  test:
-    if: github.ref == 'refs/heads/ci-refactor'
-    uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
+    # uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
