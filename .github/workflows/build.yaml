@@ -20,6 +20,7 @@ env:
 
 jobs:
   lint:
+    name: lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -39,6 +40,7 @@ jobs:
         run: yarn lint
 
   distro:
+    name: ${{ format('distro ({0})', matrix.distro) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -68,6 +70,7 @@ jobs:
         run: docker buildx bake --progress plain test-distro
 
   lang:
+    name: ${{ format('lang ({0})', matrix.tag) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -119,6 +122,7 @@ jobs:
         run: docker buildx bake --progress plain test
 
   release:
+    name: release
     needs: [lint, lang, distro]
     runs-on: ubuntu-latest
     timeout-minutes: 15
