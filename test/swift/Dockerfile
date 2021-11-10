@@ -45,8 +45,6 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
-# Only patch updates!
-# renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.2.5
 
 USER 1000
