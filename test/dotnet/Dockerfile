@@ -38,12 +38,19 @@ RUN set -ex;  \
 
 
 #--------------------------------------
-# test: dotnet 5.0
+# test: dotnet 6.0
 #--------------------------------------
 FROM base as testb
 
 ARG APT_HTTP_PROXY
 
+# Do not change
+#RUN install-tool dotnet 3.1.415
+
+# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+RUN install-tool dotnet 6.0.100
+
+# Test duplicate install
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.100
 
@@ -54,7 +61,8 @@ RUN set -ex; \
 
 RUN set -ex;  \
     dotnet add package Newtonsoft.Json --version 12.0.3; \
-    dotnet restore --force-evaluate
+    dotnet restore --force-evaluate \
+    dotnet build
 
 
 #--------------------------------------
