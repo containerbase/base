@@ -164,6 +164,6 @@ jobs:
 
       - name: semantic-release
         if: github.event_name == 'push'
-        run: npx semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+        run: yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
