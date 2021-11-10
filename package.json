@@ -33,8 +33,7 @@
     "prepare": "husky install",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
-    "release:publish": "node tools/publish-release.js",
-    "prepare": "husky install"
+    "release:publish": "node tools/publish-release.js"
   },
   "resolutions": {
     "ansi-regex": "5.0.1"
