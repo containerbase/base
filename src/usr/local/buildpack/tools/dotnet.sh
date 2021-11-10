@@ -35,6 +35,9 @@ export_env DOTNET_SKIP_FIRST_TIME_EXPERIENCE "1"
 
 curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir $DOTNET_INSTALL_DIR --no-path -version $TOOL_VERSION
 
+# first time experience
+dotnet help > /dev/null
+su $USER_NAME -c 'dotnet help' > /dev/null
 
 dotnet --info
 
