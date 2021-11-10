@@ -45,7 +45,7 @@ FROM base as testb
 ARG APT_HTTP_PROXY
 
 # Do not change
-#RUN install-tool dotnet 3.1.415
+RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.100
@@ -55,6 +55,8 @@ RUN install-tool dotnet 6.0.100
 RUN install-tool dotnet 6.0.100
 
 USER 1000
+
+RUN dotnet --info
 
 RUN set -ex; \
     dotnet restore --use-lock-file
