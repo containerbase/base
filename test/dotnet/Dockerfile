@@ -61,7 +61,7 @@ RUN set -ex; \
 
 RUN set -ex;  \
     dotnet add package Newtonsoft.Json --version 12.0.3; \
-    dotnet restore --force-evaluate \
+    dotnet restore --force-evaluate; \
     dotnet build
 
 
