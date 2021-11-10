@@ -14,8 +14,7 @@ tool_path=$(find_tool_path)
 
 function update_env () {
   reset_tool_env
-  export_tool_env MAVEN_HOME "${1}"
-  export_tool_path "${1}/bin"
+  export_tool_path "${1}"
 }
 
 if [[ -z "${tool_path}" ]]; then
