@@ -46,6 +46,12 @@
       "matchPackageNames": ["ubuntu"],
       "matchUpdateTypes": ["digest"],
       "semanticCommitType": "fix"
+    },
+    {
+      "description": "Trigger fix release for git updates",
+      "matchPackageNames": ["git"],
+      "semanticCommitType": "fix",
+      "stabilityDays": 5
     }
   ]
 }
