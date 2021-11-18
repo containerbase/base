@@ -34,7 +34,7 @@
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/"],
-      "additionalBranchPrefi": "test-",
+      "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },
     {
