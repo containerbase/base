@@ -32,8 +32,9 @@
       "automerge": false
     },
     {
-      "description": "Use `test` semantic commit scope for test/",
+      "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/"],
+      "additionalBranchPrefi": "test-",
       "semanticCommitType": "test"
     },
     {
