@@ -14,5 +14,5 @@ RUN set -ex; \
 
 
 SHELL [ "/bin/sh", "-c" ]
-RUN set-ex; echo $PATH && ls /usr/local/bin
+RUN set -ex; echo $PATH && ls /usr/local/bin
 RUN helm version
