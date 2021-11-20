@@ -24,4 +24,4 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.33.1
+RUN install-tool git v2.34.0

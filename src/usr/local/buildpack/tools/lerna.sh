@@ -8,15 +8,15 @@ if [[ $EUID -eq 0 ]]; then
   unset NPM_CONFIG_PREFIX
 fi
 
-npm install -g npm@${TOOL_VERSION}
+npm install -g lerna@${TOOL_VERSION}
 
-hash -d npm
+lerna --version
 
-npm --version
+if [[ $EUID -eq 0 ]]; then
+  shell_wrapper lerna
+fi
 
 # Clean download cache
 npm cache clean --force
 # Clean node-gyp cache
-if [[ $EUID -eq 0 ]]; then
-  rm -rf /root/.cache
-fi
+rm -rf /root/.cache

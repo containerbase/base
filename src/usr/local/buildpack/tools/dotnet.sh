@@ -10,9 +10,9 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-DOTNET_INSTALL_DIR=/usr/local/${TOOL_NAME}/${TOOL_VERSION}
+DOTNET_INSTALL_DIR=/usr/local/${TOOL_NAME}
 
-if [[ -d "${DOTNET_INSTALL_DIR}" ]]; then
+if [[ -d "${DOTNET_INSTALL_DIR}/sdk/${TOOL_VERSION}" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
@@ -26,14 +26,14 @@ esac
 
 
 mkdir -p $DOTNET_INSTALL_DIR
-arch=linux-x64
-url=https://dotnetcli.azureedge.net/dotnet/Sdk/${TOOL_VERSION}/dotnet-sdk-${TOOL_VERSION}-${arch}.tar.gz
-curl -sfL  --output dotnet.tgz $url
-tar --strip 1 -C $DOTNET_INSTALL_DIR -xzf dotnet.tgz
 
 export_path "${DOTNET_INSTALL_DIR}"
 export_env DOTNET_ROOT "${DOTNET_INSTALL_DIR}"
 export_env DOTNET_CLI_TELEMETRY_OPTOUT "1"
+export_env DOTNET_SKIP_FIRST_TIME_EXPERIENCE "1"
+
+
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir $DOTNET_INSTALL_DIR --no-path -version $TOOL_VERSION
 
 # first time experience
 dotnet help > /dev/null

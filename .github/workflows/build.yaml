@@ -79,6 +79,7 @@ jobs:
             erlang,
             golang,
             java,
+            jb,
             helm,
             nix,
             node,
@@ -125,7 +126,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@ba8cd25dca8f977f71143adcab39b0fa06705398 # renovate: tag=v1.9.2
+        uses: renovatebot/internal-tools@eb0c61ae004ee415774a12de5adb282ab06b7457 # renovate: tag=v1.10.0
         with:
           command: docker-config
 

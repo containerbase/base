@@ -60,7 +60,7 @@ FROM build as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.9.8
+ARG PYTHON_VERSION=3.9.9
 RUN install-tool python
 
 RUN set -ex; \
@@ -147,10 +147,10 @@ RUN openssl verify /renovate.pem
 # Test start
 RUN touch /.dummy
 
-# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.10
-
 USER ${USER_ID}
+
+# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
+RUN install-tool terraform 1.0.11
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -174,7 +174,7 @@ RUN install-tool powershell v7.2.0
 RUN install-tool node v16.13.0
 
 # renovate: datasource=github-releases lookupName=moby/moby
-RUN install-tool docker v20.10.10
+RUN install-tool docker v20.10.11
 
 #--------------------------------------
 # final

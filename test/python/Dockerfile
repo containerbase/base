@@ -13,7 +13,7 @@ ARG APT_HTTP_PROXY
 
 # Python
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.8
+RUN install-tool python 3.9.9
 
 
 FROM base as build-rootless
@@ -23,7 +23,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.8
+RUN install-tool python 3.9.9
 
 #--------------------------------------
 # build: pipenv
@@ -31,7 +31,7 @@ RUN install-tool python 3.9.8
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2021.11.9
+RUN install-pip pipenv 2021.11.15
 
 
 USER 1000
@@ -53,7 +53,7 @@ FROM build as testa
 
 # try install again, sould skip
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.9.8
+RUN install-tool python 3.9.9
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.1.11
@@ -121,7 +121,7 @@ FROM build-rootless as testg
 RUN set -ex; env; ls -la $HOME/bin; cat $BASH_ENV
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2021.11.9
+RUN install-pip pipenv 2021.11.15
 
 RUN set -ex; \
   cd a; \

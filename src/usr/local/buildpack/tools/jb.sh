@@ -14,7 +14,7 @@ tool_path=$(find_tool_path)
 
 function update_env () {
   reset_tool_env
-  export_tool_path "${1}"
+  export_tool_path "${1}/bin"
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -22,20 +22,20 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p ${tool_path}/bin
 
-  file=/tmp/${TOOL_NAME}.tgz
+  # https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.4.0/jb-linux-amd64
+  URL='https://github.com'
 
-  DISTRO=linux_amd64
-  curl -sSfLo ${file} https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip
-  unzip -q -d ${tool_path} ${file}
-  rm ${file}
+  curl -sSfLo ${tool_path}/bin/${TOOL_NAME} "${URL}/jsonnet-bundler/jsonnet-bundler/releases/download/v${TOOL_VERSION}/${TOOL_NAME}-linux-amd64"
+
+  chmod +x ${tool_path}/bin/${TOOL_NAME}
 
   update_env ${tool_path}
-  shell_wrapper terraform
+  shell_wrapper ${TOOL_NAME}
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
 fi
 
-terraform version
+jb --version
