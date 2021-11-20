@@ -147,10 +147,10 @@ RUN openssl verify /renovate.pem
 # Test start
 RUN touch /.dummy
 
+USER ${USER_ID}
+
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.0.11
-
-USER ${USER_ID}
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
