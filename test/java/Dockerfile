@@ -112,7 +112,7 @@ FROM build as teste
 USER 1001
 
 # renovate: datasource=maven lookupName=org.apache.maven:maven
-RUN install-tool maven 3.8.3
+RUN install-tool maven 3.8.4
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
