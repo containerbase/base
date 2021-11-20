@@ -79,6 +79,7 @@ jobs:
             erlang,
             golang,
             java,
+            jb,
             helm,
             nix,
             node,
