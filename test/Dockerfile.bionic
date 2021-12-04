@@ -37,7 +37,7 @@ RUN install-tool erlang 22.3.2
 RUN install-tool elixir 1.12.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.17.3
+RUN install-tool golang 1.17.4
 
 # renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm v3.7.1
