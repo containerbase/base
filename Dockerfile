@@ -12,7 +12,7 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 
 #  autoloading buildpack env
-ENV BASH_ENV=/usr/local/etc/env
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/user/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
@@ -24,4 +24,4 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.34.0
+RUN install-tool git v2.34.1

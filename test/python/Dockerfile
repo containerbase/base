@@ -31,7 +31,7 @@ RUN install-tool python 3.9.9
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2021.11.15
+RUN install-pip pipenv 2021.11.23
 
 
 USER 1000
@@ -42,7 +42,7 @@ USER 1000
 FROM build as poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.11
+RUN install-tool poetry 1.1.12
 
 USER 1000
 
@@ -56,7 +56,7 @@ FROM build as testa
 RUN install-tool python 3.9.9
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.11
+RUN install-tool poetry 1.1.12
 
 USER 1000
 
@@ -121,14 +121,14 @@ FROM build-rootless as testg
 RUN set -ex; env; ls -la $HOME/bin; cat $BASH_ENV
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2021.11.15
+RUN install-pip pipenv 2021.11.23
 
 RUN set -ex; \
   cd a; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.11
+RUN install-tool poetry 1.1.12
 
 RUN set -ex \
   && cd c-poetry \

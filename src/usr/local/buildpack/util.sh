@@ -1,8 +1,10 @@
 #!/bin/bash
 
+export ENV_FILE=/usr/local/etc/env
+
 function refreshenv () {
-  if [[ -r $BASH_ENV ]]; then
-    . $BASH_ENV
+  if [[ -r "$ENV_FILE" ]]; then
+    . $ENV_FILE
   fi
 }
 
@@ -12,12 +14,12 @@ fi
 
 function export_env () {
   export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $BASH_ENV
+  echo export "${1}=\${${1}-${2}}" >> $ENV_FILE
 }
 
 function export_path () {
   export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $BASH_ENV
+  echo export PATH="$1:\$PATH" >> $ENV_FILE
 }
 
 function reset_tool_env () {
@@ -61,8 +63,8 @@ function shell_wrapper () {
   cat > $FILE <<- EOM
 #!/bin/bash
 
-if [[ -f "\$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
-  . \$BASH_ENV
+if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+  . $ENV_FILE
 fi
 
 if [[ "\$(command -v ${1})" == "$FILE" ]]; then

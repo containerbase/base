@@ -51,7 +51,7 @@ FROM base as testb
 RUN install-tool java-jre 11.0.13+8
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.3
+RUN install-tool gradle 7.3.1
 
 USER 1000
 
@@ -80,7 +80,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.312+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.3
+RUN install-tool gradle 7.3.1
 
 #--------------------------------------
 # test: java 16 (non-root)
@@ -112,7 +112,7 @@ FROM build as teste
 USER 1001
 
 # renovate: datasource=maven lookupName=org.apache.maven:maven
-RUN install-tool maven 3.8.3
+RUN install-tool maven 3.8.4
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \

@@ -74,7 +74,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v16.13.0
+RUN install-tool node v16.13.1
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -130,7 +130,7 @@ ARG USER_ID=1005
 ARG APT_HTTP_PROXY
 
 # Set env and shell
-ENV BASH_ENV=/usr/local/etc/env
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
@@ -148,6 +148,8 @@ RUN openssl verify /renovate.pem
 RUN touch /.dummy
 
 USER ${USER_ID}
+
+SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.0.11
@@ -171,7 +173,7 @@ RUN install-tool git-lfs v3.0.2
 RUN install-tool powershell v7.2.0
 
 # renovate: datasource=node
-RUN install-tool node v16.13.0
+RUN install-tool node v16.13.1
 
 # renovate: datasource=github-releases lookupName=moby/moby
 RUN install-tool docker v20.10.11
