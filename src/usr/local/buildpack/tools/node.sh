@@ -26,11 +26,13 @@ curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERS
 tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
 rm node.tar.xz
 
-export_path "${NODE_INSTALL_DIR}/bin"
+export_tool_path "${NODE_INSTALL_DIR}/bin"
 
 if [[ ${MAJOR} < 15 ]]; then
   # update to latest node-gyp to fully support python3
   npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
+
+  rm -rf /tmp/empty-cache
 fi
 
 echo node: $(node --version) $(command -v node)
