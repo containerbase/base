@@ -78,7 +78,8 @@ USER 1000
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version
+  yarn --version; \
+  lerna --version
 
 #--------------------------------------
 # test: pnpm
