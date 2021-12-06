@@ -148,6 +148,22 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/tmp/.npm/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
+
+#--------------------------------------
+# test: npm (user)
+#--------------------------------------
+FROM build as teste
+
+SHELL [ "/bin/sh", "-c" ]
+
+# don't update!!
+RUN install-tool npm 8.0.0
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '8.0.0'
+
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -157,3 +173,4 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
