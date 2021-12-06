@@ -165,6 +165,22 @@ RUN npm --version | grep '8.0.0'
 
 
 #--------------------------------------
+# test: npm (root)
+#--------------------------------------
+FROM build as testf
+
+USER root
+SHELL [ "/bin/sh", "-c" ]
+
+# don't update!!
+RUN install-tool npm 8.0.0
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '8.0.0'
+
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -174,3 +190,4 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
