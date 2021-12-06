@@ -30,7 +30,7 @@ fi
 
 
 # env helper, loads tool specific env
-cat >> $BASH_ENV <<- EOM
+cat >> $ENV_FILE <<- EOM
 export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:\${PATH}"
 
 # openshift override unknown user home
@@ -57,8 +57,8 @@ fi
 EOM
 
 cat >> /etc/bash.bashrc <<- EOM
-if [[ -f "$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
-  . $BASH_ENV
+if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+  . $ENV_FILE
 fi
 EOM
 
