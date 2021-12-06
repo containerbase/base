@@ -130,7 +130,7 @@ ARG USER_ID=1005
 ARG APT_HTTP_PROXY
 
 # Set env and shell
-ENV BASH_ENV=/usr/local/etc/env
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
@@ -148,6 +148,8 @@ RUN openssl verify /renovate.pem
 RUN touch /.dummy
 
 USER ${USER_ID}
+
+SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.0.11
