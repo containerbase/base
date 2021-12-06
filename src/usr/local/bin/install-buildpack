@@ -23,6 +23,11 @@ if [[ -z "${USER_ID+x}" ]]; then
   echo "No USER_ID defined - using: ${USER_ID}"
 fi
 
+if [[ "${BASH_ENV}" != "${ENV_FILE}" ]]; then
+  echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
+  exit 1;
+fi
+
 
 # env helper, loads tool specific env
 cat >> $ENV_FILE <<- EOM
