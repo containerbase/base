@@ -1,8 +1,10 @@
 #!/bin/bash
 
+export ENV_FILE=/usr/local/etc/env
+
 function refreshenv () {
-  if [[ -r $BASH_ENV ]]; then
-    . $BASH_ENV
+  if [[ -r "$ENV_FILE" ]]; then
+    . $ENV_FILE
   fi
 }
 
@@ -12,12 +14,12 @@ fi
 
 function export_env () {
   export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $BASH_ENV
+  echo export "${1}=\${${1}-${2}}" >> $ENV_FILE
 }
 
 function export_path () {
   export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $BASH_ENV
+  echo export PATH="$1:\$PATH" >> $ENV_FILE
 }
 
 function reset_tool_env () {
@@ -61,8 +63,8 @@ function shell_wrapper () {
   cat > $FILE <<- EOM
 #!/bin/bash
 
-if [[ -f "\$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
-  . \$BASH_ENV
+if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+  . $ENV_FILE
 fi
 
 if [[ "\$(command -v ${1})" == "$FILE" ]]; then
@@ -106,7 +108,7 @@ function check_command () {
 }
 
 
-SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?([a-z-].*)?$"
+SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
 function check_semver () {
   if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
@@ -121,8 +123,24 @@ function check_semver () {
 
 function apt_install () {
   echo "Installing apt packages: ${@}"
-  apt-get update
-  apt-get install -y "$@"
+  if [[ "${APT_HTTP_PROXY}" ]]; then
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
+  fi
+  apt-get -qq update
+  apt-get -qq install -y "$@"
+
+  rm -f /etc/apt/apt.conf.d/buildpack-proxy
+}
+
+function apt_upgrade () {
+  echo "Upgrading apt packages"
+  if [[ "${APT_HTTP_PROXY}" ]]; then
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
+  fi
+  apt-get -qq update
+  apt-get upgrade -y
+
+  rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
 function require_distro () {
@@ -190,14 +208,19 @@ function get_install_dir () {
   if [[ $EUID -eq 0 ]]; then
     echo /usr/local
   else
-    echo /home/${USER_NAME}
+    echo ${USER_HOME}
   fi
 }
 
 function find_tool_path () {
   if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
     echo /usr/local/${TOOL_NAME}/${TOOL_VERSION}
-  elif [[ -d "/home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo /home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}
+  elif [[ -d "${USER_HOME}/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
+    echo ${USER_HOME}/${TOOL_NAME}/${TOOL_VERSION}
   fi
+}
+
+ignore_tool() {
+    local tools=${IGNORED_TOOLS,,}
+    [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0
 }

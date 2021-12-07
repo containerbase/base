@@ -1,0 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Woraround for Visual Studio MinGit
+export PATH="$(readlink -f "$(dirname "$0")/../node_modules/.bin"):$PATH"
+
+pretty-quick --staged

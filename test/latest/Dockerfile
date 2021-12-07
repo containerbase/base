@@ -1,6 +1,8 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 RUN touch /.dummy
 
 # install nginx for request testing
@@ -55,8 +57,10 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testb
 
-# renovate: datasource=github-releases depName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.9.4
+ARG APT_HTTP_PROXY
+
+# renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
+ARG PYTHON_VERSION=3.9.9
 RUN install-tool python
 
 RUN set -ex; \
@@ -67,8 +71,10 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testc
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.1
+ARG APT_HTTP_PROXY
+
+# renovate: datasource=node
+RUN install-tool node v16.13.1
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -77,6 +83,8 @@ RUN set -ex; \
 # test: php
 #--------------------------------------
 FROM build as testd
+
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -90,6 +98,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as teste
 
+ARG APT_HTTP_PROXY
+
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
@@ -102,11 +112,71 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testf
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.1.3
+RUN install-tool powershell v7.2.0
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
+
+#--------------------------------------
+# test: terraform
+#--------------------------------------
+FROM ubuntu:20.04@sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93 as testg
+
+ARG USER_NAME=terraform
+ARG USER_ID=1005
+ARG APT_HTTP_PROXY
+
+# Set env and shell
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
+SHELL ["/bin/bash" , "-c"]
+
+COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
+
+# Set up buildpack
+COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
+RUN install-buildpack
+
+# validate custom cert
+COPY --from=build /test/renovate.pem /renovate.pem
+RUN openssl verify /renovate.pem
+
+# Test start
+RUN touch /.dummy
+
+USER ${USER_ID}
+
+SHELL ["/bin/sh", "-c"]
+
+# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
+RUN install-tool terraform 1.0.11
+
+WORKDIR /tmp
+RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
+
+#--------------------------------------
+# test: ignore tools
+#--------------------------------------
+FROM build as testh
+
+ARG APT_HTTP_PROXY
+
+ARG IGNORED_TOOLS=powershell,node
+
+# renovate: datasource=github-releases lookupName=git-lfs/git-lfs
+RUN install-tool git-lfs v3.0.2
+
+# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+RUN install-tool powershell v7.2.0
+
+# renovate: datasource=node
+RUN install-tool node v16.13.1
+
+# renovate: datasource=github-releases lookupName=moby/moby
+RUN install-tool docker v20.10.11
 
 #--------------------------------------
 # final
@@ -119,3 +189,5 @@ COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy

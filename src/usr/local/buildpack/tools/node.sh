@@ -26,17 +26,19 @@ curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERS
 tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
 rm node.tar.xz
 
-export_path "${NODE_INSTALL_DIR}/bin"
+export_tool_path "${NODE_INSTALL_DIR}/bin"
 
 if [[ ${MAJOR} < 15 ]]; then
   # update to latest node-gyp to fully support python3
   npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
+
+  rm -rf /tmp/empty-cache
 fi
 
 echo node: $(node --version) $(command -v node)
 echo npm: $(npm --version)  $(command -v npm)
 
-NPM_CONFIG_PREFIX="/home/${USER_NAME}/.npm-global"
+NPM_CONFIG_PREFIX="${USER_HOME}/.npm-global"
 
 # npm 7 bug
 mkdir -p $NPM_CONFIG_PREFIX/{bin,lib}
@@ -49,3 +51,9 @@ export_path "\$NPM_CONFIG_PREFIX/bin"
 
 shell_wrapper node
 shell_wrapper npm
+
+# Clean download cache
+npm cache clean --force
+
+# Clean node-gyp cache
+rm -rf /root/.cache

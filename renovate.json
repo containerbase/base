@@ -5,41 +5,54 @@
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
-      "packagePatterns": ["*"],
+      "matchPackagePatterns": ["*"],
       "dependencyDashboardApproval": false
     },
     {
       "description": "Disable all managers in test/ by default",
-      "paths": ["test/"],
+      "matchPaths": ["test/"],
       "enabled": false
     },
     {
       "description": "Enable the regex manager only for test/",
-      "paths": ["test/"],
-      "managers": ["regex"],
+      "matchPaths": ["test/"],
+      "matchManagers": ["regex"],
       "enabled": true
     },
     {
       "description": "Separate patch updates in test/ so that we can automerge them",
-      "paths": ["test/"],
+      "matchPaths": ["test/"],
       "automergeType": "branch",
       "separateMinorPatch": true
     },
     {
       "description": "Don't automerge test minor/major because we might want to retain old versions in tests too",
-      "paths": ["test/"],
-      "updateTypes": ["minor", "major"],
+      "matchPaths": ["test/"],
+      "matchUpdateTypes": ["minor", "major"],
       "automerge": false
     },
     {
-      "description": "Use node versioning to get accurate stable determination",
-      "packageNames": ["node"],
-      "versioning": "node"
+      "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
+      "matchPaths": ["test/"],
+      "additionalBranchPrefix": "test-",
+      "semanticCommitType": "test"
     },
     {
       "description": "Override erlang version extraction",
-      "packageNames": ["erlang"],
+      "matchPackageNames": ["erlang"],
       "extractVersion": "^OTP-(?<version>.+)$"
+    },
+    {
+      "description": "Trigger fix release for ubuntu digest updates",
+      "matchPackageNames": ["ubuntu"],
+      "matchUpdateTypes": ["digest"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Trigger fix release for git updates",
+      "matchPackageNames": ["git"],
+      "semanticCommitType": "fix",
+      "stabilityDays": 5
     }
   ]
 }

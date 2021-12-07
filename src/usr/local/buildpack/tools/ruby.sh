@@ -11,12 +11,12 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-if [[ -d "/usr/local/ruby/${TOOL_VERSION}" ]]; then
+if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
 
-mkdir -p /usr/local/ruby
+mkdir -p /usr/local/${TOOL_NAME}
 
 ARCH=$(uname -p)
 CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
@@ -48,15 +48,15 @@ else
     rm -rf ruby-build
   fi
 
-  ruby-build $TOOL_VERSION /usr/local/ruby/${TOOL_VERSION}
+  ruby-build $TOOL_VERSION /usr/local/${TOOL_NAME}/${TOOL_VERSION}
 fi
 
-export_env GEM_HOME "/home/${USER_NAME}/.gem-global"
-export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin:/usr/local/ruby/${TOOL_VERSION}/bin"
+export_env GEM_HOME "${USER_HOME}/.gem-global"
+export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin:/usr/local/${TOOL_NAME}/${TOOL_VERSION}/bin"
 
 # System settings
-mkdir -p /usr/local/ruby/${TOOL_VERSION}/etc
-cat > /usr/local/ruby/${TOOL_VERSION}/etc/gemrc <<- EOM
+mkdir -p /usr/local/${TOOL_NAME}/${TOOL_VERSION}/etc
+cat > /usr/local/${TOOL_NAME}/${TOOL_VERSION}/etc/gemrc <<- EOM
 gem: --no-document
 :benchmark: false
 :verbose: true

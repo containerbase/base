@@ -10,7 +10,8 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
+
 tool_path=$(find_tool_path)
 
 function update_env () {
@@ -25,17 +26,21 @@ if [[ -z "${tool_path}" ]]; then
 
   mkdir -p ${tool_path}
 
-  curl -sSL $POETRY_URL | python - --version ${TOOL_VERSION} --no-modify-path
+  curl -sSL $POETRY_URL | python - --version ${TOOL_VERSION}
   unset POETRY_HOME
 
-  # fix execute for all [#150]
+  # fix execute for all renovatebot/docker-buildpack#150
   chmod +x ${tool_path}/bin/poetry
+
+  # fix uid/ gid #124
+  if [[ $UID -eq 0 ]]; then
+    [ -f "${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py" ] \
+      && chown 0:0 ${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py
+  fi
 fi
 
 update_env ${tool_path}
 
 poetry --version
 
-if [[ $EUID -eq 0 ]]; then
-  shell_wrapper poetry
-fi
+shell_wrapper poetry

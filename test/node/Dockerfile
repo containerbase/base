@@ -1,16 +1,18 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool node 14.16.1
+ARG APT_HTTP_PROXY
+
+# renovate: datasource=node
+RUN install-tool node v16.13.1
 
 RUN touch /.dummy
-
-WORKDIR /tmp
 
 USER 1000
 
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # test: node
@@ -31,10 +33,19 @@ RUN set -ex; \
 RUN node --version
 RUN npm --version
 
+
+## Test for #136
+USER 0
+
+# renovate: datasource=npm
+RUN install-npm re2 1.16.0
+
 #--------------------------------------
 # test: yarn
 #--------------------------------------
 FROM build as testb
+
+ARG APT_HTTP_PROXY
 
 RUN npm install -g yarn
 
@@ -43,7 +54,7 @@ RUN set -ex; \
   yarn --version;
 
 
-RUN set -ex; cd test/a; yarn
+RUN set -ex; cd a; yarn
 
 ENV NPM_CONFIG_PREFIX=/tmp/.npm
 RUN npm install -g yarn
@@ -58,7 +69,10 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.10
+RUN install-tool yarn 1.22.17
+
+# renovate: datasource=npm
+RUN install-tool lerna 4.0.0
 
 USER 1000
 
@@ -66,16 +80,22 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
+RUN set -ex; \
+  [ "$(command -v lerna)" = "/usr/local/bin/lerna" ] && echo "works" || exit 1; \
+  lerna --version
+
 #--------------------------------------
 # test: pnpm
 #--------------------------------------
 
 FROM build as testc
 
+ARG APT_HTTP_PROXY
+
 USER root
 
 # renovate: datasource=npm
-RUN install-tool pnpm 5.18.9
+RUN install-tool pnpm 6.23.1
 
 USER 1000
 
@@ -84,7 +104,7 @@ RUN set -ex; \
   pnpm --version;
 
 
-RUN set -ex; cd test/a; pnpm i
+RUN set -ex; cd a; pnpm i
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -93,18 +113,20 @@ RUN set -ex; \
   [ "$(command -v pnpm)" = "/usr/local/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: node 15
+# test: node 17
 #--------------------------------------
 
 FROM ${IMAGE} as testd
 
-# renovate: datasource=npm
-RUN install-tool node 15.0.1
+ARG APT_HTTP_PROXY
+
+# renovate: datasource=node
+RUN install-tool node v17.0.1
 
 RUN touch /.dummy
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.10
+RUN install-tool yarn 1.22.17
 
 USER 1000
 
@@ -130,6 +152,38 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/tmp/.npm/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
+
+#--------------------------------------
+# test: npm (user)
+#--------------------------------------
+FROM build as teste
+
+SHELL [ "/bin/sh", "-c" ]
+
+# don't update!!
+RUN install-tool npm 8.0.0
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '8.0.0'
+
+
+#--------------------------------------
+# test: npm (root)
+#--------------------------------------
+FROM build as testf
+
+USER root
+SHELL [ "/bin/sh", "-c" ]
+
+# don't update!!
+RUN install-tool npm 8.0.0
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '8.0.0'
+
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -139,3 +193,5 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy

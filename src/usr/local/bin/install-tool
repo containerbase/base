@@ -14,11 +14,16 @@ if [[ ! -f "$TOOL" ]]; then
   exit 1;
 fi
 
+if [[ $(ignore_tool) -eq 1 ]]; then
+  echo "Tool ignored - skipping: ${TOOL_NAME}"
+  exit 0;
+fi
+
 
 echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
 . $TOOL
 
 # cleanup
 if [[ $EUID -eq 0 ]]; then
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/* /tmp/*
 fi
