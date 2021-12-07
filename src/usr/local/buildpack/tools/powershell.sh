@@ -27,7 +27,8 @@ curl -sSL https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VER
 tar --strip 1 -C /usr/local/${TOOL_NAME}/${TOOL_VERSION} -xzf ${TOOL_NAME}.tgz
 rm ${TOOL_NAME}.tgz
 
-pwsh -Version
 
 PATH="${1}/bin:${PATH}"
 link_wrapper pwsh
+
+pwsh -Version
