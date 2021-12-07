@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-if [[ -d "/usr/local/powershell/${TOOL_VERSION}" ]]; then
+if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
@@ -22,12 +22,12 @@ case "$VERSION_CODENAME" in
   "focal") apt_install libc6 libgcc1 libgssapi-krb5-2 libicu66 libssl1.1 libstdc++6 zlib1g;;
 esac
 
-mkdir -p /usr/local/powershell/${TOOL_VERSION}
-curl -sSL https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-linux-x64.tar.gz --output powershell.tgz
-tar --strip 1 -C /usr/local/powershell/${TOOL_VERSION} -xzf powershell.tgz
-rm powershell.tgz
+mkdir -p /usr/local/${TOOL_NAME}/${TOOL_VERSION}
+curl -sSL https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-linux-x64.tar.gz --output ${TOOL_NAME}.tgz
+tar --strip 1 -C /usr/local/${TOOL_NAME}/${TOOL_VERSION} -xzf ${TOOL_NAME}.tgz
+rm ${TOOL_NAME}.tgz
 
-export_path "/usr/local/powershell/${TOOL_VERSION}"
+export_path "/usr/local/${TOOL_NAME}/${TOOL_VERSION}"
 
 pwsh -Version
 

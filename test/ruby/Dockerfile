@@ -1,25 +1,29 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
+ARG APT_HTTP_PROXY
+
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 FROM ${IMAGE} as build3
 
+ARG APT_HTTP_PROXY
+
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.0.1
+RUN install-tool ruby 3.0.3
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # test: bundler
@@ -45,7 +49,7 @@ RUN set -ex; \
   bundler env
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     bundle lock
 
 #--------------------------------------
@@ -54,7 +58,7 @@ RUN set -ex; \
 FROM build as testb
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.2.15
+RUN install-gem bundler 2.2.32
 
 USER 1000
 
@@ -62,7 +66,7 @@ RUN ruby --version
 RUN bundler env
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     bundle lock;
 
 SHELL [ "/bin/sh", "-c" ]
@@ -78,7 +82,7 @@ USER 1000
 RUN gem install cocoapods -v 1.9.1
 
 RUN set -ex; \
-    cd test/b/Project; \
+    cd b/Project; \
     gem install cocoapods-acknowledgements; \
     pod install;
 
@@ -88,12 +92,12 @@ RUN set -ex; \
 FROM build3 as testd
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.10.1
+RUN install-gem cocoapods 1.11.2
 
 USER 1000
 
 RUN set -ex; \
-    cd test/b/Project; \
+    cd b/Project; \
     gem install cocoapods-acknowledgements; \
     pod install;
 

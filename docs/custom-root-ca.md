@@ -2,6 +2,8 @@
 
 Most tools support two ways to extend the default Root CA certificates list.
 
+If you are using a custom base image, checkout [Custom base image](./custom-base-image.md) docs.
+
 ## Buildtime install
 
 This is the easiest method.
@@ -11,6 +13,9 @@ FROM containerbase/buildpack
 
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 RUN update-ca-certificates
+
+# configure node
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/my-root-ca.crt
 ```
 
 **TODO**: For java based tools we need another option
@@ -18,7 +23,6 @@ RUN update-ca-certificates
 ## Runtime install
 
 Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environment for additional custom root ca files.
-For NodeJS `NODE_EXTRA_CA_CERTS` is required.
 
 ```bash
 docker run --rm -it \

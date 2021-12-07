@@ -3,14 +3,16 @@ FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
-WORKDIR /tmp
-
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 #--------------------------------------
 # test: php 7.4
 #--------------------------------------
 FROM base as testa
+
+ARG APT_HTTP_PROXY
 
 # old php version, not for renovating
 RUN install-tool php 7.4.14
@@ -40,7 +42,7 @@ RUN composer --version
 
 
 RUN set -ex; \
-  cd test/a; \
+  cd a; \
   composer install --no-ansi --no-interaction
 
 #--------------------------------------
@@ -48,13 +50,15 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as testb
 
+ARG APT_HTTP_PROXY
+
 # old php version, not for renovating
 RUN install-tool php 5.6.40
 
+USER 1000
+
 # old composer version, not for renovating
 RUN install-tool composer 1.10.20
-
-USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
@@ -79,18 +83,21 @@ RUN composer --version
 #--------------------------------------
 FROM base as testc
 
+ARG APT_HTTP_PROXY
+
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-RUN install-tool php 8.0.3
+RUN install-tool php 8.1.0
 
-USER 1000
 
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.0.12
+RUN install-tool composer 2.1.14
 
 RUN install-tool composer latest
+
+USER 1000
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;

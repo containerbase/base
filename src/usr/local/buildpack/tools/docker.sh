@@ -3,6 +3,13 @@
 set -e
 
 require_root
+
+
+if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
+  echo "Skipping, already installed"
+  exit 0
+fi
+
 groupadd -g 999 docker
 usermod -aG docker ${USER_NAME}
 

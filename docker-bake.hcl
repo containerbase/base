@@ -8,29 +8,47 @@ variable "TAG" {
   default = "latest"
 }
 
+variable "APT_HTTP_PROXY" {
+  default = ""
+}
+
+variable "CACHE_WEEK" {
+  default = ""
+}
+
 group "default" {
-  targets = ["build_docker"]
+  targets = ["build-docker"]
 }
 
 group "push" {
-  targets = ["push_ghcr", "push_hub", "push_cache"]
+  targets = ["push-ghcr", "push-hub", "push-cache"]
 }
 
 group "test" {
-  targets = ["build_distro"]
+  targets = ["build-test"]
+}
+
+group "test-distro" {
+  targets = ["build-distro"]
 }
 
 
 target "settings" {
   context = "."
+  args = {
+    APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
+  }
+}
+
+target "cache" {
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
   ]
 }
 
-target "push_cache" {
-  inherits = ["settings"]
+target "push-cache" {
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
@@ -39,8 +57,8 @@ target "push_cache" {
   cache-to = ["type=inline,mode=max"]
 }
 
-target "build_docker" {
-  inherits = ["settings"]
+target "build-docker" {
+  inherits = ["settings", "cache"]
   output   = ["type=docker"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
@@ -50,15 +68,18 @@ target "build_docker" {
   ]
 }
 
-target "build_distro" {
-  dockerfile = "Dockerfile.${TAG}"
-  tags = [
-    "${OWNER}/${FILE}:${TAG}"
-  ]
+target "build-distro" {
+  inherits   = ["settings"]
+  dockerfile = "./test/Dockerfile.${TAG}"
 }
 
-target "push_ghcr" {
+target "build-test" {
   inherits = ["settings"]
+  context  = "./test/${TAG}"
+}
+
+target "push-ghcr" {
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
@@ -66,8 +87,8 @@ target "push_ghcr" {
   ]
 }
 
-target "push_hub" {
-  inherits = ["settings"]
+target "push-hub" {
+  inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags     = ["${OWNER}/${FILE}", "${OWNER}/${FILE}:${TAG}"]
 }
