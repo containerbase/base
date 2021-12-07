@@ -26,7 +26,8 @@ curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERS
 tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
 rm node.tar.xz
 
-export_tool_path "${NODE_INSTALL_DIR}/bin"
+#export_tool_path "${NODE_INSTALL_DIR}/bin"
+PATH="${NODE_INSTALL_DIR}/bin:${PATH}"
 
 if [[ ${MAJOR} < 15 ]]; then
   # update to latest node-gyp to fully support python3
@@ -49,8 +50,8 @@ chmod -R g+w $NPM_CONFIG_PREFIX
 export_env NPM_CONFIG_PREFIX $NPM_CONFIG_PREFIX
 export_path "\$NPM_CONFIG_PREFIX/bin"
 
-shell_wrapper node
-shell_wrapper npm
+link_wrapper node
+link_wrapper npm
 
 # Clean download cache
 npm cache clean --force
