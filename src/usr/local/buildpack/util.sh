@@ -67,8 +67,6 @@ if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
   . $ENV_FILE
 fi
 
-echo PATH=\$PATH
-
 if [[ "\$(command -v ${1})" == "$FILE" ]]; then
   echo Could not forward ${1}, probably wrong PATH variable. >&2
   echo PATH=\$PATH
