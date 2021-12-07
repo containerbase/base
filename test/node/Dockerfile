@@ -47,7 +47,6 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
-RUN npm config ls
 RUN npm install -g yarn
 
 RUN set -ex; \
