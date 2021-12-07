@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 require_root
 check_semver $TOOL_VERSION
