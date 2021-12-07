@@ -14,7 +14,10 @@ tool_path=$(find_tool_path)
 
 function update_env () {
   reset_tool_env
-  export_tool_path "\$HOME/.local/bin:${1}/bin"
+  export_path "${USER_HOME}/.local/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
+  link_wrapper pip
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -60,8 +63,6 @@ if [[ -z "${tool_path}" ]]; then
     python-build $TOOL_VERSION ${base_path}/$TOOL_VERSION
   fi
 
-  update_env ${tool_path}
-
   fix_python_shebangs() {
     for file in $(find ${tool_path}/bin -type f -exec grep -Iq . {} \; -print); do
       case "$(head -1 "${file}")" in
@@ -80,24 +81,18 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
-  # TODO: can be wrong pip if another python already exists
-  pip install --upgrade pip
+  ${tool_path}/bin/pip install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  pip cache purge
-
-  shell_wrapper python
-  shell_wrapper pip
+  ${tool_path}/bin/pip cache purge
   # TODO: support multiple installed python versions
   # shell_wrapper python${MAJOR}
   # shell_wrapper python${MAJOR}.${MINOR}
   # shell_wrapper pip${MAJOR}
   # shell_wrapper pip${MAJOR}.${MINOR}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 python --version
 pip --version
-

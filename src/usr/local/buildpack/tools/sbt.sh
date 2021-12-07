@@ -13,9 +13,8 @@ fi
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_env MAVEN_HOME "${1}"
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -36,13 +35,9 @@ if [[ -z "${tool_path}" ]]; then
 
   # saves 1/3 size
   rm ${tool_path}/bin/*-darwin ${tool_path}/bin/*.exe ${tool_path}/bin/*.bat
-
-  update_env ${tool_path}
-  shell_wrapper ${TOOL_NAME}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 sbt --version
 

@@ -17,12 +17,11 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 
@@ -40,12 +39,8 @@ if [[ -z "${tool_path}" ]]; then
 
   curl -sSfLo ${tool_path}/bin/composer ${BASE_URL}/${TOOL_VERSION}/composer.phar
   chmod +x ${tool_path}/bin/composer
-
-  update_env ${tool_path}
-  shell_wrapper composer
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 composer --version

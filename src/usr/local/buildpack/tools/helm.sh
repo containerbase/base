@@ -13,7 +13,7 @@ fi
 tool_path=$(find_tool_path)
 
 function update_env () {
-  PATH="${1}:${PATH}"
+  PATH="${1}/bin:${PATH}"
   link_wrapper ${TOOL_NAME}
 }
 
@@ -22,18 +22,15 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p ${tool_path}/bin
 
   file=/tmp/${TOOL_NAME}.tgz
 
   curl -sSfLo ${file} https://get.helm.sh/helm-v${TOOL_VERSION}-linux-amd64.tar.gz
-  tar --strip 1 -C ${tool_path} -xf ${file}
+  tar --strip 1 -C ${tool_path}/bin -xf ${file}
   rm ${file}
-
-  update_env ${tool_path}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 helm version

@@ -15,7 +15,8 @@ tool_path=$(find_tool_path)
 function update_env () {
   reset_tool_env
   export_tool_env MAVEN_HOME "${1}"
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper mvn
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -33,13 +34,9 @@ if [[ -z "${tool_path}" ]]; then
   curl -sSfLo ${file} "${URL}/${TOOL_NAME}/${TOOL_NAME}-${MAJOR}/${TOOL_VERSION}/binaries/apache-${TOOL_NAME}-${TOOL_VERSION}-bin.tar.gz"
   tar --strip 1 -C ${tool_path} -xf ${file}
   rm ${file}
-
-  update_env ${tool_path}
-  shell_wrapper mvn
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 mvn --version
 
