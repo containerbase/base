@@ -201,6 +201,17 @@ RUN set -ex; npm --version | grep '8.0.0'
 RUN set -ex; cd a; npm install
 
 #--------------------------------------
+# test: yarn-slim
+#--------------------------------------
+FROM build as testh
+
+# renovate: datasource=npm lookupName=yarn
+RUN install-tool yarn-slim 1.22.17
+
+RUN set -ex; yarn-slim --version
+RUN set -ex; cd a; yarn-slim install
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -212,3 +223,4 @@ COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
