@@ -22,13 +22,13 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p ${tool_path}/bin
 
   file=/tmp/${TOOL_NAME}.tgz
 
   DISTRO=linux_amd64
   curl -sSfLo ${file} https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip
-  unzip -q -d ${tool_path} ${file}
+  unzip -q -d ${tool_path}/bin ${file}
   rm ${file}
 fi
 
