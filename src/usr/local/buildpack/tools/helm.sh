@@ -13,8 +13,8 @@ fi
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}"
+  PATH="${1}:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -31,12 +31,9 @@ if [[ -z "${tool_path}" ]]; then
   rm ${file}
 
   update_env ${tool_path}
-  shell_wrapper helm
 else
   echo "Already installed, resetting env"
   update_env ${tool_path}
 fi
 
 helm version
-
-shell_wrapper helm
