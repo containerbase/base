@@ -4,16 +4,26 @@ set -e
 
 . /usr/local/buildpack/util.sh
 
-require_root
+require_user
 require_tool "$@"
-check_command npm
 
-unset NPM_CONFIG_PREFIX
+case "$TOOL_NAME" in
+  npm | yarn | pnpm | lerna)
+    install-tool $TOOL_NAME ${TOOL_VERSION}
+    ;;
 
-echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
-npm install --global ${TOOL_NAME}@${TOOL_VERSION} --unsafe
+  *)
+    require_root
+    check_command npm
+    unset NPM_CONFIG_PREFIX
 
-# Clean download cache
-npm cache clean --force
-# Clean node-gyp cache
-rm -rf /root/.cache
+    echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
+    npm install ${TOOL_NAME}@${TOOL_VERSION} --global --unsafe --cache /tmp/empty-cache
+
+    # Clean download cache
+    npm cache clean --force
+    # Clean node-gyp cache
+    rm -rf /root/.cache /tmp/empty-cache
+    ;;
+esac
+

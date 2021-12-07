@@ -53,15 +53,7 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
-
 RUN set -ex; cd a; yarn
-
-ENV NPM_CONFIG_PREFIX=/tmp/.npm
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/tmp/.npm/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -92,13 +84,8 @@ FROM build as testc
 
 ARG APT_HTTP_PROXY
 
-USER root
-
 # renovate: datasource=npm
 RUN install-tool pnpm 6.23.1
-
-USER 1000
-
 
 RUN set -ex; \
   pnpm --version;
@@ -110,7 +97,7 @@ RUN set -ex; cd a; pnpm i
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
   pnpm --version \
-  [ "$(command -v pnpm)" = "/usr/local/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v pnpm)" = "/home/user/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: node 17
@@ -144,45 +131,74 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
-RUN mkdir -p /tmp/.npm/{bin,lib}
-ENV NPM_CONFIG_PREFIX=/tmp/.npm
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/tmp/.npm/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
-
-
 #--------------------------------------
-# test: npm (user)
+# test: npm (install-tool npm)
 #--------------------------------------
 FROM build as teste
 
 SHELL [ "/bin/sh", "-c" ]
 
+USER root
 # don't update!!
 RUN install-tool npm 8.0.0
 
-RUN node --version
 RUN npm --version
 RUN npm --version | grep '8.0.0'
 
+USER 1000
+
+# don't update!!
+RUN install-tool npm 7.24.2
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '7.24.2'
 
 #--------------------------------------
-# test: npm (root)
+# test: npm (npm i -g npm)
 #--------------------------------------
 FROM build as testf
 
 USER root
+# don't update!! need force to overwrite symlink
+RUN npm i -gf npm@8.0.0
+
+RUN set -ex; command -v npm; npm --version
+RUN set -ex; npm --version | grep '8.0.0'
+
+USER 1000
+# don't update!!
+RUN npm i -g npm@7.24.2
+RUN set -ex; command -v npm; npm --version
+RUN set -ex; npm --version | grep '7.24.2'
+
+
+#--------------------------------------
+# test: npm (install-npm npm)
+#--------------------------------------
+FROM build as testg
+
 SHELL [ "/bin/sh", "-c" ]
 
+USER root
 # don't update!!
-RUN install-tool npm 8.0.0
+RUN set -ex; install-npm npm 8.0.0
 
-RUN node --version
-RUN npm --version
-RUN npm --version | grep '8.0.0'
+RUN set -ex; command -v npm; npm --version
+RUN set -ex; npm --version | grep '8.0.0'
 
+USER 1000
+RUN set -ex; command -v npm; npm --version
+RUN set -ex; npm --version | grep '8.0.0'
+RUN chmod -R g+w .
+
+# openshift
+USER 1005
+# autoload bash env required
+SHELL [ "/bin/bash", "-c" ]
+RUN set -ex; command -v npm; npm --version
+RUN set -ex; npm --version | grep '8.0.0'
+RUN set -ex; cd a; npm install
 
 #--------------------------------------
 # final
@@ -195,3 +211,4 @@ COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy

@@ -55,7 +55,7 @@ function export_tool_path () {
 }
 
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
+# use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
 function shell_wrapper () {
   local install_dir=$(get_install_dir)
   local FILE="${install_dir}/bin/${1}"
@@ -78,7 +78,7 @@ EOM
   chmod +x $FILE
 }
 
-# use this for simple symlink to /usr/local/bin
+# use this for simple symlink to /usr/local/bin or /home/<user>/bin
 function link_wrapper () {
   local install_dir=$(get_install_dir)
   local TARGET="${install_dir}/bin/${1}"

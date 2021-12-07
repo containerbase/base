@@ -10,7 +10,6 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
   exit 1
 fi
 
-
 NODE_DISTRO=linux-x64
 NODE_INSTALL_DIR=/usr/local/node/${TOOL_VERSION}
 
@@ -19,6 +18,40 @@ if [[ -d "${NODE_INSTALL_DIR}" ]]; then
   exit 0
 fi
 
+function update_env () {
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
+  link_wrapper npm
+  link_wrapper npx
+}
+
+function prepare_prefix () {
+  local prefix=${1}
+  # npm 7 bug
+  mkdir -p ${prefix}/{bin,lib}
+}
+
+function prepare_global_config () {
+  local prefix=${1}
+  prepare_prefix ${prefix}
+  npm config set prefix ${prefix} --global
+}
+
+function prepare_user_config () {
+  local prefix=${1}
+  prepare_prefix ${prefix}
+  export_path "${prefix}/bin"
+  chown -R ${USER_ID} ${prefix}
+  chmod -R g+w ${prefix}
+
+  su $USER_NAME -c "npm config set prefix ${prefix}"
+  cat >> $ENV_FILE <<- EOM
+# openshift override unknown user home
+if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
+  export NPM_CONFIG_PREFIX="${prefix}"
+fi
+EOM
+}
 
 mkdir -p $NODE_INSTALL_DIR
 
@@ -26,31 +59,23 @@ curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERS
 tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
 rm node.tar.xz
 
-export_tool_path "${NODE_INSTALL_DIR}/bin"
+update_env ${NODE_INSTALL_DIR}
 
 if [[ ${MAJOR} < 15 ]]; then
   # update to latest node-gyp to fully support python3
-  npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
-
+  ${NODE_INSTALL_DIR}/bin/npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
   rm -rf /tmp/empty-cache
 fi
 
-echo node: $(node --version) $(command -v node)
-echo npm: $(npm --version)  $(command -v npm)
 
-NPM_CONFIG_PREFIX="${USER_HOME}/.npm-global"
-
-# npm 7 bug
-mkdir -p $NPM_CONFIG_PREFIX/{bin,lib}
-chown -R ${USER_ID} $NPM_CONFIG_PREFIX
-chmod -R g+w $NPM_CONFIG_PREFIX
+# redirect root install
+prepare_global_config /usr/local
 
 # redirect user install
-export_env NPM_CONFIG_PREFIX $NPM_CONFIG_PREFIX
-export_path "\$NPM_CONFIG_PREFIX/bin"
+prepare_user_config "${USER_HOME}/.npm-global"
 
-shell_wrapper node
-shell_wrapper npm
+echo node: $(node --version) $(command -v node)
+echo npm: $(npm --version)  $(command -v npm)
 
 # Clean download cache
 npm cache clean --force
