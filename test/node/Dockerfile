@@ -107,22 +107,23 @@ FROM ${IMAGE} as testd
 
 ARG APT_HTTP_PROXY
 
+RUN touch /.dummy
+
+USER 1000
+
 # renovate: datasource=node
 RUN install-tool node v17.0.1
 
-RUN touch /.dummy
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.17
 
-USER 1000
 
 COPY --chown=1000:0 test test
 
 RUN set -ex; \
   npm --version; \
   command -v npm;
-
 
 RUN set -ex; cd test/a; npm i
 

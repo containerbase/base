@@ -33,6 +33,15 @@ function reset_tool_env () {
   fi
 }
 
+function find_tool_env () {
+  local install_dir=$(get_install_dir)
+  if [[ -z "${TOOL_NAME+x}" ]]; then
+    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
+    exit 1;
+  fi
+
+  echo "$install_dir/env.d/${TOOL_NAME}.sh"
+}
 
 function export_tool_env () {
   local install_dir=$(get_install_dir)
