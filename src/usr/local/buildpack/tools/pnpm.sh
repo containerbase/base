@@ -24,11 +24,8 @@ if [[ -z "${tool_path}" ]]; then
   NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
   # Clean node-gyp cache
   rm -rf $HOME/.cache /tmp/empty-cache
-
-  update_env ${tool_path}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 pnpm --version

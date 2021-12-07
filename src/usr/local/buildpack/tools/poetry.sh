@@ -15,8 +15,8 @@ POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -42,5 +42,3 @@ fi
 update_env ${tool_path}
 
 poetry --version
-
-shell_wrapper poetry
