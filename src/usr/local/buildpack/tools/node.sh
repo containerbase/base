@@ -10,13 +10,13 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
   exit 1
 fi
 
+NODE_DISTRO=linux-x64
+NODE_INSTALL_DIR=/usr/local/node/${TOOL_VERSION}
+
 if [[ -d "${NODE_INSTALL_DIR}" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
-
-NODE_DISTRO=linux-x64
-NODE_INSTALL_DIR=/usr/local/node/${TOOL_VERSION}
 
 function update_env () {
   PATH="${1}/bin:${PATH}"
