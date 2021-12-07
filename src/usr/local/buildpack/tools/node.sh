@@ -26,7 +26,6 @@ curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERS
 tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
 rm node.tar.xz
 
-#export_tool_path "${NODE_INSTALL_DIR}/bin"
 PATH="${NODE_INSTALL_DIR}/bin:${PATH}"
 
 if [[ ${MAJOR} < 15 ]]; then
@@ -39,6 +38,9 @@ fi
 echo node: $(node --version) $(command -v node)
 echo npm: $(npm --version)  $(command -v npm)
 
+# redirect root install
+npm config set prefix /usr/local --global
+
 NPM_CONFIG_PREFIX="${USER_HOME}/.npm-global"
 
 # npm 7 bug
@@ -47,11 +49,20 @@ chown -R ${USER_ID} $NPM_CONFIG_PREFIX
 chmod -R g+w $NPM_CONFIG_PREFIX
 
 # redirect user install
-export_env NPM_CONFIG_PREFIX $NPM_CONFIG_PREFIX
+su $USER_NAME -c 'npm config set prefix $NPM_CONFIG_PREFIX'
+cat >> $ENV_FILE <<- EOM
+# openshift override unknown user home
+if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
+  export NPM_CONFIG_PREFIX="$NPM_CONFIG_PREFIX"
+fi
+EOM
+
+# export_env NPM_CONFIG_PREFIX $NPM_CONFIG_PREFIX
 export_path "\$NPM_CONFIG_PREFIX/bin"
 
 link_wrapper node
 link_wrapper npm
+link_wrapper npx
 
 # Clean download cache
 npm cache clean --force
