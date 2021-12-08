@@ -249,12 +249,12 @@ RUN set -ex; cd a; npm install
 #--------------------------------------
 FROM ${IMAGE}
 
-# COPY --from=testa /.dummy /.dummy
-# COPY --from=testb /.dummy /.dummy
-# COPY --from=testc /.dummy /.dummy
-# COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
-# COPY --from=testg /.dummy /.dummy
-# COPY --from=testh /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
