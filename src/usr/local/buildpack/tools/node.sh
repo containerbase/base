@@ -81,9 +81,10 @@ if [[ -z "${tool_path}" ]]; then
     prepare_global_config ${PREFIX}
   fi
 
+  # required for npm
+  link_wrapper ${TOOL_NAME} $tool_path/bin
 
   if [[ ${MAJOR} < 15 ]]; then
-    link_wrapper ${TOOL_NAME} $tool_path/bin
     # update to latest node-gyp to fully support python3
     NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- $npm install --cache /tmp/empty-cache node-gyp@latest
     rm -rf /tmp/empty-cache
