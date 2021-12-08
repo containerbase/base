@@ -7,8 +7,8 @@ authors = []
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">3.6"
-numpy = "^1.16"
+python = ">3.9,<3.11"
+numpy = "^1.21.3"
 PyYAML = "^5.1"
 pampy = "^0.2.1"
 
