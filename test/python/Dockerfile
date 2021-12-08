@@ -82,7 +82,7 @@ FROM poetry as testc
 RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
 
 
-RUN set -ex; cd c-poetry && poetry add Flask
+RUN set -ex; cd c-poetry && poetry add h3py
 
 
 #--------------------------------------
