@@ -226,7 +226,7 @@ ARG BUILDPACK_DEBUG
 RUN install-tool node v14.18.1
 RUN install-tool node v14.18.2
 
-RUN cat $USER_HOME/.npmrc
+RUN cat $USER_HOME/.npmrc | grep "prefix = \"$USER_HOME/.npm-global\""
 
 RUN touch /.dummy
 
