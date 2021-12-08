@@ -18,10 +18,9 @@ PREFIX="${USER_HOME}/.npm-global"
 function update_env () {
   reset_tool_env
 
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-  link_wrapper npm
-  link_wrapper npx
+  link_wrapper ${TOOL_NAME} $tool_path/bin
+  link_wrapper npm $tool_path/bin
+  link_wrapper npx $tool_path/bin
 
   export_tool_path "${PREFIX}/bin"
 
@@ -48,6 +47,10 @@ function prepare_global_config () {
 
 function prepare_user_config () {
   local prefix=${1}
+  if [[ -r "${USER_HOME}/.npmrc" && $(cat ${USER_HOME}/.npmrc | grep 'prefix') ]]; then
+    return
+  fi
+
   prepare_prefix ${prefix}
   echo "prefix = \"${prefix}\"" >> ${USER_HOME}/.npmrc
   chown -R ${USER_ID} ${prefix} ${USER_HOME}/.npmrc
@@ -57,6 +60,7 @@ function prepare_user_config () {
 if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
+  npm=${tool_path}/bin/npm
 
   mkdir -p $tool_path
 
@@ -77,22 +81,22 @@ if [[ -z "${tool_path}" ]]; then
     prepare_global_config ${PREFIX}
   fi
 
-  update_env ${tool_path}
 
   if [[ ${MAJOR} < 15 ]]; then
+    link_wrapper ${TOOL_NAME} $tool_path/bin
     # update to latest node-gyp to fully support python3
-    ${tool_path}/bin/npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
+    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- $npm install --cache /tmp/empty-cache node-gyp@latest
     rm -rf /tmp/empty-cache
   fi
 
   # Clean download cache
-  ${tool_path}/bin/npm cache clean --force
+  NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
 
   # Clean node-gyp cache
   rm -rf $HOME/.cache
-else
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 echo node: $(node --version) $(command -v node)
 echo npm: $(npm --version)  $(command -v npm)

@@ -101,8 +101,14 @@ EOM
 function link_wrapper () {
   local install_dir=$(get_install_dir)
   local TARGET="${install_dir}/bin/${1}"
-  local SOURCE=$(command -v ${1})
-  check_command $1
+  local SOURCE=$2
+  if [[ -z "$SOURCE" ]]; then
+    SOURCE=$(command -v ${1})
+  fi
+  if [[ -d "$SOURCE" ]]; then
+    SOURCE=$SOURCE/${1}
+  fi
+  check_command $SOURCE
   ln -sf $SOURCE $TARGET
 }
 
