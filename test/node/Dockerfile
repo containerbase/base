@@ -1,7 +1,10 @@
 ARG IMAGE=containerbase/buildpack
+ARG BUILDPACK_DEBUG
+
 FROM ${IMAGE} as build
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
 RUN install-tool node v16.13.1
@@ -107,22 +110,23 @@ FROM ${IMAGE} as testd
 
 ARG APT_HTTP_PROXY
 
+RUN touch /.dummy
+
+USER 1000
+
 # renovate: datasource=node
 RUN install-tool node v17.0.1
 
-RUN touch /.dummy
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.17
 
-USER 1000
 
 COPY --chown=1000:0 test test
 
 RUN set -ex; \
   npm --version; \
   command -v npm;
-
 
 RUN set -ex; cd test/a; npm i
 
@@ -216,8 +220,13 @@ RUN set -ex; cd a; yarn-slim install
 #--------------------------------------
 FROM ${IMAGE} as testi
 
+ARG BUILDPACK_DEBUG
+
 # don't update!!
+RUN install-tool node v14.18.1
 RUN install-tool node v14.18.2
+
+RUN cat $USER_HOME/.npmrc | grep "prefix = \"$USER_HOME/.npm-global\""
 
 RUN touch /.dummy
 

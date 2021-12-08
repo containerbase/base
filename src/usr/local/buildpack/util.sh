@@ -43,6 +43,15 @@ function reset_tool_env () {
   fi
 }
 
+function find_tool_env () {
+  local install_dir=$(get_install_dir)
+  if [[ -z "${TOOL_NAME+x}" ]]; then
+    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
+    exit 1;
+  fi
+
+  echo "$install_dir/env.d/${TOOL_NAME}.sh"
+}
 
 function export_tool_env () {
   local install_dir=$(get_install_dir)
@@ -92,8 +101,14 @@ EOM
 function link_wrapper () {
   local install_dir=$(get_install_dir)
   local TARGET="${install_dir}/bin/${1}"
-  local SOURCE=$(command -v ${1})
-  check_command $1
+  local SOURCE=$2
+  if [[ -z "$SOURCE" ]]; then
+    SOURCE=$(command -v ${1})
+  fi
+  if [[ -d "$SOURCE" ]]; then
+    SOURCE=$SOURCE/${1}
+  fi
+  check_command $SOURCE
   ln -sf $SOURCE $TARGET
 }
 

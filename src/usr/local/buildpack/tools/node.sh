@@ -2,7 +2,6 @@
 
 set -e
 
-require_root
 check_semver $TOOL_VERSION
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
@@ -11,18 +10,26 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
 fi
 
 NODE_DISTRO=linux-x64
-NODE_INSTALL_DIR=/usr/local/node/${TOOL_VERSION}
+tool_path=$(find_tool_path)
+INSTALL_DIR=$(get_install_dir)
+PREFIX="${USER_HOME}/.npm-global"
 
-if [[ -d "${NODE_INSTALL_DIR}" ]]; then
-  echo "Skipping, already installed"
-  exit 0
-fi
 
 function update_env () {
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-  link_wrapper npm
-  link_wrapper npx
+  reset_tool_env
+
+  link_wrapper ${TOOL_NAME} $tool_path/bin
+  link_wrapper npm $tool_path/bin
+  link_wrapper npx $tool_path/bin
+
+  export_tool_path "${PREFIX}/bin"
+
+  cat >> $(find_tool_env) <<- EOM
+# openshift override unknown user home
+if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
+  export NPM_CONFIG_PREFIX="${PREFIX}"
+fi
+EOM
 }
 
 function prepare_prefix () {
@@ -34,51 +41,63 @@ function prepare_prefix () {
 function prepare_global_config () {
   local prefix=${1}
   prepare_prefix ${prefix}
-  npm config set prefix ${prefix} --global
+  mkdir -p ${tool_path}/etc
+  echo "prefix = \"${prefix}\"" >> ${tool_path}/etc/npmrc
 }
 
 function prepare_user_config () {
   local prefix=${1}
-  prepare_prefix ${prefix}
-  export_path "${prefix}/bin"
-  chown -R ${USER_ID} ${prefix}
-  chmod -R g+w ${prefix}
+  if [[ -r "${USER_HOME}/.npmrc" && $(cat ${USER_HOME}/.npmrc | grep 'prefix') ]]; then
+    return
+  fi
 
-  su $USER_NAME -c "npm config set prefix ${prefix}"
-  cat >> $ENV_FILE <<- EOM
-# openshift override unknown user home
-if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
-  export NPM_CONFIG_PREFIX="${prefix}"
-fi
-EOM
+  prepare_prefix ${prefix}
+  echo "prefix = \"${prefix}\"" >> ${USER_HOME}/.npmrc
+  chown -R ${USER_ID} ${prefix} ${USER_HOME}/.npmrc
+  chmod -R g+w ${prefix} ${USER_HOME}/.npmrc
 }
 
-mkdir -p $NODE_INSTALL_DIR
+if [[ -z "${tool_path}" ]]; then
+  base_path=${INSTALL_DIR}/${TOOL_NAME}
+  tool_path=${base_path}/${TOOL_VERSION}
+  npm=${tool_path}/bin/npm
 
-curl -sLo node.tar.xz https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${NODE_DISTRO}.tar.xz
-tar -C ${NODE_INSTALL_DIR} --strip 1 -xf node.tar.xz
-rm node.tar.xz
+  mkdir -p $tool_path
 
-update_env ${NODE_INSTALL_DIR}
+  file=/tmp/${TOOL_NAME}.tar.xz
 
-if [[ ${MAJOR} < 15 ]]; then
-  # update to latest node-gyp to fully support python3
-  ${NODE_INSTALL_DIR}/bin/npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
-  rm -rf /tmp/empty-cache
+  curl -sLo ${file} https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${NODE_DISTRO}.tar.xz
+  tar -C ${tool_path} --strip 1 -xf ${file}
+  rm ${file}
+
+  if [[ $EUID -eq 0 ]]; then
+    # redirect root install
+    prepare_global_config /usr/local
+
+    # redirect user install
+    prepare_user_config ${PREFIX}
+  else
+    # redirect user install
+    prepare_global_config ${PREFIX}
+  fi
+
+  # required for npm
+  link_wrapper ${TOOL_NAME} $tool_path/bin
+
+  if [[ ${MAJOR} < 15 ]]; then
+    # update to latest node-gyp to fully support python3
+    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- $npm install --cache /tmp/empty-cache node-gyp@latest
+    rm -rf /tmp/empty-cache
+  fi
+
+  # Clean download cache
+  NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
+
+  # Clean node-gyp cache
+  rm -rf $HOME/.cache
 fi
 
-
-# redirect root install
-prepare_global_config /usr/local
-
-# redirect user install
-prepare_user_config "${USER_HOME}/.npm-global"
+update_env ${tool_path}
 
 echo node: $(node --version) $(command -v node)
 echo npm: $(npm --version)  $(command -v npm)
-
-# Clean download cache
-npm cache clean --force
-
-# Clean node-gyp cache
-rm -rf /root/.cache

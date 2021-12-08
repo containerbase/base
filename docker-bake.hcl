@@ -16,6 +16,11 @@ variable "CACHE_WEEK" {
   default = ""
 }
 
+
+variable "BUILDPACK_DEBUG" {
+  default = ""
+}
+
 group "default" {
   targets = ["build-docker"]
 }
@@ -37,6 +42,7 @@ target "settings" {
   context = "."
   args = {
     APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
+    BUILDPACK_DEBUG = "${BUILDPACK_DEBUG}"
   }
 }
 
