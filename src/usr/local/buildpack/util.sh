@@ -2,6 +2,16 @@
 
 export ENV_FILE=/usr/local/etc/env
 
+check_debug() {
+  local bool="${BUILDPACK_DEBUG:-false}"
+  # comparison is performed without regard to the case of alphabetic characters
+  shopt -s nocasematch
+  if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
+    set -x
+  fi
+}
+check_debug
+
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
     . $ENV_FILE

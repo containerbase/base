@@ -213,6 +213,30 @@ RUN set -ex; yarn-slim --version
 RUN set -ex; cd a; yarn-slim install
 
 #--------------------------------------
+# test: npm (install-tool npm, node v14)
+#--------------------------------------
+FROM ${IMAGE} as testi
+
+# don't update!!
+RUN install-tool node v14.18.2
+
+RUN touch /.dummy
+
+USER 1000
+
+COPY --chown=1000:0 test test
+
+WORKDIR /test
+
+# don't update!!
+RUN install-tool npm 6.14.15
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '6.14.15'
+RUN set -ex; cd a; npm install
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -225,3 +249,4 @@ COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
