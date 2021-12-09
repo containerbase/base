@@ -13,13 +13,6 @@ fi
 tool_path=$(find_tool_path)
 npm=$(command -v npm)
 
-function update_env () {
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-  link_wrapper npx
-  hash -d ${TOOL_NAME} npx 2>/dev/null || true
-}
-
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)
   base_path=${INSTALL_DIR}/${TOOL_NAME}
@@ -42,6 +35,8 @@ if [[ -z "${tool_path}" ]]; then
   rm -rf $HOME/.cache /tmp/empty-cache
 fi
 
-update_env ${tool_path}
+link_wrapper ${TOOL_NAME} $tool_path/bin
+link_wrapper npx $tool_path/bin
+hash -d ${TOOL_NAME} npx 2>/dev/null || true
 
 npm --version

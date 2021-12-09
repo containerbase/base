@@ -31,7 +31,11 @@ fi
 
 # env helper, loads tool specific env
 cat >> $ENV_FILE <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:\${PATH}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
+
+if [ ! echo $PATH | tr ':' '\n' | grep -x -c "/home/${USER_NAME}/bin" ]; then
+  export PATH="/home/${USER_NAME}/bin:\${PATH}"
+fi
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then

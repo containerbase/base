@@ -6,11 +6,6 @@ check_command node
 
 tool_path=$(find_tool_path)
 
-function update_env () {
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-}
-
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)
   base_path=${INSTALL_DIR}/${TOOL_NAME}
@@ -26,6 +21,6 @@ if [[ -z "${tool_path}" ]]; then
   rm -rf $HOME/.cache /tmp/empty-cache
 fi
 
-update_env ${tool_path}
+link_wrapper ${TOOL_NAME} $tool_path/bin
 
 lerna --version
