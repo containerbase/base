@@ -31,7 +31,6 @@ if [[ -z "${tool_path}" ]]; then
   rm ${TOOL_NAME}.tgz
 fi
 
-PATH="${tool_path}/bin:${PATH}"
-link_wrapper pwsh
+link_wrapper pwsh ${tool_path}/bin
 
 pwsh -Version

@@ -11,12 +11,16 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
+base_path=/usr/local/${TOOL_NAME}
+tool_path=${base_path}/${TOOL_VERSION}
+
+if [[ -d "$tool_path" ]]; then
   echo "Skipping, already installed"
+  link_wrapper ${TOOL_NAME} ${tool_path}/bin
   exit 0
 fi
 
-mkdir -p /usr/local/${TOOL_NAME}
+mkdir -p $base_path
 
 ARCH=$(uname -p)
 CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
@@ -48,15 +52,15 @@ else
     rm -rf ruby-build
   fi
 
-  ruby-build $TOOL_VERSION /usr/local/${TOOL_NAME}/${TOOL_VERSION}
+  ruby-build $TOOL_VERSION $tool_path
 fi
 
 export_env GEM_HOME "${USER_HOME}/.gem-global"
-export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin:/usr/local/${TOOL_NAME}/${TOOL_VERSION}/bin"
+export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin"
 
 # System settings
-mkdir -p /usr/local/${TOOL_NAME}/${TOOL_VERSION}/etc
-cat > /usr/local/${TOOL_NAME}/${TOOL_VERSION}/etc/gemrc <<- EOM
+mkdir -p $tool_path/etc
+cat > $tool_path/etc/gemrc <<- EOM
 gem: --no-document
 :benchmark: false
 :verbose: true
@@ -64,12 +68,11 @@ gem: --no-document
 :backtrace: false
 EOM
 
+link_wrapper ruby $tool_path/bin
+link_wrapper gem $tool_path/bin
 
 
 ruby --version
 echo "gem $(gem --version)"
 
 gem env
-
-shell_wrapper ruby
-shell_wrapper gem

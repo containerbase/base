@@ -15,9 +15,8 @@ tool_path=$(find_tool_path)
 function update_env () {
   reset_tool_env
   export_tool_path "${USER_HOME}/.local/bin:${1}/bin"
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-  link_wrapper pip
+  link_wrapper ${TOOL_NAME} ${1}/bin
+  link_wrapper pip ${1}/bin
 }
 
 if [[ -z "${tool_path}" ]]; then

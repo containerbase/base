@@ -13,6 +13,7 @@ fi
 
 if [[ -d "/usr/local/go/${TOOL_VERSION}" ]]; then
   echo "Skipping, already installed"
+  link_wrapper go /usr/local/go/${TOOL_VERSION}/bin
   exit 0
 fi
 
@@ -33,14 +34,15 @@ rm go.tgz
 export_env GOPATH "/go"
 export_env CGO_ENABLED 0
 export_env GOSUMDB off
-export_path "/usr/local/go/${TOOL_VERSION}/bin:\$GOPATH/bin"
+export_path "\$GOPATH/bin"
 
 mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOPATH/pkg"
 
 chown -R ${USER_ID} $GOPATH
 chmod -R g+w $GOPATH
 
+link_wrapper go /usr/local/go/${TOOL_VERSION}/bin
+
 go version
 go env
 
-shell_wrapper go
