@@ -31,7 +31,7 @@ if [[ ! -d "$tool_path" ]]; then
   tar --strip 1 -C $tool_path -xzf go.tgz
   rm go.tgz
 
-  if [[ ! -d "${GOPATH}"]]; then
+  if [[ ! -d "${GOPATH}" ]]; then
     export_env GOPATH "/go"
     export_env CGO_ENABLED 0
     export_env GOSUMDB off
