@@ -1,4 +1,6 @@
 ARG IMAGE=containerbase/buildpack
+ARG BUILDPACK_DEBUG
+
 FROM ${IMAGE} as base
 
 RUN touch /.dummy
@@ -12,6 +14,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base as net3
 
+ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
@@ -42,6 +45,7 @@ RUN set -ex;  \
 #--------------------------------------
 FROM base as testb
 
+ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
 # Do not change
