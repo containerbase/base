@@ -51,11 +51,6 @@ if [[ ! -d "$tool_path" ]]; then
     ruby-build $TOOL_VERSION $tool_path
   fi
 
-  if [[ -z "${GEM_HOME+x}" ]]; then
-    export_env GEM_HOME "${USER_HOME}/.gem-global"
-    export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin"
-  fi
-
   # System settings
   mkdir -p $tool_path/etc
   cat > $tool_path/etc/gemrc <<- EOM
@@ -67,6 +62,12 @@ gem: --no-document
 EOM
 
 fi
+
+reset_tool_env
+export_tool_env GEM_HOME "${USER_HOME}/.gem-global"
+export_tool_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin"
+# TODO: fix me, currently required for global gems
+export_tool_path $tool_path/bin
 
 link_wrapper ruby $tool_path/bin
 link_wrapper gem $tool_path/bin

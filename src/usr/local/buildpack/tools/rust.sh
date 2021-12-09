@@ -15,14 +15,7 @@ base_path=/usr/local/buildpack/${TOOL_NAME}
 tool_path=$base_path/$TOOL_VERSION
 
 if [[ ! -d "${tool_path}" ]]; then
-
-  if [[ ! -d $base_path ]]; then
-    mkdir -p $base_path
-    export_env RUST_BACKTRACE 1
-    export_env CARGO_HOME "${USER_HOME}/.cargo"
-    export_path "\$CARGO_HOME/bin:"
-  fi
-
+  mkdir -p $base_path
   curl -sSfLo rust.tar.gz https://static.rust-lang.org/dist/rust-${TOOL_VERSION}-x86_64-unknown-linux-gnu.tar.gz
   mkdir rust
   pushd rust
@@ -30,8 +23,13 @@ if [[ ! -d "${tool_path}" ]]; then
   ./install.sh --prefix=$tool_path --components=cargo,rust-std-x86_64-unknown-linux-gnu,rustc
   popd
   rm rust.tar.gz
-rm -rf rust
+  rm -rf rust
 fi
+
+reset_tool_env
+export_tool_env RUST_BACKTRACE 1
+export_tool_env CARGO_HOME "${USER_HOME}/.cargo"
+export_tool_path "\$CARGO_HOME/bin"
 
 link_wrapper rustc ${tool_path}/bin
 link_wrapper cargo ${tool_path}/bin

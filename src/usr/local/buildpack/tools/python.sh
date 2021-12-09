@@ -14,7 +14,10 @@ tool_path=$(find_tool_path)
 
 function update_env () {
   reset_tool_env
-  export_tool_path "${USER_HOME}/.local/bin:${1}/bin"
+  export_tool_path "${USER_HOME}/.local/bin"
+  # TODO: fix me, currently required for global pip
+  export_tool_path "${1}/bin"
+
   link_wrapper ${TOOL_NAME} ${1}/bin
   link_wrapper pip ${1}/bin
 }
