@@ -54,20 +54,29 @@ if [[ ! -d "$tool_path" ]]; then
   # System settings
   mkdir -p $tool_path/etc
   cat > $tool_path/etc/gemrc <<- EOM
-gem: --no-document
+gem: --bindir /usr/local/bin --no-document
 :benchmark: false
 :verbose: true
 :update_sources: true
 :backtrace: false
 EOM
 
+  if [[ ! -r "${USER_HOME}/.gemrc" ]];then
+  cat > ${USER_HOME}/.gemrc <<- EOM
+gem: --bindir ${USER_HOME}/bin --no-document
+EOM
+    chown -R ${USER_ID} ${USER_HOME}/.gemrc
+    chmod -R g+w ${USER_HOME}/.gemrc
+  fi
+
 fi
 
 reset_tool_env
-export_tool_env GEM_HOME "${USER_HOME}/.gem-global"
-export_tool_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin"
-# TODO: fix me, currently required for global gems
-export_tool_path $tool_path/bin
+cat >> $(find_tool_env) <<- EOM
+if [ "\${EUID}" != 0 ]; then
+  export GEM_HOME="${USER_HOME}/.gem/ruby/${MAJOR}.${MINOR}.0"
+fi
+EOM
 
 link_wrapper ruby $tool_path/bin
 link_wrapper gem $tool_path/bin

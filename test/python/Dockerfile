@@ -1,4 +1,6 @@
 ARG IMAGE=containerbase/buildpack
+ARG BUILDPACK_DEBUG
+
 FROM ${IMAGE} as base
 
 RUN touch /.dummy
@@ -10,6 +12,7 @@ WORKDIR /test
 FROM base as build
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 # Python
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
@@ -19,6 +22,7 @@ RUN install-tool python 3.10.1
 FROM base as build-rootless
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 USER 1000
 
@@ -30,6 +34,8 @@ RUN install-tool python 3.10.1
 #--------------------------------------
 FROM build as pipenv
 
+ARG BUILDPACK_DEBUG
+
 # renovate: datasource=pypi
 RUN install-pip pipenv 2021.11.23
 
@@ -40,6 +46,8 @@ USER 1000
 # build: poetry
 #--------------------------------------
 FROM build as poetry
+ARG BUILDPACK_DEBUG
+
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.1.12
@@ -50,6 +58,8 @@ USER 1000
 # test a: build
 #--------------------------------------
 FROM build as testa
+
+ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
@@ -98,6 +108,8 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 FROM build as teste
 
+ARG BUILDPACK_DEBUG
+
 RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.0
 
@@ -118,7 +130,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build-rootless as testg
 
-RUN set -ex; env; ls -la $HOME/bin; cat $BASH_ENV
+ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
 RUN install-pip pipenv 2021.11.23

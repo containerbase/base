@@ -12,16 +12,6 @@ fi
 
 tool_path=$(find_tool_path)
 
-function update_env () {
-  reset_tool_env
-  export_tool_path "${USER_HOME}/.local/bin"
-  # TODO: fix me, currently required for global pip
-  export_tool_path "${1}/bin"
-
-  link_wrapper ${TOOL_NAME} ${1}/bin
-  link_wrapper pip ${1}/bin
-}
-
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)
   base_path=${INSTALL_DIR}/${TOOL_NAME}
@@ -87,14 +77,19 @@ if [[ -z "${tool_path}" ]]; then
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
   ${tool_path}/bin/pip cache purge
-  # TODO: support multiple installed python versions
-  # shell_wrapper python${MAJOR}
-  # shell_wrapper python${MAJOR}.${MINOR}
-  # shell_wrapper pip${MAJOR}
-  # shell_wrapper pip${MAJOR}.${MINOR}
 fi
 
-update_env ${tool_path}
+reset_tool_env
+# TODO: fix me, currently required for global pip
+export_tool_path "${tool_path}/bin"
+export_tool_path "${USER_HOME}/.local/bin"
+
+link_wrapper ${TOOL_NAME} ${tool_path}/bin
+link_wrapper ${TOOL_NAME}${MAJOR} ${tool_path}/bin
+link_wrapper ${TOOL_NAME}${MAJOR}.${MINOR} ${tool_path}/bin
+link_wrapper pip ${tool_path}/bin
+link_wrapper pip${MAJOR} ${tool_path}/bin
+link_wrapper pip${MAJOR}.${MINOR} ${tool_path}/bin
 
 python --version
 pip --version
