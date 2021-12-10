@@ -26,4 +26,4 @@ fi
 
 link_wrapper ${TOOL_NAME} ${tool_path}/bin/yarn
 
-yarn --version
+yarn-slim --version
