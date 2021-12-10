@@ -117,9 +117,16 @@ USER 1000
 # renovate: datasource=node
 RUN install-tool node v17.0.1
 
+RUN npm install -g yarn
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  yarn --version;
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.17
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/home/${USER_NAME}/bin/yarn" ] && echo "works" || exit 1; \
+  yarn --version;
 
 
 COPY --chown=1000:0 test test
@@ -129,11 +136,6 @@ RUN set -ex; \
   command -v npm;
 
 RUN set -ex; cd test/a; npm i
-
-RUN npm install -g yarn
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
 
 #--------------------------------------
 # test: npm (install-tool npm)
