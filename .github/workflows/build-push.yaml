@@ -12,6 +12,5 @@ jobs:
     uses: containerbase/buildpack/.github/workflows/build.yaml@main
     # uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
