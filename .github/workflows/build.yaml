@@ -3,8 +3,6 @@ name: build
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
-        required: true
       DOCKER_USERNAME:
         required: false
       DOCKER_PASSWORD:
@@ -166,5 +164,3 @@ jobs:
       - name: semantic-release
         if: github.event_name == 'push'
         run: yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

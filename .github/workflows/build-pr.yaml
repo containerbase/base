@@ -11,5 +11,3 @@ jobs:
   build:
     if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
     uses: containerbase/buildpack/.github/workflows/build.yaml@main
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
