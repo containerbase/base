@@ -152,7 +152,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.0
+RUN install-tool terraform 1.1.1
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
