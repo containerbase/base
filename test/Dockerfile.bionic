@@ -34,7 +34,7 @@ RUN install-tool dotnet 6.0.101
 #disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose
 RUN install-tool erlang 22.3.2
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.13.0
+RUN install-tool elixir 1.13.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.17.5
