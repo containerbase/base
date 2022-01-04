@@ -13,8 +13,8 @@ fi
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -30,12 +30,8 @@ if [[ -z "${tool_path}" ]]; then
   curl -sSfLo ${tool_path}/bin/${TOOL_NAME} "${URL}/jsonnet-bundler/jsonnet-bundler/releases/download/v${TOOL_VERSION}/${TOOL_NAME}-linux-amd64"
 
   chmod +x ${tool_path}/bin/${TOOL_NAME}
-
-  update_env ${tool_path}
-  shell_wrapper ${TOOL_NAME}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 jb --version

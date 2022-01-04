@@ -4,7 +4,7 @@ FROM ${IMAGE} as build
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.5.1
+RUN install-tool swift 5.5.2
 
 RUN touch /.dummy
 

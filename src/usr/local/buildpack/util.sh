@@ -2,6 +2,16 @@
 
 export ENV_FILE=/usr/local/etc/env
 
+check_debug() {
+  local bool="${BUILDPACK_DEBUG:-false}"
+  # comparison is performed without regard to the case of alphabetic characters
+  shopt -s nocasematch
+  if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
+    set -x
+  fi
+}
+check_debug
+
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
     . $ENV_FILE
@@ -33,6 +43,15 @@ function reset_tool_env () {
   fi
 }
 
+function find_tool_env () {
+  local install_dir=$(get_install_dir)
+  if [[ -z "${TOOL_NAME+x}" ]]; then
+    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
+    exit 1;
+  fi
+
+  echo "$install_dir/env.d/${TOOL_NAME}.sh"
+}
 
 function export_tool_env () {
   local install_dir=$(get_install_dir)
@@ -55,7 +74,7 @@ function export_tool_path () {
 }
 
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
+# use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
 function shell_wrapper () {
   local install_dir=$(get_install_dir)
   local FILE="${install_dir}/bin/${1}"
@@ -78,12 +97,18 @@ EOM
   chmod +x $FILE
 }
 
-# use this for simple symlink to /usr/local/bin
+# use this for simple symlink to /usr/local/bin or /home/<user>/bin
 function link_wrapper () {
   local install_dir=$(get_install_dir)
   local TARGET="${install_dir}/bin/${1}"
-  local SOURCE=$(command -v ${1})
-  check_command $1
+  local SOURCE=$2
+  if [[ -z "$SOURCE" ]]; then
+    SOURCE=$(command -v ${1})
+  fi
+  if [[ -d "$SOURCE" ]]; then
+    SOURCE=$SOURCE/${1}
+  fi
+  check_command $SOURCE
   ln -sf $SOURCE $TARGET
 }
 

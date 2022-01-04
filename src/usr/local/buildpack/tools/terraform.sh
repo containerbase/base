@@ -13,8 +13,8 @@ fi
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -22,20 +22,16 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p ${tool_path}/bin
 
   file=/tmp/${TOOL_NAME}.tgz
 
   DISTRO=linux_amd64
   curl -sSfLo ${file} https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip
-  unzip -q -d ${tool_path} ${file}
+  unzip -q -d ${tool_path}/bin ${file}
   rm ${file}
-
-  update_env ${tool_path}
-  shell_wrapper terraform
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 terraform version

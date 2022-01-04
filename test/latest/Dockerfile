@@ -60,7 +60,7 @@ FROM build as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.9.9
+ARG PYTHON_VERSION=3.10.1
 RUN install-tool python
 
 RUN set -ex; \
@@ -115,7 +115,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.0
+RUN install-tool powershell v7.2.1
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -152,7 +152,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.0.11
+RUN install-tool terraform 1.1.2
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -170,7 +170,7 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool git-lfs v3.0.2
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.0
+RUN install-tool powershell v7.2.1
 
 # renovate: datasource=node
 RUN install-tool node v16.13.1

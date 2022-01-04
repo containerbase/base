@@ -7,8 +7,8 @@ check_command node
 tool_path=$(find_tool_path)
 
 function update_env () {
-  reset_tool_env
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -24,12 +24,8 @@ if [[ -z "${tool_path}" ]]; then
   NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
   # Clean node-gyp cache
   rm -rf $HOME/.cache /tmp/empty-cache
-
-  update_env ${tool_path}
-  shell_wrapper ${TOOL_NAME}
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 lerna --version

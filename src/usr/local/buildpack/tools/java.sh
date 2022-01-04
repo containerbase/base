@@ -14,7 +14,8 @@ tool_path=$(find_tool_path)
 function update_env () {
   reset_tool_env
   export_tool_env JAVA_HOME "${1}"
-  export_tool_path "${1}/bin"
+  PATH="${1}/bin:${PATH}"
+  link_wrapper ${TOOL_NAME}
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -37,12 +38,8 @@ if [[ -z "${tool_path}" ]]; then
   tar --strip 1 -C ${tool_path} -xf ${file}
   rm ${file}
 
-  update_env ${tool_path}
-
-  shell_wrapper java
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+update_env ${tool_path}
 
 java -version
