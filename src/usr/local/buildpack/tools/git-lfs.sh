@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-if ! [ "$(command -v git-lfs)" ]; then
+if [[ -x "$(command -v git-lfs)" ]]; then
   echo "Skipping, already installed"
   exit 0
 fi
