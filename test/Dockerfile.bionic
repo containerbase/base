@@ -94,6 +94,7 @@ RUN install-tool terraform 1.1.3
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.0.2
+RUN git lfs version
 
 # renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.4.0
