@@ -16,9 +16,9 @@ if [[ -x "$(command -v git-lfs)" ]]; then
 fi
 
 ARCH=linux-amd64
-LFS_FILE="git-lfs-${ARCH}-${TOOL_VERSION}.tar.gz"
+LFS_FILE="git-lfs-${ARCH}-v${TOOL_VERSION}.tar.gz"
 
-curl -sSfLo git-lfs.tgz https://github.com/git-lfs/git-lfs/releases/download/${TOOL_VERSION}/${LFS_FILE}
+curl -sSfLo git-lfs.tgz https://github.com/git-lfs/git-lfs/releases/download/v${TOOL_VERSION}/${LFS_FILE}
 tar xzvf git-lfs.tgz -C /usr/local/bin git-lfs
 rm git-lfs.tgz
 
