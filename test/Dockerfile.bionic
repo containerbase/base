@@ -72,7 +72,7 @@ RUN install-tool python 3.10.1
 # renovate: datasource=pypi
 RUN install-pip pipenv 2022.1.8
 # renovate: datasource=pypi
-RUN install-pip hashin 0.16.0
+RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.1.12
 
