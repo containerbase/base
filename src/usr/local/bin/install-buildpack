@@ -31,7 +31,7 @@ fi
 
 # env helper, loads tool specific env
 cat >> $ENV_FILE <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}" PATH="/home/${USER_NAME}/bin:\${PATH}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then
@@ -74,9 +74,12 @@ useradd --uid ${USER_ID} --gid 0 --groups ${USER_NAME} --shell /bin/bash --creat
 mkdir /usr/local/env.d
 su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/{env.d,bin}'
 
+if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
+  echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> $ENV_FILE
+fi
+
 # OpenShift
 chmod g+w /home/${USER_NAME}/{,env.d,bin}
-
 
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"

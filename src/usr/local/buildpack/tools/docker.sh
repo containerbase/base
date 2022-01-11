@@ -4,7 +4,6 @@ set -e
 
 require_root
 
-
 if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
   echo "Skipping, already installed"
   exit 0

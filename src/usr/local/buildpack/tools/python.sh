@@ -12,14 +12,6 @@ fi
 
 tool_path=$(find_tool_path)
 
-function update_env () {
-  reset_tool_env
-  export_tool_path "${USER_HOME}/.local/bin:${1}/bin"
-  PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
-  link_wrapper pip
-}
-
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)
   base_path=${INSTALL_DIR}/${TOOL_NAME}
@@ -81,18 +73,37 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
-  ${tool_path}/bin/pip install --upgrade pip
+  PYTHONHOME=${tool_path} ${tool_path}/bin/pip install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  ${tool_path}/bin/pip cache purge
-  # TODO: support multiple installed python versions
-  # shell_wrapper python${MAJOR}
-  # shell_wrapper python${MAJOR}.${MINOR}
-  # shell_wrapper pip${MAJOR}
-  # shell_wrapper pip${MAJOR}.${MINOR}
+  PYTHONHOME=${tool_path} ${tool_path}/bin/pip cache purge
 fi
 
-update_env ${tool_path}
+reset_tool_env
+# TODO: fix me, currently required for global pip
+export_tool_path "${tool_path}/bin"
+export_tool_path "${USER_HOME}/.local/bin"
+
+function python_shell_wrapper () {
+  local install_dir=$(get_install_dir)
+  local FILE="${install_dir}/bin/${1}"
+  check_command ${tool_path}/bin/$1
+  cat > $FILE <<- EOM
+#!/bin/bash
+
+export PYTHONHOME=${tool_path} PATH=${tool_path}/bin:\$PATH
+
+${1} "\$@"
+EOM
+  chmod +x $FILE
+}
+
+python_shell_wrapper ${TOOL_NAME}
+python_shell_wrapper ${TOOL_NAME}${MAJOR}
+python_shell_wrapper ${TOOL_NAME}${MAJOR}.${MINOR}
+python_shell_wrapper pip
+python_shell_wrapper pip${MAJOR}
+python_shell_wrapper pip${MAJOR}.${MINOR}
 
 python --version
 pip --version

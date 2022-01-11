@@ -17,11 +17,6 @@ fi
 
 tool_path=$(find_tool_path)
 
-function update_env () {
-  reset_tool_env
-  export_tool_path "${1}/bin"
-}
-
 function create_gradle_settings() {
   if [[ -f ${USER_HOME}/.gradle/gradle.properties ]]; then
     echo 'Gradle settings already found'
@@ -77,12 +72,8 @@ if [[ -z "${tool_path}" ]]; then
   unzip -q -d ${base_path} ${file}
   rm ${file}
   mv ${base_path}/${TOOL_NAME}-${TOOL_VERSION} ${tool_path}
-
-  update_env ${tool_path}
-  shell_wrapper gradle
-else
-  echo "Already installed, resetting env"
-  update_env ${tool_path}
 fi
+
+link_wrapper gradle $tool_path/bin
 
 gradle --version
