@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.13.1
+RUN install-tool node v16.13.2
 
 RUN touch /.dummy
 
@@ -88,7 +88,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.23.6
+RUN install-tool pnpm 6.24.4
 
 RUN set -ex; \
   pnpm --version;

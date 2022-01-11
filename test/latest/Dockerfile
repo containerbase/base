@@ -74,7 +74,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v16.13.1
+RUN install-tool node v16.13.2
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -152,7 +152,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.0
+RUN install-tool terraform 1.1.3
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -173,10 +173,10 @@ RUN install-tool git-lfs v3.0.2
 RUN install-tool powershell v7.2.1
 
 # renovate: datasource=node
-RUN install-tool node v16.13.1
+RUN install-tool node v16.13.2
 
 # renovate: datasource=github-releases lookupName=moby/moby
-RUN install-tool docker v20.10.11
+RUN install-tool docker v20.10.12
 
 #--------------------------------------
 # final

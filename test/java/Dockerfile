@@ -27,7 +27,7 @@ USER 1000
 
 # stay on v6
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.1
+RUN install-tool gradle 6.9.2
 
 
 RUN set -ex; \
@@ -51,7 +51,7 @@ FROM base as testb
 RUN install-tool java-jre 11.0.13+8
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.3.1
+RUN install-tool gradle 7.3.3
 
 USER 1000
 
@@ -80,7 +80,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.312+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.3.1
+RUN install-tool gradle 7.3.3
 
 #--------------------------------------
 # test: java 16 (non-root)
@@ -129,7 +129,7 @@ FROM build as testf
 RUN install-tool scala v2.13.7
 
 # renovate: datasource=github-releases lookupName=sbt/sbt
-RUN install-tool sbt v1.5.6
+RUN install-tool sbt v1.6.1
 
 # doesn't work for arbitrary users
 USER 1000
