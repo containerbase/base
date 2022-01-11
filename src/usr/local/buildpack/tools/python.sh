@@ -73,10 +73,10 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
-  ${tool_path}/bin/pip install --upgrade pip
+  PYTHONHOME=${tool_path} ${tool_path}/bin/pip install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  ${tool_path}/bin/pip cache purge
+  PYTHONHOME=${tool_path} ${tool_path}/bin/pip cache purge
 fi
 
 reset_tool_env
@@ -84,12 +84,26 @@ reset_tool_env
 export_tool_path "${tool_path}/bin"
 export_tool_path "${USER_HOME}/.local/bin"
 
-link_wrapper ${TOOL_NAME} ${tool_path}/bin
-link_wrapper ${TOOL_NAME}${MAJOR} ${tool_path}/bin
-link_wrapper ${TOOL_NAME}${MAJOR}.${MINOR} ${tool_path}/bin
-link_wrapper pip ${tool_path}/bin
-link_wrapper pip${MAJOR} ${tool_path}/bin
-link_wrapper pip${MAJOR}.${MINOR} ${tool_path}/bin
+function python_shell_wrapper () {
+  local install_dir=$(get_install_dir)
+  local FILE="${install_dir}/bin/${1}"
+  check_command ${tool_path}/bin/$1
+  cat > $FILE <<- EOM
+#!/bin/bash
+
+export PYTHONHOME=${tool_path} PATH=${tool_path}/bin:\$PATH
+
+${1} "\$@"
+EOM
+  chmod +x $FILE
+}
+
+python_shell_wrapper ${TOOL_NAME}
+python_shell_wrapper ${TOOL_NAME}${MAJOR}
+python_shell_wrapper ${TOOL_NAME}${MAJOR}.${MINOR}
+python_shell_wrapper pip
+python_shell_wrapper pip${MAJOR}
+python_shell_wrapper pip${MAJOR}.${MINOR}
 
 python --version
 pip --version
