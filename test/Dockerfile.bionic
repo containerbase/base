@@ -84,7 +84,7 @@ RUN install-gem bundler 2.3.5
 RUN install-gem cocoapods 1.11.2
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.57.0
+RUN install-tool rust 1.58.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.5.2
