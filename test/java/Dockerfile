@@ -126,7 +126,7 @@ FROM build as testf
 
 # not required / used for sbt
 # renovate: datasource=github-releases lookupName=scala/scala
-RUN install-tool scala v2.13.7
+RUN install-tool scala v2.13.8
 
 # renovate: datasource=github-releases lookupName=sbt/sbt
 RUN install-tool sbt v1.6.1
