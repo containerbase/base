@@ -35,6 +35,6 @@
     "release:publish": "node tools/publish-release.js"
   },
   "resolutions": {
-    "ansi-regex": "5.0.1"
+    "strip-ansi": "6.0.1"
   }
 }
