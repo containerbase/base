@@ -83,7 +83,7 @@ RUN install-tool java 8.0.312+7
 RUN install-tool gradle 7.3.3
 
 #--------------------------------------
-# test: java 16 (non-root)
+# test: java 17 (non-root)
 #--------------------------------------
 FROM base as testd
 
