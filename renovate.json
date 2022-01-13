@@ -9,6 +9,12 @@
       "dependencyDashboardApproval": false
     },
     {
+      "description": "Hold back npm major updates in root package.json",
+      "matchUpdateTypes": ["major"],
+      "matchFiles": ["package.json"],
+      "dependencyDashboardApproval": true
+    },
+    {
       "description": "Disable all managers in test/ by default",
       "matchPaths": ["test/"],
       "enabled": false
