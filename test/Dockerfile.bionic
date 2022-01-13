@@ -77,7 +77,7 @@ RUN install-pip hashin 0.17.0
 RUN install-tool poetry 1.1.12
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.0.3
+RUN install-tool ruby 3.1.0
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem bundler 2.3.5
 # renovate: datasource=rubygems versioning=ruby
