@@ -16,7 +16,7 @@ ARG BUILDPACK_DEBUG
 
 # Python
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.1
+RUN install-tool python 3.10.2
 
 
 FROM base as build-rootless
@@ -27,7 +27,7 @@ ARG BUILDPACK_DEBUG
 USER 1000
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.1
+RUN install-tool python 3.10.2
 
 #--------------------------------------
 # build: pipenv
@@ -63,7 +63,7 @@ ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.1
+RUN install-tool python 3.10.2
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.1.12
