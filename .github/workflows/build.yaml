@@ -78,6 +78,7 @@ jobs:
             golang,
             java,
             jb,
+            flux,
             helm,
             nix,
             node,
