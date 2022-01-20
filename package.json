@@ -16,7 +16,7 @@
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
     "@types/node": "16.11.19",
-    "@types/shelljs": "0.8.10",
+    "@types/shelljs": "0.8.11",
     "conventional-changelog-conventionalcommits": "4.6.3",
     "commander": "8.3.0",
     "husky": "7.0.4",
