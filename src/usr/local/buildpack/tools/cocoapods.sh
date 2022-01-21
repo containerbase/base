@@ -9,4 +9,4 @@ check_command ruby
 gem_install
 gem_shell_wrapper pod
 
-pod --version
+pod --version --allow-root
