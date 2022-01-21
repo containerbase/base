@@ -30,9 +30,9 @@ COPY --chown=1000:0 test test
 WORKDIR /test
 
 #--------------------------------------
-# test: bundler
+# test: bundler (gem)
 #--------------------------------------
-FROM build as testa
+FROM build as test-bundler-a
 
 ARG BUILDPACK_DEBUG
 
@@ -52,12 +52,12 @@ RUN set -ex; \
 
 RUN set -ex; \
     cd a; \
-    bundle lock
+    bundler lock
 
 #--------------------------------------
 # test: global bundler
 #--------------------------------------
-FROM build as testb
+FROM build as test-bundler-b
 
 ARG BUILDPACK_DEBUG
 
@@ -71,15 +71,34 @@ RUN bundler env
 
 RUN set -ex; \
     cd a; \
-    bundle lock;
+    bundler lock;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN ruby --version
 
 #--------------------------------------
+# test: bundler (install-tool)
+#--------------------------------------
+FROM build as test-bundler-c
+
+ARG BUILDPACK_DEBUG
+USER 1000
+
+# renovate: datasource=rubygems versioning=ruby
+RUN install-tool bundler 2.3.5
+
+RUN ruby --version
+RUN bundler env
+
+RUN set -ex; \
+    cd a; \
+    bundler lock;
+
+
+#--------------------------------------
 # test: cocoapods
 #--------------------------------------
-FROM build as testc
+FROM build as test-cocoapods-a
 
 ARG BUILDPACK_DEBUG
 
@@ -93,9 +112,9 @@ RUN set -ex; \
     pod install;
 
 #--------------------------------------
-# test: global cocoapods
+# test: global cocoapods (install-gem)
 #--------------------------------------
-FROM build3 as testd
+FROM build3 as test-cocoapods-b
 
 ARG BUILDPACK_DEBUG
 
@@ -110,13 +129,33 @@ RUN set -ex; \
     pod install;
 
 
+#--------------------------------------
+# test: cocoapods (install-tool)
+#--------------------------------------
+FROM build3 as test-cocoapods-c
+
+ARG BUILDPACK_DEBUG
+
+USER 1000
+
+# renovate: datasource=rubygems versioning=ruby
+RUN install-tool cocoapods 1.11.2
+
+RUN pod env
+
+RUN set -ex; \
+    cd b/Project; \
+    gem install cocoapods-acknowledgements; \
+    pod install;
 
 #--------------------------------------
 # final
 #--------------------------------------
 FROM build
 
-COPY --from=testa /.dummy /.dummy
-COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
+COPY --from=test-bundler-a /.dummy /.dummy
+COPY --from=test-bundler-b /.dummy /.dummy
+COPY --from=test-bundler-c /.dummy /.dummy
+COPY --from=test-cocoapods-a /.dummy /.dummy
+COPY --from=test-cocoapods-b /.dummy /.dummy
+COPY --from=test-cocoapods-c /.dummy /.dummy

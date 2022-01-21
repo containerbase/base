@@ -22,6 +22,13 @@ If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Docker
 docker buildx bake
 ```
 
+You can use the following command to ignore remote cache for local testing.
+This will propably speedup local builds.
+
+```sh
+docker buildx bake  --set *.cache-from=[]
+```
+
 ### Test images
 
 To run one of the tests use the following command, it will run the java tests from [`test/java`](./test/java/).
