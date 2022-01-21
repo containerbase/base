@@ -81,6 +81,8 @@ EOM
 link_wrapper ruby $tool_path/bin
 link_wrapper gem $tool_path/bin
 
+echo $TOOL_VERSION > $base_path/.version
+
 ruby --version
 echo "gem $(gem --version)"
 
