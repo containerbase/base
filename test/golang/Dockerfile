@@ -8,6 +8,11 @@ COPY --chown=1000:0 test test
 
 WORKDIR /test
 
+# Prepare the tool
+RUN prepare-tool golang
+
+USER 1000
+
 #--------------------------------------
 # test: golang
 #--------------------------------------
@@ -16,16 +21,14 @@ FROM build as testa
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.17.6
 
-USER 1000
-
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
 
 RUN set -ex; cd b; cat go.sum; go mod tidy; cat go.sum
 
 RUN set -ex; \
-    cd d; \
-    go get -d ./...; \
-    go mod tidy;
+  cd d; \
+  go get -d ./...; \
+  go mod tidy;
 
 USER root
 RUN echo export "GOPATH=/home/${USER_NAME}/.go" | tee -a $BASH_ENV
@@ -43,11 +46,9 @@ FROM build as testb
 RUN install-tool golang 1.11.0
 
 RUN set -ex; \
-    cd d; \
-    go get -d ./...; \
-    go mod tidy;
-
-USER 1000
+  cd d; \
+  go get -d ./...; \
+  go mod tidy;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN go env

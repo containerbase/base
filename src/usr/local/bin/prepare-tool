@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/buildpack/util.sh
+
+require_distro
+require_user
+require_tool "$@"
+
+PREPARE_TOOL="/usr/local/buildpack/prepare/${TOOL_NAME}.sh"
+if [[ ! -f "$PREPARE_TOOL" ]]; then
+  echo "No tool defined - skipping: ${TOOL_NAME}" >&2
+  exit 1;
+fi
+
+if [[ $(ignore_tool) -eq 1 ]]; then
+  echo "Tool ignored - skipping: ${TOOL_NAME}"
+  exit 0;
+fi
+
+
+echo "Preparing tool ${TOOL_NAME}"
+
+. "$PREPARE_TOOL"
+
+# cleanup
+if [[ $EUID -eq 0 ]]; then
+  rm -rf /var/lib/apt/lists/* /tmp/*
+fi
