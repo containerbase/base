@@ -15,7 +15,7 @@ function gem_install() {
 
 
 function gem_link_wrapper() {
-  link_wrapper "${1:-$TOOL_NAME}" "$tool_path/bin"
+  link_wrapper ${1:-$TOOL_NAME} $tool_path/bin
 }
 
 function gem_shell_wrapper () {
@@ -24,18 +24,18 @@ function gem_shell_wrapper () {
   local ruby_version
 
   install_dir=$(get_install_dir)
-  tool_file="${install_dir}/bin/${1:-$TOOL_NAME}"
+  tool_file=${install_dir}/bin/${1:-$TOOL_NAME}
   # TODO: make generic
   ruby_version=$(cat /usr/local/ruby/.version)
 
   tool_path=$(find_versioned_tool_path)
-  check_command "${tool_path}/bin/${1:-$TOOL_NAME}"
-  cat > "$tool_file" <<- EOM
+  check_command ${tool_path}/bin/${1:-$TOOL_NAME}
+  cat > $tool_file <<- EOM
 #!/bin/bash
 
 export GEM_PATH=${tool_path}:/usr/local/ruby/${ruby_version}/lib/ruby/gems/${ruby_version} PATH=${tool_path}/bin:\$PATH
 
 ${1:-$TOOL_NAME} "\$@"
 EOM
-  chmod +x "$tool_file"
+  chmod +x $tool_file
 }
