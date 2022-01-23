@@ -5,7 +5,7 @@ set -e
 . /usr/local/buildpack/util.sh
 
 require_distro
-require_user
+require_root
 require_tool "$@"
 
 PREPARE_TOOL="/usr/local/buildpack/prepare/${TOOL_NAME}.sh"
