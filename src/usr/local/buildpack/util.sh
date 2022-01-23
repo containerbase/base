@@ -251,12 +251,6 @@ function find_versioned_tool_path () {
   fi
 }
 
-function create_tool_path () {
-  install_dir=$(get_install_dir)
-  mkdir -p "${install_dir}/${TOOL_NAME}"
-  echo "${install_dir}/${TOOL_NAME}"
-}
-
 function create_versioned_tool_path () {
   install_dir=$(get_install_dir)
   mkdir -p "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
