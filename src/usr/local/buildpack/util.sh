@@ -233,17 +233,24 @@ function get_install_dir () {
   if [[ $EUID -eq 0 ]]; then
     echo /usr/local
   else
-    echo ${USER_HOME}
+    echo "${USER_HOME}"
   fi
 }
 
 function find_tool_path () {
-  if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo /usr/local/${TOOL_NAME}/${TOOL_VERSION}
-  elif [[ -d "${USER_HOME}/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo ${USER_HOME}/${TOOL_NAME}/${TOOL_VERSION}
+  install_dir=get_install_dir
+  if [[ -d "${install_dir}/${TOOL_NAME}" ]]; then
+    echo "${install_dir}/${TOOL_NAME}"
   fi
 }
+
+function find_versioned_tool_path () {
+  tool_dir=find_tool_path
+  if [[ -d "${tool_dir}/${TOOL_VERSION}" ]]; then
+    echo "${tool_dir}/${TOOL_VERSION}"
+  fi
+}
+
 
 ignore_tool() {
     local tools=${IGNORED_TOOLS,,}

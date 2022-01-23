@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function gem_install() {
-  tool_path=$(find_tool_path)
+  tool_path=$(find_versioned_tool_path)
 
   if [[ -z "${tool_path}" ]]; then
     INSTALL_DIR=$(get_install_dir)
@@ -26,7 +26,7 @@ function gem_shell_wrapper () {
   local FILE="${install_dir}/bin/${1:-$TOOL_NAME}"
   # TODO: make generic
   local ruby_version=$(cat /usr/local/ruby/.version)
-  tool_path=$(find_tool_path)
+  tool_path=$(find_versioned_tool_path)
   check_command ${tool_path}/bin/${1:-$TOOL_NAME}
   cat > $FILE <<- EOM
 #!/bin/bash

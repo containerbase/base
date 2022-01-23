@@ -12,7 +12,7 @@ fi
 
 POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
 
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)

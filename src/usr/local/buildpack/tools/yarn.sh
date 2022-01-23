@@ -4,7 +4,7 @@ set -e
 
 check_command node
 
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)

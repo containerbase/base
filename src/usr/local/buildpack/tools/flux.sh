@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 if [[ -z "${tool_path}" ]]; then
   INSTALL_DIR=$(get_install_dir)
   base_path=${INSTALL_DIR}/${TOOL_NAME}

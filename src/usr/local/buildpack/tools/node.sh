@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
 fi
 
 NODE_DISTRO=linux-x64
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 INSTALL_DIR=$(get_install_dir)
 PREFIX="${USER_HOME}/.npm-global"
 
