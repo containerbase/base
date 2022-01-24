@@ -14,6 +14,7 @@ check_debug
 
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
+    # shellcheck source=/dev/null
     . $ENV_FILE
   fi
 }
@@ -33,7 +34,8 @@ function export_path () {
 }
 
 function reset_tool_env () {
-  local install_dir=$(get_install_dir)
+  local install_dir
+  install_dir=$(get_install_dir)
   if [[ -z "${TOOL_NAME+x}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
@@ -44,7 +46,8 @@ function reset_tool_env () {
 }
 
 function find_tool_env () {
-  local install_dir=$(get_install_dir)
+  local install_dir
+  install_dir=$(get_install_dir)
   if [[ -z "${TOOL_NAME+x}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
@@ -54,32 +57,35 @@ function find_tool_env () {
 }
 
 function export_tool_env () {
-  local install_dir=$(get_install_dir)
+  local install_dir
+  install_dir=$(get_install_dir)
   if [[ -z "${TOOL_NAME+x}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi
   export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $install_dir/env.d/${TOOL_NAME}.sh
+  echo export "${1}=\${${1}-${2}}" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
 }
 
 function export_tool_path () {
-  local install_dir=$(get_install_dir)
+  local install_dir
+  install_dir=$(get_install_dir)
   if [[ -z "${TOOL_NAME+x}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi
   export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $install_dir/env.d/${TOOL_NAME}.sh
+  echo export PATH="$1:\$PATH" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
 }
 
 
 # use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
 function shell_wrapper () {
-  local install_dir=$(get_install_dir)
+  local install_dir
   local FILE="${install_dir}/bin/${1}"
-  check_command $1
-  cat > $FILE <<- EOM
+  install_dir=$(get_install_dir)
+  check_command "$1"
+  cat > "$FILE" <<- EOM
 #!/bin/bash
 
 if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
@@ -94,22 +100,23 @@ fi
 
 ${1} "\$@"
 EOM
-  chmod +x $FILE
+  chmod +x "$FILE"
 }
 
 # use this for simple symlink to /usr/local/bin or /home/<user>/bin
 function link_wrapper () {
-  local install_dir=$(get_install_dir)
+  local install_dir
   local TARGET="${install_dir}/bin/${1}"
   local SOURCE=$2
+  install_dir=$(get_install_dir)
   if [[ -z "$SOURCE" ]]; then
-    SOURCE=$(command -v ${1})
+    SOURCE=$(command -v "${1}")
   fi
   if [[ -d "$SOURCE" ]]; then
     SOURCE=$SOURCE/${1}
   fi
-  check_command $SOURCE
-  ln -sf $SOURCE $TARGET
+  check_command "$SOURCE"
+  ln -sf "$SOURCE" "$TARGET"
 }
 
 
@@ -126,7 +133,7 @@ function check_version () {
 }
 
 function check_command () {
-  if [[ ! -x "$(command -v ${1})" ]]; then
+  if [[ ! -x $(command -v "${1}") ]]; then
     echo "No ${1} defined - aborting" >&2
     exit 1
   fi
@@ -137,7 +144,7 @@ SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)
 
 function check_semver () {
   if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
-    echo Not a semver like version - aborting: ${1}
+    echo Not a semver like version - aborting: "${1}"
     exit 1
   fi
   export MAJOR=${BASH_REMATCH[1]}
@@ -147,7 +154,7 @@ function check_semver () {
 
 
 function apt_install () {
-  echo "Installing apt packages: ${@}"
+  echo "Installing apt packages: $*"
   if [[ "${APT_HTTP_PROXY}" ]]; then
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
@@ -169,7 +176,9 @@ function apt_upgrade () {
 }
 
 function require_distro () {
-  local VERSION_CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+  local VERSION_CODENAME
+  # shellcheck source=/dev/null
+  VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
   "bionic") ;; #supported
   "focal") ;; #supported
@@ -197,7 +206,7 @@ function require_user () {
 function get_tool_version_env () {
   local tool=${1//-/_}
   tool=${tool^^}_VERSION
-  echo ${tool}
+  echo "${tool}"
 }
 
 function require_tool () {
@@ -208,8 +217,9 @@ function require_tool () {
     exit 1;
   fi
 
-  local tool_env=$(get_tool_version_env $tool)
+  local tool_env
   local version=${2-${!tool_env}}
+  tool_env=$(get_tool_version_env "$tool")
 
   if [[ -z ${version+x} ]]; then
     echo "No version defined - aborting: ${version}" >&2
@@ -233,6 +243,7 @@ function get_install_dir () {
   if [[ $EUID -eq 0 ]]; then
     echo /usr/local
   else
+    # shellcheck disable=SC2153
     echo "${USER_HOME}"
   fi
 }
