@@ -2,10 +2,10 @@
 
 set -e
 
-check_semver $TOOL_VERSION
+check_semver "$TOOL_VERSION"
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -15,7 +15,7 @@ function update_env () {
   reset_tool_env
   export_tool_env JAVA_HOME "${1}"
   PATH="${1}/bin:${PATH}"
-  link_wrapper ${TOOL_NAME}
+  link_wrapper "${TOOL_NAME}"
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -23,7 +23,7 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p "${tool_path}"
 
   file=/tmp/java.tgz
 
@@ -34,12 +34,12 @@ if [[ -z "${tool_path}" ]]; then
   BIN_URL=$(curl -sSLf -H 'accept: application/json' "${URL}/${TOOL_VERSION}?architecture=${ARCH}&${API_ARGS}" \
     | jq --raw-output '.[0].binaries[0].package.link')
 
-  curl -sSfLo ${file} ${BIN_URL}
-  tar --strip 1 -C ${tool_path} -xf ${file}
+  curl -sSfLo ${file} "${BIN_URL}"
+  tar --strip 1 -C "${tool_path}" -xf ${file}
   rm ${file}
 
 fi
 
-update_env ${tool_path}
+update_env "${tool_path}"
 
 java -version

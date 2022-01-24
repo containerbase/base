@@ -2,11 +2,11 @@
 
 set -e
 
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -17,12 +17,12 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${base_path}
+  mkdir -p "${base_path}"
 
   file=/tmp/php.tar.xz
 
   ARCH=$(uname -p)
-  CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   BASE_URL="https://github.com/containerbase/php-prebuild/releases/download"
 
    # TODO: extract to separate preparation tool
@@ -48,11 +48,11 @@ if [[ -z "${tool_path}" ]]; then
       ;;
   esac
 
-  curl -sSfLo ${file} ${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz
+  curl -sSfLo ${file} ${BASE_URL}/"${TOOL_VERSION}"/php-"${TOOL_VERSION}"-"${CODENAME}"-"${ARCH}".tar.xz
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild php'
-    tar -C ${base_path} -xf ${file}
+    tar -C "${base_path}" -xf ${file}
     rm ${file}
   else
     echo 'No prebuild php found' >&2
@@ -60,6 +60,6 @@ if [[ -z "${tool_path}" ]]; then
   fi
 fi
 
-link_wrapper ${TOOL_NAME} ${tool_path}/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
 
 php --version

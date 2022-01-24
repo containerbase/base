@@ -3,10 +3,10 @@
 set -e
 
 check_command python
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -19,21 +19,21 @@ if [[ -z "${tool_path}" ]]; then
   tool_path=${INSTALL_DIR}/${TOOL_NAME}/${TOOL_VERSION}
   export POETRY_HOME=${tool_path}
 
-  mkdir -p ${tool_path}
+  mkdir -p "${tool_path}"
 
-  curl -sSL $POETRY_URL | python - --version ${TOOL_VERSION}
+  curl -sSL $POETRY_URL | python - --version "${TOOL_VERSION}"
   unset POETRY_HOME
 
   # fix execute for all renovatebot/docker-buildpack#150
-  chmod +x ${tool_path}/bin/poetry
+  chmod +x "${tool_path}"/bin/poetry
 
   # fix uid/ gid #124
   if [[ $UID -eq 0 ]]; then
     [ -f "${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py" ] \
-      && chown 0:0 ${tool_path}/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py
+      && chown 0:0 "${tool_path}"/lib/poetry/_vendor/py2.7/backports/entry_points_selectable.py
   fi
 fi
 
-link_wrapper ${TOOL_NAME} ${tool_path}/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
 
 poetry --version

@@ -10,9 +10,9 @@ if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
 fi
 
 groupadd -g 999 docker
-usermod -aG docker ${USER_NAME}
+usermod -aG docker "${USER_NAME}"
 
-curl -sSL https://download.docker.com/linux/static/stable/x86_64/docker-${TOOL_VERSION}.tgz -o docker.tgz
+curl -sSL https://download.docker.com/linux/static/stable/x86_64/docker-"${TOOL_VERSION}".tgz -o docker.tgz
 tar xzvf docker.tgz --strip 1 -C /usr/local/bin docker/docker
 rm docker.tgz
 

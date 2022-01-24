@@ -3,11 +3,11 @@
 set -e
 
 require_root
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -16,13 +16,13 @@ tool_path=${base_path}/${TOOL_VERSION}
 
 if [[ ! -d "$tool_path" ]]; then
 
-  mkdir -p $base_path
+  mkdir -p "$base_path"
 
   ARCH=$(uname -p)
-  CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 
-  curl -sSfLo ruby.tar.xz ${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz || echo 'Ignore download error'
+  curl -sSfLo ruby.tar.xz ${RUBY_URL}/"${TOOL_VERSION}"/ruby-"${TOOL_VERSION}"-"${CODENAME}"-"${ARCH}".tar.xz || echo 'Ignore download error'
 
   if [[ -f ruby.tar.xz ]]; then
     echo "Using prebuild ruby for ${CODENAME}"
@@ -48,12 +48,12 @@ if [[ ! -d "$tool_path" ]]; then
       rm -rf ruby-build
     fi
 
-    ruby-build $TOOL_VERSION $tool_path
+    ruby-build "$TOOL_VERSION" "$tool_path"
   fi
 
   # System settings
-  mkdir -p $tool_path/etc
-  cat > $tool_path/etc/gemrc <<- EOM
+  mkdir -p "$tool_path"/etc
+  cat > "$tool_path"/etc/gemrc <<- EOM
 gem: --bindir /usr/local/bin --no-document
 :benchmark: false
 :verbose: true
@@ -62,11 +62,11 @@ gem: --bindir /usr/local/bin --no-document
 EOM
 
   if [[ ! -r "${USER_HOME}/.gemrc" ]];then
-  cat > ${USER_HOME}/.gemrc <<- EOM
+  cat > "${USER_HOME}"/.gemrc <<- EOM
 gem: --bindir ${USER_HOME}/bin --no-document
 EOM
-    chown -R ${USER_ID} ${USER_HOME}/.gemrc
-    chmod -R g+w ${USER_HOME}/.gemrc
+    chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
+    chmod -R g+w "${USER_HOME}"/.gemrc
   fi
 
 fi
@@ -78,10 +78,10 @@ if [ "\${EUID}" != 0 ]; then
 fi
 EOM
 
-link_wrapper ruby $tool_path/bin
-link_wrapper gem $tool_path/bin
+link_wrapper ruby "$tool_path"/bin
+link_wrapper gem "$tool_path"/bin
 
-echo $TOOL_VERSION > $base_path/.version
+echo "$TOOL_VERSION" > "$base_path"/.version
 
 ruby --version
 echo "gem $(gem --version)"
