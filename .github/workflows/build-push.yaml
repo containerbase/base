@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   build:
-    uses: containerbase/buildpack/.github/workflows/build.yaml@main
+    uses: chumper/buildpack/.github/workflows/build.yaml@feat/shellcheckCI
     # uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
