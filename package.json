@@ -29,6 +29,7 @@
   "scripts": {
     "build": "run-s release:prepare",
     "lint": "yarn prettier -c -u \"**/*.*\"",
+    "lint-fix": "yarn prettier -w -u \"**/*.*\"",
     "prepare": "husky install",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
