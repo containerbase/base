@@ -77,6 +77,6 @@ if [[ ! -d "${tool_path}" ]]; then
 
 fi
 
-link_wrapper "$TOOL_NAME" "$tool_path"/bin
+link_wrapper "$TOOL_NAME" "$tool_path/bin"
 
 swift --version

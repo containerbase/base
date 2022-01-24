@@ -32,7 +32,7 @@ if [[ -z "${tool_path}" ]]; then
   rm "${tool_path}"/bin/*-darwin "${tool_path}"/bin/*.exe "${tool_path}"/bin/*.bat
 fi
 
-link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 sbt --version
 

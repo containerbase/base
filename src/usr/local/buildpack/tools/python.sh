@@ -56,7 +56,7 @@ if [[ -z "${tool_path}" ]]; then
   fi
 
   fix_python_shebangs() {
-    for file in $(find "${tool_path}"/bin -type f -exec grep -Iq . {} \; -print); do
+    for file in $(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print); do
       case "$(head -1 "${file}")" in
       "#!"*"/bin/python" )
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python:" "${file}"
@@ -73,10 +73,10 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
-  PYTHONHOME=${tool_path} "${tool_path}"/bin/pip install --upgrade pip
+  PYTHONHOME=${tool_path} "${tool_path}/bin/pip" install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  PYTHONHOME=${tool_path} "${tool_path}"/bin/pip cache purge
+  PYTHONHOME=${tool_path} "${tool_path}/bin/pip" cache purge
 fi
 
 reset_tool_env
@@ -85,9 +85,11 @@ export_tool_path "${tool_path}/bin"
 export_tool_path "${USER_HOME}/.local/bin"
 
 function python_shell_wrapper () {
-  local install_dir=$(get_install_dir)
-  local FILE="${install_dir}/bin/${1}"
-  check_command "${tool_path}"/bin/"$1"
+  local install_dir
+  local FILE
+  install_dir=$(get_install_dir)
+  FILE="${install_dir}/bin/${1}"
+  check_command "${tool_path}/bin/$1"
   cat > "$FILE" <<- EOM
 #!/bin/bash
 

@@ -25,7 +25,7 @@ if [[ -z "${tool_path}" ]]; then
   unset POETRY_HOME
 
   # fix execute for all renovatebot/docker-buildpack#150
-  chmod +x "${tool_path}"/bin/poetry
+  chmod +x "${tool_path}/bin/poetry"
 
   # fix uid/ gid #124
   if [[ $UID -eq 0 ]]; then
@@ -34,6 +34,6 @@ if [[ -z "${tool_path}" ]]; then
   fi
 fi
 
-link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 poetry --version

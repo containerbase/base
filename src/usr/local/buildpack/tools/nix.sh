@@ -28,7 +28,8 @@ echo "sandbox = false" > /etc/nix/nix.conf
 mkdir -m 0755 /nix
 chown -R "${USER_ID}" /nix
 
-su "${USER_NAME}" -c "./nix-${TOOL_VERSION}-x86_64-linux/install" "${installer_options[@]}"
+
+su "${USER_NAME}" -c "./nix-${TOOL_VERSION}-x86_64-linux/install ${installer_options[*]}"
 ln -s /nix/var/nix/profiles/default/etc/profile.d/nix.sh /etc/profile.d/
 
 rm -r nix-"${TOOL_VERSION}"-x86_64-linux*

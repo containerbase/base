@@ -2,11 +2,11 @@
 
 set -e
 
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -17,16 +17,16 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}/bin
+  mkdir -p "${tool_path}/bin"
 
   file=/tmp/${TOOL_NAME}.tgz
 
   DISTRO=linux_amd64
-  curl -sSfLo ${file} https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip
-  unzip -q -d ${tool_path}/bin ${file}
-  rm ${file}
+  curl -sSfLo "${file}" "https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip"
+  unzip -q -d "${tool_path}/bin" "${file}"
+  rm "${file}"
 fi
 
-link_wrapper ${TOOL_NAME} ${tool_path}/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 terraform version

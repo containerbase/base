@@ -72,14 +72,14 @@ EOM
 fi
 
 reset_tool_env
-cat >> $(find_tool_env) <<- EOM
+cat >> "$(find_tool_env)" <<- EOM
 if [ "\${EUID}" != 0 ]; then
   export GEM_HOME="${USER_HOME}/.gem/ruby/${MAJOR}.${MINOR}.0"
 fi
 EOM
 
-link_wrapper ruby "$tool_path"/bin
-link_wrapper gem "$tool_path"/bin
+link_wrapper ruby "$tool_path/bin"
+link_wrapper gem "$tool_path/bin"
 
 echo "$TOOL_VERSION" > "$base_path"/.version
 

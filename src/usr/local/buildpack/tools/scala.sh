@@ -23,12 +23,12 @@ if [[ -z "${tool_path}" ]]; then
 
   URL='https://downloads.lightbend.com'
 
-  curl -sSfLo "${file}" ${URL}/"${TOOL_NAME}"/"${TOOL_VERSION}"/"${TOOL_NAME}"-"${TOOL_VERSION}".tgz
+  curl -sSfLo "${file}" "${URL}/${TOOL_NAME}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}.tgz"
   tar --strip 1 -C "${tool_path}" -xf "${file}"
   rm "${file}"
 fi
 
-link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 scala --version
 
