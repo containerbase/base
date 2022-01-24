@@ -17,152 +17,165 @@ env:
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
-  lint:
+  shellcheck:
+    name: runner / shellcheck
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+      - uses: actions/checkout@v2
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          reporter: shellcheck
+          path: "./src"
+          pattern: "*"
+          # exclude: "./.git/*" # Optional.
+          # check_all_files_with_shebangs: "false" # Optional.
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
 
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+  #   steps:
+  #     - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
-      - name: lint
-        run: yarn lint
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-  distro:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  #     - name: Installing dependencies
+  #       run: yarn install --frozen-lockfile
 
-    strategy:
-      matrix:
-        distro: [bionic]
+  #     - name: lint
+  #       run: yarn lint
 
-    env:
-      TAG: ${{ matrix.distro }}
+  # distro:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
 
-    steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+  #   strategy:
+  #     matrix:
+  #       distro: [bionic]
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+  #   env:
+  #     TAG: ${{ matrix.distro }}
 
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+  #   steps:
+  #     - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-      - name: test distro
-        run: docker buildx bake --progress plain test-distro
+  #     - name: Installing dependencies
+  #       run: yarn install --frozen-lockfile
 
-  lang:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  #     - name: prepare apt proxy
+  #       run: sudo yarn prepare:proxy
 
-    strategy:
-      matrix:
-        tag:
-          [
-            dotnet,
-            erlang,
-            golang,
-            java,
-            jb,
-            helm,
-            nix,
-            node,
-            php,
-            powershell,
-            python,
-            ruby,
-            rust,
-            swift,
-            latest,
-          ]
+  #     - name: test distro
+  #       run: docker buildx bake --progress plain test-distro
 
-    env:
-      TAG: ${{ matrix.tag }}
+  # lang:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
 
-    steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+  #   strategy:
+  #     matrix:
+  #       tag:
+  #         [
+  #           dotnet,
+  #           erlang,
+  #           golang,
+  #           java,
+  #           jb,
+  #           helm,
+  #           nix,
+  #           node,
+  #           php,
+  #           powershell,
+  #           python,
+  #           ruby,
+  #           rust,
+  #           swift,
+  #           latest,
+  #         ]
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+  #   env:
+  #     TAG: ${{ matrix.tag }}
 
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+  #   steps:
+  #     - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-      - name: build
-        run: docker buildx bake --progress plain
+  #     - name: Installing dependencies
+  #       run: yarn install --frozen-lockfile
 
-      - name: images
-        run: docker image ls
+  #     - name: prepare apt proxy
+  #       run: sudo yarn prepare:proxy
 
-      - name: test
-        run: docker buildx bake --progress plain test
+  #     - name: build
+  #       run: docker buildx bake --progress plain
 
-  release:
-    needs: [lint, lang, distro]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  #     - name: images
+  #       run: docker image ls
 
-    steps:
-      - name: docker-config
-        uses: renovatebot/internal-tools@453d93444a4992b80e8f09e7a4133316a690de0c # renovate: tag=v1.11.4
-        with:
-          command: docker-config
+  #     - name: test
+  #       run: docker buildx bake --progress plain test
 
-      # full checkout for semantic-release
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
-        with:
-          fetch-depth: 0
+  # release:
+  #   needs: [lint, lang, distro]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+  #   steps:
+  #     - name: docker-config
+  #       uses: renovatebot/internal-tools@453d93444a4992b80e8f09e7a4133316a690de0c # renovate: tag=v1.11.4
+  #       with:
+  #         command: docker-config
 
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          yarn config set version-git-tag false
-          npm config set scripts-prepend-node-path true
-          echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
+  #     # full checkout for semantic-release
+  #     - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Docker registry login
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+  #     - name: Init platform
+  #       run: |
+  #         git config --global core.autocrlf false
+  #         git config --global core.symlinks true
+  #         git config --global user.email 'renovate@whitesourcesoftware.com'
+  #         git config --global user.name  'Renovate Bot'
+  #         yarn config set version-git-tag false
+  #         npm config set scripts-prepend-node-path true
+  #         echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+  #     - name: Docker registry login
+  #       if: github.ref == 'refs/heads/main'
+  #       run: |
+  #         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+  #         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: semantic-release
-        if: github.event_name == 'push'
-        run: yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Installing dependencies
+  #       run: yarn install --frozen-lockfile
+
+  #     - name: prepare apt proxy
+  #       run: sudo yarn prepare:proxy
+
+  #     - name: semantic-release
+  #       if: github.event_name == 'push'
+  #       run: yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
