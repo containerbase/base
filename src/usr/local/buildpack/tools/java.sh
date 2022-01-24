@@ -9,7 +9,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 
 function update_env () {
   reset_tool_env

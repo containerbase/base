@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
   exit 1
 fi
 
-tool_path=$(find_tool_path)
+tool_path=$(find_versioned_tool_path)
 npm=$(command -v npm)
 
 if [[ -z "${tool_path}" ]]; then
