@@ -24,17 +24,17 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p "${tool_path}"/bin
+  mkdir -p "${tool_path}/bin"
 
   # OpenShift
   chmod g+w "${base_path}"
 
   BASE_URL="https://github.com/composer/composer/releases/download"
 
-  curl -sSfLo "${tool_path}"/bin/composer ${BASE_URL}/"${TOOL_VERSION}"/composer.phar
-  chmod +x "${tool_path}"/bin/composer
+  curl -sSfLo "${tool_path}/bin/composer" "${BASE_URL}/${TOOL_VERSION}/composer.phar"
+  chmod +x "${tool_path}/bin/composer"
 fi
 
-  link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
+  link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 composer --version
