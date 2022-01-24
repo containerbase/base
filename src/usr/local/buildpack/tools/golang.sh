@@ -3,11 +3,11 @@
 set -e
 
 require_root
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -26,9 +26,9 @@ if [[ ! -d "$tool_path" ]]; then
   # go suggests: git svn bzr mercurial
   apt_install bzr mercurial
 
-  mkdir -p $tool_path
-  curl -sSL https://dl.google.com/go/go${GOLANG_FILE_VERSION}.linux-amd64.tar.gz --output go.tgz
-  tar --strip 1 -C $tool_path -xzf go.tgz
+  mkdir -p "$tool_path"
+  curl -sSL "https://dl.google.com/go/go${GOLANG_FILE_VERSION}.linux-amd64.tar.gz" --output go.tgz
+  tar --strip 1 -C "$tool_path" -xzf go.tgz
   rm go.tgz
 
   if [[ ! -d "${GOPATH}" ]]; then
@@ -39,12 +39,12 @@ if [[ ! -d "$tool_path" ]]; then
 
     mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOPATH/pkg"
 
-    chown -R ${USER_ID} $GOPATH
-    chmod -R g+w $GOPATH
+    chown -R "${USER_ID}" "$GOPATH"
+    chmod -R g+w "$GOPATH"
   fi
 fi
 
-link_wrapper go $tool_path/bin
+link_wrapper go "$tool_path/bin"
 
 go version
 go env

@@ -3,7 +3,7 @@
 set -e
 
 require_root
-VERSION_CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
 
 echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu ${VERSION_CODENAME} main" | tee /etc/apt/sources.list.d/git.list
 curl -sSL \
