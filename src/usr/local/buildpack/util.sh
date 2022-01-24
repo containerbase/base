@@ -106,9 +106,10 @@ EOM
 # use this for simple symlink to /usr/local/bin or /home/<user>/bin
 function link_wrapper () {
   local install_dir
-  local TARGET="${install_dir}/bin/${1}"
+  local TARGET
   local SOURCE=$2
   install_dir=$(get_install_dir)
+  TARGET="${install_dir}/bin/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
   fi
@@ -218,8 +219,10 @@ function require_tool () {
   fi
 
   local tool_env
-  local version=${2-${!tool_env}}
+  local version
+
   tool_env=$(get_tool_version_env "$tool")
+  version=${2-${!tool_env}}
 
   if [[ -z ${version+x} ]]; then
     echo "No version defined - aborting: ${version}" >&2
