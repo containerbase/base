@@ -18,9 +18,9 @@ PREFIX="${USER_HOME}/.npm-global"
 function update_env () {
   reset_tool_env
 
-  link_wrapper "${TOOL_NAME}" "$tool_path"/bin
-  link_wrapper npm "$tool_path"/bin
-  link_wrapper npx "$tool_path"/bin
+  link_wrapper "${TOOL_NAME}" "$tool_path/bin"
+  link_wrapper npm "$tool_path/bin"
+  link_wrapper npx "$tool_path/bin"
 
   export_tool_path "${PREFIX}/bin"
 
@@ -41,20 +41,20 @@ function prepare_prefix () {
 function prepare_global_config () {
   local prefix=${1}
   prepare_prefix "${prefix}"
-  mkdir -p "${tool_path}"/etc
-  echo "prefix = \"${prefix}\"" >> "${tool_path}"/etc/npmrc
+  mkdir -p "${tool_path}/etc"
+  echo "prefix = \"${prefix}\"" >> "${tool_path}/etc/npmrc"
 }
 
 function prepare_user_config () {
   local prefix=${1}
-  if [[ -r "${USER_HOME}/.npmrc" && $(cat "${USER_HOME}"/.npmrc | grep 'prefix') ]]; then
+  if [[ -r "${USER_HOME}/.npmrc" && $(cat "${USER_HOME}/.npmrc" | grep 'prefix') ]]; then
     return
   fi
 
   prepare_prefix "${prefix}"
-  echo "prefix = \"${prefix}\"" >> "${USER_HOME}"/.npmrc
-  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}"/.npmrc
-  chmod -R g+w "${prefix}" "${USER_HOME}"/.npmrc
+  echo "prefix = \"${prefix}\"" >> "${USER_HOME}/.npmrc"
+  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}/.npmrc"
+  chmod -R g+w "${prefix}" "${USER_HOME}/.npmrc"
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -66,7 +66,7 @@ if [[ -z "${tool_path}" ]]; then
 
   file=/tmp/${TOOL_NAME}.tar.xz
 
-  curl -sLo "${file}" https://nodejs.org/dist/v"${TOOL_VERSION}"/node-v"${TOOL_VERSION}"-${NODE_DISTRO}.tar.xz
+  curl -sLo "${file}" "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${NODE_DISTRO}.tar.xz"
   tar -C "${tool_path}" --strip 1 -xf "${file}"
   rm "${file}"
 
@@ -82,7 +82,7 @@ if [[ -z "${tool_path}" ]]; then
   fi
 
   # required for npm
-  link_wrapper "${TOOL_NAME}" "$tool_path"/bin
+  link_wrapper "${TOOL_NAME}" "$tool_path/bin"
 
   if [[ ${MAJOR} -lt 15 ]]; then
     # update to latest node-gyp to fully support python3
@@ -94,7 +94,7 @@ if [[ -z "${tool_path}" ]]; then
   NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
 
   # Clean node-gyp cache
-  rm -rf "$HOME"/.cache
+  rm -rf "$HOME/.cache"
 fi
 
 update_env "${tool_path}"

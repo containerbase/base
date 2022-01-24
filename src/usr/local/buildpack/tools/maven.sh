@@ -15,7 +15,7 @@ tool_path=$(find_versioned_tool_path)
 function update_env () {
   reset_tool_env
   export_tool_env MAVEN_HOME "${1}"
-  link_wrapper mvn "$tool_path"/bin
+  link_wrapper mvn "$tool_path/bin"
 }
 
 if [[ -z "${tool_path}" ]]; then

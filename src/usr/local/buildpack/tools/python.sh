@@ -25,7 +25,7 @@ if [[ -z "${tool_path}" ]]; then
   CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   PYTHON_URL="https://github.com/containerbase/python-prebuild/releases/download"
 
-  curl -sSfLo ${file} ${PYTHON_URL}/"${TOOL_VERSION}"/python-"${TOOL_VERSION}"-"${CODENAME}"-"${ARCH}".tar.xz || echo 'Ignore download error'
+  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild python'
@@ -99,11 +99,11 @@ EOM
 }
 
 python_shell_wrapper "${TOOL_NAME}"
-python_shell_wrapper "${TOOL_NAME}"${MAJOR}
-python_shell_wrapper "${TOOL_NAME}"${MAJOR}."${MINOR}"
+python_shell_wrapper "${TOOL_NAME}${MAJOR}"
+python_shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}"
 python_shell_wrapper pip
-python_shell_wrapper pip"${MAJOR}"
-python_shell_wrapper pip"${MAJOR}"."${MINOR}"
+python_shell_wrapper "pip${MAJOR}"
+python_shell_wrapper "pip${MAJOR}.${MINOR}"
 
 python --version
 pip --version

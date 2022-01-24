@@ -17,7 +17,7 @@ installer_options=(
   --nix-extra-conf-file /tmp/nixd.conf
 )
 
-curl -sSL https://nixos.org/releases/nix/nix-"$TOOL_VERSION"/nix-"$TOOL_VERSION"-x86_64-linux.tar.xz --output nix.txz
+curl -sSL "https://nixos.org/releases/nix/nix-${TOOL_VERSION}/nix-${TOOL_VERSION}-x86_64-linux.tar.xz" --output nix.txz
 tar xJf nix.txz
 rm nix.txz
 
@@ -34,7 +34,7 @@ ln -s /nix/var/nix/profiles/default/etc/profile.d/nix.sh /etc/profile.d/
 rm -r nix-"${TOOL_VERSION}"-x86_64-linux*
 
 export_path "${USER_HOME}/.nix-profile/bin"
-export_env NIX_PATH /nix/var/nix/profiles/per-user/"${USER_NAME}"/channels
+export_env NIX_PATH "/nix/var/nix/profiles/per-user/${USER_NAME}/channels"
 
 nix-collect-garbage --delete-old
 nix-store --optimise

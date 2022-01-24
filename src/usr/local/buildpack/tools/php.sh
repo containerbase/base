@@ -48,7 +48,7 @@ if [[ -z "${tool_path}" ]]; then
       ;;
   esac
 
-  curl -sSfLo ${file} ${BASE_URL}/"${TOOL_VERSION}"/php-"${TOOL_VERSION}"-"${CODENAME}"-"${ARCH}".tar.xz
+  curl -sSfLo ${file} "${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${CODENAME}-${ARCH}".tar.xz"
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild php'
@@ -60,6 +60,6 @@ if [[ -z "${tool_path}" ]]; then
   fi
 fi
 
-link_wrapper "${TOOL_NAME}" "${tool_path}"/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 php --version

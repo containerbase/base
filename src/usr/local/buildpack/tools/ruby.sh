@@ -22,7 +22,7 @@ if [[ ! -d "$tool_path" ]]; then
   CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 
-  curl -sSfLo ruby.tar.xz ${RUBY_URL}/"${TOOL_VERSION}"/ruby-"${TOOL_VERSION}"-"${CODENAME}"-"${ARCH}".tar.xz || echo 'Ignore download error'
+  curl -sSfLo ruby.tar.xz "${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ruby.tar.xz ]]; then
     echo "Using prebuild ruby for ${CODENAME}"
