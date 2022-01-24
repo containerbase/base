@@ -71,7 +71,7 @@ if [[ -z "${tool_path}" ]]; then
   curl -sSfLo ${file} ${URL}/gradle-"${TOOL_VERSION}"-bin.zip
   unzip -q -d "${base_path}" ${file}
   rm ${file}
-  mv "${base_path}"/"${TOOL_NAME}"-"${TOOL_VERSION}" "${tool_path}"
+  mv "${base_path}/${TOOL_NAME}-${TOOL_VERSION}" "${tool_path}"
 fi
 
 link_wrapper gradle "$tool_path"/bin
