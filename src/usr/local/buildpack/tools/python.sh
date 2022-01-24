@@ -2,11 +2,11 @@
 
 set -e
 
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -17,19 +17,19 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${base_path}
+  mkdir -p "${base_path}"
 
   file=/tmp/python.tar.xz
 
   ARCH=$(uname -p)
-  CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   PYTHON_URL="https://github.com/containerbase/python-prebuild/releases/download"
 
-  curl -sSfLo ${file} ${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz || echo 'Ignore download error'
+  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild python'
-    tar -C ${base_path} -xf ${file}
+    tar -C "${base_path}" -xf ${file}
     rm ${file}
   else
     echo 'No prebuild python found, building from source'
@@ -52,11 +52,11 @@ if [[ -z "${tool_path}" ]]; then
       popd
       rm -rf pyenv
     fi
-    python-build $TOOL_VERSION ${base_path}/$TOOL_VERSION
+    python-build "$TOOL_VERSION" "${base_path}"/"$TOOL_VERSION"
   fi
 
   fix_python_shebangs() {
-    for file in $(find ${tool_path}/bin -type f -exec grep -Iq . {} \; -print); do
+    for file in $(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print); do
       case "$(head -1 "${file}")" in
       "#!"*"/bin/python" )
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python:" "${file}"
@@ -73,10 +73,10 @@ if [[ -z "${tool_path}" ]]; then
 
   fix_python_shebangs
 
-  PYTHONHOME=${tool_path} ${tool_path}/bin/pip install --upgrade pip
+  PYTHONHOME=${tool_path} "${tool_path}/bin/pip" install --upgrade pip
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  PYTHONHOME=${tool_path} ${tool_path}/bin/pip cache purge
+  PYTHONHOME=${tool_path} "${tool_path}/bin/pip" cache purge
 fi
 
 reset_tool_env
@@ -85,25 +85,27 @@ export_tool_path "${tool_path}/bin"
 export_tool_path "${USER_HOME}/.local/bin"
 
 function python_shell_wrapper () {
-  local install_dir=$(get_install_dir)
-  local FILE="${install_dir}/bin/${1}"
-  check_command ${tool_path}/bin/$1
-  cat > $FILE <<- EOM
+  local install_dir
+  local FILE
+  install_dir=$(get_install_dir)
+  FILE="${install_dir}/bin/${1}"
+  check_command "${tool_path}/bin/$1"
+  cat > "$FILE" <<- EOM
 #!/bin/bash
 
 export PYTHONHOME=${tool_path} PATH=${tool_path}/bin:\$PATH
 
 ${1} "\$@"
 EOM
-  chmod +x $FILE
+  chmod +x "$FILE"
 }
 
-python_shell_wrapper ${TOOL_NAME}
-python_shell_wrapper ${TOOL_NAME}${MAJOR}
-python_shell_wrapper ${TOOL_NAME}${MAJOR}.${MINOR}
+python_shell_wrapper "${TOOL_NAME}"
+python_shell_wrapper "${TOOL_NAME}${MAJOR}"
+python_shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}"
 python_shell_wrapper pip
-python_shell_wrapper pip${MAJOR}
-python_shell_wrapper pip${MAJOR}.${MINOR}
+python_shell_wrapper "pip${MAJOR}"
+python_shell_wrapper "pip${MAJOR}.${MINOR}"
 
 python --version
 pip --version

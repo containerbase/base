@@ -23,6 +23,8 @@ if [[ -z "$tool_path" ]]; then
     GOLANG_FILE_VERSION="${MAJOR}.${MINOR}"
   fi
 
+  mkdir -p "$tool_path"
+
   curl -sSL "https://dl.google.com/go/go${GOLANG_FILE_VERSION}.linux-amd64.tar.gz" --output go.tgz
   tar --strip 1 -C "$tool_path" -xzf go.tgz
   rm go.tgz

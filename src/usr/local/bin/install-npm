@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
 require_user
@@ -9,7 +10,7 @@ require_tool "$@"
 
 case "$TOOL_NAME" in
   npm | yarn | pnpm | lerna)
-    install-tool $TOOL_NAME ${TOOL_VERSION}
+    install-tool "$TOOL_NAME" "${TOOL_VERSION}"
     ;;
 
   *)
@@ -18,7 +19,7 @@ case "$TOOL_NAME" in
     unset NPM_CONFIG_PREFIX
 
     echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
-    npm install ${TOOL_NAME}@${TOOL_VERSION} --global --unsafe --cache /tmp/empty-cache
+    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --cache /tmp/empty-cache
 
     # Clean download cache
     npm cache clean --force

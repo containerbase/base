@@ -2,11 +2,11 @@
 
 set -e
 
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -17,18 +17,18 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${tool_path}
+  mkdir -p "${tool_path}"
 
   file=/tmp/${TOOL_NAME}.tgz
 
   URL='https://downloads.lightbend.com'
 
-  curl -sSfLo ${file} ${URL}/${TOOL_NAME}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}.tgz
-  tar --strip 1 -C ${tool_path} -xf ${file}
-  rm ${file}
+  curl -sSfLo "${file}" "${URL}/${TOOL_NAME}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}.tgz"
+  tar --strip 1 -C "${tool_path}" -xf "${file}"
+  rm "${file}"
 fi
 
-link_wrapper ${TOOL_NAME} ${tool_path}/bin
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 scala --version
 

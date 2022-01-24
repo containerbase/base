@@ -8,10 +8,10 @@ if [[ "${TOOL_VERSION}" == "latest" ]]; then
   export "TOOL_VERSION=$(curl -s https://services.gradle.org/versions/current | jq --raw-output '.version')"
 fi
 
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
@@ -23,16 +23,16 @@ function create_gradle_settings() {
     return
   fi
   echo 'Creating Gradle settings'
-  mkdir -p ${USER_HOME}/.gradle
+  mkdir -p "${USER_HOME}/.gradle"
 
-  cat > ${USER_HOME}/.gradle/gradle.properties <<- EOM
+  cat > "${USER_HOME}/.gradle/gradle.properties" <<- EOM
 org.gradle.parallel=true
 org.gradle.configureondemand=true
 org.gradle.daemon=false
 org.gradle.caching=false
 EOM
 
-  chown -R ${USER_ID} ${USER_HOME}/.gradle
+  chown -R "${USER_ID}" "${USER_HOME}/.gradle"
 }
 
 function create_maven_settings() {
@@ -41,8 +41,8 @@ function create_maven_settings() {
     return
   fi
   echo 'Creating Maven settings'
-  mkdir -p ${USER_HOME}/.m2
-  cat > ${USER_HOME}/.m2/settings.xml <<- EOM
+  mkdir -p "${USER_HOME}/.m2"
+  cat > "${USER_HOME}/.m2/settings.xml" <<- EOM
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -51,7 +51,7 @@ function create_maven_settings() {
 </settings>
 EOM
 
-  chown -R ${USER_ID} ${USER_HOME}/.m2
+  chown -R "${USER_ID}" "${USER_HOME}/.m2"
 }
 
 if [[ -z "${tool_path}" ]]; then
@@ -59,7 +59,7 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
-  mkdir -p ${base_path}
+  mkdir -p "${base_path}"
 
   create_maven_settings
   create_gradle_settings
@@ -68,12 +68,12 @@ if [[ -z "${tool_path}" ]]; then
 
   URL="https://services.gradle.org/distributions"
 
-  curl -sSfLo ${file} ${URL}/gradle-${TOOL_VERSION}-bin.zip
-  unzip -q -d ${base_path} ${file}
+  curl -sSfLo ${file} "${URL}/gradle-${TOOL_VERSION}-bin.zip"
+  unzip -q -d "${base_path}" ${file}
   rm ${file}
-  mv ${base_path}/${TOOL_NAME}-${TOOL_VERSION} ${tool_path}
+  mv "${base_path}/${TOOL_NAME}-${TOOL_VERSION}" "${tool_path}"
 fi
 
-link_wrapper gradle $tool_path/bin
+link_wrapper gradle "$tool_path/bin"
 
 gradle --version

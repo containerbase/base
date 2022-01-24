@@ -7,7 +7,7 @@ function gem_install() {
     tool_path=$(create_versioned_tool_path)
     mkdir -p "${tool_path}"
 
-    GEM_HOME=$tool_path gem install  --bindir "$tool_path"/bin "${TOOL_NAME}" -v "${TOOL_VERSION}"
+    GEM_HOME=$tool_path gem install  --bindir "$tool_path/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}"
 
   # TODO: clear gem cache
   fi
@@ -29,13 +29,13 @@ function gem_shell_wrapper () {
   ruby_version=$(cat /usr/local/ruby/.version)
 
   tool_path=$(find_versioned_tool_path)
-  check_command ${tool_path}/bin/${1:-$TOOL_NAME}
-  cat > $tool_file <<- EOM
+  check_command "${tool_path}/bin/${1:-$TOOL_NAME}"
+  cat > "$tool_file" <<- EOM
 #!/bin/bash
 
 export GEM_PATH=${tool_path}:/usr/local/ruby/${ruby_version}/lib/ruby/gems/${ruby_version} PATH=${tool_path}/bin:\$PATH
 
 ${1:-$TOOL_NAME} "\$@"
 EOM
-  chmod +x $tool_file
+  chmod +x "$tool_file"
 }
