@@ -18,6 +18,7 @@ if [[ -z "${tool_path}" ]]; then
   base_path=${INSTALL_DIR}/${TOOL_NAME}
   tool_path=${base_path}/${TOOL_VERSION}
 
+  # shellcheck source=/dev/null
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
 
   case "$VERSION_CODENAME" in

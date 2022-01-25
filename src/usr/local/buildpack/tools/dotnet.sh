@@ -17,6 +17,7 @@ if [[ -d "${DOTNET_INSTALL_DIR}/sdk/${TOOL_VERSION}" ]]; then
   exit 0
 fi
 
+# shellcheck source=/dev/null
 VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
 
 case "$VERSION_CODENAME" in

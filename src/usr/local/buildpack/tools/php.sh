@@ -22,6 +22,7 @@ if [[ -z "${tool_path}" ]]; then
   file=/tmp/php.tar.xz
 
   ARCH=$(uname -p)
+  # shellcheck source=/dev/null
   CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   BASE_URL="https://github.com/containerbase/php-prebuild/releases/download"
 

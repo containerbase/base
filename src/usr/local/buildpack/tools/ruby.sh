@@ -19,6 +19,7 @@ if [[ ! -d "$tool_path" ]]; then
   mkdir -p "$base_path"
 
   ARCH=$(uname -p)
+  # shellcheck source=/dev/null
   CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 

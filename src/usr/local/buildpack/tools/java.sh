@@ -4,6 +4,7 @@ set -e
 
 check_semver "$TOOL_VERSION"
 
+# shellcheck disable=SC2153
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   echo Invalid version: "${TOOL_VERSION}"
   exit 1

@@ -14,13 +14,15 @@ base_path=/usr/local/buildpack/${TOOL_NAME}
 tool_path=$base_path/$TOOL_VERSION
 
 if [[ ! -d "${tool_path}" ]]; then
+  # shellcheck source=/dev/null
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
-  VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
+  # shellcheck source=/dev/null
+  VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_ID}")
 
   # https://swift.org/getting-started/#on-linux
   # already installed: git
 
-  case "$VERSION_CODENAME" in
+  case "${VERSION_CODENAME}" in
     "bionic")
       apt_install \
         binutils \

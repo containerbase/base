@@ -16,6 +16,8 @@ PREFIX="${USER_HOME}/.npm-global"
 
 
 function update_env () {
+  local tool_env
+
   reset_tool_env
 
   link_wrapper "${TOOL_NAME}" "$tool_path/bin"
@@ -24,7 +26,9 @@ function update_env () {
 
   export_tool_path "${PREFIX}/bin"
 
-  cat >> $(find_tool_env) <<- EOM
+  tool_env=$(find_tool_env)
+
+  cat >> "$tool_env" <<- EOM
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
   export NPM_CONFIG_PREFIX="${PREFIX}"
@@ -47,7 +51,7 @@ function prepare_global_config () {
 
 function prepare_user_config () {
   local prefix=${1}
-  if [[ -r "${USER_HOME}/.npmrc" && $(cat "${USER_HOME}/.npmrc" | grep 'prefix') ]]; then
+  if grep 'prefix' "${USER_HOME}/.npmrc"; then
     return
   fi
 

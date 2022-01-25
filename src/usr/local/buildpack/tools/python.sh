@@ -22,6 +22,7 @@ if [[ -z "${tool_path}" ]]; then
   file=/tmp/python.tar.xz
 
   ARCH=$(uname -p)
+  # shellcheck source=/dev/null
   CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   PYTHON_URL="https://github.com/containerbase/python-prebuild/releases/download"
 
@@ -56,7 +57,9 @@ if [[ -z "${tool_path}" ]]; then
   fi
 
   fix_python_shebangs() {
-    for file in $(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print); do
+    # https://github.com/koalaman/shellcheck/wiki/SC2044
+    while IFS= read -r -d '' file
+    do
       case "$(head -1 "${file}")" in
       "#!"*"/bin/python" )
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python:" "${file}"
@@ -68,7 +71,7 @@ if [[ -z "${tool_path}" ]]; then
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python${MAJOR}.${MINOR}:" "${file}"
         ;;
       esac
-    done
+    done < <(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print0)
   }
 
   fix_python_shebangs
