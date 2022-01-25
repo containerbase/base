@@ -77,7 +77,7 @@ ARG APT_HTTP_PROXY
 
 # need to stay old
 # renovate: datasource=adoptium-java lookupName=java-jre
-RUN install-tool java 8.0.312+7
+RUN install-tool java 8.0.322+6
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.3.3
