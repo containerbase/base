@@ -17,7 +17,7 @@ if [[ ! -d "${tool_path}" ]]; then
   # shellcheck source=/dev/null
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   # shellcheck source=/dev/null
-  VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_ID}")
+  VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
 
   # https://swift.org/getting-started/#on-linux
   # already installed: git
