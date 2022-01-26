@@ -19,13 +19,14 @@ if [[ ! -d "$tool_path" ]]; then
   mkdir -p "$base_path"
 
   ARCH=$(uname -p)
-  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 
-  curl -sSfLo ruby.tar.xz "${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
+  version_codename=$(get_distro)
+
+  curl -sSfLo ruby.tar.xz "${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ruby.tar.xz ]]; then
-    echo "Using prebuild ruby for ${CODENAME}"
+    echo "Using prebuild ruby for ${version_codename}"
     apt_install \
       build-essential \
       libffi-dev \

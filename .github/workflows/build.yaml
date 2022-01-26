@@ -50,6 +50,10 @@ jobs:
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
@@ -96,6 +100,10 @@ jobs:
     steps:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
@@ -124,7 +132,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@4d9e17a6613f0a82a98830e3424d35ece662122b # renovate: tag=v1.11.5
+        uses: renovatebot/internal-tools@7bbc8c127ffd87a8305ac1d261667b359bd7300f # renovate: tag=v1.11.6
         with:
           command: docker-config
 
@@ -132,6 +140,10 @@ jobs:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 0
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1

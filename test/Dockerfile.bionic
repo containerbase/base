@@ -18,7 +18,7 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.34.1
+RUN install-tool git v2.35.0
 
 
 #--------------------------------------
@@ -43,7 +43,7 @@ RUN install-tool flux v0.25.3
 RUN install-tool golang 1.17.6
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.7.2
+RUN install-tool helm v3.8.0
 
 # renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 17.0.1+12
