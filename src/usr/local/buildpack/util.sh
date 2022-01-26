@@ -192,7 +192,7 @@ function require_distro () {
 
 function get_distro() {
   require_distro
-  # shellcheck source=/dev/null disable=2005
+  # shellcheck source=/dev/null disable=SC2005
   echo "$(. /etc/os-release && echo "${VERSION_CODENAME}")"
 }
 
