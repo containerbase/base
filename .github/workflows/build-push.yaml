@@ -9,8 +9,8 @@ concurrency:
 
 jobs:
   build:
-    # uses: containerbase/buildpack/.github/workflows/build.yaml@main
-    uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
+    uses: containerbase/buildpack/.github/workflows/build.yaml@main
+    # uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
