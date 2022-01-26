@@ -1,7 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 . "$(dirname "$0")/_/husky.sh"
 
-# Woraround for Visual Studio MinGit
-export PATH="$(readlink -f "$(dirname "$0")/../node_modules/.bin"):$PATH"
+yarn pretty-quick --staged
 
-pretty-quick --staged
+if ! command -v shellcheck > /dev/null 2>&1
+then
+    echo "shellcheck could not be found"
+    exit
+fi
+
+changed_files=$(git diff --diff-filter=M --cached --name-only | { grep -E '^src' || true; })
+if [ ${#changed_files} -gt 0 ]; then
+    shellcheck ${changed_files[@]}
+fi
