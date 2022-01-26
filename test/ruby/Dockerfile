@@ -62,7 +62,7 @@ FROM build as test-bundler-b
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.3.5
+RUN install-gem bundler 2.3.6
 
 USER 1000
 
@@ -85,7 +85,7 @@ ARG BUILDPACK_DEBUG
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.3.5
+RUN install-tool bundler 2.3.6
 
 RUN ruby --version
 RUN bundler env
