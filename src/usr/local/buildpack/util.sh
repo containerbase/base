@@ -190,6 +190,12 @@ function require_distro () {
   esac
 }
 
+function get_distro() {
+  require_distro
+  # shellcheck source=/dev/null disable=SC2005
+  echo "$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+}
+
 function require_root () {
   if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root" >&2

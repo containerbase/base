@@ -17,9 +17,9 @@ if [[ -d "${DOTNET_INSTALL_DIR}/sdk/${TOOL_VERSION}" ]]; then
   exit 0
 fi
 
-VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
+version_codename=$(get_distro)
 
-case "$VERSION_CODENAME" in
+case "$version_codename" in
   "bionic") apt_install libc6 libgcc1 libgssapi-krb5-2 libicu60 libssl1.1 libstdc++6 zlib1g;;
   "focal") apt_install libc6 libgcc1 libgssapi-krb5-2 libicu66 libssl1.1 libstdc++6 zlib1g;;
 esac

@@ -22,10 +22,11 @@ if [[ -z "${tool_path}" ]]; then
   file=/tmp/python.tar.xz
 
   ARCH=$(uname -p)
-  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   PYTHON_URL="https://github.com/containerbase/python-prebuild/releases/download"
 
-  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
+  version_codename=$(get_distro)
+
+  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild python'
@@ -56,7 +57,9 @@ if [[ -z "${tool_path}" ]]; then
   fi
 
   fix_python_shebangs() {
-    for file in $(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print); do
+    # https://github.com/koalaman/shellcheck/wiki/SC2044
+    while IFS= read -r -d '' file
+    do
       case "$(head -1 "${file}")" in
       "#!"*"/bin/python" )
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python:" "${file}"
@@ -68,7 +71,7 @@ if [[ -z "${tool_path}" ]]; then
         sed -i "1 s:.*:#\!${tool_path}\/bin\/python${MAJOR}.${MINOR}:" "${file}"
         ;;
       esac
-    done
+    done < <(find "${tool_path}/bin" -type f -exec grep -Iq . {} \; -print0)
   }
 
   fix_python_shebangs
