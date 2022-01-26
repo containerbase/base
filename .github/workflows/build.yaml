@@ -36,6 +36,16 @@ jobs:
       - name: lint
         run: yarn lint
 
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1.13.0
+        with:
+          fail_on_error: true
+          reporter: github-check
+          filter_mode: nofilter
+          path: src
+          pattern: '*.sh'
+          check_all_files_with_shebangs: 'true'
+
   distro:
     runs-on: ubuntu-latest
     timeout-minutes: 15
