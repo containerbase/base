@@ -50,8 +50,6 @@ RUN set -ex; \
   go get -d ./...; \
   go mod tidy;
 
-USER 1000
-
 SHELL [ "/bin/sh", "-c" ]
 RUN go env
 
