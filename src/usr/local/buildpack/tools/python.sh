@@ -22,11 +22,11 @@ if [[ -z "${tool_path}" ]]; then
   file=/tmp/python.tar.xz
 
   ARCH=$(uname -p)
-  # shellcheck source=/dev/null
-  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   PYTHON_URL="https://github.com/containerbase/python-prebuild/releases/download"
 
-  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz" || echo 'Ignore download error'
+  version_codename=$(get_distro)
+
+  curl -sSfLo ${file} "${PYTHON_URL}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz" || echo 'Ignore download error'
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild python'

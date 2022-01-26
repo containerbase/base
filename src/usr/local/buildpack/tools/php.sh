@@ -22,13 +22,13 @@ if [[ -z "${tool_path}" ]]; then
   file=/tmp/php.tar.xz
 
   ARCH=$(uname -p)
-  # shellcheck source=/dev/null
-  CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   BASE_URL="https://github.com/containerbase/php-prebuild/releases/download"
+
+  version_codename=$(get_distro)
 
    # TODO: extract to separate preparation tool
   require_root
-  case "$CODENAME" in
+  case "$version_codename" in
     "bionic") apt_install \
       libjpeg-turbo8 \
       libmcrypt4 \
@@ -49,7 +49,7 @@ if [[ -z "${tool_path}" ]]; then
       ;;
   esac
 
-  curl -sSfLo ${file} "${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz"
+  curl -sSfLo ${file} "${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz"
 
   if [[ -f ${file} ]]; then
     echo 'Using prebuild php'
