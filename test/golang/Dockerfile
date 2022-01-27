@@ -8,6 +8,12 @@ COPY --chown=1000:0 test test
 
 WORKDIR /test
 
+#--------------------------------------
+# intermediate: user
+#--------------------------------------
+
+FROM build as user
+
 # Prepare the tool
 RUN prepare-tool golang
 
@@ -16,7 +22,7 @@ USER 1000
 #--------------------------------------
 # test: golang
 #--------------------------------------
-FROM build as testa
+FROM user as testa
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.17.6
@@ -40,10 +46,28 @@ RUN set -ex; cd c; go get -d ./...; cat go.sum
 #--------------------------------------
 # test: check first patch version eg v1.11.0
 #--------------------------------------
-FROM build as testb
+FROM user as testb
 
 # do not update patch version
 RUN install-tool golang 1.11.0
+
+RUN set -ex; \
+  cd d; \
+  go get -d ./...; \
+  go mod tidy;
+
+SHELL [ "/bin/sh", "-c" ]
+RUN go env
+
+#--------------------------------------
+# test: install as root
+#--------------------------------------
+FROM build as testc
+
+# do not update patch version
+RUN install-tool golang 1.11.0
+
+USER 1000
 
 RUN set -ex; \
   cd d; \

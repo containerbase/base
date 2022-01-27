@@ -20,6 +20,10 @@ if [[ $(ignore_tool) -eq 1 ]]; then
   exit 0;
 fi
 
+# prepare tool if root
+if [[ $EUID -eq 0 ]]; then
+  prepare-tool "${TOOL_NAME}"
+fi
 
 echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
 # shellcheck source=/dev/null

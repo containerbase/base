@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
 require_distro
@@ -11,7 +12,7 @@ require_tool "$@"
 PREPARE_TOOL="/usr/local/buildpack/prepare/${TOOL_NAME}.sh"
 if [[ ! -f "$PREPARE_TOOL" ]]; then
   echo "No tool defined - skipping: ${TOOL_NAME}" >&2
-  exit 1;
+  exit 0;
 fi
 
 if [[ $(ignore_tool) -eq 1 ]]; then
@@ -19,9 +20,9 @@ if [[ $(ignore_tool) -eq 1 ]]; then
   exit 0;
 fi
 
-
 echo "Preparing tool ${TOOL_NAME}"
 
+# shellcheck source=/dev/null
 . "$PREPARE_TOOL"
 
 # cleanup
