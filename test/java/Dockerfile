@@ -129,7 +129,7 @@ FROM build as testf
 RUN install-tool scala v2.13.8
 
 # renovate: datasource=github-releases lookupName=sbt/sbt
-RUN install-tool sbt v1.6.1
+RUN install-tool sbt v1.6.2
 
 # doesn't work for arbitrary users
 USER 1000
