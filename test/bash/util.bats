@@ -2,8 +2,8 @@
 setup() {
   load '../../node_modules/bats-support/load'
   load '../../node_modules/bats-assert/load'
-  TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
 
+  TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
   TEST_ROOT_DIR=$(mktemp -u)
 
   load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
@@ -61,6 +61,10 @@ teardown() {
 
 @test "requires the user" {
   run require_user
+  assert_output --partial "No USER_NAME defined"
+  assert_failure
+
+  USER_NAME= run require_user
   assert_output --partial "No USER_NAME defined"
   assert_failure
 

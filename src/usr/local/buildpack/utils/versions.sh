@@ -20,3 +20,20 @@ function get_tool_version () {
 
   cat "${version_path}/${tool}" 2>&-
 }
+
+# Gets the version env var for the given tool
+# e.g
+#   get_tool_version_env foo-bar
+# returns
+#   FOO_BAR_VERSION
+function get_tool_version_env () {
+  local tool=${1//-/_}
+
+  if [[ -z "${tool}" ]]; then
+    echo "No tool defined - skipping: ${tool}" >&2
+    exit 1;
+  fi
+
+  tool=${tool^^}_VERSION
+  echo "${tool}"
+}

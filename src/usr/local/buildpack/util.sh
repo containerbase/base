@@ -15,6 +15,8 @@ export BASH_RC_FILE="${TEST_ROOT_DIR}/etc/bash.bashrc"
 . "${DIR}/utils/env.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/versions.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/link.sh"
 
 # Will check if the debug flag is set to enable verbose logging
 function check_debug() {
@@ -56,68 +58,11 @@ function check () {
   fi
 }
 
-
-
-function find_tool_env () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-
-  echo "$install_dir/env.d/${TOOL_NAME}.sh"
-}
-
-# use this if custom env is required, creates a shell wrapper to ${install_dir}/bin
-function shell_wrapper () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  local tool_file
-  tool_file="${install_dir}/bin/${1}"
-
-  check_command "$1"
-  cat > "$tool_file" <<- EOM
-#!/bin/bash
-
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
-  . $ENV_FILE
-fi
-
-if [[ "\$(command -v ${1})" == "$FILE" ]]; then
-  echo Could not forward ${1}, probably wrong PATH variable. >&2
-  echo PATH=\$PATH
-  exit 1
-fi
-
-${1} "\$@"
-EOM
-  chmod +x "$tool_file"
-}
-
-# use this for simple symlink to ${install_dir}/bin
-function link_wrapper () {
-  local install_dir
-  local tool=$1
-  local source=$2
-
-  install_dir=$(get_install_dir)
-  local target="${install_dir}/bin/${tool}"
-
-  if [[ -z "$source" ]]; then
-    source=$(command -v "${tool}")
-  fi
-  if [[ -d "$source" ]]; then
-    source=$source/${tool}
-  fi
-
-  check_command "$source"
-  ln -sf "$source" "$target"
-}
-
-
+# Will check if the given tool is a executable command
 function check_command () {
   local tool_path=$1
+  check tool_path
+
   if [[ ! -x $(command -v "${tool_path}") ]]; then
     echo "No ${1} defined - aborting" >&2
     exit 1
@@ -126,9 +71,13 @@ function check_command () {
 
 SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
+# Will check if the given string is a valid semversion and splits it into major, minor and patch versions
 function check_semver () {
-  if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
-    echo Not a semver like version - aborting: "${1}"
+  local semver=${1}
+  check semver
+
+  if [[ ! "${semver}" =~ ${SEMVER_REGEX} ]]; then
+    echo Not a semver like version - aborting: "${semver}"
     exit 1
   fi
   export MAJOR=${BASH_REMATCH[1]}
@@ -137,6 +86,7 @@ function check_semver () {
 }
 
 
+# Will install the given packages with apt
 function apt_install () {
   echo "Installing apt packages: $*"
   if [[ -n "${APT_HTTP_PROXY}" ]]; then
@@ -148,6 +98,7 @@ function apt_install () {
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
+# Will upgrade the system with apt
 function apt_upgrade () {
   echo "Upgrading apt packages"
   if [[ "${APT_HTTP_PROXY}" ]]; then
@@ -159,6 +110,7 @@ function apt_upgrade () {
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
+# Will check that the current distro is supported
 function require_distro () {
   local codename
   # shellcheck source=/dev/null
@@ -173,6 +125,7 @@ function require_distro () {
   esac
 }
 
+# Will get the code name of the current distro
 function get_distro() {
   local codename
   # shellcheck source=/dev/null
@@ -180,34 +133,26 @@ function get_distro() {
   echo "$codename"
 }
 
+# Will check if the current user is root and aborts otherwise
 function require_root () {
-  if [[ $EUID -ne 0 ]]; then
+  if [ "$(is_root)" -ne 0 ]; then
     echo "This script must be run as root" >&2
     exit 1
   fi
 }
 
+# Will check if USER_NAME is set and aborts otherwise
 function require_user () {
-  if [[ -z "${USER_NAME+x}" ]]; then
+  if [[ -z "${USER_NAME}" ]]; then
     echo "No USER_NAME defined - skipping: ${USER_NAME}" >&2
     exit 1;
   fi
 }
 
-function get_tool_version_env () {
-  local tool=${1//-/_}
-
-  if [[ -z "${tool}" ]]; then
-    echo "No tool defined - skipping: ${tool}" >&2
-    exit 1;
-  fi
-
-  tool=${tool^^}_VERSION
-  echo "${tool}"
-}
-
+# Will fetch the tool name and version and stores them in TOOL_NAME and TOOL_VERSION
 function require_tool () {
   local tool=${1}
+  check tool
 
   if [[ -z "${tool}" ]]; then
     echo "No tool defined - skipping: ${tool}" >&2
@@ -231,12 +176,13 @@ function require_tool () {
     version=${BASH_REMATCH[1]}
   fi
 
-  export "TOOL_NAME=${1}" "TOOL_VERSION=${version}"
+  export "TOOL_NAME=${tool}" "TOOL_VERSION=${version}"
 
   # compability fallback
   export "${tool_env}=${version}"
 }
 
+# Will check if the current tool is ignored
 ignore_tool() {
     local tools=${IGNORED_TOOLS,,}
     [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0

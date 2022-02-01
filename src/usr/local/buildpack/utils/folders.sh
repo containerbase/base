@@ -49,8 +49,22 @@ function create_folder () {
 
 # Will get the install dir for the buildpack installation
 function get_install_dir () {
+  if [ -n "${LEGACY}" ]; then
+    get_legacy_install_dir
+  else
     # for testing we can set TEST_ROOT_DIR
     echo "${TEST_ROOT_DIR}${ROOT_DIR}"
+  fi
+}
+
+# Will get the legacy install dir for the buildpack installation
+function get_legacy_install_dir () {
+    if [[ $EUID -eq 0 ]]; then
+    echo /usr/local
+  else
+    # shellcheck disable=SC2153
+    echo "${USER_HOME}"
+  fi
 }
 
 # Gets the path to the bin folder

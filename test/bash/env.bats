@@ -1,9 +1,10 @@
 setup() {
   load '../../node_modules/bats-support/load'
   load '../../node_modules/bats-assert/load'
-  TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
 
+  TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
   TEST_ROOT_DIR=$(mktemp -u)
+
   USER_NAME=user
   USER_ID=1000
 
@@ -140,7 +141,7 @@ teardown() {
   assert_output --partial /foo:
   export PATH=$old_path
 
-    BASH_ENV="${TEST_ROOT_DIR}/usr/local/etc/env" \
+  BASH_ENV="${TEST_ROOT_DIR}/usr/local/etc/env" \
   ENV="${TEST_ROOT_DIR}/usr/local/etc/env" \
   run bash -c 'env | grep PATH'
   assert_success

@@ -3,7 +3,6 @@ setup() {
   load '../../node_modules/bats-assert/load'
 
   TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
-
   TEST_ROOT_DIR=$(mktemp -u)
 
   load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
