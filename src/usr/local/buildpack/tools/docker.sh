@@ -1,19 +1,22 @@
 #!/bin/bash
 
-set -e
+function legacy_tool_install () {
+  set -e
 
-require_root
+  require_root
 
-if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
-  echo "Skipping, already installed"
-  exit 0
-fi
+  if [[ -d "/usr/local/bin/${TOOL_NAME}" ]]; then
+    echo "Skipping, already installed"
+    exit 0
+  fi
 
-groupadd -g 999 docker
-usermod -aG docker "${USER_NAME}"
+  groupadd -g 999 docker
+  usermod -aG docker "${USER_NAME}"
 
-curl -sSL "https://download.docker.com/linux/static/stable/x86_64/docker-${TOOL_VERSION}.tgz" -o docker.tgz
-tar xzvf docker.tgz --strip 1 -C /usr/local/bin docker/docker
-rm docker.tgz
+  curl -sSL "https://download.docker.com/linux/static/stable/x86_64/docker-${TOOL_VERSION}.tgz" -o docker.tgz
+  tar xzvf docker.tgz --strip 1 -C /usr/local/bin docker/docker
+  rm docker.tgz
 
-docker --version
+  docker --version
+}
+

@@ -1,26 +1,30 @@
 #!/bin/bash
 
-set -e
+function legacy_tool_install () {
 
-check_command node
+  set -e
 
-tool_path=$(find_versioned_tool_path)
+  check_command node
 
-if [[ -z "${tool_path}" ]]; then
-  INSTALL_DIR=$(get_install_dir)
-  base_path=${INSTALL_DIR}/${TOOL_NAME}
-  tool_path=${base_path}/${TOOL_VERSION}
+  tool_path=$(find_versioned_tool_path)
 
-  mkdir -p "${tool_path}"
+  if [[ -z "${tool_path}" ]]; then
+    INSTALL_DIR=$(get_install_dir)
+    base_path=${INSTALL_DIR}/${TOOL_NAME}
+    tool_path=${base_path}/${TOOL_VERSION}
 
-  NPM_CONFIG_PREFIX=$tool_path npm install --cache /tmp/empty-cache -g "${TOOL_NAME}@${TOOL_VERSION}"
+    mkdir -p "${tool_path}"
 
-  # Clean download cache
-  NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
-  # Clean node-gyp cache
-  rm -rf "$HOME/.cache" /tmp/empty-cache
-fi
+    NPM_CONFIG_PREFIX=$tool_path npm install --cache /tmp/empty-cache -g "${TOOL_NAME}@${TOOL_VERSION}"
 
-link_wrapper "${TOOL_NAME}" "$tool_path/bin"
+    # Clean download cache
+    NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
+    # Clean node-gyp cache
+    rm -rf "$HOME/.cache" /tmp/empty-cache
+  fi
 
-pnpm --version
+  link_wrapper "${TOOL_NAME}" "$tool_path/bin"
+
+  pnpm --version
+
+}

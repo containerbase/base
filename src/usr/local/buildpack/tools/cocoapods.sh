@@ -1,13 +1,15 @@
 #!/bin/bash
 
-set -e
+function legacy_tool_install () {
+  set -e
 
-check_command ruby
+  check_command ruby
 
-# shellcheck source=/dev/null
-. /usr/local/buildpack/utils/ruby.sh
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/utils/ruby.sh
 
-gem_install
-gem_shell_wrapper pod
+  gem_install
+  gem_shell_wrapper pod
 
-pod --version --allow-root
+  pod --version --allow-root
+}

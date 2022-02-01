@@ -20,10 +20,36 @@ if [[ $(ignore_tool) -eq 1 ]]; then
   exit 0;
 fi
 
-
-echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+# shellcheck source=/dev/null
+. /usr/local/buildpack/utils/defaults.sh
 # shellcheck source=/dev/null
 . "$TOOL"
+
+if [ -n "${LEGACY}" ]; then
+  # If this is a legacy tool, we will call the legacy method
+  echo "installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+  legacy_tool_install
+else
+  # It is not a legacy tool, so call the new methods
+  if ! check_tool_installed; then
+    echo "installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+    check_tool_requirements
+    install_tool
+  else
+    echo "tool ${TOOL_NAME} v${TOOL_VERSION} is already installed"
+  fi
+
+  if [[ "${TOOL_VERSION}" != "$(get_tool_version)" ]]; then
+    # link the tool
+    echo "linking tool ${TOOL_NAME} v${TOOL_VERSION}"
+    link_tool
+  else
+      echo "tool ${TOOL_NAME} v${TOOL_VERSION} is already linked"
+  fi
+
+  # write the version of the tool
+  set_tool_version
+fi
 
 # cleanup
 if [[ $EUID -eq 0 ]]; then

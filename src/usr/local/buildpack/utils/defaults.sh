@@ -5,6 +5,11 @@
 # This defaults are loaded before any tool file so not overwriting the function will
 # result in the install process being aborted
 
+# Is used install the tool with the legacy way by just executing the one big function
+function legacy_tool_install () {
+  exit 0
+}
+
 # Is used to check if all requirements are met to install the tool
 function check_tool_requirements () {
   echo "'check_tool_requirements' not defined for tool ${TOOL_NAME}"
@@ -32,5 +37,5 @@ function link_tool () {
 # Installs needed packages to make the tool runtime installable
 function prepare_tool() {
   echo "'prepare_tool' not defined for tool ${TOOL_NAME}"
-  exit 1
+  exit 0
 }
