@@ -17,6 +17,7 @@
     "@semantic-release/exec": "6.0.3",
     "@types/node": "16.11.21",
     "@types/shelljs": "0.8.11",
+    "bats": "^1.5.0",
     "bats-assert": "https://github.com/ztombol/bats-assert",
     "bats-support": "https://github.com/ztombol/bats-support",
     "commander": "8.3.0",
