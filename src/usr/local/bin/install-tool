@@ -9,21 +9,46 @@ require_distro
 require_user
 require_tool "$@"
 
-TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
-if [[ ! -f "$TOOL" ]]; then
-  echo "No tool defined - skipping: ${TOOL_NAME}" >&2
-  exit 1;
-fi
-
 if [[ $(ignore_tool) -eq 1 ]]; then
   echo "Tool ignored - skipping: ${TOOL_NAME}"
   exit 0;
 fi
 
+TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
+V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
 
-echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
-# shellcheck source=/dev/null
-. "$TOOL"
+if [[ -f "$V2_TOOL" ]]; then
+  # It is not a legacy tool, so call the new methods
+
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/utils/defaults.sh
+  # shellcheck source=/dev/null
+  . "$TOOL"
+
+  if ! check_tool_installed; then
+    echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+    check_tool_requirements
+    install_tool
+  else
+    echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already installed"
+  fi
+
+  if [[ "${TOOL_VERSION}" != "$(get_tool_version)" ]]; then
+    # link the tool
+    echo "Linking tool ${TOOL_NAME} v${TOOL_VERSION}"
+    link_tool
+  else
+      echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already linked"
+  fi
+
+elif [[ -f "$TOOL" ]]; then
+    echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
+  # shellcheck source=/dev/null
+  . "$TOOL"
+else
+  echo "No tool defined - skipping: ${TOOL_NAME}" >&2
+  exit 1;
+fi
 
 # cleanup
 if [[ $EUID -eq 0 ]]; then
