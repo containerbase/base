@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# shellcheck source=/dev/null
 . "$(dirname "$0")/_/husky.sh"
 
 yarn pretty-quick --staged
@@ -11,5 +13,6 @@ fi
 
 changed_files=$(git diff --diff-filter=M --cached --name-only | { grep -E '^src' || true; })
 if [ ${#changed_files} -gt 0 ]; then
-    shellcheck ${changed_files[@]}
+    # shellcheck disable=SC2086
+    shellcheck ${changed_files}
 fi
