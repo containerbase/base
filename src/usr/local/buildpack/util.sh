@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# get path location
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
 # source the helper files
 # shellcheck source=/dev/null
-. utils/environment.sh
+. "${DIR}/utils/environment.sh"
 # shellcheck source=/dev/null
-. utils/filesystem.sh
+. "${DIR}/utils/filesystem.sh"
 # shellcheck source=/dev/null
-. utils/linking.sh
+. "${DIR}/utils/linking.sh"
 
 export ENV_FILE=/usr/local/etc/env
 
