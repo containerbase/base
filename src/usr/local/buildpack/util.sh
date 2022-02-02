@@ -2,7 +2,7 @@
 
 # source the helper files
 # shellcheck source=/dev/null
-. utils/enironment.sh
+. utils/environment.sh
 # shellcheck source=/dev/null
 . utils/filesystem.sh
 # shellcheck source=/dev/null
