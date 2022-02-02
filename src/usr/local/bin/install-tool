@@ -40,9 +40,8 @@ if [[ -f "$V2_TOOL" ]]; then
   else
       echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already linked"
   fi
-
 elif [[ -f "$TOOL" ]]; then
-    echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
+  echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
   # shellcheck source=/dev/null
   . "$TOOL"
 else
