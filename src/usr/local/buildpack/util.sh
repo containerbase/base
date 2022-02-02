@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# source the helper files
+# shellcheck source=/dev/null
+. utils/enironment.sh
+# shellcheck source=/dev/null
+. utils/filesystem.sh
+# shellcheck source=/dev/null
+. utils/linking.sh
+
 export ENV_FILE=/usr/local/etc/env
 
 check_debug() {
@@ -12,114 +20,9 @@ check_debug() {
 }
 check_debug
 
-function refreshenv () {
-  if [[ -r "$ENV_FILE" ]]; then
-    # shellcheck source=/dev/null
-    . $ENV_FILE
-  fi
-}
-
 if [[ -z "${BUILDPACK+x}" ]]; then
   refreshenv
 fi
-
-function export_env () {
-  export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $ENV_FILE
-}
-
-function export_path () {
-  export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $ENV_FILE
-}
-
-function reset_tool_env () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  if [[ -f "$install_dir/env.d/${TOOL_NAME}.sh" ]];then
-    rm "$install_dir/env.d/${TOOL_NAME}.sh"
-  fi
-}
-
-function find_tool_env () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-
-  echo "$install_dir/env.d/${TOOL_NAME}.sh"
-}
-
-function export_tool_env () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
-}
-
-function export_tool_path () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
-}
-
-
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
-function shell_wrapper () {
-  local install_dir
-  local FILE="${install_dir}/bin/${1}"
-  install_dir=$(get_install_dir)
-  check_command "$1"
-  cat > "$FILE" <<- EOM
-#!/bin/bash
-
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
-  . $ENV_FILE
-fi
-
-if [[ "\$(command -v ${1})" == "$FILE" ]]; then
-  echo Could not forward ${1}, probably wrong PATH variable. >&2
-  echo PATH=\$PATH
-  exit 1
-fi
-
-${1} "\$@"
-EOM
-  chmod +x "$FILE"
-}
-
-# use this for simple symlink to /usr/local/bin or /home/<user>/bin
-function link_wrapper () {
-  local install_dir
-  local TARGET
-  local SOURCE=$2
-  install_dir=$(get_install_dir)
-  TARGET="${install_dir}/bin/${1}"
-  if [[ -z "$SOURCE" ]]; then
-    SOURCE=$(command -v "${1}")
-  fi
-  if [[ -d "$SOURCE" ]]; then
-    SOURCE=$SOURCE/${1}
-  fi
-  check_command "$SOURCE"
-  ln -sf "$SOURCE" "$TARGET"
-}
-
 
 function check_version () {
   echo "Function 'check_version' is deprecated, use 'require_tool' instead." >&2
@@ -152,7 +55,6 @@ function check_semver () {
   export MINOR=${BASH_REMATCH[3]}
   export PATCH=${BASH_REMATCH[5]}
 }
-
 
 function apt_install () {
   echo "Installing apt packages: $*"
@@ -210,12 +112,6 @@ function require_user () {
   fi
 }
 
-function get_tool_version_env () {
-  local tool=${1//-/_}
-  tool=${tool^^}_VERSION
-  echo "${tool}"
-}
-
 function require_tool () {
   local tool=$1
 
@@ -246,37 +142,6 @@ function require_tool () {
   # compability fallback
   export "${tool_env}=${version}"
 }
-
-
-function get_install_dir () {
-  if [[ $EUID -eq 0 ]]; then
-    echo /usr/local
-  else
-    # shellcheck disable=SC2153
-    echo "${USER_HOME}"
-  fi
-}
-
-function find_tool_path () {
-  install_dir=$(get_install_dir)
-  if [[ -d "${install_dir}/${TOOL_NAME}" ]]; then
-    echo "${install_dir}/${TOOL_NAME}"
-  fi
-}
-
-function find_versioned_tool_path () {
-  tool_dir=$(find_tool_path)
-  if [[ -d "${tool_dir}/${TOOL_VERSION}" ]]; then
-    echo "${tool_dir}/${TOOL_VERSION}"
-  fi
-}
-
-function create_versioned_tool_path () {
-  install_dir=$(get_install_dir)
-  mkdir -p "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
-  echo "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
-}
-
 
 ignore_tool() {
     local tools=${IGNORED_TOOLS,,}
