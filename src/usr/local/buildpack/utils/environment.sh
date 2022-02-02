@@ -3,18 +3,18 @@
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
     # shellcheck source=/dev/null
-    . $ENV_FILE
+    . "$ENV_FILE"
   fi
 }
 
 function export_env () {
   export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $ENV_FILE
+  echo export "${1}=\${${1}-${2}}" >> "$ENV_FILE"
 }
 
 function export_path () {
   export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $ENV_FILE
+  echo export PATH="$1:\$PATH" >> "$ENV_FILE"
 }
 
 function reset_tool_env () {
