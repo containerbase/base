@@ -3,8 +3,8 @@
 # use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
 function shell_wrapper () {
   local install_dir
-  local FILE="${install_dir}/bin/${1}"
   install_dir=$(get_install_dir)
+  local FILE="${install_dir}/bin/${1}"
   check_command "$1"
   cat > "$FILE" <<- EOM
 #!/bin/bash
