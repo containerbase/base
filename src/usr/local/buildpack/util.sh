@@ -14,8 +14,6 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 # shellcheck source=/dev/null
 . "${DIR}/utils/feature.sh"
 
-export ENV_FILE=/usr/local/etc/env
-
 check_debug() {
   local bool="${BUILDPACK_DEBUG:-false}"
   # comparison is performed without regard to the case of alphabetic characters
