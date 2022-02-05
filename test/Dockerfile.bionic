@@ -37,7 +37,7 @@ RUN install-tool erlang 22.3.2
 RUN install-tool elixir 1.13.2
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.26.0
+RUN install-tool flux v0.26.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.17.6
@@ -65,7 +65,7 @@ RUN install-npm lerna 4.0.0
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.1.2
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.2.5
+RUN install-tool composer 2.2.6
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.1
