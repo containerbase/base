@@ -110,7 +110,7 @@ function require_root () {
 }
 
 function require_user () {
-  if [[ -z "${USER_NAME+x}" ]]; then
+  if [[ -z "${USER_NAME}" ]]; then
     echo "No USER_NAME defined - skipping: ${USER_NAME}" >&2
     exit 1;
   fi
@@ -119,7 +119,7 @@ function require_user () {
 function require_tool () {
   local tool=$1
 
-  if [[ -z "${1+x}" ]]; then
+  if [[ -z "${tool}" ]]; then
     echo "No tool defined - skipping: ${tool}" >&2
     exit 1;
   fi
@@ -130,7 +130,7 @@ function require_tool () {
   tool_env=$(get_tool_version_env "$tool")
   version=${2-${!tool_env}}
 
-  if [[ -z ${version+x} ]]; then
+  if [[ -z ${version} ]]; then
     echo "No version defined - aborting: ${version}" >&2
     exit 1
   fi
@@ -141,7 +141,7 @@ function require_tool () {
     version=${BASH_REMATCH[1]}
   fi
 
-  export "TOOL_NAME=${1}" "TOOL_VERSION=${version}"
+  export "TOOL_NAME=${tool}" "TOOL_VERSION=${version}"
 
   # compability fallback
   export "${tool_env}=${version}"

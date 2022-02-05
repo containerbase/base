@@ -20,11 +20,9 @@ teardown() {
   assert_output --partial "No tool defined"
   assert_failure
 
-  # TODO(Chumper): In my opinion this test should fail
   run require_tool foo
-  # assert_output --partial "No version defined"
-  # assert_failure
-  assert_success
+  assert_output --partial "No version defined"
+  assert_failure
 
   require_tool foo 1.2.3
   assert [ "${TOOL_NAME}" = "foo" ]
@@ -45,11 +43,9 @@ teardown() {
   assert_output --partial "No USER_NAME defined"
   assert_failure
 
-  # TODO(Chumper): In my opinion this test should fail
   USER_NAME= run require_user
-  # assert_output --partial "No USER_NAME defined"
-  # assert_failure
-  assert_success
+  assert_output --partial "No USER_NAME defined"
+  assert_failure
 
   USER_NAME=foo run require_user
   assert_success
@@ -88,6 +84,11 @@ teardown() {
   assert [ "${MAJOR}" = "1" ]
   assert [ "${MINOR}" = "2" ]
   assert [ "${PATCH}" = "4" ]
+
+  check_semver 11.0.14+9
+  assert [ "${MAJOR}" = "11" ]
+  assert [ "${MINOR}" = "0" ]
+  assert [ "${PATCH}" = "14" ]
 }
 
 @test "deprecated check_version function" {
@@ -109,7 +110,6 @@ teardown() {
   assert_failure
   assert_output --partial "No foo defined"
 
-  # TODO(Chumper): This command should fail in my opinion
   run check_command
   assert_failure
   assert_output --partial "No  defined"
@@ -136,7 +136,7 @@ teardown() {
 
 @test "ignore_tool" {
 
-  # TODO(Chumper): Should this succed?
+  # This is fine as the tool is normally checked before
   TOOL_NAME= \
   IGNORED_TOOLS= \
   run ignore_tool
