@@ -11,6 +11,8 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "${DIR}/utils/filesystem.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/linking.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/feature.sh"
 
 export ENV_FILE=/usr/local/etc/env
 
@@ -150,4 +152,18 @@ function require_tool () {
 ignore_tool() {
     local tools=${IGNORED_TOOLS,,}
     [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0
+}
+
+# Will check if the variable given with the name is set else will exit
+# when the second parameter is set it will make an empty check
+function check () {
+
+  if [ "${!1+SET}" != "SET" ] ; then
+    echo "param ${1} is not set"
+    exit 1
+  fi
+  if [ -n "${2}" ] && [ -z "${!1}" ]; then
+    echo "param ${1} is set but empty"
+    exit 1
+  fi
 }
