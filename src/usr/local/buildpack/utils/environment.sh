@@ -79,7 +79,7 @@ function setup_env_files () {
 export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}"
 
 # openshift override unknown user home
-if [ "$(is_root)" -ne 0 ]; then
+if [[ $EUID -ne 0 ]]; then
   export HOME="\${USER_HOME}"
 fi
 

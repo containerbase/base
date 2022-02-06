@@ -2,6 +2,8 @@
 
 set -e
 
+# USER_NAME and USER_ID need to be defined as the
+# decision which paths are used are based on this information
 if [[ -z "${USER_NAME}" ]]; then
   export USER_NAME=user
   echo "No USER_NAME defined - using: ${USER_NAME}"
@@ -12,13 +14,13 @@ if [[ -z "${USER_ID}" ]]; then
   echo "No USER_ID defined - using: ${USER_ID}"
 fi
 
+# shellcheck source=/dev/null
+. /usr/local/buildpack/util.sh
+
 if [[ "${BASH_ENV}" != "${ENV_FILE}" ]]; then
   echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
   exit 1;
 fi
-
-# shellcheck source=/dev/null
-. /usr/local/buildpack/util.sh
 
 # no duplicate installs
 if [[ -n "${BUILDPACK+x}" ]]; then
