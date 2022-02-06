@@ -46,6 +46,25 @@ jobs:
           pattern: '*.sh'
           check_all_files_with_shebangs: 'true'
 
+  bats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: bats
+        run: yarn bats
+
   distro:
     runs-on: ubuntu-latest
     timeout-minutes: 15
