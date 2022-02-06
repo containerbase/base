@@ -82,15 +82,15 @@ if [ "\${EUID}" != 0 ]; then
 fi
 
 if [ -d "${install_dir}/env.d" ]; then
-  for i in "${install_dir}/env.d/"*.sh; do
+  for i in "${install_dir}/env.d"/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
   done
   unset i
 fi
-if [ -d "${USER_HOME}"/env.d ]; then
-  for i in "${USER_HOME}"/env.d/*.sh; do
+if [ -d "${USER_HOME}/env.d" ]; then
+  for i in "${USER_HOME}/env.d"/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
