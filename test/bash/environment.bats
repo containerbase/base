@@ -2,18 +2,21 @@ setup() {
   load '../../node_modules/bats-support/load'
   load '../../node_modules/bats-assert/load'
 
-  TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
+    TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
+    TEST_ROOT_DIR=$(mktemp -u)
 
-  # Not used yet, will be used after the refactoring
-  TEST_ROOT_DIR=$(mktemp -u)
+    load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
 
-  # Not used yet
-  USER_NAME=user
-  USER_ID=1000
-  # Not needed in the future
-  USER_HOME=${TEST_ROOT_DIR}
+    # load test overwrites
+    load "$TEST_DIR/util.sh"
 
-  load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
+    # set directories for test
+    ROOT_DIR="${TEST_ROOT_DIR}/root"
+    USER_HOME="${TEST_ROOT_DIR}/user"
+    ENV_FILE="${TEST_ROOT_DIR}/env"
+
+    # set default test user
+    TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -25,12 +28,10 @@ teardown() {
   local TOOL_NAME=foo
   local TOOL_VERSION=1.2.3
 
-  mkdir -p "${TEST_ROOT_DIR}/env.d"
+  mkdir -p "${TEST_ROOT_DIR}/user/env.d"
 
-  # TODO(Chumper): This should fail
   TOOL_NAME= run export_tool_env
-  # assert_failure
-  assert_success
+  assert_failure
 
   export_tool_env FOO_HOME 123
   assert [ "${FOO_HOME}" = "123" ]
@@ -50,12 +51,10 @@ teardown() {
   local TOOL_NAME=foo
   local TOOL_VERSION=1.2.3
 
-  mkdir -p "${TEST_ROOT_DIR}/env.d"
+  mkdir -p "${TEST_ROOT_DIR}/user/env.d"
 
-  # TODO(Chumper): This should fail
   TOOL_NAME= run export_tool_env
-  # assert_failure
-  assert_success
+  assert_failure
 
   export_tool_env FOO_HOME 123
   assert [ "${FOO_HOME}" = "123" ]
@@ -95,7 +94,7 @@ teardown() {
   local TOOL_NAME=foo
   local TOOL_VERSION=1.2.3
 
-  mkdir -p "${TEST_ROOT_DIR}/env.d"
+  mkdir -p "${TEST_ROOT_DIR}/user/env.d"
 
   local old_path=$PATH
 

@@ -3,13 +3,21 @@ setup() {
   load '../../node_modules/bats-support/load'
   load '../../node_modules/bats-assert/load'
 
-  TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
+    TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
+    TEST_ROOT_DIR=$(mktemp -u)
 
-  # Not used yet, but will be later
-  TEST_ROOT_DIR=$(mktemp -u)
-  USER_HOME=$TEST_ROOT_DIR
+    load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
 
-  load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
+    # load test overwrites
+    load "$TEST_DIR/util.sh"
+
+    # set directories for test
+    ROOT_DIR="${TEST_ROOT_DIR}/root"
+    USER_HOME="${TEST_ROOT_DIR}/user"
+    ENV_FILE="${TEST_ROOT_DIR}/env"
+
+    # set default test user
+    TEST_ROOT_USER=1000
 }
 
 teardown() {

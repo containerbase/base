@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Constants
-ROOT_DIR=/usr/local
-
 function get_install_dir () {
   if [ "$(is_root)" -eq 0 ]; then
     echo "${ROOT_DIR}"

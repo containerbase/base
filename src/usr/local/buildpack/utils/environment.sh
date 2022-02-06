@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export ENV_FILE=/usr/local/etc/env
-
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
     # shellcheck source=/dev/null
@@ -45,7 +43,7 @@ function find_tool_env () {
 function export_tool_env () {
   local install_dir
   install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
+  if [[ -z "${TOOL_NAME}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi
@@ -72,24 +70,27 @@ function get_tool_version_env () {
 
 function setup_env_files () {
   # env helper, loads tool specific env
+  local install_dir
+  install_dir=$(get_install_dir)
+
   cat >> "$ENV_FILE" <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="/home/${USER_NAME}"
+export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}"
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then
   export HOME="\${USER_HOME}"
 fi
 
-if [ -d /usr/local/env.d ]; then
-  for i in /usr/local/env.d/*.sh; do
+if [ -d "${install_dir}/env.d" ]; then
+  for i in "${install_dir}/env.d"/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
   done
   unset i
 fi
-if [ -d /home/"${USER_NAME}"/env.d ]; then
-  for i in /home/"${USER_NAME}"/env.d/*.sh; do
+if [ -d "${USER_HOME}/env.d" ]; then
+  for i in "${USER_HOME}/env.d"/*.sh; do
     if [ -r \$i ]; then
       . \$i
     fi
