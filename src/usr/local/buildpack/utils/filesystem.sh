@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# Constants
+ROOT_DIR=/usr/local
+
 function get_install_dir () {
-  if [[ $EUID -eq 0 ]]; then
-    echo /usr/local
+  if [ "$(is_root)" -eq 0 ]; then
+    echo "${ROOT_DIR}"
   else
     # shellcheck disable=SC2153
     echo "${USER_HOME}"

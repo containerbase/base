@@ -34,7 +34,7 @@ function reset_tool_env () {
 function find_tool_env () {
   local install_dir
   install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
+  if [[ -z "${TOOL_NAME}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi

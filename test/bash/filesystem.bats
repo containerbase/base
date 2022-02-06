@@ -4,9 +4,18 @@ setup() {
 
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
-    USER_HOME=$TEST_ROOT_DIR
 
     load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
+
+    # load test overwrites
+    load "$TEST_DIR/util.sh"
+
+    # set directories for test
+    ROOT_DIR="${TEST_ROOT_DIR}/root"
+    USER_HOME="${TEST_ROOT_DIR}/user"
+
+    # set default test user
+    TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -14,75 +23,92 @@ teardown() {
 }
 
 @test "gets the default install dir" {
-    unset TEST_ROOT_DIR
+    TEST_ROOT_USER=1000 \
     run get_install_dir
+    assert_output "${TEST_ROOT_DIR}/user"
 
-    if [[ $EUID -eq 0 ]]; then
-        assert_output "/opt/buildpack"
-    else
-        assert_output "${USER_HOME}"
-    fi
+    TEST_ROOT_USER=0 \
+    run get_install_dir
+    assert_output "${TEST_ROOT_DIR}/root"
 }
 
 @test "can create a versioned tool path as user" {
-    local install_dir=$(get_install_dir)
+    local TOOL_NAME=foo
+    local TOOL_VERSION=1.2.3
+
+    run create_versioned_tool_path
+
+    assert_output "${TEST_ROOT_DIR}/user/foo/1.2.3"
+    assert [ -d "${TEST_ROOT_DIR}/user/foo/1.2.3" ]
+}
+
+@test "can create a versioned tool path as root" {
+    local TEST_ROOT_USER=0
 
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 
-    local TEST_ROOT_USER=1000
-
-    run setup_directories
     run create_versioned_tool_path
 
-    assert_output "${install_dir}/foo/1.2.3"
-    assert [ -d "${install_dir}/foo/1.2.3" ]
+    assert_output "${TEST_ROOT_DIR}/root/foo/1.2.3"
+    assert [ -d "${TEST_ROOT_DIR}/root/foo/1.2.3" ]
 }
 
 @test "finds the versioned tool path" {
-    local install_dir=$(get_install_dir)
-
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 
     run find_versioned_tool_path
     assert_output ""
 
+    # user
     run create_versioned_tool_path
     run find_versioned_tool_path
-    assert_output "${install_dir}/foo/1.2.3"
+    assert_output "${TEST_ROOT_DIR}/user/foo/1.2.3"
+
+    # root
+    local TEST_ROOT_USER=0
+    run create_versioned_tool_path
+    run find_versioned_tool_path
+    assert_output "${TEST_ROOT_DIR}/root/foo/1.2.3"
+
 }
 
 @test "finds the tool path" {
-    local install_dir=$(get_install_dir)
-
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 
-    run setup_directories
     run find_tool_path
     assert_success
     assert_output ""
 
-    mkdir -p "${install_dir}/foo"
+    # user
+    mkdir -p "${TEST_ROOT_DIR}/user/foo"
     run find_tool_path
     assert_success
-    assert_output "${install_dir}/foo"
+    assert_output "${TEST_ROOT_DIR}/user/foo"
+
+    # root
+    local TEST_ROOT_USER=0
+    mkdir -p "${TEST_ROOT_DIR}/root/foo"
+    run find_tool_path
+    assert_success
+    assert_output "${TEST_ROOT_DIR}/root/foo"
 }
 
 @test "finds the tool env path" {
-    local install_dir=$(get_install_dir)
-
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 
-    run setup_directories
-
+    # user
     run find_tool_env
-    assert_output "${install_dir}/env.d/foo.sh"
+    assert_output "${TEST_ROOT_DIR}/user/env.d/foo.sh"
 
-    # TODO(Chumper): This should fail
+    # root
+    local TEST_ROOT_USER=0
+    run find_tool_env
+    assert_output "${TEST_ROOT_DIR}/root/env.d/foo.sh"
+
     TOOL_NAME= run find_tool_env
-    #   assert_failure
-    assert_success
+    assert_failure
 }
