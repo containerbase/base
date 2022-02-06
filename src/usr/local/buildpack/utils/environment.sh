@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export ENV_FILE=/usr/local/etc/env
-
 function refreshenv () {
   if [[ -r "$ENV_FILE" ]]; then
     # shellcheck source=/dev/null

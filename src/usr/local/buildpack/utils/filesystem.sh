@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Constants
-ROOT_DIR=/usr/local
-# shellcheck disable=SC2153
-USER_HOME="/home/${USER_NAME}"
-
 function get_install_dir () {
   if [ "$(is_root)" -eq 0 ]; then
     echo "${ROOT_DIR}"
