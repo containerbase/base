@@ -149,3 +149,12 @@ ignore_tool() {
     local tools=${IGNORED_TOOLS,,}
     [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0
 }
+
+# Checks if the current caller is root or not
+function is_root () {
+  if [[ $EUID -ne 0 ]]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
