@@ -65,10 +65,10 @@ function export_tool_path () {
 
   if [ "${add_to_end}" = true ]; then
     export PATH="$PATH:$additional_path"
-    echo export PATH="\$PATH:$additional_path" >> "${install_dir}/env.d/${TOOL_NAME}".sh
+    echo export PATH="\$PATH:$additional_path" >> "${install_dir}/env.d/${TOOL_NAME}.sh"
   else
     export PATH="$additional_path:$PATH"
-    echo export PATH="$additional_path:\$PATH" >> "${install_dir}/env.d/${TOOL_NAME}".sh
+    echo export PATH="$additional_path:\$PATH" >> "${install_dir}/env.d/${TOOL_NAME}.sh"
   fi
 }
 
