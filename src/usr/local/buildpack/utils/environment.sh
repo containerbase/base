@@ -52,14 +52,24 @@ function export_tool_env () {
 }
 
 function export_tool_path () {
+  local additional_path=$1
+  local add_to_end=${2:false}
   local install_dir
+
   install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
+
+  if [[ -z "${TOOL_NAME}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi
-  export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
+
+  if [ "${add_to_end}" = true ]; then
+    export PATH="$PATH:$additional_path"
+    echo export PATH="\$PATH:$additional_path" >> "${install_dir}/env.d/${TOOL_NAME}".sh
+  else
+    export PATH="$additional_path:$PATH"
+    echo export PATH="$additional_path:\$PATH" >> "${install_dir}/env.d/${TOOL_NAME}".sh
+  fi
 }
 
 function get_tool_version_env () {
