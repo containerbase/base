@@ -9,6 +9,7 @@ export ENV_FILE=/usr/local/etc/env
 export ROOT_DIR=/usr/local
 # shellcheck disable=SC2153
 export USER_HOME="/home/${USER_NAME}"
+export BASH_RC=/etc/bash.bashrc
 
 # source the helper files
 # shellcheck source=/dev/null

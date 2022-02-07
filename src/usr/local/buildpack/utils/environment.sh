@@ -99,7 +99,7 @@ if [ -d "${USER_HOME}/env.d" ]; then
 fi
 EOM
 
-  cat >> /etc/bash.bashrc <<- EOM
+  cat >> "${BASH_RC}" <<- EOM
 if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
   . $ENV_FILE
 fi
