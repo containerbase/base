@@ -165,3 +165,17 @@ function is_root () {
     echo 0
   fi
 }
+
+# Will check if the variable given with the name is set else will exit
+# when the second parameter is set it will make an empty check
+function check () {
+
+  if [ "${!1+SET}" != "SET" ] ; then
+    echo "param ${1} is not set"
+    exit 1
+  fi
+  if [ -n "${2}" ] && [ -z "${!1}" ]; then
+    echo "param ${1} is set but empty"
+    exit 1
+  fi
+}

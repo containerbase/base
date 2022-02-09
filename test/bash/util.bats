@@ -157,3 +157,27 @@ teardown() {
   run ignore_tool
   assert_output "1"
 }
+
+@test "check" {
+  foo=1
+  run check "foo"
+  assert_success
+
+  run check "bar"
+  assert_failure
+  assert_output --partial "not set"
+
+  bar=
+  run check "bar"
+  assert_success
+
+  run check "bar" true
+  assert_failure
+  assert_output --partial "empty"
+
+  run check ""
+  assert_failure
+
+  run check
+  assert_failure
+}
