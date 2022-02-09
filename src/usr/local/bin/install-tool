@@ -23,7 +23,7 @@ if [[ -f "$V2_TOOL" ]]; then
   # shellcheck source=/dev/null
   . /usr/local/buildpack/utils/defaults.sh
   # shellcheck source=/dev/null
-  . "$TOOL"
+  . "$V2_TOOL"
 
   if ! check_tool_installed; then
     echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
@@ -33,13 +33,9 @@ if [[ -f "$V2_TOOL" ]]; then
     echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already installed"
   fi
 
-  if [[ "${TOOL_VERSION}" != "$(get_tool_version)" ]]; then
-    # link the tool
-    echo "Linking tool ${TOOL_NAME} v${TOOL_VERSION}"
-    link_tool
-  else
-      echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already linked"
-  fi
+  # always link the tool until we have versions available
+  echo "Linking tool ${TOOL_NAME} v${TOOL_VERSION}"
+  link_tool
 elif [[ -f "$TOOL" ]]; then
   echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
   # shellcheck source=/dev/null
