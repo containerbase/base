@@ -20,6 +20,8 @@ export USER_UMASK=770
 . "${DIR}/utils/filesystem.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/linking.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/version.sh"
 
 check_debug() {
   local bool="${BUILDPACK_DEBUG:-false}"
