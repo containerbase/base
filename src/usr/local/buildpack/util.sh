@@ -4,16 +4,9 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-# CONSTANTS
-export ENV_FILE=/usr/local/etc/env
-export ROOT_DIR=/usr/local
-# shellcheck disable=SC2153
-export USER_HOME="/home/${USER_NAME}"
-export BASH_RC=/etc/bash.bashrc
-export ROOT_UMASK=750
-export USER_UMASK=770
-
 # source the helper files
+# shellcheck source=/dev/null
+. "${DIR}/utils/constants.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/environment.sh"
 # shellcheck source=/dev/null
