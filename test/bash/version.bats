@@ -26,7 +26,8 @@ teardown() {
 
 @test "set and get versions" {
 
-  setup_directories
+  run setup_directories
+  assert_success
 
   run set_tool_version
   assert_failure
@@ -80,6 +81,34 @@ teardown() {
   run get_tool_version
   assert_success
   assert_output "1.1.1"
+}
+
+@test "can set version with different umask" {
+  local version_path=$(get_version_path)
+
+  run setup_directories
+  assert_success
+
+  touch "${version_path}/foo"
+  chmod 777 "${version_path}/foo"
+
+  run set_tool_version foo 1.2.3
+  assert_success
+
+  run get_tool_version foo
+  assert_success
+  assert_output "1.2.3"
+
+  assert [ $(stat --format '%a' "${version_path}/foo") -eq 777 ]
+
+  run set_tool_version bar 1.2.4
+  assert_success
+
+  run get_tool_version bar
+  assert_success
+  assert_output "1.2.4"
+
+  assert [ $(stat --format '%a' "${version_path}/bar") -eq 660 ]
 }
 
 @test "get_tool_version_env" {

@@ -11,8 +11,10 @@ function set_tool_version () {
   local version_path
   version_path=$(get_version_path)
 
-  echo "${version}" > "${version_path}/${tool}"
-  chmod 770 "${version_path}/${tool}"
+  # set umask for subshell and enter version
+  # will only affect if we write the file initially
+  # umask 117 -> chmod 660
+  (umask 117 && echo "${version}" > "${version_path}/${tool}")
 }
 
 # Gets the version of the tool behind $TOOL_NAME or the first argument
