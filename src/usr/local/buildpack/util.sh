@@ -15,7 +15,8 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "${DIR}/utils/linking.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/cache.sh"
-
+# shellcheck source=/dev/null
+. "${DIR}/utils/version.sh"
 
 check_debug() {
   local bool="${BUILDPACK_DEBUG:-false}"
