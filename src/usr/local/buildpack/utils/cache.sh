@@ -9,7 +9,7 @@ function get_from_url () {
   check url true
 
   local name
-  name=${2:-$(basename ${url})}
+  name=${2:-$(basename "${url}")}
 
   if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${name}" ]; then
       # file in cache
@@ -17,7 +17,7 @@ function get_from_url () {
       echo "${BUILDPACK_CACHE_DIR}/${name}"
   else
     # cache disabled or not in cache
-    download_file $url $name
+    download_file "${url}" "${name}"
   fi
 }
 
@@ -29,7 +29,7 @@ function download_file () {
   check url true
 
   local name
-  name=${2:-$(basename ${url})}
+  name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-$(mktemp -u)}
   curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
@@ -68,11 +68,11 @@ function cleanup_cache () {
 # Will get the oldest file in the cache and returns the path to it
 function get_oldest_file () {
   check BUILDPACK_CACHE_DIR true
-  echo $(find ${BUILDPACK_CACHE_DIR} -type f -printf '%T+ %p\n' | sort | head -n 1 | awk '{ print $2 }')
+  find "${BUILDPACK_CACHE_DIR}" -type f -printf '%T+ %p\n' | sort | head -n 1 | awk '{ print $2 }'
 }
 
 # Get the current fill level for the cache dir in percent
 function get_cache_fill_level () {
   check BUILDPACK_CACHE_DIR true
-  echo $(df --output=pcent ${BUILDPACK_CACHE_DIR} | tr -dc '0-9')
+  df --output=pcent "${BUILDPACK_CACHE_DIR}" | tr -dc '0-9'
 }
