@@ -10,6 +10,8 @@ export ROOT_DIR=/usr/local
 # shellcheck disable=SC2153
 export USER_HOME="/home/${USER_NAME}"
 export BASH_RC=/etc/bash.bashrc
+export ROOT_UMASK=750
+export USER_UMASK=770
 
 # source the helper files
 # shellcheck source=/dev/null
@@ -163,5 +165,19 @@ function is_root () {
     echo 1
   else
     echo 0
+  fi
+}
+
+# Will check if the variable given with the name is set else will exit
+# when the second parameter is set it will make an empty check
+function check () {
+
+  if [ "${!1+SET}" != "SET" ] ; then
+    echo "param ${1} is not set"
+    exit 1
+  fi
+  if [ -n "${2}" ] && [ -z "${!1}" ]; then
+    echo "param ${1} is set but empty"
+    exit 1
   fi
 }
