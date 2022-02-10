@@ -17,4 +17,5 @@ export USER_UMASK=770
 export BUILDPACK_CACHE_DIR=
 # defines the max amount of filled space (in percent from 0-100) that is allowed
 # before the installation tries to free space by cleaning the cache folder
-export BUILDPACK_MAX_ALLOCATED_DISK=80
+# If empty, then cache cleanup is disabled
+export BUILDPACK_MAX_ALLOCATED_DISK=
