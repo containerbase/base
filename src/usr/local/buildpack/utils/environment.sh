@@ -72,12 +72,6 @@ function export_tool_path () {
   fi
 }
 
-function get_tool_version_env () {
-  local tool=${1//-/_}
-  tool=${tool^^}_VERSION
-  echo "${tool}"
-}
-
 function setup_env_files () {
   # env helper, loads tool specific env
   local install_dir
