@@ -47,5 +47,5 @@ fi
 
 # cleanup
 if [[ $EUID -eq 0 ]]; then
-  rm -rf /var/lib/apt/lists/* /tmp/*
+  rm -rf /var/lib/apt/lists/* "${TEMP_DIR:?}"/*
 fi

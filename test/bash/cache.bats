@@ -88,12 +88,12 @@ teardown() {
 
   # create cache dir
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  mkdir -p "${BUILDPACK_CACHE_DIR}/b"
 
   # create files
   touch "${BUILDPACK_CACHE_DIR}/c"
   sleep 0.01
-  touch "${BUILDPACK_CACHE_DIR}/b"
+  touch "${BUILDPACK_CACHE_DIR}/b/test"
   sleep 0.01
   touch "${BUILDPACK_CACHE_DIR}/a"
 
@@ -111,27 +111,27 @@ teardown() {
   run cleanup_cache
   assert_success
   assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b" ]
+  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
   assert [ -e "${BUILDPACK_CACHE_DIR}/c" ]
 
   run cleanup_cache true
   assert_success
   assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b" ]
+  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
   assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
 
   TEST_FILL_LEVEL=30 \
   run cleanup_cache
   assert_success
   assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b" ]
+  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
   assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
 
   TEST_FILL_LEVEL=90 \
   run cleanup_cache
   assert_success
   assert [ ! -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/b" ]
+  assert [ ! -e "${BUILDPACK_CACHE_DIR}/b/test" ]
   assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
 }
 
@@ -169,11 +169,11 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/file_example_JSON_1kb.json"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/file_example_JSON_1kb\.json"
 
   run get_from_url "${file}" test
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/test"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
 
   # overwrite donwload function to fail
   function download_file () {
@@ -182,11 +182,9 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert test '[[ $output == "${BUILDPACK_CACHE_DIR}/file_example_JSON_1kb.json" ]]'
-  assert test '[[ $stderr == "Found file in cache: ${BUILDPACK_CACHE_DIR}/file_example_JSON_1kb.json" ]]'
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/file_example_JSON_1kb\.json"
 
   run get_from_url "${file}" "test"
   assert_success
-  assert test '[[ $output == "${BUILDPACK_CACHE_DIR}/test" ]]'
-  assert test '[[ $stderr == "Found file in cache: ${BUILDPACK_CACHE_DIR}/test" ]]'
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
 }

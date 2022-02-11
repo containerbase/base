@@ -19,3 +19,6 @@ export BUILDPACK_CACHE_DIR=
 # before the installation tries to free space by cleaning the cache folder
 # If empty, then cache cleanup is disabled
 export BUILDPACK_MAX_ALLOCATED_DISK=
+# defines the temp directory that will be used when the cache is not active
+# it is used for all downloads and will be cleaned up after each install
+export TEMP_DIR=/tmp

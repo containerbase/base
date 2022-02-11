@@ -8,16 +8,21 @@ function get_from_url () {
   local url=${1}
   check url true
 
+  local checksum
+  checksum=$(echo "${url}" | sha1sum | awk '{print $1}')
+
   local name
   name=${2:-$(basename "${url}")}
 
-  if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${name}" ]; then
+  local filename="${checksum}/${name}"
+
+  if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
       # file in cache
-      echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${name}" >&2
-      echo "${BUILDPACK_CACHE_DIR}/${name}"
+      echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
+      echo "${BUILDPACK_CACHE_DIR}/${filename}"
   else
     # cache disabled or not in cache
-    download_file "${url}" "${name}"
+    download_file "${url}" "${filename}"
   fi
 }
 
@@ -31,7 +36,7 @@ function download_file () {
   local name
   name=${2:-$(basename "${url}")}
 
-  local temp_folder=${BUILDPACK_CACHE_DIR:-$(mktemp -u)}
+  local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
   curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
   echo "${temp_folder}/${name}"
 }
