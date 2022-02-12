@@ -7,10 +7,10 @@ setup() {
 
   load "$TEST_DIR/../../../src/usr/local/buildpack/util.sh"
 
-  # load v2 overrides
+  # load v2 overwrites
   load "$TEST_DIR/../../../src/usr/local/buildpack/utils/v2/overrides.sh"
 
-  # load test overrides
+  # load test overwrites
   load "$TEST_DIR/../util.sh"
 
   # set directories for test
@@ -24,7 +24,7 @@ teardown() {
     rm -rf "${TEST_ROOT_DIR}"
 }
 
-@test "override: test default functions" {
+@test "overwrite: test default functions" {
 
   run check_tool_requirements
   assert_failure

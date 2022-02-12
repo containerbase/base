@@ -24,7 +24,7 @@ teardown() {
     rm -rf "${TEST_ROOT_DIR}"
 }
 
-@test "override: gets the default install dir" {
+@test "overwrite: gets the default install dir" {
     TEST_ROOT_USER=1000 \
     run get_install_dir
     assert_output "${TEST_ROOT_DIR}/root"
@@ -34,7 +34,7 @@ teardown() {
     assert_output "${TEST_ROOT_DIR}/root"
 }
 
-@test "override: find_tool_path" {
+@test "overwrite: find_tool_path" {
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 
@@ -62,7 +62,7 @@ teardown() {
     assert_output "${TEST_ROOT_DIR}/root/tools/foo"
 }
 
-@test "override: can create a versioned tool path as root" {
+@test "overwrite: can create a versioned tool path as root" {
     local TEST_ROOT_USER=0
 
     local TOOL_NAME=foo
@@ -76,7 +76,7 @@ teardown() {
     assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 750 ]
 }
 
-@test "override: can create a versioned tool path as user" {
+@test "overwrite: can create a versioned tool path as user" {
     local TOOL_NAME=foo
     local TOOL_VERSION=1.2.3
 

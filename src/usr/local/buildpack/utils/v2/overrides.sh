@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# The overrides can only be sourced from a function,
-# so that the overrides are kept local
-
 # OVERWRITE:
 #
 # defines the root directory where tools will be installed
