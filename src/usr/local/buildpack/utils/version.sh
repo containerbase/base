@@ -26,7 +26,7 @@ function get_tool_version () {
 
   version_path=$(get_version_path)
 
-  cat "${version_path}/${tool}" 2>&-
+  cat "${version_path}/${tool}" 2>&- || true
 }
 
 # Gets the version env var for the given tool

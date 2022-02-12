@@ -29,6 +29,10 @@ teardown() {
   run setup_directories
   assert_success
 
+  run get_tool_version foo
+  assert_success
+  assert_output ""
+
   run set_tool_version
   assert_failure
 
