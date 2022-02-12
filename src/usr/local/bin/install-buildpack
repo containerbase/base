@@ -56,6 +56,17 @@ export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
 
+function prepare_v2_tools () {
+  # prepare in function to not overwrite env vars
+
+  # setup directories for v2 tools
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/utils/v2/overrides.sh
+
+  setup_directories
+  export_path "$(get_bin_path)"
+}
+prepare_v2_tools
 
 # upgrade base packages
 apt_upgrade
