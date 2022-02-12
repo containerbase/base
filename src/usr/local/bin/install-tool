@@ -18,24 +18,8 @@ TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
 V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
 
 if [[ -f "$V2_TOOL" ]]; then
-  # It is not a legacy tool, so call the new methods
-
-  # shellcheck source=/dev/null
-  . /usr/local/buildpack/utils/defaults.sh
-  # shellcheck source=/dev/null
-  . "$V2_TOOL"
-
-  if ! check_tool_installed; then
-    echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
-    check_tool_requirements
-    install_tool
-  else
-    echo "Tool ${TOOL_NAME} v${TOOL_VERSION} is already installed"
-  fi
-
-  # always link the tool until we have versions available
-  echo "Linking tool ${TOOL_NAME} v${TOOL_VERSION}"
-  link_tool
+  # install v2 tool
+  time install_v2_tool "${V2_TOOL}"
 elif [[ -f "$TOOL" ]]; then
   echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
   # shellcheck source=/dev/null
@@ -46,6 +30,6 @@ else
 fi
 
 # cleanup
-if [[ $EUID -eq 0 ]]; then
+if [[ $(is_root) -eq 0 ]]; then
   rm -rf /var/lib/apt/lists/* "${TEMP_DIR:?}"/*
 fi

@@ -56,7 +56,6 @@ export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
 
-
 # upgrade base packages
 apt_upgrade
 
@@ -78,6 +77,17 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
   echo "Found user certs, calling update-ca-certificates"
   update-ca-certificates
 fi
+
+# do this at the end as we are overwriting certain env vars and functions
+function prepare_v2_tools () {
+  # setup directories for v2 tools
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/utils/v2/overrides.sh
+
+  setup_directories
+  export_path "$(get_bin_path)"
+}
+prepare_v2_tools
 
 # cleanup
 rm -rf /var/lib/apt/lists/*
