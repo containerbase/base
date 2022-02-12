@@ -60,6 +60,8 @@ function cleanup_cache () {
     # fill level is greater then threshold and there is a file
     echo "Cache: ${fill_level}% - Cleaning up: ${oldest}"
     rm "${oldest}"
+    # remove empty folder
+    find "${BUILDPACK_CACHE_DIR}" -empty -type d -delete
 
     if [ "${single_file}" = "true" ]; then
       exit 0
