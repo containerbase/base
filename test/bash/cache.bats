@@ -86,6 +86,9 @@ teardown() {
     echo $TEST_FILL_LEVEL
   }
 
+  run cleanup_cache
+  assert_success
+
   # create cache dir
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${BUILDPACK_CACHE_DIR}/b"
@@ -100,12 +103,12 @@ teardown() {
   BUILDPACK_CACHE_DIR= \
   BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
-  assert_failure
+  assert_success
 
   BUILDPACK_CACHE_DIR= \
   BUILDPACK_CACHE_MAX_ALLOCATED_DISK=20 \
   run cleanup_cache
-  assert_failure
+  assert_success
 
   BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
