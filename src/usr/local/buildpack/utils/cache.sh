@@ -47,7 +47,11 @@ function download_file () {
 # If BUILDPACK_CACHE_MAX_ALLOCATED_DISK is not set then the cache will be cleaned
 function cleanup_cache () {
   local single_file=${1:false}
-  check BUILDPACK_CACHE_DIR true
+
+  if [ -z "${BUILDPACK_CACHE_DIR}" ]; then
+    # BUILD_CACHE_DIR is empty
+    exit 0
+  fi
 
   local max_fill_level=${BUILDPACK_CACHE_MAX_ALLOCATED_DISK:-100}
 
