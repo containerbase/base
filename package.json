@@ -30,7 +30,7 @@
     "shelljs": "0.8.5"
   },
   "scripts": {
-    "bats": "bats test/bash/tools",
+    "bats": "bats test/bash/ test/bash/v2 test/bash/tools",
     "build": "run-s release:prepare",
     "lint": "yarn prettier -c -u \"**/*.*\"",
     "lint-fix": "yarn prettier -w -u \"**/*.*\"",
