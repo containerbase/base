@@ -28,11 +28,29 @@ teardown() {
 
   run check_tool_requirements
   assert_failure
-  assert_output --partial "not defined"
+  assert_output --partial "Not a semver like version"
+
+  TOOL_VERSION=1.2.3
+  run check_tool_requirements
+  assert_success
 
   run check_tool_installed
   assert_failure
-  assert_output --partial "not defined"
+
+  TOOL_NAME=foo \
+  TOOL_VERSION=1.2.3
+  run check_tool_installed
+  assert_failure
+
+  TOOL_NAME=foo \
+  TOOL_VERSION=1.2.3
+  run create_versioned_tool_path
+  assert_success
+
+  TOOL_NAME=foo \
+  TOOL_VERSION=1.2.3
+  run check_tool_installed
+  assert_success
 
   run install_tool
   assert_failure
