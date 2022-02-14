@@ -41,7 +41,7 @@ teardown() {
     assert_output "${TEST_ROOT_DIR}/user/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/user/foo/1.2.3" ]
     assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/user/foo") -eq 775 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/user/foo/1.2.3") -eq 755 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/user/foo/1.2.3") -eq 775 ]
 }
 
 @test "can create a versioned tool path as root" {
@@ -54,7 +54,7 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/foo") -eq 755 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/foo") -eq 775 ]
     assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/foo/1.2.3") -eq 755 ]
 }
 
