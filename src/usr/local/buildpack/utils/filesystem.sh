@@ -25,8 +25,14 @@ function find_versioned_tool_path () {
 
 function create_versioned_tool_path () {
   install_dir=$(get_install_dir)
+
+  local umask=775
+  if [ "$(is_root)" -eq 0 ]; then
+    umask=755
+  fi
+
   # shellcheck disable=SC2174
-  mkdir -p -m 775 "${install_dir}/${TOOL_NAME}"
+  mkdir -p -m "${umask}" "${install_dir}/${TOOL_NAME}"
   mkdir -p "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
   echo "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
 }
