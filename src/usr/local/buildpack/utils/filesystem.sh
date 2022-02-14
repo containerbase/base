@@ -32,7 +32,7 @@ function create_versioned_tool_path () {
   fi
 
   # shellcheck disable=SC2174
-  mkdir -p -m 775 "${install_dir}/${TOOL_NAME}"
+  mkdir -p -m "${umask}" "${install_dir}/${TOOL_NAME}"
   # shellcheck disable=SC2174
   mkdir -p -m "${umask}" "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
   echo "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
