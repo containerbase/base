@@ -16,19 +16,22 @@ npm=$(command -v npm)
 if [[ -z "${tool_path}" ]]; then
   tool_path="$(create_versioned_tool_path)"
 
-  NPM_CONFIG_PREFIX=$tool_path $npm install --cache /tmp/empty-cache -g "npm@${TOOL_VERSION}"
+  temp_folder=$(mktemp -u)
+  mkdir -p "${temp_folder}"
+
+  NPM_CONFIG_PREFIX=$tool_path $npm install --cache "${temp_folder}" -g "npm@${TOOL_VERSION}"
 
 
   if [[ ${MAJOR} -lt 7 ]]; then
     # update to latest node-gyp to fully support python3
-    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- npm install --cache /tmp/empty-cache node-gyp@latest
-    rm -rf /tmp/empty-cache
+    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- npm install --cache "${temp_folder}" node-gyp@latest
+    rm -rf "${temp_folder}"
   fi
 
   # Clean download cache
   NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
   # Clean node-gyp cache
-  rm -rf "$HOME/.cache /tmp/empty-cache"
+  rm -rf "$HOME/.cache" "${temp_folder}"
 fi
 
 link_wrapper "${TOOL_NAME}" "$tool_path/bin"
