@@ -20,7 +20,7 @@ if [[ -z "${tool_path}" ]]; then
   # Clean download cache
   NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
   # Clean node-gyp cache
-  rm -rf "$HOME/.cache" "${temp_folder}" "${USER_HOME}/.npm/_cacache"
+  rm -rf "$HOME/.cache" "${temp_folder}"
 
   # patch yarn
   sed -i 's/ steps,/ steps.slice(0,1),/' "$tool_path/lib/node_modules/yarn/lib/cli.js"

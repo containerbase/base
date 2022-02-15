@@ -91,7 +91,7 @@ if [[ -z "${tool_path}" ]]; then
   if [[ ${MAJOR} -lt 15 ]]; then
     # update to latest node-gyp to fully support python3
     NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- "$npm" install --cache "${temp_folder}" node-gyp@latest
-    rm -rf "${temp_folder}" "${USER_HOME}/.npm/_cacache" "${USER_HOME}/.npm/_cacache"
+    rm -rf "${temp_folder}"
   fi
 
   # Clean download cache

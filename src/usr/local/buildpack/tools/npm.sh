@@ -31,7 +31,7 @@ if [[ -z "${tool_path}" ]]; then
   # Clean download cache
   NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
   # Clean node-gyp cache
-  rm -rf "$HOME/.cache" "${temp_folder}" "${USER_HOME}/.npm/_cacache"
+  rm -rf "$HOME/.cache" "${temp_folder}"
 fi
 
 link_wrapper "${TOOL_NAME}" "$tool_path/bin"
