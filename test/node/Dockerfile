@@ -79,6 +79,10 @@ RUN set -ex; \
   [ "$(command -v lerna)" = "/usr/local/bin/lerna" ] && echo "works" || exit 1; \
   lerna --version
 
+# openshift
+USER 1005
+RUN install-tool yarn 1.22.15
+
 #--------------------------------------
 # test: pnpm
 #--------------------------------------
@@ -159,6 +163,11 @@ RUN install-tool npm 7.24.2
 RUN node --version
 RUN npm --version
 RUN npm --version | grep '7.24.2'
+
+# openshift
+USER 1005
+
+RUN install-tool npm 7.24.1
 
 #--------------------------------------
 # test: npm (npm i -g npm)

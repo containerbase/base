@@ -14,11 +14,7 @@ tool_path=$(find_versioned_tool_path)
 npm=$(command -v npm)
 
 if [[ -z "${tool_path}" ]]; then
-  INSTALL_DIR=$(get_install_dir)
-  base_path=${INSTALL_DIR}/${TOOL_NAME}
-  tool_path=${base_path}/${TOOL_VERSION}
-
-  mkdir -p "${tool_path}"
+  tool_path="$(create_versioned_tool_path)"
 
   NPM_CONFIG_PREFIX=$tool_path $npm install --cache /tmp/empty-cache -g "npm@${TOOL_VERSION}"
 
