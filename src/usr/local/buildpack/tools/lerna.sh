@@ -12,6 +12,7 @@ if [[ -z "${tool_path}" ]]; then
   temp_folder=$(mktemp -u)
   mkdir -p "${temp_folder}"
 
+  npm cache clean --force
   NPM_CONFIG_PREFIX=$tool_path npm install --cache "${temp_folder}" -g "${TOOL_NAME}@${TOOL_VERSION}"
 
   # Clean download cache

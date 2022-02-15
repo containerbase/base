@@ -19,8 +19,8 @@ if [[ -z "${tool_path}" ]]; then
   temp_folder=$(mktemp -u)
   mkdir -p "${temp_folder}"
 
+  $npm cache clean --force
   NPM_CONFIG_PREFIX=$tool_path $npm install --cache "${temp_folder}" -g "npm@${TOOL_VERSION}"
-
 
   if [[ ${MAJOR} -lt 7 ]]; then
     # update to latest node-gyp to fully support python3
