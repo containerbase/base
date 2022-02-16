@@ -11,7 +11,6 @@ fi
 
 NODE_DISTRO=linux-x64
 tool_path=$(find_versioned_tool_path)
-INSTALL_DIR=$(get_install_dir)
 PREFIX="${USER_HOME}/.npm-global"
 
 
@@ -62,11 +61,12 @@ function prepare_user_config () {
 }
 
 if [[ -z "${tool_path}" ]]; then
-  base_path=${INSTALL_DIR}/${TOOL_NAME}
-  tool_path=${base_path}/${TOOL_VERSION}
+
+  tool_path="$(create_versioned_tool_path)"
   npm=${tool_path}/bin/npm
 
-  mkdir -p "$tool_path"
+  temp_folder=$(mktemp -u)
+  mkdir -p "${temp_folder}"
 
   file=/tmp/${TOOL_NAME}.tar.xz
 
@@ -90,8 +90,8 @@ if [[ -z "${tool_path}" ]]; then
 
   if [[ ${MAJOR} -lt 15 ]]; then
     # update to latest node-gyp to fully support python3
-    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- "$npm" install --cache /tmp/empty-cache node-gyp@latest
-    rm -rf /tmp/empty-cache
+    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- "$npm" install --cache "${temp_folder}" node-gyp@latest
+    rm -rf "${temp_folder}"
   fi
 
   # Clean download cache

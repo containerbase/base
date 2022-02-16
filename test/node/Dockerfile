@@ -14,6 +14,7 @@ RUN touch /.dummy
 USER 1000
 
 COPY --chown=1000:0 test test
+RUN chmod -R 775 /test
 
 WORKDIR /test
 
@@ -247,6 +248,63 @@ RUN npm --version | grep '6.14.15'
 RUN set -ex; cd a; npm install
 
 #--------------------------------------
+# test: openshift yarn
+#--------------------------------------
+FROM build as testj
+
+USER 1111:0
+
+ARG APT_HTTP_PROXY
+
+RUN npm install -g yarn
+
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  yarn --version;
+
+RUN set -ex; ls -lah /test/a; cd a; yarn
+
+SHELL [ "/bin/sh", "-c" ]
+
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.17
+
+# renovate: datasource=npm
+RUN install-tool lerna 4.0.0
+
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/home/user/bin/yarn" ] && echo "works" || exit 1; \
+  yarn --version
+
+RUN set -ex; \
+  [ "$(command -v lerna)" = "/home/user/bin/lerna" ] && echo "works" || exit 1; \
+  lerna --version
+
+RUN install-tool yarn 1.22.15
+
+#--------------------------------------
+# test: openshift npm (install-tool npm)
+#--------------------------------------
+FROM build as testk
+
+USER 1111:0
+
+SHELL [ "/bin/sh", "-c" ]
+
+# don't update!!
+RUN install-tool npm 8.0.0
+
+RUN npm --version
+RUN npm --version | grep '8.0.0'
+
+# don't update!!
+RUN install-tool npm 7.24.2
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep '7.24.2'
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -260,3 +318,5 @@ COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
+COPY --from=testj /.dummy /.dummy
+COPY --from=testk /.dummy /.dummy

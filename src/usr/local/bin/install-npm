@@ -18,13 +18,16 @@ case "$TOOL_NAME" in
     check_command npm
     unset NPM_CONFIG_PREFIX
 
+    temp_folder=$(mktemp -u)
+    mkdir -p "${temp_folder}"
+
     echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
-    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --cache /tmp/empty-cache
+    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --cache "${temp_folder}"
 
     # Clean download cache
     npm cache clean --force
     # Clean node-gyp cache
-    rm -rf /root/.cache /tmp/empty-cache
+    rm -rf /root/.cache "${temp_folder}"
     ;;
 esac
 
