@@ -32,7 +32,7 @@ if [[ -z "${tool_path}" ]]; then
   NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
   # Clean node-gyp cache
   rm -rf "$HOME/.cache" "${temp_folder}"
-  chmod -R 775 "${HOME}/.npm"
+  chmod -R 775 "${HOME}/.npm" || true
 fi
 
 link_wrapper "${TOOL_NAME}" "$tool_path/bin"

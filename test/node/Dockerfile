@@ -14,6 +14,7 @@ RUN touch /.dummy
 USER 1000
 
 COPY --chown=1000:0 test test
+RUN chmod -R 775 /test
 
 WORKDIR /test
 
