@@ -34,10 +34,10 @@ RUN install-tool dotnet 6.0.102
 #disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose
 RUN install-tool erlang 22.3.2
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.13.2
+RUN install-tool elixir 1.13.3
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.26.3
+RUN install-tool flux v0.27.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.17.7
@@ -93,10 +93,10 @@ RUN install-tool rust 1.58.1
 RUN install-tool swift 5.5.3
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.5
+RUN install-tool terraform 1.1.6
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.0.2
+RUN install-tool git-lfs v3.1.2
 RUN git lfs version
 
 # renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler
