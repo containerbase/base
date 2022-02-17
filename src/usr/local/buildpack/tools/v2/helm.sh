@@ -1,17 +1,5 @@
 #!/bin/bash
 
-function check_tool_requirements () {
-  check_semver "${TOOL_VERSION}"
-  if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-    echo Invalid version: "${TOOL_VERSION}"
-    exit 1
-  fi
-}
-
-function check_tool_installed () {
-  test -n "$(find_versioned_tool_path)"
-}
-
 function install_tool () {
   local versioned_tool_path
   versioned_tool_path=$(create_versioned_tool_path)
