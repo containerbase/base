@@ -93,7 +93,7 @@ RUN install-tool rust 1.58.1
 RUN install-tool swift 5.5.3
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.5
+RUN install-tool terraform 1.1.6
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.2
