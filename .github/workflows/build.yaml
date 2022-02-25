@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -84,7 +84,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -134,7 +134,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -175,7 +175,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
