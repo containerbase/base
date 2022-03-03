@@ -608,10 +608,10 @@ bats-support@0.3.0:
   resolved "https://registry.yarnpkg.com/bats-support/-/bats-support-0.3.0.tgz#a1f6b8878d2a51837911fdffa0750036f60701ef"
   integrity sha512-z+2WzXbI4OZgLnynydqH8GpI3+DcOtepO66PlK47SfEzTkiuV9hxn9eIQX+uLVFbt2Oqoc7Ky3TJ/N83lqD+cg==
 
-bats@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/bats/-/bats-1.5.0.tgz#683f522e89df7d8fc99bf3631d35501f35445166"
-  integrity sha512-83YgQw24Yi2c1ctB0Vd7WCsACUMSWuEtOboxQZyFQYfiv9hDMW7nk7bdloqGLg3vK5pOODCBGBQjhvRmHKsJuA==
+bats@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/bats/-/bats-1.6.0.tgz#7210bfcc3e4095b0189a02f189a213d06ac4d08c"
+  integrity sha512-DodA14LKCr49ZIVCgv5zWVo/ipySGHOgmJ3YzhDUBNg5k3GKwxhwxoDkErVTPHBgtmqmGswDxayfd161aINmcg==
 
 before-after-hook@^2.2.0:
   version "2.2.2"
