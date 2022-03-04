@@ -41,4 +41,8 @@ link_wrapper dotnet "$DOTNET_INSTALL_DIR"
 dotnet help > /dev/null
 su "$USER_NAME" -c 'dotnet help' > /dev/null
 
+# See https://github.com/NuGet/Home/issues/11607
+dotnet nuget list source > /dev/null
+su "$USER_NAME" -c 'dotnet nuget list source' > /dev/null
+
 dotnet --info
