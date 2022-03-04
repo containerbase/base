@@ -5,8 +5,8 @@ ARG APT_HTTP_PROXY
 
 # Erlang
 
-#disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose
-RUN install-tool erlang 22.3.2
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 22.3.4.24
 
 # Elixir
 
