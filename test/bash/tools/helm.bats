@@ -1,6 +1,4 @@
 setup_file () {
-  TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
-
   # set up the cache
   BUILDPACK_CACHE_DIR="$(mktemp -u)"
   mkdir -m 777 -p "${BUILDPACK_CACHE_DIR}"
@@ -10,7 +8,11 @@ setup() {
   load '../../../node_modules/bats-support/load'
   load '../../../node_modules/bats-assert/load'
 
+  TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
+
+  echo $TEST_DIR
+  echo $BATS_TEST_FILENAME
 
   load "$TEST_DIR/../../../src/usr/local/buildpack/util.sh"
 
@@ -22,6 +24,8 @@ setup() {
 
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
+  BIN_DIR="${TEST_ROOT_DIR}/bin"
+
   setup_directories
 
   # set default test user
