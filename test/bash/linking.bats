@@ -17,6 +17,8 @@ setup() {
     USER_HOME="${TEST_ROOT_DIR}/user"
     ENV_FILE="${TEST_ROOT_DIR}/env"
 
+    setup_directories
+
     # set default test user
     TEST_ROOT_USER=1000
 }
@@ -39,22 +41,22 @@ teardown() {
 
   run link_wrapper git
   assert_success
-  assert [ -f "${USER_HOME}/bin/git" ]
+  assert [ -f "${BIN_DIR}/git" ]
 
   echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin2/foobar"
   chmod +x "${USER_HOME}/bin2/foobar"
 
   run link_wrapper foobar "${USER_HOME}/bin2/foobar"
   assert_success
-  assert [ -f "${USER_HOME}/bin/foobar" ]
-  rm "${USER_HOME}/bin/foobar"
+  assert [ -f "${BIN_DIR}/foobar" ]
+  rm "${BIN_DIR}/foobar"
 
   echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin3/foobar"
   chmod +x "${USER_HOME}/bin3/foobar"
 
   run link_wrapper foobar "${USER_HOME}/bin3"
   assert_success
-  assert [ -f "${USER_HOME}/bin/foobar" ]
+  assert [ -f "${BIN_DIR}/foobar" ]
 
 }
 
