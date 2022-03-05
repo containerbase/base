@@ -42,7 +42,6 @@ RUN set -ex; \
 
 SHELL [ "/bin/sh", "-c" ]
 
-# renovate: datasource=github-releases lookupName=helm/helm
 RUN helm version | grep "${HELM_VERSION}"
 
 #--------------------------------------
@@ -50,7 +49,6 @@ RUN helm version | grep "${HELM_VERSION}"
 #--------------------------------------
 FROM build as testc
 
-# renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm "v${HELM_VERSION}"
 
 USER 1111
