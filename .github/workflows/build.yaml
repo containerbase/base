@@ -155,7 +155,7 @@ jobs:
         run: docker buildx bake --progress plain test
 
   release:
-    needs: [lint, lang, distro]
+    needs: [lint, bats, lang, distro]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
