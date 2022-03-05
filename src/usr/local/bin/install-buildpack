@@ -85,7 +85,6 @@ function prepare_v2_tools () {
   . /usr/local/buildpack/utils/v2/overrides.sh
 
   setup_directories
-  export_path "$(get_bin_path)"
 }
 prepare_v2_tools
 
