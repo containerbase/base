@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin or /home/<user>/bin
+# use this if custom env is required, creates a shell wrapper to /usr/local/bin
 function shell_wrapper () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  local FILE="${install_dir}/bin/${1}"
+  local FILE
+  FILE="$(get_bin_path)/bin/${1}"
   check_command "$1"
   cat > "$FILE" <<- EOM
 #!/bin/bash
@@ -24,12 +23,10 @@ EOM
   chmod +x "$FILE"
 }
 
-# use this for simple symlink to /usr/local/bin or /home/<user>/bin
+# use this for simple symlink to /usr/local/bin
 function link_wrapper () {
-  local install_dir
   local TARGET
   local SOURCE=$2
-  install_dir=$(get_install_dir)
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
