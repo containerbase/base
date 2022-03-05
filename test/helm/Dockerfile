@@ -3,6 +3,9 @@ FROM ${IMAGE} as build
 
 RUN touch /.dummy
 
+# renovate: datasource=github-releases lookupName=helm/helm
+ARG HELM_VERSION=3.8.0
+
 USER 1000
 
 #--------------------------------------
@@ -10,8 +13,7 @@ USER 1000
 #--------------------------------------
 FROM build as testa
 
-# renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.8.0
+RUN install-tool helm "v${HELM_VERSION}"
 
 RUN set -ex; helm version
 
@@ -21,7 +23,7 @@ RUN set -ex; \
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN helm version | grep '3.8.0'
+RUN helm version | grep "${HELM_VERSION}"
 
 #--------------------------------------
 # install helm as user
@@ -30,8 +32,7 @@ FROM build as testb
 
 USER 1111
 
-# renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.8.0
+RUN install-tool helm "v${HELM_VERSION}"
 
 RUN set -ex; helm version
 
@@ -42,7 +43,7 @@ RUN set -ex; \
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN helm version | grep '3.8.0'
+RUN helm version | grep "${HELM_VERSION}"
 
 #--------------------------------------
 # install helm as user when already installed
@@ -50,10 +51,11 @@ RUN helm version | grep '3.8.0'
 FROM build as testc
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.8.0
+RUN install-tool helm "v${HELM_VERSION}"
 
 USER 1111
 
+# do not update
 RUN install-tool helm v3.7.0
 
 RUN set -ex; helm version
@@ -64,7 +66,7 @@ RUN set -ex; \
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN helm version | grep '3.7.0'
+RUN helm version | grep "3.7.0"
 
 #--------------------------------------
 # final
