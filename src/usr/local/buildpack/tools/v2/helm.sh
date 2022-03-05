@@ -18,8 +18,3 @@ function link_tool () {
   link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   helm version
 }
-
-function prepare_tool() {
-  # prepare is not needed for the helm manager
-  exit 0
-}
