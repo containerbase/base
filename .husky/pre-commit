@@ -3,16 +3,4 @@
 # shellcheck source=/dev/null
 . "$(dirname "$0")/_/husky.sh"
 
-yarn pretty-quick --staged
-
-if ! command -v shellcheck > /dev/null 2>&1
-then
-    echo "shellcheck could not be found"
-    exit
-fi
-
-changed_files=$(git diff --diff-filter=M --cached --name-only | { grep -E '^src' || true; })
-if [ ${#changed_files} -gt 0 ]; then
-    # shellcheck disable=SC2086
-    shellcheck ${changed_files}
-fi
+yarn lint-staged
