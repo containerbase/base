@@ -30,7 +30,7 @@ function link_wrapper () {
   local TARGET
   local SOURCE=$2
   install_dir=$(get_install_dir)
-  TARGET="${install_dir}/bin/${1}"
+  TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
   fi
