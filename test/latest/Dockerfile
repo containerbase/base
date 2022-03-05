@@ -182,6 +182,15 @@ RUN install-tool node v16.14.0
 RUN install-tool docker v20.10.12
 
 #--------------------------------------
+# test: bin path has 775
+#--------------------------------------
+FROM build as testi
+
+ARG APT_HTTP_PROXY
+
+RUN test [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -194,3 +203,4 @@ COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
