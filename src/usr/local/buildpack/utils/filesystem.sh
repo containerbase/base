@@ -88,7 +88,7 @@ function create_folder () {
 
 # Gets the path to the bin folder
 function get_bin_path () {
-  echo "${ROOT_DIR}/bin"
+  echo "${BIN_DIR}"
 }
 
 # Gets the path to the versions folder

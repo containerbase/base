@@ -8,6 +8,12 @@ setup() {
   # Not used yet, but will be later
   TEST_ROOT_DIR=$(mktemp -u)
 
+  # set directories for test
+  ROOT_DIR="${TEST_ROOT_DIR}/root"
+  BIN_DIR="${TEST_ROOT_DIR}/bin"
+  USER_HOME="${TEST_ROOT_DIR}/user"
+  ENV_FILE="${TEST_ROOT_DIR}/env"
+
   load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
 }
 

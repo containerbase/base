@@ -188,7 +188,7 @@ FROM build as testi
 
 ARG APT_HTTP_PROXY
 
-RUN test [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
 #--------------------------------------
 # final

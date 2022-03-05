@@ -15,6 +15,7 @@ setup() {
 
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
+  BIN_DIR="${TEST_ROOT_DIR}/bin"
 
   # set default test user
   TEST_ROOT_USER=1000
