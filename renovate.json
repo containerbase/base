@@ -44,11 +44,6 @@
       "semanticCommitType": "test"
     },
     {
-      "description": "Override erlang version extraction",
-      "matchPackageNames": ["erlang"],
-      "extractVersion": "^OTP-(?<version>.+)$"
-    },
-    {
       "description": "Trigger fix release for ubuntu digest updates",
       "matchPackageNames": ["ubuntu"],
       "matchUpdateTypes": ["digest"],

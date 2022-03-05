@@ -123,7 +123,7 @@ RUN set -ex; cat /etc/hosts; \
 #--------------------------------------
 # test: terraform
 #--------------------------------------
-FROM ubuntu:20.04@sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93 as testg
+FROM ubuntu:focal as testg
 
 ARG USER_NAME=terraform
 ARG USER_ID=1005
@@ -152,7 +152,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.6
+RUN install-tool terraform 1.1.7
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -167,7 +167,7 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.27.2
+RUN install-tool flux v0.27.3
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.2
@@ -182,6 +182,15 @@ RUN install-tool node v16.14.0
 RUN install-tool docker v20.10.12
 
 #--------------------------------------
+# test: bin path has 775
+#--------------------------------------
+FROM build as testi
+
+ARG APT_HTTP_PROXY
+
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -194,3 +203,4 @@ COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy

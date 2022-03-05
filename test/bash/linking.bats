@@ -13,6 +13,7 @@ setup() {
 
     # set directories for test
     ROOT_DIR="${TEST_ROOT_DIR}/root"
+    BIN_DIR="${TEST_ROOT_DIR}/bin"
     USER_HOME="${TEST_ROOT_DIR}/user"
     ENV_FILE="${TEST_ROOT_DIR}/env"
 

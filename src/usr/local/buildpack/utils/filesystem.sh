@@ -44,13 +44,23 @@ function setup_directories () {
 
   mkdir -p "${install_dir}"
   # contains the installed tools
-  mkdir -m 770 "$(get_tools_path)"
+  # shellcheck disable=SC2174
+  mkdir -p -m 770 "$(get_tools_path)"
   # contains env for the installed tools
-  mkdir -m 770 "$(get_env_path)"
+  # shellcheck disable=SC2174
+  mkdir -p -m 770 "$(get_env_path)"
   # contains the latest version of the tools
-  mkdir -m 770 "$(get_version_path)"
+  # shellcheck disable=SC2174
+  mkdir -p -m 770 "$(get_version_path)"
   # contains the wrapper and symlinks for the tools
-  mkdir -m 770 "$(get_bin_path)"
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "$(get_bin_path)"
+
+  # if the bin path exists and does not have 775, force it
+  if [ "$(stat --format '%a' "$(get_bin_path)")" -ne 775 ]; then
+    echo "Forcing 775 on '$(get_bin_path)' ..."
+    chmod 775 "$(get_bin_path)"
+  fi
 }
 
 # Creates the given folder path with root and user umask depending on the caller
@@ -78,9 +88,7 @@ function create_folder () {
 
 # Gets the path to the bin folder
 function get_bin_path () {
-  local install_dir
-  install_dir=$(get_install_dir)
-  echo "${install_dir}/bin"
+  echo "${BIN_DIR}"
 }
 
 # Gets the path to the versions folder

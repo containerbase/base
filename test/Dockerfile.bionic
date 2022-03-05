@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:bionic@sha256:7bd7a9ca99f868bf69c4b6212f64f2af8e243f97ba13abb3e641e03a7ceb59e8 as base
+FROM ubuntu:bionic as base
 
 ARG APT_HTTP_PROXY
 
@@ -31,16 +31,16 @@ ARG APT_HTTP_PROXY
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.200
 
-#disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose
-RUN install-tool erlang 22.3.2
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 22.3.4.24
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.3
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.27.2
+RUN install-tool flux v0.27.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.17.7
+RUN install-tool golang 1.17.8
 
 # renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm v3.8.0
@@ -93,7 +93,7 @@ RUN install-tool rust 1.59.0
 RUN install-tool swift 5.5.3
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.6
+RUN install-tool terraform 1.1.7
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.2

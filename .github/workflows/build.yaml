@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
@@ -51,7 +51,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3.0.0
@@ -77,7 +77,7 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
 
       - name: init
         run: |
@@ -127,7 +127,7 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
 
       - name: init
         run: |
@@ -155,18 +155,18 @@ jobs:
         run: docker buildx bake --progress plain test
 
   release:
-    needs: [lint, lang, distro]
+    needs: [lint, bats, lang, distro]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@746bd4f47765985727ece50c9c4ae163e82e3182 # tag=v1.11.9
+        uses: renovatebot/internal-tools@23eb86b8295e2cebd5ede0ba1fdd72d72089eeda # tag=v1.12.1
         with:
           command: docker-config
 
       # full checkout for semantic-release
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
         with:
           fetch-depth: 0
 
