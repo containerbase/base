@@ -126,7 +126,7 @@ RUN set -ex; \
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.17
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 
@@ -167,6 +167,7 @@ RUN npm --version | grep '7.24.2'
 FROM build as testf
 
 USER root
+RUN echo $PATH && which npm
 # don't update!! need force to overwrite symlink
 RUN npm i -gf npm@8.0.0
 
@@ -175,7 +176,9 @@ RUN set -ex; npm --version | grep '8.0.0'
 
 USER 1000
 # don't update!!
+RUN echo $PATH && which npm
 RUN npm i -g npm@7.24.2
+RUN echo $PATH && which npm
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '7.24.2'
 
@@ -273,11 +276,11 @@ RUN install-tool yarn 1.22.17
 RUN install-tool lerna 4.0.0
 
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/user/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
 RUN set -ex; \
-  [ "$(command -v lerna)" = "/home/user/bin/lerna" ] && echo "works" || exit 1; \
+  [ "$(command -v lerna)" = "/usr/local/bin/lerna" ] && echo "works" || exit 1; \
   lerna --version
 
 RUN install-tool yarn 1.22.15
