@@ -54,7 +54,7 @@ function setup_directories () {
   mkdir -p -m 770 "$(get_version_path)"
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
-  mkdir -p -m 755 "$(get_bin_path)"
+  mkdir -p -m 775 "$(get_bin_path)"
 }
 
 # Creates the given folder path with root and user umask depending on the caller
