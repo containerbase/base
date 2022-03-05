@@ -123,7 +123,7 @@ RUN set -ex; cat /etc/hosts; \
 #--------------------------------------
 # test: terraform
 #--------------------------------------
-FROM ubuntu:20.04@sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93 as testg
+FROM ubuntu:focal as testg
 
 ARG USER_NAME=terraform
 ARG USER_ID=1005
