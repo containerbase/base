@@ -127,8 +127,8 @@ teardown() {
   assert [ $(stat --format '%a' "${install_dir}/tools") -eq 770 ]
   assert [ -d "${install_dir}/versions" ]
   assert [ $(stat --format '%a' "${install_dir}/versions") -eq 770 ]
-  assert [ -d "${install_dir}/bin" ]
-  assert [ $(stat --format '%a' "${install_dir}/bin") -eq 770 ]
+  assert [ -d "${ROOT_DIR}/bin" ]
+  assert [ $(stat --format '%a' "${ROOT_DIR}/bin") -eq 755 ]
   assert [ -d "${install_dir}/env.d" ]
   assert [ $(stat --format '%a' "${install_dir}/env.d") -eq 770 ]
 }
