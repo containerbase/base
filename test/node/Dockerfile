@@ -167,7 +167,6 @@ RUN npm --version | grep '7.24.2'
 FROM build as testf
 
 USER root
-RUN echo $PATH && which npm
 # don't update!! need force to overwrite symlink
 RUN npm i -gf npm@8.0.0
 
@@ -176,9 +175,7 @@ RUN set -ex; npm --version | grep '8.0.0'
 
 USER 1000
 # don't update!!
-RUN echo $PATH && which npm
 RUN npm i -g npm@7.24.2
-RUN echo $PATH && which npm
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '7.24.2'
 
