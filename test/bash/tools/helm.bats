@@ -58,7 +58,9 @@ teardown_file () {
 
 @test "helm: check_tool_installed" {
   local TOOL_NAME=helm
-  local TOOL_VERSION=3.8.0
+
+  # renovate: datasource=github-releases lookupName=helm/helm
+  TOOL_VERSION=3.8.0
 
   run check_tool_installed
   assert_failure
@@ -72,7 +74,9 @@ teardown_file () {
 
 @test "helm: install_tool" {
   local TOOL_NAME=helm
-  local TOOL_VERSION=3.8.0
+
+  # renovate: datasource=github-releases lookupName=helm/helm
+  TOOL_VERSION=3.8.0
 
   run install_tool
   assert_success
@@ -84,6 +88,7 @@ teardown_file () {
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
+  # don't update
   TOOL_VERSION=3.7.0
 
   run install_tool
@@ -99,8 +104,10 @@ teardown_file () {
 
 @test "helm: link_tool" {
   local TOOL_NAME=helm
-  local TOOL_VERSION=3.8.0
   local bin_path=$(get_bin_path)
+
+  # renovate: datasource=github-releases lookupName=helm/helm
+  TOOL_VERSION=3.8.0
 
   run install_tool
   assert_success
@@ -122,6 +129,7 @@ teardown_file () {
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
+  # don't update
   TOOL_VERSION=3.7.0
 
   run install_tool
