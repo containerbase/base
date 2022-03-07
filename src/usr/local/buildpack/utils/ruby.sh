@@ -25,15 +25,20 @@ function gem_shell_wrapper () {
 
   install_dir=$(get_install_dir)
   tool_file=${install_dir}/bin/${1:-$TOOL_NAME}
+
   # TODO: make generic
   ruby_version=$(cat /usr/local/ruby/.version)
+  if [[ ! "${ruby_version}" =~ ${SEMVER_REGEX} ]]; then
+    echo Ruby is not a semver like version - aborting: "${ruby_version}"
+    exit 1
+  fi
 
   tool_path=$(find_versioned_tool_path)
   check_command "${tool_path}/bin/${1:-$TOOL_NAME}"
   cat > "$tool_file" <<- EOM
 #!/bin/bash
 
-export GEM_PATH=${tool_path}:/usr/local/ruby/${ruby_version}/lib/ruby/gems/${ruby_version} PATH=${tool_path}/bin:\$PATH
+export GEM_PATH=${tool_path}:/usr/local/ruby/${ruby_version}/lib/ruby/gems/${BASH_REMATCH[1]}.${BASH_REMATCH[3]}.0 PATH=${tool_path}/bin:\$PATH
 
 ${1:-$TOOL_NAME} "\$@"
 EOM
