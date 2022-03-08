@@ -52,11 +52,11 @@ ARG APT_HTTP_PROXY
 RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.200
+RUN install-tool dotnet 6.0.201
 
 # Test duplicate install
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.200
+RUN install-tool dotnet 6.0.201
 
 USER 1000
 
