@@ -48,7 +48,7 @@ RUN install-tool helm v3.8.0
 # renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 17.0.2+8
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
-RUN install-tool gradle 7.4
+RUN install-tool gradle 7.4.1
 
 # renovate: datasource=github-releases lookupName=NixOS/nix
 RUN install-tool nix 2.3.10
