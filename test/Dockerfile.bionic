@@ -82,7 +82,7 @@ RUN install-tool poetry 1.1.13
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.1
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.3.8
+RUN install-tool bundler 2.3.9
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.11.2
 
