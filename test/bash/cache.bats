@@ -144,14 +144,14 @@ teardown() {
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${BUILDPACK_CACHE_DIR}"
 
-  local file="https://file-examples-com.github.io/uploads/2017/02/file_example_JSON_1kb.json"
+  local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/buildpack.tar.xz"
 
   run download_file
   assert_failure
 
   run download_file "${file}"
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/file_example_JSON_1kb.json"
+  assert_output "${BUILDPACK_CACHE_DIR}/buildpack.tar.xz"
 
   run download_file "${file}" "foobar"
   assert_success
@@ -161,7 +161,7 @@ teardown() {
   tmp_file=$(download_file "${file}")
   rm "${tmp_file}"
 
-  assert test "[[ "${tmp_file}" =~ "\/file_example_JSON_1kb.json" ]]"
+  assert test "[[ "${tmp_file}" =~ "\/buildpack.tar.xz" ]]"
 }
 
 @test "get_from_url" {
@@ -169,11 +169,11 @@ teardown() {
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${BUILDPACK_CACHE_DIR}"
 
-  local file="https://file-examples-com.github.io/uploads/2017/02/file_example_JSON_1kb.json"
+  local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/buildpack.tar.xz"
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/file_example_JSON_1kb\.json"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
@@ -186,7 +186,7 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/file_example_JSON_1kb\.json"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" "test"
   assert_success
