@@ -39,7 +39,7 @@ echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/buildp
 # Set up user and home directory with access to users in the root group (0)
 # https://docs.openshift.com/container-platform/3.6/creating_images/guidelines.html#use-uid
 groupadd --gid ${USER_ID} ${USER_NAME};
-useradd --uid ${USER_ID} --gid 0 --groups ${USER_NAME} --shell /bin/bash --create-home ${USER_NAME}
+useradd --uid ${USER_ID} --gid 0 --groups "${USER_NAME},root" --shell /bin/bash --create-home ${USER_NAME}
 
 # create env helper paths
 mkdir /usr/local/env.d
