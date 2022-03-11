@@ -9,7 +9,7 @@ ARG HELM_VERSION=3.8.0
 USER 1000
 
 #--------------------------------------
-# install helm as root
+# install helm as root, run as both
 #--------------------------------------
 FROM build as testa
 
@@ -22,6 +22,22 @@ RUN set -ex; \
   helm repo update
 
 SHELL [ "/bin/sh", "-c" ]
+
+RUN helm version | grep "${HELM_VERSION}"
+
+# openshift
+USER 1000:0
+
+RUN set -ex; \
+  helm repo update
+
+RUN helm version | grep "${HELM_VERSION}"
+
+# even more restricted
+USER 1000:1000
+
+RUN set -ex; \
+  helm repo update
 
 RUN helm version | grep "${HELM_VERSION}"
 
@@ -44,6 +60,14 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN helm version | grep "${HELM_VERSION}"
 
+# even more restricted
+USER 1000:1000
+
+RUN set -ex; \
+  helm repo update
+
+RUN helm version | grep "${HELM_VERSION}"
+
 #--------------------------------------
 # install helm as user when already installed
 #--------------------------------------
@@ -63,6 +87,14 @@ RUN set -ex; \
   helm repo update
 
 SHELL [ "/bin/sh", "-c" ]
+
+RUN helm version | grep "3.7.0"
+
+# even more restricted
+USER 1000:1000
+
+RUN set -ex; \
+  helm repo update
 
 RUN helm version | grep "3.7.0"
 
