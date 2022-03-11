@@ -15,6 +15,8 @@ RUN install-tool helm "v${HELM_VERSION}"
 
 RUN set -ex; helm version
 
+USER 1000:1000
+
 RUN set -ex; \
   helm repo add stable https://charts.helm.sh/stable; \
   helm repo update

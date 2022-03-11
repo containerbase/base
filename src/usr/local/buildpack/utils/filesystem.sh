@@ -45,13 +45,13 @@ function setup_directories () {
   mkdir -p "${install_dir}"
   # contains the installed tools
   # shellcheck disable=SC2174
-  mkdir -p -m 770 "$(get_tools_path)"
+  mkdir -p -m 775 "$(get_tools_path)"
   # contains env for the installed tools
   # shellcheck disable=SC2174
-  mkdir -p -m 770 "$(get_env_path)"
+  mkdir -p -m 775 "$(get_env_path)"
   # contains the latest version of the tools
   # shellcheck disable=SC2174
-  mkdir -p -m 770 "$(get_version_path)"
+  mkdir -p -m 775 "$(get_version_path)"
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_bin_path)"
