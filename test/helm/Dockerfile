@@ -60,10 +60,9 @@ SHELL [ "/bin/sh", "-c" ]
 RUN helm version | grep "${HELM_VERSION}"
 
 # even more restricted
-USER 1000:1000
+USER 1111:1000
 
 RUN set -ex; \
-  helm repo add stable https://charts.helm.sh/stable; \
   helm repo update
 
 RUN helm version | grep "${HELM_VERSION}"
@@ -87,15 +86,6 @@ RUN set -ex; \
   helm repo update
 
 SHELL [ "/bin/sh", "-c" ]
-
-RUN helm version | grep "3.7.0"
-
-# even more restricted
-USER 1000:1000
-
-RUN set -ex; \
-  helm repo add stable https://charts.helm.sh/stable; \
-  helm repo update
 
 RUN helm version | grep "3.7.0"
 
