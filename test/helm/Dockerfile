@@ -27,6 +27,7 @@ RUN helm version | grep "${HELM_VERSION}"
 USER 1000:0
 
 RUN set -ex; \
+  helm repo add stable https://charts.helm.sh/stable; \
   helm repo update
 
 RUN helm version | grep "${HELM_VERSION}"
@@ -62,6 +63,7 @@ RUN helm version | grep "${HELM_VERSION}"
 USER 1000:1000
 
 RUN set -ex; \
+  helm repo add stable https://charts.helm.sh/stable; \
   helm repo update
 
 RUN helm version | grep "${HELM_VERSION}"
@@ -92,6 +94,7 @@ RUN helm version | grep "3.7.0"
 USER 1000:1000
 
 RUN set -ex; \
+  helm repo add stable https://charts.helm.sh/stable; \
   helm repo update
 
 RUN helm version | grep "3.7.0"
