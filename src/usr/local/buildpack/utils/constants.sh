@@ -12,9 +12,9 @@ export BIN_DIR=/usr/local/bin
 # shellcheck disable=SC2153
 export USER_HOME="/home/${USER_NAME}"
 # defines the umask for folders created by the root
-export ROOT_UMASK=750
+export ROOT_UMASK=755
 # defines the umask fo folders created by the user
-export USER_UMASK=770
+export USER_UMASK=775
 # defines the cache folder for downloaded tools, if empty no cache will be used
 export BUILDPACK_CACHE_DIR=${BUILDPACK_CACHE_DIR}
 # defines the max amount of filled space (in percent from 0-100) that is allowed

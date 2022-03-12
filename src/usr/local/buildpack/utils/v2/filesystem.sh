@@ -25,7 +25,7 @@ function find_tool_path () {
 
 # OVERWRITE:
 #
-# Creates the tool path in {installdir}/tools/{toolname} with 770 instead of in {installdir}/{toolname} with default umask
+# Creates the tool path in {installdir}/tools/{toolname} with 775 instead of in {installdir}/{toolname} with default umask
 function create_tool_path () {
   local tools_path
   tools_path=$(get_tools_path)
@@ -35,7 +35,7 @@ function create_tool_path () {
     return
   fi
 
-  create_folder "${tools_path}/${TOOL_NAME}" 770
+  create_folder "${tools_path}/${TOOL_NAME}" 775
   echo "${tools_path}/${TOOL_NAME}"
 }
 

@@ -49,7 +49,7 @@ teardown() {
     run create_tool_path
     assert_success
     assert_output "${TEST_ROOT_DIR}/root/tools/foo"
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 770 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
 
     # user
     run find_tool_path
@@ -73,8 +73,8 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/tools/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/tools/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 770 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 750 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 755 ]
 }
 
 @test "overwrite: can create a versioned tool path as user" {
@@ -85,6 +85,6 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/tools/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/tools/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 770 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 770 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
+    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 775 ]
 }

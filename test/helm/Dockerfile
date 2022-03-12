@@ -6,11 +6,10 @@ RUN touch /.dummy
 # renovate: datasource=github-releases lookupName=helm/helm
 ARG HELM_VERSION=3.8.0
 
-USER 1000
 
-#--------------------------------------
-# install helm as root
-#--------------------------------------
+#------------------------------------------------------------------
+# testa: install helm as root, run as both
+#------------------------------------------------------------------
 FROM build as testa
 
 RUN install-tool helm "v${HELM_VERSION}"
@@ -25,9 +24,26 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN helm version | grep "${HELM_VERSION}"
 
-#--------------------------------------
-# install helm as user
-#--------------------------------------
+USER 1000
+
+RUN set -ex; \
+  helm repo add stable https://charts.helm.sh/stable; \
+  helm repo update
+
+RUN helm version | grep "${HELM_VERSION}"
+
+# even more restricted
+USER 1000:1000
+
+RUN set -ex; \
+  helm repo update
+
+RUN helm version | grep "${HELM_VERSION}"
+
+
+#------------------------------------------------------------------
+# testb: install helm as user (openshift)
+#------------------------------------------------------------------
 FROM build as testb
 
 USER 1111
@@ -44,9 +60,10 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN helm version | grep "${HELM_VERSION}"
 
-#--------------------------------------
-# install helm as user when already installed
-#--------------------------------------
+
+#------------------------------------------------------------------
+# testc: install as user when already installed as root (openshift)
+#------------------------------------------------------------------
 FROM build as testc
 
 RUN install-tool helm "v${HELM_VERSION}"
@@ -66,9 +83,10 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN helm version | grep "3.7.0"
 
-#--------------------------------------
+
+#------------------------------------------------------------------
 # final
-#--------------------------------------
+#------------------------------------------------------------------
 FROM build
 
 COPY --from=testa /.dummy /.dummy

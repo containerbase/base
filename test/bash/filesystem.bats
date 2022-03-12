@@ -125,13 +125,13 @@ teardown() {
   assert_success
 
   assert [ -d "${install_dir}/tools" ]
-  assert [ $(stat --format '%a' "${install_dir}/tools") -eq 770 ]
+  assert [ $(stat --format '%a' "${install_dir}/tools") -eq 775 ]
   assert [ -d "${install_dir}/versions" ]
-  assert [ $(stat --format '%a' "${install_dir}/versions") -eq 770 ]
+  assert [ $(stat --format '%a' "${install_dir}/versions") -eq 775 ]
   assert [ -d "${BIN_DIR}" ]
   assert [ $(stat --format '%a' "${BIN_DIR}") -eq 775 ]
   assert [ -d "${install_dir}/env.d" ]
-  assert [ $(stat --format '%a' "${install_dir}/env.d") -eq 770 ]
+  assert [ $(stat --format '%a' "${install_dir}/env.d") -eq 775 ]
 }
 
 @test "creates a folder with correct permissions" {
