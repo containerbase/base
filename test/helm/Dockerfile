@@ -6,7 +6,6 @@ RUN touch /.dummy
 # renovate: datasource=github-releases lookupName=helm/helm
 ARG HELM_VERSION=3.8.0
 
-USER 1000
 
 #--------------------------------------
 # install helm as root, run as both
