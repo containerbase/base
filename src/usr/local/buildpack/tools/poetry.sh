@@ -10,7 +10,7 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
   exit 1
 fi
 
-POETRY_URL=https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
+POETRY_URL=https://install.python-poetry.org
 
 tool_path=$(find_versioned_tool_path)
 
