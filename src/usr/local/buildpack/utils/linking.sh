@@ -3,7 +3,7 @@
 # use this if custom env is required, creates a shell wrapper to /usr/local/bin
 function shell_wrapper () {
   local FILE
-  FILE="$(get_bin_path)/bin/${1}"
+  FILE="$(get_bin_path)/${1}"
   check_command "$1"
   cat > "$FILE" <<- EOM
 #!/bin/bash
@@ -20,7 +20,8 @@ fi
 
 ${1} "\$@"
 EOM
-  chmod +x "$FILE"
+  # make it writable for the owner and the group
+  chmod 775 "$FILE"
 }
 
 # use this for simple symlink to /usr/local/bin

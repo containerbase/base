@@ -62,6 +62,10 @@ teardown() {
 
 @test "shell_wrapper" {
 
+  mkdir -p "${USER_HOME}/bin"
+  echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin/foobar"
+  chmod +x "${USER_HOME}/bin/foobar"
+
   run shell_wrapper
   assert_failure
   assert_output --partial "No  defined"
@@ -70,8 +74,13 @@ teardown() {
   assert_failure
   assert_output --partial "No foo defined"
 
-  # cannot test, the function is broken
-  # run shell_wrapper ls
-  # assert_success
-  # assert_output --partial "No foo defined"
+  run shell_wrapper ls
+  assert_success
+  assert [ -f "${BIN_DIR}/ls" ]
+  assert [ $(stat --format '%a' "${BIN_DIR}/ls") -eq 775 ]
+
+  PATH="${USER_HOME}/bin":$PATH run shell_wrapper foobar
+  assert_success
+  assert [ -f "${BIN_DIR}/foobar" ]
+  assert [ $(stat --format '%a' "${BIN_DIR}/ls") -eq 775 ]
 }
