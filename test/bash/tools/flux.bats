@@ -102,6 +102,13 @@ teardown_file () {
   run flux -v
   assert_success
   assert_output --partial "${TOOL_VERSION}"
+
+  # don't update
+  TOOL_VERSION=0.26.999
+
+  run install_tool
+  assert_failure
+  assert_output -p "No file found"
 }
 
 @test "flux: link_tool" {

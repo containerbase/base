@@ -8,7 +8,13 @@ function install_tool () {
 
   local file
   file=$(get_from_url "https://get.helm.sh/helm-v${TOOL_VERSION}-linux-amd64.tar.gz")
-  tar --strip 1 -C "${versioned_tool_path}/bin" -xf "${file}"
+
+  if [[ -f ${file} ]]; then
+    tar --strip 1 -C "${versioned_tool_path}/bin" -xf "${file}"
+  else
+    echo "No file found for version ${TOOL_VERSION}"
+    exit 1
+  fi
 }
 
 function link_tool () {

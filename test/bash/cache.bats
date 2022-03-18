@@ -192,3 +192,15 @@ teardown() {
   assert_success
   assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
 }
+
+@test "get_from_url with errors" {
+  # create cache dir
+  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${BUILDPACK_CACHE_DIR}"
+
+  local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/foobar"
+
+  run get_from_url "${file}"
+  assert_success
+  assert_output ""
+}

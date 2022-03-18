@@ -102,6 +102,13 @@ teardown_file () {
   run helm version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
+
+  # don't update
+  TOOL_VERSION=3.6.999
+
+  run install_tool
+  assert_failure
+  assert_output -p "No file found"
 }
 
 @test "helm: link_tool" {

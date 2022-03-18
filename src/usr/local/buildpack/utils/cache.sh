@@ -29,6 +29,9 @@ function get_from_url () {
 # Will download the file into the cache folder and returns the path
 # If the cache is not enabled it will download it to a temp folder
 # The second argument will be the filename if given
+#
+# If the download receives an error, the output will be given on stderr
+# and an empty string is returned
 function download_file () {
   local url=${1}
   check url true
@@ -37,8 +40,9 @@ function download_file () {
   name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
-  echo "${temp_folder}/${name}"
+  if curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" >/dev/null 2>&1 ; then
+    echo "${temp_folder}/${name}"
+  fi
 }
 
 # will try to clean up the oldest file in the cache until the cache is empty
