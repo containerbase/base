@@ -20,8 +20,10 @@ fi
 
 ${1} "\$@"
 EOM
-  # make it writable for the owner and the group
-  chmod 775 "$FILE"
+  if [[ -O "$FILE" ]] && [ "$(stat --format '%a' "${FILE}")" -ne 775 ] ; then
+    # make it writable for the owner and the group only if we are the owner
+    chmod 775 "$FILE"
+  fi
 }
 
 # use this for simple symlink to /usr/local/bin
@@ -41,6 +43,8 @@ function link_wrapper () {
 
 ${SOURCE} "\$@"
 EOM
-  # make it writable for the owner and the group
-  chmod 775 "$TARGET"
+  if [[ -O "$TARGET" ]] && [ "$(stat --format '%a' "${TARGET}")" -ne 775 ] ; then
+    # make it writable for the owner and the group only if we are the owner
+    chmod 775 "$TARGET"
+  fi
 }
