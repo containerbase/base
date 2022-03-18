@@ -36,5 +36,11 @@ function link_wrapper () {
     SOURCE=$SOURCE/${1}
   fi
   check_command "$SOURCE"
-  ln -sf "$SOURCE" "$TARGET"
+  cat > "$TARGET" <<- EOM
+#!/bin/bash
+
+${SOURCE} "\$@"
+EOM
+  # make it writable for the owner and the group
+  chmod 775 "$FILE"
 }
