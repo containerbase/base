@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+# shellcheck source=/dev/null
+. /usr/local/buildpack/util.sh
+
+for tool in "$@"
+do
+  prepare_v2_tool "${tool}"
+done
