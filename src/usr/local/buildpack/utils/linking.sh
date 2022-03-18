@@ -42,5 +42,5 @@ function link_wrapper () {
 ${SOURCE} "\$@"
 EOM
   # make it writable for the owner and the group
-  chmod 775 "$FILE"
+  chmod 775 "$TARGET"
 }
