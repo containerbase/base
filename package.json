@@ -38,8 +38,5 @@
     "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js"
-  },
-  "resolutions": {
-    "strip-ansi": "6.0.1"
   }
 }
