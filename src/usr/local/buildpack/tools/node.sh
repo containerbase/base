@@ -9,6 +9,9 @@ if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
   exit 1
 fi
 
+# shellcheck source=/dev/null
+. /usr/local/buildpack/utils/node.sh
+
 NODE_DISTRO=linux-x64
 tool_path=$(find_versioned_tool_path)
 PREFIX="${USER_HOME}/.npm-global"
@@ -24,6 +27,8 @@ function update_env () {
   link_wrapper npx "$tool_path/bin"
 
   export_tool_path "${PREFIX}/bin"
+  export_tool_env NO_UPDATE_NOTIFIER 1
+  export_tool_env NPM_CONFIG_FUND false
 
   tool_env=$(find_tool_env)
 
@@ -56,17 +61,16 @@ function prepare_user_config () {
 
   prepare_prefix "${prefix}"
   echo "prefix = \"${prefix}\"" >> "${USER_HOME}/.npmrc"
-  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}/.npmrc"
-  chmod -R g+w "${prefix}" "${USER_HOME}/.npmrc"
+  mkdir -p "${USER_HOME}/.npm/_logs"
+  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
+  chmod -R g+w "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
 }
 
 if [[ -z "${tool_path}" ]]; then
+  npm_init
 
   tool_path="$(create_versioned_tool_path)"
   npm=${tool_path}/bin/npm
-
-  temp_folder=$(mktemp -u)
-  mkdir -p "${temp_folder}"
 
   file=/tmp/${TOOL_NAME}.tar.xz
 
@@ -90,15 +94,10 @@ if [[ -z "${tool_path}" ]]; then
 
   if [[ ${MAJOR} -lt 15 ]]; then
     # update to latest node-gyp to fully support python3
-    NPM_CONFIG_PREFIX=$tool_path $npm explore npm -g -- "$npm" install --cache "${temp_folder}" node-gyp@latest
-    rm -rf "${temp_folder}"
+    $npm explore npm --global --prefix "$tool_path" -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}"
   fi
 
-  # Clean download cache
-  NPM_CONFIG_PREFIX=$tool_path $npm cache clean --force
-
-  # Clean node-gyp cache
-  rm -rf "$HOME/.cache"
+  npm_clean
 fi
 
 update_env "${tool_path}"
