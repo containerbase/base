@@ -89,18 +89,21 @@ export_tool_path "${USER_HOME}/.local/bin"
 
 function python_shell_wrapper () {
   local install_dir
-  local FILE
+  local tool_target
+  local tool_wrapper
+
   install_dir=$(get_install_dir)
-  FILE="${install_dir}/bin/${1}"
-  check_command "${tool_path}/bin/$1"
-  cat > "$FILE" <<- EOM
+  tool_wrapper="${install_dir}/bin/${1}"
+  tool_target="${tool_path}/bin/$1"
+  check_command "${tool_target}"
+  cat > "$tool_wrapper" <<- EOM
 #!/bin/bash
 
 export PYTHONHOME=${tool_path} PATH=${tool_path}/bin:\$PATH
 
-${1} "\$@"
+${tool_target} "\$@"
 EOM
-  chmod 775 "$FILE"
+  chmod 775 "$tool_wrapper"
 }
 
 python_shell_wrapper "${TOOL_NAME}"
