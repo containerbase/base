@@ -100,7 +100,7 @@ export PYTHONHOME=${tool_path} PATH=${tool_path}/bin:\$PATH
 
 ${1} "\$@"
 EOM
-  chmod +x "$FILE"
+  chmod 775 "$FILE"
 }
 
 python_shell_wrapper "${TOOL_NAME}"

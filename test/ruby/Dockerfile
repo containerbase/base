@@ -51,8 +51,8 @@ RUN set -ex; \
   bundler env
 
 RUN set -ex; \
-    cd a; \
-    bundler lock
+  cd a; \
+  bundler lock
 
 #--------------------------------------
 # test: global bundler
@@ -70,8 +70,8 @@ RUN ruby --version
 RUN bundler env
 
 RUN set -ex; \
-    cd a; \
-    bundler lock;
+  cd a; \
+  bundler lock;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN ruby --version
@@ -81,19 +81,30 @@ RUN ruby --version
 #--------------------------------------
 FROM build as test-bundler-c
 
+# do not change, testing only
+ENV BUNDLER_VERSION=1.17.3
+RUN install-tool bundler
+RUN set -ex; \
+  bundler --version | grep ${BUNDLER_VERSION}; \
+  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1;
+
 ARG BUILDPACK_DEBUG
 USER 1000
 
-# renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.3.10
 
-RUN ruby --version
+# renovate: datasource=rubygems depName=bundler versioning=ruby
+ENV BUNDLER_VERSION=2.3.10
+RUN install-tool bundler
+
+RUN set -ex; \
+  bundler --version | grep ${BUNDLER_VERSION}; \
+  [ "$(command -v bundler)" = "$USER_HOME/bin/bundler" ] && echo "works" || exit 1;
+
 RUN bundler env
 
 RUN set -ex; \
-    cd a; \
-    bundler lock;
-
+  cd a; \
+  bundler lock;
 
 #--------------------------------------
 # test: cocoapods
@@ -107,9 +118,9 @@ USER 1000
 RUN gem install cocoapods -v 1.9.1
 
 RUN set -ex; \
-    cd b/Project; \
-    gem install cocoapods-acknowledgements; \
-    pod install;
+  cd b/Project; \
+  gem install cocoapods-acknowledgements; \
+  pod install;
 
 #--------------------------------------
 # test: global cocoapods (install-gem)
@@ -124,9 +135,9 @@ RUN install-gem cocoapods 1.11.3
 USER 1000
 
 RUN set -ex; \
-    cd b/Project; \
-    gem install cocoapods-acknowledgements; \
-    pod install;
+  cd b/Project; \
+  gem install cocoapods-acknowledgements; \
+  pod install;
 
 
 #--------------------------------------
@@ -144,9 +155,9 @@ RUN install-tool cocoapods 1.11.3
 RUN pod env
 
 RUN set -ex; \
-    cd b/Project; \
-    gem install cocoapods-acknowledgements; \
-    pod install;
+  cd b/Project; \
+  gem install cocoapods-acknowledgements; \
+  pod install;
 
 #--------------------------------------
 # final

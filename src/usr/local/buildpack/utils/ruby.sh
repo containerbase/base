@@ -7,7 +7,7 @@ function gem_install() {
     tool_path=$(create_versioned_tool_path)
     mkdir -p "${tool_path}"
 
-    GEM_HOME=$tool_path gem install  --bindir "$tool_path/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}"
+    GEM_HOME=$tool_path gem install --bindir "$tool_path/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}"
 
   # TODO: clear gem cache
   fi
@@ -42,5 +42,5 @@ export GEM_PATH=${tool_path}:/usr/local/ruby/${ruby_version}/lib/ruby/gems/${BAS
 
 ${1:-$TOOL_NAME} "\$@"
 EOM
-  chmod +x "$tool_file"
+  chmod 775 "$tool_file"
 }
