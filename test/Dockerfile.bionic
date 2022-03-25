@@ -37,7 +37,7 @@ RUN install-tool erlang 24.3.2.0
 RUN install-tool elixir 1.13.3
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.27.4
+RUN install-tool flux v0.28.2
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.18.0
@@ -71,9 +71,9 @@ RUN install-tool composer 2.2.9
 RUN install-tool powershell v7.2.2
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.3
+RUN install-tool python 3.10.4
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.1.8
+RUN install-pip pipenv 2022.3.24
 # renovate: datasource=pypi
 RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
@@ -82,7 +82,7 @@ RUN install-tool poetry 1.1.13
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.1
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.3.9
+RUN install-tool bundler 2.3.10
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.11.3
 
