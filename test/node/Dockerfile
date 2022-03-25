@@ -287,6 +287,9 @@ RUN install-tool yarn 1.22.15
 #--------------------------------------
 FROM build as testk
 
+ARG BUILDPACK_DEBUG
+# ENV NPM_CONFIG_LOGLEVEL=verbose
+
 USER 1111:0
 
 SHELL [ "/bin/sh", "-c" ]
@@ -303,6 +306,20 @@ RUN install-tool npm 7.24.2
 RUN node --version
 RUN npm --version
 RUN npm --version | grep '7.24.2'
+
+# don't update!!
+ENV NPM_VERSION=6.14.16
+
+RUN install-tool npm ${NPM_VERSION}
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep "${NPM_VERSION}"
+
+# TODO: use bats test
+RUN set -ex; \
+  [ "$(cat /home/user/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  && echo node-gyp works || exit 1;
 
 #--------------------------------------
 # final
