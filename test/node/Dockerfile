@@ -65,7 +65,7 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.17
+RUN install-tool yarn 1.22.18
 
 # renovate: datasource=npm
 RUN install-tool lerna 4.0.0
@@ -124,7 +124,7 @@ RUN set -ex; \
   yarn --version;
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.17
+RUN install-tool yarn 1.22.18
 RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
@@ -213,7 +213,7 @@ RUN set -ex; cd a; npm install
 FROM build as testh
 
 # renovate: datasource=npm lookupName=yarn
-RUN install-tool yarn-slim 1.22.17
+RUN install-tool yarn-slim 1.22.18
 
 RUN set -ex; yarn-slim --version
 RUN set -ex; cd a; yarn-slim install
@@ -267,7 +267,7 @@ RUN set -ex; ls -lah /test/a; cd a; yarn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.17
+RUN install-tool yarn 1.22.18
 
 # renovate: datasource=npm
 RUN install-tool lerna 4.0.0
@@ -287,6 +287,9 @@ RUN install-tool yarn 1.22.15
 #--------------------------------------
 FROM build as testk
 
+ARG BUILDPACK_DEBUG
+# ENV NPM_CONFIG_LOGLEVEL=verbose
+
 USER 1111:0
 
 SHELL [ "/bin/sh", "-c" ]
@@ -303,6 +306,20 @@ RUN install-tool npm 7.24.2
 RUN node --version
 RUN npm --version
 RUN npm --version | grep '7.24.2'
+
+# don't update!!
+ENV NPM_VERSION=6.14.16
+
+RUN install-tool npm ${NPM_VERSION}
+
+RUN node --version
+RUN npm --version
+RUN npm --version | grep "${NPM_VERSION}"
+
+# TODO: use bats test
+RUN set -ex; \
+  [ "$(cat /home/user/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  && echo node-gyp works || exit 1;
 
 #--------------------------------------
 # final
