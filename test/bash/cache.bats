@@ -201,6 +201,5 @@ teardown() {
   local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/foobar"
 
   run get_from_url "${file}"
-  assert_success
-  assert_output ""
+  assert_failure
 }

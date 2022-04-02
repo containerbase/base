@@ -40,9 +40,8 @@ function download_file () {
   name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  if curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" >/dev/null 2>&1 ; then
-    echo "${temp_folder}/${name}"
-  fi
+  curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" >/dev/null 2>&1 || exit 1
+  echo "${temp_folder}/${name}"
 }
 
 # will try to clean up the oldest file in the cache until the cache is empty
