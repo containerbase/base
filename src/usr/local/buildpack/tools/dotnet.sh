@@ -38,11 +38,19 @@ curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir "$DOTNE
 link_wrapper dotnet "$DOTNET_INSTALL_DIR"
 
 # first time experience
-dotnet help > /dev/null
-su "$USER_NAME" -c 'dotnet help' > /dev/null
+dotnet new > /dev/null
+su "$USER_NAME" -c 'dotnet new' > /dev/null
 
-# See https://github.com/NuGet/Home/issues/11607
-dotnet nuget list source > /dev/null
-su "$USER_NAME" -c 'dotnet nuget list source' > /dev/null
+su "$USER_NAME" -c "mkdir -p \$HOME/.nuget" > /dev/null
+
+# command available since net core 3.1
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source
+if [[ ${MAJOR} -gt 3 || (${MAJOR} -eq 3 && ${MINOR} -ge 1) ]]; then
+  # See https://github.com/NuGet/Home/issues/11607
+  dotnet nuget list source > /dev/null
+  su "$USER_NAME" -c 'dotnet nuget list source' > /dev/null
+fi
+
+chmod -R g+w "$USER_HOME/.nuget"
 
 dotnet --info

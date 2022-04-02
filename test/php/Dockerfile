@@ -18,9 +18,17 @@ ARG APT_HTTP_PROXY
 RUN install-tool php 7.4.14
 
 # old composer version, not for renovating
-RUN install-tool composer 1.10.20
+RUN install-tool composer 1.10.0
+
+RUN set -ex; \
+  composer --version | grep 1.10.0; \
+  [ "$(command -v composer)" = "/usr/local/bin/composer" ] && echo "works" || exit 1;
 
 USER 1000
+
+# old composer version, not for renovating
+# testing user install overwrite
+RUN install-tool composer 1.10.20
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
@@ -38,7 +46,9 @@ RUN set -ex; \
   $(php -r 'exit(extension_loaded("json") ? 0 : 1);') && echo "php-json installed" || exit 1;
 
 RUN php --version
-RUN composer --version
+RUN set -ex; \
+  composer --version | grep 1.10.20; \
+  [ "$(command -v composer)" = "/usr/local/bin/composer" ] && echo "works" || exit 1;
 
 
 RUN set -ex; \
@@ -93,7 +103,7 @@ RUN install-tool php 8.1.4
 
 
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.2.9
+RUN install-tool composer 2.3.3
 
 RUN install-tool composer latest
 
