@@ -21,7 +21,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.1
+RUN install-tool ruby 3.1.2
 
 RUN touch /.dummy
 
@@ -62,7 +62,7 @@ FROM build as test-bundler-b
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.3.10
+RUN install-gem bundler 2.3.11
 
 USER 1000
 
@@ -93,7 +93,7 @@ USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.3.10
+ENV BUNDLER_VERSION=2.3.11
 RUN install-tool bundler
 
 RUN set -ex; \
