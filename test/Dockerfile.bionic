@@ -18,7 +18,7 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.35.1
+RUN install-tool git v2.35.3
 
 
 #--------------------------------------
@@ -29,21 +29,21 @@ FROM base as test
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.201
+RUN install-tool dotnet 6.0.202
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.3.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.13.3
+RUN install-tool elixir 1.13.4
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
 RUN install-tool flux v0.28.5
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.18.0
+RUN install-tool golang 1.18.1
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.8.1
+RUN install-tool helm v3.8.2
 
 # renovate: datasource=adoptium-java lookupName=java-jre
 RUN install-tool java 17.0.2+8
@@ -65,7 +65,7 @@ RUN install-npm lerna 4.0.0
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.1.4
 # renovate: datasource=github-releases lookupName=composer/composer
-RUN install-tool composer 2.3.4
+RUN install-tool composer 2.3.5
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.2
@@ -80,7 +80,7 @@ RUN install-pip hashin 0.17.0
 RUN install-tool poetry 1.1.13
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.1
+RUN install-tool ruby 3.1.2
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.3.11
 # renovate: datasource=rubygems versioning=ruby
@@ -90,7 +90,7 @@ RUN install-tool cocoapods 1.11.3
 RUN install-tool rust 1.60.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.6.0
+RUN install-tool swift 5.6.1
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.1.8
