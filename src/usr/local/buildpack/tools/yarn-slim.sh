@@ -4,23 +4,16 @@ set -e
 
 check_command node
 
+# shellcheck source=/dev/null
+. /usr/local/buildpack/utils/node.sh
+
 tool_path=$(find_versioned_tool_path)
 
 if [[ -z "${tool_path}" ]]; then
+  npm_init
   tool_path="$(create_versioned_tool_path)"
-
-  temp_folder=$(mktemp -u)
-  mkdir -p "${temp_folder}"
-
-  mkdir -p "${tool_path}"
-
-  npm cache clean --force
-  NPM_CONFIG_PREFIX=$tool_path npm install --cache "${temp_folder}" -g "yarn@${TOOL_VERSION}"
-
-  # Clean download cache
-  NPM_CONFIG_PREFIX=$tool_path npm cache clean --force
-  # Clean node-gyp cache
-  rm -rf "$HOME/.cache" "${temp_folder}"
+  npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "$tool_path" --cache "${NPM_CONFIG_CACHE}"
+  npm_clean
 
   # patch yarn
   sed -i 's/ steps,/ steps.slice(0,1),/' "$tool_path/lib/node_modules/yarn/lib/cli.js"

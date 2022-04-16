@@ -68,11 +68,11 @@ teardown() {
 
   run shell_wrapper
   assert_failure
-  assert_output --partial "No  defined"
+  assert_output --partial "param SOURCE is set but empty"
 
   run shell_wrapper foo
   assert_failure
-  assert_output --partial "No foo defined"
+  assert_output --partial "param SOURCE is set but empty"
 
   run shell_wrapper ls
   assert_success

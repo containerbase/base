@@ -35,6 +35,6 @@ if [[ -z "${tool_path}" ]]; then
   chmod +x "${tool_path}/bin/composer"
 fi
 
-  link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
+link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 
 composer --version
