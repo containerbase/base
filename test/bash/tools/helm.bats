@@ -1,7 +1,11 @@
 setup_file () {
-  # set up the cache
-  BUILDPACK_CACHE_DIR="$(mktemp -u)"
-  mkdir -m 777 -p "${BUILDPACK_CACHE_DIR}"
+  # use global cache
+  mkdir -m 777 -p /tmp/renovate/bats || true
+  if [ -e /tmp/renovate/bats ]; then
+    export BUILDPACK_CACHE_DIR=/tmp/renovate/bats
+  else
+    export BUILDPACK_CACHE_DIR="$(mktemp -u)"
+  fi
 }
 
 setup() {
@@ -38,10 +42,6 @@ setup() {
 
 teardown() {
     rm -rf "${TEST_ROOT_DIR}"
-}
-
-teardown_file () {
-  rm -rf "${BUILDPACK_CACHE_DIR}"
 }
 
 @test "helm: check_tool_requirements" {
