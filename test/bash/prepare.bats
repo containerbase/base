@@ -17,6 +17,11 @@ setup() {
     USER_HOME="${TEST_ROOT_DIR}/user"
     ENV_FILE="${TEST_ROOT_DIR}/env"
 
+    setup_directories
+
+    # copy buildpack files
+    cp -r "$TEST_DIR/../../src/usr/local/buildpack" "${ROOT_DIR}/buildpack"
+
     # set default test user is root
     TEST_ROOT_USER=1000
 }
@@ -26,8 +31,17 @@ teardown() {
 }
 
 @test "prepare-tool" {
-  run prepare_v2_tool
+  run prepare_tools
   assert_failure
   assert_output "param TOOL_NAME is set but empty"
-}
 
+  run prepare_tools foobar
+  assert_failure
+  assert_output "This script must be run as root"
+
+  TEST_ROOT_USER=0 \
+  BUILDPACK_DEBUG=1 \
+  run prepare_tools foobar2
+  assert_failure
+  assert_output "tool foobar2 does not exist"
+}

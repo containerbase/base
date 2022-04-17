@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # Will install the tool in the given path according to the v2 tool spec
-function prepare_v2_tool () {
+function prepare_tools () {
   local TOOL_NAME
   TOOL_NAME=${1}
-
   check TOOL_NAME true
 
   require_root
@@ -14,15 +13,18 @@ function prepare_v2_tool () {
     exit 0;
   fi
 
-  V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
+  TOOL="${ROOT_DIR}/buildpack/tools/v2/${TOOL_NAME}.sh"
 
   # load overrides needed for v2 tools
   # shellcheck source=/dev/null
-  . /usr/local/buildpack/utils/v2/overrides.sh
+  . "${ROOT_DIR}/buildpack/utils/v2/overrides.sh"
 
-  if [[ -f "$V2_TOOL" ]]; then
+  if [[ -f "$TOOL" ]]; then
     # shellcheck source=/dev/null
-    . "${V2_TOOL}"
+    . "${TOOL}"
+  else
+    echo "tool ${TOOL_NAME} does not exist"
+    exit 1
   fi
 
   # prepare tool
