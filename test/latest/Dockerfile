@@ -170,7 +170,7 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool flux v0.28.5
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.1.2
+RUN install-tool git-lfs v3.1.4
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.2
