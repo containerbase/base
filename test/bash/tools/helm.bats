@@ -44,6 +44,13 @@ teardown() {
     rm -rf "${TEST_ROOT_DIR}"
 }
 
+teardown_file () {
+  if [ "${BUILDPACK_CACHE_DIR}" != "/tmp/renovate/bats" ]; then
+    fail "test"
+    rm -rf "${BUILDPACK_CACHE_DIR}"
+  fi
+}
+
 @test "helm: check_tool_requirements" {
   TOOL_NAME=helm
 
