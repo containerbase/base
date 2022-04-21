@@ -63,7 +63,7 @@ RUN install-tool yarn 1.22.18
 RUN install-npm lerna 4.0.0
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-RUN install-tool php 8.1.4
+RUN install-tool php 8.1.5
 # renovate: datasource=github-releases lookupName=composer/composer
 RUN install-tool composer 2.3.5
 
@@ -82,7 +82,7 @@ RUN install-tool poetry 1.1.13
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.3.11
+RUN install-tool bundler 2.3.12
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.11.3
 
@@ -93,10 +93,10 @@ RUN install-tool rust 1.60.0
 RUN install-tool swift 5.6.1
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.8
+RUN install-tool terraform 1.1.9
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.1.2
+RUN install-tool git-lfs v3.1.4
 RUN git lfs version
 
 # renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler

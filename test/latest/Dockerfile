@@ -152,7 +152,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.1.8
+RUN install-tool terraform 1.1.9
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -170,7 +170,7 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool flux v0.28.5
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.1.2
+RUN install-tool git-lfs v3.1.4
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.2
