@@ -54,7 +54,7 @@ RUN install-tool gradle 7.4.2
 RUN install-tool nix 2.3.10
 
 # renovate: datasource=node
-RUN install-tool node v16.14.2
+RUN install-tool node v16.15.0
 # renovate: datasource=npm
 RUN install-tool pnpm 6.32.4
 # renovate: datasource=npm
