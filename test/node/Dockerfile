@@ -322,6 +322,88 @@ RUN set -ex; \
   && echo node-gyp works || exit 1;
 
 #--------------------------------------
+# test: corepack
+#--------------------------------------
+FROM build as testl
+
+SHELL [ "/bin/sh", "-c" ]
+
+USER root
+
+# don't update!!
+RUN install-tool corepack 0.9.0
+
+RUN corepack --version | tee | grep '0.9.0'
+
+USER 1000
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.10.0
+
+RUN corepack --version
+RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
+
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v pnpm)" = "/usr/local/bin/pnpm" ] && echo "works" || exit 1;
+
+#--------------------------------------
+# test: yarn (corepack)
+#--------------------------------------
+FROM build as testm
+
+SHELL [ "/bin/sh", "-c" ]
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.10.0
+
+# renovate: datasource=npm lookupName=yarn
+ARG YARN_VERSION=1.22.18
+
+RUN set -ex; cd a; \
+  npm pkg set packageManager=yarn@${YARN_VERSION}; \
+  yarn -v | tee | grep ${YARN_VERSION}; \
+  yarn install
+
+#--------------------------------------
+# test: yarn v3 (corepack)
+#--------------------------------------
+FROM build as testn
+
+SHELL [ "/bin/sh", "-c" ]
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.10.0
+
+# renovate: datasource=npm lookupName=yarn
+ARG YARN_VERSION=3.1.0
+
+# re2 needs to be deleted https://github.com/uhop/install-artifact-from-github/pull/1
+RUN set -ex; cd a; \
+  npm pkg set packageManager=yarn@${YARN_VERSION}; \
+  yarn -v | tee | grep ${YARN_VERSION}; \
+  npm pkg delete dependencies.re2; \
+  yarn install
+
+#--------------------------------------
+# test: pnpm (corepack)
+#--------------------------------------
+FROM build as testo
+
+SHELL [ "/bin/sh", "-c" ]
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.10.0
+
+# renovate: datasource=npm lookupName=pnpm
+ARG PNPM_VERSION=7.0.0
+
+RUN set -ex; cd a; \
+  npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
+  pnpm -v | tee | grep ${PNPM_VERSION}; \
+  pnpm install
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -337,3 +419,7 @@ COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
 COPY --from=testj /.dummy /.dummy
 COPY --from=testk /.dummy /.dummy
+COPY --from=testl /.dummy /.dummy
+COPY --from=testm /.dummy /.dummy
+COPY --from=testn /.dummy /.dummy
+COPY --from=testo /.dummy /.dummy
