@@ -21,6 +21,3 @@ link_wrapper "${TOOL_NAME}" "${tool_path}/bin"
 corepack --version
 
 corepack enable --install-directory "$(get_bin_path)"
-
-yarn --version
-pnpm --version
