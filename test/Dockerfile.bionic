@@ -37,7 +37,7 @@ RUN install-tool erlang 24.3.3.0
 RUN install-tool elixir 1.13.4
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.30.0
+RUN install-tool flux v0.30.2
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.18.1
