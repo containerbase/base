@@ -19,6 +19,8 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "${DIR}/utils/version.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/install.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/prepare.sh"
 
 check_debug() {
   local bool="${BUILDPACK_DEBUG:-false}"
@@ -109,7 +111,7 @@ function get_distro() {
 }
 
 function require_root () {
-  if [[ $EUID -ne 0 ]]; then
+  if [[ $(is_root) -ne 0 ]]; then
     echo "This script must be run as root" >&2
     exit 1
   fi

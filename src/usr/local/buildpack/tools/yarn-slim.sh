@@ -19,6 +19,6 @@ if [[ -z "${tool_path}" ]]; then
   sed -i 's/ steps,/ steps.slice(0,1),/' "$tool_path/lib/node_modules/yarn/lib/cli.js"
 fi
 
-link_wrapper "${TOOL_NAME}" "${tool_path}/bin/yarn"
+link_wrapper yarn "${tool_path}/bin/yarn"
 
-yarn-slim --version
+yarn --version
