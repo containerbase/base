@@ -88,7 +88,6 @@ if [ "\${EUID}" != 0 ]; then
 fi
 
 for p in \${env_dirs[@]}; do
-  echo "\${p}"
   if [ -d "\${p}/env.d" ]; then
     for i in "\${p}/env.d"/*.sh; do
       if [ -r \$i ]; then
@@ -98,6 +97,8 @@ for p in \${env_dirs[@]}; do
     unset i
   fi
 done
+unset p
+unset env_dirs
 
 EOM
 
