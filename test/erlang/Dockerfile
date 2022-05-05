@@ -14,6 +14,7 @@ WORKDIR /test
 FROM build as testa
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.3.0
@@ -34,12 +35,17 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testb
 
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
 RUN prepare-tool erlang
 
 USER 1001
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.3.0
+
+ARG BUILDPACK_DEBUG
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.4
