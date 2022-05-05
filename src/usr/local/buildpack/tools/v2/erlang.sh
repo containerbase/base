@@ -1,5 +1,26 @@
 #!/bin/bash
 
+SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
+
+function check_semver () {
+  if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
+    echo Not a semver like version - aborting: "${1}"
+    exit 1
+  fi
+  export MAJOR=${BASH_REMATCH[1]}
+  export MINOR=${BASH_REMATCH[3]}
+  export PATCH=${BASH_REMATCH[5]}
+  export BUILD=${BASH_REMATCH[7]}
+}
+
+function check_tool_requirements () {
+  check_semver "${TOOL_VERSION}"
+  if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" || ! "${BUILD}" ]]; then
+    echo Invalid version: "${TOOL_VERSION}"
+    exit 1
+  fi
+}
+
 function prepare_tool() {
   local version_codename
 
@@ -35,6 +56,7 @@ function install_tool () {
       exit 1
     fi
     prepare_tool
+    tool_path=$(find_tool_path)
   fi
 
   ARCH=$(uname -p)
