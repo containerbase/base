@@ -38,7 +38,11 @@ function prepare_tool() {
       ;;
   esac
 
-  create_tool_path
+  local tool_path
+  tool_path=$(create_tool_path)
+
+  # workaround https://github.com/containerbase/buildpack/issues/377
+  ln -sf "$tool_path" /usr/local/erlang
 }
 
 function install_tool () {
@@ -71,6 +75,7 @@ function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "erl" "${versioned_tool_path}/bin"
+  export_tool_env ERL_ROOTDIR "${versioned_tool_path}"
+  shell_wrapper erl "${versioned_tool_path}/bin"
   erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 }
