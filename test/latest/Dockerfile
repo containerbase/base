@@ -74,7 +74,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v16.14.2
+RUN install-tool node v16.15.0
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -115,7 +115,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.2
+RUN install-tool powershell v7.2.3
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -167,16 +167,16 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.28.5
+RUN install-tool flux v0.30.2
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.4
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.2
+RUN install-tool powershell v7.2.3
 
 # renovate: datasource=node
-RUN install-tool node v16.14.2
+RUN install-tool node v16.15.0
 
 # renovate: datasource=github-releases lookupName=moby/moby
 RUN install-tool docker v20.10.14

@@ -28,6 +28,7 @@ function update_env () {
 
   export_tool_path "${PREFIX}/bin"
   export_tool_env NO_UPDATE_NOTIFIER 1
+  export_tool_env NPM_CONFIG_UPDATE_NOTIFIER false
   export_tool_env NPM_CONFIG_FUND false
 
   tool_env=$(find_tool_env)
