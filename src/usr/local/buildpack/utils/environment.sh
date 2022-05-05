@@ -80,27 +80,25 @@ function setup_env_files () {
   cat >> "$ENV_FILE" <<- EOM
 export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}"
 
+env_dirs=("/usr/local" "/opt/buildpack" "\${USER_HOME}")
+
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then
   export HOME="\${USER_HOME}"
 fi
 
-if [ -d "${install_dir}/env.d" ]; then
-  for i in "${install_dir}/env.d"/*.sh; do
-    if [ -r \$i ]; then
-      . \$i
-    fi
-  done
-  unset i
-fi
-if [ -d "${USER_HOME}/env.d" ]; then
-  for i in "${USER_HOME}/env.d"/*.sh; do
-    if [ -r \$i ]; then
-      . \$i
-    fi
-  done
-  unset i
-fi
+for p in \${env_dirs[@]}; do
+  echo "\${p}"
+  if [ -d "\${p}/env.d" ]; then
+    for i in "\${p}/env.d"/*.sh; do
+      if [ -r \$i ]; then
+        . \$i
+      fi
+    done
+    unset i
+  fi
+done
+
 EOM
 
   cat >> "${BASH_RC}" <<- EOM
