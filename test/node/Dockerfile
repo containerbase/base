@@ -216,7 +216,7 @@ FROM build as testh
 RUN install-tool yarn-slim 1.22.18
 
 RUN set -ex; yarn-slim --version
-RUN set -ex; cd a; yarn-slim install
+RUN set -ex; cd a; yarn install
 
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
