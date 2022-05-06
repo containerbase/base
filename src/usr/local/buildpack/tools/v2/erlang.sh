@@ -40,9 +40,6 @@ function prepare_tool() {
 
   local tool_path
   tool_path=$(create_tool_path)
-
-  # workaround https://github.com/containerbase/buildpack/issues/377
-  ln -sf "$tool_path" /usr/local/erlang
 }
 
 function install_tool () {
