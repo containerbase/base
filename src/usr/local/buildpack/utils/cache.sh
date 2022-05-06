@@ -37,7 +37,7 @@ function download_file () {
   name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  curl --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
+  curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
   echo "${temp_folder}/${name}"
 }
 
