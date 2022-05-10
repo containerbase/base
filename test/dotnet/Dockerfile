@@ -18,7 +18,7 @@ ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 3.1.418
+RUN install-tool dotnet 3.1.419
 
 USER 1000
 
