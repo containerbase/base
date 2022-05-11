@@ -53,11 +53,11 @@ RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.202
+RUN install-tool dotnet 6.0.300
 
 # Test duplicate install
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.202
+RUN install-tool dotnet 6.0.300
 
 USER 1000
 
