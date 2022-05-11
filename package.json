@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
-    "@types/node": "16.11.27",
+    "@types/node": "16.11.34",
     "@types/shelljs": "0.8.11",
     "bats": "1.6.0",
     "bats-assert": "2.0.0",
