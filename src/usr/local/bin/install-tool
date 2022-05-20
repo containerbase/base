@@ -2,23 +2,34 @@
 
 set -e
 
+# shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
 require_distro
 require_user
 require_tool "$@"
 
+if [[ $(ignore_tool) -eq 1 ]]; then
+  echo "Tool ignored - skipping: ${TOOL_NAME}"
+  exit 0;
+fi
+
 TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
-if [[ ! -f "$TOOL" ]]; then
+V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
+
+if [[ -f "$V2_TOOL" ]]; then
+  # install v2 tool
+  time install_v2_tool "${V2_TOOL}"
+elif [[ -f "$TOOL" ]]; then
+  echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
+  # shellcheck source=/dev/null
+  . "$TOOL"
+else
   echo "No tool defined - skipping: ${TOOL_NAME}" >&2
   exit 1;
 fi
 
-
-echo "Installing tool ${TOOL_NAME} v${TOOL_VERSION}"
-. $TOOL
-
 # cleanup
-if [[ $EUID -eq 0 ]]; then
-  rm -rf /var/lib/apt/lists/*
+if [[ $(is_root) -eq 0 ]]; then
+  rm -rf /var/lib/apt/lists/* "${TEMP_DIR:?}"/*
 fi

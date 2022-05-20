@@ -1,90 +1,40 @@
 #!/bin/bash
 
-function refreshenv () {
-  if [[ -r $BASH_ENV ]]; then
-    . $BASH_ENV
+# get path location
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+# source the helper files
+# shellcheck source=/dev/null
+. "${DIR}/utils/constants.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/environment.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/filesystem.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/linking.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/cache.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/version.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/install.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/prepare.sh"
+
+check_debug() {
+  local bool="${BUILDPACK_DEBUG:-false}"
+  # comparison is performed without regard to the case of alphabetic characters
+  shopt -s nocasematch
+  if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
+    set -x
   fi
 }
+check_debug
 
 if [[ -z "${BUILDPACK+x}" ]]; then
   refreshenv
 fi
-
-function export_env () {
-  export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $BASH_ENV
-}
-
-function export_path () {
-  export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $BASH_ENV
-}
-
-function reset_tool_env () {
-  local install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  if [[ -f "$install_dir/env.d/${TOOL_NAME}.sh" ]];then
-    rm "$install_dir/env.d/${TOOL_NAME}.sh"
-  fi
-}
-
-
-function export_tool_env () {
-  local install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> $install_dir/env.d/${TOOL_NAME}.sh
-}
-
-function export_tool_path () {
-  local install_dir=$(get_install_dir)
-  if [[ -z "${TOOL_NAME+x}" ]]; then
-    echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
-    exit 1;
-  fi
-  export PATH="$1:$PATH"
-  echo export PATH="$1:\$PATH" >> $install_dir/env.d/${TOOL_NAME}.sh
-}
-
-
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
-function shell_wrapper () {
-  local install_dir=$(get_install_dir)
-  local FILE="${install_dir}/bin/${1}"
-  check_command $1
-  cat > $FILE <<- EOM
-#!/bin/bash
-
-if [[ -f "\$BASH_ENV" && -z "${BUILDPACK+x}" ]]; then
-  . \$BASH_ENV
-fi
-
-if [[ "\$(command -v ${1})" == "$FILE" ]]; then
-  echo Could not forward ${1}, probably wrong PATH variable. >&2
-  echo PATH=\$PATH
-  exit 1
-fi
-
-${1} "\$@"
-EOM
-  chmod +x $FILE
-}
-
-# use this for simple symlink to /usr/local/bin
-function link_wrapper () {
-  local install_dir=$(get_install_dir)
-  local TARGET="${install_dir}/bin/${1}"
-  local SOURCE=$(command -v ${1})
-  check_command $1
-  ln -sf $SOURCE $TARGET
-}
-
 
 function check_version () {
   echo "Function 'check_version' is deprecated, use 'require_tool' instead." >&2
@@ -99,18 +49,18 @@ function check_version () {
 }
 
 function check_command () {
-  if [[ ! -x "$(command -v ${1})" ]]; then
+  if [[ ! -x $(command -v "${1}") ]]; then
     echo "No ${1} defined - aborting" >&2
     exit 1
   fi
 }
 
 
-SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?([a-z-].*)?$"
+SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
 function check_semver () {
   if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
-    echo Not a semver like version - aborting: ${1}
+    echo Not a semver like version - aborting: "${1}"
     exit 1
   fi
   export MAJOR=${BASH_REMATCH[1]}
@@ -118,15 +68,32 @@ function check_semver () {
   export PATCH=${BASH_REMATCH[5]}
 }
 
-
 function apt_install () {
-  echo "Installing apt packages: ${@}"
-  apt-get update
-  apt-get install -y "$@"
+  echo "Installing apt packages: $*"
+  if [[ "${APT_HTTP_PROXY}" ]]; then
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
+  fi
+  apt-get -qq update
+  apt-get -qq install -y "$@"
+
+  rm -f /etc/apt/apt.conf.d/buildpack-proxy
+}
+
+function apt_upgrade () {
+  echo "Upgrading apt packages"
+  if [[ "${APT_HTTP_PROXY}" ]]; then
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
+  fi
+  apt-get -qq update
+  apt-get upgrade -y
+
+  rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
 function require_distro () {
-  local VERSION_CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
+  local VERSION_CODENAME
+  # shellcheck source=/dev/null
+  VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
   "bionic") ;; #supported
   "focal") ;; #supported
@@ -137,38 +104,41 @@ function require_distro () {
   esac
 }
 
+function get_distro() {
+  require_distro
+  # shellcheck source=/dev/null disable=SC2005
+  echo "$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+}
+
 function require_root () {
-  if [[ $EUID -ne 0 ]]; then
+  if [[ $(is_root) -ne 0 ]]; then
     echo "This script must be run as root" >&2
     exit 1
   fi
 }
 
 function require_user () {
-  if [[ -z "${USER_NAME+x}" ]]; then
+  if [[ -z "${USER_NAME}" ]]; then
     echo "No USER_NAME defined - skipping: ${USER_NAME}" >&2
     exit 1;
   fi
 }
 
-function get_tool_version_env () {
-  local tool=${1//-/_}
-  tool=${tool^^}_VERSION
-  echo ${tool}
-}
-
 function require_tool () {
   local tool=$1
 
-  if [[ -z "${1+x}" ]]; then
+  if [[ -z "${tool}" ]]; then
     echo "No tool defined - skipping: ${tool}" >&2
     exit 1;
   fi
 
-  local tool_env=$(get_tool_version_env $tool)
-  local version=${2-${!tool_env}}
+  local tool_env
+  local version
 
-  if [[ -z ${version+x} ]]; then
+  tool_env=$(get_tool_version_env "$tool")
+  version=${2-${!tool_env}}
+
+  if [[ -z ${version} ]]; then
     echo "No version defined - aborting: ${version}" >&2
     exit 1
   fi
@@ -179,25 +149,36 @@ function require_tool () {
     version=${BASH_REMATCH[1]}
   fi
 
-  export "TOOL_NAME=${1}" "TOOL_VERSION=${version}"
+  export "TOOL_NAME=${tool}" "TOOL_VERSION=${version}"
 
   # compability fallback
   export "${tool_env}=${version}"
 }
 
+ignore_tool() {
+    local tools=${IGNORED_TOOLS,,}
+    [[ $tools =~ (^|,)$TOOL_NAME($|,) ]] && echo 1 || echo 0
+}
 
-function get_install_dir () {
-  if [[ $EUID -eq 0 ]]; then
-    echo /usr/local
+# Checks if the current caller is root or not
+function is_root () {
+  if [[ $EUID -ne 0 ]]; then
+    echo 1
   else
-    echo /home/${USER_NAME}
+    echo 0
   fi
 }
 
-function find_tool_path () {
-  if [[ -d "/usr/local/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo /usr/local/${TOOL_NAME}/${TOOL_VERSION}
-  elif [[ -d "/home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}" ]]; then
-    echo /home/${USER_NAME}/${TOOL_NAME}/${TOOL_VERSION}
+# Will check if the variable given with the name is set else will exit
+# when the second parameter is set it will make an empty check
+function check () {
+
+  if [ "${!1+SET}" != "SET" ] ; then
+    echo "param ${1} is not set"
+    exit 1
+  fi
+  if [ -n "${2}" ] && [ -z "${!1}" ]; then
+    echo "param ${1} is set but empty"
+    exit 1
   fi
 }

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+# shellcheck source=/dev/null
+. /usr/local/buildpack/util.sh
+
+require_user
+require_tool "$@"
+
+case "$TOOL_NAME" in
+  npm | yarn | pnpm | lerna)
+    install-tool "$TOOL_NAME" "${TOOL_VERSION}"
+    ;;
+
+  *)
+    require_root
+    check_command npm
+    unset NPM_CONFIG_PREFIX
+
+    temp_folder=$(mktemp -u)
+    mkdir -p "${temp_folder}"
+
+    echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
+    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --no-audit --no-fund --cache "${temp_folder}"
+
+    # Clean download cache
+    npm cache clean --force
+    # Clean node-gyp cache
+    rm -rf /root/.cache "${temp_folder}"
+    ;;
+esac
+

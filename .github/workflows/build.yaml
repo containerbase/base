@@ -1,27 +1,72 @@
 name: build
 
 on:
-  push:
-    branches:
-      - main
-      - 'renovate/**'
-
-  pull_request:
+  workflow_call:
+    secrets:
+      DOCKER_USERNAME:
+        required: false
+      DOCKER_PASSWORD:
+        required: false
 
 env:
   DRY_RUN: ${{ github.ref != 'refs/heads/main' }}
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 14
+  NODE_VERSION: v16.13.0 # renovate: datasource=node depName=node
+  APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: lint
+        run: yarn lint
+
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@66c9a47bf02255b250284a82251cb4cadf5043f5 # tag=v1.15.0
+        with:
+          fail_on_error: true
+          reporter: github-check
+          filter_mode: nofilter
+          path: src
+          pattern: '*.sh'
+          check_all_files_with_shebangs: 'true'
+
+  bats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: bats
+        run: yarn bats
+
   distro:
     runs-on: ubuntu-latest
-
     timeout-minutes: 15
 
     strategy:
@@ -32,14 +77,29 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: test distro
-        run: docker buildx bake --progress plain test
+        run: docker buildx bake --progress plain test-distro
 
   lang:
     runs-on: ubuntu-latest
-
     timeout-minutes: 15
 
     strategy:
@@ -49,8 +109,10 @@ jobs:
             dotnet,
             erlang,
             flutter,
+            flux,
             golang,
             java,
+            jb,
             helm,
             nix,
             node,
@@ -63,8 +125,27 @@ jobs:
             latest,
           ]
 
+    env:
+      TAG: ${{ matrix.tag }}
+
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
 
       - name: build
         run: docker buildx bake --progress plain
@@ -73,24 +154,33 @@ jobs:
         run: docker image ls
 
       - name: test
-        run: docker buildx build --progress plain ./test/${{ matrix.tag }}
+        run: docker buildx bake --progress plain test
 
   release:
-    needs: [lang, distro]
+    needs: [lint, bats, lang, distro]
     runs-on: ubuntu-latest
-
     timeout-minutes: 15
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@v1.5.3
+        uses: renovatebot/internal-tools@5d3360ba42b05c5de4098bd90acf9e452ad88a3b # tag=v1.13.3
         with:
           command: docker-config
 
+      # full checkout for semantic-release
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        with:
+          fetch-depth: 0
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -100,11 +190,7 @@ jobs:
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
-
-      # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 0
+          echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
       - name: Docker registry login
         if: github.ref == 'refs/heads/main'
@@ -112,17 +198,14 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Cache Yarn packages
-        uses: actions/cache@v2.1.4
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
+
       - name: semantic-release
         if: github.event_name == 'push'
-        run: npx semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+        run: yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

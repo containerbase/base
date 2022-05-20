@@ -3,73 +3,88 @@
 set -e
 
 require_root
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
-if [[ -d "/usr/local/ruby/${TOOL_VERSION}" ]]; then
-  echo "Skipping, already installed"
-  exit 0
-fi
+base_path=/usr/local/${TOOL_NAME}
+tool_path=${base_path}/${TOOL_VERSION}
 
-mkdir -p /usr/local/ruby
+if [[ ! -d "$tool_path" ]]; then
 
-ARCH=$(uname -p)
-CODENAME=$(. /etc/os-release && echo ${VERSION_CODENAME})
-RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
+  mkdir -p "$base_path"
 
-curl -sSfLo ruby.tar.xz ${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${CODENAME}-${ARCH}.tar.xz || echo 'Ignore download error'
+  ARCH=$(uname -p)
+  RUBY_URL="https://github.com/containerbase/ruby-prebuild/releases/download"
 
-if [[ -f ruby.tar.xz ]]; then
-  echo "Using prebuild ruby for ${CODENAME}"
-  apt_install \
-    build-essential \
-    libffi-dev \
-    ;
-  tar -C /usr/local/ruby -xf ruby.tar.xz
-  rm ruby.tar.xz
-else
-  echo 'No prebuild ruby found, building from source'
-  apt_install \
-    build-essential \
-    libreadline-dev \
-    libssl-dev \
-    zlib1g-dev \
-    libffi-dev \
-    ;
+  version_codename=$(get_distro)
 
-  if [[ ! -x "$(command -v ruby-build)" ]]; then
-    git clone https://github.com/rbenv/ruby-build.git
-    PREFIX=/usr/local ./ruby-build/install.sh
-    rm -rf ruby-build
+  curl -sSfLo ruby.tar.xz "${RUBY_URL}/${TOOL_VERSION}/ruby-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz" || echo 'Ignore download error'
+
+  if [[ -f ruby.tar.xz ]]; then
+    echo "Using prebuild ruby for ${version_codename}"
+    apt_install \
+      build-essential \
+      libffi-dev \
+      ;
+    tar -C /usr/local/ruby -xf ruby.tar.xz
+    rm ruby.tar.xz
+  else
+    echo 'No prebuild ruby found, building from source'
+    apt_install \
+      build-essential \
+      libreadline-dev \
+      libssl-dev \
+      zlib1g-dev \
+      libffi-dev \
+      ;
+
+    if [[ ! -x "$(command -v ruby-build)" ]]; then
+      git clone https://github.com/rbenv/ruby-build.git
+      PREFIX=/usr/local ./ruby-build/install.sh
+      rm -rf ruby-build
+    fi
+
+    ruby-build "$TOOL_VERSION" "$tool_path"
   fi
 
-  ruby-build $TOOL_VERSION /usr/local/ruby/${TOOL_VERSION}
-fi
-
-export_env GEM_HOME "/home/${USER_NAME}/.gem-global"
-export_path "\$GEM_HOME/bin:\$HOME/.gem/ruby/${MAJOR}.${MINOR}.0/bin:/usr/local/ruby/${TOOL_VERSION}/bin"
-
-# System settings
-mkdir -p /usr/local/ruby/${TOOL_VERSION}/etc
-cat > /usr/local/ruby/${TOOL_VERSION}/etc/gemrc <<- EOM
-gem: --no-document
+  # System settings
+  mkdir -p "$tool_path"/etc
+  cat > "$tool_path"/etc/gemrc <<- EOM
+gem: --bindir /usr/local/bin --no-document
 :benchmark: false
 :verbose: true
 :update_sources: true
 :backtrace: false
 EOM
 
+  if [[ ! -r "${USER_HOME}/.gemrc" ]];then
+  cat > "${USER_HOME}"/.gemrc <<- EOM
+gem: --bindir ${USER_HOME}/bin --no-document
+EOM
+    chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
+    chmod -R g+w "${USER_HOME}"/.gemrc
+  fi
 
+fi
+
+reset_tool_env
+cat >> "$(find_tool_env)" <<- EOM
+if [ "\${EUID}" != 0 ]; then
+  export GEM_HOME="${USER_HOME}/.gem/ruby/${MAJOR}.${MINOR}.0"
+fi
+EOM
+
+link_wrapper ruby "$tool_path/bin"
+link_wrapper gem "$tool_path/bin"
+
+echo "$TOOL_VERSION" > "$base_path"/.version
 
 ruby --version
 echo "gem $(gem --version)"
 
 gem env
-
-shell_wrapper ruby
-shell_wrapper gem

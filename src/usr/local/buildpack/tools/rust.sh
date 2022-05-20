@@ -3,36 +3,36 @@
 set -e
 
 require_root
-check_semver ${TOOL_VERSION}
+check_semver "${TOOL_VERSION}"
 
 
 if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-  echo Invalid version: ${TOOL_VERSION}
+  echo Invalid version: "${TOOL_VERSION}"
   exit 1
 fi
 
-if [[ -d "/usr/local/rust/${TOOL_VERSION}" ]]; then
-  echo "Skipping, already installed"
-  exit 0
+base_path=/usr/local/buildpack/${TOOL_NAME}
+tool_path=$base_path/$TOOL_VERSION
+
+if [[ ! -d "${tool_path}" ]]; then
+  mkdir -p "$base_path"
+  curl -sSfLo rust.tar.gz "https://static.rust-lang.org/dist/rust-${TOOL_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+  mkdir rust
+  pushd rust
+  tar --strip 1 -xf ../rust.tar.gz
+  ./install.sh --prefix="$tool_path" --components=cargo,rust-std-x86_64-unknown-linux-gnu,rustc
+  popd
+  rm rust.tar.gz
+  rm -rf rust
 fi
 
-mkdir -p /usr/local/rust
+reset_tool_env
+export_tool_env RUST_BACKTRACE 1
+export_tool_env CARGO_HOME "${USER_HOME}/.cargo"
+export_tool_path "\$CARGO_HOME/bin"
 
-curl -sSfLo rust.tar.gz https://static.rust-lang.org/dist/rust-${TOOL_VERSION}-x86_64-unknown-linux-gnu.tar.gz
-mkdir rust
-pushd rust
-tar --strip 1 -xf ../rust.tar.gz
-./install.sh --prefix=/usr/local/rust/${TOOL_VERSION} --components=cargo,rust-std-x86_64-unknown-linux-gnu,rustc
-popd
-rm rust.tar.gz
-rm -rf rust
-
-export_env RUST_BACKTRACE 1
-export_env CARGO_HOME "/home/${USER_NAME}/.cargo"
-export_path "\$CARGO_HOME/bin:/usr/local/rust/${TOOL_VERSION}/bin"
+link_wrapper rustc "${tool_path}/bin"
+link_wrapper cargo "${tool_path}/bin"
 
 cargo --version
 rustc --version
-
-shell_wrapper cargo
-shell_wrapper rustc

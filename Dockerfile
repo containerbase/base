@@ -1,22 +1,18 @@
 #--------------------------------------
-# Non-root user to create
-#--------------------------------------
-ARG USER_ID=1000
-ARG USER_NAME=user
-
-#--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal@sha256:3c9c713e0979e9bd6061ed52ac1e9e1f246c9495aa063619d9d695fb8039aa1f
+FROM ubuntu:20.04@sha256:47f14534bda344d9fe6ffd6effb95eefe579f4be0d508b7445cf77f61a0e5724
 
-ARG USER_ID
-ARG USER_NAME
+ARG APT_HTTP_PROXY
+
+# Weekly cache buster
+ARG CACHE_WEEK
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 
 #  autoloading buildpack env
-ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/user/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
@@ -28,5 +24,4 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.31.1
-
+RUN install-tool git v2.36.1

@@ -1,0 +1,16 @@
+name: build-push
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: containerbase/buildpack/.github/workflows/build.yaml@main
+    # uses: containerbase/buildpack/.github/workflows/build.yaml@ci-refactor
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

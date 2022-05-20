@@ -2,53 +2,38 @@
 
 set -e
 
+# USER_NAME and USER_ID need to be defined as the
+# decision which paths are used are based on this information
+if [[ -z "${USER_NAME}" ]]; then
+  export USER_NAME=user
+  echo "No USER_NAME defined - using: ${USER_NAME}"
+fi
+
+if [[ -z "${USER_ID}" ]]; then
+  export USER_ID=1000
+  echo "No USER_ID defined - using: ${USER_ID}"
+fi
+
+# shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
+if [[ "${BASH_ENV}" != "${ENV_FILE}" ]]; then
+  echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
+  exit 1;
+fi
+
 # no duplicate installs
-if [[ ! -z "${BUILDPACK+x}" ]]; then
+if [[ -n "${BUILDPACK+x}" ]]; then
   echo "BUILDPACK defined - skipping: ${BUILDPACK}"
   exit 1;
 fi
 
 require_distro
 require_root
-require_user
 
-if [[ -z "${USER_ID+x}" ]]; then
-  echo "No USER_ID defined - skipping: ${USER_ID}"
-  exit 1;
-fi
-
-if [[ -z "${BASH_ENV+x}" ]]; then
-  echo "No BASH_ENV defined - skipping: ${BASH_ENV}"
-  exit 1;
-fi
-
-
-
-# env helper, loads tool specific env
-cat >> $BASH_ENV <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}"
-if [ -d /usr/local/env.d ]; then
-  for i in /usr/local/env.d/*.sh; do
-    if [ -r \$i ]; then
-      . \$i
-    fi
-  done
-  unset i
-fi
-if [ -d /home/${USER_NAME}/env.d ]; then
-  for i in /home/${USER_NAME}/env.d/*.sh; do
-    if [ -r \$i ]; then
-      . \$i
-    fi
-  done
-  unset i
-fi
-EOM
+setup_env_files
 
 echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/buildpack.conf
-echo "APT::Get::Upgrade \"false\";" | tee -a /etc/apt/apt.conf.d/buildpack.conf
 echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/buildpack.conf
 
 # Set up user and home directory with access to users in the root group (0)
@@ -58,26 +43,50 @@ useradd --uid ${USER_ID} --gid 0 --groups ${USER_NAME} --shell /bin/bash --creat
 
 # create env helper paths
 mkdir /usr/local/env.d
-su ${USER_NAME} -c 'mkdir -p /home/${USER_NAME}/{env.d,bin}'
+su ${USER_NAME} -c "mkdir -p /home/${USER_NAME}/{env.d,bin}"
+
+if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
+  echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> "$ENV_FILE"
+fi
 
 # OpenShift
 chmod g+w /home/${USER_NAME}/{,env.d,bin}
 
-
-
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
+
+# upgrade base packages
+apt_upgrade
+
 # install basic required packages
 apt_install \
   ca-certificates \
   curl \
   dumb-init \
   gnupg \
+  jq \
   openssh-client \
   unzip \
   xz-utils \
   ;
+
+# check for /usr/local/share/ca-certificates/*.crt
+
+if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.' | wc -c)" -gt 0 ]]; then
+  echo "Found user certs, calling update-ca-certificates"
+  update-ca-certificates
+fi
+
+# do this at the end as we are overwriting certain env vars and functions
+function prepare_v2_tools () {
+  # setup directories for v2 tools
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/utils/v2/overrides.sh
+
+  setup_directories
+}
+prepare_v2_tools
 
 # cleanup
 rm -rf /var/lib/apt/lists/*

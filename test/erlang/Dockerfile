@@ -1,22 +1,65 @@
 ARG IMAGE=containerbase/buildpack
-FROM ${IMAGE}
+FROM ${IMAGE} as build
 
-# Erlang
+RUN touch /.dummy
 
-#disable renovate: datasource=github-releases lookupName=erlang/otp versioning=loose
-RUN install-tool erlang 22.3.2
+# test openshift compatibility 1000<>1001
+COPY --chown=1001:0 test test
 
-# Elixir
+WORKDIR /test
+
+#--------------------------------------
+# test: erlang (root)
+#--------------------------------------
+FROM build as testa
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 24.3.4.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.11.4
+RUN install-tool elixir 1.13.4
 
-WORKDIR /tmp
 
-COPY --chown=1000:0 test test
-
-USER 1000
+USER 1001
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     mix deps.update --all;
+
+
+#--------------------------------------
+# test: erlang (user,openshift)
+#--------------------------------------
+FROM build as testb
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+RUN prepare-tool erlang
+
+USER 1001
+
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 24.3.4.0
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool elixir 1.13.4
+
+
+RUN set -ex; \
+    cd a; \
+    mix deps.update --all;
+
+
+#--------------------------------------
+# final
+#--------------------------------------
+FROM build
+
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy

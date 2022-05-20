@@ -2,14 +2,11 @@
 
 set -e
 
+# shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
 require_tool "$@"
 check_command gem
 
-if [[ $EUID -eq 0 ]]; then
-  unset GEM_HOME
-fi
-
 echo "Installing gem ${TOOL_NAME} v${TOOL_VERSION}"
-gem install ${TOOL_NAME} -v ${TOOL_VERSION}
+gem install "${TOOL_NAME}" -v "${TOOL_VERSION}"

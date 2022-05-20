@@ -4,14 +4,18 @@ set -e
 
 check_command node
 
-if [[ $EUID -eq 0 ]]; then
-  unset NPM_CONFIG_PREFIX
+# shellcheck source=/dev/null
+. /usr/local/buildpack/utils/node.sh
+
+tool_path=$(find_versioned_tool_path)
+
+if [[ -z "${tool_path}" ]]; then
+  npm_init
+  npm_install
+  tool_path=$(find_versioned_tool_path)
+  npm_clean
 fi
 
-npm install -g pnpm@${TOOL_VERSION}
+link_wrapper "${TOOL_NAME}" "$tool_path/bin"
 
 pnpm --version
-
-if [[ $EUID -eq 0 ]]; then
-  shell_wrapper pnpm
-fi

@@ -1,21 +1,23 @@
 ARG IMAGE=containerbase/buildpack
 FROM ${IMAGE} as build
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.51.0
+ARG APT_HTTP_PROXY
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.51.0
+RUN install-tool rust 1.61.0
 
-WORKDIR /tmp
+# renovate: datasource=docker versioning=docker
+RUN install-tool rust 1.61.0
 
 COPY --chown=1000:0 test test
+
+WORKDIR /test
 
 USER 1000
 
 
 RUN set -ex; \
-    cd test/a; \
+    cd a; \
     cargo update; \
     cargo update --manifest-path Cargo.toml --package serde;
 
