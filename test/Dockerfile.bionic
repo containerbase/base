@@ -40,7 +40,7 @@ RUN install-tool elixir 1.13.4
 RUN install-tool flux v0.30.2
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.18.2
+RUN install-tool golang 1.18.3
 
 # renovate: datasource=github-releases lookupName=helm/helm
 RUN install-tool helm v3.9.0
