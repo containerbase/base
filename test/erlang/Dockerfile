@@ -17,7 +17,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.0
+RUN install-tool erlang 25.0.0.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.4
@@ -43,7 +43,7 @@ RUN prepare-tool erlang
 USER 1001
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.0
+RUN install-tool erlang 25.0.0.0
 
 ARG BUILDPACK_DEBUG
 
