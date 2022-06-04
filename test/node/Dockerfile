@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.15.0
+RUN install-tool node v16.15.1
 
 RUN touch /.dummy
 
