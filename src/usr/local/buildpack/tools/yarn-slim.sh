@@ -12,7 +12,7 @@ tool_path=$(find_versioned_tool_path)
 if [[ -z "${tool_path}" ]]; then
   npm_init
   tool_path="$(create_versioned_tool_path)"
-  npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "$tool_path" --cache "${NPM_CONFIG_CACHE}"
+  npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "$tool_path" --cache "${NPM_CONFIG_CACHE}" 2>&1
   npm_clean
 
   # patch yarn
