@@ -95,7 +95,7 @@ if [[ -z "${tool_path}" ]]; then
 
   if [[ ${MAJOR} -lt 15 ]]; then
     # update to latest node-gyp to fully support python3
-    $npm explore npm --global --prefix "$tool_path" -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}"
+    $npm explore npm --global --prefix "$tool_path" -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" 2>&1
   fi
 
   npm_clean
