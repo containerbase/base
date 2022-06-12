@@ -1,46 +1,11 @@
 #!/bin/bash
 
-# Helper function to create a temp cache dir for node downloads
-function npm_init () {
-  temp_folder=$(mktemp -u)
-  mkdir -p "${temp_folder}"
-  export NPM_CONFIG_CACHE="${temp_folder}" NO_UPDATE_NOTIFIER=1 NPM_CONFIG_FUND=false
-}
+# get path location
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-# Helper function to clean up the node cache dir
-function npm_clean () {
-  # Clean npm stuff
-  rm -rf "$HOME/.cache" "${NPM_CONFIG_CACHE}" "$HOME/.npm/_logs"/*
-}
-
-# Helper function to prepare a dir for node binaries
-function prepare_prefix () {
-  local prefix=${1}
-  # npm 7 bug
-  mkdir -p "${prefix}"/{bin,lib}
-}
-
-# Helper function to link to a globally installed node
-function prepare_global_config () {
-  local prefix=${1}
-  prepare_prefix "${prefix}"
-  mkdir -p "${versioned_tool_path}/etc"
-  echo "prefix = \"${prefix}\"" >> "${versioned_tool_path}/etc/npmrc"
-}
-
-# Helper function to link to a user installed node
-function prepare_user_config () {
-  local prefix=${1}
-  if grep 'prefix' "${USER_HOME}/.npmrc"; then
-    return
-  fi
-
-  prepare_prefix "${prefix}"
-  echo "prefix = \"${prefix}\"" >> "${USER_HOME}/.npmrc"
-  mkdir -p "${USER_HOME}/.npm/_logs"
-  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
-  chmod -R g+w "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
-}
+# shellcheck source=/dev/null
+. "$DIR/../../utils/node.sh"
 
 function check_tool_requirements () {
   check_semver "$TOOL_VERSION"
@@ -81,7 +46,11 @@ function install_tool () {
   # required for npm
   link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
 
+  # get semver
+  check_semver "$TOOL_VERSION"
+
   if [[ ${MAJOR} -lt 15 ]]; then
+    echo "updating node-gyp"
     # update to latest node-gyp to fully support python3
     $npm explore npm --global --prefix "$versioned_tool_path" -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" 2>&1
   fi
@@ -109,6 +78,7 @@ function link_tool () {
 
   tool_env=$(find_tool_env)
 
+  # if not root, set the npmprefix config option to the user folder
   cat >> "$tool_env" <<- EOM
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
