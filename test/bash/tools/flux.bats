@@ -1,18 +1,16 @@
 setup_file () {
+  export TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
+
   # set up the cache
-  BUILDPACK_CACHE_DIR="$(mktemp -u)"
-  mkdir -m 777 -p "${BUILDPACK_CACHE_DIR}"
+  load "$TEST_DIR/../cache.sh"
+  export BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
 }
 
 setup() {
   load '../../../node_modules/bats-support/load'
   load '../../../node_modules/bats-assert/load'
 
-  TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
-
-  echo $TEST_DIR
-  echo $BATS_TEST_FILENAME
 
   load "$TEST_DIR/../../../src/usr/local/buildpack/util.sh"
 
@@ -41,7 +39,7 @@ teardown() {
 }
 
 teardown_file () {
-  rm -rf "${BUILDPACK_CACHE_DIR}"
+  clean_temp_dir $BUILDPACK_CACHE_DIR TEST_CACHE_DIR
 }
 
 @test "flux: check_tool_requirements" {
