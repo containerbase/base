@@ -20,6 +20,7 @@ ARG APT_HTTP_PROXY
 # stay at 3.1
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 3.1.419
+RUN set -ex; dotnet --version | grep 3.1.
 
 USER 1000
 
@@ -59,12 +60,12 @@ RUN install-tool dotnet 6.0.300
 # Test duplicate install
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.300
+RUN set -ex; dotnet --version | grep 6.0.
 
 USER 1000
 
 RUN dotnet --info
 
-RUN set -ex; dotnet --version | tee | grep 6.0
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -84,8 +85,7 @@ ARG BUILDPACK_DEBUG
 # only patch updates
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.300
-
-RUN set -ex; dotnet --version | tee | grep 6.0
+RUN set -ex; dotnet --version | grep 6.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
