@@ -34,22 +34,8 @@ if [[ ! -d "$tool_path" ]]; then
     tar -C /usr/local/ruby -xf ruby.tar.xz
     rm ruby.tar.xz
   else
-    echo 'No prebuild ruby found, building from source'
-    apt_install \
-      build-essential \
-      libreadline-dev \
-      libssl-dev \
-      zlib1g-dev \
-      libffi-dev \
-      ;
-
-    if [[ ! -x "$(command -v ruby-build)" ]]; then
-      git clone https://github.com/rbenv/ruby-build.git
-      PREFIX=/usr/local ./ruby-build/install.sh
-      rm -rf ruby-build
-    fi
-
-    ruby-build "$TOOL_VERSION" "$tool_path"
+    echo 'No prebuild ruby found' >&2
+    exit 1
   fi
 
   # System settings
