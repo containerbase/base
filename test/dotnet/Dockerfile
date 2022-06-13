@@ -17,6 +17,7 @@ FROM base as net3
 ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
+# stay at 3.1
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 3.1.419
 
@@ -71,6 +72,22 @@ RUN set -ex;  \
     dotnet restore --force-evaluate; \
     dotnet build
 
+#--------------------------------------
+# test: dotnet 6.0 (non-root)
+#--------------------------------------
+FROM net3 as testc
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+RUN install-tool dotnet 6.0.300
+
+RUN set -ex; \
+    dotnet restore --use-lock-file
+
+RUN set -ex;  \
+    dotnet add package Newtonsoft.Json --version 12.0.3; \
+    dotnet restore --force-evaluate
 
 #--------------------------------------
 # final
@@ -79,3 +96,4 @@ FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
