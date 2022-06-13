@@ -10,7 +10,7 @@ COPY --chown=1000:0 test test
 WORKDIR /test
 
 #--------------------------------------
-# net3: dotnet 3.1 base image
+# net3: dotnet 3.1 base image (LTS)
 #--------------------------------------
 FROM base as net3
 
@@ -29,7 +29,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN dotnet --info
 
 #--------------------------------------
-# test: dotnet 3.1
+# test: dotnet 3.1 (LTS)
 #--------------------------------------
 FROM net3 as testa
 
@@ -42,7 +42,7 @@ RUN set -ex;  \
 
 
 #--------------------------------------
-# test: dotnet 6.0
+# test: dotnet 6.0 (LTS)
 #--------------------------------------
 FROM base as testb
 
@@ -64,6 +64,8 @@ USER 1000
 
 RUN dotnet --info
 
+RUN set -ex; dotnet --version | tee | grep 6.0
+
 RUN set -ex; \
     dotnet restore --use-lock-file
 
@@ -73,14 +75,17 @@ RUN set -ex;  \
     dotnet build
 
 #--------------------------------------
-# test: dotnet 6.0 (non-root)
+# test: dotnet 6.0 (non-root, LTS)
 #--------------------------------------
 FROM net3 as testc
 
 ARG BUILDPACK_DEBUG
 
+# only patch updates
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.300
+
+RUN set -ex; dotnet --version | tee | grep 6.0
 
 RUN set -ex; \
     dotnet restore --use-lock-file
