@@ -33,27 +33,8 @@ if [[ -z "${tool_path}" ]]; then
     tar -C "${base_path}" -xf ${file}
     rm ${file}
   else
-    echo 'No prebuild python found, building from source'
-    require_root
-    apt_install \
-      build-essential \
-      libbz2-dev \
-      libffi-dev \
-      liblzma-dev \
-      libreadline-dev \
-      libsqlite3-dev \
-      libssl-dev \
-      zlib1g-dev \
-      ;
-
-    if [[ ! -x "$(command -v python-build)" ]]; then
-      git clone https://github.com/pyenv/pyenv.git
-      pushd pyenv/plugins/python-build
-      ./install.sh
-      popd
-      rm -rf pyenv
-    fi
-    python-build "$TOOL_VERSION" "${base_path}"/"$TOOL_VERSION"
+    echo 'No prebuild python found' >&2
+    exit 1
   fi
 
   fix_python_shebangs() {
