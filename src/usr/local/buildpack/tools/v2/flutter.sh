@@ -14,8 +14,8 @@ function install_tool () {
   local FLUTTER_SDK_URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_SDK_CHANNEL}/linux/flutter_linux_${TOOL_VERSION}-${FLUTTER_SDK_CHANNEL}.tar.xz"
   local file
 
-  if [[ ${MAJOR} -lt 2 || (${MAJOR} -eq 1 && ${MINOR} -lt 17) ]]; then
-    echo "flutter < 1.17.0 not supported" >&2
+  if [[ $MAJOR -lt 1 || ($MAJOR -eq 1 && $MINOR -lt 17) ]]; then
+    echo "flutter < 1.17.0 is not supported: ${MAJOR}.${MINOR}" >&2
     exit 1
   fi
 
@@ -29,7 +29,11 @@ function install_tool () {
   fi
 
   # git unsafe directory
-  git config --global --add safe.directory "${versioned_tool_path}"
+  if [[ $(is_root) -eq 0 ]]; then
+    git config --system --add safe.directory "${versioned_tool_path}"
+  else
+    git config --global --add safe.directory "${versioned_tool_path}"
+  fi
 }
 
 function link_tool () {
