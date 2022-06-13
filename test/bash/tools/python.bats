@@ -64,6 +64,10 @@ teardown_file () {
   run check_tool_installed
   assert_failure
 
+  # needed to export versions
+  check_tool_requirements
+
+
   run install_tool
   assert_success
 
@@ -78,6 +82,9 @@ teardown_file () {
   # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
   TOOL_VERSION=3.10.5
 
+  # needed to export versions
+  check_tool_requirements
+
   run install_tool
   assert_success
 
@@ -90,6 +97,9 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=3.10.4
+
+  # needed to export versions
+  check_tool_requirements
 
   run install_tool
   assert_success
@@ -109,6 +119,9 @@ teardown_file () {
 
   # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
   TOOL_VERSION=3.10.5
+
+  # needed to export versions
+  check_tool_requirements
 
   run install_tool
   assert_success
@@ -132,6 +145,9 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=3.10.4
+
+  # needed to export versions
+  check_tool_requirements
 
   run install_tool
   assert_success

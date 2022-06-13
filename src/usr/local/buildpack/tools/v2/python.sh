@@ -26,9 +26,6 @@ function install_tool () {
   local arch
   local version_codename
 
-  # get semver -> major, minor, patch
-  check_semver "${TOOL_VERSION}"
-
   versioned_tool_path=$(create_versioned_tool_path)
   arch=$(uname -p)
   url="https://github.com/containerbase/python-prebuild/releases/download"
