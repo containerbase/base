@@ -59,9 +59,6 @@ function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  # get semver -> major, minor, patch
-  check_semver "${TOOL_VERSION}"
-
   reset_tool_env
 
   # export python vars
