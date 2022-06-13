@@ -54,10 +54,6 @@ RUN set -ex; \
     cd b; \
     flutter pub upgrade;
 
-RUN set -ex; \
-    cd c; \
-    flutter pub upgrade;
-
 #--------------------------------------
 # test: flutter 2.x (non-root)
 #--------------------------------------
