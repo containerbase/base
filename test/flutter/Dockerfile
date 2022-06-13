@@ -6,4 +6,3 @@ ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
 
-
