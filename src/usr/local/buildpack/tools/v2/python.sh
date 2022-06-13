@@ -19,26 +19,6 @@ fix_python_shebangs() {
   done < <(find "${versioned_tool_path}/bin" -type f -exec grep -Iq . {} \; -print0)
 }
 
-function prepare_tool() {
-  apt_install \
-    build-essential \
-    libbz2-dev \
-    libffi-dev \
-    liblzma-dev \
-    libreadline-dev \
-    libsqlite3-dev \
-    libssl-dev \
-    zlib1g-dev \
-    ;
-  if [[ ! -x "$(command -v python-build)" ]]; then
-    git clone https://github.com/pyenv/pyenv.git
-    pushd pyenv/plugins/python-build || exit
-    ./install.sh
-    popd || exit
-    rm -rf pyenv
-  fi
-}
-
 function install_tool () {
   local versioned_tool_path
   local file
@@ -62,7 +42,8 @@ function install_tool () {
     echo 'Using prebuild python'
     tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
   else
-    python-build "$TOOL_VERSION" "${versioned_tool_path}/${TOOL_VERSION}"
+    echo 'No prebuild python found' >&2
+    exit 1
   fi
 
   fix_python_shebangs
