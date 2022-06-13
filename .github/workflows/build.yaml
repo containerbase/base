@@ -71,7 +71,7 @@ jobs:
 
     strategy:
       matrix:
-        distro: [bionic]
+        distro: [jammy, bionic]
 
     env:
       TAG: ${{ matrix.distro }}
