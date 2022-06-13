@@ -70,7 +70,7 @@ function link_tool () {
   local tool_path
   tool_path=$(find_tool_path)
 
-  shell_wrapper "${TOOL_NAME}" "${tool_path}/bin"
+  shell_wrapper "${TOOL_NAME}" "${tool_path}"
 
   dotnet new > /dev/null
   if [[ $(is_root) -eq 0 ]]; then
