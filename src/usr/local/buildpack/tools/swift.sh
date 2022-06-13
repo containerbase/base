@@ -56,6 +56,10 @@ if [[ ! -d "${tool_path}" ]]; then
         tzdata \
         zlib1g-dev \
       ;;
+    *)
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use 'ubuntu' or 'bionic'." >&2
+      exit 1
+    ;;
   esac
 
 
