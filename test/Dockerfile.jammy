@@ -63,21 +63,21 @@ RUN install-tool yarn 1.22.18
 RUN install-npm lerna 5.0.0
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-#RUN install-tool php 8.1.7
+RUN install-tool php 8.1.7
 # renovate: datasource=github-releases lookupName=composer/composer
-#RUN install-tool composer 2.3.7
+RUN install-tool composer 2.3.7
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.4
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-#RUN install-tool python 3.10.5
+RUN install-tool python 3.10.5
 # renovate: datasource=pypi
-#RUN install-pip pipenv 2022.6.7
+RUN install-pip pipenv 2022.6.7
 # renovate: datasource=pypi
-#RUN install-pip hashin 0.17.0
+RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
-#RUN install-tool poetry 1.1.13
+RUN install-tool poetry 1.1.13
 
 # renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
