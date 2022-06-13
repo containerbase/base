@@ -63,9 +63,12 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir "$tool_path" --no-path --version "$TOOL_VERSION"
-  # we need write access to some sub dirs
-  chmod -R g+w "$tool_path"
+  curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir "$tool_path" --no-path --version "$TOOL_VERSION" --skip-non-versioned-files
+
+  # we need write access to some sub dirs for non root
+  if [[ $(is_root) -eq 0 ]]; then
+    find "$tool_path" -type d -exec chmod g+w {} \;
+  fi
 }
 
 function link_tool () {
