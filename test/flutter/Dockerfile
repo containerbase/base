@@ -19,7 +19,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate datasource=flutter-version
-RUN install-tool flutter 1.17.0
+RUN install-tool flutter 1.22.6
 
 USER 1000
 
@@ -44,7 +44,7 @@ RUN prepare-tool flutter
 USER 1000
 
 # renovate datasource=flutter-version
-RUN install-tool flutter 1.17.0
+RUN install-tool flutter 1.22.6
 
 RUN set -ex; \
     cd a; \
@@ -52,6 +52,10 @@ RUN set -ex; \
 
 RUN set -ex; \
     cd b; \
+    flutter pub upgrade;
+
+RUN set -ex; \
+    cd c; \
     flutter pub upgrade;
 
 #--------------------------------------
@@ -69,13 +73,9 @@ USER 1000
 # renovate datasource=flutter-version
 RUN install-tool flutter 2.2.2
 
-# RUN set -ex; \
-#     cd a; \
-#     flutter pub upgrade;
-
-# RUN set -ex; \
-#     cd b; \
-#     flutter pub upgrade;
+RUN set -ex; \
+    cd c; \
+    flutter pub upgrade;
 
 #--------------------------------------
 # test: flutter 3.x (non-root)
@@ -92,13 +92,9 @@ USER 1000
 # renovate datasource=flutter-version
 RUN install-tool flutter 3.0.2
 
-# RUN set -ex; \
-#     cd a; \
-#     flutter pub upgrade;
-
-# RUN set -ex; \
-#     cd b; \
-#     flutter pub upgrade;
+RUN set -ex; \
+    cd c; \
+    flutter pub upgrade;
 
 #--------------------------------------
 # final
