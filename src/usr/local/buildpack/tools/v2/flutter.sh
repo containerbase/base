@@ -25,7 +25,7 @@ function install_tool () {
   # we need write access to some sub dirs for non root :-(
   if [[ $(is_root) -eq 0 ]]; then
     chgrp -R root "${versioned_tool_path}"
-    chmod -R g=u "${versioned_tool_path}"
+    chmod -R g+w "${versioned_tool_path}"
   fi
 
   # git unsafe directory
@@ -46,6 +46,7 @@ function link_tool () {
   flutter --version
 
   if [[ $(is_root) -eq 0 ]]; then
+    chmod -R g+w "${versioned_tool_path}"
     su -c 'flutter --version' "${USER_NAME}"
   fi
 }
