@@ -36,6 +36,10 @@ function prepare_tool() {
       libssl1.1 \
       libsctp1 \
       ;;
+    *)
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use 'ubuntu' or 'bionic'." >&2
+      exit 1
+    ;;
   esac
 
   local tool_path

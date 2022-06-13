@@ -47,6 +47,19 @@ if [[ -z "${tool_path}" ]]; then
       libxslt1.1 \
       libzip5 \
       ;;
+    "jammy") apt_install \
+      libjpeg-turbo8 \
+      libmcrypt4 \
+      libonig5 \
+      libpng16-16 \
+      libtidy5deb1 \
+      libxslt1.1 \
+      libzip4 \
+      ;;
+    *)
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use 'ubuntu' or 'bionic'." >&2
+      exit 1
+    ;;
   esac
 
   curl -sSfLo ${file} "${BASE_URL}/${TOOL_VERSION}/php-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz"
