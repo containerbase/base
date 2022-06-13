@@ -97,6 +97,7 @@ function require_distro () {
   case "$VERSION_CODENAME" in
   "bionic") ;; #supported
   "focal") ;; #supported
+  "jammy") ;; #supported (partial)
   *)
     echo "Distro not supported: ${VERSION_CODENAME}! Please use 'ubuntu bionic or focal'." >&2
     exit 1
