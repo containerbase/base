@@ -108,6 +108,7 @@ jobs:
           [
             dotnet,
             erlang,
+            flutter,
             flux,
             golang,
             java,
