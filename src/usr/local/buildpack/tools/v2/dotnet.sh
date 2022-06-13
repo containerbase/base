@@ -64,6 +64,8 @@ function install_tool () {
   fi
 
   curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir "$tool_path" --no-path --version "$TOOL_VERSION"
+  # we need write access to some sub dirs
+  chmod -R g+w "$tool_path"
 }
 
 function link_tool () {
