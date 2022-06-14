@@ -36,8 +36,13 @@ function prepare_tool() {
       libssl1.1 \
       libsctp1 \
       ;;
+    "jammy") apt_install \
+      libodbc1 \
+      libssl3 \
+      libsctp1 \
+      ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use 'ubuntu' or 'bionic'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac
