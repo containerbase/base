@@ -99,7 +99,7 @@ RUN install-tool rust 1.61.0
 RUN install-tool terraform 1.2.2
 
 # renovate: datasource=github-releases lookupName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.1.4
+RUN install-tool git-lfs v3.2.0
 RUN git lfs version
 
 # renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler
