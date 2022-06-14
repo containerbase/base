@@ -1,4 +1,5 @@
 #!/bin/bash
+
 function prepare_tool() {
   echo '{ "firstRun": false, "enabled": false }' > ~/.flutter
   echo '{ "firstRun": false, "enabled": false }' > "${USER_HOME}/.flutter"

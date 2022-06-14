@@ -19,5 +19,8 @@ fi
 
 for tool in "${TOOLS[@]}"
 do
+  # TODO: find better way to reset env
+  # shellcheck source=/dev/null
+  . /usr/local/buildpack/util.sh
   prepare_tools "${tool}"
 done

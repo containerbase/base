@@ -1,9 +1,12 @@
 ARG IMAGE=containerbase/buildpack
-FROM ${IMAGE} as build
+FROM ${IMAGE} as base
 
 ARG APT_HTTP_PROXY
 
 RUN touch /.dummy
+
+
+FROM base as build
 
 # install nginx for request testing
 RUN install-apt nginx
@@ -184,11 +187,14 @@ RUN install-tool docker v20.10.17
 #--------------------------------------
 # test: bin path has 775
 #--------------------------------------
-FROM build as testi
+FROM base as testi
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+
+RUN prepare-tool all
 
 #--------------------------------------
 # final
