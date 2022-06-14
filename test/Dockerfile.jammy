@@ -36,6 +36,9 @@ RUN install-tool dotnet 6.0.300
 # renovate: datasource=docker versioning=docker
 #RUN install-tool elixir 1.13.4
 
+# renovate datasource=flutter-version
+RUN install-tool flutter 3.0.2
+
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
 RUN install-tool flux v0.31.1
 
