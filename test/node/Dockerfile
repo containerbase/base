@@ -213,7 +213,7 @@ RUN set -ex; cd a; npm install
 FROM build as testh
 
 # renovate: datasource=npm lookupName=yarn
-RUN install-tool yarn-slim 1.22.18
+RUN install-tool yarn-slim 1.22.19
 
 RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install
