@@ -36,8 +36,7 @@ function prepare_prefix () {
 }
 
 function check_tool_requirements () {
-  check_semver "$TOOL_VERSION"
-  validate_semver 2
+  check_semver "$TOOL_VERSION" "minor"
 }
 
 function install_tool () {
