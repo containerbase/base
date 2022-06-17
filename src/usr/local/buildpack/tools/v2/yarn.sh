@@ -2,8 +2,7 @@
 
 function check_tool_requirements () {
   check_command node
-  check_semver "$TOOL_VERSION"
-  validate_semver
+  check_semver "$TOOL_VERSION" "all"
 }
 
 function install_tool () {

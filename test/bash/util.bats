@@ -95,39 +95,54 @@ teardown() {
   assert [ "${MAJOR}" = "11" ]
   assert [ "${MINOR}" = "0" ]
   assert [ "${PATCH}" = "14" ]
-}
 
-@test "validate_semver" {
+  run check_semver 1.2.3
+  assert_success
 
-  run validate_semver
+  run check_semver 1.2.3 "none"
+  assert_success
+
+  run check_semver 1.2.3 "all"
+  assert_success
+
+  run check_semver 1.2.3 "major"
+  assert_success
+
+  run check_semver 1.2.3 "minor"
+  assert_success
+
+  run check_semver 1.2.3 "patch"
+  assert_success
+
+  run check_semver 1.2 "none"
+  assert_success
+
+  run check_semver 1.2 "all"
   assert_failure
 
-  MAJOR=3 \
-  MINOR=2 \
-  run validate_semver
+  run check_semver 1.2 "major"
+  assert_success
+
+  run check_semver 1.2 "minor"
+  assert_success
+
+  run check_semver 1.2 "patch"
   assert_failure
 
-  check_semver 1.2.3
-
-  run validate_semver 3
-  assert_success
-
-  run validate_semver 2
-  assert_success
-
-  run validate_semver 1
-  assert_success
-
-  check_semver 1.2
-
-  run validate_semver 3
+  run check_semver 1 "all"
   assert_failure
 
-  run validate_semver 2
+  run check_semver 1 "none"
   assert_success
 
-  run validate_semver 1
+  run check_semver 1 "major"
   assert_success
+
+  run check_semver 1 "minor"
+  assert_failure
+
+  run check_semver 1 "patch"
+  assert_failure
 }
 
 @test "deprecated check_version function" {
