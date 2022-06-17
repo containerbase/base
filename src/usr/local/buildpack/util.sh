@@ -68,6 +68,22 @@ function check_semver () {
   export PATCH=${BASH_REMATCH[5]}
 }
 
+function validate_semver () {
+  local number_of_parts=${1:-3}
+  if [[ number_of_parts -ge 1 ]] && [[ ! "${MAJOR}" ]]; then
+    echo Invalid version - Major not defined: "${TOOL_VERSION}"
+    exit 1
+  fi
+  if [[ number_of_parts -ge 2 ]] && [[ ! "${MINOR}" ]]; then
+    echo Invalid version - Minor not defined: "${TOOL_VERSION}"
+    exit 1
+  fi
+    if [[ number_of_parts -ge 3 ]] && [[ ! "${PATCH}" ]]; then
+    echo Invalid version - Patch not defined: "${TOOL_VERSION}"
+    exit 1
+  fi
+}
+
 function apt_install () {
   echo "Installing apt packages: $*"
   if [[ "${APT_HTTP_PROXY}" ]]; then

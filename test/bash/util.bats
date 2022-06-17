@@ -97,6 +97,39 @@ teardown() {
   assert [ "${PATCH}" = "14" ]
 }
 
+@test "validate_semver" {
+
+  run validate_semver
+  assert_failure
+
+  MAJOR=3 \
+  MINOR=2 \
+  run validate_semver
+  assert_failure
+
+  check_semver 1.2.3
+
+  run validate_semver 3
+  assert_success
+
+  run validate_semver 2
+  assert_success
+
+  run validate_semver 1
+  assert_success
+
+  check_semver 1.2
+
+  run validate_semver 3
+  assert_failure
+
+  run validate_semver 2
+  assert_success
+
+  run validate_semver 1
+  assert_success
+}
+
 @test "deprecated check_version function" {
   run check_version FOO
   assert_output --partial "deprecated"

@@ -29,6 +29,7 @@ function reset_tool_env () {
   fi
 }
 
+# Gets the env file name of the given tool
 function find_tool_env () {
   local install_dir
   install_dir=$(get_install_dir)
