@@ -67,7 +67,7 @@ function check_semver () {
   local lowest_component=${2:-none}
 
   if [[ ! "${version}" =~ ${SEMVER_REGEX} ]]; then
-    echo Not a semver like version - aborting: "${1}"
+    echo Not a semver like version - aborting: "${version}"
     exit 1
   fi
   export MAJOR=${BASH_REMATCH[1]}
