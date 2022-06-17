@@ -65,7 +65,7 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.18
+RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
 RUN install-tool lerna 5.0.0
@@ -124,7 +124,7 @@ RUN set -ex; \
   yarn --version;
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.18
+RUN install-tool yarn 1.22.19
 RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
@@ -213,7 +213,7 @@ RUN set -ex; cd a; npm install
 FROM build as testh
 
 # renovate: datasource=npm lookupName=yarn
-RUN install-tool yarn-slim 1.22.18
+RUN install-tool yarn-slim 1.22.19
 
 RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install
@@ -267,7 +267,7 @@ RUN set -ex; ls -lah /test/a; cd a; yarn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.18
+RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
 RUN install-tool lerna 5.0.0

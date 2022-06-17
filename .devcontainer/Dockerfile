@@ -1,7 +1,7 @@
-FROM containerbase/node:16.15.1@sha256:78ebd9b2d6a5504552c914fa1b8e3fc246da3eb15a006e94408c0e66773fdcfe
+FROM containerbase/node:16.15.1@sha256:26985b100adc5ee8f6223a30f466d5e1a56310e4022cd0efe0db66251d7e4d31
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.18
+RUN install-tool yarn 1.22.19
 
 USER root
 RUN install-apt shellcheck

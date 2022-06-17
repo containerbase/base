@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
+SEMVER_REGEX_ERLANG="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
-function check_semver () {
-  if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
+function check_semver_erlang () {
+  if [[ ! "${1}" =~ ${SEMVER_REGEX_ERLANG} ]]; then
     echo Not a semver like version - aborting: "${1}"
     exit 1
   fi
@@ -14,7 +14,7 @@ function check_semver () {
 }
 
 function check_tool_requirements () {
-  check_semver "${TOOL_VERSION}"
+  check_semver_erlang "${TOOL_VERSION}"
   if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" || ! "${BUILD}" ]]; then
     echo Invalid version: "${TOOL_VERSION}"
     exit 1
@@ -36,8 +36,13 @@ function prepare_tool() {
       libssl1.1 \
       libsctp1 \
       ;;
+    "jammy") apt_install \
+      libodbc1 \
+      libssl3 \
+      libsctp1 \
+      ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use 'ubuntu' or 'bionic'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac
