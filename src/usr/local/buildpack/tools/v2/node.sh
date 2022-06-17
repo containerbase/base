@@ -37,11 +37,7 @@ function prepare_prefix () {
 
 function check_tool_requirements () {
   check_semver "$TOOL_VERSION"
-
-  if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
-    echo Invalid version: "${TOOL_VERSION}"
-    exit 1
-  fi
+  validate_semver 2
 }
 
 function install_tool () {
