@@ -35,6 +35,11 @@ setup() {
   TOOL_NAME=node \
   # renovate: datasource=node
   TOOL_VERSION=16.15.1 \
+  check_tool_requirements
+
+  TOOL_NAME=node \
+  # renovate: datasource=node
+  TOOL_VERSION=16.15.1 \
   run install_tool
 
   # load npm
@@ -71,6 +76,8 @@ teardown_file () {
   run check_tool_installed
   assert_failure
 
+  check_tool_requirements
+
   run install_tool
   assert_success
 
@@ -86,6 +93,8 @@ teardown_file () {
   # renovate: datasource=npm lookupName=npm
   TOOL_VERSION=8.12.1
 
+  check_tool_requirements
+
   PATH="${bin_path}:${PATH}" \
   run install_tool
   assert_success
@@ -99,6 +108,8 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=8.12.0
+
+  check_tool_requirements
 
   run install_tool
   assert_success
@@ -118,6 +129,8 @@ teardown_file () {
 
   # renovate: datasource=npm lookupName=npm
   TOOL_VERSION=8.12.1
+
+  check_tool_requirements
 
   PATH="${bin_path}:${PATH}" \
   run install_tool
@@ -141,6 +154,8 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=8.12.0
+
+  check_tool_requirements
 
   PATH="${bin_path}:${PATH}" \
   run install_tool

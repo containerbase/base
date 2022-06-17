@@ -7,6 +7,34 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 # shellcheck source=/dev/null
 . "$DIR/../../utils/node.sh"
 
+# Helper function to link to a globally installed node
+function prepare_global_config () {
+  local prefix=${1}
+  prepare_prefix "${prefix}"
+  mkdir -p "${versioned_tool_path}/etc"
+  echo "prefix = \"${prefix}\"" >> "${versioned_tool_path}/etc/npmrc"
+}
+
+# Helper function to link to a user installed node
+function prepare_user_config () {
+  local prefix=${1}
+  if grep 'prefix' "${USER_HOME}/.npmrc"; then
+    return
+  fi
+
+  prepare_prefix "${prefix}"
+  echo "prefix = \"${prefix}\"" >> "${USER_HOME}/.npmrc"
+  mkdir -p "${USER_HOME}/.npm/_logs"
+  chown -R "${USER_ID}" "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
+  chmod -R g+w "${prefix}" "${USER_HOME}/.npmrc" "${USER_HOME}/.npm"
+}
+
+function prepare_prefix () {
+  local prefix=${1}
+  # npm 7 bug
+  mkdir -p "${prefix}"/{bin,lib}
+}
+
 function check_tool_requirements () {
   check_semver "$TOOL_VERSION"
 
@@ -45,9 +73,6 @@ function install_tool () {
 
   # required for npm
   link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-
-  # get semver
-  check_semver "$TOOL_VERSION"
 
   if [[ ${MAJOR} -lt 15 ]]; then
     echo "updating node-gyp"

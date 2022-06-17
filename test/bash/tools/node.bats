@@ -66,6 +66,8 @@ teardown_file () {
   run check_tool_installed
   assert_failure
 
+  check_tool_requirements
+
   run install_tool
   assert_success
 
@@ -80,6 +82,8 @@ teardown_file () {
   # renovate: datasource=node
   TOOL_VERSION=16.15.1
 
+  check_tool_requirements
+
   run install_tool
   assert_success
 
@@ -92,6 +96,9 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=16.15.0
+
+  check_tool_requirements
+
   run install_tool
   assert_success
 
@@ -110,6 +117,8 @@ teardown_file () {
 
   # renovate: datasource=node
   TOOL_VERSION=16.15.1
+
+  check_tool_requirements
 
   run install_tool
   assert_success
@@ -133,6 +142,8 @@ teardown_file () {
 
   # don't update
   TOOL_VERSION=16.15.0
+
+  check_tool_requirements
 
   run install_tool
   assert_success
