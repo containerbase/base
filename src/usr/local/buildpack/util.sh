@@ -59,14 +59,14 @@ function check_command () {
 SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
 # will extract the given version into MAJOR, MINOR and PATCH components
-# the optional second argument gives the highes versions required.
+# the optional second argument gives the highest component required.
 # Possible values are none (default), major, minor, patch or all (same as patch)
 # which requires at least the given component to be set
 function check_semver () {
   local version=${1}
   local lowest_component=${2:-none}
 
-  if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
+  if [[ ! "${version}" =~ ${SEMVER_REGEX} ]]; then
     echo Not a semver like version - aborting: "${1}"
     exit 1
   fi
@@ -77,13 +77,13 @@ function check_semver () {
   if [[ ! "${lowest_component}" =~ all|major|minor|patch ]]; then
     return
   elif [[ "${lowest_component}" =~ all|major|minor|patch ]] && [[ ! "${MAJOR}" ]]; then
-    echo Invalid version - Major not defined: "${TOOL_VERSION}"
+    echo Invalid version - Major not defined: "${version}"
     exit 1
   elif [[ "${lowest_component}" =~ all|minor|patch ]] && [[ ! "${MINOR}" ]]; then
-    echo Invalid version - Minor not defined: "${TOOL_VERSION}"
+    echo Invalid version - Minor not defined: "${version}"
     exit 1
   elif [[ "${lowest_component}" =~ all|patch ]] && [[ ! "${PATCH}" ]]; then
-    echo Invalid version - Patch not defined: "${TOOL_VERSION}"
+    echo Invalid version - Patch not defined: "${version}"
     exit 1
   fi
 }
