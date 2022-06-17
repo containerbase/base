@@ -10,9 +10,6 @@ function npm_install () {
   local versioned_tool_path
   versioned_tool_path="$(create_versioned_tool_path)"
 
-  # get semver => MAJOR, MINOR, PATCH
-  check_semver "${TOOL_VERSION}"
-
   npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --no-audit --prefix "$versioned_tool_path" --cache "${NPM_CONFIG_CACHE}" 2>&1
 
   if [[ "${TOOL_NAME}" == "npm" && ${MAJOR} -lt 7 ]]; then
