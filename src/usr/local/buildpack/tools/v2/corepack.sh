@@ -2,12 +2,7 @@
 
 function check_tool_requirements () {
   check_command node
-  check_semver "$TOOL_VERSION"
-
-  if [[ ! "${MAJOR}" || ! "${MINOR}" || ! "${PATCH}" ]]; then
-    echo Invalid version: "${TOOL_VERSION}"
-    exit 1
-  fi
+  check_semver "$TOOL_VERSION" "all"
 }
 
 function install_tool () {
