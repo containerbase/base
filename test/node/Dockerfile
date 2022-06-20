@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.32.22
+RUN install-tool pnpm 7.3.0
 
 RUN set -ex; \
   pnpm --version;
