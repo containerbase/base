@@ -19,7 +19,10 @@ V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
 
 if [[ -f "$V2_TOOL" ]]; then
   # install v2 tool
-  time install_v2_tool "${V2_TOOL}"
+  start=$(date +%s)
+  install_v2_tool "${V2_TOOL}"
+  duration=$((start - $(date +%s)))
+  echo "Installed ${V2_TOOL} in ${duration} seconds"
 elif [[ -f "$TOOL" ]]; then
   echo "Installing legacy tool ${TOOL_NAME} v${TOOL_VERSION}"
   # shellcheck source=/dev/null
