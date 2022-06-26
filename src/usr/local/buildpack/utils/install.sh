@@ -13,7 +13,7 @@ function install_v2_tool () {
   . "${path}"
 
   if ! check_tool_installed; then
-    echo "installing tool ${TOOL_NAME} v${TOOL_VERSION}"
+    echo "installing v2 tool ${TOOL_NAME} v${TOOL_VERSION}"
     check_tool_requirements
     install_tool
   else

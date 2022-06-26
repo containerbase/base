@@ -32,7 +32,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool dotnet 6.0.301
 
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.1
+RUN install-tool erlang 24.3.4.2
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.4
 
@@ -40,7 +40,7 @@ RUN install-tool elixir 1.13.4
 RUN install-tool flutter 3.0.2
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.31.1
+RUN install-tool flux v0.31.2
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.18.3
@@ -59,11 +59,11 @@ RUN install-tool nix 2.3.10
 # renovate: datasource=node
 RUN install-tool node v16.15.1
 # renovate: datasource=npm
-RUN install-tool pnpm 6.32.19
+RUN install-tool pnpm 7.3.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
-RUN install-npm lerna 5.0.0
+RUN install-npm lerna 5.1.4
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
 RUN install-tool php 8.1.7
@@ -71,7 +71,7 @@ RUN install-tool php 8.1.7
 RUN install-tool composer 2.3.7
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.4
+RUN install-tool powershell v7.2.5
 
 # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
@@ -103,4 +103,4 @@ RUN install-tool git-lfs v3.1.4
 RUN git lfs version
 
 # renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler
-RUN install-tool jb v0.4.0
+RUN install-tool jb v0.5.1

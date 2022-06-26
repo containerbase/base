@@ -4,7 +4,7 @@ FROM ${IMAGE} as build
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.4
+RUN install-tool powershell v7.2.5
 
 USER 1000
 

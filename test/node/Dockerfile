@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.0.0
+RUN install-tool lerna 5.1.4
 
 USER 1000
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 6.32.19
+RUN install-tool pnpm 7.3.0
 
 RUN set -ex; \
   pnpm --version;
@@ -270,7 +270,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.0.0
+RUN install-tool lerna 5.1.4
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -338,7 +338,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 1000
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.10.0
+RUN install-tool corepack 0.11.2
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -355,7 +355,7 @@ FROM build as testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.10.0
+RUN install-tool corepack 0.11.2
 
 # renovate: datasource=npm lookupName=yarn
 ARG YARN_VERSION=1.22.18
@@ -373,7 +373,7 @@ FROM build as testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.10.0
+RUN install-tool corepack 0.11.2
 
 # renovate: datasource=npm lookupName=yarn
 ARG YARN_VERSION=3.1.0
@@ -393,7 +393,7 @@ FROM build as testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.10.0
+RUN install-tool corepack 0.11.2
 
 # renovate: datasource=npm lookupName=pnpm
 ARG PNPM_VERSION=7.0.0
