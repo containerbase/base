@@ -130,7 +130,7 @@ function cache_folder () {
 
   if [ -z "${BUILDPACK_CACHE_DIR}" ]; then
     # BUILD_CACHE_DIR is not set
-    exit 0
+    return
   fi
 
   local checksum
