@@ -7,6 +7,9 @@ variable "FILE" {
 variable "TAG" {
   default = "latest"
 }
+variable "BUILDPACK_VERSION" {
+  default = "unknown"
+}
 
 variable "APT_HTTP_PROXY" {
   default = ""
@@ -43,6 +46,7 @@ target "settings" {
   args = {
     APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
     BUILDPACK_DEBUG = "${BUILDPACK_DEBUG}"
+    BUILDPACK_VERSION = "${BUILDPACK_VERSION}"
   }
 }
 

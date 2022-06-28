@@ -8,6 +8,8 @@ ARG APT_HTTP_PROXY
 # Weekly cache buster
 ARG CACHE_WEEK
 
+ARG BUILDPACK_VERSION
+
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/buildpack"
 
@@ -25,3 +27,6 @@ RUN install-buildpack
 
 # renovate: datasource=github-tags lookupName=git/git
 RUN install-tool git v2.36.1
+
+
+LABEL org.opencontainers.image.version="${BUILDPACK_VERSION}"
