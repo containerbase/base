@@ -3,12 +3,12 @@
 # This is the cache implementation for the buildpack project.
 #
 # The idea is to cache tools to speed up the installation for the next installs.
-# For this this file supports caching of the following:
-#   * files downloaded from the internet
-#   * versioned tool folders (basically all folders, but should only be used for tools right now)
+# Currently supported:
+#   * urls which resolves to binary files downloaded from the internet
+#   * folders (basically all folders, but should only be used for versioned tool folders right now)
 #
-# Caching of folders will result in an archive that will be stored in the cache.
-# So it is useful for small folders only
+# Cached folders will be stored as an archive file in the cache.
+# Cached urls will be stored as is in the cache.
 #
 # The structure of the cache is the following:
 # ${BUILDPACK_CACHE_DIR}
@@ -17,10 +17,14 @@
 # ├── 375f537df492a02fd1744a6e0973943e45163a10
 # │   └── folder.tar
 #
+# The base name of cached urls will be sha1 hashed and used as folder name
+# The path of folders will be sha1 hashed and used as folder name.
+#
 # The cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR is set.
-# It also supports cleaning up the cache if there is not enough disk space.
-# Cleanup will always happen on the checksum folder, not the individual files.
-# This is needed to prevent breaking tools that require all files
+#
+# The cache supports a cleanup function if there is not enough disk space.
+# The function will always work on the checksum folder, not the individual files inside the folders.
+
 
 # will attempt to download the file at the given url and stores it in the cache.
 # If this file already exists, will return the cached version
@@ -139,8 +143,8 @@ function cache_folder () {
   local filename="${checksum}/folder.tar"
   local cache_path="${BUILDPACK_CACHE_DIR}/${filename}"
 
-  # create folder
-  mkdir -p "${BUILDPACK_CACHE_DIR}/${checksum}"
+  # create folder with root umask
+  create_folder "${BUILDPACK_CACHE_DIR}/${checksum}" "${ROOT_UMASK}"
 
   # remove file if it exists
   if [ -e "${cache_path}" ]; then
