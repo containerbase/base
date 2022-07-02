@@ -25,7 +25,7 @@ function install_v2_tool () {
   current_version="$(get_tool_version)"
 
   if [[ -n "${current_version}" ]] && [[ "${current_version}" = "${TOOL_VERSION}" ]]; then
-    echo "tool is alredy linked: ${TOOL_NAME} v${TOOL_VERSION}"
+    echo "tool is already linked: ${TOOL_NAME} v${TOOL_VERSION}"
   else
     echo "linking tool ${TOOL_NAME} v${TOOL_VERSION}"
     link_tool
