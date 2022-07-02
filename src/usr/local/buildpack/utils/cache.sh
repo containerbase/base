@@ -187,6 +187,6 @@ function restore_folder_from_cache () {
   fi
 
   # untar folder
-  tar -xvf "${cache_path}" -C "${path}"
+  tar -xf "${cache_path}" -C "${path}"
   echo 0
 }
