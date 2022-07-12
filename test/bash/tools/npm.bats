@@ -137,6 +137,7 @@ teardown_file () {
   run install_tool
   assert_success
 
+  PATH="${bin_path}:${PATH}" \
   run link_tool
   assert_success
   assert_output --partial "${TOOL_VERSION}"

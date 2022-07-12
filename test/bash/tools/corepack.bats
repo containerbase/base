@@ -112,6 +112,7 @@ teardown_file () {
 
   check_tool_requirements
 
+  PATH="${bin_path}:${PATH}" \
   run install_tool
   assert_success
 
