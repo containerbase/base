@@ -23,6 +23,7 @@ setup() {
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
   BIN_DIR="${TEST_ROOT_DIR}/bin"
+  USER_HOME="${TEST_ROOT_DIR}/userhome"
 
   setup_directories
 
