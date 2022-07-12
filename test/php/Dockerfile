@@ -99,7 +99,7 @@ ARG APT_HTTP_PROXY
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases lookupName=containerbase/php-prebuild
-RUN install-tool php 8.1.7
+RUN install-tool php 8.1.8
 
 
 # renovate: datasource=github-releases lookupName=composer/composer
