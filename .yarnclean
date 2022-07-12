@@ -6,6 +6,7 @@ powered-test
 
 # asset directories
 docs
+# doc - breaks `yaml`
 website
 images
 assets
