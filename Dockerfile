@@ -26,7 +26,7 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.37.0
+RUN install-tool git v2.37.1
 
 
 LABEL org.opencontainers.image.version="${BUILDPACK_VERSION}"
