@@ -37,7 +37,7 @@ FROM build as pipenv
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.6.7
+RUN install-pip pipenv 2022.7.4
 
 
 USER 1000
@@ -50,7 +50,7 @@ ARG BUILDPACK_DEBUG
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.13
+RUN install-tool poetry 1.1.14
 
 USER 1000
 
@@ -66,7 +66,7 @@ ARG BUILDPACK_DEBUG
 RUN install-tool python 3.10.5
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.13
+RUN install-tool poetry 1.1.14
 
 USER 1000
 
@@ -133,14 +133,14 @@ FROM build-rootless as testg
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.6.7
+RUN install-pip pipenv 2022.7.4
 
 RUN set -ex; \
   cd a; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.13
+RUN install-tool poetry 1.1.14
 
 RUN set -ex \
   && cd c-poetry \

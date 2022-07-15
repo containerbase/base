@@ -20,5 +20,5 @@ function npm_install () {
 
 function npm_clean () {
   # Clean npm stuff
-  rm -rf "$HOME/.cache" "${NPM_CONFIG_CACHE}" "$HOME/.npm/_logs"/*
+  rm -rf "${NPM_CONFIG_CACHE}" "$HOME/.npm/_logs"/*
 }

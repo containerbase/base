@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.15.1
+RUN install-tool node v16.16.0
 
 RUN touch /.dummy
 
@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.1.6
+RUN install-tool lerna 5.1.8
 
 USER 1000
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.3.0
+RUN install-tool pnpm 7.5.0
 
 RUN set -ex; \
   pnpm --version;
@@ -270,7 +270,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.1.6
+RUN install-tool lerna 5.1.8
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \

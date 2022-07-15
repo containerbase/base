@@ -14,7 +14,7 @@ WORKDIR /test
 FROM build as testa
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.18.3
+RUN install-tool golang 1.18.4
 
 USER 1000
 

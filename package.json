@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
-    "@types/node": "16.11.41",
+    "@types/node": "16.11.43",
     "@types/shelljs": "0.8.11",
     "bats": "1.7.0",
     "bats-assert": "2.0.0",
@@ -30,7 +30,7 @@
     "shelljs": "0.8.5"
   },
   "scripts": {
-    "bats": "bats test/bash/ test/bash/v2 test/bash/tools",
+    "test:bats": "bats --verbose-run test/bash/ test/bash/v2 test/bash/tools",
     "build": "run-s release:prepare",
     "lint": "yarn prettier -c -u \"**/*.*\"",
     "lint-fix": "yarn prettier -w -u \"**/*.*\"",

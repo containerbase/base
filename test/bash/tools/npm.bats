@@ -23,6 +23,7 @@ setup() {
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
   BIN_DIR="${TEST_ROOT_DIR}/bin"
+  USER_HOME="${TEST_ROOT_DIR}/userhome"
 
   setup_directories
 
@@ -136,6 +137,7 @@ teardown_file () {
   run install_tool
   assert_success
 
+  PATH="${bin_path}:${PATH}" \
   run link_tool
   assert_success
   assert_output --partial "${TOOL_VERSION}"

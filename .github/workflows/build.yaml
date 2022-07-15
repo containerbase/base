@@ -13,7 +13,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 16.15.1 # renovate: datasource=node depName=node
+  NODE_VERSION: 16.16.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -64,11 +64,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: bats
-        run: yarn bats
+        run: yarn test:bats
 
   distro:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     strategy:
       matrix:
@@ -85,7 +85,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -137,7 +137,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -178,7 +178,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
