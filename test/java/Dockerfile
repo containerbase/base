@@ -27,7 +27,7 @@ USER 1000
 
 # stay on v6
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.2
+RUN install-tool gradle 7.5
 
 
 RUN set -ex; \
@@ -51,7 +51,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.1+10
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.4.2
+RUN install-tool gradle 7.5
 
 USER 1000
 
@@ -80,7 +80,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.332+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.4.2
+RUN install-tool gradle 7.5
 
 #--------------------------------------
 # test: java 17 (non-root)
