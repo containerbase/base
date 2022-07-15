@@ -197,6 +197,7 @@ teardown() {
     # set up the cache
   load "$TEST_DIR/cache.sh"
   BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  BUILDPACK_CACHE_FOLDERS="true"
 
   # create "tool" folder
   tool_folder=$(mktemp -u)
@@ -215,11 +216,11 @@ teardown() {
 
   run cache_folder "${tool_folder}" "${key}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
 
   run cache_folder "${tool_folder}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
 
   # delete cache entry
   rm -rf ${BUILDPACK_CACHE_DIR}/${key_checksum}
@@ -230,6 +231,7 @@ teardown() {
   # set up the cache
   load "$TEST_DIR/cache.sh"
   BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  BUILDPACK_CACHE_FOLDERS="true"
 
   # create "tool" folder
   tool_folder=$(mktemp -u)
@@ -248,11 +250,11 @@ teardown() {
 
   run cache_folder "${tool_folder}" "${key}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
 
   run cache_folder "${tool_folder}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
 
   # test with key
 

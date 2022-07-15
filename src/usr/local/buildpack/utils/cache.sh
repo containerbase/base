@@ -20,7 +20,8 @@
 # The base name of cached urls will be sha1 hashed and used as folder name
 # The path of folders will be sha1 hashed and used as folder name.
 #
-# The cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR is set.
+# The url cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR is set.
+# The fodler cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR and BUILDPACK_CACHE_FOLDERS is set.
 #
 # The cache supports a cleanup function if there is not enough disk space.
 # The function will always work on the checksum folder, not the individual files inside the folders.
@@ -122,7 +123,7 @@ function calculate_checksum () {
 # Any existing entry under the given key will be overriden
 # If the key is not passed, then the path will be used as key
 #
-# Only enabled when BUILDPACK_CACHE_DIR is set, noop otherwise
+# Only enabled when BUILDPACK_CACHE_DIR and BUILDPACK_CACHE_FOLDERS is set, noop otherwise
 #
 # Will return the path to the cached folder as tar file
 function cache_folder () {
@@ -132,7 +133,7 @@ function cache_folder () {
   check path true
   check key true
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ]; then
+  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ -z "${BUILDPACK_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     return
   fi
@@ -140,7 +141,7 @@ function cache_folder () {
   local checksum
   checksum=$(calculate_checksum "${key}")
 
-  local filename="${checksum}/folder.tar"
+  local filename="${checksum}/folder.tar.zst"
   local cache_path="${BUILDPACK_CACHE_DIR}/${filename}"
 
   # create folder with root umask
@@ -152,7 +153,7 @@ function cache_folder () {
   fi
 
   # tar folder
-  tar -cf "${cache_path}" -C "${path}" .
+  tar -C "${path}" -cf - . | zstd -qq --no-progress -z -T0 --long=30 -o "${cache_path}"
   echo "${cache_path}"
 }
 
@@ -168,7 +169,7 @@ function restore_folder_from_cache () {
   check path true
   check key true
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ]; then
+  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ -z "${BUILDPACK_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     echo 1
     return
@@ -177,7 +178,7 @@ function restore_folder_from_cache () {
   local checksum
   checksum=$(calculate_checksum "${key}")
 
-  local filename="${checksum}/folder.tar"
+  local filename="${checksum}/folder.tar.zst"
   local cache_path="${BUILDPACK_CACHE_DIR}/${filename}"
 
   if [ ! -e "${cache_path}" ]; then
@@ -187,6 +188,6 @@ function restore_folder_from_cache () {
   fi
 
   # untar folder
-  tar -xf "${cache_path}" -C "${path}"
+  zstd -qq --no-progress -c -d -T0 --long=30 "${cache_path}" | tar -C "${path}" -xpf -
   echo 0
 }
