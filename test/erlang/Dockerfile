@@ -16,8 +16,11 @@ FROM build as testa
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+# Do not update - last v24 release
 RUN install-tool erlang 24.3.4.2
+
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 25.0.0.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.4
