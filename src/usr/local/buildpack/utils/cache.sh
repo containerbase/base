@@ -17,8 +17,8 @@
 # ├── 375f537df492a02fd1744a6e0973943e45163a10
 # │   └── folder.tar
 #
-# The base name of cached urls will be sha1 hashed and used as folder name
-# The path of folders will be sha1 hashed and used as folder name.
+# The base name of cached urls will be sha256 hashed and used as folder name
+# The path of folders will be sha256 hashed and used as folder name.
 #
 # The url cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR is set.
 # The fodler cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR and BUILDPACK_CACHE_FOLDERS is set.
@@ -116,7 +116,7 @@ function get_cache_fill_level () {
 # Will calculate the checksum for the given string
 function calculate_checksum () {
   local text=$1
-  echo "${text}" | sha1sum | awk '{print $1}'
+  echo "${text}" | sha256sum | awk '{print $1}'
 }
 
 # Will cache the given folder under a given key in the cache

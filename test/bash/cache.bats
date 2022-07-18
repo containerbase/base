@@ -173,11 +173,11 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # overwrite donwload function to fail
   function download_file () {
@@ -186,11 +186,11 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" "test"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
 }
 
 @test "cache_folder" {
