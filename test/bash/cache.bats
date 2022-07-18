@@ -173,11 +173,11 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # overwrite donwload function to fail
   function download_file () {
@@ -186,9 +186,107 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/buildpack\.tar\.xz"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" "test"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{40}/test"
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+}
+
+@test "cache_folder" {
+    # set up the cache
+  load "$TEST_DIR/cache.sh"
+  BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  BUILDPACK_CACHE_FOLDERS="true"
+
+  # create "tool" folder
+  tool_folder=$(mktemp -u)
+  mkdir -p "${tool_folder}"
+  touch "${tool_folder}/a"
+  touch "${tool_folder}/b"
+
+  local key
+  key=$(random_word)
+
+  local key_checksum
+  key_checksum=$(calculate_checksum "${key}")
+
+  local path_checksum
+  path_checksum=$(calculate_checksum "${tool_folder}")
+
+  run cache_folder "${tool_folder}" "${key}"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
+
+  run cache_folder "${tool_folder}"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
+
+  # delete cache entry
+  rm -rf ${BUILDPACK_CACHE_DIR}/${key_checksum}
+  rm -rf ${BUILDPACK_CACHE_DIR}/${path_checksum}
+}
+
+@test "restore_folder_from_cache" {
+  # set up the cache
+  load "$TEST_DIR/cache.sh"
+  BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  BUILDPACK_CACHE_FOLDERS="true"
+
+  # create "tool" folder
+  tool_folder=$(mktemp -u)
+  mkdir -p "${tool_folder}"
+  touch "${tool_folder}/a"
+  touch "${tool_folder}/b"
+
+  local key
+  key="$(random_word)"
+
+  local key_checksum
+  key_checksum=$(calculate_checksum "${key}")
+
+  local path_checksum
+  path_checksum=$(calculate_checksum "${tool_folder}")
+
+  run cache_folder "${tool_folder}" "${key}"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
+
+  run cache_folder "${tool_folder}"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
+
+  # test with key
+
+  # delete entries
+  rm "${tool_folder}/a" "${tool_folder}/b"
+
+  assert [ ! -e "${tool_folder}/a" ]
+  assert [ ! -e "${tool_folder}/b" ]
+
+  # restore
+  run restore_folder_from_cache "${tool_folder}" "${key}"
+  assert_success
+
+  assert [ -e "${tool_folder}/a" ]
+  assert [ -e "${tool_folder}/b" ]
+
+  # test without key
+
+  # delete entries
+  rm "${tool_folder}/a" "${tool_folder}/b"
+
+  assert [ ! -e "${tool_folder}/a" ]
+  assert [ ! -e "${tool_folder}/b" ]
+
+  # restore
+  run restore_folder_from_cache "${tool_folder}"
+  assert_success
+
+  assert [ -e "${tool_folder}/a" ]
+  assert [ -e "${tool_folder}/b" ]
+
+  # delete cache entry
+  rm -rf ${BUILDPACK_CACHE_DIR}/${key_checksum}
+  rm -rf ${BUILDPACK_CACHE_DIR}/${path_checksum}
 }
