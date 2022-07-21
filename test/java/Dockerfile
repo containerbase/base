@@ -92,7 +92,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=adoptium-java depName=java
-ARG JAVA_VERSION=17.0.3+7
+ARG JAVA_VERSION=17.0.4+8
 RUN install-tool java
 
 # test latest gradle
