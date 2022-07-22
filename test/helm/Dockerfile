@@ -3,7 +3,7 @@ FROM ${IMAGE} as build
 
 RUN touch /.dummy
 
-# renovate: datasource=github-releases lookupName=helm/helm
+# renovate: datasource=github-releases packageName=helm/helm
 ARG HELM_VERSION=3.8.0
 
 

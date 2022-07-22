@@ -17,7 +17,7 @@ COPY src/ /
 RUN install-buildpack
 
 
-# renovate: datasource=github-tags lookupName=git/git
+# renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.37.1
 
 
@@ -28,10 +28,10 @@ FROM base as test
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.302
 
-# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.4.2
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.13.4
@@ -39,21 +39,21 @@ RUN install-tool elixir 1.13.4
 # renovate datasource=flutter-version
 RUN install-tool flutter 3.0.2
 
-# renovate: datasource=github-releases lookupName=fluxcd/flux2
+# renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v0.31.4
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.18.4
 
-# renovate: datasource=github-releases lookupName=helm/helm
+# renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.9.2
 
-# renovate: datasource=adoptium-java lookupName=java-jre
+# renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 17.0.4+8
-# renovate: datasource=gradle-version lookupName=gradle versioning=gradle
+# renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 7.5
 
-# renovate: datasource=github-releases lookupName=NixOS/nix
+# renovate: datasource=github-releases packageName=NixOS/nix
 RUN install-tool nix 2.3.10
 
 # renovate: datasource=node
@@ -65,15 +65,15 @@ RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
 RUN install-npm lerna 5.1.8
 
-# renovate: datasource=github-releases lookupName=containerbase/php-prebuild
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.1.8
-# renovate: datasource=github-releases lookupName=composer/composer
+# renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.3.10
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.5
 
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
 # renovate: datasource=pypi
 RUN install-pip pipenv 2022.7.4
@@ -82,7 +82,7 @@ RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.1.14
 
-# renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.3.18
@@ -95,12 +95,12 @@ RUN install-tool rust 1.62.1
 # renovate: datasource=docker versioning=docker
 #RUN install-tool swift 5.6.1
 
-# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
+# renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.2.5
 
-# renovate: datasource=github-releases lookupName=git-lfs/git-lfs
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.4
 RUN git lfs version
 
-# renovate: datasource=github-releases lookupName=jsonnet-bundler/jsonnet-bundler
+# renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1

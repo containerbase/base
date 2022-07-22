@@ -62,7 +62,7 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.10.5
 RUN install-tool python
 
@@ -89,7 +89,7 @@ FROM build as testd
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
 
 RUN set -ex; \
@@ -117,7 +117,7 @@ FROM build as testf
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.5
 
 RUN set -ex; cat /etc/hosts; \
@@ -154,7 +154,7 @@ USER ${USER_ID}
 
 SHELL ["/bin/sh", "-c"]
 
-# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
+# renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.2.5
 
 WORKDIR /tmp
@@ -169,19 +169,19 @@ ARG APT_HTTP_PROXY
 
 ARG IGNORED_TOOLS=powershell,node
 
-# renovate: datasource=github-releases lookupName=fluxcd/flux2
+# renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v0.31.4
 
-# renovate: datasource=github-releases lookupName=git-lfs/git-lfs
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.4
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.2.5
 
 # renovate: datasource=node
 RUN install-tool node v16.16.0
 
-# renovate: datasource=github-releases lookupName=moby/moby
+# renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v20.10.17
 
 #--------------------------------------

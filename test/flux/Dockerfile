@@ -3,7 +3,7 @@ FROM ${IMAGE} as build
 
 RUN touch /.dummy
 
-# renovate: datasource=github-releases lookupName=fluxcd/flux2
+# renovate: datasource=github-releases packageName=fluxcd/flux2
 ARG FLUX_VERSION=0.27.3
 
 USER 1000

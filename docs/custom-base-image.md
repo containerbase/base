@@ -37,7 +37,7 @@ COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-buildpack
 
 
-# renovate: datasource=github-tags lookupName=git/git
+# renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.15.4
@@ -83,7 +83,7 @@ COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-buildpack
 
 
-# renovate: datasource=github-tags lookupName=git/git
+# renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.15.4

@@ -15,7 +15,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # Python
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
 
 
@@ -26,7 +26,7 @@ ARG BUILDPACK_DEBUG
 
 USER 1000
 
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
 
 #--------------------------------------
@@ -62,7 +62,7 @@ FROM build as testa
 ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
 
 # renovate: datasource=pypi

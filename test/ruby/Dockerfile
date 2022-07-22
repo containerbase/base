@@ -20,7 +20,7 @@ FROM ${IMAGE} as build3
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
 
 RUN touch /.dummy

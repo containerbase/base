@@ -71,7 +71,7 @@ teardown_file () {
   local TOOL_NAME=pnpm
   local TOOL_VERSION
 
-  # renovate: datasource=pnpm lookupName=pnpm
+  # renovate: datasource=pnpm depName=pnpm
   TOOL_VERSION=7.2.1
 
   run check_tool_installed
@@ -91,7 +91,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=pnpm lookupName=pnpm
+  # renovate: datasource=pnpm depName=pnpm
   TOOL_VERSION=7.2.1
 
   check_tool_requirements
@@ -128,7 +128,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=pnpm lookupName=pnpm
+  # renovate: datasource=pnpm depName=pnpm
   TOOL_VERSION=7.2.1
 
   check_tool_requirements

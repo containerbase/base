@@ -58,7 +58,7 @@ teardown_file () {
   local TOOL_NAME=helm
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=helm/helm
+  # renovate: datasource=github-releases depName=helm/helm
   TOOL_VERSION=3.8.0
 
   run check_tool_installed
@@ -75,7 +75,7 @@ teardown_file () {
   local TOOL_NAME=helm
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=helm/helm
+  # renovate: datasource=github-releases depName=helm/helm
   TOOL_VERSION=3.8.0
 
   run install_tool
@@ -107,7 +107,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases lookupName=helm/helm
+  # renovate: datasource=github-releases depName=helm/helm
   TOOL_VERSION=3.8.0
 
   run install_tool

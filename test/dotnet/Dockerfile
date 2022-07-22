@@ -18,7 +18,7 @@ ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
 # stay at 3.1
-# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 3.1.421
 RUN set -ex; dotnet --version | grep 3.1.
 
@@ -54,11 +54,11 @@ ARG APT_HTTP_PROXY
 RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
-# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.302
 
 # Test duplicate install
-# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.302
 RUN set -ex; dotnet --version | grep 6.0.
 
@@ -83,7 +83,7 @@ FROM net3 as testc
 ARG BUILDPACK_DEBUG
 
 # only patch updates
-# renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
 RUN install-tool dotnet 6.0.302
 RUN set -ex; dotnet --version | grep 6.0.
 

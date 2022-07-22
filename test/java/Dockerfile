@@ -15,7 +15,7 @@ FROM base as build
 ARG APT_HTTP_PROXY
 
 # TODO: only lts
-# renovate: datasource=adoptium-java lookupName=java-jre
+# renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 11.0.16+8
 
 #--------------------------------------
@@ -47,7 +47,7 @@ RUN gradle --version
 #--------------------------------------
 FROM base as testb
 
-# renovate: datasource=adoptium-java lookupName=java-jre
+# renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java-jre 18.0.1+10
 
 # renovate: datasource=gradle-version versioning=gradle
@@ -76,7 +76,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java lookupName=java-jre
+# renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.332+9
 
 # renovate: datasource=gradle-version versioning=gradle
@@ -111,7 +111,7 @@ FROM build as teste
 # test openshift userid missmatch
 USER 1001
 
-# renovate: datasource=maven lookupName=org.apache.maven:maven
+# renovate: datasource=maven packageName=org.apache.maven:maven
 RUN install-tool maven 3.8.6
 
 RUN set -ex; \
@@ -125,10 +125,10 @@ RUN set -ex; \
 FROM build as testf
 
 # not required / used for sbt
-# renovate: datasource=github-releases lookupName=scala/scala
+# renovate: datasource=github-releases packageName=scala/scala
 RUN install-tool scala v2.13.8
 
-# renovate: datasource=github-releases lookupName=sbt/sbt
+# renovate: datasource=github-releases packageName=sbt/sbt
 RUN install-tool sbt v1.6.2
 
 # doesn't work for arbitrary users

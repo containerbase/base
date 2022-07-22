@@ -71,7 +71,7 @@ teardown_file () {
   local TOOL_NAME=corepack
   local TOOL_VERSION
 
-  # renovate: datasource=npm lookupName=corepack
+  # renovate: datasource=npm depName=corepack
   TOOL_VERSION=0.11.2
 
   run check_tool_installed
@@ -91,7 +91,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=corepack
+  # renovate: datasource=npm depName=corepack
   TOOL_VERSION=0.11.2
 
   check_tool_requirements
@@ -129,7 +129,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=corepack
+  # renovate: datasource=npm depName=corepack
   TOOL_VERSION=0.11.2
 
   check_tool_requirements

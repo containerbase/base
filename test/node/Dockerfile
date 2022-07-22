@@ -212,7 +212,7 @@ RUN set -ex; cd a; npm install
 #--------------------------------------
 FROM build as testh
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 RUN install-tool yarn-slim 1.22.19
 
 RUN set -ex; yarn --version
@@ -357,7 +357,7 @@ SHELL [ "/bin/sh", "-c" ]
 # renovate: datasource=npm
 RUN install-tool corepack 0.12.0
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=1.22.18
 
 RUN set -ex; cd a; \
@@ -375,7 +375,7 @@ SHELL [ "/bin/sh", "-c" ]
 # renovate: datasource=npm
 RUN install-tool corepack 0.12.0
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=3.1.0
 
 # re2 needs to be deleted https://github.com/uhop/install-artifact-from-github/pull/1
@@ -395,7 +395,7 @@ SHELL [ "/bin/sh", "-c" ]
 # renovate: datasource=npm
 RUN install-tool corepack 0.12.0
 
-# renovate: datasource=npm lookupName=pnpm
+# renovate: datasource=npm packageName=pnpm
 ARG PNPM_VERSION=7.0.0
 
 RUN set -ex; cd a; \

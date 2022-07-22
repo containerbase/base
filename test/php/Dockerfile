@@ -98,11 +98,11 @@ ARG APT_HTTP_PROXY
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
 
-# renovate: datasource=github-releases lookupName=containerbase/php-prebuild
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.1.8
 
 
-# renovate: datasource=github-releases lookupName=composer/composer
+# renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.3.10
 
 RUN install-tool composer latest
