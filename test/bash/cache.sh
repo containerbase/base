@@ -30,3 +30,8 @@ function clean_temp_dir () {
     rm -rf "${temp_dir}"
   fi
 }
+
+# generates a random word to be used in tests
+function random_word () {
+  tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo ''
+}

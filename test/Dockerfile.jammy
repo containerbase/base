@@ -40,16 +40,16 @@ RUN install-tool elixir 1.13.4
 RUN install-tool flutter 3.0.2
 
 # renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.31.3
+RUN install-tool flux v0.31.4
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.18.4
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.9.1
+RUN install-tool helm v3.9.2
 
 # renovate: datasource=adoptium-java lookupName=java-jre
-RUN install-tool java 17.0.3+7
+RUN install-tool java 17.0.4+8
 # renovate: datasource=gradle-version lookupName=gradle versioning=gradle
 RUN install-tool gradle 7.5
 
@@ -59,7 +59,7 @@ RUN install-tool nix 2.3.10
 # renovate: datasource=node
 RUN install-tool node v16.16.0
 # renovate: datasource=npm
-RUN install-tool pnpm 7.5.0
+RUN install-tool pnpm 7.5.2
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
@@ -90,7 +90,7 @@ RUN install-tool bundler 2.3.18
 RUN install-tool cocoapods 1.11.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.62.0
+RUN install-tool rust 1.62.1
 
 # renovate: datasource=docker versioning=docker
 #RUN install-tool swift 5.6.1

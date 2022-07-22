@@ -69,6 +69,7 @@ apt_install \
   openssh-client \
   unzip \
   xz-utils \
+  zstd \
   ;
 
 # check for /usr/local/share/ca-certificates/*.crt

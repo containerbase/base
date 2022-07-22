@@ -6,16 +6,28 @@ function check_tool_requirements () {
 }
 
 function install_tool () {
+  local versioned_tool_path
+  versioned_tool_path=$(create_versioned_tool_path)
+
   # get path location
   DIR="${BASH_SOURCE%/*}"
   if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-  # shellcheck source=/dev/null
-  . "$DIR/../../utils/node.sh"
+  # shellcheck disable=SC2046
+  if [[ $(restore_folder_from_cache "${versioned_tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
+    # restore from cache not possible
+    # either not in cache or error, install
 
-  npm_init
-  npm_install
-  npm_clean
+    # shellcheck source=/dev/null
+    . "$DIR/../../utils/node.sh"
+
+    npm_init
+    npm_install
+    npm_clean
+
+    # store in cache
+    cache_folder "${versioned_tool_path}" "${TOOL_NAME}/${TOOL_VERSION}"
+  fi
 }
 
 function link_tool () {
