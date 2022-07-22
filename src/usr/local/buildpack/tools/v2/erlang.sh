@@ -26,20 +26,20 @@ function prepare_tool() {
 
   version_codename=$(get_distro)
   case "$version_codename" in
-    "bionic") apt_install \
-      libodbc1 \
-      libssl1.1 \
-      libsctp1 \
+    "bionic") #apt_install \
+      #libodbc1 \
+      #libssl1.1 \
+      #libsctp1 \
       ;;
-    "focal") apt_install \
-      libodbc1 \
-      libssl1.1 \
-      libsctp1 \
+    "focal") #apt_install \
+      #libodbc1 \
+      #libssl1.1 \
+      #libsctp1 \
       ;;
-    "jammy") apt_install \
-      libodbc1 \
-      libssl3 \
-      libsctp1 \
+    "jammy") #apt_install \
+      #libodbc1 \
+      #libssl3 \
+      #libsctp1 \
       ;;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
