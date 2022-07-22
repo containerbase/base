@@ -75,8 +75,8 @@ function download_file () {
 function cleanup_cache () {
   local single_file=${1:false}
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ]; then
-    # BUILD_CACHE_DIR is not set
+  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ ! -d "${BUILDPACK_CACHE_DIR}" ]; then
+    # BUILD_CACHE_DIR is not set or doesn't exist
     exit 0
   fi
 
