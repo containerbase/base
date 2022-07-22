@@ -19,36 +19,27 @@ function check_tool_requirements () {
     echo Invalid version: "${TOOL_VERSION}"
     exit 1
   fi
-}
 
-function prepare_tool() {
   local version_codename
-
-  version_codename=$(get_distro)
-  case "$version_codename" in
-    "bionic") #apt_install \
-      #libodbc1 \
-      #libssl1.1 \
-      #libsctp1 \
-      ;;
-    "focal") #apt_install \
-      #libodbc1 \
-      #libssl1.1 \
-      #libsctp1 \
-      ;;
-    "jammy") #apt_install \
-      #libodbc1 \
-      #libssl3 \
-      #libsctp1 \
-      ;;
+  version_codename="$(get_distro)"
+  case "${version_codename}" in
+    "bionic");;
+    "focal");;
+    "jammy");;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac
+}
 
+function prepare_tool() {
   local tool_path
   tool_path=$(create_tool_path)
+  # Workaround for compatibillity for Erlang hardcoded paths, works for v22+
+  if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/erlang" ]; then
+    ln -sf "${tool_path}" /usr/local/erlang
+  fi
 }
 
 function install_tool () {
@@ -81,7 +72,8 @@ function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  export_tool_env ERL_ROOTDIR "${versioned_tool_path}"
+  # only works for v24+
+  #export_tool_env ERL_ROOTDIR "${versioned_tool_path}"
   shell_wrapper erl "${versioned_tool_path}/bin"
   erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 }

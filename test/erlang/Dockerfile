@@ -57,9 +57,36 @@ RUN set -ex; \
 
 
 #--------------------------------------
+# test: erlang (v22,user,openshift)
+#--------------------------------------
+FROM build as testc
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+RUN prepare-tool erlang
+
+USER 1001
+
+# no major update, pin elixir if newer version doesn't support v22
+# renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 22.3.4.26
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool elixir 1.13.4
+
+
+RUN set -ex; \
+    cd a; \
+    mix deps.update --all;
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
