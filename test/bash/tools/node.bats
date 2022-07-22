@@ -79,7 +79,7 @@ teardown_file () {
   local TOOL_NAME=node
   local TOOL_VERSION
 
-  # renovate: datasource=node
+  # renovate: datasource=node depName=node
   TOOL_VERSION=16.15.1
 
   check_tool_requirements
@@ -115,7 +115,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=node
+  # renovate: datasource=node depName=node
   TOOL_VERSION=16.15.1
 
   check_tool_requirements

@@ -75,7 +75,7 @@ teardown_file () {
   local TOOL_NAME=flux
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases depName=fluxcd/flux2
+  # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
   TOOL_VERSION=0.27.3
 
   run install_tool
@@ -107,7 +107,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases depName=flux/flux
+  # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
   TOOL_VERSION=0.27.3
 
   run install_tool

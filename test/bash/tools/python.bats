@@ -58,7 +58,7 @@ teardown_file () {
   local TOOL_NAME=python
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases depName=containerbase/python-prebuild
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
   TOOL_VERSION=3.10.5
 
   run check_tool_installed
@@ -79,7 +79,7 @@ teardown_file () {
   local TOOL_NAME=python
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases depName=containerbase/python-prebuild
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
   TOOL_VERSION=3.10.5
 
   # needed to export versions
@@ -117,7 +117,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases depName=containerbase/python-prebuild
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
   TOOL_VERSION=3.10.5
 
   # needed to export versions
