@@ -196,6 +196,8 @@ RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
 RUN prepare-tool all
 
+RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
+
 #--------------------------------------
 # final
 #--------------------------------------
