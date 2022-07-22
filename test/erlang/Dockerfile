@@ -16,6 +16,7 @@ FROM build as testa
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
+# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.4.2
 
@@ -42,6 +43,7 @@ RUN prepare-tool erlang
 
 USER 1001
 
+# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.4.2
 
@@ -68,6 +70,7 @@ RUN prepare-tool erlang
 
 USER 1001
 
+# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # no major update, pin elixir if newer version doesn't support v22
 # renovate: datasource=github-releases lookupName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 22.3.4.26
