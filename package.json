@@ -20,7 +20,7 @@
     "bats": "1.7.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
-    "commander": "9.3.0",
+    "commander": "9.4.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
     "husky": "8.0.1",
     "lint-staged": "13.0.3",
