@@ -76,7 +76,7 @@ RUN install-tool powershell v7.2.5
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.10.5
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.7.4
+RUN install-pip pipenv 2022.7.24
 # renovate: datasource=pypi
 RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
