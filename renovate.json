@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>containerbase/.github"],
-  "ignorePaths": [],
+  "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
+  "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
