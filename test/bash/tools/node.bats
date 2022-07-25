@@ -82,6 +82,9 @@ teardown_file () {
   # renovate: datasource=node depName=node
   TOOL_VERSION=v16.16.0
 
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
+
   check_tool_requirements
 
   run install_tool
