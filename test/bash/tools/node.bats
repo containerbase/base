@@ -120,6 +120,7 @@ teardown_file () {
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
+
   check_tool_requirements
 
   run install_tool
