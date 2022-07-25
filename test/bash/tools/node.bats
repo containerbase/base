@@ -119,7 +119,7 @@ teardown_file () {
   TOOL_VERSION=v16.15.1
 
   # trim leading v prefix
-  require_tool
+  TOOL_VERSION="${TOOL_VERSION#v}"
   check_tool_requirements
 
   run install_tool
