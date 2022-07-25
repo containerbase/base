@@ -116,7 +116,10 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=node depName=node
-  TOOL_VERSION=16.15.1
+  TOOL_VERSION=v16.15.1
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   check_tool_requirements
 
