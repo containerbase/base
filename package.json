@@ -10,8 +10,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=14.15.0",
-    "yarn": "^1.17.0"
+    "node": ">=16.13.0",
+    "yarn": "^3.2.0"
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
@@ -31,13 +31,13 @@
   },
   "scripts": {
     "test:bats": "bats --verbose-run test/bash/ test/bash/v2 test/bash/tools",
-    "build": "run-s release:prepare",
-    "lint": "yarn prettier -c -u \"**/*.*\"",
-    "lint-fix": "yarn prettier -w -u \"**/*.*\"",
-    "prepare": "husky install",
+    "build": "release:prepare",
+    "lint": "prettier -c -u \"**/*.*\"",
+    "lint-fix": "prettier -w -u \"**/*.*\"",
+    "postinstall": "husky install",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@3.2.2"
 }

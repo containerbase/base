@@ -31,8 +31,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: lint
         run: yarn lint
@@ -60,8 +63,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: bats
         run: yarn test:bats
@@ -90,8 +96,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
@@ -142,8 +151,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
@@ -183,6 +195,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Init platform
         run: |
           git config --global core.autocrlf false
@@ -200,7 +215,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
