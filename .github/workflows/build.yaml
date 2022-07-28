@@ -196,7 +196,7 @@ jobs:
           cache: yarn
 
       - name: enable corepack
-        run: corepack enable
+        run: sudo corepack enable
 
       - name: Init platform
         run: |
