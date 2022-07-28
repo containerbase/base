@@ -24,6 +24,8 @@ FROM base as build-rootless
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
+RUN prepare-tool python
+
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild

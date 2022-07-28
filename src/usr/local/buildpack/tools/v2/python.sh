@@ -46,12 +46,25 @@ EOM
   fi
 }
 
+function prepare_tool() {
+  create_tool_path
+  export_path "${USER_HOME}/.local/bin"
+}
+
 function install_tool () {
   local versioned_tool_path
   local file
   local url
   local arch
   local version_codename
+
+  if [[ ! -d "$(find_tool_path)" ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prepare_tool
+  fi
 
   versioned_tool_path=$(create_versioned_tool_path)
   arch=$(uname -p)
@@ -87,7 +100,6 @@ function link_tool () {
 
   # export python vars
   export_tool_path "${versioned_tool_path}/bin"
-  export_tool_path "${USER_HOME}/.local/bin"
 
   # TODO: fix me, currently required for global pip
   python_shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}"
