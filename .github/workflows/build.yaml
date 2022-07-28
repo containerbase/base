@@ -97,7 +97,7 @@ jobs:
           cache: yarn
 
       - name: enable corepack
-        run: corepack enable
+        run: sudo corepack enable
 
       - name: Installing dependencies
         run: yarn install
@@ -152,7 +152,7 @@ jobs:
           cache: yarn
 
       - name: enable corepack
-        run: corepack enable
+        run: sudo corepack enable
 
       - name: Installing dependencies
         run: yarn install
