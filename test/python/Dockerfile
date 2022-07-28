@@ -157,6 +157,28 @@ RUN set -ex \
   && cat requirements.txt \
   ;
 
+#--------------------------------------
+# test h: pipenv (multiple python)
+#--------------------------------------
+FROM base as testh
+# use build when #462 is fixed
+
+ARG BUILDPACK_DEBUG
+
+# Do not update minor
+RUN install-tool python 3.8.13
+
+# make as latest
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.10.5
+
+# renovate: datasource=pypi
+RUN install-pip pipenv 2022.7.24
+
+RUN set -ex; \
+  cd h-pipenv; \
+  pipenv lock;
+
 
 #--------------------------------------
 # final
@@ -170,3 +192,4 @@ COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
