@@ -30,7 +30,7 @@
     "shelljs": "0.8.5"
   },
   "scripts": {
-    "test:bats": "bats --verbose-run test/bash/ test/bash/v2 test/bash/tools",
+    "test:bats": "node_modules/bats/bin/bats --timing --verbose-run test/bash/ test/bash/v2 test/bash/tools",
     "build": "release:prepare",
     "lint": "prettier -c -u \"**/*.*\"",
     "lint-fix": "prettier -w -u \"**/*.*\"",
