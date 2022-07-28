@@ -23,6 +23,7 @@ setup() {
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
   BIN_DIR="${TEST_ROOT_DIR}/bin"
+  ENV_FILE="${TEST_ROOT_DIR}/env"
 
   setup_directories
 
@@ -67,6 +68,8 @@ teardown_file () {
   # needed to export versions
   check_tool_requirements
 
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
@@ -84,6 +87,9 @@ teardown_file () {
 
   # needed to export versions
   check_tool_requirements
+
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
@@ -122,6 +128,9 @@ teardown_file () {
 
   # needed to export versions
   check_tool_requirements
+
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
