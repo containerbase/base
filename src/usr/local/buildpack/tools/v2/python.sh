@@ -95,6 +95,8 @@ function install_tool () {
 function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
+  
+  check_semver "${TOOL_VERSION}"
 
   reset_tool_env
 
