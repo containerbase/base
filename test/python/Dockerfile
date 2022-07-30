@@ -181,6 +181,24 @@ RUN set -ex; \
   cd h-pipenv; \
   pipenv lock;
 
+#--------------------------------------
+# test i: relink previously installed python
+#--------------------------------------
+FROM build as testi
+
+ARG BUILDPACK_DEBUG
+
+# install some versions of python
+RUN install-tool python 3.8.0
+RUN install-tool python 3.9.0
+
+# install back the previous version to relink it
+RUN install-tool python 3.8.0
+
+USER 1000
+
+SHELL [ "/bin/sh", "-c" ]
+RUN python --version | grep 3.8.0
 
 #--------------------------------------
 # final
@@ -195,3 +213,4 @@ COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
