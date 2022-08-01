@@ -162,8 +162,7 @@ RUN set -ex \
 #--------------------------------------
 # test h: pipenv (multiple python)
 #--------------------------------------
-FROM base as testh
-# use build when #462 is fixed
+FROM build as testh
 
 ARG BUILDPACK_DEBUG
 
@@ -180,7 +179,6 @@ RUN install-pip pipenv 2022.7.24
 RUN set -ex; \
   cd h-pipenv; \
   pipenv lock;
-
 
 #--------------------------------------
 # final
