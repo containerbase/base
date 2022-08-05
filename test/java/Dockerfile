@@ -51,7 +51,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5
+RUN install-tool gradle 7.5.1
 
 USER 1000
 
@@ -80,7 +80,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.345+1
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5
+RUN install-tool gradle 7.5.1
 
 #--------------------------------------
 # test: java 17 (non-root)
