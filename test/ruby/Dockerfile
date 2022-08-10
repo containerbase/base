@@ -1,7 +1,15 @@
 ARG IMAGE=containerbase/buildpack
 ARG BUILDPACK_DEBUG
 
-FROM ${IMAGE} as build
+FROM ${IMAGE} as base
+
+RUN touch /.dummy
+
+COPY --chown=1000:0 test test
+WORKDIR /test
+
+
+FROM base as build
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
@@ -9,13 +17,8 @@ ARG BUILDPACK_DEBUG
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
-RUN touch /.dummy
 
-COPY --chown=1000:0 test test
-
-WORKDIR /test
-
-FROM ${IMAGE} as build3
+FROM base as build3
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
@@ -23,11 +26,6 @@ ARG BUILDPACK_DEBUG
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
 
-RUN touch /.dummy
-
-COPY --chown=1000:0 test test
-
-WORKDIR /test
 
 #--------------------------------------
 # test: bundler (gem)
@@ -160,13 +158,39 @@ RUN set -ex; \
   pod install;
 
 #--------------------------------------
+# test: cocoapods (install-gem, non-root)
+#--------------------------------------
+FROM build3 as test-cocoapods-d
+
+ARG APT_HTTP_PROXY
+RUN prepare-tool ruby
+
+
+USER 1000
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
+RUN install-tool ruby 3.1.2
+
+# renovate: datasource=rubygems versioning=ruby
+RUN install-gem cocoapods 1.11.3
+
+
+RUN set -ex; \
+  cd b/Project; \
+  gem install cocoapods-acknowledgements; \
+  pod install;
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
 
-COPY --from=test-bundler-a /.dummy /.dummy
-COPY --from=test-bundler-b /.dummy /.dummy
-COPY --from=test-bundler-c /.dummy /.dummy
+# COPY --from=test-bundler-a /.dummy /.dummy
+# COPY --from=test-bundler-b /.dummy /.dummy
+# COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
+COPY --from=test-cocoapods-d /.dummy /.dummy

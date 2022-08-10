@@ -19,10 +19,6 @@ function gem_install() {
 }
 
 
-function gem_link_wrapper() {
-  link_wrapper "${1:-$TOOL_NAME}" "$tool_path/bin"
-}
-
 function gem_shell_wrapper () {
   local install_dir
   local ruby_path
