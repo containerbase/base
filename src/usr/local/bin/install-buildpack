@@ -66,6 +66,7 @@ apt_install \
   dumb-init \
   gnupg \
   jq \
+  libarchive-tools \
   openssh-client \
   unzip \
   xz-utils \

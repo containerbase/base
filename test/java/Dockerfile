@@ -23,9 +23,12 @@ RUN install-tool java 11.0.16+8
 #--------------------------------------
 FROM build as testa
 
+RUN prepare-tool gradle
+
 USER 1000
 
 # stay on v6
+RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 6.9.2
 
@@ -88,6 +91,8 @@ RUN install-tool gradle 7.5.1
 FROM base as testd
 
 ARG APT_HTTP_PROXY
+
+RUN prepare-tool gradle
 
 USER 1000
 
