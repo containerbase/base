@@ -24,3 +24,6 @@ export BUILDPACK_MAX_ALLOCATED_DISK=${BUILDPACK_MAX_ALLOCATED_DISK}
 # defines the temp directory that will be used when the cache is not active
 # it is used for all downloads and will be cleaned up after each install
 export TEMP_DIR=/tmp
+
+# used to source helper from tools
+export BUILDPACK_DIR=$ROOT_DIR/buildpack

@@ -1,22 +1,5 @@
 #!/bin/bash
 
-set -e
-
-check_command java
-
-if [[ "${TOOL_VERSION}" == "latest" ]]; then
-  export "TOOL_VERSION=$(curl -s https://services.gradle.org/versions/current | jq --raw-output '.version')"
-fi
-
-check_semver "${TOOL_VERSION}"
-
-if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then
-  echo Invalid version: "${TOOL_VERSION}"
-  exit 1
-fi
-
-tool_path=$(find_versioned_tool_path)
-
 function create_gradle_settings() {
   if [[ -f ${USER_HOME}/.gradle/gradle.properties ]]; then
     echo 'Gradle settings already found'
@@ -53,27 +36,3 @@ EOM
 
   chown -R "${USER_ID}" "${USER_HOME}/.m2"
 }
-
-if [[ -z "${tool_path}" ]]; then
-  INSTALL_DIR=$(get_install_dir)
-  base_path=${INSTALL_DIR}/${TOOL_NAME}
-  tool_path=${base_path}/${TOOL_VERSION}
-
-  mkdir -p "${base_path}"
-
-  create_maven_settings
-  create_gradle_settings
-
-  file=/tmp/gradle.zip
-
-  URL="https://services.gradle.org/distributions"
-
-  curl -sSfLo ${file} "${URL}/gradle-${TOOL_VERSION}-bin.zip"
-  unzip -q -d "${base_path}" ${file}
-  rm ${file}
-  mv "${base_path}/${TOOL_NAME}-${TOOL_VERSION}" "${tool_path}"
-fi
-
-link_wrapper gradle "$tool_path/bin"
-
-gradle --version
