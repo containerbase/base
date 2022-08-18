@@ -37,7 +37,6 @@ EOM
   chown -R "${USER_ID}" "${USER_HOME}/.m2"
 }
 
-
 function get_java_install_url () {
   local arch=x64
   local url
@@ -56,11 +55,27 @@ function install_java () {
   local file
   local url
   local type=${1}
+  local ssl_dir
+
+  ssl_dir=$(get_ssl_path)
+
+  if [[ ! -f "${ssl_dir}/cacerts" ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prepare_tool
+  fi
 
   versioned_tool_path=$(create_versioned_tool_path)
   url=$(get_java_install_url "${TOOL_VERSION}" "${type}")
   file=$(get_from_url "${url}")
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
+  if [[ "$type" = "jdk" ]] && [[ "${MAJOR}" -eq 8 ]]; then
+    ln -sf "${ssl_dir}/cacerts" "${versioned_tool_path}/jre/lib/security/cacerts"
+  else
+    ln -sf "${ssl_dir}/cacerts" "${versioned_tool_path}/lib/security/cacerts"
+  fi
 }
 
 function link_java () {
@@ -74,4 +89,39 @@ function link_java () {
 #  export_tool_env JAVA_HOME "${versioned_tool_path}"
 
   java -version
+}
+
+function prepare_java () {
+  local ssl_dir
+  local url
+  local version
+  local file
+
+  ssl_dir=$(get_ssl_path)
+
+  if [[ -f "${ssl_dir}/cacerts" ]]; then
+    # cert store already there
+    return
+  fi
+
+  version=$(get_latest_java_version jre)
+  url=$(get_java_install_url "${version}" jre)
+  file=$(get_from_url "${url}")
+
+  mkdir -p "${TEMP_DIR}/java"
+  tar --strip 1 -C "${TEMP_DIR}/java" -xf "${file}"
+  cp "${TEMP_DIR}/java/lib/security/cacerts" "${ssl_dir}/cacerts"
+  rm -rf "${TEMP_DIR}/java"
+}
+
+function get_latest_java_version () {
+  local arch=x64
+  local url
+  local baseUrl=https://api.adoptium.net/v3/info/release_versions
+  local apiArgs='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&release_type=ga'
+  local type=${1}
+
+  url=$(curl -sSLf -H 'accept: application/json' "${baseUrl}?architecture=${arch}&image_type=${type}&${apiArgs}" \
+    | jq --raw-output '.versions[0].semver')
+  echo "${url}"
 }
