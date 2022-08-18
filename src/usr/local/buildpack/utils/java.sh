@@ -108,8 +108,10 @@ function prepare_java () {
   url=$(get_java_install_url "${version}" jre)
   file=$(get_from_url "${url}")
 
-  tar --strip 1 -C "${TEMP_DIR}" -xf "${file}"
-  cp "${TEMP_DIR}/lib/security/cacerts" "${ssl_dir}/cacerts"
+  mkdir -p "${TEMP_DIR}/java"
+  tar --strip 1 -C "${TEMP_DIR}/java" -xf "${file}"
+  cp "${TEMP_DIR}/java/lib/security/cacerts" "${ssl_dir}/cacerts"
+  rm -rf "${TEMP_DIR}/java"
 }
 
 function get_latest_java_version () {
