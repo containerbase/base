@@ -25,4 +25,7 @@ function link_tool () {
   shell_wrapper sbt "${versioned_tool_path}/bin"
 
   sbt --version
+
+  # fix, cleanup sbt temp data
+  rm -rf /tmp/.sbt ~/.sbt
 }

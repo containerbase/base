@@ -144,7 +144,7 @@ RUN set -ex; \
   ls -la; env; \
   sbt compile
 
-RUN ls -la ~
+RUN ls -la ~ /tmp
 
 #--------------------------------------
 # final
