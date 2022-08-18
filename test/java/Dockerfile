@@ -97,8 +97,8 @@ RUN prepare-tool gradle
 USER 1000
 
 # renovate: datasource=adoptium-java depName=java
-ARG JAVA_VERSION=17.0.4+8
-RUN install-tool java
+ARG JAVA_JDK_VERSION=17.0.4+8
+RUN install-tool java-jdk
 
 # test latest gradle
 RUN install-tool gradle latest
