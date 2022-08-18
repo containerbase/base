@@ -92,7 +92,7 @@ FROM base as testd
 
 ARG APT_HTTP_PROXY
 
-RUN prepare-tool gradle
+RUN prepare-tool java gradle
 
 USER 1000
 
@@ -145,6 +145,8 @@ RUN set -ex; \
   sbt compile
 
 RUN ls -la ~ /tmp
+
+RUN ls -la /opt/buildpack/ssl /opt/buildpack/tools/java/11.0.16+8/lib/security/cacerts
 
 #--------------------------------------
 # final
