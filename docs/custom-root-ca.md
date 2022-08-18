@@ -46,7 +46,7 @@ docker run --rm -it \
 
 ### Java
 
-For java you need to mount your own certificate store to `/opt/buildpack/ssl/cacerts`.
+For Java you need to mount your own certificate store to `/opt/buildpack/ssl/cacerts`.
 
 ```bash
 docker run --rm -it \
