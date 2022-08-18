@@ -18,7 +18,19 @@ RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/my-root-ca.crt
 ```
 
-**TODO**: For java based tools we need another option
+### Java
+
+Buildpack will create a central certificate store at `/opt/buildpack/ssl/cacerts` when preparing Java (`prepare-tool java`).
+This will be used by all Java versions installed by our `install-tool`.
+So you can copy your own store like this:
+
+```Dockerfile
+FROM containerbase/buildpack
+
+COPY my-root-cert-store.jks /opt/buildpack/ssl/cacerts
+
+RUN install-tool java <version>
+```
 
 ## Runtime install
 
@@ -27,6 +39,19 @@ Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environmen
 ```bash
 docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
+  -e SSL_CERT_FILE=/my-root-ca.crt \
+  -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
+  containerbase/buildpack bash
+```
+
+### Java
+
+For java you need to mount your own certificate store to `/opt/buildpack/ssl/cacerts`.
+
+```bash
+docker run --rm -it \
+  -v my-root-ca.crt:/my-root-ca.crt \
+  -v my-root-cert-store.jks:/opt/buildpack/ssl/cacerts \
   -e SSL_CERT_FILE=/my-root-ca.crt \
   -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
   containerbase/buildpack bash
