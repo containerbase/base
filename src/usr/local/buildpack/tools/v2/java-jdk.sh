@@ -4,7 +4,7 @@ function install_tool () {
   # shellcheck source=/dev/null
   . "${BUILDPACK_DIR}/utils/java.sh"
 
-  install_java jre
+  install_java jdk
 }
 
 function link_tool () {
