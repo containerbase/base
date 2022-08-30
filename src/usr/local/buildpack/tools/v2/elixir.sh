@@ -10,7 +10,7 @@ function install_tool () {
 
   local file
   file=$(get_from_url "https://github.com/elixir-lang/elixir/releases/download/v${TOOL_VERSION}/Precompiled.zip")
-  unzip -q "${file}" -d "${versioned_tool_path}"
+  bsdtar -C "${versioned_tool_path}" -xf "${file}"
 }
 
 function link_tool () {
