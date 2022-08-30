@@ -13,6 +13,7 @@ WORKDIR /test
 FROM base as build
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre

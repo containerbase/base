@@ -64,7 +64,10 @@ function download_file () {
   name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
+  if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
+    echo "Download failed: ${url}" >&2
+    exit 1
+  fi;
   echo "${temp_folder}/${name}"
 }
 

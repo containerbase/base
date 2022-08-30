@@ -38,23 +38,39 @@ EOM
 }
 
 function get_java_install_url () {
-  local arch=x64
-  local url
-  local baseUrl=https://api.adoptium.net/v3/assets/version
-  local apiArgs='heap_size=normal&os=linux&page=0&page_size=1&project=jdk'
+  local arch
+  local json
+  local base_url=https://api.adoptium.net/v3/assets/version
+  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk'
   local version=${1}
-  local type=${2}
+  local type=${2:-jre}
+  local patched_version
 
-  url=$(curl -sSLf -H 'accept: application/json' "${baseUrl}/${version}?architecture=${arch}&image_type=${type}&${apiArgs}" \
-    | jq --raw-output '.[0].binaries[0].package.link')
-  echo "${url}"
+  if [ -z "${version}" ]; then
+    echo "Missing Java version"
+    exit 1
+  fi
+
+  # https://github.com/adoptium/api.adoptium.net/issues/468
+  arch=$(uname -m)
+  # https://github.com/adoptium/api.adoptium.net/issues/492
+  patched_version=$(patch_java_version "$version")
+
+  if ! json=$(curl -sSLf -H 'accept: application/json' "${base_url}/${version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1) && [ "$patched_version" != "$version" ]; then
+    if ! json=$(curl -sSLf -H 'accept: application/json' "${base_url}/${patched_version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1); then
+      echo "Invalid java version: $version" >&2
+      exit 1
+    fi
+  fi
+
+  echo "${json}" | jq --raw-output '.[0].binaries[0].package.link'
 }
 
 function install_java () {
   local versioned_tool_path
   local file
   local url
-  local type=${1}
+  local type=${1:-jre}
   local ssl_dir
 
   ssl_dir=$(get_ssl_path)
@@ -115,13 +131,25 @@ function prepare_java () {
 }
 
 function get_latest_java_version () {
-  local arch=x64
-  local url
-  local baseUrl=https://api.adoptium.net/v3/info/release_versions
-  local apiArgs='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&release_type=ga'
-  local type=${1}
+  local arch
+  local version
+  local base_url=https://api.adoptium.net/v3/info/release_versions
+  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&release_type=ga&lts=true'
+  local type=${1:-jre}
 
-  url=$(curl -sSLf -H 'accept: application/json' "${baseUrl}?architecture=${arch}&image_type=${type}&${apiArgs}" \
-    | jq --raw-output '.versions[0].semver')
-  echo "${url}"
+  # https://github.com/adoptium/api.adoptium.net/issues/468
+  arch=$(uname -m)
+  curl -sSLf -H 'accept: application/json' "${base_url}?architecture=${arch}&image_type=${type}&${api_args}" \
+    | jq --raw-output '.versions[0].semver'
+}
+
+# https://github.com/adoptium/api.adoptium.net/issues/492
+function patch_java_version () {
+  local version=${1}
+  if [[ "${version}" =~ ^((0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*))\+([1-9])([0-9][0-9])$ ]]; then
+    local build=${BASH_REMATCH[5]}
+    local meta=${BASH_REMATCH[6]}
+    version="${BASH_REMATCH[1]}.$build+$((meta + 0))"
+  fi
+  echo "${version}"
 }
