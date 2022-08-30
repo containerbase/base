@@ -23,7 +23,7 @@ if [[ -z "${tool_path}" ]]; then
 
   DISTRO=linux_amd64
   curl -sSfLo "${file}" "https://releases.hashicorp.com/terraform/${TOOL_VERSION}/terraform_${TOOL_VERSION}_${DISTRO}.zip"
-  unzip -q -d "${tool_path}/bin" "${file}"
+  bsdtar -C "${tool_path}/bin" -xf "${file}"
   rm "${file}"
 fi
 
