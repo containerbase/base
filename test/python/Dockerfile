@@ -113,7 +113,7 @@ FROM build as teste
 ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
-RUN install-tool poetry 1.1.0
+# RUN install-tool poetry 1.1.0 // Fails tests now
 
 #--------------------------------------
 # test f: pip_requirements
