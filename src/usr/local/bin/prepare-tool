@@ -7,6 +7,8 @@ TOOL_PATH="/usr/local/buildpack/tools/v2"
 # shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
+require_root
+
 TOOLS=( "$@" )
 
 # special case if only 'all' is given
@@ -24,3 +26,10 @@ do
   . /usr/local/buildpack/util.sh
   prepare_tools "${tool}"
 done
+
+# cleanup
+rm -rf /var/lib/apt/lists/*
+# workaround no hostname assumes docker build env
+if [[ -z "${HOSTNAME}" ]]; then
+  rm -rf "${TEMP_DIR:?}"/*
+fi

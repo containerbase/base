@@ -38,8 +38,8 @@ fi
 # cleanup
 if [[ $(is_root) -eq 0 ]]; then
   rm -rf /var/lib/apt/lists/*
-  # workaround no hostname assumes docker build env
-  if [[ -z "${HOSTNAME}" ]]; then
-    rm -rf "${TEMP_DIR:?}"/*
-  fi
+fi
+# workaround no hostname assumes docker build env
+if [[ -z "${HOSTNAME}" ]]; then
+  rm -rf "${TEMP_DIR:?}"/*
 fi
