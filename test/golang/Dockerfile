@@ -20,7 +20,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.19.0
+RUN install-tool golang 1.19.1
 
 USER 1000
 
@@ -74,7 +74,7 @@ RUN prepare-tool golang
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.19.0
+RUN install-tool golang 1.19.1
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
