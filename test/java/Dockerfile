@@ -43,6 +43,12 @@ FROM build as testa
 
 RUN prepare-tool gradle
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
+  exit 0
+
 USER 1000
 
 # stay on v6
@@ -103,6 +109,11 @@ RUN install-tool java 8.0.342+7
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.5.1
 
+# test openshift userid missmatch
+USER 1001
+
+RUN gradle --version
+
 #--------------------------------------
 # test: java 17 (non-root)
 #--------------------------------------
@@ -112,7 +123,8 @@ ARG APT_HTTP_PROXY
 
 RUN prepare-tool java gradle
 
-USER 1000
+# test openshift userid missmatch
+USER 1001
 
 # renovate: datasource=adoptium-java depName=java
 ARG JAVA_JDK_VERSION=17.0.4+8

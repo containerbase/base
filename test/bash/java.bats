@@ -88,3 +88,29 @@ teardown() {
   assert_success
   assert_output --regexp '^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+'
 }
+
+@test "create_gradle_settings" {
+  run create_gradle_settings
+  assert_success
+  assert_output "Creating Gradle settings"
+
+  run create_gradle_settings
+  assert_success
+  assert_output "Gradle settings already found"
+
+  assert [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]
+  assert [ $(stat --format '%a' "${USER_HOME}/.gradle/gradle.properties") -eq 664 ]
+}
+
+@test "create_maven_settings" {
+  run create_maven_settings
+  assert_success
+  assert_output "Creating Maven settings"
+
+  run create_maven_settings
+  assert_success
+  assert_output "Maven settings already found"
+
+  assert [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]
+  assert [ $(stat --format '%a' "${USER_HOME}/.m2/settings.xml") -eq 664 ]
+}

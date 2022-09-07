@@ -16,6 +16,7 @@ org.gradle.caching=false
 EOM
 
   chown -R "${USER_ID}" "${USER_HOME}/.gradle"
+  chmod -R g+w "${USER_HOME}/.gradle"
 }
 
 function create_maven_settings () {
@@ -25,6 +26,7 @@ function create_maven_settings () {
   fi
   echo 'Creating Maven settings'
   mkdir -p "${USER_HOME}/.m2"
+
   cat > "${USER_HOME}/.m2/settings.xml" <<- EOM
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -35,6 +37,7 @@ function create_maven_settings () {
 EOM
 
   chown -R "${USER_ID}" "${USER_HOME}/.m2"
+  chmod -R g+w "${USER_HOME}/.m2"
 }
 
 function get_java_install_url () {
