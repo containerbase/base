@@ -41,7 +41,6 @@ if [ "$(is_root)" -eq 0 ]; then
 fi
 # workaround no hostname assumes docker build env
 if [ -z "${HOSTNAME}" ] || [ "${HOSTNAME}" = "buildkitsandbox" ]; then
-  echo "Cleanup: ${TEMP_DIR:?}"
   rm -rf "${TEMP_DIR:?}"/*
 else
   echo "skip cleanup, not a docker build: ${HOSTNAME}"

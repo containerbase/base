@@ -116,6 +116,7 @@ jobs:
       matrix:
         tag:
           [
+            dart,
             dotnet,
             erlang,
             flutter,

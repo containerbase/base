@@ -4,7 +4,7 @@ function prepare_tool() {
   echo '{ "firstRun": false, "enabled": false }' > ~/.flutter
   echo '{ "firstRun": false, "enabled": false }' > "${USER_HOME}/.flutter"
   chown "${USER_NAME}" "${USER_HOME}/.flutter"
-  chmod -R g=u "${USER_HOME}/.flutter"
+  chmod g=u "${USER_HOME}/.flutter"
 }
 
 function install_tool () {
