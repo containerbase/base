@@ -50,7 +50,7 @@ if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
 fi
 
 # OpenShift
-chmod g+w /home/${USER_NAME}/{,env.d,bin}
+chmod -R g+w /home/${USER_NAME}
 
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"

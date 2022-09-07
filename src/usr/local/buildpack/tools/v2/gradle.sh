@@ -43,7 +43,7 @@ function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "GRADLE_USER_HOME=\$HOME/.gradle"
 
   gradle --version
 }
