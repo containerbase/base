@@ -36,10 +36,13 @@ else
 fi
 
 # cleanup
-if [[ $(is_root) -eq 0 ]]; then
+if [ "$(is_root)" -eq 0 ]; then
   rm -rf /var/lib/apt/lists/*
 fi
 # workaround no hostname assumes docker build env
-if [[ -z "${HOSTNAME}" ]]; then
+if [ -z "${HOSTNAME}" ] || [ "${HOSTNAME}" = "buildkitsandbox" ]; then
+  echo "Cleanup: ${TEMP_DIR:?}"
   rm -rf "${TEMP_DIR:?}"/*
+else
+  echo "skip cleanup, not a docker build: ${HOSTNAME}"
 fi

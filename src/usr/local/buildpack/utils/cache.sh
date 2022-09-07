@@ -80,7 +80,7 @@ function cleanup_cache () {
 
   if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ ! -d "${BUILDPACK_CACHE_DIR}" ]; then
     # BUILD_CACHE_DIR is not set or doesn't exist
-    exit 0
+    return
   fi
 
   local max_fill_level=${BUILDPACK_CACHE_MAX_ALLOCATED_DISK:-100}
@@ -96,7 +96,7 @@ function cleanup_cache () {
     rm "${oldest}"
 
     if [ "${single_file}" = "true" ]; then
-      exit 0
+      return
     fi
 
     fill_level=$(get_cache_fill_level)

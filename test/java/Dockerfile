@@ -15,9 +15,26 @@ FROM base as build
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
+RUN prepare-tool java
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
+
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 11.0.16+8
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
+
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 #--------------------------------------
 # test: gradle 6
@@ -152,7 +169,7 @@ RUN ls -la /opt/buildpack/ssl /opt/buildpack/tools/java/11.0.16+8/lib/security/c
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

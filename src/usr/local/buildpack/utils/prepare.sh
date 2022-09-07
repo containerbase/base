@@ -29,9 +29,4 @@ function prepare_tools () {
 
   # prepare tool
   prepare_tool
-
-  # cleanup
-  if [[ $(is_root) -eq 0 ]]; then
-    rm -rf /var/lib/apt/lists/* "${TEMP_DIR:?}"/*
-  fi
 }
