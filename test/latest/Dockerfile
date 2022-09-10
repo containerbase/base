@@ -182,7 +182,7 @@ RUN install-tool powershell v7.2.6
 RUN install-tool node v16.17.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v20.10.17
+RUN install-tool docker v20.10.18
 
 #--------------------------------------
 # test: bin path has 775
