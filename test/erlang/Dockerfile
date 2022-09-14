@@ -16,7 +16,7 @@ FROM build as testa
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+# https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.4.4
 
@@ -32,7 +32,7 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: erlang (user,openshift)
+# test: erlang (v24,user,openshift)
 #--------------------------------------
 FROM build as testb
 
@@ -43,7 +43,8 @@ RUN prepare-tool erlang
 
 USER 1001
 
-# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+# https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+# no major update, pin elixir if newer version doesn't support v24
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 24.3.4.4
 

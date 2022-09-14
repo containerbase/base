@@ -2,14 +2,22 @@
 
 function install_tool () {
   local versioned_tool_path
+  local file
+  local base_url="https://github.com/elixir-lang/elixir/releases/download"
+  local base_file="Precompiled.zip"
 
   check_command erl
 
   versioned_tool_path=$(create_versioned_tool_path)
-  create_folder "${versioned_tool_path}/bin"
 
-  local file
-  file=$(get_from_url "https://github.com/elixir-lang/elixir/releases/download/v${TOOL_VERSION}/Precompiled.zip")
+  # https://github.com/elixir-lang/elixir/releases/tag/v1.14.0
+  if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -eq 14 ]; then
+    base_file=elixir-otp-23.zip
+  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -gt 14 ]; then
+    base_file=elixir-otp-24.zip
+  fi
+
+  file=$(get_from_url "${base_url}/v${TOOL_VERSION}/${base_file}")
   bsdtar -C "${versioned_tool_path}" -xf "${file}"
 }
 
