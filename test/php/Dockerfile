@@ -103,7 +103,7 @@ RUN install-tool php 8.1.10
 
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.4.1
+RUN install-tool composer 2.4.2
 
 RUN install-tool composer latest
 
@@ -147,7 +147,7 @@ RUN install-tool php 8.1.10
 
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.4.1
+RUN install-tool composer 2.4.2
 
 RUN install-tool composer latest
 
