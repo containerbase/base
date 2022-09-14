@@ -75,12 +75,12 @@ FROM containerbase/buildpack
 ARG IGNORED_TOOLS=powershell,node
 
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.1.3
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool node 14.17.3
 
-# renovate: datasource=github-releases lookupName=moby/moby
+# renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker 20.10.7
 ```

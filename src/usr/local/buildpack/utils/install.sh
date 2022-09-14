@@ -12,9 +12,10 @@ function install_v2_tool () {
   # shellcheck source=/dev/null
   . "${path}"
 
+  check_tool_requirements
+
   if ! check_tool_installed; then
     echo "installing v2 tool ${TOOL_NAME} v${TOOL_VERSION}"
-    check_tool_requirements
     install_tool
   else
     echo "tool ${TOOL_NAME} v${TOOL_VERSION} is already installed"

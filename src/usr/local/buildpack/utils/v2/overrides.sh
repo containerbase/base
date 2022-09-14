@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# defines the legacy root directory where old tools will be installed
+# reguired for some legacy tools for bat test redirection
+export ROOT_DIR_LEGACY="${ROOT_DIR}"
+
 # OVERWRITE:
 #
 # defines the root directory where tools will be installed

@@ -31,8 +31,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: lint
         run: yarn lint
@@ -60,8 +63,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: bats
         run: yarn test:bats
@@ -90,8 +96,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: sudo corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
@@ -107,6 +116,7 @@ jobs:
       matrix:
         tag:
           [
+            dart,
             dotnet,
             erlang,
             flutter,
@@ -142,8 +152,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: sudo corepack enable
+
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
@@ -164,7 +177,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@8b36136de47a39691cf88806e73d488d62e903cf # tag=v1.13.9
+        uses: renovatebot/internal-tools@ac2a85780492e013c8fa9d87aa72a788b78fbd58 # tag=v1.14.2
         with:
           command: docker-config
 
@@ -183,13 +196,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: enable corepack
+        run: sudo corepack enable
+
       - name: Init platform
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
-          yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
           echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
@@ -200,7 +215,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy

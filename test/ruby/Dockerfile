@@ -20,7 +20,7 @@ FROM ${IMAGE} as build3
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# renovate: datasource=github-releases lookupName=containerbase/ruby-prebuild versioning=ruby
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.2
 
 RUN touch /.dummy
@@ -62,7 +62,7 @@ FROM build as test-bundler-b
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.3.18
+RUN install-gem bundler 2.3.22
 
 USER 1000
 
@@ -93,7 +93,7 @@ USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.3.18
+ENV BUNDLER_VERSION=2.3.22
 RUN install-tool bundler
 
 RUN set -ex; \

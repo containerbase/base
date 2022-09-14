@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.16.0
+RUN install-tool node v16.17.0
 
 RUN touch /.dummy
 
@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.1.8
+RUN install-tool lerna 5.5.1
 
 USER 1000
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.5.2
+RUN install-tool pnpm 7.11.0
 
 RUN set -ex; \
   pnpm --version;
@@ -212,7 +212,7 @@ RUN set -ex; cd a; npm install
 #--------------------------------------
 FROM build as testh
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 RUN install-tool yarn-slim 1.22.19
 
 RUN set -ex; yarn --version
@@ -270,7 +270,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.1.8
+RUN install-tool lerna 5.5.1
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -338,7 +338,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 1000
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.0
+RUN install-tool corepack 0.14.0
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -355,9 +355,9 @@ FROM build as testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.0
+RUN install-tool corepack 0.14.0
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=1.22.18
 
 RUN set -ex; cd a; \
@@ -373,9 +373,9 @@ FROM build as testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.0
+RUN install-tool corepack 0.14.0
 
-# renovate: datasource=npm lookupName=yarn
+# renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=3.1.0
 
 # re2 needs to be deleted https://github.com/uhop/install-artifact-from-github/pull/1
@@ -393,9 +393,9 @@ FROM build as testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.0
+RUN install-tool corepack 0.14.0
 
-# renovate: datasource=npm lookupName=pnpm
+# renovate: datasource=npm packageName=pnpm
 ARG PNPM_VERSION=7.0.0
 
 RUN set -ex; cd a; \

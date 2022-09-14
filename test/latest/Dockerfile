@@ -62,8 +62,8 @@ FROM build as testb
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases depName=python lookupName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.10.5
+# renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
+ARG PYTHON_VERSION=3.10.7
 RUN install-tool python
 
 RUN set -ex; \
@@ -77,7 +77,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v16.16.0
+RUN install-tool node v16.17.0
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -89,7 +89,7 @@ FROM build as testd
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
 
 RUN set -ex; \
@@ -117,8 +117,8 @@ FROM build as testf
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.5
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
+RUN install-tool powershell v7.2.6
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -154,8 +154,8 @@ USER ${USER_ID}
 
 SHELL ["/bin/sh", "-c"]
 
-# renovate: datasource=docker lookupName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.2.5
+# renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
+RUN install-tool terraform 1.2.9
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -169,20 +169,20 @@ ARG APT_HTTP_PROXY
 
 ARG IGNORED_TOOLS=powershell,node
 
-# renovate: datasource=github-releases lookupName=fluxcd/flux2
-RUN install-tool flux v0.31.4
+# renovate: datasource=github-releases packageName=fluxcd/flux2
+RUN install-tool flux v0.34.0
 
-# renovate: datasource=github-releases lookupName=git-lfs/git-lfs
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.4
 
-# renovate: datasource=github-releases lookupName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.5
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
+RUN install-tool powershell v7.2.6
 
 # renovate: datasource=node
-RUN install-tool node v16.16.0
+RUN install-tool node v16.17.0
 
-# renovate: datasource=github-releases lookupName=moby/moby
-RUN install-tool docker v20.10.17
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v20.10.18
 
 #--------------------------------------
 # test: bin path has 775
@@ -195,6 +195,8 @@ ARG BUILDPACK_DEBUG
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
 RUN prepare-tool all
+
+RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
 # final

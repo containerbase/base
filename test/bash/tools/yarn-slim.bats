@@ -71,7 +71,7 @@ teardown_file () {
   local TOOL_NAME=yarn-slim
   local TOOL_VERSION
 
-  # renovate: datasource=npm lookupName=yarn-slim
+  # renovate: datasource=npm depName=yarn
   TOOL_VERSION=1.22.19
 
   run check_tool_installed
@@ -91,7 +91,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=yarn-slim
+  # renovate: datasource=npm depName=yarn
   TOOL_VERSION=1.22.19
 
   check_tool_requirements
@@ -128,7 +128,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=yarn-slim
+  # renovate: datasource=npm depName=yarn
   TOOL_VERSION=1.22.19
 
   check_tool_requirements

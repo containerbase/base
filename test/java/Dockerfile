@@ -13,19 +13,46 @@ WORKDIR /test
 FROM base as build
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+RUN prepare-tool java
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
 
 # TODO: only lts
-# renovate: datasource=adoptium-java lookupName=java-jre
+# renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 11.0.16+8
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
+
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 #--------------------------------------
 # test: gradle 6
 #--------------------------------------
 FROM build as testa
 
+RUN prepare-tool gradle
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
+  exit 0
+
 USER 1000
 
 # stay on v6
+RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 6.9.2
 
@@ -47,11 +74,11 @@ RUN gradle --version
 #--------------------------------------
 FROM base as testb
 
-# renovate: datasource=adoptium-java lookupName=java-jre
-RUN install-tool java-jre 18.0.1+10
+# renovate: datasource=adoptium-java packageName=java-jre
+RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5
+RUN install-tool gradle 7.5.1
 
 USER 1000
 
@@ -76,11 +103,16 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java lookupName=java-jre
-RUN install-tool java 8.0.332+9
+# disable renovate: datasource=adoptium-java packageName=java-jre
+RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5
+RUN install-tool gradle 7.5.1
+
+# test openshift userid missmatch
+USER 1001
+
+RUN gradle --version
 
 #--------------------------------------
 # test: java 17 (non-root)
@@ -89,11 +121,14 @@ FROM base as testd
 
 ARG APT_HTTP_PROXY
 
-USER 1000
+RUN prepare-tool java gradle
+
+# test openshift userid missmatch
+USER 1001
 
 # renovate: datasource=adoptium-java depName=java
-ARG JAVA_VERSION=17.0.4+8
-RUN install-tool java
+ARG JAVA_JDK_VERSION=17.0.4+8
+RUN install-tool java-jdk
 
 # test latest gradle
 RUN install-tool gradle latest
@@ -111,7 +146,7 @@ FROM build as teste
 # test openshift userid missmatch
 USER 1001
 
-# renovate: datasource=maven lookupName=org.apache.maven:maven
+# renovate: datasource=maven packageName=org.apache.maven:maven
 RUN install-tool maven 3.8.6
 
 RUN set -ex; \
@@ -125,11 +160,11 @@ RUN set -ex; \
 FROM build as testf
 
 # not required / used for sbt
-# renovate: datasource=github-releases lookupName=scala/scala
+# renovate: datasource=github-releases packageName=scala/scala
 RUN install-tool scala v2.13.8
 
-# renovate: datasource=github-releases lookupName=sbt/sbt
-RUN install-tool sbt v1.6.2
+# renovate: datasource=github-releases packageName=sbt/sbt
+RUN install-tool sbt v1.7.1
 
 # doesn't work for arbitrary users
 USER 1000
@@ -139,12 +174,14 @@ RUN set -ex; \
   ls -la; env; \
   sbt compile
 
-RUN ls -la ~
+RUN ls -la ~ /tmp
+
+RUN ls -la /opt/buildpack/ssl /opt/buildpack/tools/java/11.0.16+8/lib/security/cacerts
 
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

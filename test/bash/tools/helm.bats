@@ -58,8 +58,11 @@ teardown_file () {
   local TOOL_NAME=helm
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=helm/helm
-  TOOL_VERSION=3.8.0
+  # renovate: datasource=github-releases depName=helm packageName=helm/helm
+  TOOL_VERSION=v3.9.4
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run check_tool_installed
   assert_failure
@@ -75,8 +78,11 @@ teardown_file () {
   local TOOL_NAME=helm
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=helm/helm
-  TOOL_VERSION=3.8.0
+  # renovate: datasource=github-releases depName=helm packageName=helm/helm
+  TOOL_VERSION=v3.9.4
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run install_tool
   assert_success
@@ -107,8 +113,11 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases lookupName=helm/helm
-  TOOL_VERSION=3.8.0
+  # renovate: datasource=github-releases depName=helm packageName=helm/helm
+  TOOL_VERSION=v3.9.4
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run install_tool
   assert_success

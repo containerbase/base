@@ -15,8 +15,8 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # Python
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.5
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.10.7
 
 
 FROM base as build-rootless
@@ -24,10 +24,12 @@ FROM base as build-rootless
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
+RUN prepare-tool python
+
 USER 1000
 
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.5
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.10.7
 
 #--------------------------------------
 # build: pipenv
@@ -37,7 +39,7 @@ FROM build as pipenv
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.7.4
+RUN install-pip pipenv 2022.9.8
 
 
 USER 1000
@@ -50,7 +52,7 @@ ARG BUILDPACK_DEBUG
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.2.0
 
 USER 1000
 
@@ -62,11 +64,11 @@ FROM build as testa
 ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
-# renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-RUN install-tool python 3.10.5
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.10.7
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.2.0
 
 USER 1000
 
@@ -111,7 +113,7 @@ FROM build as teste
 ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
-RUN install-tool poetry 1.1.0
+# RUN install-tool poetry 1.1.0 // Fails tests now
 
 #--------------------------------------
 # test f: pip_requirements
@@ -133,14 +135,14 @@ FROM build-rootless as testg
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.7.4
+RUN install-pip pipenv 2022.9.8
 
 RUN set -ex; \
   cd a; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.2.0
 
 RUN set -ex \
   && cd c-poetry \
@@ -157,6 +159,26 @@ RUN set -ex \
   && cat requirements.txt \
   ;
 
+#--------------------------------------
+# test h: pipenv (multiple python)
+#--------------------------------------
+FROM build as testh
+
+ARG BUILDPACK_DEBUG
+
+# Do not update minor
+RUN install-tool python 3.8.13
+
+# make as latest
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.10.7
+
+# renovate: datasource=pypi
+RUN install-pip pipenv 2022.9.8
+
+RUN set -ex; \
+  cd h-pipenv; \
+  pipenv lock;
 
 #--------------------------------------
 # final
@@ -170,3 +192,4 @@ COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy

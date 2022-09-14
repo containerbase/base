@@ -71,8 +71,8 @@ teardown_file () {
   local TOOL_NAME=npm
   local TOOL_VERSION
 
-  # renovate: datasource=npm lookupName=npm
-  TOOL_VERSION=8.12.1
+  # renovate: datasource=npm depName=npm
+  TOOL_VERSION=8.19.1
 
   run check_tool_installed
   assert_failure
@@ -91,8 +91,8 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=npm
-  TOOL_VERSION=8.12.1
+  # renovate: datasource=npm depName=npm
+  TOOL_VERSION=8.19.1
 
   check_tool_requirements
 
@@ -128,8 +128,8 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm lookupName=npm
-  TOOL_VERSION=8.12.1
+  # renovate: datasource=npm depName=npm
+  TOOL_VERSION=8.19.1
 
   check_tool_requirements
 

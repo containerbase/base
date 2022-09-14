@@ -45,7 +45,7 @@ function get_from_url () {
 
   if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
       # file in cache
-      echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
+      # echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
       echo "${BUILDPACK_CACHE_DIR}/${filename}"
   else
     # cache disabled or not in cache
@@ -64,7 +64,10 @@ function download_file () {
   name=${2:-$(basename "${url}")}
 
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}"
+  if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
+    echo "Download failed: ${url}" >&2
+    exit 1
+  fi;
   echo "${temp_folder}/${name}"
 }
 
@@ -77,7 +80,7 @@ function cleanup_cache () {
 
   if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ ! -d "${BUILDPACK_CACHE_DIR}" ]; then
     # BUILD_CACHE_DIR is not set or doesn't exist
-    exit 0
+    return
   fi
 
   local max_fill_level=${BUILDPACK_CACHE_MAX_ALLOCATED_DISK:-100}
@@ -93,7 +96,7 @@ function cleanup_cache () {
     rm "${oldest}"
 
     if [ "${single_file}" = "true" ]; then
-      exit 0
+      return
     fi
 
     fill_level=$(get_cache_fill_level)

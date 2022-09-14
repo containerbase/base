@@ -55,6 +55,9 @@ function setup_directories () {
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_bin_path)"
+  # contains the certificates for the tools
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "$(get_ssl_path)"
 
   # if the bin path exists and does not have 775, force it
   if [ "$(stat --format '%a' "$(get_bin_path)")" -ne 775 ]; then
@@ -110,6 +113,13 @@ function get_tools_path () {
   local install_dir
   install_dir=$(get_install_dir)
   echo "${install_dir}/tools"
+}
+
+# Gets the path to the ssl folder
+function get_ssl_path () {
+  local install_dir
+  install_dir=$(get_install_dir)
+  echo "${install_dir}/ssl"
 }
 
 # will get the correct umask based on the caller id

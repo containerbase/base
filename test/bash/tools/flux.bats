@@ -58,8 +58,11 @@ teardown_file () {
   local TOOL_NAME=flux
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=fluxcd/flux2
-  TOOL_VERSION=0.27.3
+  # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
+  TOOL_VERSION=v0.34.0
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run check_tool_installed
   assert_failure
@@ -75,8 +78,11 @@ teardown_file () {
   local TOOL_NAME=flux
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=fluxcd/flux2
-  TOOL_VERSION=0.27.3
+  # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
+  TOOL_VERSION=v0.34.0
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run install_tool
   assert_success
@@ -107,8 +113,11 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases lookupName=flux/flux
-  TOOL_VERSION=0.27.3
+  # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
+  TOOL_VERSION=v0.34.0
+
+  # trim leading v prefix
+  TOOL_VERSION="${TOOL_VERSION#v}"
 
   run install_tool
   assert_success

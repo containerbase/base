@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:20.04@sha256:fd92c36d3cb9b1d027c4d2a72c6bf0125da82425fc2ca37c414d4f010180dc19
+FROM ubuntu:20.04@sha256:35ab2bf57814e9ff49e365efd5a5935b6915eede5c7f8581e9e1b85e0eecbe16
 
 ARG APT_HTTP_PROXY
 
@@ -25,8 +25,8 @@ COPY src/ /
 RUN install-buildpack
 
 
-# renovate: datasource=github-tags lookupName=git/git
-RUN install-tool git v2.37.1
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.37.3
 
 
 LABEL org.opencontainers.image.version="${BUILDPACK_VERSION}"

@@ -9,7 +9,7 @@ license = "MIT"
 python = ">3.6"
 numpy = "^1.16"
 PyYAML = "^5.1"
-pampy = "^0.2.1"
+pampy = { version = "^0.2.1", python = ">3.6" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.4"

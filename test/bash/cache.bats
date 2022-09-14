@@ -148,6 +148,11 @@ teardown() {
 
   run download_file
   assert_failure
+  assert_output "param url is set but empty"
+
+  run download_file "${file}zzz"
+  assert_failure
+  assert_line "Download failed: ${file}zzz"
 
   run download_file "${file}"
   assert_success

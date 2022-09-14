@@ -23,6 +23,7 @@ setup() {
   # set directories for test
   ROOT_DIR="${TEST_ROOT_DIR}/root"
   BIN_DIR="${TEST_ROOT_DIR}/bin"
+  ENV_FILE="${TEST_ROOT_DIR}/env"
 
   setup_directories
 
@@ -58,8 +59,8 @@ teardown_file () {
   local TOOL_NAME=python
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.5
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
+  TOOL_VERSION=3.10.7
 
   run check_tool_installed
   assert_failure
@@ -67,6 +68,8 @@ teardown_file () {
   # needed to export versions
   check_tool_requirements
 
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
@@ -79,11 +82,14 @@ teardown_file () {
   local TOOL_NAME=python
   local TOOL_VERSION
 
-  # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.5
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
+  TOOL_VERSION=3.10.7
 
   # needed to export versions
   check_tool_requirements
+
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
@@ -117,11 +123,14 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=github-releases lookupName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.5
+  # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
+  TOOL_VERSION=3.10.7
 
   # needed to export versions
   check_tool_requirements
+
+  run prepare_tool
+  assert_success
 
   run install_tool
   assert_success
