@@ -24,6 +24,7 @@ RUN install-tool flutter 1.22.6
 USER 1000
 
 RUN set -ex; \
+    ls -la /opt/buildpack/tools/flutter/1.22.6 $USER_HOME; \
     cd a; \
     flutter pub upgrade;
 
@@ -47,6 +48,7 @@ USER 1000
 RUN install-tool flutter 1.22.6
 
 RUN set -ex; \
+    ls -la /opt/buildpack/tools/flutter/1.22.6; \
     cd a; \
     flutter pub upgrade;
 
@@ -93,6 +95,30 @@ RUN set -ex; \
     flutter pub upgrade;
 
 #--------------------------------------
+# test: flutter 3.x (non-root, openshift)
+#--------------------------------------
+FROM base as teste
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+RUN prepare-tool flutter
+
+
+# fix test file perms for openstack
+RUN chown -R 1001 .
+
+USER 1001
+
+# renovate datasource=flutter-version
+RUN install-tool flutter 3.0.2
+
+RUN set -ex; \
+    cd c; \
+    flutter pub upgrade;
+
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -101,3 +127,4 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
