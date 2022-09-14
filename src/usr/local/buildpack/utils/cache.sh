@@ -45,7 +45,7 @@ function get_from_url () {
 
   if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
       # file in cache
-      echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
+      # echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
       echo "${BUILDPACK_CACHE_DIR}/${filename}"
   else
     # cache disabled or not in cache
