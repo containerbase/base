@@ -52,7 +52,7 @@ ARG BUILDPACK_DEBUG
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.2.0
+RUN install-tool poetry 1.2.1
 
 USER 1000
 
@@ -68,7 +68,7 @@ ARG BUILDPACK_DEBUG
 RUN install-tool python 3.10.7
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.2.0
+RUN install-tool poetry 1.2.1
 
 USER 1000
 
@@ -142,7 +142,7 @@ RUN set -ex; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.2.0
+RUN install-tool poetry 1.2.1
 
 RUN set -ex \
   && cd c-poetry \
