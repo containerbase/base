@@ -130,3 +130,9 @@ function get_umask () {
     echo "${USER_UMASK}"
   fi
 }
+
+
+# Gets the path to the buildpack folder
+function get_buildpack_path () {
+  echo "${BUILDPACK_DIR}"
+}

@@ -20,10 +20,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-
   setup_directories
 
   # set default test user

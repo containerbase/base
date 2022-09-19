@@ -2,6 +2,14 @@
 
 # Will overwrite certain util functions to make them testable
 
+# set directories for test
+export BUILDPACK_DIR="${TEST_DIR}/../../../src/usr/local/buildpack"
+export ROOT_DIR="${TEST_ROOT_DIR}/root"
+export BIN_DIR="${TEST_ROOT_DIR}/bin"
+export USER_HOME="${TEST_ROOT_DIR}/userhome"
+export ENV_FILE="${TEST_ROOT_DIR}/env"
+
+
 # Overwrite is_root function to check a test root user
 # instead of the effective caller
 function is_root () {

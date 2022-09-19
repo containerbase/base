@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# get path location
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
 # shellcheck source=/dev/null
-. "$DIR/../../utils/node.sh"
+. "$(get_buildpack_path)/utils/node.sh"
 
 # Helper function to link to a globally installed node
 function prepare_global_config () {
