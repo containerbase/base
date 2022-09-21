@@ -38,8 +38,8 @@ setup() {
   TOOL_VERSION=16.15.1 \
   run install_tool
 
-  # load npm
-  load "$TEST_DIR/../../../src/usr/local/buildpack/tools/v2/npm.sh"
+  # load lerna
+  load "$TEST_DIR/../../../src/usr/local/buildpack/tools/v2/lerna.sh"
 }
 
 teardown() {
@@ -50,8 +50,8 @@ teardown_file () {
   clean_temp_dir $BUILDPACK_CACHE_DIR TEST_CACHE_DIR
 }
 
-@test "npm: check_tool_requirements" {
-  TOOL_NAME=npm
+@test "lerna: check_tool_requirements" {
+  TOOL_NAME=lerna
 
   TOOL_VERSION=foobar \
   run check_tool_requirements
@@ -62,12 +62,12 @@ teardown_file () {
   assert_success
 }
 
-@test "npm: check_tool_installed" {
-  local TOOL_NAME=npm
+@test "lerna: check_tool_installed" {
+  local TOOL_NAME=lerna
   local TOOL_VERSION
 
-  # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.19.2
+  # renovate: datasource=npm depName=lerna
+  TOOL_VERSION=5.5.1
 
   run check_tool_installed
   assert_failure
@@ -81,13 +81,13 @@ teardown_file () {
   assert_success
 }
 
-@test "npm: install_tool" {
-  local TOOL_NAME=npm
+@test "lerna: install_tool" {
+  local TOOL_NAME=lerna
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.19.2
+  # renovate: datasource=npm depName=lerna
+  TOOL_VERSION=5.5.1
 
   check_tool_requirements
 
@@ -98,12 +98,12 @@ teardown_file () {
   local versioned_tool_path=$(find_versioned_tool_path)
 
   PATH="${versioned_tool_path}/bin:${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
   # don't update
-  TOOL_VERSION=8.12.0
+  TOOL_VERSION=3.22.1
 
   check_tool_requirements
 
@@ -113,18 +113,18 @@ teardown_file () {
   local versioned_tool_path=$(find_versioned_tool_path)
 
   PATH="${versioned_tool_path}/bin:${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 }
 
-@test "npm: link_tool" {
-  local TOOL_NAME=npm
+@test "lerna: link_tool" {
+  local TOOL_NAME=lerna
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.19.2
+  # renovate: datasource=npm depName=lerna
+  TOOL_VERSION=5.5.1
 
   check_tool_requirements
 
@@ -138,19 +138,19 @@ teardown_file () {
   assert_output --partial "${TOOL_VERSION}"
 
   PATH="${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
   local versioned_tool_path=$(find_versioned_tool_path)
 
   PATH="${versioned_tool_path}/bin:${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
   # don't update
-  TOOL_VERSION=8.12.0
+  TOOL_VERSION=3.22.1
 
   check_tool_requirements
 
@@ -166,12 +166,12 @@ teardown_file () {
   local versioned_tool_path=$(find_versioned_tool_path)
 
   PATH="${versioned_tool_path}/bin:${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
   PATH="${bin_path}" \
-  run npm -v
+  run lerna --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 }

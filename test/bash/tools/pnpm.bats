@@ -20,11 +20,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  USER_HOME="${TEST_ROOT_DIR}/userhome"
-
   setup_directories
 
   # set default test user
@@ -71,7 +66,7 @@ teardown_file () {
   local TOOL_NAME=pnpm
   local TOOL_VERSION
 
-  # renovate: datasource=pnpm depName=pnpm
+  # renovate: datasource=npm depName=pnpm
   TOOL_VERSION=7.2.1
 
   run check_tool_installed
@@ -91,7 +86,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=pnpm depName=pnpm
+  # renovate: datasource=npm depName=pnpm
   TOOL_VERSION=7.2.1
 
   check_tool_requirements
@@ -128,7 +123,7 @@ teardown_file () {
   local TOOL_VERSION
   local bin_path=$(get_bin_path)
 
-  # renovate: datasource=pnpm depName=pnpm
+  # renovate: datasource=npm depName=pnpm
   TOOL_VERSION=7.2.1
 
   check_tool_requirements
