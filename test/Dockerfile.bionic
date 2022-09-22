@@ -90,7 +90,7 @@ RUN install-tool bundler 2.3.22
 RUN install-tool cocoapods 1.11.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.63.0
+RUN install-tool rust 1.64.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.7.0
