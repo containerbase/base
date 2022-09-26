@@ -3,7 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/containerbase/buildpack)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/buildpack)
 
-# containerbase buildpack
+# containerbase buildpack (not related to or associated with buildpacks.io)
 
 This repository is the source for the Docker Hub image `containerbase/buildpack`.
 Commits to `main` branch are automatically built and published.
