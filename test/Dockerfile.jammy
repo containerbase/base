@@ -40,7 +40,7 @@ RUN install-tool elixir 1.14.0
 RUN install-tool flutter 3.0.2
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.34.0
+RUN install-tool flux v0.35.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.19.1
