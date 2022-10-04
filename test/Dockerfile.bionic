@@ -43,7 +43,7 @@ RUN install-tool flutter 3.0.2
 RUN install-tool flux v0.35.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.19.1
+RUN install-tool golang 1.19.2
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.10.0
