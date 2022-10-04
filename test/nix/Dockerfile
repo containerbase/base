@@ -3,7 +3,7 @@ FROM ${IMAGE} as build
 
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=github-releases packageName=NixOS/nix
+# renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.3.10
 
 USER 1000
