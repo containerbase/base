@@ -26,7 +26,7 @@ RUN set -ex; \
 
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 11.0.16+8
+RUN install-tool java 19.0.0+36
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -127,7 +127,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=adoptium-java depName=java
-ARG JAVA_JDK_VERSION=17.0.4+8
+ARG JAVA_JDK_VERSION=19.0.0+36
 RUN install-tool java-jdk
 
 # test latest gradle
