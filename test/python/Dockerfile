@@ -39,7 +39,7 @@ FROM build as pipenv
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.10.4
+RUN install-pip pipenv 2022.10.9
 
 
 USER 1000
@@ -135,7 +135,7 @@ FROM build-rootless as testg
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.10.4
+RUN install-pip pipenv 2022.10.9
 
 RUN set -ex; \
   cd a; \
@@ -174,7 +174,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.10.7
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.10.4
+RUN install-pip pipenv 2022.10.9
 
 RUN set -ex; \
   cd h-pipenv; \
