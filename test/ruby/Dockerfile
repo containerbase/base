@@ -61,6 +61,9 @@ FROM build as test-bundler-b
 
 ARG BUILDPACK_DEBUG
 
+
+RUN gem install bundler -v 1.17.2
+
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem bundler 2.3.23
 
