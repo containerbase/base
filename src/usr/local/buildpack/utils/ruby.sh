@@ -6,7 +6,7 @@ function gem_install() {
 
   # shellcheck disable=SC2153
   tool_name="${TOOL_NAME}"
-  tool_path=$(find_tool_path)
+  tool_path=$(find_versioned_tool_path)
 
   if [[ -z "${tool_path}" ]]; then
     tool_path=$(create_versioned_tool_path)
