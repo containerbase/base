@@ -177,7 +177,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@44a5a74eecdbe5d9bba6859e884a6cebbcc7d526 # tag=v1.14.5
+        uses: renovatebot/internal-tools@8b03c470dacbf6be4199308b06ef467c5d9f5cfc # tag=v1.14.6
         with:
           command: docker-config
 
