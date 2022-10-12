@@ -55,11 +55,11 @@ RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.401
+RUN install-tool dotnet 6.0.402
 
 # Test duplicate install
 # renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.401
+RUN install-tool dotnet 6.0.402
 RUN set -ex; dotnet --version | grep 6.0.
 
 USER 1000
@@ -84,7 +84,7 @@ ARG BUILDPACK_DEBUG
 
 # only patch updates
 # renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 6.0.401
+RUN install-tool dotnet 6.0.402
 RUN set -ex; dotnet --version | grep 6.0.
 
 RUN set -ex; \
