@@ -34,7 +34,7 @@ RUN install-tool dotnet 6.0.402
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 25.1.1.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.0
+RUN install-tool elixir 1.14.1
 
 # renovate datasource=flutter-version
 RUN install-tool flutter 3.0.2
