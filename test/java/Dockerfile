@@ -54,7 +54,7 @@ USER 1000
 # stay on v6
 RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.2
+RUN install-tool gradle 6.9.3
 
 
 RUN set -ex; \
