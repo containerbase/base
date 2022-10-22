@@ -63,7 +63,7 @@ RUN install-tool pnpm 7.12.2
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
-RUN install-npm lerna 5.6.2
+RUN install-npm lerna 6.0.1
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.1.11
