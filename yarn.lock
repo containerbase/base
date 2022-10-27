@@ -814,12 +814,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bats@npm:1.8.0":
-  version: 1.8.0
-  resolution: "bats@npm:1.8.0"
+"bats@npm:1.8.2":
+  version: 1.8.2
+  resolution: "bats@npm:1.8.2"
   bin:
     bats: bin/bats
-  checksum: cc013c3f4cffef372eaafc89695d18fe0626ccbe9d3f0654454145805dce8f5eb4bb563f7a49d0322ab7d3b011cccbf249931cb5cae9dd4c28676e181dbd294f
+  checksum: 0aed8bd823fde6115fdfde1ab622d9e8bb620ee2f24156331b654a9ed46583bd55b8177a994dd5efc27fce75c64e27a4d11a64af1ba9ff83591d1927454c6e44
   languageName: node
   linkType: hard
 
@@ -893,7 +893,7 @@ __metadata:
     "@semantic-release/exec": 6.0.3
     "@types/node": 16.11.68
     "@types/shelljs": 0.8.11
-    bats: 1.8.0
+    bats: 1.8.2
     bats-assert: 2.0.0
     bats-support: 0.3.0
     commander: 9.4.1
