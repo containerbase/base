@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v18.12.0
+RUN install-tool node v16.18.0
 
 RUN touch /.dummy
 
@@ -104,7 +104,7 @@ RUN set -ex; \
   [ "$(command -v pnpm)" = "/home/user/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: node 17
+# test: node 18
 #--------------------------------------
 
 FROM ${IMAGE} as testd
