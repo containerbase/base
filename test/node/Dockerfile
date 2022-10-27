@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.18.0
+RUN install-tool node v18.12.0
 
 RUN touch /.dummy
 
@@ -116,7 +116,7 @@ RUN touch /.dummy
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v17.0.1
+RUN install-tool node v18.12.0
 
 RUN npm install -g yarn
 RUN set -ex; \
