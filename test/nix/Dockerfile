@@ -39,7 +39,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: nix 2.11
 #--------------------------------------
-FROM base as testa
+FROM base as testb
 
 ARG APT_HTTP_PROXY
 
@@ -64,3 +64,11 @@ RUN set -ex; \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
     flake update
+
+#--------------------------------------
+# final
+#--------------------------------------
+FROM base
+
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
