@@ -5,7 +5,7 @@ set -e
 # USER_NAME and USER_ID need to be defined as the
 # decision which paths are used are based on this information
 if [[ -z "${USER_NAME}" ]]; then
-  export USER_NAME=user
+  export USER_NAME=ubuntu
   echo "No USER_NAME defined - using: ${USER_NAME}"
 fi
 

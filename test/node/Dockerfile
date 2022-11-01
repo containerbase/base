@@ -101,7 +101,7 @@ RUN set -ex; cd a; pnpm i
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
   pnpm --version \
-  [ "$(command -v pnpm)" = "/home/user/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: node 18
@@ -318,7 +318,7 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ "$(cat /home/user/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  [ "$(cat /home/${USER_NAME}/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
   && echo node-gyp works || exit 1;
 
 #--------------------------------------
