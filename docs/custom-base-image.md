@@ -9,7 +9,7 @@ You should always use a specific version which can be found at [docker hub](http
 
 ## Default user name and id
 
-Use this template for using a custom base image with our default user named `user` and userid `1000`.
+Use this template for using a custom base image with our default user named `ubuntu` and userid `1000`.
 
 ```dockerfile
 # This buildpack is used for tool intallation and user/directory setup
@@ -21,7 +21,7 @@ FROM amd64/ubuntu:focal as base
 ARG APT_HTTP_PROXY
 
 # Set env and shell
-ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/ubuntu/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 # This entry point ensures that dumb-init is run
