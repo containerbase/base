@@ -19,7 +19,7 @@ ARG APT_HTTP_PROXY
 
 # stay at 3.1
 # renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
-RUN install-tool dotnet 3.1.424
+RUN install-tool dotnet 3.1.425
 RUN set -ex; dotnet --version | grep 3.1.
 
 USER 1000
