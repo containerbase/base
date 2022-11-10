@@ -46,7 +46,7 @@ RUN install-tool flux v0.36.0
 RUN install-tool golang 1.19.3
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.10.1
+RUN install-tool helm v3.10.2
 
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 17.0.5+8
