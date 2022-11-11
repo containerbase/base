@@ -338,7 +338,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 1000
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.0
+RUN install-tool corepack 0.15.1
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -355,7 +355,7 @@ FROM build as testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.0
+RUN install-tool corepack 0.15.1
 
 # renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=1.22.18
@@ -373,7 +373,7 @@ FROM build as testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.0
+RUN install-tool corepack 0.15.1
 
 # renovate: datasource=npm packageName=yarn
 ARG YARN_VERSION=3.1.0
@@ -393,7 +393,7 @@ FROM build as testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.0
+RUN install-tool corepack 0.15.1
 
 # renovate: datasource=npm packageName=pnpm
 ARG PNPM_VERSION=7.0.0
