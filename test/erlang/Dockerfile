@@ -21,7 +21,7 @@ ARG BUILDPACK_DEBUG
 RUN install-tool erlang 25.1.2.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.1
+RUN install-tool elixir 1.14.2
 
 
 USER 1001
@@ -51,7 +51,7 @@ RUN install-tool erlang 24.3.4.6
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.1
+RUN install-tool elixir 1.14.2
 
 
 RUN set -ex; \
