@@ -20,6 +20,31 @@ fix_python_shebangs() {
 }
 
 function prepare_tool() {
+  local version_codename
+
+  version_codename="$(get_distro)"
+  case "$version_codename" in
+    "bionic") apt_install \
+      default-libmysqlclient-dev \
+      gcc \
+      libpq-dev \
+      ;;
+    "focal") apt_install \
+      default-libmysqlclient-dev \
+      gcc \
+      libpq-dev \
+      ;;
+    "jammy") apt_install \
+      default-libmysqlclient-dev \
+      gcc \
+      libpq-dev \
+      ;;
+    *)
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
+      exit 1
+    ;;
+  esac
+
   create_tool_path
   export_path "${USER_HOME}/.local/bin"
 }
@@ -74,13 +99,14 @@ function link_tool () {
   # export python vars
   export_tool_path "${versioned_tool_path}/bin"
 
+  local exports="PYTHONHOME=\"${versioned_tool_path}\" CPATH=\"${versioned_tool_path}/include/python${MAJOR}.${MINOR}\" LD_LIBRARY_PATH=\"${versioned_tool_path}/lib/\""
   # TODO: fix me, currently required for global pip
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper pip "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "${exports}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin" "${exports}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "${exports}"
+  shell_wrapper pip "${versioned_tool_path}/bin" "${exports}"
+  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin" "${exports}"
+  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "${exports}"
 
   python --version
   pip --version
