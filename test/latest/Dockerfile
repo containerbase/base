@@ -170,7 +170,7 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.36.0
+RUN install-tool flux v0.37.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.1.4
