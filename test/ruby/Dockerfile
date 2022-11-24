@@ -21,7 +21,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.2
+RUN install-tool ruby 3.1.3
 
 RUN touch /.dummy
 
