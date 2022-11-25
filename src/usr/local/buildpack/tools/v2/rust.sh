@@ -27,7 +27,7 @@ function install_tool () {
 
   file=$(get_from_url "https://static.rust-lang.org/dist/rust-${TOOL_VERSION}-${arch}-unknown-linux-gnu.tar.gz")
   mkdir -p "${TEMP_DIR}/rust"
-  bsdtar -C "${TEMP_DIR}/rust" -strip 1 -xf "${file}"
+  bsdtar --strip 1 -C "${TEMP_DIR}/rust" -xf "${file}"
   "${TEMP_DIR}/rust/install.sh" --prefix="$versioned_tool_path" --components=cargo,rust-std-${arch}-unknown-linux-gnu,rustc
   rm -rf "${TEMP_DIR}/rust"
 }
