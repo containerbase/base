@@ -79,7 +79,7 @@ function setup_env_files () {
   install_dir=$(get_install_dir)
 
   cat >> "$ENV_FILE" <<- EOM
-export BUILDPACK=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}"
+export BUILDPACK=1 CONTAINERBASE=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}" CONTAINERBASE_ENV=1
 
 env_dirs=("/usr/local" "/opt/buildpack" "\${USER_HOME}")
 
@@ -104,7 +104,7 @@ unset env_dirs
 EOM
 
   cat >> "${BASH_RC}" <<- EOM
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+if [[ -r "$ENV_FILE" && -z "${CONTAINERBASE_ENV+x}" ]]; then
   . $ENV_FILE
 fi
 EOM

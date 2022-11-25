@@ -19,33 +19,6 @@ fix_python_shebangs() {
   done < <(find "${versioned_tool_path}/bin" -type f -exec grep -Iq . {} \; -print0)
 }
 
-function python_shell_wrapper () {
-  local TARGET
-  local versioned_tool_path=$2
-  local SOURCE
-  TARGET="$(get_bin_path)/${1}"
-  SOURCE=${versioned_tool_path}/bin/${1}
-  check SOURCE true
-  check_command "$SOURCE"
-
-  cat > "$TARGET" <<- EOM
-#!/bin/bash
-
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
-  . $ENV_FILE
-fi
-
-export PYTHONHOME=${versioned_tool_path}
-
-${SOURCE} "\$@"
-EOM
-  # make it writable for the owner and the group
-  if [[ -O "$TARGET" ]] && [ "$(stat --format '%a' "${TARGET}")" -ne 775 ] ; then
-    # make it writable for the owner and the group only if we are the owner
-    chmod 775 "$TARGET"
-  fi
-}
-
 function prepare_tool() {
   create_tool_path
   export_path "${USER_HOME}/.local/bin"
@@ -102,12 +75,12 @@ function link_tool () {
   export_tool_path "${versioned_tool_path}/bin"
 
   # TODO: fix me, currently required for global pip
-  python_shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}"
-  python_shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}"
-  python_shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}"
-  python_shell_wrapper pip "${versioned_tool_path}"
-  python_shell_wrapper "pip${MAJOR}" "${versioned_tool_path}"
-  python_shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper pip "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
 
   python --version
   pip --version

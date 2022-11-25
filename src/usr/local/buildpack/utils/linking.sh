@@ -18,7 +18,7 @@ function shell_wrapper () {
   cat > "$TARGET" <<- EOM
 #!/bin/bash
 
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
   . $ENV_FILE
 fi
 EOM
