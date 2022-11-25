@@ -23,8 +23,8 @@ if [[ "${BASH_ENV}" != "${ENV_FILE}" ]]; then
 fi
 
 # no duplicate installs
-if [[ -n "${BUILDPACK+x}" ]]; then
-  echo "BUILDPACK defined - skipping: ${BUILDPACK}"
+if [[ -n "${CONTAINERBASE_ENV+x}" ]]; then
+  echo "CONTAINERBASE_ENV defined - skipping: ${CONTAINERBASE_ENV}"
   exit 1;
 fi
 

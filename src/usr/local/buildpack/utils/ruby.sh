@@ -18,25 +18,15 @@ function gem_install() {
   fi
 }
 
-
-function gem_link_wrapper() {
-  link_wrapper "${1:-$TOOL_NAME}" "$tool_path/bin"
-}
-
 function gem_shell_wrapper () {
-  local install_dir
   local ruby_path
   local ruby_version
   local ruby_minor_version
   local tool_name
   local tool_path
-  local tool_target
-  local tool_wrapper
 
-  install_dir=$(get_install_dir)
   tool_name=${1:-$TOOL_NAME}
   tool_path=$(find_versioned_tool_path)
-  tool_wrapper=${install_dir}/bin/${tool_name}
   ruby_path=/usr/local/ruby
 
   # TODO: make generic
@@ -47,14 +37,6 @@ function gem_shell_wrapper () {
   fi
 
   ruby_minor_version="${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
-  tool_target="${tool_path}/bin/${tool_name}"
-  check_command "${tool_target}"
-  cat > "$tool_wrapper" <<- EOM
-#!/bin/bash
 
-export GEM_PATH=${tool_path}:${ruby_path}/${ruby_version}/lib/ruby/gems/${ruby_minor_version}.0 PATH=${tool_path}/bin:\$PATH
-
-${tool_target} "\$@"
-EOM
-  chmod 775 "$tool_wrapper"
+  shell_wrapper "$tool_name" "${tool_path}/bin" "GEM_PATH=${tool_path}:${ruby_path}/${ruby_version}/lib/ruby/gems/${ruby_minor_version}.0 PATH=${tool_path}/bin:\$PATH"
 }

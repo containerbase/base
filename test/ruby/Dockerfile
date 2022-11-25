@@ -101,7 +101,7 @@ RUN install-tool bundler
 
 RUN set -ex; \
   bundler --version | grep ${BUNDLER_VERSION}; \
-  [ "$(command -v bundler)" = "$USER_HOME/bin/bundler" ] && echo "works" || exit 1;
+  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1;
 
 RUN bundler env
 
