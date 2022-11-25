@@ -37,7 +37,7 @@ function link_tool () {
   versioned_tool_path=$(find_versioned_tool_path)
 
   shell_wrapper "cargo" "${versioned_tool_path}/bin"
-  shell_wrapper "rust" "${versioned_tool_path}/bin"
+  shell_wrapper "rustc" "${versioned_tool_path}/bin"
 
   cargo --version
   rustc --version
