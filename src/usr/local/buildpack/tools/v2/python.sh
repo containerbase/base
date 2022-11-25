@@ -75,12 +75,12 @@ function link_tool () {
   export_tool_path "${versioned_tool_path}/bin"
 
   # TODO: fix me, currently required for global pip
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper pip "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper pip "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
 
   python --version
   pip --version
