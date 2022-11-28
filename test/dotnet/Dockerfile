@@ -19,7 +19,7 @@ ARG APT_HTTP_PROXY
 
 # stay at 3.1
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 3.1.425
+RUN install-tool dotnet 7.0.100
 RUN set -ex; dotnet --version | grep 3.1.
 
 USER 1000
@@ -55,11 +55,11 @@ RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.403
+RUN install-tool dotnet 7.0.100
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.403
+RUN install-tool dotnet 7.0.100
 RUN set -ex; dotnet --version | grep 6.0.
 
 USER 1000
@@ -84,7 +84,7 @@ ARG BUILDPACK_DEBUG
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.403
+RUN install-tool dotnet 7.0.100
 RUN set -ex; dotnet --version | grep 6.0.
 
 RUN set -ex; \
