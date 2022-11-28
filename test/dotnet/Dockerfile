@@ -18,7 +18,7 @@ ARG BUILDPACK_DEBUG
 ARG APT_HTTP_PROXY
 
 # stay at 3.1
-# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 3.1.425
 RUN set -ex; dotnet --version | grep 3.1.
 
@@ -54,11 +54,11 @@ ARG APT_HTTP_PROXY
 RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
-# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 6.0.403
 
 # Test duplicate install
-# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 6.0.403
 RUN set -ex; dotnet --version | grep 6.0.
 
@@ -83,9 +83,29 @@ FROM net3 as testc
 ARG BUILDPACK_DEBUG
 
 # only patch updates
-# renovate: datasource=docker packageName=mcr.microsoft.com/dotnet/sdk versioning=docker
+# renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 6.0.403
 RUN set -ex; dotnet --version | grep 6.0.
+
+RUN set -ex; \
+    dotnet restore --use-lock-file
+
+RUN set -ex;  \
+    dotnet add package Newtonsoft.Json --version 12.0.3; \
+    dotnet restore --force-evaluate
+
+
+#--------------------------------------
+# test: dotnet 7.0 (non-root)
+#--------------------------------------
+FROM net3 as testd
+
+ARG BUILDPACK_DEBUG
+
+# only patch updates
+# renovate: datasource=dotnet packageName=dotnet-sdk
+RUN install-tool dotnet 7.0.100
+RUN set -ex; dotnet --version | grep 7.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -102,3 +122,4 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
