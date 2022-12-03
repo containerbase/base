@@ -180,27 +180,6 @@ RUN set -ex; \
   cd h-pipenv; \
   pipenv lock;
 
-
-#------------------------------
-# test i: mysqlclient, psycopg2
-#------------------------------
-FROM build as testi
-
-ARG BUILDPACK_DEBUG
-
-RUN install-tool python 3.11.0
-RUN install-tool python 3.10.8
-
-RUN python3.11 -m pip install mysqlclient psycopg2
-RUN python3.10 -m pip install mysqlclient psycopg2
-
-RUN set -ex; \
-  mkdir i; \
-  cd i; \
-  python3.11 -m pip freeze > libs3.11.txt; \
-  python3.10 -m pip freeze > libs3.10.txt
-
-
 #--------------------------------------
 # final
 #--------------------------------------
@@ -214,4 +193,3 @@ COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
