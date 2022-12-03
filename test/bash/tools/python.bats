@@ -147,6 +147,11 @@ teardown_file () {
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
+  run python python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
+  assert_success
+  assert_output --partial "CPATH=\"${versioned_tool_path}/include/python"
+  assert_output --partial "LD_LIBRARY_PATH=\"${versioned_tool_path}/lib/\""
+
   # don't update
   TOOL_VERSION=3.10.4
 
@@ -172,4 +177,9 @@ teardown_file () {
   run python --version
   assert_success
   assert_output --partial "${TOOL_VERSION}"
+
+  run python python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
+  assert_success
+  assert_output --partial "CPATH=\"${versioned_tool_path}/include/python"
+  assert_output --partial "LD_LIBRARY_PATH=\"${versioned_tool_path}/lib/\""
 }
