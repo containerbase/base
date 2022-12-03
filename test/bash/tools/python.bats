@@ -147,7 +147,7 @@ teardown_file () {
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
-  run python python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
+  run python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
   assert_success
   assert_output --partial "CPATH=\"${versioned_tool_path}/include/python"
   assert_output --partial "LD_LIBRARY_PATH=\"${versioned_tool_path}/lib/\""
@@ -178,7 +178,7 @@ teardown_file () {
   assert_success
   assert_output --partial "${TOOL_VERSION}"
 
-  run python python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
+  run python -c 'import os; print([f"{k}={v}" for k, v in sorted(os.environ.items())])'
   assert_success
   assert_output --partial "CPATH=\"${versioned_tool_path}/include/python"
   assert_output --partial "LD_LIBRARY_PATH=\"${versioned_tool_path}/lib/\""
