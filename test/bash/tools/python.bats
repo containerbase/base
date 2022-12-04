@@ -116,6 +116,7 @@ teardown_file () {
 @test "python: link_tool" {
   local TOOL_NAME=python
   local TOOL_VERSION
+  local TEST_ROOT_USER=0
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
