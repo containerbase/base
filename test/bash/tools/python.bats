@@ -55,7 +55,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.11.0
+  TOOL_VERSION=3.11.1
 
   run check_tool_installed
   assert_failure
@@ -78,7 +78,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.11.0
+  TOOL_VERSION=3.11.1
 
   # needed to export versions
   check_tool_requirements
@@ -119,7 +119,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.11.0
+  TOOL_VERSION=3.11.1
 
   # needed to export versions
   check_tool_requirements
