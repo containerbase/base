@@ -174,10 +174,6 @@ RUN set -ex; \
   ls -la; env; \
   sbt compile
 
-RUN ls -la ~ /tmp
-
-RUN ls -la /opt/buildpack/ssl /opt/buildpack/tools/java/11.0.16+8/lib/security/cacerts
-
 #--------------------------------------
 # final
 #--------------------------------------
