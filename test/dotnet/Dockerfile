@@ -19,7 +19,7 @@ ARG APT_HTTP_PROXY
 
 # stay at 3.1
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 3.1.425
+RUN install-tool dotnet 5.0.408
 RUN set -ex; dotnet --version | grep 3.1.
 
 USER 1000
