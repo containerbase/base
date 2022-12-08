@@ -33,6 +33,9 @@ function install_v2_tool () {
     set_tool_version
   fi
 
+  # Allow tools to do some additional stuff, like overwriting additional shell wrapper
+  post_install
+
   # cleanup
   cleanup_cache
 }
