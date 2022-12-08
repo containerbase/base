@@ -26,9 +26,10 @@ function install_tool () {
 }
 
 function link_tool () {
-  local versioned_tool_path
-  versioned_tool_path=$(find_versioned_tool_path)
-
-  link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  post_install
   yarn --version
+}
+
+function post_install () {
+  link_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
 }
