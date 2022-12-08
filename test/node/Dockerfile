@@ -411,7 +411,7 @@ RUN install-tool pnpm 7.17.1
 RUN install-tool corepack 0.15.2
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=7.0.0
+ARG PNPM_VERSION=7.0.1
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
