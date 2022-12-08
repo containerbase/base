@@ -3,6 +3,8 @@
   "extends": ["github>containerbase/.github"],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
   "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
+  "separateMultipleMajor": true,
+  "separateMajorMinor": true,
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
