@@ -358,7 +358,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool corepack 0.15.2
 
 # renovate: datasource=npm depName=yarn
-ARG YARN_VERSION=1.22.18
+ARG YARN_VERSION=1.22.19
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
@@ -377,7 +377,7 @@ RUN install-tool corepack 0.15.2
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.18
+RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.15.2
