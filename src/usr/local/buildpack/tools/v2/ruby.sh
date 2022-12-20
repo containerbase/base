@@ -1,33 +1,5 @@
 #!/bin/bash
 
-function ruby_shell_wrapper () {
-  local TARGET
-  local versioned_tool_path=$2
-  local SOURCE
-  TARGET="$(get_bin_path)/${1}"
-  SOURCE=${versioned_tool_path}/bin/${1}
-  check SOURCE true
-  check_command "$SOURCE"
-
-  cat > "$TARGET" <<- EOM
-#!/bin/bash
-
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
-  . $ENV_FILE
-fi
-if [ "\${EUID}" != 0 ]; then
-  export GEM_HOME="${USER_HOME}/.gem/ruby/${MAJOR}.${MINOR}.0"
-fi
-
-${SOURCE} "\$@"
-EOM
-  # make it writable for the owner and the group
-  if [[ -O "$TARGET" ]] && [ "$(stat --format '%a' "${TARGET}")" -ne 775 ] ; then
-    # make it writable for the owner and the group only if we are the owner
-    chmod 775 "$TARGET"
-  fi
-}
-
 function prepare_tool() {
   local version_codename
   local tool_path
@@ -48,9 +20,9 @@ function prepare_tool() {
     ;
   tool_path=$(create_tool_path)
 
-  cat > "${USER_HOME}"/.gemrc <<- EOM
-gem: --bindir ${USER_HOME}/bin --no-document
-EOM
+  {
+    printf -- "gem: --bindir %s/bin --no-document\n" "${USER_HOME}"
+  } > "${USER_HOME}"/.gemrc
   chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
   chmod -R g+w "${USER_HOME}"/.gemrc
 
@@ -88,27 +60,36 @@ function install_tool () {
 
   versioned_tool_path=$(find_versioned_tool_path)
   # System settings
-  mkdir -p "$versioned_tool_path"/etc
-  cat > "$versioned_tool_path"/etc/gemrc <<- EOM
-gem: --bindir /usr/local/bin --no-document
-:benchmark: false
-:verbose: true
-:update_sources: true
-:backtrace: false
-EOM
+  mkdir -p "$versioned_tool_path/etc"
+  {
+    printf -- "gem: --bindir /usr/local/bin --no-document\n"
+    printf -- ":benchmark: false\n"
+    printf -- ":verbose: true\n"
+    printf -- ":update_sources: true\n"
+    printf -- ":backtrace: false\n"
+  } > "$versioned_tool_path/etc/gemrc"
 
 }
 
 function link_tool () {
   local tool_path
   local versioned_tool_path
+  local ruby_minor_version
+
   tool_path=$(find_tool_path)
   versioned_tool_path=$(find_versioned_tool_path)
+  ruby_minor_version="${MAJOR}.${MINOR}.0"
 
-  ruby_shell_wrapper ruby "${versioned_tool_path}"
-  ruby_shell_wrapper gem "${versioned_tool_path}"
+  reset_tool_env
+  # export ruby varsreset_tool_env
+  {
+    printf -- "if [ \"\${EUID}\" != 0 ] && [ -z \"\$GEM_HOME\" ]; then\n"
+    printf -- "  export GEM_HOME=\"%s/.gem/ruby/%s\"\n" "${USER_HOME}" "${ruby_minor_version}"
+    printf -- "fi\n"
+  } >> "$(find_tool_env)"
 
-  echo "$TOOL_VERSION" > "${tool_path}"/.version
+  shell_wrapper ruby "${versioned_tool_path}/bin"
+  shell_wrapper gem "${versioned_tool_path}/bin"
 
   ruby --version
   echo "gem $(gem --version)"
