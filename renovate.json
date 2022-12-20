@@ -41,6 +41,13 @@
       "automerge": false
     },
     {
+      "description": "Automerge test selected minor updates in tests",
+      "matchPaths": ["test/**"],
+      "matchPackageNames": ["docker", "dotnet", "git", "helm", "npm", "pipenv", "poetry", "pnpm", "rust", "swift"],
+      "matchUpdateTypes": ["minor"],
+      "automerge": true
+    },
+    {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/**"],
       "additionalBranchPrefix": "test-",
