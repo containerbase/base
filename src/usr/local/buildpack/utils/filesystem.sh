@@ -10,20 +10,24 @@ function get_install_dir () {
 }
 
 function find_tool_path () {
+  local tool=${1:-$TOOL_NAME}
   install_dir=$(get_install_dir)
-  if [[ -d "${install_dir}/${TOOL_NAME}" ]]; then
-    echo "${install_dir}/${TOOL_NAME}"
+  if [[ -d "${install_dir}/${tool}" ]]; then
+    echo "${install_dir}/${tool}"
   fi
 }
 
 function find_versioned_tool_path () {
-  tool_dir=$(find_tool_path)
-  if [[ -d "${tool_dir}/${TOOL_VERSION}" ]]; then
-    echo "${tool_dir}/${TOOL_VERSION}"
+  local tool=${1:-$TOOL_NAME}
+  local version=${2:-$TOOL_VERSION}
+  tool_dir=$(find_tool_path "$tool")
+  if [[ -d "${tool_dir}/${version}" ]]; then
+    echo "${tool_dir}/${version}"
   fi
 }
 
 function create_versioned_tool_path () {
+  local tool=${1:-$TOOL_NAME}
   install_dir=$(get_install_dir)
 
   local umask=775
@@ -32,9 +36,9 @@ function create_versioned_tool_path () {
   fi
 
   # shellcheck disable=SC2174
-  mkdir -p -m "${umask}" "${install_dir}/${TOOL_NAME}"
-  mkdir -m "${umask}" "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
-  echo "${install_dir}/${TOOL_NAME}/${TOOL_VERSION}"
+  mkdir -p -m "${umask}" "${install_dir}/${tool}"
+  mkdir -m "${umask}" "${install_dir}/${tool}/${TOOL_VERSION}"
+  echo "${install_dir}/${tool}/${TOOL_VERSION}"
 }
 
 # Will set up the general folder structure for the whole buildpack installation

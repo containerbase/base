@@ -1,7 +1,17 @@
 ARG IMAGE=containerbase/buildpack
 ARG BUILDPACK_DEBUG
 
-FROM ${IMAGE} as build
+#--------------------------------------
+FROM ${IMAGE} as base
+
+RUN touch /.dummy
+
+COPY --chown=1000:0 test test
+WORKDIR /test
+
+
+#--------------------------------------
+FROM base as build
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
@@ -9,13 +19,8 @@ ARG BUILDPACK_DEBUG
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
-RUN touch /.dummy
-
-COPY --chown=1000:0 test test
-
-WORKDIR /test
-
-FROM ${IMAGE} as build3
+#--------------------------------------
+FROM base as build3
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
@@ -23,11 +28,6 @@ ARG BUILDPACK_DEBUG
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.1.3
 
-RUN touch /.dummy
-
-COPY --chown=1000:0 test test
-
-WORKDIR /test
 
 #--------------------------------------
 # test: bundler (gem)
@@ -84,14 +84,18 @@ RUN ruby --version
 #--------------------------------------
 FROM build as test-bundler-c
 
+ARG BUILDPACK_DEBUG
+
 # do not change, testing only
 ENV BUNDLER_VERSION=1.17.3
 RUN install-tool bundler
+
+
 RUN set -ex; \
   bundler --version | grep ${BUNDLER_VERSION}; \
-  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1;
+  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
+  true
 
-ARG BUILDPACK_DEBUG
 USER 1000
 
 
@@ -101,7 +105,8 @@ RUN install-tool bundler
 
 RUN set -ex; \
   bundler --version | grep ${BUNDLER_VERSION}; \
-  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1;
+  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
+  true
 
 RUN bundler env
 
@@ -163,9 +168,33 @@ RUN set -ex; \
   pod install;
 
 #--------------------------------------
+# test: cocoapods (install-gem, non-root)
+#--------------------------------------
+FROM base as test-cocoapods-d
+
+ARG APT_HTTP_PROXY
+RUN prepare-tool ruby
+
+
+USER 1000
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
+RUN install-tool ruby 3.1.3
+
+# renovate: datasource=rubygems versioning=ruby
+RUN install-gem cocoapods 1.11.3
+
+RUN set -ex; \
+  cd b/Project; \
+  gem install cocoapods-acknowledgements; \
+  pod install;
+
+#--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=test-bundler-a /.dummy /.dummy
 COPY --from=test-bundler-b /.dummy /.dummy
@@ -173,3 +202,4 @@ COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
+COPY --from=test-cocoapods-d /.dummy /.dummy
