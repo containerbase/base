@@ -5,7 +5,7 @@ set -e
 # USER_NAME and USER_ID need to be defined as the
 # decision which paths are used are based on this information
 if [[ -z "${USER_NAME}" ]]; then
-  export USER_NAME=user
+  export USER_NAME=ubuntu
   echo "No USER_NAME defined - using: ${USER_NAME}"
 fi
 
@@ -23,8 +23,8 @@ if [[ "${BASH_ENV}" != "${ENV_FILE}" ]]; then
 fi
 
 # no duplicate installs
-if [[ -n "${BUILDPACK+x}" ]]; then
-  echo "BUILDPACK defined - skipping: ${BUILDPACK}"
+if [[ -n "${CONTAINERBASE_ENV+x}" ]]; then
+  echo "CONTAINERBASE_ENV defined - skipping: ${CONTAINERBASE_ENV}"
   exit 1;
 fi
 
@@ -38,19 +38,19 @@ echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/buildp
 
 # Set up user and home directory with access to users in the root group (0)
 # https://docs.openshift.com/container-platform/3.6/creating_images/guidelines.html#use-uid
-groupadd --gid ${USER_ID} ${USER_NAME};
-useradd --uid ${USER_ID} --gid 0 --groups ${USER_NAME} --shell /bin/bash --create-home ${USER_NAME}
+groupadd --gid "${USER_ID}" "${USER_NAME}";
+useradd --uid "${USER_ID}" --gid 0 --groups "${USER_NAME}" --shell /bin/bash --create-home "${USER_NAME}"
 
 # create env helper paths
 mkdir /usr/local/env.d
-su ${USER_NAME} -c "mkdir -p /home/${USER_NAME}/{env.d,bin}"
+su "${USER_NAME}" -c "mkdir -p \"/home/${USER_NAME}/\"{env.d,bin}"
 
 if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
   echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> "$ENV_FILE"
 fi
 
 # OpenShift
-chmod g+w /home/${USER_NAME}/{,env.d,bin}
+chmod -R g+w "/home/${USER_NAME}"
 
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
@@ -66,6 +66,7 @@ apt_install \
   dumb-init \
   gnupg \
   jq \
+  libarchive-tools \
   openssh-client \
   unzip \
   xz-utils \

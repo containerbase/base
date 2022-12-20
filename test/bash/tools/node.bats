@@ -21,11 +21,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  USER_HOME="${TEST_ROOT_DIR}/userhome"
-
   setup_directories
 
   # set default test user
@@ -80,7 +75,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=node depName=node
-  TOOL_VERSION=v16.16.0
+  TOOL_VERSION=v18.12.1
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -119,7 +114,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=node depName=node
-  TOOL_VERSION=v16.16.0
+  TOOL_VERSION=v18.12.1
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"

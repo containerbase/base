@@ -1,11 +1,12 @@
-![Build status](https://github.com/containerbase/buildpack/workflows/build/badge.svg)
+![Build status](https://github.com/containerbase/base/workflows/build/badge.svg)
 ![Docker Image Size (latest)](https://img.shields.io/docker/image-size/containerbase/buildpack/latest)
-![GitHub](https://img.shields.io/github/license/containerbase/buildpack)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/buildpack)
+![GitHub](https://img.shields.io/github/license/containerbase/base)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/base)
 
-# containerbase buildpack
+# containerbase base
 
-This repository is the source for the Docker Hub image `containerbase/buildpack`.
+This repository is the source for the Docker Hub image `containerbase/buildpack`, which is to be renamed to `containerbase/base`.
+It is not associated with or compatible with the `buildpacks.io` project.
 Commits to `main` branch are automatically built and published.
 
 ## Local development

@@ -20,10 +20,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-
   setup_directories
 
   # set default test user
@@ -59,7 +55,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=helm packageName=helm/helm
-  TOOL_VERSION=v3.9.2
+  TOOL_VERSION=v3.10.3
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -79,7 +75,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=helm packageName=helm/helm
-  TOOL_VERSION=v3.9.2
+  TOOL_VERSION=v3.10.3
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -114,7 +110,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases depName=helm packageName=helm/helm
-  TOOL_VERSION=v3.9.2
+  TOOL_VERSION=v3.10.3
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"

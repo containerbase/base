@@ -9,17 +9,12 @@ function install_tool () {
   local versioned_tool_path
   versioned_tool_path=$(create_versioned_tool_path)
 
-  # get path location
-  DIR="${BASH_SOURCE%/*}"
-  if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-  # shellcheck disable=SC2046
   if [[ $(restore_folder_from_cache "${versioned_tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
     # restore from cache not possible
     # either not in cache or error, install
 
     # shellcheck source=/dev/null
-    . "$DIR/../../utils/node.sh"
+    . "$(get_buildpack_path)/utils/node.sh"
 
     npm_init
     npm_install
@@ -31,9 +26,10 @@ function install_tool () {
 }
 
 function link_tool () {
-  local versioned_tool_path
-  versioned_tool_path=$(find_versioned_tool_path)
-
-  link_wrapper "${TOOL_NAME}" "$versioned_tool_path/bin"
+  post_install
   pnpm --version
+}
+
+function post_install () {
+  link_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
 }

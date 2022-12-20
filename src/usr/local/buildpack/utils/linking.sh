@@ -4,6 +4,7 @@
 function shell_wrapper () {
   local TARGET
   local SOURCE=$2
+  local EXPORTS=$3
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
@@ -17,12 +18,17 @@ function shell_wrapper () {
   cat > "$TARGET" <<- EOM
 #!/bin/bash
 
-if [[ -r "$ENV_FILE" && -z "${BUILDPACK+x}" ]]; then
+if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
   . $ENV_FILE
 fi
-
-${SOURCE} "\$@"
 EOM
+
+  if [ -n "$EXPORTS" ]; then
+    echo "export $EXPORTS" >> "$TARGET"
+  fi
+
+  echo "${SOURCE} \"\$@\"" >> "$TARGET"
+
   # make it writable for the owner and the group
   if [[ -O "$TARGET" ]] && [ "$(stat --format '%a' "${TARGET}")" -ne 775 ] ; then
     # make it writable for the owner and the group only if we are the owner

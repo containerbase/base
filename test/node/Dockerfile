@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.16.0
+RUN install-tool node v16.19.0
 
 RUN touch /.dummy
 
@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.3.0
+RUN install-tool lerna 6.1.0
 
 USER 1000
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.6.0
+RUN install-tool pnpm 7.18.2
 
 RUN set -ex; \
   pnpm --version;
@@ -101,10 +101,10 @@ RUN set -ex; cd a; pnpm i
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
   pnpm --version \
-  [ "$(command -v pnpm)" = "/home/user/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: node 17
+# test: node 18
 #--------------------------------------
 
 FROM ${IMAGE} as testd
@@ -116,7 +116,7 @@ RUN touch /.dummy
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v17.0.1
+RUN install-tool node v18.12.1
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -270,7 +270,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 5.3.0
+RUN install-tool lerna 6.1.0
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -318,7 +318,7 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ "$(cat /home/user/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  [ "$(cat /home/${USER_NAME}/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
   && echo node-gyp works || exit 1;
 
 #--------------------------------------
@@ -338,7 +338,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 1000
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.1
+RUN install-tool corepack 0.15.2
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -355,10 +355,10 @@ FROM build as testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.1
+RUN install-tool corepack 0.15.2
 
-# renovate: datasource=npm packageName=yarn
-ARG YARN_VERSION=1.22.18
+# renovate: datasource=npm depName=yarn
+ARG YARN_VERSION=1.22.19
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
@@ -373,17 +373,25 @@ FROM build as testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.1
+RUN install-tool corepack 0.15.2
 
-# renovate: datasource=npm packageName=yarn
-ARG YARN_VERSION=3.1.0
+# test if corepack is overriding yarn
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.19
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.15.2
+
+
+# renovate: datasource=npm depName=yarn
+ARG YARN_VERSION=3.3.0
 
 # re2 needs to be deleted https://github.com/uhop/install-artifact-from-github/pull/1
-RUN set -ex; cd a; \
+RUN set -ex; cd b; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
+  yarn -v; \
   yarn -v | tee | grep ${YARN_VERSION}; \
-  npm pkg delete dependencies.re2; \
-  yarn install
+  yarn install --immutable
 
 #--------------------------------------
 # test: pnpm (corepack)
@@ -393,10 +401,17 @@ FROM build as testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.12.1
+RUN install-tool corepack 0.15.2
 
-# renovate: datasource=npm packageName=pnpm
-ARG PNPM_VERSION=7.0.0
+# test if corepack is overriding pnpm
+# renovate: datasource=npm
+RUN install-tool pnpm 7.18.2
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.15.2
+
+# renovate: datasource=npm depName=pnpm
+ARG PNPM_VERSION=7.18.2
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -404,22 +419,56 @@ RUN set -ex; cd a; \
   pnpm install
 
 #--------------------------------------
+# test: pnpm / yarn (link / wrapper overrides)
+#--------------------------------------
+FROM build as testp
+
+ARG PNPM_VERSION=6.0.0
+ARG YARN_VERSION=1.22.0
+ARG YARN_SLIM_VERSION=1.22.5
+
+RUN install-tool pnpm
+RUN install-tool yarn
+RUN install-tool yarn-slim
+
+# renovate: datasource=npm
+RUN install-tool corepack 0.15.2
+
+RUN install-tool pnpm
+RUN install-tool yarn
+
+RUN set -ex; \
+  pnpm -v; \
+  pnpm -v | grep ${PNPM_VERSION};
+
+RUN set -ex; \
+  yarn -v; \
+  yarn -v | grep ${YARN_VERSION};
+
+
+RUN install-tool yarn-slim
+RUN set -ex; \
+  yarn -v; \
+  yarn -v | grep ${YARN_SLIM_VERSION};
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
 
-COPY --from=testa /.dummy /.dummy
-COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
-COPY --from=testj /.dummy /.dummy
-COPY --from=testk /.dummy /.dummy
-COPY --from=testl /.dummy /.dummy
-COPY --from=testm /.dummy /.dummy
+# COPY --from=testa /.dummy /.dummy
+# COPY --from=testb /.dummy /.dummy
+# COPY --from=testc /.dummy /.dummy
+# COPY --from=testd /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
+# COPY --from=testg /.dummy /.dummy
+# COPY --from=testh /.dummy /.dummy
+# COPY --from=testi /.dummy /.dummy
+# COPY --from=testj /.dummy /.dummy
+# COPY --from=testk /.dummy /.dummy
+# COPY --from=testl /.dummy /.dummy
+# COPY --from=testm /.dummy /.dummy
 COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
+COPY --from=testp /.dummy /.dummy

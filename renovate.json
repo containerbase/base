@@ -3,6 +3,8 @@
   "extends": ["github>containerbase/.github"],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
   "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
+  "separateMultipleMajor": true,
+  "separateMajorMinor": true,
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
@@ -17,30 +19,30 @@
     },
     {
       "description": "Disable all managers in test/ by default",
-      "matchPaths": ["test/"],
+      "matchPaths": ["test/**"],
       "enabled": false
     },
     {
       "description": "Enable the regex manager only for test/",
-      "matchPaths": ["test/"],
+      "matchPaths": ["test/**"],
       "matchManagers": ["regex"],
       "enabled": true
     },
     {
       "description": "Separate patch updates in test/ so that we can automerge them",
-      "matchPaths": ["test/"],
+      "matchPaths": ["test/**"],
       "automergeType": "branch",
       "separateMinorPatch": true
     },
     {
       "description": "Don't automerge test minor/major because we might want to retain old versions in tests too",
-      "matchPaths": ["test/"],
+      "matchPaths": ["test/**"],
       "matchUpdateTypes": ["minor", "major"],
       "automerge": false
     },
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
-      "matchPaths": ["test/"],
+      "matchPaths": ["test/**"],
       "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },

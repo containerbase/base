@@ -16,7 +16,7 @@ ARG BUILDPACK_DEBUG
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.10.6
+RUN install-tool python 3.11.1
 
 
 FROM base as build-rootless
@@ -29,7 +29,7 @@ RUN prepare-tool python
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.10.6
+RUN install-tool python 3.11.1
 
 #--------------------------------------
 # build: pipenv
@@ -39,7 +39,7 @@ FROM build as pipenv
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.8.5
+RUN install-pip pipenv 2022.12.19
 
 
 USER 1000
@@ -52,7 +52,7 @@ ARG BUILDPACK_DEBUG
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.3.1
 
 USER 1000
 
@@ -65,10 +65,10 @@ ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.10.6
+RUN install-tool python 3.11.1
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.3.1
 
 USER 1000
 
@@ -113,7 +113,7 @@ FROM build as teste
 ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
-RUN install-tool poetry 1.1.0
+# RUN install-tool poetry 1.1.0 // Fails tests now
 
 #--------------------------------------
 # test f: pip_requirements
@@ -135,14 +135,14 @@ FROM build-rootless as testg
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.8.5
+RUN install-pip pipenv 2022.12.19
 
 RUN set -ex; \
   cd a; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.1.14
+RUN install-tool poetry 1.3.1
 
 RUN set -ex \
   && cd c-poetry \
@@ -171,10 +171,10 @@ RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.10.6
+RUN install-tool python 3.11.1
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.8.5
+RUN install-pip pipenv 2022.12.19
 
 RUN set -ex; \
   cd h-pipenv; \

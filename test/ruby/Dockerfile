@@ -24,7 +24,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.2
+RUN install-tool ruby 3.1.3
 
 
 #--------------------------------------
@@ -59,8 +59,11 @@ FROM build as test-bundler-b
 
 ARG BUILDPACK_DEBUG
 
+
+RUN gem install bundler -v 1.17.2
+
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.3.19
+RUN install-gem bundler 2.3.26
 
 USER 1000
 
@@ -91,12 +94,12 @@ USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.3.19
+ENV BUNDLER_VERSION=2.3.26
 RUN install-tool bundler
 
 RUN set -ex; \
   bundler --version | grep ${BUNDLER_VERSION}; \
-  [ "$(command -v bundler)" = "$USER_HOME/bin/bundler" ] && echo "works" || exit 1;
+  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1;
 
 RUN bundler env
 

@@ -32,7 +32,7 @@ check_debug() {
 }
 check_debug
 
-if [[ -z "${BUILDPACK+x}" ]]; then
+if [[ -z "${CONTAINERBASE_ENV+x}" ]]; then
   refreshenv
 fi
 

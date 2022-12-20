@@ -34,6 +34,10 @@ if [[ -z "${tool_path}" ]]; then
   curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-linux-x64.tar.gz" --output "${TOOL_NAME}".tgz
   tar --strip 1 -C "$tool_path/bin" -xzf "${TOOL_NAME}".tgz
   rm "${TOOL_NAME}".tgz
+  if [[ ! -x "${tool_path}/bin/pwsh" ]]; then
+    echo "fixing missing executable bit"
+    chmod +x "${tool_path}/bin/pwsh"
+  fi
 fi
 
 link_wrapper pwsh "${tool_path}/bin"

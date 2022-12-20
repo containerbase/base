@@ -20,11 +20,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  ENV_FILE="${TEST_ROOT_DIR}/env"
-
   setup_directories
 
   # set default test user
@@ -60,7 +55,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.6
+  TOOL_VERSION=3.11.1
 
   run check_tool_installed
   assert_failure
@@ -83,7 +78,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.6
+  TOOL_VERSION=3.11.1
 
   # needed to export versions
   check_tool_requirements
@@ -124,7 +119,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-  TOOL_VERSION=3.10.6
+  TOOL_VERSION=3.11.1
 
   # needed to export versions
   check_tool_requirements

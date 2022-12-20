@@ -13,21 +13,48 @@ WORKDIR /test
 FROM base as build
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
+
+RUN prepare-tool java
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
 
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 11.0.16+8
+RUN install-tool java 11.0.17+8
+
+RUN set -ex; \
+  ls -la /tmp; \
+  find /tmp -type f; \
+  exit 0
+
+
+RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 #--------------------------------------
 # test: gradle 6
 #--------------------------------------
 FROM build as testa
 
+RUN prepare-tool gradle
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
+  exit 0
+
 USER 1000
 
 # stay on v6
+RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.2
+RUN install-tool gradle 6.9.3
 
 
 RUN set -ex; \
@@ -51,7 +78,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5.1
+RUN install-tool gradle 7.6
 
 USER 1000
 
@@ -76,11 +103,16 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # need to stay old
-# renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 8.0.345+1
+# disable renovate: datasource=adoptium-java packageName=java-jre
+RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5.1
+RUN install-tool gradle 7.6
+
+# test openshift userid missmatch
+USER 1001
+
+RUN gradle --version
 
 #--------------------------------------
 # test: java 17 (non-root)
@@ -89,11 +121,14 @@ FROM base as testd
 
 ARG APT_HTTP_PROXY
 
-USER 1000
+RUN prepare-tool java gradle
+
+# test openshift userid missmatch
+USER 1001
 
 # renovate: datasource=adoptium-java depName=java
-ARG JAVA_VERSION=17.0.4+8
-RUN install-tool java
+ARG JAVA_JDK_VERSION=17.0.5+8
+RUN install-tool java-jdk
 
 # test latest gradle
 RUN install-tool gradle latest
@@ -126,10 +161,10 @@ FROM build as testf
 
 # not required / used for sbt
 # renovate: datasource=github-releases packageName=scala/scala
-RUN install-tool scala v2.13.8
+RUN install-tool scala v2.13.10
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.6.2
+RUN install-tool sbt v1.8.0
 
 # doesn't work for arbitrary users
 USER 1000
@@ -139,12 +174,10 @@ RUN set -ex; \
   ls -la; env; \
   sbt compile
 
-RUN ls -la ~
-
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

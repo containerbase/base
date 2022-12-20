@@ -99,15 +99,58 @@ ARG APT_HTTP_PROXY
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.1.9
+RUN install-tool php 8.2.0
 
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.3.10
+RUN install-tool composer 2.4.4
 
 RUN install-tool composer latest
 
 USER 1000
+
+RUN set -ex; \
+  [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
+
+RUN set -ex; \
+  $(php -r 'exit(extension_loaded("mbstring") ? 0 : 1);') && echo "php-mbstring installed" || exit 1;
+
+RUN set -ex; \
+  $(php -r 'exit(extension_loaded("curl") ? 0 : 1);') && echo "php-curl installed" || exit 1;
+
+RUN set -ex; \
+  $(php -r 'exit(extension_loaded("xml") ? 0 : 1);') && echo "php-xml installed" || exit 1;
+
+RUN set -ex; \
+  $(php -r 'exit(extension_loaded("json") ? 0 : 1);') && echo "php-json installed" || exit 1;
+
+RUN php --version
+RUN composer --version
+
+#--------------------------------------
+# testd: php 8.0 (non-root)
+#--------------------------------------
+FROM base as testd
+
+ARG APT_HTTP_PROXY
+
+# no auto env for testing
+SHELL [ "/bin/sh", "-c" ]
+
+RUN prepare-tool php
+
+USER 1000
+
+
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
+RUN install-tool php 8.2.0
+
+RUN install-tool composer latest
+
+# renovate: datasource=github-releases packageName=composer/composer
+RUN install-tool composer 2.4.4
+
+
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;

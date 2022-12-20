@@ -20,11 +20,6 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/../util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  USER_HOME="${TEST_ROOT_DIR}/userhome"
-
   setup_directories
 
   # set default test user
@@ -72,7 +67,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.15.1
+  TOOL_VERSION=9.2.0
 
   run check_tool_installed
   assert_failure
@@ -92,7 +87,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.15.1
+  TOOL_VERSION=9.2.0
 
   check_tool_requirements
 
@@ -129,7 +124,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=8.15.1
+  TOOL_VERSION=9.2.0
 
   check_tool_requirements
 
