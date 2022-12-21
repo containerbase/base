@@ -113,7 +113,8 @@ FROM build as test-poetry-d
 ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
-# RUN install-tool poetry 1.1.0 // Fails tests now
+RUN install-tool poetry 1.1.15
+# // Fails tests now
 
 #--------------------------------------
 # test a: pip_requirements
@@ -181,6 +182,26 @@ RUN set -ex; \
   pipenv lock;
 
 #--------------------------------------
+# test c: python2.7
+#--------------------------------------
+FROM build-rootless as testc
+
+ARG BUILDPACK_DEBUG
+
+# needs to be v2
+RUN install-tool python 2.7.18
+
+# don't change
+RUN install-pip pipenv 2020.11.15
+RUN install-tool poetry 0.12.17
+
+RUN install-tool poetry 1.1.15
+
+# renovate: datasource=pypi
+RUN install-pip hashin 0.17.0
+
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
@@ -193,3 +214,4 @@ COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
