@@ -35,7 +35,7 @@ RUN set -ex; \
     flake update
 
 #--------------------------------------
-# test: nix 2.11
+# test: nix latest
 #--------------------------------------
 FROM base as testb
 
