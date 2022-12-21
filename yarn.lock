@@ -566,10 +566,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:16.18.3":
-  version: 16.18.3
-  resolution: "@types/node@npm:16.18.3"
-  checksum: 6b8ba2ea5d842f7986e366cb9184c54d273d492784dc62e08fd5afeae938d9b61aec6e4222d2541cd18f9b1412ba361bbcb3f4204fb003608af80a2a6af959f9
+"@types/node@npm:16.18.9":
+  version: 16.18.9
+  resolution: "@types/node@npm:16.18.9"
+  checksum: 7dc9cb417869592b2ad64233d06cd3eda63b8ae31d72a0811e4f5ac5a2ef01feb4d4c91159481e506c7a56951981359e75069c7fae6f0de90fc0c3c8b69a36cd
   languageName: node
   linkType: hard
 
@@ -885,7 +885,7 @@ __metadata:
   resolution: "buildpack@workspace:."
   dependencies:
     "@semantic-release/exec": 6.0.3
-    "@types/node": 16.18.3
+    "@types/node": 16.18.9
     "@types/shelljs": 0.8.11
     bats: 1.8.2
     bats-assert: 2.0.0
@@ -893,9 +893,9 @@ __metadata:
     commander: 9.4.1
     conventional-changelog-conventionalcommits: 5.0.0
     husky: 8.0.2
-    lint-staged: 13.0.4
+    lint-staged: 13.1.0
     npm-run-all: 4.1.5
-    prettier: 2.8.0
+    prettier: 2.8.1
     semantic-release: 19.0.5
     shelljs: 0.8.5
   languageName: unknown
@@ -2739,9 +2739,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-staged@npm:13.0.4":
-  version: 13.0.4
-  resolution: "lint-staged@npm:13.0.4"
+"lint-staged@npm:13.1.0":
+  version: 13.1.0
+  resolution: "lint-staged@npm:13.1.0"
   dependencies:
     cli-truncate: ^3.1.0
     colorette: ^2.0.19
@@ -2758,7 +2758,7 @@ __metadata:
     yaml: ^2.1.3
   bin:
     lint-staged: bin/lint-staged.js
-  checksum: 4676172df5dc734a7f409ad786a72d39bd2239de8b2e5eb1d99eaa751479f60f7b4ef85c8508698855b51b125a512f395ac6a3c7d2d57de8e8221e0aaaab6f4f
+  checksum: adf20c4ca9285c4a93b06598b970d71b04cfe58a1a4c9006f753b83e02c1c622d1866c32a4f1e7e29a98091c501eac3345f7678af247b4f97d5be88b3d8727c1
   languageName: node
   linkType: hard
 
@@ -3943,12 +3943,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.0":
-  version: 2.8.0
-  resolution: "prettier@npm:2.8.0"
+"prettier@npm:2.8.1":
+  version: 2.8.1
+  resolution: "prettier@npm:2.8.1"
   bin:
     prettier: bin-prettier.js
-  checksum: 72004ce0cc9bb097daf3e3833f62495768724392c1d5b178dd47372337616e9e50ecbb0804f236596223f7b5eb1bbe69cefc8957dca21112c5777e77ef73a564
+  checksum: 4f21a0f1269f76fb36f54e9a8a1ea4c11e27478958bf860661fb4b6d7ac69aac1581f8724fa98ea3585e56d42a2ea317a17ff6e3324f40cb11ff9e20b73785cc
   languageName: node
   linkType: hard
 

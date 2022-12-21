@@ -67,7 +67,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=9.1.2
+  TOOL_VERSION=9.2.0
 
   run check_tool_installed
   assert_failure
@@ -87,7 +87,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=9.1.2
+  TOOL_VERSION=9.2.0
 
   check_tool_requirements
 
@@ -124,7 +124,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=npm depName=npm
-  TOOL_VERSION=9.1.2
+  TOOL_VERSION=9.2.0
 
   check_tool_requirements
 

@@ -35,14 +35,14 @@ RUN set -ex; \
     flake update
 
 #--------------------------------------
-# test: nix 2.11
+# test: nix latest
 #--------------------------------------
 FROM base as testb
 
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.11.1
+RUN install-tool nix 2.12.0
 
 USER 1000
 

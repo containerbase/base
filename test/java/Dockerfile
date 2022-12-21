@@ -26,7 +26,7 @@ RUN set -ex; \
 
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 11.0.16+8
+RUN install-tool java 11.0.17+8
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -78,7 +78,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5.1
+RUN install-tool gradle 7.6
 
 USER 1000
 
@@ -107,7 +107,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.5.1
+RUN install-tool gradle 7.6
 
 # test openshift userid missmatch
 USER 1001
@@ -173,10 +173,6 @@ RUN set -ex; \
   cd sbt; \
   ls -la; env; \
   sbt compile
-
-RUN ls -la ~ /tmp
-
-RUN ls -la /opt/buildpack/ssl /opt/buildpack/tools/java/11.0.16+8/lib/security/cacerts
 
 #--------------------------------------
 # final

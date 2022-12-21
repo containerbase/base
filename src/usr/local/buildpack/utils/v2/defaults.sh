@@ -37,3 +37,9 @@ function link_tool () {
 function prepare_tool() {
   echo "'prepare_tool' not defined for tool ${TOOL_NAME}"
 }
+
+# Called after install_tool and link_tool. It's always called.
+# Allow tools to do some additional stuff, like overwriting additional shell wrapper
+function post_install () {
+  true
+}

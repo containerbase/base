@@ -45,7 +45,7 @@ function prepare_tool() {
     ;;
   esac
 
-  create_tool_path
+  create_tool_path > /dev/null
   export_path "${USER_HOME}/.local/bin"
 }
 

@@ -1,42 +1,53 @@
 #!/bin/bash
 
-function gem_install() {
-  local tool_path
-  local tool_name
-
-  # shellcheck disable=SC2153
-  tool_name="${TOOL_NAME}"
-  tool_path=$(find_versioned_tool_path)
-
-  if [[ -z "${tool_path}" ]]; then
-    tool_path=$(create_versioned_tool_path)
-    mkdir -p "${tool_path}"
-
-    GEM_HOME=$tool_path gem install --bindir "$tool_path/bin" "${tool_name}" -v "${TOOL_VERSION}"
-
-    # TODO: clear gem cache
-  fi
+function check_tool_requirements () {
+  check_command ruby
+  check_semver "$TOOL_VERSION" "all"
 }
 
-function gem_shell_wrapper () {
-  local ruby_path
-  local ruby_version
-  local ruby_minor_version
-  local tool_name
-  local tool_path
-
-  tool_name=${1:-$TOOL_NAME}
-  tool_path=$(find_versioned_tool_path)
-  ruby_path=/usr/local/ruby
-
-  # TODO: make generic
-  ruby_version=$(cat $ruby_path/.version)
+function get_ruby_minor_version() {
+  local ruby_version=$1
   if [[ ! "${ruby_version}" =~ ${SEMVER_REGEX} ]]; then
     echo Ruby is not a semver like version - aborting: "${ruby_version}"
     exit 1
   fi
+  echo "${BASH_REMATCH[1]}.${BASH_REMATCH[3]}.0"
+}
 
-  ruby_minor_version="${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
+function find_gem_versioned_path() {
+  local ruby_version
+  local tool_dir
+  ruby_version=$(get_tool_version ruby)
+  tool_dir="$(find_versioned_tool_path)/$(get_ruby_minor_version "${ruby_version}")"
 
-  shell_wrapper "$tool_name" "${tool_path}/bin" "GEM_PATH=${tool_path}:${ruby_path}/${ruby_version}/lib/ruby/gems/${ruby_minor_version}.0 PATH=${tool_path}/bin:\$PATH"
+  if [[ -d "${tool_dir}" ]]; then
+    echo "${tool_dir}"
+  fi
+}
+
+function check_tool_installed() {
+  test -n "$(find_gem_versioned_path)"
+}
+
+function install_tool() {
+  local ruby_version
+  local tool_path
+  ruby_version=$(get_tool_version ruby)
+  tool_path="$(create_versioned_tool_path)/$(get_ruby_minor_version "${ruby_version}")"
+  mkdir -p "${tool_path}"
+  gem install --install-dir "${tool_path}" --bindir "${tool_path}/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}" --silent
+
+  # TODO: clear gem cache
+}
+
+function post_install () {
+  local tool_path
+
+  tool_path=$(find_gem_versioned_path)
+
+  while IFS= read -r -d '' tool
+  do
+    [ -e "${tool_path}/bin/$tool" ] || continue
+    shell_wrapper "$tool" "${tool_path}/bin" "GEM_PATH=\$GEM_PATH:${tool_path}"
+  done < <(find "${tool_path}/bin" -type f -printf "%f\0")
 }

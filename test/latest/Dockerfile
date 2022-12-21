@@ -63,7 +63,7 @@ FROM build as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.11.0
+ARG PYTHON_VERSION=3.11.1
 RUN install-tool python
 
 RUN set -ex; \
@@ -118,7 +118,7 @@ FROM build as testf
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.7
+RUN install-tool powershell v7.3.1
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -173,16 +173,16 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool flux v0.37.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.1.4
+RUN install-tool git-lfs v3.3.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.2.7
+RUN install-tool powershell v7.3.1
 
 # renovate: datasource=node
 RUN install-tool node v18.12.1
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v20.10.21
+RUN install-tool docker v20.10.22
 
 #--------------------------------------
 # test: bin path has 775

@@ -13,7 +13,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 16.18.1 # renovate: datasource=node depName=node
+  NODE_VERSION: 16.19.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3.5.1
@@ -41,7 +41,7 @@ jobs:
         run: yarn lint
 
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@66c9a47bf02255b250284a82251cb4cadf5043f5 # tag=v1.15.0
+        uses: reviewdog/action-shellcheck@66eb2b135834bedc025f2e23e25598cbcb12b3c5 # v1.16.0
         with:
           fail_on_error: true
           reporter: github-check
@@ -55,7 +55,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3.5.1
@@ -84,7 +84,7 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: init
         run: |
@@ -140,7 +140,7 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: init
         run: |
@@ -177,12 +177,12 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@398845862f453798d77377861116d2aa064bc814 # v1.14.7
+        uses: renovatebot/internal-tools@4325a65d80eba70e1b7c5d05706e5111c6402843 # v1.14.9
         with:
           command: docker-config
 
       # full checkout for semantic-release
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
         with:
           fetch-depth: 0
 
