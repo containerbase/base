@@ -59,7 +59,17 @@ function install_tool () {
   fix_python_shebangs
 
   # install latest pip
-  "${versioned_tool_path}/bin/python" -m pip install --upgrade pip
+  PIP_ROOT_USER_ACTION=ignore "${versioned_tool_path}/bin/python" -m pip install \
+      --compile \
+      --use-pep517 \
+      --no-warn-script-location \
+      --no-cache-dir \
+      --disable-pip-version-check \
+      --quiet \
+      --upgrade \
+      pip \
+      virtualenv \
+      ;
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
   "${versioned_tool_path}/bin/python" -m pip cache purge

@@ -14,7 +14,6 @@ pip install \
   --use-pep517 \
   --no-cache-dir \
   --disable-pip-version-check \
-  --root-user-action=ignore \
   --quiet \
   "${TOOL_NAME}==${TOOL_VERSION}"
 

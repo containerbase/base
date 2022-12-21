@@ -11,6 +11,7 @@ function get_python_minor_version() {
     echo Ruby is not a semver like version - aborting: "${python_version}"
     exit 1
   fi
+  export PYTHON_MAJOR=${BASH_REMATCH[1]}
   echo "${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
 }
 
@@ -30,36 +31,41 @@ function check_tool_installed() {
 }
 
 function install_tool() {
+  local python_minor_version
   local python_version
   local tool_path
+
   python_version=$(get_tool_version python)
-  tool_path="$(create_versioned_tool_path)/$(get_python_minor_version "${python_version}")"
-  mkdir -p "${tool_path}"
-  pip install \
-    --prefix "${tool_path}" \
+  python_minor_version=$(get_python_minor_version "${python_version}")
+  tool_path="$(create_versioned_tool_path)/${python_minor_version}"
+
+  python -m virtualenv \
+    --no-periodic-update \
+    --quiet \
+    "${tool_path}"
+
+  "${tool_path}/bin/python" -m pip install \
     --compile \
     --use-pep517 \
     --no-warn-script-location \
     --no-cache-dir \
     --disable-pip-version-check \
-    --root-user-action=ignore \
     --quiet \
     "${TOOL_NAME}==${TOOL_VERSION}"
 
   # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  pip cache purge
+  python -m pip cache purge
+
+  # remove virtualenv app-data
+  rm -rf ~/.local/share/virtualenv
 }
 
-
-
 function python_shell_wrapper () {
-  local python_version
   local tool_path
   local tool=$1
 
-  python_version=$(get_python_minor_version "$(get_tool_version python)")
   tool_path=$(find_pip_versioned_path)
-  shell_wrapper "$tool" "${tool_path}/bin" "PYTHONPATH=${tool_path}/lib/python${python_version}/site-packages:\$PYTHONPATH"
+  shell_wrapper "$tool" "${tool_path}/bin"
 }
 
 function post_install () {

@@ -201,6 +201,12 @@ RUN install-tool poetry 1.1.15
 RUN install-pip hashin 0.17.0
 
 
+RUN set -ex; \
+  poetry new poetry-demo; \
+  cd poetry-demo; \
+  poetry update --lock --no-interaction pytest; \
+  true
+
 #--------------------------------------
 # final
 #--------------------------------------
