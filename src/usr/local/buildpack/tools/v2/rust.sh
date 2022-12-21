@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function prepare_tool() {
-  create_tool_path
+  create_tool_path > /dev/null
   export_env RUST_BACKTRACE 1
   export_env CARGO_HOME "${USER_HOME}/.cargo"
   export_path "\$CARGO_HOME/bin"

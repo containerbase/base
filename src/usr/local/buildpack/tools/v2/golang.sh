@@ -15,7 +15,7 @@ function prepare_tool() {
 
   chown -R "${USER_ID}" "$GOPATH"
   chmod -R g+w "$GOPATH"
-  create_tool_path
+  create_tool_path > /dev/null
 }
 
 function install_tool () {

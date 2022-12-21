@@ -20,7 +20,7 @@ fix_python_shebangs() {
 }
 
 function prepare_tool() {
-  create_tool_path
+  create_tool_path > /dev/null
   export_path "${USER_HOME}/.local/bin"
 }
 
