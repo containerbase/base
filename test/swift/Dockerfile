@@ -1,10 +1,8 @@
 ARG IMAGE=containerbase/buildpack
-FROM ${IMAGE} as build
-
 ARG APT_HTTP_PROXY
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.7.2
+#--------------------------------------
+FROM ${IMAGE} as base
 
 RUN touch /.dummy
 
@@ -14,7 +12,14 @@ WORKDIR /test
 
 
 #--------------------------------------
-# testa: swift 5.3
+FROM base as build
+
+ARG APT_HTTP_PROXY
+# renovate: datasource=docker versioning=docker
+RUN install-tool swift 5.7.2
+
+#--------------------------------------
+# testa: swift latest
 #--------------------------------------
 FROM build as testa
 
@@ -39,27 +44,24 @@ RUN swift --version
 
 
 #--------------------------------------
-# testb: swift 5.2.5
+# testb: swift 5.2.5 (non-root)
 #--------------------------------------
 FROM build as testb
 
-ARG APT_HTTP_PROXY
+USER 1000
 
 RUN install-tool swift 5.2.5
 
-USER 1000
-
-RUN swift --version
+RUN set -ex; swift --version | grep 5.2.5
 
 RUN set -ex; \
   cd c; \
   swift package resolve
 
-
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
