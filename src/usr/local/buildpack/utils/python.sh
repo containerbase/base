@@ -8,7 +8,7 @@ function check_tool_requirements () {
 function get_python_minor_version() {
   local python_version=$1
   if [[ ! "${python_version}" =~ ${SEMVER_REGEX} ]]; then
-    echo Ruby is not a semver like version - aborting: "${python_version}"
+    echo Python is not a semver like version - aborting: "${python_version}"
     exit 1
   fi
   export PYTHON_MAJOR=${BASH_REMATCH[1]}
