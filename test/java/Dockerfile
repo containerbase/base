@@ -159,6 +159,9 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testf
 
+
+WORKDIR /
+
 # not required / used for sbt
 # renovate: datasource=github-releases packageName=scala/scala
 RUN install-tool scala v2.13.10
@@ -169,6 +172,7 @@ RUN install-tool sbt v1.8.0
 # doesn't work for arbitrary users
 USER 1000
 
+WORKDIR /test
 RUN set -ex; \
   cd sbt; \
   ls -la; env; \
