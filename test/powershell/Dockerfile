@@ -9,7 +9,7 @@ RUN touch /.dummy
 #--------------------------------------
 # test: powershell 7.2
 #--------------------------------------
-FROM build as testa
+FROM base as testa
 
 ARG APT_HTTP_PROXY
 
@@ -30,7 +30,7 @@ RUN pwsh --version
 #--------------------------------------
 # test: powershell 7.x
 #--------------------------------------
-FROM build as testb
+FROM base as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
