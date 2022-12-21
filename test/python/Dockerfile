@@ -57,9 +57,9 @@ RUN install-tool poetry 1.3.1
 USER 1000
 
 #--------------------------------------
-# test a: build
+# test poetry-a: build
 #--------------------------------------
-FROM build as testa
+FROM build as test-poetry-a
 
 ARG BUILDPACK_DEBUG
 
@@ -77,9 +77,9 @@ RUN python --version
 RUN poetry --version
 
 #--------------------------------------
-# test b: pipenv
+# test pipenv-a: pipenv
 #--------------------------------------
-FROM pipenv as testb
+FROM pipenv as test-pipenv-a
 
 RUN set -ex; \
   cd a; \
@@ -87,9 +87,9 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test c: poetry
+# test poetry-b: c-poetry
 #--------------------------------------
-FROM poetry as testc
+FROM poetry as test-poetry-b
 
 RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
 
@@ -98,27 +98,28 @@ RUN set -ex; cd c-poetry && poetry add h3py
 
 
 #--------------------------------------
-# test d: poetry
+# test poetry-c: d-poetry
 #--------------------------------------
-FROM poetry as testd
+FROM poetry as test-poetry-c
 
 RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 
 
 #--------------------------------------
-# test e: poetry (old versions)
+# test poetry-d: poetry (old versions)
 #--------------------------------------
-FROM build as teste
+FROM build as test-poetry-d
 
 ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
-# RUN install-tool poetry 1.1.0 // Fails tests now
+RUN install-tool poetry 1.1.15
+# // Fails tests now
 
 #--------------------------------------
-# test f: pip_requirements
+# test a: pip_requirements
 #--------------------------------------
-FROM build as testf
+FROM build as testa
 
 RUN pip install hashin
 
@@ -128,9 +129,9 @@ RUN set -ex; \
   cat requirements.txt
 
 #--------------------------------------
-# test g: non-root
+# test b: non-root
 #--------------------------------------
-FROM build-rootless as testg
+FROM build-rootless as testb
 
 ARG BUILDPACK_DEBUG
 
@@ -160,9 +161,9 @@ RUN set -ex \
   ;
 
 #--------------------------------------
-# test h: pipenv (multiple python)
+# test pipenv-b: pipenv (multiple python)
 #--------------------------------------
-FROM build as testh
+FROM build as test-pipenv-b
 
 ARG BUILDPACK_DEBUG
 
@@ -181,15 +182,42 @@ RUN set -ex; \
   pipenv lock;
 
 #--------------------------------------
+# test c: python2.7
+#--------------------------------------
+FROM build-rootless as testc
+
+ARG BUILDPACK_DEBUG
+
+# needs to be v2
+RUN install-tool python 2.7.18
+
+# don't change
+RUN install-pip pipenv 2020.11.15
+RUN install-tool poetry 0.12.17
+
+RUN install-tool poetry 1.1.15
+
+# renovate: datasource=pypi
+RUN install-pip hashin 0.17.0
+
+
+RUN set -ex; \
+  poetry new poetry-demo; \
+  cd poetry-demo; \
+  poetry update --lock --no-interaction pytest; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM build
 
+COPY --from=test-poetry-a /.dummy /.dummy
+COPY --from=test-poetry-b /.dummy /.dummy
+COPY --from=test-poetry-c /.dummy /.dummy
+COPY --from=test-poetry-d /.dummy /.dummy
+COPY --from=test-pipenv-a /.dummy /.dummy
+COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
