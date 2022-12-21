@@ -7,16 +7,18 @@ FROM ${IMAGE} as base
 RUN touch /.dummy
 
 #--------------------------------------
-# test: powershell 7.2
+# test: powershell 7.2 (non-root)
 #--------------------------------------
 FROM base as testa
 
 ARG APT_HTTP_PROXY
+RUN prepare-tool powershell
+
+USER 1000
 
 # Don't update
 RUN install-tool powershell v7.2.8
 
-USER 1000
 
 RUN set -ex; \
   pwsh -Version
