@@ -39,7 +39,7 @@ FROM build as pipenv
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.12.19
+RUN install-tool pipenv 2022.12.19
 
 
 USER 1000
@@ -114,7 +114,6 @@ ARG BUILDPACK_DEBUG
 
 RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.15
-# // Fails tests now
 
 #--------------------------------------
 # test a: pip_requirements
@@ -152,7 +151,7 @@ RUN set -ex \
   ;
 
 # renovate: datasource=pypi
-RUN install-pip hashin 0.17.0
+RUN install-tool hashin 0.17.0
 
 RUN set -ex \
   && cd f \
@@ -175,7 +174,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.11.1
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2022.12.19
+RUN install-tool pipenv 2022.12.19
 
 RUN set -ex; \
   cd h-pipenv; \
@@ -191,15 +190,15 @@ ARG BUILDPACK_DEBUG
 # needs to be v2
 RUN install-tool python 2.7.18
 
-# don't change
-RUN install-pip pipenv 2020.11.15
+# don't change, never versions don't work on python 2.7
+RUN install-tool pipenv 2020.11.15
 RUN install-tool poetry 0.12.17
-
 RUN install-tool poetry 1.1.15
+RUN install-tool hashin 0.17.0
+RUN install-tool pip-tools 5.5.0
 
-# renovate: datasource=pypi
-RUN install-pip hashin 0.17.0
-
+# https://github.com/python-poetry/poetry/issues/3010
+RUN poetry config experimental.new-installer false
 
 RUN set -ex; \
   poetry new poetry-demo; \
@@ -210,7 +209,7 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=test-poetry-a /.dummy /.dummy
 COPY --from=test-poetry-b /.dummy /.dummy
