@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 require_root
 
 version_codename=$(get_distro)
@@ -13,6 +11,7 @@ curl -sSL \
 
 # TODO: Only latest version available on launchpad :-/
 #apt_install git=1:${TOOL_VERSION}*
+
 apt_install git
 
 git --version
