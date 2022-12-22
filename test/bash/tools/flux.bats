@@ -55,7 +55,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-  TOOL_VERSION=v0.38.1
+  TOOL_VERSION=v0.38.2
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -75,7 +75,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-  TOOL_VERSION=v0.38.1
+  TOOL_VERSION=v0.38.2
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -110,7 +110,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-  TOOL_VERSION=v0.38.1
+  TOOL_VERSION=v0.38.2
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
