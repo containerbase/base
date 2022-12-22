@@ -68,7 +68,7 @@ RUN install-npm lerna 6.1.0
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.2.0
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.5.0
+RUN install-tool composer 2.5.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.3.1
