@@ -89,12 +89,28 @@ function check_semver () {
 }
 
 function apt_install () {
-  echo "Installing apt packages: $*"
+  local packages=()
+
+  for pkg in "$@"
+  do
+    if ! dpkg -s "${pkg}" 2> /dev/null | grep -s -q "Status: install" > /dev/null
+    then
+      packages=("${packages[@]}" "${pkg}")
+    fi
+  done
+
+  if [[ ${#packages[@]} -eq 0 ]]
+  then
+    echo "No packages to install"
+    return
+  fi
+
+  echo "Installing apt packages: ${packages[*]}"
   if [[ "${APT_HTTP_PROXY}" ]]; then
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
   apt-get -qq update
-  apt-get -qq install -y "$@"
+  apt-get -qq install -y "${packages[@]}"
 
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
@@ -105,7 +121,7 @@ function apt_upgrade () {
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/buildpack-proxy
   fi
   apt-get -qq update
-  apt-get upgrade -y
+  apt-get -qq upgrade -y
 
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
