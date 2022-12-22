@@ -9,13 +9,9 @@ require_tool "$@"
 check_command pip
 
 echo "Installing pip tool ${TOOL_NAME} v${TOOL_VERSION}"
-pip install \
+python -W ignore -m pip install \
   --upgrade \
   --use-pep517 \
   --no-cache-dir \
-  --disable-pip-version-check \
   --quiet \
   "${TOOL_NAME}==${TOOL_VERSION}"
-
-# clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-pip cache purge

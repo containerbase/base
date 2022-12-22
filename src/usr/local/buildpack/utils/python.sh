@@ -44,17 +44,16 @@ function install_tool() {
     --quiet \
     "${tool_path}"
 
-  "${tool_path}/bin/python" -m pip install \
-    --compile \
-    --use-pep517 \
-    --no-warn-script-location \
-    --no-cache-dir \
-    --disable-pip-version-check \
-    --quiet \
-    "${TOOL_NAME}==${TOOL_VERSION}"
-
-  # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  python -m pip cache purge
+  "${tool_path}/bin/python" \
+    -W ignore \
+    -m pip \
+      install \
+      --compile \
+      --use-pep517 \
+      --no-warn-script-location \
+      --no-cache-dir \
+      --quiet \
+      "${TOOL_NAME}==${TOOL_VERSION}"
 
   # remove virtualenv app-data
   rm -rf ~/.local/share/virtualenv

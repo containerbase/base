@@ -20,8 +20,15 @@ fix_python_shebangs() {
 }
 
 function prepare_tool() {
-  create_tool_path > /dev/null
+  local tool_path
+  tool_path=$(create_tool_path)
+
+  # Workaround for compatibillity for Python hardcoded paths
+  if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/python" ]; then
+    ln -sf "${tool_path}" /usr/local/python
+  fi
   export_path "${USER_HOME}/.local/bin"
+  export_env PIP_DISABLE_PIP_VERSION_CHECK 1
 }
 
 function install_tool () {
@@ -49,8 +56,7 @@ function install_tool () {
   file=$(get_from_url "${url}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
 
   if [[ -f ${file} ]]; then
-    echo 'Using prebuild python'
-    tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
+    bsdtar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
   else
     echo 'No prebuild python found' >&2
     exit 1
@@ -58,21 +64,20 @@ function install_tool () {
 
   fix_python_shebangs
 
-  # install latest pip
-  PIP_ROOT_USER_ACTION=ignore "${versioned_tool_path}/bin/python" -m pip install \
+  # install latest pip and virtualenv
+  PIP_ROOT_USER_ACTION=ignore "${versioned_tool_path}/bin/python" \
+    -W ignore \
+    -m pip \
+      install \
       --compile \
       --use-pep517 \
       --no-warn-script-location \
       --no-cache-dir \
-      --disable-pip-version-check \
       --quiet \
       --upgrade \
       pip \
       virtualenv \
       ;
-
-  # clean cache https://pip.pypa.io/en/stable/reference/pip_cache/#pip-cache
-  "${versioned_tool_path}/bin/python" -m pip cache purge
 }
 
 function link_tool () {
@@ -84,14 +89,13 @@ function link_tool () {
   # export python vars
   export_tool_path "${versioned_tool_path}/bin"
 
-  # TODO: fix me, currently required for global pip
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper pip "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
-  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin" "PYTHONHOME=${versioned_tool_path}"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin"
+  shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin"
+  shell_wrapper pip "${versioned_tool_path}/bin"
+  shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin"
+  shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin"
 
   python --version
-  pip --version
+  PYTHONWARNINGS=ignore pip --version
 }
