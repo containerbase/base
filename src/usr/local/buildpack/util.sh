@@ -95,7 +95,7 @@ function apt_install () {
   do
     if ! dpkg -s "${pkg}" 2> /dev/null | grep -s -q "Status: install" > /dev/null
     then
-      packages=("${packages[@]}" "${pkg}")
+      packages+=("${pkg}")
     fi
   done
 
