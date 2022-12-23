@@ -81,6 +81,13 @@
       "matchPackageNames": ["git"],
       "semanticCommitType": "fix",
       "stabilityDays": 5
+    },
+    {
+      "description": "Update renovate only weekly",
+      "matchPackageNames": ["renovate"],
+      "extends": ["schedule:weekly"],
+      "automerge": true,
+      "separateMinorPatch": false
     }
   ]
 }
