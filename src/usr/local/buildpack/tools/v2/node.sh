@@ -14,7 +14,8 @@ function prepare_global_config () {
 # Helper function to link to a user installed node
 function prepare_user_config () {
   local prefix=${1}
-  if grep 'prefix' "${USER_HOME}/.npmrc"; then
+  if grep -s -q 'prefix' "${USER_HOME}/.npmrc" > /dev/null
+  then
     return
   fi
 
