@@ -9,7 +9,7 @@ require_user
 require_tool "$@"
 
 case "$TOOL_NAME" in
-  npm | yarn | pnpm | lerna)
+  npm | yarn | pnpm | lerna | renovate)
     install-tool "$TOOL_NAME" "${TOOL_VERSION}"
     ;;
 
