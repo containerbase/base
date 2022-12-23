@@ -318,8 +318,9 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ "$(cat /home/${USER_NAME}/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
-  && echo node-gyp works || exit 1;
+  [ -r /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
+  [ "$(cat /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
 
 #--------------------------------------
 # test: corepack
