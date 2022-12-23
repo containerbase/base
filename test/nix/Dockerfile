@@ -1,4 +1,8 @@
 ARG IMAGE=containerbase/buildpack
+ARG APT_HTTP_PROXY
+ARG GITHUB_TOKEN
+
+#--------------------------------------
 FROM ${IMAGE} as base
 
 RUN touch /.dummy
@@ -12,15 +16,17 @@ WORKDIR /test
 #--------------------------------------
 FROM base as testa
 
-ARG APT_HTTP_PROXY
 
 # old nix version, not for renovating
 RUN install-tool nix 2.10.0
 
 USER 1000
 
+ARG GITHUB_TOKEN
+
 RUN set -ex; \
   nix --version
+
 
 RUN set -ex; \
   nix \
@@ -29,6 +35,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 RUN set -ex; \
+  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
@@ -39,12 +46,14 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as testb
 
-ARG APT_HTTP_PROXY
+
+USER 1000
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.12.0
 
-USER 1000
+
+ARG GITHUB_TOKEN
 
 RUN set -ex; \
   nix --version
@@ -56,6 +65,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 RUN set -ex; \
+  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
