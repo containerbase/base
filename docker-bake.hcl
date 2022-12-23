@@ -19,8 +19,11 @@ variable "CACHE_WEEK" {
   default = ""
 }
 
-
 variable "BUILDPACK_DEBUG" {
+  default = ""
+}
+
+variable "GITHUB_TOKEN" {
   default = ""
 }
 
