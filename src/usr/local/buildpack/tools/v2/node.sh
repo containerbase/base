@@ -69,7 +69,7 @@ function install_tool () {
   if [[ ${MAJOR} -lt 15 ]]; then
     echo "updating node-gyp"
     # update to latest node-gyp to fully support python3
-    $npm explore npm --global --prefix "$versioned_tool_path" --silent -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
+    $npm explore npm -g --prefix "$versioned_tool_path" --silent -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
   fi
 
   # clean temp dir
