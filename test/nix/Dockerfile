@@ -35,7 +35,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 RUN set -ex; \
-  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access_tokens = github.com=${GITHUB_TOKEN}"; \
+  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
@@ -65,7 +65,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 RUN set -ex; \
-  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access_tokens = github.com=${GITHUB_TOKEN}"; \
+  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
