@@ -22,7 +22,7 @@ case "$TOOL_NAME" in
     mkdir -p "${temp_folder}"
 
     echo "Installing npm tool ${TOOL_NAME} v${TOOL_VERSION}"
-    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --no-audit --no-fund --cache "${temp_folder}" 2>&1
+    npm install "${TOOL_NAME}@${TOOL_VERSION}" --global --unsafe --no-audit --no-fund --cache "${temp_folder}" --silent 2>&1
 
     # Clean download cache
     npm cache clean --force
