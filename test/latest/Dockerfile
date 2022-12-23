@@ -165,6 +165,10 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 FROM build as testh
 
+RUN prepare-tool docker
+
+USER 1000
+
 ARG APT_HTTP_PROXY
 
 ARG IGNORED_TOOLS=powershell,node
