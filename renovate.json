@@ -65,6 +65,12 @@
       "semanticCommitType": "test"
     },
     {
+      "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
+      "matchPaths": ["test/**"],
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "test-major-"
+    },
+    {
       "description": "Trigger fix release for ubuntu digest updates",
       "matchPackageNames": ["ubuntu"],
       "matchUpdateTypes": ["digest"],
