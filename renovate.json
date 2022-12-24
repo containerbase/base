@@ -44,6 +44,7 @@
       "description": "Automerge test selected minor updates in tests",
       "matchPaths": ["test/**"],
       "matchPackageNames": [
+        "bundler",
         "docker",
         "dotnet",
         "git",
