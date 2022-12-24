@@ -566,10 +566,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:16.18.9":
-  version: 16.18.9
-  resolution: "@types/node@npm:16.18.9"
-  checksum: 7dc9cb417869592b2ad64233d06cd3eda63b8ae31d72a0811e4f5ac5a2ef01feb4d4c91159481e506c7a56951981359e75069c7fae6f0de90fc0c3c8b69a36cd
+"@types/node@npm:16.18.10":
+  version: 16.18.10
+  resolution: "@types/node@npm:16.18.10"
+  checksum: 1b138616923e9a1c6d3806edf75714b605d2ec689357cdc675bc73816c508ff11b3c68df054b02a496c76654d8ed53add2e90816af39423431c73aa6eec06f29
   languageName: node
   linkType: hard
 
@@ -885,7 +885,7 @@ __metadata:
   resolution: "buildpack@workspace:."
   dependencies:
     "@semantic-release/exec": 6.0.3
-    "@types/node": 16.18.9
+    "@types/node": 16.18.10
     "@types/shelljs": 0.8.11
     bats: 1.8.2
     bats-assert: 2.0.0
