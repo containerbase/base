@@ -138,7 +138,6 @@ jobs:
             ruby,
             rust,
             swift,
-            vendir,
             latest,
           ]
 
