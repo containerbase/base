@@ -17,6 +17,7 @@ function prepare_tool() {
   apt_install \
     build-essential \
     libffi-dev \
+    libyaml-0-2 \
     ;
   tool_path=$(create_tool_path)
 
