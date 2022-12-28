@@ -26,7 +26,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.3
+RUN install-tool ruby 3.2.0
 
 
 #--------------------------------------
@@ -181,7 +181,7 @@ USER 1000
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.1.3
+RUN install-tool ruby 3.2.0
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem cocoapods 1.11.3
