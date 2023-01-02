@@ -1,4 +1,4 @@
-![Build status](https://github.com/containerbase/base/workflows/build/badge.svg)
+![Build status](https://github.com/containerbase/base/actions/workflows/build-push.yml/badge.svg)
 ![Docker Image Size (latest)](https://img.shields.io/docker/image-size/containerbase/buildpack/latest)
 ![GitHub](https://img.shields.io/github/license/containerbase/base)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/base)
