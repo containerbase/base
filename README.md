@@ -24,7 +24,7 @@ docker buildx bake
 ```
 
 You can use the following command to ignore remote cache for local testing.
-This will propably speedup local builds.
+This will probably speedup local builds.
 
 ```sh
 docker buildx bake  --set *.cache-from=[]
@@ -62,7 +62,7 @@ To use a custom base image with `containerbase/buildpack` checkout [custom-base-
 
 ### Custom Root CA Certificates
 
-To add custom root certifactes to the `containerbase/buildpack` base image checkout [custom-root-ca](./docs/custom-root-ca.md) docs.
+To add custom root certificates to the `containerbase/buildpack` base image checkout [custom-root-ca](./docs/custom-root-ca.md) docs.
 
 ### Temporary disable tool installer
 
