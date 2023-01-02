@@ -59,7 +59,7 @@ RUN install-tool nix 2.12.0
 # renovate: datasource=node
 RUN install-tool node v18.12.1
 # renovate: datasource=npm
-RUN install-tool pnpm 7.19.0
+RUN install-tool pnpm 7.20.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
