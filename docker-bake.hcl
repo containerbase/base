@@ -19,8 +19,11 @@ variable "CACHE_WEEK" {
   default = ""
 }
 
-
 variable "BUILDPACK_DEBUG" {
+  default = ""
+}
+
+variable "GITHUB_TOKEN" {
   default = ""
 }
 
@@ -47,6 +50,7 @@ target "settings" {
     APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
     BUILDPACK_DEBUG = "${BUILDPACK_DEBUG}"
     BUILDPACK_VERSION = "${BUILDPACK_VERSION}"
+    GITHUB_TOKEN = "${GITHUB_TOKEN}"
   }
 }
 

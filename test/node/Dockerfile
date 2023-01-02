@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.1.0
+RUN install-tool lerna 6.2.0
 
 USER 1000
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.18.2
+RUN install-tool pnpm 7.20.0
 
 RUN set -ex; \
   pnpm --version;
@@ -270,7 +270,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.1.0
+RUN install-tool lerna 6.2.0
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -318,8 +318,9 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ "$(cat /home/${USER_NAME}/npm/${NPM_VERSION}/lib/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
-  && echo node-gyp works || exit 1;
+  [ -r /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
+  [ "$(cat /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
 
 #--------------------------------------
 # test: corepack
@@ -405,13 +406,13 @@ RUN install-tool corepack 0.15.2
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 7.18.2
+RUN install-tool pnpm 7.20.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.15.2
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=7.18.2
+ARG PNPM_VERSION=7.20.0
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -452,23 +453,39 @@ RUN set -ex; \
   yarn -v | grep ${YARN_SLIM_VERSION};
 
 #--------------------------------------
+# test: renovate
+#--------------------------------------
+FROM build as testq
+
+
+# renovate: datasource=npm
+RUN install-tool renovate 34.70.6
+
+RUN set -ex; \
+  renovate --version; \
+  renovate-config-validator; \
+  true
+
+
+#--------------------------------------
 # final
 #--------------------------------------
-FROM ${IMAGE}
+FROM build
 
-# COPY --from=testa /.dummy /.dummy
-# COPY --from=testb /.dummy /.dummy
-# COPY --from=testc /.dummy /.dummy
-# COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
-# COPY --from=testg /.dummy /.dummy
-# COPY --from=testh /.dummy /.dummy
-# COPY --from=testi /.dummy /.dummy
-# COPY --from=testj /.dummy /.dummy
-# COPY --from=testk /.dummy /.dummy
-# COPY --from=testl /.dummy /.dummy
-# COPY --from=testm /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
+COPY --from=testj /.dummy /.dummy
+COPY --from=testk /.dummy /.dummy
+COPY --from=testl /.dummy /.dummy
+COPY --from=testm /.dummy /.dummy
 COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
+COPY --from=testq /.dummy /.dummy

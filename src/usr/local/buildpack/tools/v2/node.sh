@@ -14,7 +14,8 @@ function prepare_global_config () {
 # Helper function to link to a user installed node
 function prepare_user_config () {
   local prefix=${1}
-  if grep 'prefix' "${USER_HOME}/.npmrc"; then
+  if grep -s -q 'prefix' "${USER_HOME}/.npmrc" > /dev/null
+  then
     return
   fi
 
@@ -68,7 +69,7 @@ function install_tool () {
   if [[ ${MAJOR} -lt 15 ]]; then
     echo "updating node-gyp"
     # update to latest node-gyp to fully support python3
-    $npm explore npm --global --prefix "$versioned_tool_path" -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" 2>&1
+    $npm explore npm -g --prefix "$versioned_tool_path" --silent -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
   fi
 
   # clean temp dir

@@ -17,6 +17,9 @@ env:
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -174,11 +177,17 @@ jobs:
 
       - name: test
         run: docker buildx bake --progress plain test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     needs: [lint, bats, lang, distro]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
 
     steps:
       - name: docker-config
@@ -190,6 +199,8 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
         with:
           fetch-depth: 0
+
+      - uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # tag=v2.8.1
 
       - name: init
         run: |

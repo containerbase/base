@@ -3,7 +3,7 @@
   "extends": ["github>containerbase/.github"],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
   "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
-  "separateMultipleMajor": true,
+  "separateMultipleMajor": false,
   "separateMajorMinor": true,
   "packageRules": [
     {
@@ -44,6 +44,7 @@
       "description": "Automerge test selected minor updates in tests",
       "matchPaths": ["test/**"],
       "matchPackageNames": [
+        "bundler",
         "docker",
         "dotnet",
         "git",
@@ -81,6 +82,13 @@
       "matchPackageNames": ["git"],
       "semanticCommitType": "fix",
       "stabilityDays": 5
+    },
+    {
+      "description": "Update renovate only weekly",
+      "matchPackageNames": ["renovate"],
+      "extends": ["schedule:weekly"],
+      "automerge": true,
+      "separateMinorPatch": false
     }
   ]
 }
