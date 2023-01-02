@@ -17,6 +17,9 @@ env:
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -181,6 +184,10 @@ jobs:
     needs: [lint, bats, lang, distro]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
 
     steps:
       - name: docker-config
