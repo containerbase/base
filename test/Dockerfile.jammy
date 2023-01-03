@@ -104,3 +104,6 @@ RUN git lfs version
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
+
+# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
+RUN install-tool vendir v0.32.2

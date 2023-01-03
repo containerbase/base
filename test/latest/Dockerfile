@@ -203,6 +203,31 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
+# test: vendir
+#--------------------------------------
+FROM base as testj
+
+# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
+ARG VENDIR_VERSION=0.32.2
+
+RUN install-tool vendir "v${VENDIR_VERSION}"
+
+RUN set -ex; vendir --version
+
+SHELL [ "/bin/sh", "-c" ]
+
+RUN vendir --version | grep "${VENDIR_VERSION}"
+
+USER 1000
+
+RUN vendir --version | grep "${VENDIR_VERSION}"
+
+# even more restricted
+USER 1000:1000
+
+RUN vendir --version | grep "${VENDIR_VERSION}"
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM ${IMAGE}
@@ -216,3 +241,4 @@ COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
+COPY --from=testj /.dummy /.dummy
