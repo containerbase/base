@@ -38,25 +38,34 @@ function install_tool() {
   python_version=$(get_tool_version python)
   python_minor_version=$(get_python_minor_version "${python_version}")
   tool_path="$(create_versioned_tool_path)/${python_minor_version}"
+  mkdir -p "${tool_path}"
 
-  python -m virtualenv \
-    --no-periodic-update \
-    --quiet \
-    "${tool_path}"
+  if [[ $(restore_folder_from_cache "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
+    # restore from cache not possible
+    # either not in cache or error, install
 
-  "${tool_path}/bin/python" \
-    -W ignore \
-    -m pip \
-      install \
-      --compile \
-      --use-pep517 \
-      --no-warn-script-location \
-      --no-cache-dir \
+    python -m virtualenv \
+      --no-periodic-update \
       --quiet \
-      "${TOOL_NAME}==${TOOL_VERSION}"
+      "${tool_path}"
 
-  # remove virtualenv app-data
-  rm -rf ~/.local/share/virtualenv
+    "${tool_path}/bin/python" \
+      -W ignore \
+      -m pip \
+        install \
+        --compile \
+        --use-pep517 \
+        --no-warn-script-location \
+        --no-cache-dir \
+        --quiet \
+        "${TOOL_NAME}==${TOOL_VERSION}"
+
+    # remove virtualenv app-data
+    rm -rf ~/.local/share/virtualenv
+
+    # store in cache
+    cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}"
+  fi
 }
 
 function python_shell_wrapper () {

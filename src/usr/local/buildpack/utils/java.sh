@@ -59,8 +59,8 @@ function get_java_install_url () {
   # https://github.com/adoptium/api.adoptium.net/issues/492
   patched_version=$(patch_java_version "$version")
 
-  if ! json=$(curl -sSLf -H 'accept: application/json' "${base_url}/${version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1) && [ "$patched_version" != "$version" ]; then
-    if ! json=$(curl -sSLf -H 'accept: application/json' "${base_url}/${patched_version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1); then
+  if ! json=$(curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}/${version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1) && [ "$patched_version" != "$version" ]; then
+    if ! json=$(curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}/${patched_version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1); then
       echo "Invalid java version: $version" >&2
       exit 1
     fi
@@ -142,7 +142,7 @@ function get_latest_java_version () {
 
   # https://github.com/adoptium/api.adoptium.net/issues/468
   arch=$(uname -m)
-  curl -sSLf -H 'accept: application/json' "${base_url}?architecture=${arch}&image_type=${type}&${api_args}" \
+  curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}?architecture=${arch}&image_type=${type}&${api_args}" \
     | jq --raw-output '.versions[0].semver'
 }
 
