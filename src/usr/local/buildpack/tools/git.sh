@@ -5,7 +5,7 @@ require_root
 version_codename=$(get_distro)
 
 echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu ${version_codename} main" | tee /etc/apt/sources.list.d/git.list
-curl -sSL \
+curl --retry 3 -sSL \
   'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xE1DD270288B4E6030699E45FA1715D88E1DF1F24' \
   | apt-key add -
 

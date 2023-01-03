@@ -4,7 +4,7 @@ function check_tool_requirements () {
   check_command java
   # TODO: do we still need this ?
   if [[ "${TOOL_VERSION}" == "latest" ]]; then
-    export "TOOL_VERSION=$(curl -s https://services.gradle.org/versions/current | jq --raw-output '.version')"
+    export "TOOL_VERSION=$(curl --retry 3 -sSfL https://services.gradle.org/versions/current | jq --raw-output '.version')"
   fi
   check_semver "$TOOL_VERSION" minor
 }

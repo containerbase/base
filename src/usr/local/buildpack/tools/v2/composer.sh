@@ -3,7 +3,7 @@ function check_tool_requirements () {
   check_command php
 
   if [[ "${TOOL_VERSION}" == "latest" ]]; then
-    export "TOOL_VERSION=$(curl -s https://api.github.com/repos/composer/composer/releases/latest | jq --raw-output '.tag_name')"
+    export "TOOL_VERSION=$(curl --retry 3 -sSfL https://api.github.com/repos/composer/composer/releases/latest | jq --raw-output '.tag_name')"
   fi
   check_semver "${TOOL_VERSION}" all
 }
