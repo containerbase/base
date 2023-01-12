@@ -104,7 +104,7 @@ ARG BUILDPACK_DEBUG
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.101
+RUN install-tool dotnet 7.0.102
 RUN set -ex; dotnet --version | grep 7.0.
 
 RUN set -ex; \
