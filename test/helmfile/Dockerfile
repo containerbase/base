@@ -56,7 +56,7 @@ RUN install-tool helmfile "v${HELMFILE_VERSION}"
 USER 1111
 
 # do not update
-RUN install-tool helmfile v0.140.0
+RUN install-tool helmfile v0.149.0
 
 RUN set -ex; helmfile version
 
