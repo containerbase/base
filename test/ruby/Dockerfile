@@ -65,7 +65,7 @@ ARG BUILDPACK_DEBUG
 RUN gem install bundler -v 1.17.2
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.4.4
+RUN install-gem bundler 2.4.5
 
 USER 1000
 
@@ -100,7 +100,7 @@ USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.4.4
+ENV BUNDLER_VERSION=2.4.5
 RUN install-tool bundler
 
 RUN set -ex; \
