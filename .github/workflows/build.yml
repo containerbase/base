@@ -47,7 +47,7 @@ jobs:
         run: yarn lint
 
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@66eb2b135834bedc025f2e23e25598cbcb12b3c5 # v1.16.0
+        uses: reviewdog/action-shellcheck@fbfac85cb32a64ef1c42d8fbfcd1bb42500fc6ac # v1.16.1
         with:
           fail_on_error: true
           reporter: github-check
