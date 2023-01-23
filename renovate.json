@@ -49,6 +49,7 @@
         "dotnet",
         "git",
         "helm",
+        "helmfile",
         "npm",
         "pipenv",
         "poetry",
