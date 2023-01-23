@@ -136,7 +136,6 @@ jobs:
             java,
             jb,
             helm,
-            helmfile,
             nix,
             node,
             php,

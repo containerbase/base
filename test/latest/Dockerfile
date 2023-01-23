@@ -227,6 +227,31 @@ USER 1000:1000
 
 RUN vendir --version | grep "${VENDIR_VERSION}"
 
+#------------------------------------------------------------------
+# testk:  helmfile
+#------------------------------------------------------------------
+FROM build as testk
+
+# renovate: datasource=github-releases packageName=helmfile/helmfile
+ARG HELMFILE_VERSION=0.150.0
+
+RUN install-tool helmfile "v${HELMFILE_VERSION}"
+
+RUN set -ex; helmfile version
+
+SHELL [ "/bin/sh", "-c" ]
+
+RUN helmfile version | grep "${HELMFILE_VERSION}"
+
+USER 1000
+
+RUN helmfile version | grep "${HELMFILE_VERSION}"
+
+# even more restricted
+USER 1000:1000
+
+RUN helmfile version | grep "${HELMFILE_VERSION}"
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -242,3 +267,4 @@ COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
 COPY --from=testj /.dummy /.dummy
+COPY --from=testk /.dummy /.dummy
