@@ -9,7 +9,6 @@ on:
         required: false
 
 env:
-  DRY_RUN: ${{ github.ref_name != 'main' }}
   OWNER: ${{ github.repository_owner }}
   FILE: buildpack
   DOCKER_BUILDKIT: 1
