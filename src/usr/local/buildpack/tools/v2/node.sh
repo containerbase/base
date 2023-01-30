@@ -85,7 +85,7 @@ function link_tool () {
   reset_tool_env
 
   link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-  if [[ -f "$(get_bin_path)/npm" ]]; then
+  if [[ ! -f "$(get_bin_path)/npm" ]]; then
     link_wrapper npm "${versioned_tool_path}/bin"
     link_wrapper npx "${versioned_tool_path}/bin"
   fi
