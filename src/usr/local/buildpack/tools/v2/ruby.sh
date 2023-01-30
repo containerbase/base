@@ -6,11 +6,10 @@ function prepare_tool() {
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
-    "bionic");;
     "focal");;
     "jammy");;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac

@@ -88,7 +88,8 @@ jobs:
 
     strategy:
       matrix:
-        distro: [jammy, bionic]
+        distro:
+          - jammy
 
     env:
       TAG: ${{ matrix.distro }}

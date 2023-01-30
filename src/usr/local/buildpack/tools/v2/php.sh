@@ -6,15 +6,6 @@ function prepare_tool() {
 
   version_codename="$(get_distro)"
   case "$version_codename" in
-    "bionic") apt_install \
-      libjpeg-turbo8 \
-      libmcrypt4 \
-      libonig4 \
-      libpng16-16 \
-      libtidy5 \
-      libxslt1.1 \
-      libzip4 \
-      ;;
     "focal") apt_install \
       libjpeg-turbo8 \
       libmcrypt4 \
@@ -34,7 +25,7 @@ function prepare_tool() {
       libzip4 \
       ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac
