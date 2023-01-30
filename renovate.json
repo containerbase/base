@@ -73,6 +73,18 @@
       "semanticCommitType": "fix"
     },
     {
+      "description": "Use `build` semantic commit scope for build deps",
+      "matchDepNames": [
+        "commander",
+        "conventional-changelog-conventionalcommits",
+        "node",
+        "semantic-release",
+        "@semantic-release/exec",
+        "shelljs"
+      ],
+      "semanticCommitType": "build"
+    },
+    {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/**"],
       "additionalBranchPrefix": "test-",
