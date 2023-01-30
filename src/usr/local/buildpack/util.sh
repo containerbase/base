@@ -131,14 +131,13 @@ function require_distro () {
   # shellcheck source=/dev/null
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
-  "bionic") ;; #supported
   "focal") ;; #supported
   "jammy") #supported (partial)
     echo "WARNING: Not all tools are yet supported!" >&2
     echo "  -> https://github.com/containerbase/buildpack/issues/361" >&2
     ;;
   *)
-    echo "Distro not supported: ${VERSION_CODENAME}! Please use 'ubuntu bionic focal or jammy'." >&2
+    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal' or 'jammy'." >&2
     exit 1
    ;;
   esac

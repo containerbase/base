@@ -6,21 +6,6 @@ function prepare_tool() {
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
-    "bionic")
-      apt_install \
-        binutils \
-        libc6-dev \
-        libcurl4 \
-        libedit2 \
-        libgcc-5-dev \
-        libpython2.7 \
-        libsqlite3-0 \
-        libstdc++-5-dev \
-        libxml2 \
-        pkg-config \
-        tzdata \
-        zlib1g-dev \
-        ;;
     "focal")
       apt_install \
         binutils \
@@ -58,7 +43,7 @@ function prepare_tool() {
         zlib1g-dev \
         ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'bionic', 'focal' or 'jammy'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
     ;;
   esac

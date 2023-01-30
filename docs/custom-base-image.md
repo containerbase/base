@@ -1,7 +1,7 @@
 # Custom base image
 
 The following sample can be used to create a `containerbase/buildpack` based image which does not extend `containerbase/buildpack` directly.
-Currently only ubuntu focal and bionic based amd64 distro is suported.
+Currently only ubuntu focal and jammy based amd64 distro are suported.
 
 You can also use our buildpack from GitHub container registry as `ghcr.io/containerbase/buildpack`.
 `containerbase/buildpack` and `ghcr.io/containerbase/buildpack` are exchangeble.
