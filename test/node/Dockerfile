@@ -154,6 +154,12 @@ RUN npm --version | grep '8.0.0'
 
 USER 1000
 
+# don't update!! Should not overwrite npm
+RUN install-tool node 18.13.0
+
+RUN set -ex; npm --version
+RUN set -ex; npm --version | grep '8.0.0'
+
 # don't update!!
 RUN install-tool npm 7.24.2
 
