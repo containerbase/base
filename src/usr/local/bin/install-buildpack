@@ -68,7 +68,6 @@ apt_install \
   jq \
   libarchive-tools \
   openssh-client \
-  unzip \
   xz-utils \
   zstd \
   ;
