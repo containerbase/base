@@ -899,7 +899,7 @@ __metadata:
     lint-staged: 13.1.0
     npm-run-all: 4.1.5
     prettier: 2.8.3
-    semantic-release: 20.0.4
+    semantic-release: 20.1.0
     shelljs: 0.8.5
   languageName: unknown
   linkType: soft
@@ -4510,9 +4510,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semantic-release@npm:20.0.4":
-  version: 20.0.4
-  resolution: "semantic-release@npm:20.0.4"
+"semantic-release@npm:20.1.0":
+  version: 20.1.0
+  resolution: "semantic-release@npm:20.1.0"
   dependencies:
     "@semantic-release/commit-analyzer": ^9.0.2
     "@semantic-release/error": ^3.0.0
@@ -4544,7 +4544,7 @@ __metadata:
     yargs: ^17.5.1
   bin:
     semantic-release: bin/semantic-release.js
-  checksum: b8cdfae4dfad1dcdcec84452b2736c7419b34950c46e9c8bb4872829d70c044c8ddccf30a449d1ba030f48c66f82559675a6d9bb1681b2e167ecd75e858025b7
+  checksum: b58215e8b969f27bcd9f518e5c6b577ff770c8ebe93ab428c51f464032b744a6004c5c7b1a1be8ec9c9d7d3f80c57e845f933081b15e7f1a8c1ffd2e0d478e22
   languageName: node
   linkType: hard
 
