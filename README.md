@@ -1,13 +1,13 @@
-![Build status](https://github.com/containerbase/base/actions/workflows/build-push.yml/badge.svg)
-![Docker Image Size (latest)](https://img.shields.io/docker/image-size/containerbase/buildpack/latest)
-![GitHub](https://img.shields.io/github/license/containerbase/base)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/base)
-
 # containerbase base
 
-This repository is the source for the Docker Hub image `containerbase/buildpack`, which is to be renamed to `containerbase/base`.
+![Build status](https://github.com/containerbase/base/actions/workflows/build-push.yml/badge.svg)
+![Docker Image Size (latest)](https://img.shields.io/docker/image-size/containerbase/base/latest)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/base)
+![Licence: MIT](https://img.shields.io/github/license/containerbase/base)
+
+This repository is the source for the Docker images [`containerbase/base`](https://hub.docker.com/r/containerbase/base) and `ghcr.io/containerbase/base`.
 It is not associated with or compatible with the `buildpacks.io` project.
-Commits to `main` branch are automatically built and published.
+Commits to `main` branch are automatically build and published.
 
 ## Local development
 
@@ -17,7 +17,7 @@ You should use
 
 ### Base image
 
-If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Dockerfile), you need to rebuild the `containerbase/buildpack` image.
+If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Dockerfile), you need to rebuild the `containerbase/base` image.
 
 ```sh
 docker buildx bake
@@ -58,11 +58,11 @@ You can simply export `APT_HTTP_PROXY` to your local env and our build tools wil
 
 ## Custom base image
 
-To use a custom base image with `containerbase/buildpack` checkout [custom-base-image](./docs/custom-base-image.md) docs.
+To use a custom base image with `containerbase/base` checkout [custom-base-image](./docs/custom-base-image.md) docs.
 
 ### Custom Root CA Certificates
 
-To add custom root certificates to the `containerbase/buildpack` base image checkout [custom-root-ca](./docs/custom-root-ca.md) docs.
+To add custom root certificates to the `containerbase/base` base image checkout [custom-root-ca](./docs/custom-root-ca.md) docs.
 
 ### Temporary disable tool installer
 
@@ -71,7 +71,7 @@ To temporary disable / skip some tool installer set the build arg `IGNORED_TOOLS
 The following sample will skip the installation of `powershell` and `node`.
 
 ```Dockerfile
-FROM containerbase/buildpack
+FROM containerbase/base
 
 ARG IGNORED_TOOLS=powershell,node
 

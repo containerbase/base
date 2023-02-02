@@ -1,4 +1,4 @@
-ARG IMAGE=containerbase/buildpack
+ARG IMAGE=containerbase/base
 ARG BUILDPACK_DEBUG
 
 #--------------------------------------

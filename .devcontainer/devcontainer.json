@@ -1,5 +1,5 @@
 {
-  "name": "buildpack",
+  "name": "containerbase",
   "dockerFile": "Dockerfile",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"

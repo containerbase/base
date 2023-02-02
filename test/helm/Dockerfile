@@ -1,4 +1,4 @@
-ARG IMAGE=containerbase/buildpack
+ARG IMAGE=containerbase/base
 FROM ${IMAGE} as build
 
 RUN touch /.dummy

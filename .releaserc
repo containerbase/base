@@ -90,5 +90,7 @@
     ]
   },
   "tagFormat": "${version}",
-  "branches": ["main"]
+  "branches": [
+    "main"
+  ]
 }

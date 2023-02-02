@@ -144,7 +144,7 @@ teardown() {
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${BUILDPACK_CACHE_DIR}"
 
-  local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/buildpack.tar.xz"
+  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
 
   run download_file
   assert_failure
@@ -174,7 +174,7 @@ teardown() {
   BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${BUILDPACK_CACHE_DIR}"
 
-  local file="https://github.com/containerbase/buildpack/releases/download/1.0.0/buildpack.tar.xz"
+  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
 
   run get_from_url "${file}"
   assert_success
