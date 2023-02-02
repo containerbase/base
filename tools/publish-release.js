@@ -16,7 +16,7 @@ if (dry) {
 
 shell.echo('Pushing docker images');
 
-r = shell.exec('docker buildx bake --progress plain push');
+r = shell.exec('docker buildx bake --progress plain --provenance=false push');
 if (r.code) {
   shell.exit(1);
 }
