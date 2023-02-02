@@ -1,11 +1,11 @@
 # Custom base image
 
-The following sample can be used to create a `containerbase/buildpack` based image which does not extend `containerbase/buildpack` directly.
+The following sample can be used to create a `containerbase/base` based image which does not extend `containerbase/base` directly.
 Currently only ubuntu focal and jammy based amd64 distro are suported.
 
-You can also use our buildpack from GitHub container registry as `ghcr.io/containerbase/buildpack`.
-`containerbase/buildpack` and `ghcr.io/containerbase/buildpack` are exchangeble.
-You should always use a specific version which can be found at [docker hub](https://hub.docker.com/r/containerbase/buildpack/tags) or at [GitHub container registry](ghcr.io/containerbase/buildpack)
+You can also use our buildpack from GitHub container registry as `ghcr.io/containerbase/base`.
+`containerbase/base` and `ghcr.io/containerbase/base` are exchangeble.
+You should always use a specific version which can be found at [docker hub](https://hub.docker.com/r/containerbase/base/tags) or at [GitHub container registry](ghcr.io/containerbase/base)
 
 ## Default user name and id
 
@@ -13,7 +13,7 @@ Use this template for using a custom base image with our default user named `ubu
 
 ```dockerfile
 # This buildpack is used for tool intallation and user/directory setup
-FROM containerbase/buildpack AS buildpack
+FROM containerbase/base AS buildpack
 
 FROM amd64/ubuntu:focal as base
 
@@ -33,7 +33,7 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up buildpack
 COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
-COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=buildpack /usr/local/base/ /usr/local/base/
 RUN install-buildpack
 
 
@@ -56,7 +56,7 @@ You can also customize username or userid by using this template.
 
 ```dockerfile
 # This buildpack is used for tool intallation and user/directory setup
-FROM containerbase/buildpack AS buildpack
+FROM containerbase/base AS buildpack
 
 FROM amd64/ubuntu:focal as base
 
@@ -79,7 +79,7 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up buildpack
 COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
-COPY --from=buildpack /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=buildpack /usr/local/base/ /usr/local/base/
 RUN install-buildpack
 
 

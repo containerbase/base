@@ -134,7 +134,7 @@ function require_distro () {
   "focal") ;; #supported
   "jammy") #supported (partial)
     echo "WARNING: Not all tools are yet supported!" >&2
-    echo "  -> https://github.com/containerbase/buildpack/issues/361" >&2
+    echo "  -> https://github.com/containerbase/base/issues/361" >&2
     ;;
   *)
     echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal' or 'jammy'." >&2

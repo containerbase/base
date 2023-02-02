@@ -11,9 +11,9 @@ ARG CACHE_WEEK
 ARG BUILDPACK_VERSION
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
-  org.opencontainers.image.source="https://github.com/containerbase/buildpack"
+  org.opencontainers.image.source="https://github.com/containerbase/base"
 
-#  autoloading buildpack env
+#  autoloading containerbase env
 ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/ubuntu/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 

@@ -2,7 +2,7 @@ variable "OWNER" {
   default = "containerbase"
 }
 variable "FILE" {
-  default = "buildpack"
+  default = "base"
 }
 variable "TAG" {
   default = "latest"
@@ -32,7 +32,7 @@ group "default" {
 }
 
 group "push" {
-  targets = ["push-ghcr", "push-hub", "push-cache"]
+  targets = ["push-ghcr", "push-hub", "push-legacy", "push-cache"]
 }
 
 group "test" {
@@ -47,10 +47,10 @@ group "test-distro" {
 target "settings" {
   context = "."
   args = {
-    APT_HTTP_PROXY = "${APT_HTTP_PROXY}"
-    BUILDPACK_DEBUG = "${BUILDPACK_DEBUG}"
+    APT_HTTP_PROXY    = "${APT_HTTP_PROXY}"
+    BUILDPACK_DEBUG   = "${BUILDPACK_DEBUG}"
     BUILDPACK_VERSION = "${BUILDPACK_VERSION}"
-    GITHUB_TOKEN = "${GITHUB_TOKEN}"
+    GITHUB_TOKEN      = "${GITHUB_TOKEN}"
   }
 }
 
@@ -105,4 +105,16 @@ target "push-hub" {
   inherits = ["settings", "cache"]
   output   = ["type=registry"]
   tags     = ["${OWNER}/${FILE}", "${OWNER}/${FILE}:${TAG}"]
+}
+
+// TODO: remove on next major
+target "push-legacy" {
+  inherits = ["settings", "cache"]
+  output   = ["type=registry"]
+  tags = [
+    "ghcr.io/${OWNER}/buildpack",
+    "ghcr.io/${OWNER}/buildpack:${TAG}",
+    "${OWNER}/buildpack",
+    "${OWNER}/buildpack:${TAG}"
+  ]
 }

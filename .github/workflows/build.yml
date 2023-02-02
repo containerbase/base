@@ -10,7 +10,7 @@ on:
 
 env:
   OWNER: ${{ github.repository_owner }}
-  FILE: buildpack
+  FILE: base
   DOCKER_BUILDKIT: 1
   NODE_VERSION: 18.13.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
