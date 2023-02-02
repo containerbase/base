@@ -18,7 +18,7 @@ ARG BUILDPACK_DEBUG
 
 # https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 25.2.1.0
+RUN install-tool erlang 25.2.2.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.14.3
