@@ -92,6 +92,12 @@ target "build-test" {
   context  = "./test/${TAG}"
 }
 
+target "test-arm64" {
+  inherits   = ["settings"]
+  platforms  = ["linux/arm64"]
+  dockerfile = "./test/Dockerfile.arm64"
+}
+
 target "push-ghcr" {
   inherits = ["settings", "cache"]
   output   = ["type=registry"]
