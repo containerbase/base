@@ -19,6 +19,7 @@ function prepare_tool() {
 function install_tool () {
   local file
   local versioned_tool_path
+  local arch=linux-x64
 
   if [[ ! -d "$(find_tool_path)" ]]; then
     if [[ $(is_root) -ne 0 ]]; then
@@ -30,7 +31,11 @@ function install_tool () {
 
   versioned_tool_path=$(create_versioned_tool_path)
 
-  file=$(get_from_url "https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-linux-x64.tar.gz")
+  if [[ "$(uname -p)" = "aarch64" ]]; then
+    arch=linux-arm64
+  fi
+
+  file=$(get_from_url "https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-${arch}.tar.gz")
   bsdtar -C "${versioned_tool_path}" -xzf "${file}"
   # Happened on v7.3.0
   if [[ ! -x "${versioned_tool_path}/pwsh" ]]; then
