@@ -69,8 +69,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          npm config set scripts-prepend-node-path true
+          git config --global user.name  'Renovate Bot
           echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
       - name: Docker registry login
