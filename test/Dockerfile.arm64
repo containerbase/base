@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:jammy as base
+FROM ubuntu:focal as base
 
 ARG APT_HTTP_PROXY
 
@@ -25,10 +25,13 @@ FROM base as test
 
 ARG APT_HTTP_PROXY
 
-RUN uname -p
+RUN uname -p | tee | grep aarch64
+
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v23.0.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-#RUN install-tool dotnet 7.0.102
+RUN install-tool dotnet 7.0.102
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 #RUN install-tool erlang 25.2.2.0
@@ -59,13 +62,13 @@ RUN uname -p
 #RUN install-tool nix 2.13.2
 
 # renovate: datasource=node
-#RUN install-tool node v18.14.0
+RUN install-tool node v18.14.0
 # renovate: datasource=npm
-#RUN install-tool pnpm 7.26.2
+RUN install-tool pnpm 7.26.2
 # renovate: datasource=npm
-#RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
-#RUN install-npm lerna 6.4.1
+RUN install-tool lerna 6.4.1
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 #RUN install-tool php 8.2.2

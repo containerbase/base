@@ -39,6 +39,7 @@ function check_tool_requirements () {
 function install_tool () {
   local versioned_tool_path
   local npm # temp npm executable
+  local arch=linux-x64
 
   versioned_tool_path=$(create_versioned_tool_path)
 
@@ -47,8 +48,12 @@ function install_tool () {
 
   npm=${versioned_tool_path}/bin/npm
 
+  if [[ "$(uname -p)" = "aarch64" ]]; then
+    arch=linux-arm64
+  fi
+
   # download file
-  file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-linux-x64.tar.xz")
+  file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${arch}.tar.xz")
   # extract
   tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 

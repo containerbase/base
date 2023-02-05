@@ -9,6 +9,7 @@ function prepare_tool() {
 function install_tool () {
   local versioned_tool_path
   local file
+  local arch
 
   if [[ ! -d "$(find_tool_path)" ]]; then
     if [[ $(is_root) -ne 0 ]]; then
@@ -18,8 +19,10 @@ function install_tool () {
     prepare_tool
   fi
 
+  arch=$(uname -p)
+
   versioned_tool_path=$(create_versioned_tool_path)
-  file=$(get_from_url "https://download.docker.com/linux/static/stable/x86_64/docker-${TOOL_VERSION}.tgz")
+  file=$(get_from_url "https://download.docker.com/linux/static/stable/${arch}/docker-${TOOL_VERSION}.tgz")
   mkdir "${versioned_tool_path}/bin"
   bsdtar -C "${versioned_tool_path}/bin" --strip 1 -xf "${file}" docker/docker
 }
