@@ -40,17 +40,18 @@ function install_tool () {
   local versioned_tool_path
   local npm # temp npm executable
 
+  # download file
+  file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-linux-x64.tar.xz")
+
   versioned_tool_path=$(create_versioned_tool_path)
+
+  # extract
+  tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
   # init temp dir
   npm_init
 
   npm=${versioned_tool_path}/bin/npm
-
-  # download file
-  file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-linux-x64.tar.xz")
-  # extract
-  tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
   if [[ $(is_root) -eq 0 ]]; then
     # redirect root install
