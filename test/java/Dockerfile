@@ -147,7 +147,7 @@ FROM build as teste
 USER 1001
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.8.7
+RUN install-tool maven 3.9.0
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
