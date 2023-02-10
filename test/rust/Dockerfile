@@ -17,10 +17,10 @@ FROM base as build
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.67.0
+RUN install-tool rust 1.67.1
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.67.0
+RUN install-tool rust 1.67.1
 
 
 USER 1000
@@ -48,7 +48,7 @@ ARG BUILDPACK_DEBUG
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.67.0
+RUN install-tool rust 1.67.1
 
 RUN set -ex; \
     cd a; \
