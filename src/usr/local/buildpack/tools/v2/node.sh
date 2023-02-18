@@ -44,11 +44,11 @@ function install_tool () {
   checksums=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/SHASUMS256.txt")
 
   # get checksum from file
-  original_checksum=$(grep "node-v${TOOL_VERSION}-linux-x64.tar.xz" "${checksums}" | cut -d' ' -f1)
+  original_checksum=$(grep "node-v${TOOL_VERSION}-${arch}.tar.xz" "${checksums}" | cut -d' ' -f1)
 
   # download file
   file=$(get_from_url \
-    "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-linux-x64.tar.xz" \
+    "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${arch}.tar.xz" \
     "node-v${TOOL_VERSION}-${arch}.tar.xz" \
     "${original_checksum}" \
     "sha256sum" )
