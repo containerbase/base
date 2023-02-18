@@ -7,7 +7,7 @@ ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=node
-RUN install-tool node v16.19.0
+RUN install-tool node v16.19.1
 
 RUN touch /.dummy
 
@@ -89,7 +89,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.26.3
+RUN install-tool pnpm 7.27.0
 
 RUN set -ex; \
   pnpm --version;
@@ -116,7 +116,7 @@ RUN touch /.dummy
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.14.0
+RUN install-tool node v18.14.1
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -412,13 +412,13 @@ RUN install-tool corepack 0.15.3
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 7.26.3
+RUN install-tool pnpm 7.27.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.15.3
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=7.26.3
+ARG PNPM_VERSION=7.27.0
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
