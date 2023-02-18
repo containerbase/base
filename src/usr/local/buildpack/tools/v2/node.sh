@@ -39,9 +39,19 @@ function check_tool_requirements () {
 function install_tool () {
   local versioned_tool_path
   local npm # temp npm executable
+  local arch=linux-x64
+
+  checksums=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/SHASUMS256.txt")
+
+  # get checksum from file
+  original_checksum=$(grep "node-v${TOOL_VERSION}-${arch}.tar.xz" "${checksums}" | cut -d' ' -f1)
 
   # download file
-  file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-linux-x64.tar.xz")
+  file=$(get_from_url \
+    "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${arch}.tar.xz" \
+    "node-v${TOOL_VERSION}-${arch}.tar.xz" \
+    "${original_checksum}" \
+    "sha256sum" )
 
   versioned_tool_path=$(create_versioned_tool_path)
 
