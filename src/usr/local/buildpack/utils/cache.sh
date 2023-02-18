@@ -53,9 +53,15 @@ function get_from_url () {
   local filename="${checksum}/${name}"
 
   if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
-      # file in cache
-      # echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
-      echo "${BUILDPACK_CACHE_DIR}/${filename}"
+      # file in cache, verify checksum first
+      if [ -n "${expected_checksum}" ] && ! verify_checksum "${BUILDPACK_CACHE_DIR}/${filename}" "${expected_checksum}" "${checksum_algo}" ; then
+        # file in cache but checksum doesn't match, so remove file and download again
+        echo "Cached file is corrupt, redownloading: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
+        rm -rf "${BUILDPACK_CACHE_DIR:?}/${filename}"
+        download_file "${url}" "${filename}" "${expected_checksum}" "${checksum_algo}"
+      else
+        echo "${BUILDPACK_CACHE_DIR}/${filename}"
+      fi
   else
     # cache disabled or not in cache
     download_file "${url}" "${filename}" "${expected_checksum}" "${checksum_algo}"
@@ -81,9 +87,9 @@ function download_file () {
   checksum_algo=${4}
 
   local retry=3
+  local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
   while [ "${retry}" -gt 0 ]; do
     retry=$((retry-1))
-    local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
     if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
       echo "Download failed: ${url}" >&2
       exit 1
