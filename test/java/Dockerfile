@@ -54,7 +54,7 @@ USER 1000
 # stay on v6
 RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.0.1
+RUN install-tool gradle 6.9.3
 
 
 RUN set -ex; \
@@ -70,7 +70,7 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: gradle 7
+# test: java 18 + gradle 8
 #--------------------------------------
 FROM base as testb
 
@@ -96,7 +96,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
-# test: java 8
+# test: java 8 + gradle 7
 #--------------------------------------
 FROM build as testc
 
@@ -107,7 +107,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.0.1
+RUN install-tool gradle 7.6
 
 # test openshift userid missmatch
 USER 1001
