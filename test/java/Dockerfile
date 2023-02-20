@@ -70,7 +70,7 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: gradle 7
+# test: java 18 + gradle 8
 #--------------------------------------
 FROM base as testb
 
@@ -78,7 +78,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.6
+RUN install-tool gradle 8.0.1
 
 USER 1000
 
@@ -96,7 +96,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
-# test: java 8
+# test: java 8 + gradle 7
 #--------------------------------------
 FROM build as testc
 
