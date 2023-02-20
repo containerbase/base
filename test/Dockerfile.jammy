@@ -37,7 +37,7 @@ RUN install-tool elixir 1.14.3
 RUN install-tool flutter 3.0.2
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.39.0
+RUN install-tool flux v0.40.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.20.1
@@ -76,7 +76,7 @@ RUN install-tool powershell v7.3.2
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.11.1
 # renovate: datasource=pypi
-RUN install-pip pipenv 2023.2.4
+RUN install-pip pipenv 2023.2.18
 # renovate: datasource=pypi
 RUN install-pip hashin 0.17.0
 # renovate: datasource=pypi
