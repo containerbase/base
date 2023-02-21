@@ -68,7 +68,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.5.0
+RUN install-tool lerna 6.5.1
 
 USER 1000
 
@@ -276,7 +276,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.5.0
+RUN install-tool lerna 6.5.1
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
