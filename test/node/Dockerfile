@@ -116,7 +116,7 @@ RUN touch /.dummy
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.14.1
+RUN install-tool node v18.14.2
 
 RUN npm install -g yarn
 RUN set -ex; \
