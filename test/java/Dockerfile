@@ -107,7 +107,7 @@ ARG APT_HTTP_PROXY
 RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.6
+RUN install-tool gradle 7.6.1
 
 # test openshift userid missmatch
 USER 1001
