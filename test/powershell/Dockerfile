@@ -36,7 +36,7 @@ FROM base as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.2
+RUN install-tool powershell v7.3.3
 
 USER 1000
 
