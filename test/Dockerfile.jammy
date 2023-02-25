@@ -26,7 +26,7 @@ FROM base as test
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.200
+RUN install-tool dotnet 7.0.201
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 25.2.3.0
