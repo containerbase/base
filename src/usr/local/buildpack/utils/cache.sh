@@ -159,7 +159,7 @@ function verify_checksum () {
       ;;
   esac
   if [ "$real_checksum" != "$expected_checksum" ]; then
-    echo "Checksum does not match for file ${file}. Expected: ${expected_checksum} - Got: ${real_checksum}" >&2
+    echo "Checksum does not match for file ${file}. Expected: '${expected_checksum}' - Got: '${real_checksum}'" >&2
     return 1
   fi
   return 0

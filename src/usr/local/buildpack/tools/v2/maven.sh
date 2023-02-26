@@ -9,6 +9,9 @@ function install_tool () {
   local versioned_tool_path
   versioned_tool_path=$(create_versioned_tool_path)
 
+  local checksum_file
+  local original_checksum
+
   local file
   # https://downloads.apache.org/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
   local URL='https://downloads.apache.org'
