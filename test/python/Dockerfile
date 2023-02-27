@@ -116,6 +116,24 @@ RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.15
 
 #--------------------------------------
+# poetry test e: root install - non root install
+#--------------------------------------
+FROM build as test-poetry-e
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.3.2
+
+USER 1001
+
+# use older version
+RUN install-tool python 3.10.0
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.3.2
+
+#--------------------------------------
 # test a: pip_requirements
 #--------------------------------------
 FROM build as testa
@@ -215,6 +233,7 @@ COPY --from=test-poetry-a /.dummy /.dummy
 COPY --from=test-poetry-b /.dummy /.dummy
 COPY --from=test-poetry-c /.dummy /.dummy
 COPY --from=test-poetry-d /.dummy /.dummy
+COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
