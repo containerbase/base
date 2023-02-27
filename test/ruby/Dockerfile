@@ -115,6 +115,26 @@ RUN set -ex; \
   bundler lock;
 
 #--------------------------------------
+# test: bundler install root - install rootless
+#--------------------------------------
+FROM build3 as test-bundler-d
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=rubygems depName=bundler versioning=ruby
+ENV BUNDLER_VERSION=2.4.7
+RUN install-tool bundler
+
+USER 1000
+
+# install old version
+RUN install-tool ruby 3.1.0
+
+# renovate: datasource=rubygems depName=bundler versioning=ruby
+ENV BUNDLER_VERSION=2.4.7
+RUN install-tool bundler
+
+#--------------------------------------
 # test: cocoapods
 #--------------------------------------
 FROM build as test-cocoapods-a
@@ -199,6 +219,7 @@ FROM base
 COPY --from=test-bundler-a /.dummy /.dummy
 COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
+COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
