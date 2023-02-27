@@ -30,6 +30,9 @@ function check_tool_installed() {
 }
 
 function install_tool() {
+  # always install with user umask
+  # shellcheck disable=SC2034
+  local ROOT_UMASK=${USER_UMASK}
   local ruby_version
   local tool_path
   ruby_version=$(get_tool_version ruby)
