@@ -133,9 +133,8 @@ RUN set -ex \
 
 USER 1001
 
+# use older version
 RUN install-tool python 3.10.0
-
-RUN ls -lah /opt/buildpack/tools/poetry/1.3.2
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.3.2
