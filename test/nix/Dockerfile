@@ -50,7 +50,7 @@ FROM base as testb
 USER 1000
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.13.2
+RUN install-tool nix 2.13.3
 
 
 ARG GITHUB_TOKEN
