@@ -116,6 +116,37 @@ RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.15
 
 #--------------------------------------
+# poetry test e: root install - non root install
+#--------------------------------------
+FROM build as test-poetry-e
+
+ARG BUILDPACK_DEBUG
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.3.2
+
+RUN set -ex \
+  && cd c-poetry \
+  && poetry update --lock --no-interaction \
+  && poetry add h3py \
+  ;
+
+USER 1001
+
+RUN install-tool python 3.10.0
+
+RUN ls -lah /opt/buildpack/tools/poetry/1.3.2
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.3.2
+
+RUN set -ex \
+  && cd c-poetry \
+  && poetry update --lock --no-interaction \
+  && poetry add h3py \
+  ;
+
+#--------------------------------------
 # test a: pip_requirements
 #--------------------------------------
 FROM build as testa
@@ -215,6 +246,7 @@ COPY --from=test-poetry-a /.dummy /.dummy
 COPY --from=test-poetry-b /.dummy /.dummy
 COPY --from=test-poetry-c /.dummy /.dummy
 COPY --from=test-poetry-d /.dummy /.dummy
+COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
