@@ -125,12 +125,6 @@ ARG BUILDPACK_DEBUG
 # renovate: datasource=pypi
 RUN install-tool poetry 1.3.2
 
-RUN set -ex \
-  && cd c-poetry \
-  && poetry update --lock --no-interaction \
-  && poetry add h3py \
-  ;
-
 USER 1001
 
 # use older version
@@ -138,12 +132,6 @@ RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.3.2
-
-RUN set -ex \
-  && cd c-poetry \
-  && poetry update --lock --no-interaction \
-  && poetry add h3py \
-  ;
 
 #--------------------------------------
 # test a: pip_requirements
