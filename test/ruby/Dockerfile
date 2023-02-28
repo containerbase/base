@@ -158,7 +158,7 @@ FROM build3 as test-cocoapods-b
 ARG BUILDPACK_DEBUG
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.3
+RUN install-gem cocoapods 1.12.0
 
 USER 1000
 
@@ -178,7 +178,7 @@ ARG BUILDPACK_DEBUG
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.11.3
+RUN install-tool cocoapods 1.12.0
 
 RUN pod env
 
@@ -204,7 +204,7 @@ ARG BUILDPACK_DEBUG
 RUN install-tool ruby 3.2.1
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.3
+RUN install-gem cocoapods 1.12.0
 
 RUN set -ex; \
   cd b/Project; \

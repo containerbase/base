@@ -87,7 +87,7 @@ RUN install-tool ruby 3.2.1
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.4.7
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.11.3
+RUN install-tool cocoapods 1.12.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.67.1
