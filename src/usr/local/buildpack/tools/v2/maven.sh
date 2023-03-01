@@ -15,14 +15,17 @@ function install_tool () {
   local file_name="apache-${TOOL_NAME}-${TOOL_VERSION}-bin.tar.gz"
   local file_url="${TOOL_NAME}/${TOOL_NAME}-${MAJOR}/${TOOL_VERSION}/binaries/${file_name}"
 
+  local checksum_file
+  local expected_checksum
+
   checksum_file=$(get_from_url "${URL}/${file_url}.sha512")
   # get checksum from file
-  original_checksum=$(cat "${checksum_file}")
+  expected_checksum=$(cat "${checksum_file}")
 
   file=$(get_from_url \
     "${URL}/${file_url}" \
     "${file_name}" \
-    "${original_checksum}" \
+    "${expected_checksum}" \
     "sha512sum" )
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
 }
