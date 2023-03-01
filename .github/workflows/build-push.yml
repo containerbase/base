@@ -49,7 +49,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # tag=v2.8.1
+      - uses: sigstore/cosign-installer@77560e399fb1b0d50a89024c16dd3a908f8d44b5 # v3.0.0
 
       - name: init
         run: |
