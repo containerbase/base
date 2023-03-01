@@ -41,16 +41,20 @@ function install_tool () {
   local npm # temp npm executable
   local arch=linux-x64
 
-  checksums=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/SHASUMS256.txt")
+  local checksum_file
+  local expected_checksum
+
+
+  checksum_file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/SHASUMS256.txt")
 
   # get checksum from file
-  original_checksum=$(grep "node-v${TOOL_VERSION}-${arch}.tar.xz" "${checksums}" | cut -d' ' -f1)
+  expected_checksum=$(grep "node-v${TOOL_VERSION}-${arch}.tar.xz" "${checksum_file}" | cut -d' ' -f1)
 
   # download file
   file=$(get_from_url \
     "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${arch}.tar.xz" \
     "node-v${TOOL_VERSION}-${arch}.tar.xz" \
-    "${original_checksum}" \
+    "${expected_checksum}" \
     "sha256sum" )
 
   versioned_tool_path=$(create_versioned_tool_path)
