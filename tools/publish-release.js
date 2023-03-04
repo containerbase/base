@@ -21,17 +21,15 @@ if (r.code) {
   shell.exit(1);
 }
 
-process.env['COSIGN_EXPERIMENTAL'] = 'true';
-
 r = shell.exec(
-  `cosign sign ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+  `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
 );
 if (r.code) {
   shell.exit(1);
 }
 
 r = shell.exec(
-  `cosign sign ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+  `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
 );
 if (r.code) {
   shell.exit(1);
