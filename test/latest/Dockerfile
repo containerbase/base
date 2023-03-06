@@ -203,7 +203,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: vendir
+# test: vendir, helmfile, kustomize
 #--------------------------------------
 FROM base as testj
 
@@ -213,13 +213,20 @@ ARG VENDIR_VERSION=0.32.2
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=0.150.0
 
+# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
+ARG KUSTOMIZE_VERSION=5.0.0
+
 RUN install-tool vendir "v${VENDIR_VERSION}"
 
 RUN install-tool helmfile "v${HELMFILE_VERSION}"
 
+RUN install-tool kustomize "v${KUSTOMIZE_VERSION}"
+
 RUN set -ex; vendir --version
 
 RUN set -ex; helmfile version
+
+RUN set -ex; kustomize version
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -227,11 +234,15 @@ RUN vendir --version | grep "${VENDIR_VERSION}"
 
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
+RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
+
 USER 1000
 
 RUN vendir --version | grep "${VENDIR_VERSION}"
 
 RUN helmfile version | grep "${HELMFILE_VERSION}"
+
+RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
 
 #--------------------------------------

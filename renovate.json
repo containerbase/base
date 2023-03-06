@@ -48,6 +48,7 @@
         "docker",
         "dotnet",
         "git",
+        "kustomize",
         "helm",
         "helmfile",
         "npm",
@@ -102,6 +103,11 @@
       "extends": ["schedule:weekly"],
       "automerge": true,
       "separateMinorPatch": false
+    },
+    {
+      "descriptions": "Handle tag prefix in kustomize monorepo",
+      "matchPackageNames": ["kubernetes-sigs/kustomize"],
+      "extractVersion": "^kustomize/v(?<version>.*)$"
     }
   ]
 }
