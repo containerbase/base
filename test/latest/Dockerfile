@@ -220,7 +220,7 @@ RUN install-tool vendir "v${VENDIR_VERSION}"
 
 RUN install-tool helmfile "v${HELMFILE_VERSION}"
 
-RUN install-tool kustomize "v${KUSTOMIZE_VERSION}"
+RUN install-tool kustomize "${KUSTOMIZE_VERSION}"
 
 RUN set -ex; vendir --version
 

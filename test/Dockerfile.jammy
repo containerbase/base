@@ -43,7 +43,7 @@ RUN install-tool flux v0.40.2
 RUN install-tool golang 1.20.1
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize v5.0.0
+RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.11.1

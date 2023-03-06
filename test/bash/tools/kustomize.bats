@@ -55,7 +55,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-  TOOL_VERSION=v5.0.0
+  TOOL_VERSION=5.0.0
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -75,7 +75,7 @@ teardown_file () {
   local TOOL_VERSION
 
   # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-  TOOL_VERSION=v5.0.0
+  TOOL_VERSION=5.0.0
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
@@ -110,7 +110,7 @@ teardown_file () {
   local bin_path=$(get_bin_path)
 
   # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-  TOOL_VERSION=v5.0.0
+  TOOL_VERSION=5.0.0
 
   # trim leading v prefix
   TOOL_VERSION="${TOOL_VERSION#v}"
