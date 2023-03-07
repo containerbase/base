@@ -15,7 +15,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: base
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 18.14.2 # renovate: datasource=node depName=node
+  NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
