@@ -4,6 +4,11 @@ function install_tool () {
   local versioned_tool_path
   local file
   local arch=linux_amd64
+
+  if [[ "$(uname -p)" = "aarch64" ]]; then
+    arch=linux_arm64
+  fi
+
   local kustomize_file="${TOOL_NAME}_v${TOOL_VERSION}_${arch}.tar.gz"
 
   versioned_tool_path=$(create_versioned_tool_path)
