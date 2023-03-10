@@ -63,7 +63,7 @@ FROM build as testb
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.11.1
+ARG PYTHON_VERSION=3.11.2
 RUN install-tool python
 
 RUN set -ex; \
@@ -77,7 +77,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=node
-RUN install-tool node v18.14.2
+RUN install-tool node v18.15.0
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -155,7 +155,7 @@ USER ${USER_ID}
 SHELL ["/bin/sh", "-c"]
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.3.9
+RUN install-tool terraform 1.4.0
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -174,7 +174,7 @@ ARG APT_HTTP_PROXY
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.40.2
+RUN install-tool flux v0.41.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.3.0
@@ -183,7 +183,7 @@ RUN install-tool git-lfs v3.3.0
 RUN install-tool powershell v7.3.3
 
 # renovate: datasource=node
-RUN install-tool node v18.14.2
+RUN install-tool node v18.15.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v23.0.1

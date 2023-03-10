@@ -15,7 +15,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: base
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 18.14.2 # renovate: datasource=node depName=node
+  NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@76a5b860e95d6388d3914cbe739ca535ce6a0c7d # v1.15.5
+        uses: renovatebot/internal-tools@9c8277b2fedd1acd9da7ce2fa7213b49bffbf043 # v1.15.6
         with:
           command: docker-config
 
