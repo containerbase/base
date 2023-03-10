@@ -48,6 +48,7 @@
         "docker",
         "dotnet",
         "git",
+        "kustomize",
         "helm",
         "helmfile",
         "npm",

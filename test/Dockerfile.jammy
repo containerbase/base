@@ -42,6 +42,9 @@ RUN install-tool flux v0.41.0
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.20.2
 
+# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
+RUN install-tool kustomize 5.0.0
+
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.11.2
 
