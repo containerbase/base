@@ -34,6 +34,11 @@ EOM
     # make it writable for the owner and the group only if we are the owner
     chmod 775 "$TARGET"
   fi
+  # make it writable for the default user
+  if [[ -O "$TARGET" ]] && [ "$(stat --format '%u' "${TARGET}")" -ne "${USER_ID}" ] ; then
+    # make it writable for the owner and the group only if we are the owner
+    chown "${USER_ID}" "$TARGET"
+  fi
 }
 
 # use this for simple symlink to /usr/local/bin
