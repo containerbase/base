@@ -5,6 +5,7 @@ RUN touch /.dummy
 
 # renovate: datasource=github-releases packageName=helm/helm
 ARG HELM_VERSION=3.8.0
+ARG BUILDPACK_DEBUG
 
 
 #------------------------------------------------------------------
@@ -48,7 +49,11 @@ FROM build as testb
 
 USER 1111
 
+RUN id
+
 RUN install-tool helm "v${HELM_VERSION}"
+
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/helm") -eq 1111 ]
 
 RUN set -ex; helm version
 
@@ -66,7 +71,10 @@ RUN helm version | grep "${HELM_VERSION}"
 #------------------------------------------------------------------
 FROM build as testc
 
+
 RUN install-tool helm "v${HELM_VERSION}"
+
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/helm") -eq ${USER_ID} ]
 
 USER 1111
 
