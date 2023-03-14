@@ -66,7 +66,7 @@ ARG APT_HTTP_PROXY
 ARG PYTHON_VERSION=3.11.2
 RUN install-tool python
 
-RUN [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME}
@@ -81,8 +81,6 @@ ARG APT_HTTP_PROXY
 # renovate: datasource=node
 RUN install-tool node v18.15.0
 
-RUN [ $(stat --format '%u' "/usr/local/bin/node") -eq ${USER_ID} ]
-
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
 
@@ -96,7 +94,7 @@ ARG APT_HTTP_PROXY
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
 
-RUN [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME}
@@ -111,6 +109,8 @@ ARG APT_HTTP_PROXY
 
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
+
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME}
