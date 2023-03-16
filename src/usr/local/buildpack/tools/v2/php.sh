@@ -36,7 +36,7 @@ function install_tool () {
   local tool_path
   local file
   local BASE_URL
-  local ARCH
+  local arch
   local version_codename
 
   tool_path=$(find_tool_path)
@@ -50,11 +50,11 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  ARCH=$(uname -p)
+  arch=$(uname -p)
   BASE_URL="https://github.com/containerbase/${TOOL_NAME}-prebuild/releases/download"
   version_codename=$(get_distro)
 
-  file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${ARCH}.tar.xz")
+  file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
   tar -C "${tool_path}" -xf "${file}"
 }
 
