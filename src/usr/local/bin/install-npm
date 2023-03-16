@@ -9,7 +9,8 @@ require_user
 require_tool "$@"
 
 case "$TOOL_NAME" in
-  npm | yarn | pnpm | lerna | renovate)
+  lerna | npm | pnpm | renovate | yarn)
+    echo "WARNING: Use 'install-tool $TOOL_NAME $TOOL_VERSION'" >&2
     install-tool "$TOOL_NAME" "${TOOL_VERSION}"
     ;;
 
