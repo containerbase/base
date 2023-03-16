@@ -1,4 +1,4 @@
-FROM containerbase/node:18.15.0@sha256:5c0dbacb3043a43551df6c79b6c34ee99d31edb0e063080fc8d85d19759f3c97
+FROM containerbase/node:18.15.0@sha256:b35640a3174ebc1d889e56170549e43187609473b477e72b3e45222432d290c0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.17.0
