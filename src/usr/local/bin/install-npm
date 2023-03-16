@@ -9,11 +9,13 @@ require_user
 require_tool "$@"
 
 case "$TOOL_NAME" in
-  npm | yarn | pnpm | lerna | renovate)
+  lerna | npm | pnpm | renovate | yarn)
+    echo "WARNING: Use 'install-tool $TOOL_NAME $TOOL_VERSION'" >&2
     install-tool "$TOOL_NAME" "${TOOL_VERSION}"
     ;;
 
   *)
+    echo "WARNING: Command is deprecated and will be removed soon" >&2
     require_root
     check_command npm
     unset NPM_CONFIG_PREFIX

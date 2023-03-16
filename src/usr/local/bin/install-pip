@@ -5,13 +5,25 @@ set -e
 # shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
+require_user
 require_tool "$@"
-check_command pip
 
-echo "Installing pip tool ${TOOL_NAME} v${TOOL_VERSION}"
-python -W ignore -m pip install \
-  --upgrade \
-  --use-pep517 \
-  --no-cache-dir \
-  --quiet \
-  "${TOOL_NAME}==${TOOL_VERSION}"
+case "$TOOL_NAME" in
+  hashin | pipenv | pip-tools | poetry)
+    echo "WARNING: Use 'install-tool $TOOL_NAME $TOOL_VERSION'" >&2
+    install-tool "$TOOL_NAME" "${TOOL_VERSION}"
+    ;;
+
+  *)
+    echo "WARNING: Command is deprecated and will be removed soon" >&2
+    check_command python
+
+    echo "Installing pip tool ${TOOL_NAME} v${TOOL_VERSION}"
+    python -W ignore -m pip install \
+      --upgrade \
+      --use-pep517 \
+      --no-cache-dir \
+      --quiet \
+      "${TOOL_NAME}==${TOOL_VERSION}"
+    ;;
+esac
