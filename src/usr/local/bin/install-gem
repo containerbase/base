@@ -5,6 +5,8 @@ set -e
 # shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
+echo "WARNING: Command is deprecated and will be removed soon" >&2
+
 require_tool "$@"
 check_command gem
 
