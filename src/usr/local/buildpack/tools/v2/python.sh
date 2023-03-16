@@ -53,7 +53,7 @@ function install_tool () {
   file=$(get_from_url "${url}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
 
   if [[ -f ${file} ]]; then
-    bsdtar -C "${versioned_tool_path}" -xf "${file}"
+    bsdtar -C "$(find_tool_path)" -xf "${file}"
   else
     echo 'No prebuild python found' >&2
     exit 1
