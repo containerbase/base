@@ -6,16 +6,15 @@ function install_tool () {
   local arch=linux_amd64
   local helmfile_file
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
-  create_folder "${versioned_tool_path}/bin"
-
   if [[ "$(uname -p)" = "aarch64" ]]; then
     arch=linux-arm64
   fi
 
   helmfile_file="${TOOL_NAME}_${TOOL_VERSION}_${arch}.tar.gz"
   file=$(get_from_url "https://github.com/${TOOL_NAME}/${TOOL_NAME}/releases/download/v${TOOL_VERSION}/${helmfile_file}")
+
+  versioned_tool_path=$(create_versioned_tool_path)
+  create_folder "${versioned_tool_path}/bin"
   bsdtar -C "${versioned_tool_path}/bin" -xf "${file}" "${TOOL_NAME}"
 }
 

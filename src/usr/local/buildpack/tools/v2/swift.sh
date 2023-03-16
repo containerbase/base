@@ -75,8 +75,6 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
 
   # shellcheck source=/dev/null
   VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
@@ -94,6 +92,8 @@ function install_tool () {
   SWIFT_WEBDIR="$SWIFT_WEBROOT/$SWIFT_BRANCH/$(echo "$SWIFT_PLATFORM" | tr -d .)"
 
   file=$(get_from_url "$SWIFT_WEBDIR/$SWIFT_VER/$SWIFT_VER-$SWIFT_PLATFORM.tar.gz")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   bsdtar --strip 2 -C "${versioned_tool_path}" -xzf "${file}"
 }
 

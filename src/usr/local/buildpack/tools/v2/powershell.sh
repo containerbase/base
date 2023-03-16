@@ -29,13 +29,13 @@ function install_tool () {
     prepare_tool
   fi
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
   if [[ "$(uname -p)" = "aarch64" ]]; then
     arch=linux-arm64
   fi
 
   file=$(get_from_url "https://github.com/PowerShell/PowerShell/releases/download/v${TOOL_VERSION}/powershell-${TOOL_VERSION}-${arch}.tar.gz")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   bsdtar -C "${versioned_tool_path}" -xzf "${file}"
   # Happened on v7.3.0
   if [[ ! -x "${versioned_tool_path}/pwsh" ]]; then

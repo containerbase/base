@@ -9,7 +9,6 @@ function prepare_tool() {
 
 function install_tool () {
   local versioned_tool_path
-  versioned_tool_path=$(create_versioned_tool_path)
 
   local FLUTTER_SDK_CHANNEL="stable"
   local FLUTTER_SDK_URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_SDK_CHANNEL}/linux/flutter_linux_${TOOL_VERSION}-${FLUTTER_SDK_CHANNEL}.tar.xz"
@@ -21,6 +20,8 @@ function install_tool () {
   fi
 
   file=$(get_from_url "$FLUTTER_SDK_URL")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
   if [ "$MAJOR" -eq 1 ]; then

@@ -32,8 +32,6 @@ function install_tool () {
     prepare_tool
   fi
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
   # fix version
   GOLANG_FILE_VERSION=${TOOL_VERSION}
   if [[ "${PATCH}" == "0" ]]; then
@@ -45,6 +43,8 @@ function install_tool () {
   fi
 
   file=$(get_from_url "https://dl.google.com/go/go${GOLANG_FILE_VERSION}.${arch}.tar.gz")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
 }
 

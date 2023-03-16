@@ -7,8 +7,6 @@ function check_tool_requirements () {
 
 function install_tool () {
   local versioned_tool_path
-  versioned_tool_path=$(create_versioned_tool_path)
-
   local file
   # https://downloads.apache.org/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
   local URL='https://downloads.apache.org'
@@ -27,6 +25,8 @@ function install_tool () {
     "${file_name}" \
     "${expected_checksum}" \
     "sha512sum" )
+
+  versioned_tool_path=$(create_versioned_tool_path)
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
 }
 
