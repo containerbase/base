@@ -1,18 +1,19 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
 
 #--------------------------------------
 # test: php 7.4
 #--------------------------------------
 FROM base as testa
-
-ARG APT_HTTP_PROXY
 
 # old php version, not for renovating
 RUN install-tool php 7.4.14
@@ -60,8 +61,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as testb
 
-ARG APT_HTTP_PROXY
-
 # old php version, not for renovating
 RUN install-tool php 5.6.40
 
@@ -92,8 +91,6 @@ RUN composer --version
 # test: php 8.0
 #--------------------------------------
 FROM base as testc
-
-ARG APT_HTTP_PROXY
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
@@ -132,8 +129,6 @@ RUN composer --version
 #--------------------------------------
 FROM base as testd
 
-ARG APT_HTTP_PROXY
-
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
 
@@ -149,7 +144,6 @@ RUN install-tool composer latest
 
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.5.4
-
 
 
 RUN set -ex; \

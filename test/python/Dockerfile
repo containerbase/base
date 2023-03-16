@@ -1,28 +1,28 @@
-ARG IMAGE=containerbase/base
-ARG BUILDPACK_DEBUG
-
-FROM ${IMAGE} as base
-
-RUN touch /.dummy
-
-COPY --chown=1000:0 test test
-
-WORKDIR /test
-
-FROM base as build
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
+
+RUN touch /.dummy
+COPY --chown=1000:0 test test
+WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.11.2
 
-
+#--------------------------------------
+# build-rootless
+#--------------------------------------
 FROM base as build-rootless
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 RUN prepare-tool python
 
@@ -36,11 +36,8 @@ RUN install-tool python 3.11.2
 #--------------------------------------
 FROM build as pipenv
 
-ARG BUILDPACK_DEBUG
-
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.2.18
-
 
 USER 1000
 
@@ -48,8 +45,6 @@ USER 1000
 # build: poetry
 #--------------------------------------
 FROM build as poetry
-ARG BUILDPACK_DEBUG
-
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.4.0
@@ -60,8 +55,6 @@ USER 1000
 # test poetry-a: build
 #--------------------------------------
 FROM build as test-poetry-a
-
-ARG BUILDPACK_DEBUG
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
@@ -93,7 +86,6 @@ FROM poetry as test-poetry-b
 
 RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
 
-
 RUN set -ex; cd c-poetry && poetry add h3py
 
 
@@ -110,8 +102,6 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 FROM build as test-poetry-d
 
-ARG BUILDPACK_DEBUG
-
 RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.15
 
@@ -119,8 +109,6 @@ RUN install-tool poetry 1.1.15
 # poetry test e: root install - non root install
 #--------------------------------------
 FROM build as test-poetry-e
-
-ARG BUILDPACK_DEBUG
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.4.0
@@ -138,7 +126,8 @@ RUN install-tool poetry 1.4.0
 #--------------------------------------
 FROM build as testa
 
-RUN pip install hashin
+# renovate: datasource=pypi
+RUN install-tool hashin 0.17.0
 
 RUN set -ex; \
   cd f; \
@@ -182,8 +171,6 @@ RUN set -ex \
 #--------------------------------------
 FROM build as test-pipenv-b
 
-ARG BUILDPACK_DEBUG
-
 # Do not update minor
 RUN install-tool python 3.8.13
 
@@ -202,8 +189,6 @@ RUN set -ex; \
 # test c: python2.7
 #--------------------------------------
 FROM build-rootless as testc
-
-ARG BUILDPACK_DEBUG
 
 # needs to be v2
 RUN install-tool python 2.7.18

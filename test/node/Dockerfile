@@ -1,22 +1,27 @@
-ARG IMAGE=containerbase/base
-ARG BUILDPACK_DEBUG
-
-FROM ${IMAGE} as build
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# renovate: datasource=node
-RUN install-tool node v16.19.1
-
 RUN touch /.dummy
-
-USER 1000
 
 COPY --chown=1000:0 test test
 RUN chmod -R 775 /test
-
 WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
+
+# renovate: datasource=node
+RUN install-tool node v16.19.1
+
+USER 1000
+
 
 #--------------------------------------
 # test: node
@@ -107,11 +112,9 @@ RUN set -ex; \
 # test: node 18
 #--------------------------------------
 
-FROM ${IMAGE} as testd
+FROM base as testd
 
 ARG APT_HTTP_PROXY
-
-RUN touch /.dummy
 
 USER 1000
 
@@ -227,7 +230,7 @@ RUN set -ex; cd a; yarn install
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
 #--------------------------------------
-FROM ${IMAGE} as testi
+FROM base as testi
 
 ARG BUILDPACK_DEBUG
 
@@ -476,7 +479,7 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

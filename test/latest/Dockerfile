@@ -1,11 +1,16 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
 
-
+#--------------------------------------
+# build
+#--------------------------------------
 FROM base as build
 
 # install nginx for request testing
@@ -60,8 +65,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testb
 
-ARG APT_HTTP_PROXY
-
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.11.2
 RUN install-tool python
@@ -76,8 +79,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testc
 
-ARG APT_HTTP_PROXY
-
 # renovate: datasource=node
 RUN install-tool node v18.15.0
 
@@ -88,8 +89,6 @@ RUN set -ex; \
 # test: php
 #--------------------------------------
 FROM build as testd
-
-ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -105,8 +104,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as teste
 
-ARG APT_HTTP_PROXY
-
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
@@ -120,8 +117,6 @@ RUN set -ex; \
 # test: powershell
 #--------------------------------------
 FROM build as testf
-
-ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.3.3
@@ -137,6 +132,7 @@ FROM ubuntu:focal as testg
 ARG USER_NAME=terraform
 ARG USER_ID=1005
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 # Set env and shell
 ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
@@ -175,8 +171,6 @@ RUN prepare-tool docker
 
 USER 1000
 
-ARG APT_HTTP_PROXY
-
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
@@ -198,9 +192,6 @@ RUN install-tool docker v23.0.1
 # test: bin path has 775
 #--------------------------------------
 FROM base as testi
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
@@ -254,7 +245,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 #--------------------------------------
 # final
 #--------------------------------------
-FROM ${IMAGE}
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

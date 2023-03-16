@@ -15,6 +15,9 @@ env:
   NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
+  # https://github.com/docker/buildx/releases/tag/v0.10.4
+  # we don't want them for test builds
+  BUILDX_NO_DEFAULT_ATTESTATIONS: true
 
 permissions:
   contents: read

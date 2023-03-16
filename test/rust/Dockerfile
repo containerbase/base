@@ -1,20 +1,21 @@
-ARG IMAGE=containerbase/base
-ARG BUILDPACK_DEBUG
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
-FROM ${IMAGE} as base
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
-
-ARG BUILDPACK_DEBUG
 
 RUN prepare-tool rust
 
+#--------------------------------------
+# build
+#--------------------------------------
 FROM base as build
-ARG BUILDPACK_DEBUG
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.68.0
@@ -43,7 +44,6 @@ RUN cargo --version
 # test b: non-root
 #--------------------------------------
 FROM base as testb
-ARG BUILDPACK_DEBUG
 
 USER 1000
 

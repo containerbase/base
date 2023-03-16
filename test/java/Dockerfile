@@ -1,5 +1,10 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
 
@@ -11,9 +16,6 @@ WORKDIR /test
 # build: Java LTS base
 #--------------------------------------
 FROM base as build
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 RUN prepare-tool java
 
@@ -100,8 +102,6 @@ RUN gradle --version
 #--------------------------------------
 FROM build as testc
 
-ARG APT_HTTP_PROXY
-
 # need to stay old
 # disable renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.342+7
@@ -118,8 +118,6 @@ RUN gradle --version
 # test: java 17 (non-root)
 #--------------------------------------
 FROM base as testd
-
-ARG APT_HTTP_PROXY
 
 RUN prepare-tool java gradle
 

@@ -1,23 +1,19 @@
-ARG IMAGE=containerbase/base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-FROM ${IMAGE} as build
-
-
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
 
 #--------------------------------------
 # test: golang
 #--------------------------------------
-FROM build as testa
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+FROM base as testa
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.20.2
@@ -43,10 +39,7 @@ RUN set -ex; cd c; go get -d ./...; cat go.sum
 #--------------------------------------
 # test: check first patch version eg v1.11.0
 #--------------------------------------
-FROM build as testb
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+FROM base as testb
 
 # do not update patch version
 RUN install-tool golang 1.11.0
@@ -64,10 +57,7 @@ RUN go env
 #--------------------------------------
 # test: golang (non-root)
 #--------------------------------------
-FROM build as testc
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+FROM base as testc
 
 RUN prepare-tool golang
 
@@ -89,7 +79,7 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

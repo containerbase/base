@@ -1,12 +1,13 @@
-ARG IMAGE=containerbase/base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-FROM ${IMAGE} as base
-
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
 
 #--------------------------------------
@@ -14,11 +15,6 @@ WORKDIR /test
 #--------------------------------------
 FROM base as net3
 
-ARG BUILDPACK_DEBUG
-ARG APT_HTTP_PROXY
-
-# stay at 3.1
-# renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 3.1.426
 RUN set -ex; dotnet --version | grep 3.1.
 
@@ -46,9 +42,6 @@ RUN set -ex;  \
 # test: dotnet 6.0 (LTS)
 #--------------------------------------
 FROM base as testb
-
-ARG BUILDPACK_DEBUG
-ARG APT_HTTP_PROXY
 
 # Do not change
 RUN install-tool dotnet 2.2.207
@@ -80,8 +73,6 @@ RUN set -ex;  \
 #--------------------------------------
 FROM net3 as testc
 
-ARG BUILDPACK_DEBUG
-
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 6.0.407
@@ -99,8 +90,6 @@ RUN set -ex;  \
 # test: dotnet 7.0 (non-root)
 #--------------------------------------
 FROM net3 as testd
-
-ARG BUILDPACK_DEBUG
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
