@@ -5,6 +5,8 @@ set -e
 # shellcheck source=/dev/null
 . /usr/local/buildpack/util.sh
 
+echo "WARNING: Command is deprecated and will be removed soon" >&2
+
 require_user
 require_tool "$@"
 
@@ -15,7 +17,6 @@ case "$TOOL_NAME" in
     ;;
 
   *)
-    echo "WARNING: Command is deprecated and will be removed soon" >&2
     require_root
     check_command npm
     unset NPM_CONFIG_PREFIX
