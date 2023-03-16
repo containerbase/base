@@ -8,7 +8,6 @@ function install_tool () {
 
   check_command erl
 
-  versioned_tool_path=$(create_versioned_tool_path)
 
   # https://github.com/elixir-lang/elixir/releases/tag/v1.14.0
   if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -eq 14 ]; then
@@ -18,6 +17,8 @@ function install_tool () {
   fi
 
   file=$(get_from_url "${base_url}/v${TOOL_VERSION}/${base_file}")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   bsdtar -C "${versioned_tool_path}" -xf "${file}"
 }
 

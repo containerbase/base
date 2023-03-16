@@ -10,11 +10,10 @@ function install_tool() {
   local file
   local arch
 
-  versioned_tool_path=$(create_versioned_tool_path)
   arch=$(uname -m)
-
   file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic.${arch}-linux/latest/download-by-type/file/binary-dist")
 
+  versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
   cp "${file}" "${versioned_tool_path}/bin/nix"
   chmod +x "${versioned_tool_path}/bin/nix"

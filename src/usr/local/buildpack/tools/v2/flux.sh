@@ -5,12 +5,13 @@ function install_tool () {
   local file
   local arch=linux_amd64
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
   if [[ "$(uname -p)" = "aarch64" ]]; then
     arch=linux_arm64
   fi
+
   file=$(get_from_url "https://github.com/fluxcd/flux2/releases/download/v${TOOL_VERSION}/flux_${TOOL_VERSION}_${arch}.tar.gz")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   tar -C "${versioned_tool_path}" -zxvf "${file}"
 }
 

@@ -20,9 +20,9 @@ function install_tool () {
   fi
 
   arch=$(uname -p)
+  file=$(get_from_url "https://download.docker.com/linux/static/stable/${arch}/docker-${TOOL_VERSION}.tgz")
 
   versioned_tool_path=$(create_versioned_tool_path)
-  file=$(get_from_url "https://download.docker.com/linux/static/stable/${arch}/docker-${TOOL_VERSION}.tgz")
   mkdir "${versioned_tool_path}/bin"
   bsdtar -C "${versioned_tool_path}/bin" --strip 1 -xf "${file}" docker/docker
 }

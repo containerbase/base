@@ -21,6 +21,8 @@ function install_tool () {
   local tool_path
   local versioned_tool_path
   local file
+  local URL='https://services.gradle.org/distributions'
+
   tool_path=$(find_tool_path)
 
   if [[ ! -d "${tool_path}" ]]; then
@@ -32,10 +34,9 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  local URL='https://services.gradle.org/distributions'
-  versioned_tool_path=$(create_versioned_tool_path)
-
   file=$(get_from_url "${URL}/gradle-${TOOL_VERSION}-bin.zip")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   bsdtar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
 }
 

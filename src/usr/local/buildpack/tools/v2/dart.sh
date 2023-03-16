@@ -27,8 +27,9 @@ function install_tool () {
     exit 1
   fi
 
-  versioned_tool_path=$(create_versioned_tool_path)
   file=$(get_from_url "$DART_SDK_URL")
+
+  versioned_tool_path=$(create_versioned_tool_path)
   bsdtar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 }
 

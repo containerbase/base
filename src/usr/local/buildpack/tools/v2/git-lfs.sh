@@ -11,8 +11,6 @@ function install_tool () {
   local lfs_file
   local strip=0
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
   if [[ "$(uname -p)" = "aarch64" ]]; then
     arch=linux-arm64
   fi
@@ -27,6 +25,8 @@ function install_tool () {
 
   temp_dir="$(mktemp -d)"
   bsdtar --strip $strip -C "${temp_dir}" -xf "${file}"
+
+  versioned_tool_path=$(create_versioned_tool_path)
   mkdir "${versioned_tool_path}/bin"
   mv "${temp_dir}/git-lfs" "${versioned_tool_path}/bin/"
   rm -rf "${temp_dir}"
