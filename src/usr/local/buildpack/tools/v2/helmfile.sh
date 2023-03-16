@@ -7,7 +7,7 @@ function install_tool () {
   local helmfile_file
 
   if [[ "$(uname -p)" = "aarch64" ]]; then
-    arch=linux-arm64
+    arch=linux_arm64
   fi
 
   helmfile_file="${TOOL_NAME}_${TOOL_VERSION}_${arch}.tar.gz"
