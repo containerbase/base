@@ -28,6 +28,7 @@ if [[ -n "${CONTAINERBASE_ENV+x}" ]]; then
   exit 1;
 fi
 
+require_arch
 require_distro
 require_root
 

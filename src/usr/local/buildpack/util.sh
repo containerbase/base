@@ -126,6 +126,24 @@ function apt_upgrade () {
   rm -f /etc/apt/apt.conf.d/buildpack-proxy
 }
 
+
+function require_arch () {
+  local arch
+  # shellcheck source=/dev/null
+  arch=$(uname -p)
+  case "$arch" in
+  "x86_64") ;; #supported
+  "aarch64") #supported (partial)
+    echo "WARNING: Not all tools are yet supported!" >&2
+    echo "  -> https://github.com/containerbase/base/issues/711" >&2
+    ;;
+  *)
+    echo "Arch not supported: ${arch}! Please use 'x86_64' or 'aarch64'." >&2
+    exit 1
+   ;;
+  esac
+}
+
 function require_distro () {
   local VERSION_CODENAME
   # shellcheck source=/dev/null

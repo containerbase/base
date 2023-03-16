@@ -21,7 +21,7 @@ function prepare_tool() {
 function install_tool () {
   local versioned_tool_path
   local file
-  local ARCH
+  local arch=linux-amd64
   local GOLANG_FILE_VERSION
 
   if [[ ! -d "$(find_tool_path)" ]]; then
@@ -33,14 +33,18 @@ function install_tool () {
   fi
 
   versioned_tool_path=$(create_versioned_tool_path)
-  ARCH=linux-amd64
+
   # fix version
   GOLANG_FILE_VERSION=${TOOL_VERSION}
   if [[ "${PATCH}" == "0" ]]; then
     GOLANG_FILE_VERSION="${MAJOR}.${MINOR}"
   fi
 
-  file=$(get_from_url "https://dl.google.com/go/go${GOLANG_FILE_VERSION}.${ARCH}.tar.gz")
+  if [[ "$(uname -p)" = "aarch64" ]]; then
+    arch=linux-arm64
+  fi
+
+  file=$(get_from_url "https://dl.google.com/go/go${GOLANG_FILE_VERSION}.${arch}.tar.gz")
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
 }
 
