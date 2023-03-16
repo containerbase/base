@@ -79,6 +79,7 @@ target "build-docker" {
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
     "${OWNER}/${FILE}:${TAG}",
     "${OWNER}/${FILE}",
+    "containerbase/test"
   ]
 }
 

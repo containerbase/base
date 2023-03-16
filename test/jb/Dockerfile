@@ -1,16 +1,27 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as build
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
+
+COPY --chown=1000:0 test test
+
+WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
 
 USER 1000
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
 
-COPY --chown=1000:0 test test
-
-WORKDIR /test
 
 #--------------------------------------
 # test: jb install
@@ -26,6 +37,6 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy

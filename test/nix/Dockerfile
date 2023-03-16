@@ -1,14 +1,14 @@
-ARG IMAGE=containerbase/base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
 ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 ARG GITHUB_TOKEN
 
-#--------------------------------------
-FROM ${IMAGE} as base
-
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
 
 #--------------------------------------
@@ -16,13 +16,10 @@ WORKDIR /test
 #--------------------------------------
 FROM base as testa
 
-
 # old nix version, not for renovating
 RUN install-tool nix 2.10.0
 
 USER 1000
-
-ARG GITHUB_TOKEN
 
 RUN set -ex; \
   nix --version
@@ -50,10 +47,7 @@ FROM base as testb
 USER 1000
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.13.2
-
-
-ARG GITHUB_TOKEN
+RUN install-tool nix 2.14.1
 
 RUN set -ex; \
   nix --version

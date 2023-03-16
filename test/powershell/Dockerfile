@@ -1,8 +1,10 @@
-ARG IMAGE=containerbase/base
-ARG APT_HTTP_PROXY
-
 #--------------------------------------
-FROM ${IMAGE} as base
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
 
@@ -11,7 +13,6 @@ RUN touch /.dummy
 #--------------------------------------
 FROM base as testa
 
-ARG APT_HTTP_PROXY
 RUN prepare-tool powershell
 
 USER 1000
@@ -33,10 +34,9 @@ RUN pwsh --version
 # test: powershell 7.x
 #--------------------------------------
 FROM base as testb
-ARG APT_HTTP_PROXY
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.2
+RUN install-tool powershell v7.3.3
 
 USER 1000
 

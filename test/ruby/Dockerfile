@@ -1,40 +1,36 @@
-ARG IMAGE=containerbase/base
-ARG BUILDPACK_DEBUG
-
 #--------------------------------------
-FROM ${IMAGE} as base
-
-RUN touch /.dummy
-
-COPY --chown=1000:0 test test
-WORKDIR /test
-
-
+# base
 #--------------------------------------
-FROM base as build
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
+
+RUN touch /.dummy
+COPY --chown=1000:0 test test
+WORKDIR /test
+
+#--------------------------------------
+# build: ruby 2.x
+#--------------------------------------
+FROM base as build
 
 # Do not renovate ruby 2.x
 RUN install-tool ruby 2.6.4
 
 #--------------------------------------
+# build3: ruby 3.x
+#--------------------------------------
 FROM base as build3
 
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.0
+RUN install-tool ruby 3.2.1
 
 
 #--------------------------------------
 # test: bundler (gem)
 #--------------------------------------
 FROM build as test-bundler-a
-
-ARG BUILDPACK_DEBUG
 
 # openshift
 USER 1005
@@ -59,13 +55,10 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as test-bundler-b
 
-ARG BUILDPACK_DEBUG
-
-
 RUN gem install bundler -v 1.17.2
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.4.6
+RUN install-gem bundler 2.4.8
 
 USER 1000
 
@@ -84,8 +77,6 @@ RUN ruby --version
 #--------------------------------------
 FROM build as test-bundler-c
 
-ARG BUILDPACK_DEBUG
-
 # do not change, testing only
 ENV BUNDLER_VERSION=1.17.3
 RUN install-tool bundler
@@ -96,11 +87,13 @@ RUN set -ex; \
   [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
   true
 
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
+
 USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.4.6
+ENV BUNDLER_VERSION=2.4.8
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -115,11 +108,29 @@ RUN set -ex; \
   bundler lock;
 
 #--------------------------------------
+# test: bundler install root - install rootless
+#--------------------------------------
+FROM build3 as test-bundler-d
+
+# renovate: datasource=rubygems depName=bundler versioning=ruby
+ENV BUNDLER_VERSION=2.4.8
+RUN install-tool bundler
+
+RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
+
+USER 1000
+
+# install old version
+RUN install-tool ruby 3.1.0
+
+# renovate: datasource=rubygems depName=bundler versioning=ruby
+ENV BUNDLER_VERSION=2.4.8
+RUN install-tool bundler
+
+#--------------------------------------
 # test: cocoapods
 #--------------------------------------
 FROM build as test-cocoapods-a
-
-ARG BUILDPACK_DEBUG
 
 USER 1000
 
@@ -135,10 +146,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM build3 as test-cocoapods-b
 
-ARG BUILDPACK_DEBUG
-
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.3
+RUN install-gem cocoapods 1.12.0
 
 USER 1000
 
@@ -153,12 +162,10 @@ RUN set -ex; \
 #--------------------------------------
 FROM build3 as test-cocoapods-c
 
-ARG BUILDPACK_DEBUG
-
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.11.3
+RUN install-tool cocoapods 1.12.0
 
 RUN pod env
 
@@ -172,19 +179,15 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as test-cocoapods-d
 
-ARG APT_HTTP_PROXY
 RUN prepare-tool ruby
-
 
 USER 1000
 
-ARG BUILDPACK_DEBUG
-
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.0
+RUN install-tool ruby 3.2.1
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.11.3
+RUN install-gem cocoapods 1.12.0
 
 RUN set -ex; \
   cd b/Project; \
@@ -199,6 +202,7 @@ FROM base
 COPY --from=test-bundler-a /.dummy /.dummy
 COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
+COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy

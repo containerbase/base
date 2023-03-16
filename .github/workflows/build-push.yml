@@ -15,7 +15,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   FILE: base
   DOCKER_BUILDKIT: 1
-  NODE_VERSION: 18.14.0 # renovate: datasource=node depName=node
+  NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   BUILDPACK_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -40,16 +40,16 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: renovatebot/internal-tools@5300db677841fbc464dc831e7bb11902b45b8b69 # v1.15.0
+        uses: containerbase/internal-tools@c1d6f949a65c2388101e357ff36d7b960ae1735f # v1.15.7
         with:
           command: docker-config
 
       # full checkout for semantic-release
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
         with:
           fetch-depth: 0
 
-      - uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # tag=v2.8.1
+      - uses: sigstore/cosign-installer@c3667d99424e7e6047999fb6246c0da843953c65 # v3.0.1
 
       - name: init
         run: |

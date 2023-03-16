@@ -1,5 +1,7 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
@@ -11,12 +13,16 @@ COPY --chown=1000:0 test test
 WORKDIR /test
 
 #--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
+
+RUN prepare-tool flutter
+
+#--------------------------------------
 # test: flutter 1.x (root)
 #--------------------------------------
 FROM base as testa
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 # renovate datasource=flutter-version
 RUN install-tool flutter 1.22.6
@@ -35,12 +41,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 1.x (non-root)
 #--------------------------------------
-FROM base as testb
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool flutter
+FROM build as testb
 
 USER 1000
 
@@ -59,12 +60,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 2.x (non-root)
 #--------------------------------------
-FROM base as testc
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool flutter
+FROM build as testc
 
 USER 1000
 
@@ -78,12 +74,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root)
 #--------------------------------------
-FROM base as testd
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool flutter
+FROM build as testd
 
 USER 1000
 
@@ -97,13 +88,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root, openshift)
 #--------------------------------------
-FROM base as teste
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool flutter
-
+FROM build as teste
 
 # fix test file perms for openstack
 RUN chown -R 1001 .

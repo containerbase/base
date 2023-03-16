@@ -1,20 +1,20 @@
-ARG IMAGE=containerbase/base
-ARG APT_HTTP_PROXY
-
 #--------------------------------------
-FROM ${IMAGE} as base
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
 
-
+#--------------------------------------
+# build
 #--------------------------------------
 FROM base as build
 
-ARG APT_HTTP_PROXY
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.7.3
 

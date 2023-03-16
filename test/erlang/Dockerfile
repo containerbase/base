@@ -1,24 +1,31 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as build
-
-RUN touch /.dummy
-
-# test openshift compatibility 1000<>1001
-COPY --chown=1001:0 test test
-
-WORKDIR /test
-
 #--------------------------------------
-# test: erlang (root)
+# base
 #--------------------------------------
-FROM build as testa
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
+RUN touch /.dummy
+# test openshift compatibility 1000<>1001
+COPY --chown=1001:0 test test
+WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
+
+RUN prepare-tool erlang
+
+#--------------------------------------
+# test: erlang (root)
+#--------------------------------------
+FROM base as testa
+
 # https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 25.2.2.0
+RUN install-tool erlang 25.3.0.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.14.3
@@ -36,19 +43,12 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testb
 
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool erlang
-
 USER 1001
 
 # https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # no major update, pin elixir if newer version doesn't support v24
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.7
-
-ARG BUILDPACK_DEBUG
+RUN install-tool erlang 24.3.4.9
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.14.3
@@ -64,11 +64,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testc
 
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool erlang
-
 USER 1001
 
 # https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
@@ -76,10 +71,7 @@ USER 1001
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 22.3.4.26
 
-ARG BUILDPACK_DEBUG
-
 RUN install-tool elixir 1.13.4
-
 
 RUN set -ex; \
     cd a; \
@@ -88,7 +80,7 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

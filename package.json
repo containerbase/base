@@ -15,18 +15,18 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
-    "@types/node": "18.11.18",
+    "@types/node": "18.14.6",
     "@types/shelljs": "0.8.11",
-    "bats": "1.8.2",
+    "bats": "1.9.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
     "commander": "10.0.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
     "husky": "8.0.3",
-    "lint-staged": "13.1.0",
+    "lint-staged": "13.1.4",
     "npm-run-all": "4.1.5",
-    "prettier": "2.8.3",
-    "semantic-release": "20.1.0",
+    "prettier": "2.8.4",
+    "semantic-release": "20.1.1",
     "shelljs": "0.8.5"
   },
   "scripts": {
@@ -40,5 +40,5 @@
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js"
   },
-  "packageManager": "yarn@3.3.1"
+  "packageManager": "yarn@3.4.1"
 }

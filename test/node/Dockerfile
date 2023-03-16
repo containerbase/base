@@ -1,22 +1,27 @@
-ARG IMAGE=containerbase/base
-ARG BUILDPACK_DEBUG
-
-FROM ${IMAGE} as build
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
-# renovate: datasource=node
-RUN install-tool node v16.19.0
-
 RUN touch /.dummy
-
-USER 1000
 
 COPY --chown=1000:0 test test
 RUN chmod -R 775 /test
-
 WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
+
+# renovate: datasource=node
+RUN install-tool node v16.19.1
+
+USER 1000
+
 
 #--------------------------------------
 # test: node
@@ -68,7 +73,7 @@ USER root
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.4.1
+RUN install-tool lerna 6.5.1
 
 USER 1000
 
@@ -89,7 +94,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 7.26.2
+RUN install-tool pnpm 7.29.1
 
 RUN set -ex; \
   pnpm --version;
@@ -107,16 +112,14 @@ RUN set -ex; \
 # test: node 18
 #--------------------------------------
 
-FROM ${IMAGE} as testd
+FROM base as testd
 
 ARG APT_HTTP_PROXY
-
-RUN touch /.dummy
 
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.14.0
+RUN install-tool node v18.15.0
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -227,7 +230,7 @@ RUN set -ex; cd a; yarn install
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
 #--------------------------------------
-FROM ${IMAGE} as testi
+FROM base as testi
 
 ARG BUILDPACK_DEBUG
 
@@ -276,7 +279,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool lerna 6.4.1
+RUN install-tool lerna 6.5.1
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -345,7 +348,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 1000
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -362,7 +365,7 @@ FROM build as testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 # renovate: datasource=npm depName=yarn
 ARG YARN_VERSION=1.22.19
@@ -380,14 +383,14 @@ FROM build as testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 
 # renovate: datasource=npm depName=yarn
@@ -408,17 +411,17 @@ FROM build as testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 7.26.2
+RUN install-tool pnpm 7.29.1
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=7.26.2
+ARG PNPM_VERSION=7.29.1
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -439,7 +442,7 @@ RUN install-tool yarn
 RUN install-tool yarn-slim
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.15.3
+RUN install-tool corepack 0.17.0
 
 RUN install-tool pnpm
 RUN install-tool yarn
@@ -465,7 +468,7 @@ FROM build as testq
 
 
 # renovate: datasource=npm
-RUN install-tool renovate 34.70.6
+RUN install-tool renovate 34.157.1
 
 RUN set -ex; \
   renovate --version; \
@@ -476,7 +479,7 @@ RUN set -ex; \
 #--------------------------------------
 # final
 #--------------------------------------
-FROM build
+FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy

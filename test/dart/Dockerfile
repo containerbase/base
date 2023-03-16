@@ -1,24 +1,26 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
 ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
-
 COPY --chown=1000:0 test test
-
 WORKDIR /test
+
+#--------------------------------------
+# build
+#--------------------------------------
+FROM base as build
+
+RUN prepare-tool dart
 
 #--------------------------------------
 # test: dart 2.x (non-root)
 #--------------------------------------
-FROM base as testa
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
-
-RUN prepare-tool dart
+FROM build as testa
 
 USER 1000
 
@@ -37,9 +39,6 @@ RUN set -ex; \
 # test: dart 2.x (root, openstack)
 #--------------------------------------
 FROM base as testb
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 # renovate datasource=docker
 RUN install-tool dart 2.18.0

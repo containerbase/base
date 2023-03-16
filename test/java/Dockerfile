@@ -1,5 +1,10 @@
-ARG IMAGE=containerbase/base
-FROM ${IMAGE} as base
+#--------------------------------------
+# base
+#--------------------------------------
+FROM containerbase/test as base
+
+ARG APT_HTTP_PROXY
+ARG BUILDPACK_DEBUG
 
 RUN touch /.dummy
 
@@ -11,9 +16,6 @@ WORKDIR /test
 # build: Java LTS base
 #--------------------------------------
 FROM base as build
-
-ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
 
 RUN prepare-tool java
 
@@ -54,7 +56,7 @@ USER 1000
 # stay on v6
 RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.3
+RUN install-tool gradle 6.9.4
 
 
 RUN set -ex; \
@@ -70,7 +72,7 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: gradle 7
+# test: java 18 + gradle 8
 #--------------------------------------
 FROM base as testb
 
@@ -78,7 +80,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.6
+RUN install-tool gradle 8.0.2
 
 USER 1000
 
@@ -96,18 +98,16 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
-# test: java 8
+# test: java 8 + gradle 7
 #--------------------------------------
 FROM build as testc
-
-ARG APT_HTTP_PROXY
 
 # need to stay old
 # disable renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.6
+RUN install-tool gradle 7.6.1
 
 # test openshift userid missmatch
 USER 1001
@@ -118,8 +118,6 @@ RUN gradle --version
 # test: java 17 (non-root)
 #--------------------------------------
 FROM base as testd
-
-ARG APT_HTTP_PROXY
 
 RUN prepare-tool java gradle
 
@@ -147,7 +145,7 @@ FROM build as teste
 USER 1001
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.8.7
+RUN install-tool maven 3.9.0
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \

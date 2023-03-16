@@ -30,7 +30,10 @@
 # will attempt to download the file at the given url and stores it in the cache.
 # If this file already exists, will return the cached version
 # The cache will only used if BUILDPACK_CACHE_DIR is set
-# First argument is the url, second one is the filename (optional)
+# First argument is the url
+# Second argument is the filename (optional)
+# Third argument is the checksum that the file should have (optional)
+# Fourth argument is the checksum algorithm (optional)
 function get_from_url () {
   local url=${1}
   check url true
@@ -41,21 +44,35 @@ function get_from_url () {
   local name
   name=${2:-$(basename "${url}")}
 
+  local expected_checksum
+  expected_checksum=${3}
+
+  local checksum_algo
+  checksum_algo=${4}
+
   local filename="${checksum}/${name}"
 
   if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
-      # file in cache
-      # echo "Found file in cache: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
-      echo "${BUILDPACK_CACHE_DIR}/${filename}"
+      # file in cache, verify checksum first
+      if [ -n "${expected_checksum}" ] && ! verify_checksum "${BUILDPACK_CACHE_DIR}/${filename}" "${expected_checksum}" "${checksum_algo}" ; then
+        # file in cache but checksum doesn't match, so remove file and download again
+        echo "Cached file is corrupt, redownloading: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
+        rm -rf "${BUILDPACK_CACHE_DIR:?}/${filename}"
+        download_file "${url}" "${filename}" "${expected_checksum}" "${checksum_algo}"
+      else
+        echo "${BUILDPACK_CACHE_DIR}/${filename}"
+      fi
   else
     # cache disabled or not in cache
-    download_file "${url}" "${filename}"
+    download_file "${url}" "${filename}" "${expected_checksum}" "${checksum_algo}"
   fi
 }
 
 # Will download the file into the cache folder and returns the path
 # If the cache is not enabled it will download it to a temp folder
-# The second argument will be the filename if given
+# The second argument will be the filename if given (optional)
+# The third argument is the exepcted checksum of the file if given (optional)
+# The fourth argument is the checksum algorithm (optional)
 function download_file () {
   local url=${1}
   check url true
@@ -63,12 +80,89 @@ function download_file () {
   local name
   name=${2:-$(basename "${url}")}
 
+  local expected_checksum
+  expected_checksum=${3}
+
+  local checksum_algo
+  checksum_algo=${4}
+
+  local retry=3
   local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
-  if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
-    echo "Download failed: ${url}" >&2
-    exit 1
-  fi;
+  while [ "${retry}" -gt 0 ]; do
+    retry=$((retry-1))
+    if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
+      echo "Download failed: ${url}" >&2
+      exit 1
+    fi;
+
+    # verify checksum if given
+    if [ -n "${expected_checksum}" ]; then
+      if ! verify_checksum "${temp_folder}/${name}" "${expected_checksum}" "${checksum_algo}" ; then
+        echo "Retries left: ${retry}" >&2
+        # clean up what we downloaded so far
+        rm "${temp_folder}/${name}"
+        if [ "${retry}" -le 0 ]; then
+          echo "Checksum verification failed: ${url}" >&2
+          exit 1
+        fi
+        echo "Checksum verification failed, retrying" >&2
+        continue
+      fi
+    fi
+    retry=0
+  done
+
   echo "${temp_folder}/${name}"
+}
+
+# Will verify if the given checksum matches the given file
+# First argument is the path to the file
+# Second argument is the checksum
+# Third argument is the type, currently supported:
+# * sha1
+# * sha224sum
+# * sha256sum
+# * sha384sum
+# * sha512sum
+function verify_checksum () {
+  local file=${1}
+  check file true
+
+  local expected_checksum=${2}
+  check expected_checksum true
+
+  local algorithm=${3}
+  check algorithm true
+
+
+  # prevent executing the algorithm blindly
+  # so use this switch case statement
+  case $algorithm in
+    sha1sum)
+      real_checksum=$(sha1sum "${file}" | cut -d' ' -f1)
+      ;;
+    sha224sum)
+      real_checksum=$(sha224sum "${file}" | cut -d' ' -f1)
+      ;;
+    sha256sum)
+      real_checksum=$(sha256sum "${file}" | cut -d' ' -f1)
+      ;;
+    sha384sum)
+      real_checksum=$(sha384sum "${file}" | cut -d' ' -f1)
+      ;;
+    sha512sum)
+      real_checksum=$(sha512sum "${file}" | cut -d' ' -f1)
+      ;;
+    *)
+      echo "Non supported checksum algorithm: ${algorithm}" >&2
+      return 1
+      ;;
+  esac
+  if [ "$real_checksum" != "$expected_checksum" ]; then
+    echo "Checksum does not match for file ${file}. Expected: ${expected_checksum} - Got: ${real_checksum}" >&2
+    return 1
+  fi
+  return 0
 }
 
 # will try to clean up the oldest file in the cache until the cache is empty

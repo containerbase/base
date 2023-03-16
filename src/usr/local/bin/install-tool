@@ -43,6 +43,4 @@ fi
 # workaround no hostname assumes docker build env
 if [ -z "${HOSTNAME}" ] || [ "${HOSTNAME}" = "buildkitsandbox" ]; then
   rm -rf "${TEMP_DIR:?}"/*
-else
-  echo "skip cleanup, not a docker build: ${HOSTNAME}"
 fi

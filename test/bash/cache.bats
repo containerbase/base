@@ -198,6 +198,71 @@ teardown() {
   assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
 }
 
+@test "get_from_url_with_checksum" {
+  # create cache dir
+  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${BUILDPACK_CACHE_DIR}"
+
+  # sha256sum of file
+  local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
+  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+
+  rm -rf "${BUILDPACK_CACHE_DIR}"
+
+  run get_from_url "${file}" test "${checksum}" "sha256sum"
+  assert_success
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+
+  rm -rf "${BUILDPACK_CACHE_DIR}"
+
+  # wrong checksum
+  run get_from_url "${file}" $(basename "${file}") "123" "sha256sum"
+  assert_failure
+  assert_output --partial "Retries left: 2"
+  assert_output --partial "Retries left: 1"
+  assert_output --partial "Retries left: 0"
+
+  rm -rf "${BUILDPACK_CACHE_DIR}"
+
+  run get_from_url "${file}" test "123" "sha256sum"
+  assert_failure
+  assert_output --partial "Retries left: 2"
+  assert_output --partial "Retries left: 1"
+  assert_output --partial "Retries left: 0"
+}
+
+@test "get_from_url_with_cache_and_checksum" {
+  # create cache dir
+  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${BUILDPACK_CACHE_DIR}"
+
+  # sha256sum of file
+  local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
+  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  assert_success
+  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+
+  file_path="${output}"
+
+  run get_from_url "${file}" test "${checksum}" "sha256sum"
+  assert_success
+  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+
+  # change checksum of cached file
+  echo "a" >> "${file_path}"
+
+  # corrupt file in cache
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  assert_success
+  assert_output --partial "Cached file is corrupt"
+}
+
 @test "cache_folder" {
     # set up the cache
   load "$TEST_DIR/cache.sh"
