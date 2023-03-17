@@ -64,7 +64,7 @@ RUN install-tool helmfile v0.150.0
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 17.0.6+10
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 7.6
+RUN install-tool gradle 7.6.1
 
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
