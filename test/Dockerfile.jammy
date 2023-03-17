@@ -25,6 +25,9 @@ FROM base as test
 
 ARG APT_HTTP_PROXY
 
+# renovate datasource=docker
+RUN install-tool dart 2.18.0
+
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 7.0.202
 
@@ -39,11 +42,11 @@ RUN install-tool flutter 3.0.2
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v0.41.1
 
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
+RUN install-tool git-lfs v3.3.0
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.20.2
-
-# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.11.2
@@ -55,6 +58,9 @@ RUN install-tool helmfile v0.151.0
 RUN install-tool java 17.0.6+10
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 8.0.2
+
+# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
+RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.14.1
@@ -100,10 +106,6 @@ RUN install-tool swift 5.7.3
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.4.1
-
-# renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.3.0
-RUN git lfs version
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
