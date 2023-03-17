@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>containerbase/.github"],
+  "extends": ["github>containerbase/.github", "github>containerbase/.github//merge-queue.json"],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
   "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
   "separateMultipleMajor": false,
