@@ -20,6 +20,7 @@ function install_tool () {
   local file
   local arch=x64
 
+  local dart_file
   local checksum_file
   local expected_checksum
 
@@ -38,11 +39,12 @@ function install_tool () {
     exit 1
   fi
 
-  checksum_file=$(get_from_url "${DART_SDK_URL}/dartsdk-linux-${arch}-release.zip.sha256sum")
+  dart_file="dartsdk-linux-${arch}-release.zip"
+  checksum_file=$(get_from_url "${DART_SDK_URL}/${dart_file}.sha256sum")
   # get checksum from file
-  expected_checksum=$(grep "\\*dartsdk-linux-${arch}-release.zip" "${checksum_file}" | cut -d' ' -f1)
+  expected_checksum=$(grep "\\*${dart_file}" "${checksum_file}" | cut -d' ' -f1)
 
-  file=$(get_from_url "${DART_SDK_URL}/dartsdk-linux-${arch}-release.zip" "${expected_checksum}" "sha256sum")
+  file=$(get_from_url "${DART_SDK_URL}/${dart_file}" "${dart_file}" "${expected_checksum}" "sha256sum")
 
   versioned_tool_path=$(create_versioned_tool_path)
   bsdtar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
