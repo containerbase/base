@@ -34,7 +34,6 @@
     {
       "description": "Separate patch updates in test/ so that we can automerge them",
       "matchPaths": ["test/**"],
-      "automergeType": "branch",
       "separateMinorPatch": true
     },
     {
