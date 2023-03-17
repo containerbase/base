@@ -12,9 +12,9 @@ function install_tool () {
   local versioned_tool_path
   local file
 
-  versioned_tool_path=$(create_versioned_tool_path)
   file=$(get_from_url "https://github.com/composer/composer/releases/download/${TOOL_VERSION}/composer.phar")
 
+  versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
   cp "${file}" "${versioned_tool_path}/bin/composer"
   chmod +x "${versioned_tool_path}/bin/composer"

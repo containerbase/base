@@ -2,6 +2,9 @@ name: build-push
 
 on:
   push:
+    branches-ignore:
+      - gh-readonly-queue/**
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -40,7 +43,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@c1d6f949a65c2388101e357ff36d7b960ae1735f # v1.15.7
+        uses: containerbase/internal-tools@47809eda33adec5b2926c5c7e7de8f2602fd3ed3 # v1.15.8
         with:
           command: docker-config
 

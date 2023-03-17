@@ -49,6 +49,7 @@ jobs:
         run: yarn lint
 
       - name: shellcheck
+        if: ${{ github.event_name != 'merge_group' }}
         uses: reviewdog/action-shellcheck@f52d78284b4941028952125a10c76676c3d456eb # v1.17.0
         with:
           fail_on_error: true
@@ -185,3 +186,35 @@ jobs:
         run: docker buildx bake --progress plain test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  arm64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: docker-config
+        uses: containerbase/internal-tools@47809eda33adec5b2926c5c7e7de8f2602fd3ed3 # v1.15.8
+        with:
+          command: docker-config
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: enable corepack
+        run: sudo corepack enable
+
+      - name: Installing dependencies
+        run: yarn install
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
+
+      - name: build
+        run: docker buildx bake --progress plain test-arm64

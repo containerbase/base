@@ -96,7 +96,7 @@ FROM base as testc
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.3
+RUN install-tool php 8.2.4
 
 
 # renovate: datasource=github-releases packageName=composer/composer
@@ -138,7 +138,7 @@ USER 1000
 
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.3
+RUN install-tool php 8.2.4
 
 RUN install-tool composer latest
 

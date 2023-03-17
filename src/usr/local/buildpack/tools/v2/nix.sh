@@ -8,13 +8,12 @@ function check_tool_requirements() {
 function install_tool() {
   local versioned_tool_path
   local file
-  local ARCH
+  local arch
+
+  arch=$(uname -m)
+  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic.${arch}-linux/latest/download-by-type/file/binary-dist")
 
   versioned_tool_path=$(create_versioned_tool_path)
-  ARCH=$(uname -m)
-
-  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic.${ARCH}-linux/latest/download-by-type/file/binary-dist")
-
   create_folder "${versioned_tool_path}/bin"
   cp "${file}" "${versioned_tool_path}/bin/nix"
   chmod +x "${versioned_tool_path}/bin/nix"

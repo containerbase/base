@@ -11,10 +11,10 @@ function install_tool () {
 
   local kustomize_file="${TOOL_NAME}_v${TOOL_VERSION}_${arch}.tar.gz"
 
-  versioned_tool_path=$(create_versioned_tool_path)
-
-  create_folder "${versioned_tool_path}/bin"
   file=$(get_from_url "https://github.com/kubernetes-sigs/${TOOL_NAME}/releases/download/${TOOL_NAME}%2Fv${TOOL_VERSION}/${kustomize_file}")
+
+  versioned_tool_path=$(create_versioned_tool_path)
+  create_folder "${versioned_tool_path}/bin"
   bsdtar -C "${versioned_tool_path}/bin" -xf "${file}" "${TOOL_NAME}"
 }
 

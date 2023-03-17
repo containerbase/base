@@ -27,3 +27,7 @@ export TEMP_DIR=/tmp
 
 # used to source helper from tools
 export BUILDPACK_DIR=$ROOT_DIR/buildpack
+
+# Used to find matching tool downloads
+ARCHITECTURE=$(uname -p)
+export ARCHITECTURE

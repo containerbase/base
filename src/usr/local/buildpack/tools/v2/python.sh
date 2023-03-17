@@ -46,21 +46,20 @@ function install_tool () {
     prepare_tool
   fi
 
-  versioned_tool_path=$(create_versioned_tool_path)
   arch=$(uname -p)
   url="https://github.com/containerbase/python-prebuild/releases/download"
   version_codename=$(get_distro)
 
-  create_folder "${versioned_tool_path}/bin"
-
   file=$(get_from_url "${url}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
 
   if [[ -f ${file} ]]; then
-    bsdtar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
+    bsdtar -C "$(find_tool_path)" -xf "${file}"
   else
     echo 'No prebuild python found' >&2
     exit 1
   fi
+
+  versioned_tool_path=$(find_versioned_tool_path)
 
   fix_python_shebangs
 
