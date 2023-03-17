@@ -62,7 +62,7 @@ RUN install-tool helmfile v0.150.0
 RUN install-tool nix 2.13.2
 
 # renovate: datasource=node
-RUN install-tool node v18.14.0
+RUN install-tool node v18.14.2
 # renovate: datasource=npm
 RUN install-tool pnpm 7.26.2
 # renovate: datasource=npm
