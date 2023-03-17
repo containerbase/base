@@ -15,7 +15,7 @@ RUN install-buildpack
 
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.39.2
+RUN install-tool git v2.40.0
 
 # lerna fails for some unknown reason
 ARG IGNORED_TOOLS=erlang,elixir,flutter,lerna,php,composer,python,hashin,pipenv,poetry,ruby,bundler,cocoapods,swift
