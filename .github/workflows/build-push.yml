@@ -2,6 +2,8 @@ name: build-push
 
 on:
   push:
+    branches-ignore:
+      - gh-readonly-queue/**
   merge_group:
 
 concurrency:
