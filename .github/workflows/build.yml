@@ -49,6 +49,7 @@ jobs:
         run: yarn lint
 
       - name: shellcheck
+        if: ${{ github.event_name != 'merge_group' }
         uses: reviewdog/action-shellcheck@f52d78284b4941028952125a10c76676c3d456eb # v1.17.0
         with:
           fail_on_error: true
