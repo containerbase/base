@@ -71,7 +71,7 @@ RUN install-tool gradle 7.6.1
 RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.13.3
+RUN install-tool nix 2.14.1
 
 # renovate: datasource=node
 RUN install-tool node v18.15.0
