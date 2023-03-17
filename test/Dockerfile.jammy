@@ -105,7 +105,7 @@ RUN install-tool rust 1.68.0
 RUN install-tool swift 5.7.3
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.4.1
+RUN install-tool terraform 1.4.2
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
