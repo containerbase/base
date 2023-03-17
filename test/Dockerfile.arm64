@@ -96,7 +96,7 @@ RUN install-tool powershell v7.3.2
 #RUN install-tool cocoapods 1.11.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.67.0
+RUN install-tool rust 1.67.1
 
 # renovate: datasource=docker versioning=docker
 #RUN install-tool swift 5.7.3
