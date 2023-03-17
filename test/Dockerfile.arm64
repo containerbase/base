@@ -31,7 +31,7 @@ RUN uname -p | tee | grep aarch64
 RUN install-tool docker v23.0.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.102
+RUN install-tool dotnet 7.0.202
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 #RUN install-tool erlang 25.2.2.0
