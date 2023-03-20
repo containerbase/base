@@ -10,7 +10,7 @@ function prepare_tools () {
 
   if [[ $(ignore_tool) -eq 1 ]]; then
     echo "Tool ignored - skipping: ${TOOL_NAME}"
-    exit 0;
+    return
   fi
 
   TOOL="${ROOT_DIR}/buildpack/tools/v2/${TOOL_NAME}.sh"
