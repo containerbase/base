@@ -25,7 +25,7 @@ RUN uname -p | tee | grep aarch64
 
 RUN touch /.dummy
 
-ARG IGNORED_TOOLS=erlang,elixir,php,composer,swift
+ARG IGNORED_TOOLS=erlang,elixir,flutter,php,composer,swift
 
 RUN prepare-tool all
 
