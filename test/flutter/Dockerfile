@@ -22,7 +22,7 @@ RUN prepare-tool flutter
 #--------------------------------------
 # test: flutter 1.x (root)
 #--------------------------------------
-FROM base as testa
+FROM build as testa
 
 # renovate datasource=flutter-version
 RUN install-tool flutter 1.22.6
@@ -101,7 +101,6 @@ RUN install-tool flutter 3.0.2
 RUN set -ex; \
     cd c; \
     flutter pub upgrade;
-
 
 #--------------------------------------
 # final
