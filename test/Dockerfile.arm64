@@ -13,21 +13,26 @@ COPY src/ /
 
 RUN install-buildpack
 
-
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.40.0
 
-# lerna fails for some unknown reason
-ARG IGNORED_TOOLS=erlang,elixir,flutter,lerna,php,composer,python,hashin,pipenv,poetry,ruby,bundler,cocoapods,swift
+#--------------------------------------
+# Image: build
+#--------------------------------------
+FROM base as build
+
+RUN uname -p | tee | grep aarch64
+
+RUN touch /.dummy
+
+ARG IGNORED_TOOLS=erlang,elixir,flutter,php,composer,swift
+
+RUN prepare-tool all
 
 #--------------------------------------
 # Image: test
 #--------------------------------------
-FROM base as test
-
-ARG APT_HTTP_PROXY
-
-RUN uname -p | tee | grep aarch64
+FROM build as test
 
 # renovate datasource=docker
 RUN install-tool dart 2.18.0
@@ -37,11 +42,6 @@ RUN install-tool docker v23.0.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 7.0.202
-
-# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 25.3.0.0
-# renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.3
 
 # renovate datasource=flutter-version
 RUN install-tool flutter 3.0.2
@@ -61,50 +61,14 @@ RUN install-tool helm v3.11.2
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 RUN install-tool helmfile v0.151.0
 
-# renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 17.0.6+10
-# renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 7.6.1
-
-
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.14.1
 
-# renovate: datasource=node
-RUN install-tool node v18.15.0
-# renovate: datasource=npm
-RUN install-tool pnpm 7.29.1
-# renovate: datasource=npm
-RUN install-tool yarn 1.22.19
-# renovate: datasource=npm
-RUN install-tool lerna 6.5.1
-
-# renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.4
-# renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.5.4
-
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.3.3
-
-# renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.2
-# renovate: datasource=pypi
-RUN install-tool pipenv 2023.3.20
-# renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
-# renovate: datasource=pypi
-RUN install-tool poetry 1.4.1
-
-# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.1
-# renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.4.8
-# renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.12.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.68.0
@@ -120,3 +84,86 @@ RUN install-tool jb v0.5.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 RUN install-tool vendir v0.33.1
+
+#--------------------------------------
+# Image: test-erlang
+#--------------------------------------
+FROM build as test-erlang
+
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 25.3.0.0
+# renovate: datasource=docker versioning=docker
+RUN install-tool elixir 1.14.3
+
+#--------------------------------------
+# Image: test-java
+#--------------------------------------
+FROM build as test-java
+
+# renovate: datasource=adoptium-java packageName=java-jre
+RUN install-tool java 17.0.6+10
+# renovate: datasource=gradle-version packageName=gradle versioning=gradle
+RUN install-tool gradle 7.6.1
+
+#--------------------------------------
+# Image: test-node
+#--------------------------------------
+FROM build as test-node
+
+# renovate: datasource=node
+RUN install-tool node v18.15.0
+# renovate: datasource=npm
+RUN install-tool pnpm 7.29.1
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.19
+# renovate: datasource=npm
+RUN install-tool lerna 6.5.1
+
+#--------------------------------------
+# Image: test-python
+#--------------------------------------
+FROM build as test-php
+
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
+RUN install-tool php 8.2.4
+# renovate: datasource=github-releases packageName=composer/composer
+RUN install-tool composer 2.5.4
+
+#--------------------------------------
+# Image: test-python
+#--------------------------------------
+FROM build as test-python
+
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.11.2
+# renovate: datasource=pypi
+RUN install-tool pipenv 2023.3.20
+# renovate: datasource=pypi
+RUN install-tool hashin 0.17.0
+# renovate: datasource=pypi
+RUN install-tool poetry 1.4.1
+
+#--------------------------------------
+# Image: test-ruby
+#--------------------------------------
+FROM build as test-ruby
+
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
+RUN install-tool ruby 3.2.1
+# renovate: datasource=rubygems versioning=ruby
+RUN install-tool bundler 2.4.8
+# renovate: datasource=rubygems versioning=ruby
+RUN install-tool cocoapods 1.12.0
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test /.dummy /.dummy
+COPY --from=test-erlang /.dummy /.dummy
+COPY --from=test-java /.dummy /.dummy
+COPY --from=test-node /.dummy /.dummy
+COPY --from=test-php /.dummy /.dummy
+COPY --from=test-python /.dummy /.dummy
+COPY --from=test-ruby /.dummy /.dummy
