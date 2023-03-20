@@ -10,37 +10,31 @@ function prepare_tool() {
 function install_tool () {
   local versioned_tool_path
 
-  local FLUTTER_SDK_CHANNEL="stable"
-  local FLUTTER_SDK_URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_SDK_CHANNEL}/linux/flutter_linux_${TOOL_VERSION}-${FLUTTER_SDK_CHANNEL}.tar.xz"
-  local file
-
-  if [[ $MAJOR -lt 1 || ($MAJOR -eq 1 && $MINOR -lt 17) ]]; then
-    echo "flutter < 1.17.0 is not supported: ${MAJOR}.${MINOR}" >&2
-    exit 1
-  fi
-
-  file=$(get_from_url "$FLUTTER_SDK_URL")
-
   versioned_tool_path=$(create_versioned_tool_path)
-  tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
-  if [ "$MAJOR" -eq 1 ]; then
+  git clone \
+    --quiet \
+    -c advice.detachedHead=false \
+    --depth 1 \
+    --filter=blob:none \
+    --branch "${TOOL_VERSION}" \
+    https://github.com/flutter/flutter.git \
+    "${versioned_tool_path}"
 
-    # git unsafe directory
-    if [[ $(is_root) -eq 0 ]]; then
-      git config --system --add safe.directory "${versioned_tool_path}"
-    else
-      git config --global --add safe.directory "${versioned_tool_path}"
-    fi
+  # download dart sdk and init flutter (too heavy)
+  #"${versioned_tool_path}/bin/flutter" precache
 
-    # fix rights
-    chmod -R g+w "${versioned_tool_path}"
-
-    # download dart sdk and init flutter
-    "${versioned_tool_path}/bin/flutter" --version
-    # fix rights
-    chmod -R g+w "${versioned_tool_path}"
+  # git unsafe directory
+  if [[ $(is_root) -eq 0 ]]; then
+    git config --system --add safe.directory "${versioned_tool_path}"
+  else
+    git config --global --add safe.directory "${versioned_tool_path}"
   fi
+
+  # download dart sdk and init flutter
+  "${versioned_tool_path}/bin/flutter" --version
+  # fix rights
+  chmod -R g+w "${versioned_tool_path}"
 }
 
 function link_tool () {
