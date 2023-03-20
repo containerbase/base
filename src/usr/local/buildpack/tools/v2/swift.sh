@@ -52,6 +52,7 @@ function prepare_tool() {
 }
 
 function install_tool () {
+  local arch
   local tool_path
   local file
   local SWIFT_PLATFORM
@@ -79,15 +80,21 @@ function install_tool () {
   # shellcheck source=/dev/null
   VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
 
-  # https://swift.org/builds/swift-5.3-release/ubuntu1804/swift-5.3-RELEASE/swift-5.3-RELEASE-ubuntu20.04.tar.gz
+  # https://download.swift.org/swift-5.7-release/ubuntu2204/swift-5.7-RELEASE/swift-5.7-RELEASE-ubuntu22.04.tar.gz
+  # https://download.swift.org/swift-5.7.3-release/ubuntu2204/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04.tar.gz
+  # https://download.swift.org/swift-5.7.3-release/ubuntu2204-aarch64/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04-aarch64.tar.gz
   if [[ "${PATCH}" = "0" ]]; then
     version=${MAJOR}.${MINOR}
   fi
 
-  SWIFT_PLATFORM=ubuntu${VERSION_ID}
+  if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
+    arch=-${ARCHITECTURE}
+  fi
+
+  SWIFT_PLATFORM=ubuntu${VERSION_ID}${arch}
   SWIFT_BRANCH=swift-${version}-release
   SWIFT_VER=swift-${version}-RELEASE
-  SWIFT_WEBROOT=https://swift.org/builds
+  SWIFT_WEBROOT=https://download.swift.org
 
   SWIFT_WEBDIR="$SWIFT_WEBROOT/$SWIFT_BRANCH/$(echo "$SWIFT_PLATFORM" | tr -d .)"
 
