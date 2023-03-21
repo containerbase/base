@@ -26,8 +26,6 @@ RUN uname -p | tee | grep aarch64
 
 RUN touch /.dummy
 
-ARG IGNORED_TOOLS=php,composer
-
 RUN prepare-tool all
 
 #--------------------------------------
