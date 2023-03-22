@@ -16,7 +16,9 @@ if (dry) {
 
 shell.echo('Pushing docker images');
 
-r = shell.exec('docker buildx bake --progress plain --provenance=false push');
+r = shell.exec(
+  'docker buildx bake --progress plain --provenance=false --set settings.platform=linux/amd64,linux/arm64 push'
+);
 if (r.code) {
   shell.exit(1);
 }

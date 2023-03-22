@@ -32,7 +32,7 @@ group "default" {
 }
 
 group "push" {
-  targets = ["push-ghcr", "push-hub", "push-legacy", "push-cache"]
+  targets = ["push-ghcr", "push-hub", "push-cache"]
 }
 
 group "test" {
@@ -69,6 +69,16 @@ target "push-cache" {
     "ghcr.io/${OWNER}/cache:${FILE}",
   ]
   cache-to = ["type=inline,mode=max"]
+}
+
+target "build" {
+  inherits = ["settings", "cache"]
+  tags = [
+    "ghcr.io/${OWNER}/${FILE}",
+    "ghcr.io/${OWNER}/${FILE}:${TAG}",
+    "${OWNER}/${FILE}:${TAG}",
+    "${OWNER}/${FILE}"
+  ]
 }
 
 target "build-docker" {
@@ -114,14 +124,3 @@ target "push-hub" {
   tags     = ["${OWNER}/${FILE}", "${OWNER}/${FILE}:${TAG}"]
 }
 
-// TODO: remove on next major
-target "push-legacy" {
-  inherits = ["settings", "cache"]
-  output   = ["type=registry"]
-  tags = [
-    "ghcr.io/${OWNER}/buildpack",
-    "ghcr.io/${OWNER}/buildpack:${TAG}",
-    "${OWNER}/buildpack",
-    "${OWNER}/buildpack:${TAG}"
-  ]
-}
