@@ -80,7 +80,7 @@ teardown() {
 
 @test "cache delete" {
   local TEST_FILL_LEVEL=88
-  local BUILDPACK_CACHE_MAX_ALLOCATED_DISK=50
+  local CONTAINERBASE_MAX_ALLOCATED_DISK=50
 
   # overwrite function to verify deletion
   function get_cache_fill_level () {
@@ -102,16 +102,16 @@ teardown() {
   touch "${CONTAINERBASE_CACHE_DIR}/a"
 
   CONTAINERBASE_CACHE_DIR= \
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
+  CONTAINERBASE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
   assert_success
 
   CONTAINERBASE_CACHE_DIR= \
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK=20 \
+  CONTAINERBASE_MAX_ALLOCATED_DISK=20 \
   run cleanup_cache
   assert_success
 
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
+  CONTAINERBASE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
   assert_success
   assert [ -e "${CONTAINERBASE_CACHE_DIR}/a" ]
