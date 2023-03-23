@@ -8,7 +8,7 @@ ARG CONTAINERBASE_DEBUG
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.40.0

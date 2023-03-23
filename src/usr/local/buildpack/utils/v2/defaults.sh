@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This file contains all functions a tool must implement to be properly supported
-# The buildpack scripts rely on the functions to decide if a tool needs to be handled in a special way
+# The containerbase scripts rely on the functions to decide if a tool needs to be handled in a special way
 # This defaults are loaded before any tool file so not overwriting the function will
 # result in the install process being aborted
 

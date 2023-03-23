@@ -12,7 +12,18 @@ shell.mkdir('-p', 'bin');
 
 await fs.writeFile('src/usr/local/buildpack/version', version);
 
-let r = shell.exec('tar -cJf ./bin/buildpack.tar.xz -C ./src .');
+let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
+if (r.code) {
+  shell.exit(1);
+}
+
+r = shell.exec('sha512sum ./bin/containerbase.tar.xz');
+if (r.code) {
+  shell.exit(1);
+}
+r.to('./bin/containerbase.tar.xz.sha512');
+
+r = shell.cp('./bin/containerbase.tar.xz', './bin/buildpack.tar.xz');
 if (r.code) {
   shell.exit(1);
 }

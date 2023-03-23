@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 ARG FLUX_VERSION=0.27.3

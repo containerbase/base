@@ -20,7 +20,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/my-root-ca.crt
 
 ### Buildtime Java install
 
-Buildpack will create a central certificate store at `/opt/buildpack/ssl/cacerts` when preparing Java (`prepare-tool java`).
+Containerbase will create a central certificate store at `/opt/buildpack/ssl/cacerts` when preparing Java (`prepare-tool java`).
 This will be used by all Java versions installed by our `install-tool`.
 So you can copy your own store like this:
 

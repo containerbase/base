@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
