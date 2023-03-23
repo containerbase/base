@@ -41,5 +41,5 @@
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js"
   },
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@3.5.0"
 }
