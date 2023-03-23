@@ -6,7 +6,7 @@ const version = opts.release;
 
 shell.echo(`Preparing version: ${version}`);
 process.env.TAG = version;
-process.env.BUILDPACK_VERSION = version;
+process.env.CONTAINERBASE_VERSION = version;
 
 shell.mkdir('-p', 'bin');
 

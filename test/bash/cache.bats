@@ -27,40 +27,40 @@ teardown() {
 
 @test "get_oldest_file" {
 
-  BUILDPACK_CACHE_DIR= \
+  CONTAINERBASE_CACHE_DIR= \
   run get_oldest_file
   assert_failure
 
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   run get_oldest_file
   assert_success
   assert_output ""
 
   # create files
-  touch "${BUILDPACK_CACHE_DIR}/b"
+  touch "${CONTAINERBASE_CACHE_DIR}/b"
   # sleep for a milisecond, otherwise the files have the same age
   # and then it will get sorted by name
   sleep 0.01
-  touch "${BUILDPACK_CACHE_DIR}/a"
+  touch "${CONTAINERBASE_CACHE_DIR}/a"
 
   run get_oldest_file
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/b"
+  assert_output "${CONTAINERBASE_CACHE_DIR}/b"
 }
 
 @test "get_cache_fill_level" {
   local TEST_FILL_LEVEL=88
 
-  BUILDPACK_CACHE_DIR= \
+  CONTAINERBASE_CACHE_DIR= \
   run get_cache_fill_level
   assert_failure
 
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   local real_fill_level=$(get_cache_fill_level)
   assert test "[[ "$real_fill_level" =~ ^[0-9]+$ ]]"
@@ -80,7 +80,7 @@ teardown() {
 
 @test "cache delete" {
   local TEST_FILL_LEVEL=88
-  local BUILDPACK_CACHE_MAX_ALLOCATED_DISK=50
+  local CONTAINERBASE_MAX_ALLOCATED_DISK=50
 
   # overwrite function to verify deletion
   function get_cache_fill_level () {
@@ -91,58 +91,58 @@ teardown() {
   assert_success
 
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}/b"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}/b"
 
   # create files
-  touch "${BUILDPACK_CACHE_DIR}/c"
+  touch "${CONTAINERBASE_CACHE_DIR}/c"
   sleep 0.01
-  touch "${BUILDPACK_CACHE_DIR}/b/test"
+  touch "${CONTAINERBASE_CACHE_DIR}/b/test"
   sleep 0.01
-  touch "${BUILDPACK_CACHE_DIR}/a"
+  touch "${CONTAINERBASE_CACHE_DIR}/a"
 
-  BUILDPACK_CACHE_DIR= \
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
+  CONTAINERBASE_CACHE_DIR= \
+  CONTAINERBASE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
   assert_success
 
-  BUILDPACK_CACHE_DIR= \
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK=20 \
+  CONTAINERBASE_CACHE_DIR= \
+  CONTAINERBASE_MAX_ALLOCATED_DISK=20 \
   run cleanup_cache
   assert_success
 
-  BUILDPACK_CACHE_MAX_ALLOCATED_DISK= \
+  CONTAINERBASE_MAX_ALLOCATED_DISK= \
   run cleanup_cache
   assert_success
-  assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/c" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/a" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/b/test" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/c" ]
 
   run cleanup_cache true
   assert_success
-  assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/a" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/b/test" ]
+  assert [ ! -e "${CONTAINERBASE_CACHE_DIR}/c" ]
 
   TEST_FILL_LEVEL=30 \
   run cleanup_cache
   assert_success
-  assert [ -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ -e "${BUILDPACK_CACHE_DIR}/b/test" ]
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/a" ]
+  assert [ -e "${CONTAINERBASE_CACHE_DIR}/b/test" ]
+  assert [ ! -e "${CONTAINERBASE_CACHE_DIR}/c" ]
 
   TEST_FILL_LEVEL=90 \
   run cleanup_cache
   assert_success
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/a" ]
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/b/test" ]
-  assert [ ! -e "${BUILDPACK_CACHE_DIR}/c" ]
+  assert [ ! -e "${CONTAINERBASE_CACHE_DIR}/a" ]
+  assert [ ! -e "${CONTAINERBASE_CACHE_DIR}/b/test" ]
+  assert [ ! -e "${CONTAINERBASE_CACHE_DIR}/c" ]
 }
 
 @test "download_file" {
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
 
@@ -156,13 +156,13 @@ teardown() {
 
   run download_file "${file}"
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/buildpack.tar.xz"
+  assert_output "${CONTAINERBASE_CACHE_DIR}/buildpack.tar.xz"
 
   run download_file "${file}" "foobar"
   assert_success
-  assert_output "${BUILDPACK_CACHE_DIR}/foobar"
+  assert_output "${CONTAINERBASE_CACHE_DIR}/foobar"
 
-  BUILDPACK_CACHE_DIR= \
+  CONTAINERBASE_CACHE_DIR= \
   tmp_file=$(download_file "${file}")
   rm "${tmp_file}"
 
@@ -171,18 +171,18 @@ teardown() {
 
 @test "get_from_url" {
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # overwrite donwload function to fail
   function download_file () {
@@ -191,17 +191,17 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   run get_from_url "${file}" "test"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 }
 
 @test "get_from_url_with_checksum" {
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   # sha256sum of file
   local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
@@ -209,15 +209,15 @@ teardown() {
 
   run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
-  rm -rf "${BUILDPACK_CACHE_DIR}"
+  rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
   run get_from_url "${file}" test "${checksum}" "sha256sum"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
-  rm -rf "${BUILDPACK_CACHE_DIR}"
+  rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
   # wrong checksum
   run get_from_url "${file}" $(basename "${file}") "123" "sha256sum"
@@ -226,7 +226,7 @@ teardown() {
   assert_output --partial "Retries left: 1"
   assert_output --partial "Retries left: 0"
 
-  rm -rf "${BUILDPACK_CACHE_DIR}"
+  rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
   run get_from_url "${file}" test "123" "sha256sum"
   assert_failure
@@ -237,8 +237,8 @@ teardown() {
 
 @test "get_from_url_with_cache_and_checksum" {
   # create cache dir
-  BUILDPACK_CACHE_DIR="${TEST_ROOT_DIR}/cache"
-  mkdir -p "${BUILDPACK_CACHE_DIR}"
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
   # sha256sum of file
   local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
@@ -246,13 +246,13 @@ teardown() {
 
   run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
 
   file_path="${output}"
 
   run get_from_url "${file}" test "${checksum}" "sha256sum"
   assert_success
-  assert_output --regexp "${BUILDPACK_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # change checksum of cached file
   echo "a" >> "${file_path}"
@@ -266,8 +266,8 @@ teardown() {
 @test "cache_folder" {
     # set up the cache
   load "$TEST_DIR/cache.sh"
-  BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
-  BUILDPACK_CACHE_FOLDERS="true"
+  CONTAINERBASE_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  CONTAINERBASE_CACHE_FOLDERS="true"
 
   # create "tool" folder
   tool_folder=$(mktemp -u)
@@ -286,22 +286,22 @@ teardown() {
 
   run cache_folder "${tool_folder}" "${key}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
 
   run cache_folder "${tool_folder}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
 
   # delete cache entry
-  rm -rf ${BUILDPACK_CACHE_DIR}/${key_checksum}
-  rm -rf ${BUILDPACK_CACHE_DIR}/${path_checksum}
+  rm -rf ${CONTAINERBASE_CACHE_DIR}/${key_checksum}
+  rm -rf ${CONTAINERBASE_CACHE_DIR}/${path_checksum}
 }
 
 @test "restore_folder_from_cache" {
   # set up the cache
   load "$TEST_DIR/cache.sh"
-  BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
-  BUILDPACK_CACHE_FOLDERS="true"
+  CONTAINERBASE_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  CONTAINERBASE_CACHE_FOLDERS="true"
 
   # create "tool" folder
   tool_folder=$(mktemp -u)
@@ -320,11 +320,11 @@ teardown() {
 
   run cache_folder "${tool_folder}" "${key}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/${key_checksum}/folder\.tar\.zst"
 
   run cache_folder "${tool_folder}"
   assert_success
-  assert_output --regexp "^${BUILDPACK_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/${path_checksum}/folder\.tar\.zst"
 
   # test with key
 
@@ -357,6 +357,6 @@ teardown() {
   assert [ -e "${tool_folder}/b" ]
 
   # delete cache entry
-  rm -rf ${BUILDPACK_CACHE_DIR}/${key_checksum}
-  rm -rf ${BUILDPACK_CACHE_DIR}/${path_checksum}
+  rm -rf ${CONTAINERBASE_CACHE_DIR}/${key_checksum}
+  rm -rf ${CONTAINERBASE_CACHE_DIR}/${path_checksum}
 }

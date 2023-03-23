@@ -4,7 +4,7 @@
 FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 RUN touch /.dummy
 COPY --chown=1000:0 test test
@@ -139,7 +139,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build-rootless as testb
 
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 # renovate: datasource=pypi
 RUN install-pip pipenv 2023.3.20

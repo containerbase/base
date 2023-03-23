@@ -8,7 +8,7 @@ ARG APT_HTTP_PROXY
 # Weekly cache buster
 ARG CACHE_WEEK
 
-ARG BUILDPACK_VERSION
+ARG CONTAINERBASE_VERSION
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/base"
@@ -29,4 +29,4 @@ RUN install-buildpack
 RUN install-tool git v2.40.0
 
 
-LABEL org.opencontainers.image.version="${BUILDPACK_VERSION}"
+LABEL org.opencontainers.image.version="${CONTAINERBASE_VERSION}"

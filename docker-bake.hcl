@@ -7,7 +7,7 @@ variable "FILE" {
 variable "TAG" {
   default = "latest"
 }
-variable "BUILDPACK_VERSION" {
+variable "CONTAINERBASE_VERSION" {
   default = "unknown"
 }
 
@@ -19,7 +19,7 @@ variable "CACHE_WEEK" {
   default = ""
 }
 
-variable "BUILDPACK_DEBUG" {
+variable "CONTAINERBASE_DEBUG" {
   default = ""
 }
 
@@ -48,8 +48,8 @@ target "settings" {
   context = "."
   args = {
     APT_HTTP_PROXY    = "${APT_HTTP_PROXY}"
-    BUILDPACK_DEBUG   = "${BUILDPACK_DEBUG}"
-    BUILDPACK_VERSION = "${BUILDPACK_VERSION}"
+    CONTAINERBASE_DEBUG   = "${CONTAINERBASE_DEBUG}"
+    CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
     GITHUB_TOKEN      = "${GITHUB_TOKEN}"
   }
 }

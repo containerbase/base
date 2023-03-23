@@ -4,7 +4,7 @@
 FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 ARG GITHUB_TOKEN
 
 RUN touch /.dummy
