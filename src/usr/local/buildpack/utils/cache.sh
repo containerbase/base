@@ -11,7 +11,7 @@
 # Cached urls will be stored as is in the cache.
 #
 # The structure of the cache is the following:
-# ${BUILDPACK_CACHE_DIR}
+# ${CONTAINERBASE_CACHE_DIR}
 # ├── 3018548ea9a02ddc5ba69b0044ca78bb9e65bfe0
 # │   └── binary.tar.xz
 # ├── 375f537df492a02fd1744a6e0973943e45163a10
@@ -20,8 +20,8 @@
 # The base name of cached urls will be sha256 hashed and used as folder name
 # The path of folders will be sha256 hashed and used as folder name.
 #
-# The url cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR is set.
-# The fodler cache is disabled by default and will only be activated when BUILDPACK_CACHE_DIR and BUILDPACK_CACHE_FOLDERS is set.
+# The url cache is disabled by default and will only be activated when CONTAINERBASE_CACHE_DIR is set.
+# The fodler cache is disabled by default and will only be activated when CONTAINERBASE_CACHE_DIR and CONTAINERBASE_CACHE_FOLDERS is set.
 #
 # The cache supports a cleanup function if there is not enough disk space.
 # The function will always work on the checksum folder, not the individual files inside the folders.
@@ -29,7 +29,7 @@
 
 # will attempt to download the file at the given url and stores it in the cache.
 # If this file already exists, will return the cached version
-# The cache will only used if BUILDPACK_CACHE_DIR is set
+# The cache will only used if CONTAINERBASE_CACHE_DIR is set
 # First argument is the url
 # Second argument is the filename (optional)
 # Third argument is the checksum that the file should have (optional)
@@ -52,15 +52,15 @@ function get_from_url () {
 
   local filename="${checksum}/${name}"
 
-  if [ -n "${BUILDPACK_CACHE_DIR}" ] && [ -e "${BUILDPACK_CACHE_DIR}/${filename}" ]; then
+  if [ -n "${CONTAINERBASE_CACHE_DIR}" ] && [ -e "${CONTAINERBASE_CACHE_DIR}/${filename}" ]; then
       # file in cache, verify checksum first
-      if [ -n "${expected_checksum}" ] && ! verify_checksum "${BUILDPACK_CACHE_DIR}/${filename}" "${expected_checksum}" "${checksum_algo}" ; then
+      if [ -n "${expected_checksum}" ] && ! verify_checksum "${CONTAINERBASE_CACHE_DIR}/${filename}" "${expected_checksum}" "${checksum_algo}" ; then
         # file in cache but checksum doesn't match, so remove file and download again
-        echo "Cached file is corrupt, redownloading: ${BUILDPACK_CACHE_DIR}/${filename}" >&2
-        rm -rf "${BUILDPACK_CACHE_DIR:?}/${filename}"
+        echo "Cached file is corrupt, redownloading: ${CONTAINERBASE_CACHE_DIR}/${filename}" >&2
+        rm -rf "${CONTAINERBASE_CACHE_DIR:?}/${filename}"
         download_file "${url}" "${filename}" "${expected_checksum}" "${checksum_algo}"
       else
-        echo "${BUILDPACK_CACHE_DIR}/${filename}"
+        echo "${CONTAINERBASE_CACHE_DIR}/${filename}"
       fi
   else
     # cache disabled or not in cache
@@ -87,7 +87,7 @@ function download_file () {
   checksum_algo=${4}
 
   local retry=3
-  local temp_folder=${BUILDPACK_CACHE_DIR:-${TEMP_DIR}}
+  local temp_folder=${CONTAINERBASE_CACHE_DIR:-${TEMP_DIR}}
   while [ "${retry}" -gt 0 ]; do
     retry=$((retry-1))
     if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
@@ -168,16 +168,16 @@ function verify_checksum () {
 # will try to clean up the oldest file in the cache until the cache is empty
 # or unless the threshold is reached
 # When given true as first argument, will only delete a single file
-# If BUILDPACK_CACHE_MAX_ALLOCATED_DISK is not set then the cache will be cleaned
+# If CONTAINERBASE_MAX_ALLOCATED_DISK is not set then the cache will be cleaned
 function cleanup_cache () {
   local single_file=${1:false}
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ ! -d "${BUILDPACK_CACHE_DIR}" ]; then
+  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ ! -d "${CONTAINERBASE_CACHE_DIR}" ]; then
     # BUILD_CACHE_DIR is not set or doesn't exist
     return
   fi
 
-  local max_fill_level=${BUILDPACK_CACHE_MAX_ALLOCATED_DISK:-100}
+  local max_fill_level=${CONTAINERBASE_MAX_ALLOCATED_DISK:-100}
 
   local fill_level
   local oldest
@@ -200,14 +200,14 @@ function cleanup_cache () {
 
 # Will get the oldest file in the cache and returns the path to it
 function get_oldest_file () {
-  check BUILDPACK_CACHE_DIR true
-  find "${BUILDPACK_CACHE_DIR}" -type f -printf '%T+ %p\n' | sort | head -n 1 | awk '{ print $2 }'
+  check CONTAINERBASE_CACHE_DIR true
+  find "${CONTAINERBASE_CACHE_DIR}" -type f -printf '%T+ %p\n' | sort | head -n 1 | awk '{ print $2 }'
 }
 
 # Get the current fill level for the cache dir in percent
 function get_cache_fill_level () {
-  check BUILDPACK_CACHE_DIR true
-  df --output=pcent "${BUILDPACK_CACHE_DIR}" | tr -dc '0-9'
+  check CONTAINERBASE_CACHE_DIR true
+  df --output=pcent "${CONTAINERBASE_CACHE_DIR}" | tr -dc '0-9'
 }
 
 # Will calculate the checksum for the given string
@@ -220,7 +220,7 @@ function calculate_checksum () {
 # Any existing entry under the given key will be overriden
 # If the key is not passed, then the path will be used as key
 #
-# Only enabled when BUILDPACK_CACHE_DIR and BUILDPACK_CACHE_FOLDERS is set, noop otherwise
+# Only enabled when CONTAINERBASE_CACHE_DIR and CONTAINERBASE_CACHE_FOLDERS is set, noop otherwise
 #
 # Will return the path to the cached folder as tar file
 function cache_folder () {
@@ -230,7 +230,7 @@ function cache_folder () {
   check path true
   check key true
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ -z "${BUILDPACK_CACHE_FOLDERS}" ]; then
+  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS:-$BUILDPACK_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     return
   fi
@@ -239,10 +239,10 @@ function cache_folder () {
   checksum=$(calculate_checksum "${key}")
 
   local filename="${checksum}/folder.tar.zst"
-  local cache_path="${BUILDPACK_CACHE_DIR}/${filename}"
+  local cache_path="${CONTAINERBASE_CACHE_DIR}/${filename}"
 
   # create folder with root umask
-  create_folder "${BUILDPACK_CACHE_DIR}/${checksum}" "${ROOT_UMASK}"
+  create_folder "${CONTAINERBASE_CACHE_DIR}/${checksum}" "${ROOT_UMASK}"
 
   # remove file if it exists
   if [ -e "${cache_path}" ]; then
@@ -266,7 +266,7 @@ function restore_folder_from_cache () {
   check path true
   check key true
 
-  if [ -z "${BUILDPACK_CACHE_DIR}" ] || [ -z "${BUILDPACK_CACHE_FOLDERS}" ]; then
+  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS:-$BUILDPACK_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     echo 1
     return
@@ -276,7 +276,7 @@ function restore_folder_from_cache () {
   checksum=$(calculate_checksum "${key}")
 
   local filename="${checksum}/folder.tar.zst"
-  local cache_path="${BUILDPACK_CACHE_DIR}/${filename}"
+  local cache_path="${CONTAINERBASE_CACHE_DIR}/${filename}"
 
   if [ ! -e "${cache_path}" ]; then
     # not in cache

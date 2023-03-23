@@ -4,7 +4,7 @@
 FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 RUN touch /.dummy
 
@@ -232,7 +232,7 @@ RUN set -ex; cd a; yarn install
 #--------------------------------------
 FROM base as testi
 
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 # don't update!!
 RUN install-tool node v14.18.1
@@ -296,7 +296,7 @@ RUN install-tool yarn 1.22.15
 #--------------------------------------
 FROM build as testk
 
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 # ENV NPM_CONFIG_LOGLEVEL=verbose
 
 USER 1111:0

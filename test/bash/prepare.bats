@@ -40,7 +40,7 @@ teardown() {
   assert_output "This script must be run as root"
 
   TEST_ROOT_USER=0 \
-  BUILDPACK_DEBUG=1 \
+  CONTAINERBASE_DEBUG=1 \
   run prepare_tools foobar2
   assert_failure
   assert_output "tool foobar2 does not exist"

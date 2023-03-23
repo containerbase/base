@@ -3,7 +3,7 @@ setup_file () {
 
   # set up the cache
   load "$TEST_DIR/../cache.sh"
-  export BUILDPACK_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
+  export CONTAINERBASE_CACHE_DIR="$(create_temp_dir TEST_CACHE_DIR)"
 }
 
 setup() {
@@ -35,7 +35,7 @@ teardown() {
 }
 
 teardown_file () {
-  clean_temp_dir $BUILDPACK_CACHE_DIR TEST_CACHE_DIR
+  clean_temp_dir $CONTAINERBASE_CACHE_DIR TEST_CACHE_DIR
 }
 
 @test "flux: check_tool_requirements" {

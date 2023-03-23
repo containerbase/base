@@ -19,7 +19,7 @@ env:
   FILE: base
   DOCKER_BUILDKIT: 1
   NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
-  BUILDPACK_VERSION: ${{ github.sha }}
+  CONTAINERBASE_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:

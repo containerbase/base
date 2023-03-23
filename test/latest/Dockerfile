@@ -4,7 +4,7 @@
 FROM containerbase/test as base
 
 ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 RUN touch /.dummy
 
@@ -132,7 +132,7 @@ FROM ubuntu:focal as testg
 ARG USER_NAME=terraform
 ARG USER_ID=1005
 ARG APT_HTTP_PROXY
-ARG BUILDPACK_DEBUG
+ARG CONTAINERBASE_DEBUG
 
 # Set env and shell
 ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
