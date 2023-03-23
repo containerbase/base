@@ -133,10 +133,7 @@ function require_arch () {
   arch=$(uname -p)
   case "$arch" in
   "x86_64") ;; #supported
-  "aarch64") #supported (partial)
-    echo "WARNING: Not all tools are yet supported!" >&2
-    echo "  -> https://github.com/containerbase/base/issues/711" >&2
-    ;;
+  "aarch64") ;; #supported
   *)
     echo "Arch not supported: ${arch}! Please use 'x86_64' or 'aarch64'." >&2
     exit 1
