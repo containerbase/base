@@ -176,16 +176,16 @@ FROM build as testh
 
 RUN prepare-tool docker
 
+# TODO: move to prepare of git-lfs
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
 USER 1000
 
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v0.41.2
-
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.3.0

@@ -15,6 +15,10 @@ COPY src/ /
 
 RUN install-buildpack
 
+# TODO: move to prepare for bundler and cocoapods
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
 COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test
 
@@ -39,6 +43,8 @@ RUN install-tool ruby 3.2.1
 # test: bundler (gem)
 #--------------------------------------
 FROM build as test-bundler-a
+
+ENV PATH=/home/ubuntu/bin:$PATH
 
 # openshift
 USER 1005
@@ -140,9 +146,7 @@ RUN install-tool bundler
 #--------------------------------------
 FROM build as test-cocoapods-a
 
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
+ENV PATH=/home/ubuntu/bin:$PATH
 
 USER 1000
 
@@ -157,10 +161,6 @@ RUN set -ex; \
 # test: global cocoapods (install-gem)
 #--------------------------------------
 FROM build3 as test-cocoapods-b
-
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem cocoapods 1.12.0
@@ -178,10 +178,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build3 as test-cocoapods-c
 
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
-
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
@@ -198,10 +194,6 @@ RUN set -ex; \
 # test: cocoapods (install-gem, non-root)
 #--------------------------------------
 FROM base as test-cocoapods-d
-
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
 
 RUN prepare-tool ruby
 

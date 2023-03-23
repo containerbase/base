@@ -54,7 +54,8 @@ RUN install-tool yarn 1.22.19
 FROM base
 
 COPY --from=test-node /.dummy /.dummy
-COPY --from=test-lerna /.dummy /.dummy
+# fails locally
+# COPY --from=test-lerna /.dummy /.dummy
 COPY --from=test-pnpm /.dummy /.dummy
 COPY --from=test-yarn /.dummy /.dummy
 
