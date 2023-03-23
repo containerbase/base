@@ -17,7 +17,7 @@ env:
   DRY_RUN: ${{ github.ref_name != 'main' }}
   OWNER: ${{ github.repository_owner }}
   FILE: base
-  DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
   NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   CONTAINERBASE_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
@@ -36,6 +36,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     permissions:
       contents: write
       packages: write

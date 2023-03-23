@@ -1,12 +1,16 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+COPY src/ /
+
+RUN install-buildpack
 
 #--------------------------------------
 # build
@@ -16,7 +20,7 @@ FROM base as build
 # install nginx for request testing
 RUN install-apt nginx
 
-COPY src/ /
+COPY test/latest/src/ /
 
 WORKDIR /test
 
@@ -175,6 +179,10 @@ ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v0.41.2
+
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.3.0

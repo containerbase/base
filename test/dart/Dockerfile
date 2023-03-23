@@ -1,13 +1,19 @@
 #--------------------------------------
-# base
 #--------------------------------------
-FROM containerbase/test as base
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
-COPY --chown=1000:0 test test
+COPY src/ /
+
+RUN install-buildpack
+
+COPY --chown=1000:0 test/dart/test test
 WORKDIR /test
 
 #--------------------------------------

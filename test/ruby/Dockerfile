@@ -1,13 +1,18 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
-COPY --chown=1000:0 test test
+COPY src/ /
+
+RUN install-buildpack
+
+COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -132,6 +137,10 @@ RUN install-tool bundler
 #--------------------------------------
 FROM build as test-cocoapods-a
 
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
 USER 1000
 
 RUN gem install cocoapods -v 1.9.1
@@ -145,6 +154,10 @@ RUN set -ex; \
 # test: global cocoapods (install-gem)
 #--------------------------------------
 FROM build3 as test-cocoapods-b
+
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem cocoapods 1.12.0
@@ -162,6 +175,10 @@ RUN set -ex; \
 #--------------------------------------
 FROM build3 as test-cocoapods-c
 
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
@@ -178,6 +195,10 @@ RUN set -ex; \
 # test: cocoapods (install-gem, non-root)
 #--------------------------------------
 FROM base as test-cocoapods-d
+
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
 
 RUN prepare-tool ruby
 

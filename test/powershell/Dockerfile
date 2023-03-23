@@ -1,12 +1,16 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+COPY src/ /
+
+RUN install-buildpack
 
 #--------------------------------------
 # test: powershell 7.2 (non-root)

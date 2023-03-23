@@ -1,13 +1,22 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
-COPY --chown=1000:0 test test
+COPY src/ /
+
+RUN install-buildpack
+
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
+COPY --chown=1000:0 test/golang/test test
 WORKDIR /test
 
 #--------------------------------------

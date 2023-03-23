@@ -1,14 +1,23 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+COPY src/ /
 
-COPY --chown=1000:0 test test
+RUN install-buildpack
+
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
+COPY --chown=1000:0 test/flutter/test test
 
 WORKDIR /test
 

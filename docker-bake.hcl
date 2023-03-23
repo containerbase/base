@@ -100,7 +100,7 @@ target "build-distro" {
 
 target "build-test" {
   inherits = ["settings"]
-  context  = "./test/${TAG}"
+  dockerfile = "./test/${TAG}/Dockerfile"
 }
 
 target "build-arm64" {

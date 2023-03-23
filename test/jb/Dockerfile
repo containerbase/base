@@ -1,14 +1,19 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+COPY src/ /
 
-COPY --chown=1000:0 test test
+RUN install-buildpack
+
+
+COPY --chown=1000:0 test/jb/test test
 
 WORKDIR /test
 

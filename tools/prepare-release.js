@@ -18,7 +18,7 @@ if (r.code) {
 }
 
 r = shell.exec(
-  'docker buildx bake --progress plain --set settings.platform=linux/amd64,linux/arm64 build'
+  'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
 );
 if (r.code) {
   shell.exit(1);
