@@ -11,13 +11,11 @@ on:
 env:
   OWNER: ${{ github.repository_owner }}
   FILE: base
-  DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
+  BUILDX_NO_DEFAULT_LOAD: 1
   NODE_VERSION: 18.15.0 # renovate: datasource=node depName=node
   CONTAINERBASE_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
-  # https://github.com/docker/buildx/releases/tag/v0.10.4
-  # we don't want them for test builds
-  BUILDX_NO_DEFAULT_ATTESTATIONS: true
 
 permissions:
   contents: read
@@ -86,6 +84,35 @@ jobs:
       - name: bats
         run: yarn test:bats
 
+  base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+
+      - name: init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: enable corepack
+        run: sudo corepack enable
+
+      - name: Installing dependencies
+        run: yarn install
+
+      - name: prepare apt proxy
+        run: sudo yarn prepare:proxy
+
+      - name: test distro
+        run: docker buildx bake
+
   distro:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -121,7 +148,7 @@ jobs:
         run: sudo yarn prepare:proxy
 
       - name: test distro
-        run: docker buildx bake --progress plain test-distro
+        run: docker buildx bake test-distro
 
   lang:
     runs-on: ubuntu-latest
@@ -155,46 +182,11 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
-
-      - name: init
-        run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-
-      - name: enable corepack
-        run: sudo corepack enable
-
-      - name: Installing dependencies
-        run: yarn install
-
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
-
-      - name: build
-        run: docker buildx bake --progress plain
-
-      - name: images
-        run: docker image ls
-
-      - name: test
-        run: docker buildx bake --progress plain test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  arm64:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
       - name: docker-config
         uses: containerbase/internal-tools@47809eda33adec5b2926c5c7e7de8f2602fd3ed3 # v1.15.8
         with:
           command: docker-config
+
       - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
 
       - name: init
@@ -216,5 +208,7 @@ jobs:
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
 
-      - name: build
-        run: docker buildx bake --progress plain test-arm64
+      - name: test
+        run: docker buildx bake test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

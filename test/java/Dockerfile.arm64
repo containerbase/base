@@ -1,0 +1,50 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: java
+#--------------------------------------
+FROM base as test-java
+
+# renovate: datasource=adoptium-java packageName=java-jre
+RUN install-tool java 17.0.6+10
+
+#--------------------------------------
+# Image: java
+#--------------------------------------
+FROM test-java as test-gradle
+
+# renovate: datasource=gradle-version packageName=gradle versioning=gradle
+RUN install-tool gradle 7.6.1
+
+#--------------------------------------
+# Image: maven
+#--------------------------------------
+FROM test-java as test-maven
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool maven 3.9.0
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-java /.dummy /.dummy
+COPY --from=test-gradle /.dummy /.dummy
+COPY --from=test-maven /.dummy /.dummy

@@ -1,13 +1,25 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
-COPY --chown=1000:0 test test
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
+
+# TODO: move to prepare for bundler and cocoapods
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
+COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -31,6 +43,8 @@ RUN install-tool ruby 3.2.1
 # test: bundler (gem)
 #--------------------------------------
 FROM build as test-bundler-a
+
+ENV PATH=/home/ubuntu/bin:$PATH
 
 # openshift
 USER 1005
@@ -131,6 +145,8 @@ RUN install-tool bundler
 # test: cocoapods
 #--------------------------------------
 FROM build as test-cocoapods-a
+
+ENV PATH=/home/ubuntu/bin:$PATH
 
 USER 1000
 

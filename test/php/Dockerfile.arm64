@@ -3,6 +3,7 @@
 #--------------------------------------
 FROM ubuntu:focal as base
 
+RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
@@ -15,34 +16,25 @@ COPY src/ /
 
 RUN install-buildpack
 
-COPY --chown=1000:0 test/jb/test test
-WORKDIR /test
+#--------------------------------------
+# Image: php
+#--------------------------------------
+FROM base as test-php
+
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
+RUN install-tool php 8.2.4
+#--------------------------------------
+# Image: composer
+#--------------------------------------
+FROM test-php as test-composer
+
+# renovate: datasource=github-releases packageName=composer/composer
+RUN install-tool composer 2.5.5
 
 #--------------------------------------
-# build
-#--------------------------------------
-FROM base as build
-
-USER 1000
-
-# renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
-RUN install-tool jb v0.5.1
-
-
-#--------------------------------------
-# test: jb install
-#--------------------------------------
-
-FROM build as testa
-
-RUN set -ex; \
-    jb install; \
-    test -d vendor/github.com/prometheus-operator/prometheus-operator; \
-    test -d vendor/prometheus-operator
-
-#--------------------------------------
-# final
+# Image: final
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
+COPY --from=test-php /.dummy /.dummy
+COPY --from=test-composer /.dummy /.dummy

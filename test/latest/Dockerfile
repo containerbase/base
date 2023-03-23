@@ -1,12 +1,19 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
 
 #--------------------------------------
 # build
@@ -16,7 +23,7 @@ FROM base as build
 # install nginx for request testing
 RUN install-apt nginx
 
-COPY src/ /
+COPY test/latest/src/ /
 
 WORKDIR /test
 
@@ -168,6 +175,10 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 FROM build as testh
 
 RUN prepare-tool docker
+
+# TODO: move to prepare of git-lfs
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
 
 USER 1000
 

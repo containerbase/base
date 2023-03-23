@@ -3,6 +3,7 @@
 #--------------------------------------
 FROM ubuntu:focal as base
 
+RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
@@ -15,34 +16,26 @@ COPY src/ /
 
 RUN install-buildpack
 
-COPY --chown=1000:0 test/jb/test test
-WORKDIR /test
+#--------------------------------------
+# Image: erlang
+#--------------------------------------
+FROM base as test-erlang
+
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 25.3.0.0
 
 #--------------------------------------
-# build
+# Image: elixir
 #--------------------------------------
-FROM base as build
+FROM test-erlang as test-elixir
 
-USER 1000
-
-# renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
-RUN install-tool jb v0.5.1
-
+# renovate: datasource=docker versioning=docker
+RUN install-tool elixir 1.14.3
 
 #--------------------------------------
-# test: jb install
-#--------------------------------------
-
-FROM build as testa
-
-RUN set -ex; \
-    jb install; \
-    test -d vendor/github.com/prometheus-operator/prometheus-operator; \
-    test -d vendor/prometheus-operator
-
-#--------------------------------------
-# final
+# Image: final
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
+COPY --from=test-erlang /.dummy /.dummy
+COPY --from=test-elixir /.dummy /.dummy

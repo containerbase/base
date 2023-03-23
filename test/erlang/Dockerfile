@@ -1,14 +1,22 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
+
 # test openshift compatibility 1000<>1001
-COPY --chown=1001:0 test test
+COPY --chown=1001:0 test/erlang/test test
 WORKDIR /test
 
 #--------------------------------------

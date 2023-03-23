@@ -1,12 +1,19 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 ARG FLUX_VERSION=0.27.3

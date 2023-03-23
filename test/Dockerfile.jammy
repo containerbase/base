@@ -6,10 +6,6 @@ FROM ubuntu:jammy as base
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-#  autoloading containerbase env
-ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
-SHELL ["/bin/bash" , "-c"]
-
 COPY src/ /
 
 RUN install-buildpack

@@ -1,14 +1,21 @@
 #--------------------------------------
-# base
+# Image: base
 #--------------------------------------
-FROM containerbase/test as base
+FROM ubuntu:focal as base
+
+RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-RUN touch /.dummy
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
 
-COPY --chown=1000:0 test test
+COPY src/ /
+
+RUN install-buildpack
+
+COPY --chown=1000:0 test/node/test test
 RUN chmod -R 775 /test
 WORKDIR /test
 
@@ -133,7 +140,7 @@ RUN set -ex; \
   yarn --version;
 
 
-COPY --chown=1000:0 test test
+COPY --chown=1000:0 test/node/test test
 
 RUN set -ex; \
   npm --version; \
@@ -244,8 +251,7 @@ RUN touch /.dummy
 
 USER 1000
 
-COPY --chown=1000:0 test test
-
+COPY --chown=1000:0 test/node/test test
 WORKDIR /test
 
 # don't update!!

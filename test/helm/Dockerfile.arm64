@@ -1,0 +1,32 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+ENV BASH_ENV=/usr/local/etc/env
+SHELL ["/bin/bash" , "-c"]
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: helm
+#--------------------------------------
+FROM base as test-helm
+
+# renovate: datasource=github-releases packageName=helm/helm
+RUN install-tool helm v3.11.2
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-helm /.dummy /.dummy
