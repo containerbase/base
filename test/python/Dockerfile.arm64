@@ -1,0 +1,55 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: python
+#--------------------------------------
+FROM base as test-python
+
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.11.2
+
+#--------------------------------------
+# Image: hashin
+#--------------------------------------
+FROM test-python as test-hashin
+
+# renovate: datasource=pypi
+RUN install-tool hashin 0.17.0
+
+#--------------------------------------
+# Image: pipenv
+#--------------------------------------
+FROM test-python as test-pipenv
+
+# renovate: datasource=pypi
+RUN install-tool pipenv 2023.3.20
+
+#--------------------------------------
+# Image: poetry
+#--------------------------------------
+FROM test-python as test-poetry
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.4.1
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-hashin /.dummy /.dummy
+COPY --from=test-pipenv /.dummy /.dummy
+COPY --from=test-poetry /.dummy /.dummy

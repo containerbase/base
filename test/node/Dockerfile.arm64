@@ -1,0 +1,57 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: node
+#--------------------------------------
+FROM base as test-node
+
+# renovate: datasource=node
+RUN install-tool node v18.15.0
+
+#--------------------------------------
+# Image: lerna
+#--------------------------------------
+FROM test-node as test-lerna
+
+# renovate: datasource=npm
+RUN install-tool lerna 6.5.1
+
+#--------------------------------------
+# Image: pnpm
+#--------------------------------------
+FROM test-node as test-pnpm
+
+# renovate: datasource=npm
+RUN install-tool pnpm 7.29.3
+
+#--------------------------------------
+# Image: yarn
+#--------------------------------------
+FROM test-node as test-yarn
+
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.19
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-node /.dummy /.dummy
+COPY --from=test-lerna /.dummy /.dummy
+COPY --from=test-pnpm /.dummy /.dummy
+COPY --from=test-yarn /.dummy /.dummy
+

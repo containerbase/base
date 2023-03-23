@@ -1,0 +1,83 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: docker
+#--------------------------------------
+FROM base as test-docker
+
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v23.0.1
+
+#--------------------------------------
+# Image: git
+#--------------------------------------
+FROM base as test-git
+
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
+#--------------------------------------
+# Image: git-lfs
+#--------------------------------------
+FROM test-git as test-git-lfs
+
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
+RUN install-tool git-lfs v3.3.0
+
+#--------------------------------------
+# Image: helmfile
+#--------------------------------------
+FROM base as test-helmfile
+
+# renovate: datasource=github-releases packageName=helmfile/helmfile
+RUN install-tool helmfile v0.151.0
+
+#--------------------------------------
+# Image: kustomize
+#--------------------------------------
+FROM base as test-kustomize
+
+# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
+RUN install-tool kustomize 5.0.0
+
+#--------------------------------------
+# Image: terraform
+#--------------------------------------
+FROM base as test-terraform
+
+# renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
+RUN install-tool terraform 1.4.2
+
+#--------------------------------------
+# Image: vendir
+#--------------------------------------
+FROM base as test-vendir
+
+# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
+RUN install-tool vendir v0.33.1
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-docker /.dummy /.dummy
+COPY --from=test-git /.dummy /.dummy
+COPY --from=test-git-lfs /.dummy /.dummy
+COPY --from=test-helmfile /.dummy /.dummy
+COPY --from=test-kustomize /.dummy /.dummy
+COPY --from=test-terraform /.dummy /.dummy
+COPY --from=test-vendir /.dummy /.dummy

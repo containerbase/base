@@ -1,0 +1,29 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: jb
+#--------------------------------------
+FROM base as test-jb
+
+# renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
+RUN install-tool jb v0.5.1
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-jb /.dummy /.dummy

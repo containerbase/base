@@ -1,0 +1,33 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+# currently go doesn't install git
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.40.0
+
+#--------------------------------------
+# Image: golang
+#--------------------------------------
+FROM base as test-golang
+
+# renovate: datasource=docker versioning=docker
+RUN install-tool golang 1.20.2
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-golang /.dummy /.dummy

@@ -1,0 +1,29 @@
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ubuntu:focal as base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+
+COPY src/ /
+
+RUN install-buildpack
+
+#--------------------------------------
+# Image: dotnet
+#--------------------------------------
+FROM base as test-dotnet
+
+# renovate: datasource=dotnet packageName=dotnet-sdk
+RUN install-tool dotnet 7.0.202
+
+#--------------------------------------
+# Image: final
+#--------------------------------------
+FROM base
+
+COPY --from=test-dotnet /.dummy /.dummy

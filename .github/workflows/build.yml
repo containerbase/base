@@ -186,35 +186,3 @@ jobs:
         run: docker buildx bake --progress plain test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  arm64:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@47809eda33adec5b2926c5c7e7de8f2602fd3ed3 # v1.15.8
-        with:
-          command: docker-config
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
-
-      - name: init
-        run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-
-      - name: enable corepack
-        run: sudo corepack enable
-
-      - name: Installing dependencies
-        run: yarn install
-
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
-
-      - name: build
-        run: docker buildx bake --progress plain test-arm64

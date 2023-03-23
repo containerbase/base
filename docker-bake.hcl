@@ -36,7 +36,7 @@ group "push" {
 }
 
 group "test" {
-  targets = ["build-test"]
+  targets = ["build-test", "build-arm64"]
 }
 
 group "test-distro" {
@@ -47,10 +47,10 @@ group "test-distro" {
 target "settings" {
   context = "."
   args = {
-    APT_HTTP_PROXY    = "${APT_HTTP_PROXY}"
+    APT_HTTP_PROXY        = "${APT_HTTP_PROXY}"
     CONTAINERBASE_DEBUG   = "${CONTAINERBASE_DEBUG}"
     CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
-    GITHUB_TOKEN      = "${GITHUB_TOKEN}"
+    GITHUB_TOKEN          = "${GITHUB_TOKEN}"
   }
 }
 
@@ -103,19 +103,16 @@ target "build-test" {
   context  = "./test/${TAG}"
 }
 
-target "test-arm64" {
+target "build-arm64" {
   inherits   = ["settings"]
   platforms  = ["linux/arm64"]
-  dockerfile = "./test/Dockerfile.arm64"
+  dockerfile = "./test/${TAG}/Dockerfile.arm64"
 }
 
 target "push-ghcr" {
   inherits = ["settings", "cache"]
   output   = ["type=registry"]
-  tags = [
-    "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}",
-  ]
+  tags     = ["ghcr.io/${OWNER}/${FILE}", "ghcr.io/${OWNER}/${FILE}:${TAG}", ]
 }
 
 target "push-hub" {
