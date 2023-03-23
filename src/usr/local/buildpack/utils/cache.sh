@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This is the cache implementation for the buildpack project.
+# This is the cache implementation for the containerbase project.
 #
 # The idea is to cache tools to speed up the installation for the next installs.
 # Currently supported:

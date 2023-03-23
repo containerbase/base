@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 #--------------------------------------
 # test: powershell 7.2 (non-root)

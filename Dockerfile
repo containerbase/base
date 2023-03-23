@@ -22,7 +22,7 @@ CMD ["bash"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git

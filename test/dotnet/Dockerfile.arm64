@@ -14,7 +14,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 #--------------------------------------
 # Image: dotnet

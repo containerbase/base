@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
 # renovate: datasource=github-tags packageName=git/git

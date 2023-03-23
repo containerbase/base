@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 COPY --chown=1000:0 test/node/test test
 RUN chmod -R 775 /test

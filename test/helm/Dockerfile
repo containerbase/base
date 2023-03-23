@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # renovate: datasource=github-releases packageName=helm/helm
 ARG HELM_VERSION=3.8.0

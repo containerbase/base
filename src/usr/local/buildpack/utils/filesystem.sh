@@ -41,7 +41,7 @@ function create_versioned_tool_path () {
   echo "${install_dir}/${tool}/${TOOL_VERSION}"
 }
 
-# Will set up the general folder structure for the whole buildpack installation
+# Will set up the general folder structure for the whole containerbase installation
 function setup_directories () {
   local install_dir
   install_dir=$(get_install_dir)
@@ -136,7 +136,7 @@ function get_umask () {
 }
 
 
-# Gets the path to the buildpack folder
+# Gets the path to the containerbase folder
 function get_buildpack_path () {
   echo "${BUILDPACK_DIR}"
 }

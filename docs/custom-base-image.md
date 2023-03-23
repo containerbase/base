@@ -3,7 +3,7 @@
 The following sample can be used to create a `containerbase/base` based image which does not extend `containerbase/base` directly.
 Currently only ubuntu focal and jammy based amd64 distro are suported.
 
-You can also use our buildpack from GitHub container registry as `ghcr.io/containerbase/base`.
+You can also use our containerbase from GitHub container registry as `ghcr.io/containerbase/base`.
 `containerbase/base` and `ghcr.io/containerbase/base` are exchangeble.
 You should always use a specific version which can be found at [docker hub](https://hub.docker.com/r/containerbase/base/tags) or at [GitHub container registry](ghcr.io/containerbase/base)
 
@@ -12,8 +12,8 @@ You should always use a specific version which can be found at [docker hub](http
 Use this template for using a custom base image with our default user named `ubuntu` and userid `1000`.
 
 ```dockerfile
-# This buildpack is used for tool intallation and user/directory setup
-FROM containerbase/base AS buildpack
+# This containerbase is used for tool intallation and user/directory setup
+FROM containerbase/base AS containerbase
 
 FROM amd64/ubuntu:focal as base
 
@@ -28,13 +28,13 @@ SHELL ["/bin/bash" , "-c"]
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
-# Optional: Add custom root certificate, should come before `install-buildpack`
+# Optional: Add custom root certificate, should come before `install-containerbase`
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
-# Set up buildpack
-COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
-COPY --from=buildpack /usr/local/base/ /usr/local/base/
-RUN install-buildpack
+# Set up containerbase
+COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
+RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
@@ -55,12 +55,12 @@ USER 1000
 You can also customize username or userid by using this template.
 
 ```dockerfile
-# This buildpack is used for tool intallation and user/directory setup
-FROM containerbase/base AS buildpack
+# This containerbase is used for tool intallation and user/directory setup
+FROM containerbase/base AS containerbase
 
 FROM amd64/ubuntu:focal as base
 
-# The buildpack supports custom user
+# The containerbase supports custom user
 ARG USER_NAME=custom
 ARG USER_ID=1005
 # Allows custom apt proxy usage
@@ -74,13 +74,13 @@ SHELL ["/bin/bash" , "-c"]
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
-# Optional: Add custom root certificate, should come before `install-buildpack`
+# Optional: Add custom root certificate, should come before `install-containerbase`
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
-# Set up buildpack
-COPY --from=buildpack /usr/local/bin/ /usr/local/bin/
-COPY --from=buildpack /usr/local/base/ /usr/local/base/
-RUN install-buildpack
+# Set up containerbase
+COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
+RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git

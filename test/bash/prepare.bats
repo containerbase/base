@@ -19,7 +19,7 @@ setup() {
 
     setup_directories
 
-    # copy buildpack files
+    # copy containerbase files
     cp -r "$TEST_DIR/../../src/usr/local/buildpack" "${ROOT_DIR}/buildpack"
 
     # set default test user is root

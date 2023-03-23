@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 #--------------------------------------
 # build
@@ -147,10 +147,10 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
-# Set up buildpack
+# Set up containerbase
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
-RUN install-buildpack
+RUN install-containerbase
 
 # validate custom cert
 COPY --from=build /test/renovate.pem /renovate.pem

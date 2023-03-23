@@ -13,7 +13,7 @@ SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
 
-RUN install-buildpack
+RUN install-containerbase
 
 # test openshift compatibility 1000<>1001
 COPY --chown=1001:0 test/erlang/test test
