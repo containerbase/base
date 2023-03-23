@@ -140,7 +140,7 @@ RUN set -ex; \
   yarn --version;
 
 
-COPY --chown=1000:0 test test
+COPY --chown=1000:0 test/node/test test
 
 RUN set -ex; \
   npm --version; \
@@ -251,8 +251,7 @@ RUN touch /.dummy
 
 USER 1000
 
-COPY --chown=1000:0 test test
-
+COPY --chown=1000:0 test/node/test test
 WORKDIR /test
 
 # don't update!!

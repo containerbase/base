@@ -20,7 +20,6 @@ RUN install-buildpack
 RUN install-tool git v2.40.0
 
 COPY --chown=1000:0 test/flutter/test test
-
 WORKDIR /test
 
 #--------------------------------------

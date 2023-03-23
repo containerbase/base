@@ -15,7 +15,7 @@ COPY src/ /
 
 RUN install-buildpack
 
-COPY --chown=1000:0 test/nix/ test
+COPY --chown=1000:0 test/nix/test test
 WORKDIR /test
 
 #--------------------------------------
