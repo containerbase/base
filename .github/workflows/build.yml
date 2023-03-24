@@ -152,31 +152,29 @@ jobs:
 
   lang:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     strategy:
       matrix:
         tag:
-          [
-            dart,
-            dotnet,
-            erlang,
-            flutter,
-            flux,
-            golang,
-            java,
-            jb,
-            helm,
-            nix,
-            node,
-            php,
-            powershell,
-            python,
-            ruby,
-            rust,
-            swift,
-            latest,
-          ]
+          - dart
+          - dotnet
+          - erlang
+          - flutter
+          - flux
+          - golang
+          - java
+          - jb
+          - helm
+          - nix
+          - node
+          - php
+          - powershell
+          - python
+          - ruby
+          - rust
+          - swift
+          - latest
 
     env:
       TAG: ${{ matrix.tag }}
