@@ -66,7 +66,7 @@ RUN install-tool nix 2.14.1
 RUN install-tool powershell v7.3.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.68.1
+RUN install-tool rust 1.68.2
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.7.3
