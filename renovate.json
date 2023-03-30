@@ -53,6 +53,7 @@
         "kustomize",
         "helm",
         "helmfile",
+        "lerna",
         "npm",
         "pipenv",
         "poetry",
