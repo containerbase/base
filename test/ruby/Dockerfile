@@ -36,7 +36,7 @@ RUN install-tool ruby 2.6.4
 FROM base as build3
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.1
+RUN install-tool ruby 3.2.2
 
 
 #--------------------------------------
@@ -200,7 +200,7 @@ RUN prepare-tool ruby
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.1
+RUN install-tool ruby 3.2.2
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-gem cocoapods 1.12.0
