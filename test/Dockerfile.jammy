@@ -144,7 +144,7 @@ RUN install-tool poetry 1.4.1
 FROM build as test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.1
+RUN install-tool ruby 3.2.2
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.4.10
 # renovate: datasource=rubygems versioning=ruby
