@@ -39,25 +39,49 @@ function check_tool_requirements () {
 function install_tool () {
   local versioned_tool_path
   local npm # temp npm executable
-  local arch=linux-x64
+  local arch=${ARCHITECTURE}
+  local name=${TOOL_NAME}
+  local version=${TOOL_VERSION}
+  local version_codename
 
   local checksum_file
   local expected_checksum
 
+  # first try containerbase
+  version_codename=$(get_distro)
+  checksum_file=$(get_from_url "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
 
-  if [[ "$(uname -p)" = "aarch64" ]]; then
-    arch=linux-arm64
+  if [[ -n "${checksum_file}" ]]; then
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
+    # download file
+    file=$(get_from_url \
+      "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
+      "${name}-${version}-${version_codename}-${arch}.tar.xz" \
+      "${expected_checksum}" \
+      "sha512sum" )
+  else
+    # fallback to nodejs.org
+    arch=x64
+    if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
+      arch=arm64
+    fi
+
+    checksum_file=$(get_from_url "https://nodejs.org/dist/v${version}/SHASUMS256.txt")
+    # get checksum from file
+    expected_checksum=$(grep "${name}-v${version}-${arch}.tar.xz" "${checksum_file}" | cut -d' ' -f1)
+    # download file
+    file=$(get_from_url \
+      "https://nodejs.org/dist/v${version}/${name}-v${version}-linux-${arch}.tar.xz" \
+      "${name}-v${version}-linux-${arch}.tar.xz" \
+      "${expected_checksum}" \
+      "sha256sum" )
   fi
 
-  checksum_file=$(get_from_url "https://nodejs.org/dist/v${TOOL_VERSION}/SHASUMS256.txt")
-  # get checksum from file
-  expected_checksum=$(grep "node-v${TOOL_VERSION}-${arch}.tar.xz" "${checksum_file}" | cut -d' ' -f1)
-  # download file
-  file=$(get_from_url \
-    "https://nodejs.org/dist/v${TOOL_VERSION}/node-v${TOOL_VERSION}-${arch}.tar.xz" \
-    "node-v${TOOL_VERSION}-${arch}.tar.xz" \
-    "${expected_checksum}" \
-    "sha256sum" )
+  if [[ -z "$file" ]]; then
+    echo "Download failed" >&2
+    exit 1;
+  fi
 
   versioned_tool_path=$(create_versioned_tool_path)
 

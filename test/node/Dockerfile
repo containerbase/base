@@ -481,6 +481,8 @@ RUN set -ex; \
   renovate-config-validator; \
   true
 
+# Test from nodejs.org
+RUN install-tool node v12.22.12
 
 #--------------------------------------
 # final
