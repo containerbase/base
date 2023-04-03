@@ -44,26 +44,45 @@ function prepare_tool() {
 function install_tool () {
   local tool_path
   local file
-  local BASE_URL
-  local arch
+  local base_url
+  local arch=${ARCHITECTURE}
+  local name=${TOOL_NAME}
+  local version=${TOOL_VERSION}
   local version_codename
+  local checksum_file
+  local expected_checksum
 
   tool_path=$(find_tool_path)
 
   if [[ ! -d "${tool_path}" ]]; then
     if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
+      echo "${name} not prepared" >&2
       exit 1
     fi
     prepare_tool
     tool_path=$(find_tool_path)
   fi
 
-  arch=$(uname -p)
-  BASE_URL="https://github.com/containerbase/${TOOL_NAME}-prebuild/releases/download"
+  base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
-  file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
+  checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  # get checksum from file
+  expected_checksum=$(cat "${checksum_file}")
+  # download file
+  file=$(get_from_url \
+    "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${expected_checksum}" \
+    sha512sum
+    )
+
+  if [[ -z "$file" ]]; then
+    echo "Download failed" >&2
+    exit 1;
+  fi
+
+  # extract file
   tar -C "${tool_path}" -xf "${file}"
 }
 
