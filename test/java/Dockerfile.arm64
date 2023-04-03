@@ -37,8 +37,8 @@ RUN install-tool gradle 7.6.1
 #--------------------------------------
 FROM test-java as test-maven
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool maven 3.9.0
+# renovate: datasource=maven packageName=org.apache.maven:maven
+RUN install-tool maven 3.9.1
 
 #--------------------------------------
 # Image: final
