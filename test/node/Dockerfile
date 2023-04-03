@@ -474,7 +474,7 @@ FROM build as testq
 
 
 # renovate: datasource=npm
-RUN install-tool renovate 35.23.3
+RUN install-tool renovate 35.31.5
 
 RUN set -ex; \
   renovate --version; \
