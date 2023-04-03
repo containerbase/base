@@ -46,7 +46,7 @@ RUN install-tool pipenv 2023.3.20
 FROM test-python as test-poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.4.1
+RUN install-tool poetry 1.4.2
 
 #--------------------------------------
 # Image: final
