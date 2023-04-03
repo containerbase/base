@@ -46,12 +46,13 @@ function install_tool () {
 
   local checksum_file
   local expected_checksum
+  local githubExists
 
-  # first try containerbase
   version_codename=$(get_distro)
-  checksum_file=$(get_from_url "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  githubExists=$(curl -sSLIo /dev/null -w "%{http_code}" "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
 
-  if [[ -n "${checksum_file}" ]]; then
+  if [[ "${githubExists}" == "200" ]]; then
+    checksum_file=$(get_from_url "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
     # get checksum from file
     expected_checksum=$(cat "${checksum_file}")
     # download file
@@ -63,7 +64,7 @@ function install_tool () {
   else
     # fallback to nodejs.org
     arch=x64
-    if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
+    if [[ "${ARCHITECTURE}" == "aarch64" ]]; then
       arch=arm64
     fi
 
