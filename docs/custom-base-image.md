@@ -33,13 +33,13 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
 COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
-COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
+COPY --from=containerbase /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=node versioning=node
 RUN install-tool node 14.15.4
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
@@ -79,13 +79,13 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
 COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
-COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
+COPY --from=containerbase /usr/local/buildpack/ /usr/local/buildpack/
 RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=node versioning=node
 RUN install-tool node 14.15.4
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
