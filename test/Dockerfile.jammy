@@ -88,7 +88,7 @@ FROM build as test-erlang
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 25.3.0.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.3
+RUN install-tool elixir 1.14.4
 
 #--------------------------------------
 # Image: test-java
@@ -108,7 +108,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v18.15.0
 # renovate: datasource=npm
-RUN install-tool pnpm 7.30.5
+RUN install-tool pnpm 8.0.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
