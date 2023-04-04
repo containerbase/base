@@ -32,32 +32,54 @@ function prepare_tool() {
 }
 
 function install_tool () {
+  local tool_path
   local versioned_tool_path
   local file
-  local url
-  local arch
+  local base_url
+  local arch=${ARCHITECTURE}
+  local name=${TOOL_NAME}
+  local version=${TOOL_VERSION}
   local version_codename
+  local checksum_file
+  local expected_checksum
+  local checksum_exists
 
-  if [[ ! -d "$(find_tool_path)" ]]; then
+  tool_path=$(find_tool_path)
+
+  if [[ ! -d "${tool_path}" ]]; then
     if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
+      echo "${name} not prepared"
       exit 1
     fi
     prepare_tool
+    tool_path=$(find_tool_path)
   fi
 
-  arch=$(uname -p)
-  url="https://github.com/containerbase/python-prebuild/releases/download"
+  base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
-  file=$(get_from_url "${url}/${TOOL_VERSION}/python-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
-
-  if [[ -f ${file} ]]; then
-    bsdtar -C "$(find_tool_path)" -xf "${file}"
-  else
-    echo 'No prebuild python found' >&2
-    exit 1
+  # not all releases have checksums
+  checksum_exists=$(curl -sSLIo /dev/null -w "%{http_code}" "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  if [[ "${checksum_exists}" == "200" ]]; then
+    checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
   fi
+
+  # download file
+  file=$(get_from_url \
+    "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${expected_checksum}" \
+    sha512sum
+    )
+
+  if [[ -z "$file" ]]; then
+    echo "Download failed" >&2
+    exit 1;
+  fi
+
+  bsdtar -C "${tool_path}" -xf "${file}"
 
   versioned_tool_path=$(find_versioned_tool_path)
 
