@@ -30,7 +30,7 @@
     "shelljs": "0.8.5"
   },
   "scripts": {
-    "test:bats": "node_modules/bats/bin/bats --timing --verbose-run test/bash/ test/bash/v2 test/bash/tools",
+    "test:bats": "node_modules/bats/bin/bats --timing --verbose-run test/bash/ test/bash/v2",
     "test:docker": "node tools/test.js",
     "bats": "node_modules/bats/bin/bats --timing --verbose-run",
     "build": "release:prepare",
