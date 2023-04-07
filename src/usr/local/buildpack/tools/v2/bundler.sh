@@ -5,5 +5,5 @@
 
 function link_tool () {
   post_install
-  bundler --version
+  SKIP_VERSION || bundler --version
 }

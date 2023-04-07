@@ -33,5 +33,5 @@ function link_tool () {
   link_wrapper npx "${versioned_tool_path}/bin"
 
   hash -d npm npx 2>/dev/null || true
-  npm --version
+  SKIP_VERSION || npm --version
 }

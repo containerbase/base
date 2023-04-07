@@ -14,4 +14,4 @@ curl --retry 3 -sSL \
 
 apt_install git
 
-git --version
+SKIP_VERSION || git --version
