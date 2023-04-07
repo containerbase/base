@@ -111,5 +111,5 @@ function link_tool () {
 
   shell_wrapper "$TOOL_NAME" "$tool_path/bin"
 
-  SKIP_VERSION || swift --version
+  $SKIP_VERSION || swift --version
 }

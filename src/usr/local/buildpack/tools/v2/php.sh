@@ -87,5 +87,5 @@ function link_tool () {
   versioned_tool_path=$(find_versioned_tool_path)
 
   shell_wrapper php "${versioned_tool_path}/bin"
-  SKIP_VERSION || php --version
+  $SKIP_VERSION || php --version
 }

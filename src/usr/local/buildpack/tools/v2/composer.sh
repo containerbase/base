@@ -25,5 +25,5 @@ function link_tool () {
   versioned_tool_path=$(find_versioned_tool_path)
 
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-  SKIP_VERSION || composer --version
+  $SKIP_VERSION || composer --version
 }

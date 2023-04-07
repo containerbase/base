@@ -5,5 +5,5 @@
 
 function link_tool () {
   post_install
-  SKIP_VERSION || hashin --version
+  $SKIP_VERSION || hashin --version
 }

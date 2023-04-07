@@ -147,6 +147,6 @@ if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
 fi
 EOM
 
-  SKIP_VERSION || echo "node: $(node --version) $(command -v node)"
-  SKIP_VERSION || echo "npm: $(npm --version)  $(command -v npm)"
+  $SKIP_VERSION || echo "node: $(node --version) $(command -v node)"
+  $SKIP_VERSION || echo "npm: $(npm --version)  $(command -v npm)"
 }

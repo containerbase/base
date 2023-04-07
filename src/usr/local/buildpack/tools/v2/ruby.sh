@@ -91,7 +91,7 @@ function link_tool () {
   shell_wrapper ruby "${versioned_tool_path}/bin"
   shell_wrapper gem "${versioned_tool_path}/bin"
 
-  SKIP_VERSION || ruby --version
-  SKIP_VERSION || echo "gem $(gem --version)"
-  SKIP_VERSION || gem env
+  $SKIP_VERSION || ruby --version
+  $SKIP_VERSION || echo "gem $(gem --version)"
+  $SKIP_VERSION || gem env
 }

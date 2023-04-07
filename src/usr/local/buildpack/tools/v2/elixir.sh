@@ -29,8 +29,8 @@ function link_tool () {
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper mix "${versioned_tool_path}/bin"
 
-  SKIP_VERSION || elixir --version
-  SKIP_VERSION || mix --version
+  $SKIP_VERSION || elixir --version
+  $SKIP_VERSION || mix --version
 
   if [[ $(is_root) -eq 0 ]]; then
     su -c 'mix local.hex --force' "${USER_NAME}"
