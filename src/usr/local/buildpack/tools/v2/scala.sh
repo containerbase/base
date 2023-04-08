@@ -22,5 +22,5 @@ function link_tool () {
 
   shell_wrapper scala "${versioned_tool_path}/bin"
 
-  scala --version
+  [[ -n $SKIP_VERSION ]] || scala --version
 }

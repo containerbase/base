@@ -5,7 +5,7 @@
 
 function link_tool () {
   post_install
-  pip-compile --version
+  [[ -n $SKIP_VERSION ]] || pip-compile --version
 }
 
 function post_install () {

@@ -29,5 +29,5 @@ function install_tool () {
 
 function link_tool () {
   shell_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
-  docker --version
+  [[ -n $SKIP_VERSION ]] || docker --version
 }

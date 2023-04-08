@@ -56,5 +56,5 @@ function link_tool () {
 
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
 
-  dart --version
+  [[ -n $SKIP_VERSION ]] || dart --version
 }

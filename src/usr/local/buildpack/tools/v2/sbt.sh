@@ -28,7 +28,7 @@ function link_tool () {
   # https://github.com/sbt/sbt/issues/1458
   temp_dir="$(mktemp -d)"
   pushd "$temp_dir" || exit 1
-  sbt --version
+  [[ -n $SKIP_VERSION ]] || sbt --version
   popd || exit 1
 
   # fix, cleanup sbt temp data

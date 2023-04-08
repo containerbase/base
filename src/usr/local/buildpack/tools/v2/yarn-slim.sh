@@ -31,7 +31,7 @@ function install_tool () {
 
 function link_tool () {
   post_install
-  yarn --version
+  [[ -n $SKIP_VERSION ]] || yarn --version
 }
 
 function post_install () {
