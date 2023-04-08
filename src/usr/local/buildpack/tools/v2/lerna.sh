@@ -31,5 +31,5 @@ function link_tool () {
   versioned_tool_path=$(find_versioned_tool_path)
 
   link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-  $SKIP_VERSION || lerna --version
+  [[ -n $SKIP_VERSION ]] || lerna --version
 }

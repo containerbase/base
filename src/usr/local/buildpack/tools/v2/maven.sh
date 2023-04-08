@@ -40,5 +40,5 @@ function link_tool () {
 #  reset_tool_env
 #  export_tool_env MAVEN_HOME "${versioned_tool_path}"
 
-  $SKIP_VERSION || mvn --version
+  [[ -n $SKIP_VERSION ]] || mvn --version
 }

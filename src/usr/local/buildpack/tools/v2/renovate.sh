@@ -34,7 +34,7 @@ function install_tool () {
 
 function link_tool () {
   post_install
-  $SKIP_VERSION || renovate --version
+  [[ -n $SKIP_VERSION ]] || renovate --version
 }
 
 function post_install () {

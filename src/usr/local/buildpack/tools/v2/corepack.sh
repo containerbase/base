@@ -27,7 +27,7 @@ function install_tool () {
 
 function link_tool () {
   link_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
-  $SKIP_VERSION || corepack --version
+  [[ -n $SKIP_VERSION ]] || corepack --version
   post_install
 }
 

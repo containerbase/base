@@ -5,5 +5,5 @@
 
 function link_tool () {
   post_install
-  $SKIP_VERSION || pod --version --allow-root
+  [[ -n $SKIP_VERSION ]] || pod --version --allow-root
 }

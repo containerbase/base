@@ -46,5 +46,5 @@ function link_tool () {
 
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "GRADLE_USER_HOME=\$HOME/.gradle"
 
-  $SKIP_VERSION || gradle --version
+  [[ -n $SKIP_VERSION ]] || gradle --version
 }
