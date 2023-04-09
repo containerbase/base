@@ -12,7 +12,14 @@ function install_tool () {
   local versioned_tool_path
   local file
 
-  file=$(get_from_url "https://github.com/composer/composer/releases/download/${TOOL_VERSION}/composer.phar")
+  local checksum_file
+  local expected_checksum
+
+  checksum_file=$(get_from_url "https://getcomposer.org/download/${TOOL_VERSION}/composer.phar.sha256sum")
+  # get checksum from file
+  expected_checksum=$(grep "composer.phar" "${checksum_file}" | cut -d' ' -f1)
+
+  file=$(get_from_url "https://getcomposer.org/download/${TOOL_VERSION}/composer.phar" "composer.phar" "${expected_checksum}" "sha256sum" )
 
   versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
