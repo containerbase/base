@@ -5,5 +5,5 @@
 
 function link_tool () {
   post_install
-  pipenv --version
+  [[ -n $SKIP_VERSION ]] || pipenv --version
 }

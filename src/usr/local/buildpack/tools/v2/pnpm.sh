@@ -27,7 +27,7 @@ function install_tool () {
 
 function link_tool () {
   post_install
-  pnpm --version
+  [[ -n $SKIP_VERSION ]] || pnpm --version
 }
 
 function post_install () {
