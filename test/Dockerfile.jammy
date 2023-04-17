@@ -33,7 +33,7 @@ FROM build as test
 RUN install-tool dart 2.18.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v23.0.3
+RUN install-tool docker v23.0.4
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 7.0.203
