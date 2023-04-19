@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-java
 
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 17.0.6+10
+RUN install-tool java 17.0.7+7
 
 #--------------------------------------
 # Image: java
