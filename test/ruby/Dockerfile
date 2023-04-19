@@ -163,7 +163,7 @@ RUN set -ex; \
 FROM build3 as test-cocoapods-b
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.12.0
+RUN install-gem cocoapods 1.12.1
 
 USER 1000
 
@@ -181,7 +181,7 @@ FROM build3 as test-cocoapods-c
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.12.0
+RUN install-tool cocoapods 1.12.1
 
 RUN pod env
 
@@ -203,7 +203,7 @@ USER 1000
 RUN install-tool ruby 3.2.2
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.12.0
+RUN install-gem cocoapods 1.12.1
 
 RUN set -ex; \
   cd b/Project; \
