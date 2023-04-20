@@ -45,7 +45,7 @@ RUN install-tool python 3.11.3
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.3.20
+RUN install-tool pipenv 2023.4.20
 
 USER 1000
 
@@ -150,7 +150,7 @@ FROM build-rootless as testb
 ARG CONTAINERBASE_DEBUG
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2023.3.20
+RUN install-pip pipenv 2023.4.20
 
 RUN set -ex; \
   cd a; \
@@ -187,7 +187,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.11.3
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.3.20
+RUN install-tool pipenv 2023.4.20
 
 RUN set -ex; \
   cd h-pipenv; \
