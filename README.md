@@ -27,7 +27,7 @@ You can use the following command to ignore remote cache for local testing.
 This will probably speedup local builds.
 
 ```sh
-docker buildx bake  --set *.cache-from=[]
+docker buildx bake  --set *.cache-from=
 ```
 
 ### Test images
