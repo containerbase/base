@@ -140,3 +140,20 @@ function get_umask () {
 function get_buildpack_path () {
   echo "${BUILDPACK_DIR}"
 }
+
+# Own the file by default user and make it writable for root group
+function set_file_owner() {
+  local target=${1}
+  local perms=${2:-775}
+
+  # make it writable for the owner and the group
+  if [[ -O "${target}" ]] && [ "$(stat --format '%a' "${target}")" -ne "${perms}" ] ; then
+    # make it writable for the owner and the group only if we are the owner
+    chmod "${perms}" "${target}"
+  fi
+  # make it writable for the default user
+  if [[ -O "${target}" ]] && [ "$(stat --format '%u' "${target}")" -eq "0" ] ; then
+    # make it writable for the owner and the group only if we are the owner
+    chown "${USER_ID}" "${target}"
+  fi
+}

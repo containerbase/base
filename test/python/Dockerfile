@@ -147,8 +147,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build-rootless as testb
 
-ARG CONTAINERBASE_DEBUG
-
 # renovate: datasource=pypi
 RUN install-pip pipenv 2023.4.20
 
@@ -178,6 +176,8 @@ RUN set -ex \
 # test pipenv-b: pipenv (multiple python)
 #--------------------------------------
 FROM build as test-pipenv-b
+
+USER 1001
 
 # Do not update minor
 RUN install-tool python 3.8.13
