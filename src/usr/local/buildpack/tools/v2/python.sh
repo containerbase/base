@@ -86,12 +86,11 @@ function install_tool () {
   fix_python_shebangs
 
   # install latest pip and virtualenv
-  PIP_ROOT_USER_ACTION=ignore "${versioned_tool_path}/bin/python" \
+  PIP_ROOT_USER_ACTION=ignore PIP_USE_PEP517=true "${versioned_tool_path}/bin/python" \
     -W ignore \
     -m pip \
       install \
       --compile \
-      --use-pep517 \
       --no-warn-script-location \
       --no-cache-dir \
       --quiet \

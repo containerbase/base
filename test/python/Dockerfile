@@ -198,6 +198,9 @@ RUN set -ex; \
 #--------------------------------------
 FROM build-rootless as testc
 
+# test older python install
+RUN install-tool python 3.6.15
+
 # needs to be v2
 RUN install-tool python 2.7.18
 
