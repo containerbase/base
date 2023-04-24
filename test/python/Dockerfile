@@ -177,7 +177,7 @@ RUN set -ex \
 #--------------------------------------
 FROM build as test-pipenv-b
 
-USER 1001
+USER 1000
 
 # Do not update minor
 RUN install-tool python 3.8.13
