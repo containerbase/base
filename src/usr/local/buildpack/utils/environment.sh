@@ -49,7 +49,8 @@ function export_tool_env () {
     exit 1;
   fi
   export "${1}=${2}"
-  echo export "${1}=\${${1}-${2}}" >> "$install_dir"/env.d/"${TOOL_NAME}".sh
+  echo export "${1}=\${${1}-${2}}" >> "${install_dir}/env.d/${TOOL_NAME}.sh"
+  set_file_owner "${install_dir}/env.d/${TOOL_NAME}.sh" 664
 }
 
 function export_tool_path () {
@@ -71,6 +72,7 @@ function export_tool_path () {
     export PATH="$additional_path:$PATH"
     echo export PATH="$additional_path:\$PATH" >> "${install_dir}/env.d/${TOOL_NAME}.sh"
   fi
+  set_file_owner "${install_dir}/env.d/${TOOL_NAME}.sh" 664
 }
 
 function setup_env_files () {

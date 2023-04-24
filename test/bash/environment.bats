@@ -40,6 +40,7 @@ teardown() {
   run cat "${install_dir}/env.d/foo.sh"
   assert_success
   assert_output --partial "FOO_HOME=\${FOO_HOME-123}"
+  assert [ $(stat --format '%a' "${install_dir}/env.d/foo.sh") -eq 664 ]
 
   run reset_tool_env
   assert_success

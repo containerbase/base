@@ -29,16 +29,7 @@ EOM
 
   echo "${SOURCE} \"\$@\"" >> "$TARGET"
 
-  # make it writable for the owner and the group
-  if [[ -O "$TARGET" ]] && [ "$(stat --format '%a' "${TARGET}")" -ne 775 ] ; then
-    # make it writable for the owner and the group only if we are the owner
-    chmod 775 "$TARGET"
-  fi
-  # make it writable for the default user
-  if [[ -O "$TARGET" ]] && [ "$(stat --format '%u' "${TARGET}")" -eq "0" ] ; then
-    # make it writable for the owner and the group only if we are the owner
-    chown "${USER_ID}" "$TARGET"
-  fi
+  set_file_owner "${TARGET}" 775
 }
 
 # use this for simple symlink to /usr/local/bin
