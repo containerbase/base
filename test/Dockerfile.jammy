@@ -54,7 +54,7 @@ RUN install-tool golang 1.20.3
 RUN install-tool helm v3.11.3
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.152.0
+RUN install-tool helmfile v0.153.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.0.0
