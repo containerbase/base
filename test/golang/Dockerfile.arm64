@@ -18,7 +18,7 @@ RUN install-containerbase
 
 # currently go doesn't install git
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
+RUN install-tool git v2.40.1
 
 #--------------------------------------
 # Image: golang
