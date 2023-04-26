@@ -26,7 +26,7 @@ RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.0
+RUN install-tool git v2.40.1
 
 
 LABEL org.opencontainers.image.version="${CONTAINERBASE_VERSION}"
