@@ -49,7 +49,7 @@ function install_tool () {
   local githubExists
 
   version_codename=$(get_distro)
-  githubExists=$(curl -sSLIo /dev/null -w "%{http_code}" "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  githubExists=$(file_exists "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
 
   if [[ "${githubExists}" == "200" ]]; then
     checksum_file=$(get_from_url "https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")

@@ -288,3 +288,9 @@ function restore_folder_from_cache () {
   zstd -qq --no-progress -c -d -T0 --long=30 "${cache_path}" | tar -C "${path}" -xpf -
   echo 0
 }
+
+# Do a HEAD request to check if a file exists at url.
+# It returns the http status code.
+function file_exists () {
+  curl -sSLIo /dev/null -w "%{http_code}" "${1}"
+}

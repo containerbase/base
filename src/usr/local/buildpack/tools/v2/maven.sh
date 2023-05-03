@@ -14,17 +14,29 @@ function install_tool () {
   local file_url="${TOOL_NAME}/${TOOL_NAME}-${MAJOR}/${TOOL_VERSION}/binaries/${file_name}"
 
   local checksum_file
+  local checksum_algo
   local expected_checksum
 
-  checksum_file=$(get_from_url "${URL}/${file_url}.sha512")
-  # get checksum from file
-  expected_checksum=$(cat "${checksum_file}")
+  if [[ "$(file_exists "${URL}/${file_url}.sha512")" -eq 200 ]]; then
+    checksum_file=$(get_from_url "${URL}/${file_url}.sha512")
+    checksum_algo=sha512sum
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
+  elif [[ "$(file_exists "${URL}/${file_url}.sha1")" -eq 200 ]]; then
+    checksum_file=$(get_from_url "${URL}/${file_url}.sha1")
+    checksum_algo=sha1sum
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
+  else
+    echo "Missing checksum"
+    exit 1
+  fi
 
   file=$(get_from_url \
     "${URL}/${file_url}" \
     "${file_name}" \
     "${expected_checksum}" \
-    "sha512sum" )
+    "${checksum_algo}" )
 
   versioned_tool_path=$(create_versioned_tool_path)
   tar --strip 1 -C "${versioned_tool_path}" -xf "${file}"
