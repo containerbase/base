@@ -8,8 +8,8 @@ function check_tool_requirements () {
 function install_tool () {
   local versioned_tool_path
   local file
-  # https://downloads.apache.org/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
-  local URL='https://downloads.apache.org'
+  # https://archive.apache.org/dist/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
+  local URL='https://archive.apache.org/dist'
   local file_name="apache-${TOOL_NAME}-${TOOL_VERSION}-bin.tar.gz"
   local file_url="${TOOL_NAME}/${TOOL_NAME}-${MAJOR}/${TOOL_VERSION}/binaries/${file_name}"
 
