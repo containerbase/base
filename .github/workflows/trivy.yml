@@ -1,0 +1,38 @@
+name: trivy
+
+on:
+  schedule:
+    - cron: '59 11 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        id: latest-release
+        with:
+          result-encoding: string
+          script: |
+            const { data } = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            return data.name;
+
+      - uses: aquasecurity/trivy-action@e5f43133f6e8736992c9f3c1b3296e24b37e17f2 # v0.10.0
+        with:
+          image-ref: 'ghcr.io/${{ github.repository }}:${{ steps.latest-release.outputs.result }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - uses: github/codeql-action/upload-sarif@29b1f65c5e92e24fe6b6647da1eaabe529cec70f # v2.3.3
+        with:
+          sarif_file: trivy-results.sarif
