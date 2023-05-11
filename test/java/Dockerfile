@@ -157,7 +157,7 @@ USER 1001
 RUN install-tool maven 3.5.0
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.9.1
+RUN install-tool maven 3.9.2
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
