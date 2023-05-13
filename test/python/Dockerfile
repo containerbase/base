@@ -94,7 +94,7 @@ FROM poetry as test-poetry-b
 
 RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
 
-RUN set -ex; cd c-poetry && poetry add h3py
+RUN set -ex; cd c-poetry && poetry add h5py
 
 
 #--------------------------------------
@@ -160,7 +160,7 @@ RUN install-tool poetry 1.4.2
 RUN set -ex \
   && cd c-poetry \
   && poetry update --lock --no-interaction \
-  && poetry add h3py \
+  && poetry add h5py \
   ;
 
 # renovate: datasource=pypi
