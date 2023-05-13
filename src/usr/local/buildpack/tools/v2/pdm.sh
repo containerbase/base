@@ -5,5 +5,5 @@
 
 function link_tool () {
   post_install
-  [[ -n $SKIP_VERSION ]] || poetry --version
+  [[ -n $SKIP_VERSION ]] || pdm --version
 }
