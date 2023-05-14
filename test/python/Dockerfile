@@ -200,10 +200,6 @@ FROM build as test-pdm
 
 USER 1000
 
-# make as latest
-# renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.3
-
 # renovate: datasource=pypi
 RUN install-tool pdm 2.6.1
 
