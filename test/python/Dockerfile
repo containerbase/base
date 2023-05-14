@@ -194,6 +194,16 @@ RUN set -ex; \
   pipenv lock;
 
 #--------------------------------------
+# test pdm: pdm (multiple python)
+#--------------------------------------
+FROM build as test-pdm
+
+USER 1000
+
+# renovate: datasource=pypi
+RUN install-tool pdm 2.6.1
+
+#--------------------------------------
 # test c: python2.7
 #--------------------------------------
 FROM build-rootless as testc
@@ -232,6 +242,7 @@ COPY --from=test-poetry-d /.dummy /.dummy
 COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
+COPY --from=test-pdm /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
