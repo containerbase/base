@@ -54,7 +54,9 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  curl --retry 3 -sSL https://dot.net/v1/dotnet-install.sh | bash -s - --install-dir "$tool_path" --no-path --version "$TOOL_VERSION" --skip-non-versioned-files
+  curl --retry 3 --retry-all-errors -sSLO https://dot.net/v1/dotnet-install.sh
+  bash dotnet-install.sh --install-dir "$tool_path" --no-path --version "$TOOL_VERSION" --skip-non-versioned-files
+  rm -f dotnet-install.sh
 
   # we need write access to some sub dirs for non root
   if [[ $(is_root) -eq 0 ]]; then
