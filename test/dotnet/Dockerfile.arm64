@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-dotnet
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.203
+RUN install-tool dotnet 7.0.302
 
 #--------------------------------------
 # Image: final
