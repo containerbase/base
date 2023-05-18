@@ -632,10 +632,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.16.6":
-  version: 18.16.6
-  resolution: "@types/node@npm:18.16.6"
-  checksum: 99417418952c0b1a6ff5dd40ccf01c2cd18db6a1c54bfaaff29c700c877e2e541aa31ea33090592f3817adb2b8c0946b86c7fb57049131e7c08252d70075f09b
+"@types/node@npm:18.16.8":
+  version: 18.16.8
+  resolution: "@types/node@npm:18.16.8"
+  checksum: d2ec9b61abd260b0fa1e33e4eca8f0089ebb6f6ec1ad2f036a4d01af11dba4f1dbff95b2a1f5dbe9eab3a6f38ed4bd8bf95eb2de9ad96b1caa1f67671e623c1d
   languageName: node
   linkType: hard
 
@@ -1364,7 +1364,7 @@ __metadata:
   resolution: "containerbase@workspace:."
   dependencies:
     "@semantic-release/exec": 6.0.3
-    "@types/node": 18.16.6
+    "@types/node": 18.16.8
     "@types/shelljs": 0.8.12
     bats: 1.9.0
     bats-assert: 2.0.0
