@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v23.0.6
+RUN install-tool docker v24.0.1
 
 #--------------------------------------
 # Image: git
