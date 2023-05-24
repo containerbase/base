@@ -122,7 +122,7 @@ FROM build as test-php
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.2.6
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.5.5
+RUN install-tool composer 2.5.6
 
 #--------------------------------------
 # Image: test-python
