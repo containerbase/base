@@ -1,9 +1,13 @@
 import { Cli } from 'clipanion';
-//import process from 'node:process';
+import process from 'node:process';
 import { InstallToolCommand } from './command/install-tool';
 
 const [node, app, ...args] = process.argv;
 
+/*
+ * Workaround for linking the cli tool as different executables.
+ * So it can be called as `install-tool node 1.2.3`.
+ */
 if (
   process.argv0.endsWith('/install-tool') ||
   process.argv0 == 'install-tool'
@@ -11,12 +15,14 @@ if (
   args.unshift('install', 'tool');
 }
 
-// console.log(args);
+declare module globalThis {
+  const CONTAINERBASE_VERSION: string | undefined;
+}
 
 const cli = new Cli({
   binaryLabel: `containerbase-cli`,
   binaryName: `${node} ${app}`,
-  binaryVersion: process.env.CONTAINERBASE_VERSION,
+  binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
 });
 
 cli.register(InstallToolCommand);
