@@ -81,6 +81,17 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
   update-ca-certificates
 fi
 
+function link_tool () {
+  local arch=x64
+
+  if [[ "${ARCHITECTURE}" = "aarch64" ]];then
+    arch=arm64
+  fi
+  ln -sf /opt/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
+}
+link_tool
+
+
 # do this at the end as we are overwriting certain env vars and functions
 function prepare_v2_tools () {
   # setup directories for v2 tools

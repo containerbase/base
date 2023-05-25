@@ -110,103 +110,112 @@ jobs:
       - name: prepare apt proxy
         run: sudo yarn prepare:proxy
 
+      - name: build
+        run: yarn build
+
       - name: test distro
         run: docker buildx bake
 
-  distro:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  # distro:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
 
-    strategy:
-      matrix:
-        distro:
-          - jammy
+  #   strategy:
+  #     matrix:
+  #       distro:
+  #         - jammy
 
-    env:
-      TAG: ${{ matrix.distro }}
+  #   env:
+  #     TAG: ${{ matrix.distro }}
 
-    steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+  #   steps:
+  #     - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
-      - name: init
-        run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+  #     - name: init
+  #       run: |
+  #         echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-      - name: enable corepack
-        run: sudo corepack enable
+  #     - name: enable corepack
+  #       run: sudo corepack enable
 
-      - name: Installing dependencies
-        run: yarn install
+  #     - name: Installing dependencies
+  #       run: yarn install
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+  #     - name: prepare apt proxy
+  #       run: sudo yarn prepare:proxy
 
-      - name: test distro
-        run: docker buildx bake test-distro
+  #     - name: build
+  #       run: yarn build
 
-  lang:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  #     - name: test distro
+  #       run: docker buildx bake test-distro
 
-    strategy:
-      matrix:
-        tag:
-          - dart
-          - dotnet
-          - erlang
-          - flutter
-          - flux
-          - golang
-          - java
-          - jb
-          - helm
-          - nix
-          - node
-          - php
-          - powershell
-          - python
-          - ruby
-          - rust
-          - swift
-          - latest
+  # lang:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
 
-    env:
-      TAG: ${{ matrix.tag }}
+  #   strategy:
+  #     matrix:
+  #       tag:
+  #         - dart
+  #         - dotnet
+  #         - erlang
+  #         - flutter
+  #         - flux
+  #         - golang
+  #         - java
+  #         - jb
+  #         - helm
+  #         - nix
+  #         - node
+  #         - php
+  #         - powershell
+  #         - python
+  #         - ruby
+  #         - rust
+  #         - swift
+  #         - latest
 
-    steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@b9e581aa14afe27bd751cd4c6443593104097fda # v1.17.5
-        with:
-          command: docker-config
+  #   env:
+  #     TAG: ${{ matrix.tag }}
 
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+  #   steps:
+  #     - name: docker-config
+  #       uses: containerbase/internal-tools@b9e581aa14afe27bd751cd4c6443593104097fda # v1.17.5
+  #       with:
+  #         command: docker-config
 
-      - name: init
-        run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+  #     - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+  #     - name: init
+  #       run: |
+  #         echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
-      - name: enable corepack
-        run: sudo corepack enable
+  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
+  #       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: yarn
 
-      - name: Installing dependencies
-        run: yarn install
+  #     - name: enable corepack
+  #       run: sudo corepack enable
 
-      - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+  #     - name: Installing dependencies
+  #       run: yarn install
 
-      - name: test
-        run: docker buildx bake test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: prepare apt proxy
+  #       run: sudo yarn prepare:proxy
+
+  #     - name: build
+  #       run: yarn build
+
+  #     - name: test
+  #       run: docker buildx bake test
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

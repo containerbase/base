@@ -28,6 +28,12 @@ if (r.code) {
   shell.exit(1);
 }
 
+// compile the cli
+r = shell.exec('yarn build:cli');
+if (r.code) {
+  shell.exit(1);
+}
+
 r = shell.exec(
   'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
 );
