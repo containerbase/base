@@ -10,10 +10,11 @@ import {
 import type { CliMode } from '../utils';
 import { prepareToolVersion } from './install-tools/utils';
 import { logger } from '../utils/logger';
+import process from 'node:process';
 
 export function prepareCommands(
   cli: Cli,
-  mode: CliMode,
+  mode: CliMode | null,
   args: string[]
 ): string[] {
   logger.debug('prepare commands');
@@ -30,4 +31,18 @@ export function prepareCommands(
   cli.register(InstallToolLegacyCommand);
   cli.register(InstallToolNodeCommand);
   return prepareToolVersion(mode, args);
+}
+
+export function parseBinaryName(
+  mode: CliMode | null,
+  node: string,
+  app: string
+): string | undefined {
+  if (mode) {
+    return mode;
+  }
+
+  return process.argv0.endsWith('/node') || process.argv0 === 'node'
+    ? `${node} ${app}`
+    : process.argv0;
 }

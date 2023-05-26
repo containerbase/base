@@ -1,6 +1,9 @@
 import type { CliMode } from '../../utils';
 
-export function prepareToolVersion(mode: CliMode, args: string[]): string[] {
+export function prepareToolVersion(
+  mode: CliMode | null,
+  args: string[]
+): string[] {
   switch (mode) {
     case 'install-tool': {
       if (args.length === 1) {
@@ -9,7 +12,8 @@ export function prepareToolVersion(mode: CliMode, args: string[]): string[] {
       }
       break;
     }
-    case 'containerbase-cli': {
+    case 'containerbase-cli':
+    default: {
       if (args.length === 2) {
         // containerbase-cli it node
         appendVersion(args, 1);

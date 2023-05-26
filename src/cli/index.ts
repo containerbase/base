@@ -2,23 +2,23 @@
 
 import { Builtins, Cli } from 'clipanion';
 import process from 'node:process';
-import { prepareCommands } from './command';
-import { cliMode, validateSystem } from './utils';
-
-const [node, app, ...args] = process.argv;
+import { parseBinaryName, prepareCommands } from './command';
+import { cliMode, logger, validateSystem } from './utils';
 
 declare module globalThis {
   const CONTAINERBASE_VERSION: string | undefined;
 }
 
 async function main() {
+  logger.trace({ argv0: process.argv0, argv: process.argv }, 'main');
   await validateSystem();
 
   const mode = cliMode();
+  const [node, app, ...args] = process.argv;
 
   const cli = new Cli({
     binaryLabel: `containerbase-cli`,
-    binaryName: mode ? mode : `${node} ${app}`,
+    binaryName: parseBinaryName(mode, node, app),
     binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
   });
 
