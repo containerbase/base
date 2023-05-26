@@ -89,6 +89,7 @@ function link_tool () {
   fi
   ln -sf /opt/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/containerbase-cli
   ln -sf /opt/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
+  ln -sf /opt/containerbase/version /usr/local/buildpack/version
 }
 link_tool
 

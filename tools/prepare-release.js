@@ -8,11 +8,13 @@ shell.echo(`Preparing version: ${version}`);
 process.env.TAG = version;
 process.env.CONTAINERBASE_VERSION = version;
 
-shell.mkdir('-p', 'bin');
+shell.mkdir('-p', 'bin', 'src/opt/containerbase');
 
-await fs.writeFile('src/usr/local/buildpack/version', version);
+await fs.writeFile('src/opt/containerbase/version', version);
 
-let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
+let r = shell.exec(
+  `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`
+);
 if (r.code) {
   shell.exit(1);
 }

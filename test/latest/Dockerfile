@@ -150,6 +150,7 @@ COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 # Set up containerbase
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=build /opt/containerbase/ /opt/containerbase/
 RUN install-containerbase
 
 # validate custom cert

@@ -3,6 +3,7 @@ node_modules/
 /bin
 /src/usr/local/buildpack/version
 /src/opt/containerbase/bin/containerbase-cli-*
+/src/opt/containerbase/version
 /dist
 
 
