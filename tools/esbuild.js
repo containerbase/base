@@ -1,26 +1,50 @@
 import { build } from 'esbuild';
 import { exec } from 'pkg';
+import esbuildPLuginPino from 'esbuild-plugin-pino';
+import fs from 'node:fs/promises';
 
 await build({
-  entryPoints: ['src/cli/index.ts'],
+  entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
   bundle: true,
   platform: 'node',
   target: 'node18',
   minify: false,
+  tsconfig: 'src/cli/tsconfig.json',
   // format: "esm", // not supoorted
-  outfile: './dist/containerbase-cli.js',
+  outdir: './dist/',
   define: {
     'globalThis.CONTAINERBASE_VERSION': `"${
       process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER'
     }"`,
   },
+  plugins: [esbuildPLuginPino({ transports: ['pino-pretty'] })],
 });
 
+await fs.writeFile(
+  './dist/package.json',
+  JSON.stringify(
+    {
+      name: 'containerbase-cli',
+      version: process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
+      private: true,
+      type: 'commonjs',
+      bin: {
+        'containerbase-cli': './containerbase-cli.js',
+      },
+      pkg: {
+        scripts: ['*.js'],
+        targets: ['node18-linux-x64', 'node18-linux-arm64'],
+      },
+    },
+    undefined,
+    2
+  )
+);
+
 await exec([
-  '--targets',
-  'node18-linux-x64,node18-linux-arm64',
   '--out-path',
   './src/opt/containerbase/bin',
   '--public',
-  './dist/containerbase-cli.js',
+  // '--debug',
+  'dist',
 ]);
