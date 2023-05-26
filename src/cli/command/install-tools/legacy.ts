@@ -1,6 +1,7 @@
 import { Command, Option } from 'clipanion';
 import { execa } from 'execa';
-import { logger } from '../../utils';
+import { logger, validateVersion } from '../../utils';
+import t from 'typanion';
 
 export class InstallToolLegacyCommand extends Command {
   static paths = [['install', 'tool'], ['it']];
@@ -18,7 +19,10 @@ export class InstallToolLegacyCommand extends Command {
 
   name = Option.String({ required: true });
 
-  version = Option.String({ required: true });
+  version = Option.String({
+    required: true,
+    validator: t.cascade(t.isString(), validateVersion()),
+  });
 
   async execute(): Promise<number | void> {
     logger.info(`Installing legacy tool ${this.name} v${this.version}...`);

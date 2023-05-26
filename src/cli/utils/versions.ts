@@ -24,3 +24,23 @@ export function validateSemver(): StrictValidator<string, string> {
     },
   });
 }
+
+export function validateVersion(): StrictValidator<string, string> {
+  return makeValidator<string, string>({
+    test: (value, state): value is string => {
+      if (value.startsWith('v')) {
+        if (state?.coercions) {
+          if (!state.coercion) {
+            state.errors?.push(`${state?.p ?? '.'}: Unbound coercion result`);
+            return false;
+          }
+          state.coercions.push([
+            state.p ?? '.',
+            state.coercion.bind(null, value.slice(1)),
+          ]);
+        }
+      }
+      return true;
+    },
+  });
+}

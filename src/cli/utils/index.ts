@@ -2,9 +2,9 @@ import process from 'node:process';
 import type { CliMode } from './types';
 
 export type * from './types';
-export { validateSemver } from './versions';
-export { logger } from './logger';
-export { getDistro, validateSystem } from './common';
+export * from './versions';
+export * from './logger';
+export * from './common';
 
 export function cliMode(): CliMode | null {
   if (
