@@ -1,4 +1,4 @@
-import { Cli } from 'clipanion';
+import { Builtins, Cli } from 'clipanion';
 import process from 'node:process';
 import { InstallToolCommand } from './command/install-tool';
 
@@ -25,5 +25,6 @@ const cli = new Cli({
   binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
 });
 
+cli.register(Builtins.HelpCommand);
 cli.register(InstallToolCommand);
 cli.runExit(args);
