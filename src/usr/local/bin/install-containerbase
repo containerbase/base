@@ -87,6 +87,7 @@ function link_tool () {
   if [[ "${ARCHITECTURE}" = "aarch64" ]];then
     arch=arm64
   fi
+  ln -sf /opt/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/containerbase-cli
   ln -sf /opt/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
 }
 link_tool
