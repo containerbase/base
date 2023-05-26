@@ -11,8 +11,10 @@ export async function validateSystem(): Promise<never | void> {
     logger.fatal(`Unsupported platform: ${os.platform()}! Please use Linux.`);
     process.exit(1);
   }
-  if (os.arch() !== 'x64') {
-    logger.fatal(`Unsupported architecture: ${os.arch()}! Please use x64.`);
+  if (os.arch() !== 'x64' && os.arch() !== 'arm64') {
+    logger.fatal(
+      `Unsupported architecture: ${os.arch()}! Please use 'x64' or 'arm64'.`
+    );
     process.exit(1);
   }
   const d = await (distro ??= readDistro());
