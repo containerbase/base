@@ -17,6 +17,7 @@
     "@semantic-release/exec": "6.0.3",
     "@tsconfig/node18": "2.0.1",
     "@types/node": "18.16.13",
+    "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
     "bats": "1.9.0",
     "bats-assert": "2.0.0",
@@ -24,6 +25,7 @@
     "commander": "10.0.1",
     "conventional-changelog-conventionalcommits": "5.0.0",
     "esbuild": "0.17.19",
+    "esbuild-plugin-pino": "2.0.0",
     "husky": "8.0.3",
     "lint-staged": "13.2.2",
     "npm-run-all": "4.1.5",
@@ -52,6 +54,10 @@
   "dependencies": {
     "clipanion": "3.2.0",
     "execa": "7.1.1",
-    "got": "12.6.0"
+    "got": "12.6.0",
+    "pino": "8.14.1",
+    "pino-pretty": "10.0.0",
+    "semver": "7.5.1",
+    "typanion": "3.12.1"
   }
 }
