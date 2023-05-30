@@ -1,6 +1,6 @@
 import { build } from 'esbuild';
 import { exec } from 'pkg';
-import esbuildPLuginPino from 'esbuild-plugin-pino';
+import esbuildPluginPino from 'esbuild-plugin-pino';
 import fs from 'node:fs/promises';
 
 await build({
@@ -17,7 +17,7 @@ await build({
       process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER'
     }"`,
   },
-  plugins: [esbuildPLuginPino({ transports: ['pino-pretty'] })],
+  plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
 });
 
 await fs.writeFile(
