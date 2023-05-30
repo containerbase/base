@@ -55,6 +55,7 @@
         "helmfile",
         "lerna",
         "npm",
+        "pdm",
         "pipenv",
         "poetry",
         "pnpm",
