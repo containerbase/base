@@ -1,5 +1,0 @@
-#!/bin/bash
-
-echo "WARNING: Command is deprecated and will be removed soon" >&2
-
-install-containerbase

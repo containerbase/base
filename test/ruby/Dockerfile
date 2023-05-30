@@ -72,7 +72,7 @@ FROM build as test-bundler-b
 RUN gem install bundler -v 1.17.2
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem bundler 2.4.13
+RUN install-tool bundler 2.4.13
 
 USER 1000
 
@@ -158,12 +158,12 @@ RUN set -ex; \
   pod install;
 
 #--------------------------------------
-# test: global cocoapods (install-gem)
+# test: global cocoapods (gem install, root)
 #--------------------------------------
 FROM build3 as test-cocoapods-b
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.12.1
+RUN gem install cocoapods 1.12.1
 
 USER 1000
 
@@ -191,26 +191,6 @@ RUN set -ex; \
   pod install;
 
 #--------------------------------------
-# test: cocoapods (install-gem, non-root)
-#--------------------------------------
-FROM base as test-cocoapods-d
-
-RUN prepare-tool ruby
-
-USER 1000
-
-# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.2
-
-# renovate: datasource=rubygems versioning=ruby
-RUN install-gem cocoapods 1.12.1
-
-RUN set -ex; \
-  cd b/Project; \
-  gem install cocoapods-acknowledgements; \
-  pod install;
-
-#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -222,4 +202,3 @@ COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
-COPY --from=test-cocoapods-d /.dummy /.dummy

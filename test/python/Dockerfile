@@ -148,7 +148,7 @@ RUN set -ex; \
 FROM build-rootless as testb
 
 # renovate: datasource=pypi
-RUN install-pip pipenv 2023.5.19
+RUN install-tool pipenv 2023.5.19
 
 RUN set -ex; \
   cd a; \
