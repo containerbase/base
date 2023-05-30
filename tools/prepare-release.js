@@ -1,36 +1,44 @@
 import fs from 'fs/promises';
+import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
-import { opts } from './utils.js';
 
-const version = opts.release;
+class PrepareCommand extends Command {
+  release = Option.String('-r, --release', { required: true });
 
-shell.echo(`Preparing version: ${version}`);
-process.env.TAG = version;
-process.env.CONTAINERBASE_VERSION = version;
+  async execute() {
+    const version = this.release;
 
-shell.mkdir('-p', 'bin');
+    shell.echo(`Preparing version: ${version}`);
+    process.env.TAG = version;
+    process.env.CONTAINERBASE_VERSION = version;
 
-await fs.writeFile('src/usr/local/buildpack/version', version);
+    shell.mkdir('-p', 'bin');
 
-let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
-if (r.code) {
-  shell.exit(1);
+    await fs.writeFile('src/usr/local/buildpack/version', version);
+
+    let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
+    if (r.code) {
+      return 1;
+    }
+
+    r = shell.exec('sha512sum ./bin/containerbase.tar.xz');
+    if (r.code) {
+      return 1;
+    }
+    r.to('./bin/containerbase.tar.xz.sha512');
+
+    r = shell.cp('./bin/containerbase.tar.xz', './bin/buildpack.tar.xz');
+    if (r.code) {
+      shell.exit(1);
+    }
+
+    r = shell.exec(
+      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
+    );
+    if (r.code) {
+      return 1;
+    }
+  }
 }
 
-r = shell.exec('sha512sum ./bin/containerbase.tar.xz');
-if (r.code) {
-  shell.exit(1);
-}
-r.to('./bin/containerbase.tar.xz.sha512');
-
-r = shell.cp('./bin/containerbase.tar.xz', './bin/buildpack.tar.xz');
-if (r.code) {
-  shell.exit(1);
-}
-
-r = shell.exec(
-  'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
-);
-if (r.code) {
-  shell.exit(1);
-}
+void runExit(PrepareCommand);
