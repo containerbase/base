@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import process from 'node:process';
+import { argv, argv0 } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
 import { parseBinaryName, prepareCommands } from './command';
 import { cliMode, logger, validateSystem } from './utils';
@@ -12,11 +12,11 @@ declare global {
 }
 
 async function main(): Promise<void> {
-  logger.trace({ argv0: process.argv0, argv: process.argv }, 'main');
+  logger.trace({ argv0, argv }, 'main');
   await validateSystem();
 
   const mode = cliMode();
-  const [node, app, ...args] = process.argv;
+  const [node, app, ...args] = argv;
 
   const cli = new Cli({
     binaryLabel: `containerbase-cli`,
@@ -29,4 +29,4 @@ async function main(): Promise<void> {
   await cli.runExit(prepareCommands(cli, mode, args));
 }
 
-void (async () => await main())();
+void main();

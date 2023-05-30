@@ -1,4 +1,4 @@
-import process from 'node:process';
+import { argv0 } from 'node:process';
 import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
@@ -42,7 +42,5 @@ export function parseBinaryName(
     return mode;
   }
 
-  return process.argv0.endsWith('/node') || process.argv0 === 'node'
-    ? `${node} ${app}`
-    : process.argv0;
+  return argv0.endsWith('/node') || argv0 === 'node' ? `${node} ${app}` : argv0;
 }

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
-import process from 'node:process';
+import { exit } from 'node:process';
 import { logger } from './logger';
 import type { Distro } from './types';
 
@@ -9,13 +9,13 @@ let distro: undefined | Promise<Distro>;
 export async function validateSystem(): Promise<never | void> {
   if (os.platform() !== 'linux') {
     logger.fatal(`Unsupported platform: ${os.platform()}! Please use Linux.`);
-    process.exit(1);
+    exit(1);
   }
   if (os.arch() !== 'x64' && os.arch() !== 'arm64') {
     logger.fatal(
       `Unsupported architecture: ${os.arch()}! Please use 'x64' or 'arm64'.`
     );
-    process.exit(1);
+    exit(1);
   }
   const d = await (distro ??= readDistro());
   switch (d.versionCode) {
@@ -27,7 +27,7 @@ export async function validateSystem(): Promise<never | void> {
         { distro: d },
         `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal' or 'jammy'.`
       );
-      process.exit(1);
+      exit(1);
   }
 }
 

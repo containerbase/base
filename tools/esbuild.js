@@ -10,7 +10,7 @@ await build({
   target: 'node18',
   minify: false,
   tsconfig: 'src/cli/tsconfig.json',
-  // format: "esm", // not supoorted
+  // format: "esm", // not supported
   outdir: './dist/',
   define: {
     'globalThis.CONTAINERBASE_VERSION': `"${

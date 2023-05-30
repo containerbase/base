@@ -7,7 +7,7 @@ export class InstallToolLegacyCommand extends Command {
   static paths = [['install', 'tool'], ['it']];
 
   static usage = Command.Usage({
-    description: 'Installs a tool into the container.',
+    description: 'Installs a legacy bash scripted tool into the container.',
     examples: [
       ['Installs node 14.17.0', '$0 install tool node 14.17.0'],
       [
