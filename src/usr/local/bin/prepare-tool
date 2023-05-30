@@ -2,14 +2,14 @@
 
 set -e
 
-TOOL_PATH="/usr/local/buildpack/tools/v2"
 
 # shellcheck source=/dev/null
-. /usr/local/buildpack/util.sh
+. /opt/containerbase/util.sh
 
 require_root
 
 TOOLS=( "$@" )
+TOOL_PATH="/${CONTAINERBASE_DIR}/tools/v2"
 
 # special case if only 'all' is given
 if [ "$#" -eq 1 ] && [ "${TOOLS[0]}" == "all" ]; then
@@ -23,7 +23,7 @@ for tool in "${TOOLS[@]}"
 do
   # TODO: find better way to reset env
   # shellcheck source=/dev/null
-  . /usr/local/buildpack/util.sh
+  . "/${CONTAINERBASE_DIR}/util.sh"
   prepare_tools "${tool}"
 done
 

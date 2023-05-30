@@ -3,7 +3,7 @@
 # Will overwrite certain util functions to make them testable
 
 # set directories for test
-export BUILDPACK_DIR="${TEST_DIR}/../../../src/usr/local/buildpack"
+export CONTAINERBASE_DIR="${TEST_DIR}/../../../src/opt/containerbase"
 export ROOT_DIR="${TEST_ROOT_DIR}/root"
 export BIN_DIR="${TEST_ROOT_DIR}/bin"
 export USER_HOME="${TEST_ROOT_DIR}/userhome"

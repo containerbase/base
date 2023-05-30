@@ -13,11 +13,11 @@ function prepare_tools () {
     return
   fi
 
-  TOOL="${ROOT_DIR}/buildpack/tools/v2/${TOOL_NAME}.sh"
+  TOOL="${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"
 
   # load overrides needed for v2 tools
   # shellcheck source=/dev/null
-  . "${ROOT_DIR}/buildpack/utils/v2/overrides.sh"
+  . "${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
 
   if [[ -f "$TOOL" ]]; then
     # shellcheck source=/dev/null

@@ -8,7 +8,7 @@ RUN touch /.dummy
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-ENV BASH_ENV=/usr/local/etc/env
+ENV BASH_ENV=/opt/containerbase/env
 SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
@@ -142,14 +142,14 @@ ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
 # Set env and shell
-ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/opt/containerbase/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
 COPY --from=build /usr/local/bin/ /usr/local/bin/
-COPY --from=build /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=build /opt/containerbase/ /opt/containerbase/
 RUN install-containerbase
 
 # validate custom cert

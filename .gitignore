@@ -2,6 +2,7 @@
 node_modules/
 /bin
 /src/usr/local/buildpack/version
+/src/opt/containerbase/version
 
 .eslintcache
 

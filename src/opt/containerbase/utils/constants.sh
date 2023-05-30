@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # defines the location of the env file that gets sourced for every command
-export ENV_FILE=/usr/local/etc/env
+export ENV_FILE=/opt/containerbase/env
 # defines the location of the global bashrc
 export BASH_RC=/etc/bash.bashrc
 # defines the root directory where tools will be installed
@@ -26,7 +26,7 @@ export CONTAINERBASE_MAX_ALLOCATED_DISK=${CONTAINERBASE_MAX_ALLOCATED_DISK:-$BUI
 export TEMP_DIR=/tmp
 
 # used to source helper from tools
-export BUILDPACK_DIR=$ROOT_DIR/buildpack
+export CONTAINERBASE_DIR=/opt/containerbase
 
 # Used to find matching tool downloads
 ARCHITECTURE=$(uname -p)

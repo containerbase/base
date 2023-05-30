@@ -15,7 +15,7 @@ if [[ -z "${USER_ID}" ]]; then
 fi
 
 # shellcheck source=/dev/null
-. /usr/local/buildpack/util.sh
+. /opt/containerbase/util.sh
 
 if [[ -n "${BASH_ENV}" && "${BASH_ENV}" != "${ENV_FILE}" ]]; then
   echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
@@ -81,11 +81,14 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
   update-ca-certificates
 fi
 
+# Compabillity
+ln -sf /opt/containerbase /usr/local/buildpack
+
 # do this at the end as we are overwriting certain env vars and functions
 function prepare_v2_tools () {
   # setup directories for v2 tools
   # shellcheck source=/dev/null
-  . /usr/local/buildpack/utils/v2/overrides.sh
+  . /opt/containerbase/utils/v2/overrides.sh
 
   setup_directories
 }

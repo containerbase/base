@@ -3,7 +3,7 @@
 set -e
 
 # shellcheck source=/dev/null
-. /usr/local/buildpack/util.sh
+. /opt/containerbase/util.sh
 
 require_arch
 require_distro
@@ -15,8 +15,8 @@ if [[ $(ignore_tool) -eq 1 ]]; then
   exit 0;
 fi
 
-TOOL="/usr/local/buildpack/tools/${TOOL_NAME}.sh"
-V2_TOOL="/usr/local/buildpack/tools/v2/${TOOL_NAME}.sh"
+TOOL="/${CONTAINERBASE_DIR}/tools/${TOOL_NAME}.sh"
+V2_TOOL="/${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"
 
 if [[ -f "$V2_TOOL" ]]; then
   # install v2 tool

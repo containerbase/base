@@ -15,10 +15,6 @@
           {
             "path": "bin/containerbase.tar.xz.sha512",
             "label": "containerbase.tar.xz.sha512"
-          },
-          {
-            "path": "bin/buildpack.tar.xz",
-            "label": "buildpack.tar.xz"
           }
         ]
       }
