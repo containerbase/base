@@ -54,7 +54,7 @@ RUN npm --version
 USER 0
 
 # renovate: datasource=npm
-RUN npm install -g re2 1.16.0
+RUN npm install -g re2@1.16.0
 
 #--------------------------------------
 # test: yarn
@@ -205,7 +205,7 @@ SHELL [ "/bin/sh", "-c" ]
 
 USER root
 # don't update!!
-RUN set -ex; npm install -g npm 8.0.0
+RUN set -ex; npm install -g npm@8.0.0
 
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
