@@ -44,7 +44,9 @@ jobs:
         run: yarn install
 
       - name: lint
-        run: yarn lint
+        run: |
+          yarn eslint -f gha
+          yarn prettier
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}

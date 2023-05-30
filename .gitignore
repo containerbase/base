@@ -3,6 +3,7 @@ node_modules/
 /bin
 /src/usr/local/buildpack/version
 
+.eslintcache
 
 # yarn v2+ https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .pnp.*
