@@ -35,7 +35,7 @@
     "bats": "1.9.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
-    "commander": "10.0.1",
+    "clipanion": "3.2.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
     "eslint": "8.41.0",
     "eslint-config-prettier": "8.8.0",
