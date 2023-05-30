@@ -1,5 +1,5 @@
-import shell from 'shelljs';
 import { promises as fs } from 'fs';
+import shell from 'shelljs';
 
 shell.config.fatal = true;
 

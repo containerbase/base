@@ -1,38 +1,47 @@
+import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
-import { opts } from './utils.js';
 
-const version = opts.release;
-const dry = opts.dryRun;
-/** @type {shell.ShellString} */
-let r;
+class PrepareCommand extends Command {
+  release = Option.String('-r, --release', { required: true });
+  dryRun = Option.Boolean('-d, --dry-run', { required: false });
 
-shell.echo(`Publish version: ${version}`);
-process.env.TAG = version;
+  execute() {
+    const version = this.release;
+    const dry = this.dryRun;
+    /** @type {shell.ShellString} */
+    let r;
 
-if (dry) {
-  shell.echo('DRY-RUN: done.');
-  shell.exit(0);
+    shell.echo(`Publish version: ${version}`);
+    process.env.TAG = version;
+
+    if (dry) {
+      shell.echo('DRY-RUN: done.');
+      return;
+    }
+
+    shell.echo('Pushing docker images');
+
+    r = shell.exec(
+      'docker buildx bake --provenance=false --set settings.platform=linux/amd64,linux/arm64 push'
+    );
+    if (r.code) {
+      return 1;
+    }
+
+    r = shell.exec(
+      `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+    );
+    if (r.code) {
+      return 1;
+    }
+
+    r = shell.exec(
+      `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+    );
+    if (r.code) {
+      return 1;
+    }
+  }
 }
 
-shell.echo('Pushing docker images');
-
-r = shell.exec(
-  'docker buildx bake --provenance=false --set settings.platform=linux/amd64,linux/arm64 push'
-);
-if (r.code) {
-  shell.exit(1);
-}
-
-r = shell.exec(
-  `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
-);
-if (r.code) {
-  shell.exit(1);
-}
-
-r = shell.exec(
-  `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
-);
-if (r.code) {
-  shell.exit(1);
-}
+void runExit(PrepareCommand);

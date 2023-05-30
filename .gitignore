@@ -6,6 +6,7 @@ node_modules/
 /src/opt/containerbase/version
 /dist
 
+.eslintcache
 
 # yarn v2+ https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .pnp.*

@@ -2,5 +2,6 @@
   "*.sh": "shellcheck",
   ".husky/*": "shellcheck",
   "src/usr/local/bin/*": "shellcheck",
+  "*.{js,ts,cjs,mjs}": "eslint --fix",
   "*": "prettier --ignore-unknown --write"
 }
