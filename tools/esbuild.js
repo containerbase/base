@@ -10,7 +10,7 @@ await build({
   target: 'node18',
   minify: false,
   tsconfig: 'src/cli/tsconfig.json',
-  // format: "esm", // not supported
+  // format: "esm", // not supported https://github.com/vercel/pkg/issues/1291
   outdir: './dist/',
   define: {
     'globalThis.CONTAINERBASE_VERSION': `"${
