@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import process from 'node:process';
-import type { Distro } from './types';
 import { logger } from './logger';
+import type { Distro } from './types';
 
 let distro: undefined | Promise<Distro>;
 

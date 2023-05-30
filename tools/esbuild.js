@@ -1,7 +1,7 @@
-import { build } from 'esbuild';
-import { exec } from 'pkg';
-import esbuildPluginPino from 'esbuild-plugin-pino';
 import fs from 'node:fs/promises';
+import { build } from 'esbuild';
+import esbuildPluginPino from 'esbuild-plugin-pino';
+import { exec } from 'pkg';
 
 await build({
   entryPoints: { 'containerbase-cli': './src/cli/index.ts' },

@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
 import { execa } from 'execa';
+import * as t from 'typanion';
 import { logger, validateVersion } from '../../utils';
-import t from 'typanion';
 
 export class InstallToolLegacyCommand extends Command {
   static paths = [['install', 'tool'], ['it']];

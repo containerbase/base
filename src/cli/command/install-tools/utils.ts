@@ -26,7 +26,8 @@ export function prepareToolVersion(
   }
   return args;
 }
-function appendVersion(args: string[], index: number) {
+
+function appendVersion(args: string[], index: number): void {
   const tool = args.at(index)!;
   const version =
     process.env[tool.replace('-', '_').toUpperCase() + '_VERSION'];

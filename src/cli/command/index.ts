@@ -1,4 +1,7 @@
+import process from 'node:process';
 import type { Cli } from 'clipanion';
+import type { CliMode } from '../utils';
+import { logger } from '../utils/logger';
 import {
   InstallToolLegacyCommand,
   InstallToolLegacyShortCommand,
@@ -7,10 +10,7 @@ import {
   InstallToolNodeCommand,
   InstallToolNodeShortCommand,
 } from './install-tools/node';
-import type { CliMode } from '../utils';
 import { prepareToolVersion } from './install-tools/utils';
-import { logger } from '../utils/logger';
-import process from 'node:process';
 
 export function prepareCommands(
   cli: Cli,
@@ -22,7 +22,7 @@ export function prepareCommands(
    * Workaround for linking the cli tool as different executables.
    * So it can be called as `install-tool node 1.2.3`.
    */
-  if (mode == 'install-tool') {
+  if (mode === 'install-tool') {
     cli.register(InstallToolLegacyShortCommand);
     cli.register(InstallToolNodeShortCommand);
     return prepareToolVersion(mode, args);

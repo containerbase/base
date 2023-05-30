@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
 import { execa } from 'execa';
-import { validateSemver, logger } from '../../utils';
-import t from 'typanion';
+import * as t from 'typanion';
+import { logger, validateSemver } from '../../utils';
 
 export class InstallToolNodeCommand extends Command {
   static paths = [

@@ -9,13 +9,13 @@ export * from './common';
 export function cliMode(): CliMode | null {
   if (
     process.argv0.endsWith('/install-tool') ||
-    process.argv0 == 'install-tool'
+    process.argv0 === 'install-tool'
   ) {
     return 'install-tool';
   }
   if (
     process.argv0.endsWith('/install-tool') ||
-    process.argv0 == 'install-tool'
+    process.argv0 === 'install-tool'
   ) {
     return 'containerbase-cli';
   }

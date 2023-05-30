@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
-import { Builtins, Cli } from 'clipanion';
 import process from 'node:process';
+import { Builtins, Cli } from 'clipanion';
 import { parseBinaryName, prepareCommands } from './command';
 import { cliMode, logger, validateSystem } from './utils';
 
-declare module globalThis {
-  const CONTAINERBASE_VERSION: string | undefined;
+declare global {
+  // needs to be this to make eslint happy
+  // eslint-disable-next-line no-var
+  var CONTAINERBASE_VERSION: string | undefined;
 }
 
-async function main() {
+async function main(): Promise<void> {
   logger.trace({ argv0: process.argv0, argv: process.argv }, 'main');
   await validateSystem();
 
@@ -24,7 +26,7 @@ async function main() {
 
   cli.register(Builtins.HelpCommand);
 
-  cli.runExit(prepareCommands(cli, mode, args));
+  await cli.runExit(prepareCommands(cli, mode, args));
 }
 
-(async () => await main())();
+void (async () => await main())();
