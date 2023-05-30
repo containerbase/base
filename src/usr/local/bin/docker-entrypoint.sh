@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ -f "/opt/containerbase/env" && -z "${CONTAINERBASE_ENV+x}" ]]; then
+if [[ -f "/usr/local/etc/env" && -z "${CONTAINERBASE_ENV+x}" ]]; then
     # shellcheck source=/dev/null
-  . /opt/containerbase/env
+  . /usr/local/etc/env
 fi
 
 exec dumb-init -- "$@"

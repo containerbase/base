@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # defines the location of the env file that gets sourced for every command
-export ENV_FILE=/opt/containerbase/env
+export ENV_FILE=/usr/local/etc/env
 # defines the location of the global bashrc
 export BASH_RC=/etc/bash.bashrc
 # defines the root directory where tools will be installed

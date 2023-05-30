@@ -8,7 +8,7 @@ RUN touch /.dummy
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-ENV BASH_ENV=/opt/containerbase/env
+ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 COPY src/ /
@@ -142,7 +142,7 @@ ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
 # Set env and shell
-ENV BASH_ENV=/opt/containerbase/env PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt

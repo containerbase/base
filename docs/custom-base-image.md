@@ -21,7 +21,7 @@ FROM amd64/ubuntu:focal as base
 ARG APT_HTTP_PROXY
 
 # Set env and shell
-ENV BASH_ENV=/opt/containerbase/env ENV=/opt/containerbase/env PATH=/home/ubuntu/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/ubuntu/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 # This entry point ensures that dumb-init is run
@@ -67,7 +67,7 @@ ARG USER_ID=1005
 ARG APT_HTTP_PROXY
 
 # Set env and shell
-ENV BASH_ENV=/opt/containerbase/env ENV=/opt/containerbase/env PATH=/home/$USER_NAME/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
 # This entry point ensures that dumb-init is run
