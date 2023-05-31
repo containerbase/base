@@ -93,7 +93,7 @@ function prepare_v2_tools () {
 prepare_v2_tools
 
 
-# Compabillity, will be removed on v8
+# Compabillity, will be removed on future major
 ln -sf /usr/local/containerbase /usr/local/buildpack
 ln -sf /opt/containerbase /opt/buildpack
 
