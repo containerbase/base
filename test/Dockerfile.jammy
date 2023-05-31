@@ -60,7 +60,7 @@ RUN install-tool helmfile v0.154.0
 RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.15.1
+RUN install-tool nix 2.16.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.3.4
