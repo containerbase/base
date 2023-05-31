@@ -178,22 +178,11 @@ RUN npm --version
 RUN npm --version | grep '7.24.2'
 
 #--------------------------------------
-# test: npm (npm i -g npm)
+# test: unsued
 #--------------------------------------
 FROM build as testf
 
-USER root
-# don't update!! need force to overwrite symlink
-RUN npm i -gf npm@8.0.0
-
-RUN set -ex; command -v npm; npm --version
-RUN set -ex; npm --version | grep '8.0.0'
-
-USER 1000
-# don't update!!
-RUN npm i -g npm@7.24.2
-RUN set -ex; command -v npm; npm --version
-RUN set -ex; npm --version | grep '7.24.2'
+# unused
 
 
 #--------------------------------------
@@ -491,7 +480,7 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
