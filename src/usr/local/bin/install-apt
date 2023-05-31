@@ -3,7 +3,7 @@
 set -e
 
 # shellcheck source=/dev/null
-. /opt/containerbase/util.sh
+. /usr/local/containerbase/util.sh
 
 require_root
 

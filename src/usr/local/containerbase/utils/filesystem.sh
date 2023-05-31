@@ -137,7 +137,7 @@ function get_umask () {
 
 
 # Gets the path to the containerbase folder
-function get_buildpack_path () {
+function get_containerbase_path () {
   echo "${CONTAINERBASE_DIR}"
 }
 

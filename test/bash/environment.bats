@@ -5,7 +5,7 @@ setup() {
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
 
-  load "$TEST_DIR/../../src/opt/containerbase/util.sh"
+  load "$TEST_DIR/../../src/usr/local/containerbase/util.sh"
 
   # load test overwrites
   load "$TEST_DIR/util.sh"

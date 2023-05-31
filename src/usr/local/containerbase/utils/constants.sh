@@ -26,7 +26,7 @@ export CONTAINERBASE_MAX_ALLOCATED_DISK=${CONTAINERBASE_MAX_ALLOCATED_DISK:-$BUI
 export TEMP_DIR=/tmp
 
 # used to source helper from tools
-export CONTAINERBASE_DIR=/opt/containerbase
+export CONTAINERBASE_DIR=/usr/local/containerbase
 
 # Used to find matching tool downloads
 ARCHITECTURE=$(uname -p)

@@ -7,10 +7,10 @@ setup() {
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
 
-  load "$TEST_DIR/../../src/opt/containerbase/util.sh"
+  load "$TEST_DIR/../../src/usr/local/containerbase/util.sh"
 
   # load v2 overwrites
-  load "$TEST_DIR/../../src/opt/containerbase/utils/v2/overrides.sh"
+  load "$TEST_DIR/../../src/usr/local/containerbase/utils/v2/overrides.sh"
 
   # load test overwrites
   load "$TEST_DIR/util.sh"
@@ -24,12 +24,12 @@ setup() {
   setup_directories
 
   # copy containerbase files
-  cp -r "$TEST_DIR/../../src/opt/containerbase" "${ROOT_DIR}/buildpack"
+  cp -r "$TEST_DIR/../../src/usr/local/containerbase" "${ROOT_DIR}/containerbase"
 
   # set default test user is root
   TEST_ROOT_USER=1000
   # load helm
-  load "$TEST_DIR/../../src/opt/containerbase/utils/java.sh"
+  load "$TEST_DIR/../../src/usr/local/containerbase/utils/java.sh"
 }
 
 teardown() {

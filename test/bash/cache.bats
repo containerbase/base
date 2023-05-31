@@ -6,7 +6,7 @@ setup() {
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
 
-    load "$TEST_DIR/../../src/opt/containerbase/util.sh"
+    load "$TEST_DIR/../../src/usr/local/containerbase/util.sh"
 
     # load test overwrites
     load "$TEST_DIR/util.sh"
@@ -144,7 +144,7 @@ teardown() {
   CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
-  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+  local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
 
   run download_file
   assert_failure
@@ -156,7 +156,7 @@ teardown() {
 
   run download_file "${file}"
   assert_success
-  assert_output "${CONTAINERBASE_CACHE_DIR}/buildpack.tar.xz"
+  assert_output "${CONTAINERBASE_CACHE_DIR}/containerbase.tar.xz"
 
   run download_file "${file}" "foobar"
   assert_success
@@ -166,7 +166,7 @@ teardown() {
   tmp_file=$(download_file "${file}")
   rm "${tmp_file}"
 
-  assert test "[[ "${tmp_file}" =~ "\/buildpack.tar.xz" ]]"
+  assert test "[[ "${tmp_file}" =~ "\/containerbase.tar.xz" ]]"
 }
 
 @test "get_from_url" {
@@ -174,11 +174,11 @@ teardown() {
   CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
-  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+  local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
@@ -191,7 +191,7 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   run get_from_url "${file}" "test"
   assert_success
@@ -203,17 +203,17 @@ teardown() {
   CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
-  # sha256sum of file
-  local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
-  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+  # sha512sum of file
+  local checksum="233c335a7f10e9f0dfd7e9d0cda802a38c15a7f13b6678c55980814f22799a70590d56888a819b6591881ec1939240d9dbe68e7e495021b4d6c6a49cdee24d80"
+  local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
 
-  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
   assert_success
-  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
-  run get_from_url "${file}" test "${checksum}" "sha256sum"
+  run get_from_url "${file}" test "${checksum}" "sha512sum"
   assert_success
   assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
@@ -240,17 +240,17 @@ teardown() {
   CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${CONTAINERBASE_CACHE_DIR}"
 
-  # sha256sum of file
-  local checksum="72e5ba348fdddc06d7b0561403377581c927d62e8f22a911531ad07f616b8c21"
-  local file="https://github.com/containerbase/base/releases/download/1.0.0/buildpack.tar.xz"
+  # sha512sum of file
+  local checksum="233c335a7f10e9f0dfd7e9d0cda802a38c15a7f13b6678c55980814f22799a70590d56888a819b6591881ec1939240d9dbe68e7e495021b4d6c6a49cdee24d80"
+  local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
 
-  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
   assert_success
-  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/buildpack\.tar\.xz"
+  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   file_path="${output}"
 
-  run get_from_url "${file}" test "${checksum}" "sha256sum"
+  run get_from_url "${file}" test "${checksum}" "sha512sum"
   assert_success
   assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
@@ -258,7 +258,7 @@ teardown() {
   echo "a" >> "${file_path}"
 
   # corrupt file in cache
-  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha256sum"
+  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
   assert_success
   assert_output --partial "Cached file is corrupt"
 }

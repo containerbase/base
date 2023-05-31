@@ -14,7 +14,7 @@ class PrepareCommand extends Command {
 
     shell.mkdir('-p', 'bin');
 
-    await fs.writeFile('src/opt/containerbase/version', version);
+    await fs.writeFile('src/usr/local/containerbase/version', version);
 
     let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
     if (r.code) {

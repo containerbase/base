@@ -14,7 +14,7 @@ setup() {
   USER_HOME="${TEST_ROOT_DIR}/user"
   ENV_FILE="${TEST_ROOT_DIR}/env"
 
-  load "$TEST_DIR/../../src/opt/containerbase/util.sh"
+  load "$TEST_DIR/../../src/usr/local/containerbase/util.sh"
 }
 
 teardown() {

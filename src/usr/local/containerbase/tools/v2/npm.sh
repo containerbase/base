@@ -2,7 +2,7 @@
 
 function check_tool_requirements () {
   check_command node
-  check_semver "$TOOL_VERSION" "all"
+  check_semver "$TOOL_VERSION" "minor"
 }
 
 function install_tool () {
@@ -14,7 +14,7 @@ function install_tool () {
     # either not in cache or error, install
 
     # shellcheck source=/dev/null
-    . "$(get_buildpack_path)/utils/node.sh"
+    . "$(get_containerbase_path)/utils/node.sh"
 
     npm_init
     npm_install
@@ -26,11 +26,12 @@ function install_tool () {
 }
 
 function link_tool () {
-  link_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
-  [[ -n $SKIP_VERSION ]] || corepack --version
-  post_install
-}
+  local versioned_tool_path
+  versioned_tool_path=$(find_versioned_tool_path)
 
-function post_install () {
-  corepack enable --install-directory "$(get_bin_path)"
+  link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  link_wrapper npx "${versioned_tool_path}/bin"
+
+  hash -d npm npx 2>/dev/null || true
+  [[ -n $SKIP_VERSION ]] || npm --version
 }

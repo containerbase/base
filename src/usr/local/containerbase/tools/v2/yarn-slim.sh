@@ -14,7 +14,7 @@ function install_tool () {
     # either not in cache or error, install
 
     # shellcheck source=/dev/null
-    . "$(get_buildpack_path)/utils/node.sh"
+    . "$(get_containerbase_path)/utils/node.sh"
 
     npm_init
     npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "${versioned_tool_path}" --cache "${NPM_CONFIG_CACHE}" 2>&1

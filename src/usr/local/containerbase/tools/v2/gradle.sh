@@ -11,7 +11,7 @@ function check_tool_requirements () {
 
 function prepare_tool() {
   # shellcheck source=/dev/null
-  . "$(get_buildpack_path)/utils/java.sh"
+  . "$(get_containerbase_path)/utils/java.sh"
   create_maven_settings
   create_gradle_settings
   create_tool_path > /dev/null
