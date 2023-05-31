@@ -194,7 +194,7 @@ SHELL [ "/bin/sh", "-c" ]
 
 USER root
 # don't update!!
-RUN set -ex; npm install -g npm@8.0.0
+RUN set -ex; npm install -gf npm@8.0.0
 
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
