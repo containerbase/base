@@ -178,7 +178,7 @@ RUN npm --version
 RUN npm --version | grep '7.24.2'
 
 #--------------------------------------
-# test: unsued
+# test: unused
 #--------------------------------------
 FROM build as testf
 
