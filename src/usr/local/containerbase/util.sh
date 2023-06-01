@@ -107,23 +107,23 @@ function apt_install () {
 
   echo "Installing apt packages: ${packages[*]}"
   if [[ "${APT_HTTP_PROXY}" ]]; then
-    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy.conf
   fi
   apt-get -qq update
   apt-get -qq install -y "${packages[@]}"
 
-  rm -f /etc/apt/apt.conf.d/containerbase-proxy
+  rm -f /etc/apt/apt.conf.d/containerbase-proxy.conf
 }
 
 function apt_upgrade () {
   echo "Upgrading apt packages"
   if [[ "${APT_HTTP_PROXY}" ]]; then
-    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy
+    echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy.conf
   fi
   apt-get -qq update
   apt-get -qq upgrade -y
 
-  rm -f /etc/apt/apt.conf.d/containerbase-proxy
+  rm -f /etc/apt/apt.conf.d/containerbase-proxy.conf
 }
 
 
