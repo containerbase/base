@@ -3,17 +3,25 @@ import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
 
 class PrepareCommand extends Command {
-  release = Option.String('-r, --release', { required: true });
+  release = Option.String('-r,--release', { required: true });
+  gitSha = Option.String('--sha', { required: false });
+  dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
   async execute() {
     const version = this.release;
     shell.echo(`Preparing version: ${version}`);
+
+    if (this.dryRun) {
+      shell.echo('DRY-RUN: done.');
+      return;
+    }
+
     process.env.TAG = version;
     process.env.CONTAINERBASE_VERSION = version;
 
     shell.mkdir('-p', 'bin', 'src/opt/containerbase');
 
-    await fs.writeFile('src/opt/containerbase/version', version);
+    await fs.writeFile('src/usr/local/containerbase/version', version);
 
     let r = shell.exec(
       `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`
@@ -27,17 +35,6 @@ class PrepareCommand extends Command {
       return 1;
     }
     r.to('./bin/containerbase.tar.xz.sha512');
-
-    r = shell.cp('./bin/containerbase.tar.xz', './bin/buildpack.tar.xz');
-    if (r.code) {
-      return 1;
-    }
-
-    // compile the cli
-    r = shell.exec('yarn build:cli');
-    if (r.code) {
-      return 1;
-    }
 
     r = shell.exec(
       'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'

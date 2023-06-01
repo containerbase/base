@@ -54,7 +54,7 @@ RUN npm --version
 USER 0
 
 # renovate: datasource=npm
-RUN install-npm re2 1.16.0
+RUN npm install -g re2@1.16.0
 
 #--------------------------------------
 # test: yarn
@@ -178,26 +178,15 @@ RUN npm --version
 RUN npm --version | grep '7.24.2'
 
 #--------------------------------------
-# test: npm (npm i -g npm)
+# test: unused
 #--------------------------------------
 FROM build as testf
 
-USER root
-# don't update!! need force to overwrite symlink
-RUN npm i -gf npm@8.0.0
-
-RUN set -ex; command -v npm; npm --version
-RUN set -ex; npm --version | grep '8.0.0'
-
-USER 1000
-# don't update!!
-RUN npm i -g npm@7.24.2
-RUN set -ex; command -v npm; npm --version
-RUN set -ex; npm --version | grep '7.24.2'
+# unused
 
 
 #--------------------------------------
-# test: npm (install-npm npm)
+# test: npm (npm install -g npm)
 #--------------------------------------
 FROM build as testg
 
@@ -205,7 +194,7 @@ SHELL [ "/bin/sh", "-c" ]
 
 USER root
 # don't update!!
-RUN set -ex; install-npm npm 8.0.0
+RUN set -ex; npm install -gf npm@8.0.0
 
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
@@ -333,8 +322,8 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ -r /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
-  [ "$(cat /opt/buildpack/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  [ -r /opt/containerbase/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
+  [ "$(cat /opt/containerbase/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
   && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
 
 #--------------------------------------
@@ -491,7 +480,7 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy

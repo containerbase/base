@@ -20,14 +20,14 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/my-root-ca.crt
 
 ### Buildtime Java install
 
-Containerbase will create a central certificate store at `/opt/buildpack/ssl/cacerts` when preparing Java (`prepare-tool java`).
+Containerbase will create a central certificate store at `/opt/containerbase/ssl/cacerts` when preparing Java (`prepare-tool java`).
 This will be used by all Java versions installed by our `install-tool`.
 So you can copy your own store like this:
 
 ```Dockerfile
 FROM containerbase/base
 
-COPY my-root-cert-store.jks /opt/buildpack/ssl/cacerts
+COPY my-root-cert-store.jks /opt/containerbase/ssl/cacerts
 
 RUN install-tool java <version>
 ```
@@ -46,12 +46,12 @@ docker run --rm -it \
 
 ### Runtime Java install
 
-For Java you need to mount your own certificate store to `/opt/buildpack/ssl/cacerts`.
+For Java you need to mount your own certificate store to `/opt/containerbase/ssl/cacerts`.
 
 ```bash
 docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
-  -v my-root-cert-store.jks:/opt/buildpack/ssl/cacerts \
+  -v my-root-cert-store.jks:/opt/containerbase/ssl/cacerts \
   -e SSL_CERT_FILE=/my-root-ca.crt \
   -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
   containerbase/base bash

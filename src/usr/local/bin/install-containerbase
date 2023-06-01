@@ -15,7 +15,7 @@ if [[ -z "${USER_ID}" ]]; then
 fi
 
 # shellcheck source=/dev/null
-. /usr/local/buildpack/util.sh
+. /usr/local/containerbase/util.sh
 
 if [[ -n "${BASH_ENV}" && "${BASH_ENV}" != "${ENV_FILE}" ]]; then
   echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
@@ -34,8 +34,8 @@ require_root
 
 setup_env_files
 
-echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/buildpack.conf
-echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/buildpack.conf
+echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
+echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 
 # Set up user and home directory with access to users in the root group (0)
 # https://docs.openshift.com/container-platform/3.6/creating_images/guidelines.html#use-uid
@@ -99,11 +99,16 @@ link_tool
 function prepare_v2_tools () {
   # setup directories for v2 tools
   # shellcheck source=/dev/null
-  . /usr/local/buildpack/utils/v2/overrides.sh
+  . /usr/local/containerbase/utils/v2/overrides.sh
 
   setup_directories
 }
 prepare_v2_tools
+
+
+# Compabillity, will be removed on future major
+ln -sf /usr/local/containerbase /usr/local/buildpack
+ln -sf /opt/containerbase /opt/buildpack
 
 # cleanup
 rm -rf /var/lib/apt/lists/* /var/log/dpkg.* /var/log/apt

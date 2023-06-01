@@ -40,7 +40,7 @@ RUN install-tool flutter 1.22.6
 USER 1000
 
 RUN set -ex; \
-    ls -la /opt/buildpack/tools/flutter/1.22.6 $USER_HOME; \
+    ls -la /opt/containerbase/tools/flutter/1.22.6 $USER_HOME; \
     cd a; \
     flutter pub upgrade;
 
@@ -59,7 +59,7 @@ USER 1000
 RUN install-tool flutter 1.22.6
 
 RUN set -ex; \
-    ls -la /opt/buildpack/tools/flutter/1.22.6; \
+    ls -la /opt/containerbase/tools/flutter/1.22.6; \
     cd a; \
     flutter pub upgrade;
 

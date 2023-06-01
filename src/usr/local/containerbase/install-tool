@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -e
+
+# shellcheck source=/dev/null
+. /usr/local/containerbase/util.sh
+
+require_arch
+require_distro
+require_user
+require_tool "$@"
+
+if [[ $(ignore_tool) -eq 1 ]]; then
+  echo "Tool ignored - skipping: ${TOOL_NAME}"
+  exit 0;
+fi
+
+TOOL="/${CONTAINERBASE_DIR}/tools/${TOOL_NAME}.sh"
+V2_TOOL="/${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"
+
+if [[ -f "$V2_TOOL" ]]; then
+  # install v2 tool
+  start=$(date +%s)
+  install_v2_tool "${V2_TOOL}"
+  duration=$(($(date +%s) - start))
+  echo "Installed v2 ${V2_TOOL} in ${duration} seconds"
+elif [[ -f "$TOOL" ]]; then
+  echo "Installing v1 tool ${TOOL_NAME} v${TOOL_VERSION}"
+  start=$(date +%s)
+  # shellcheck source=/dev/null
+  . "$TOOL"
+  duration=$(($(date +%s) - start))
+  echo "Installed v1 ${TOOL_NAME} in ${duration} seconds"
+else
+  echo "No tool defined - skipping: ${TOOL_NAME}" >&2
+  exit 1;
+fi
+
+# cleanup
+if [ "$(is_root)" -eq 0 ]; then
+  rm -rf /var/lib/apt/lists/* /var/log/dpkg.* /var/log/apt
+fi
+# workaround no hostname assumes docker build env
+if [ -z "${HOSTNAME}" ] || [ "${HOSTNAME}" = "buildkitsandbox" ]; then
+  rm -rf "${TEMP_DIR:?}"/*
+fi
