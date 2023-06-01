@@ -8,7 +8,7 @@ export ROOT_DIR_LEGACY="${ROOT_DIR}"
 #
 # defines the root directory where tools will be installed
 # shellcheck disable=SC2168,SC2034
-export ROOT_DIR=/opt/buildpack
+export ROOT_DIR=/opt/containerbase
 
 # get path location
 DIR="${BASH_SOURCE%/*}"

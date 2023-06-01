@@ -77,13 +77,10 @@ function export_tool_path () {
 
 function setup_env_files () {
   # env helper, loads tool specific env
-  local install_dir
-  install_dir=$(get_install_dir)
-
   cat >> "$ENV_FILE" <<- EOM
 export BUILDPACK=1 CONTAINERBASE=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" USER_HOME="${USER_HOME}" CONTAINERBASE_ENV=1
 
-env_dirs=("/usr/local" "/opt/buildpack" "\${USER_HOME}")
+env_dirs=("/usr/local" "/opt/containerbase" "\${USER_HOME}")
 
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ]; then

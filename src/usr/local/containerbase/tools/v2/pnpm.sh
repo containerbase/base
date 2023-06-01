@@ -9,13 +9,12 @@ function install_tool () {
   local versioned_tool_path
   versioned_tool_path=$(create_versioned_tool_path)
 
-
   if [[ $(restore_folder_from_cache "${versioned_tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
     # restore from cache not possible
     # either not in cache or error, install
 
     # shellcheck source=/dev/null
-    . "$(get_buildpack_path)/utils/node.sh"
+    . "$(get_containerbase_path)/utils/node.sh"
 
     npm_init
     npm_install
@@ -27,9 +26,10 @@ function install_tool () {
 }
 
 function link_tool () {
-  local versioned_tool_path
-  versioned_tool_path=$(find_versioned_tool_path)
+  post_install
+  [[ -n $SKIP_VERSION ]] || pnpm --version
+}
 
-  link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-  [[ -n $SKIP_VERSION ]] || lerna --version
+function post_install () {
+  link_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
 }

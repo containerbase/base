@@ -6,7 +6,7 @@ setup() {
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
 
-    load "$TEST_DIR/../../src/usr/local/buildpack/util.sh"
+    load "$TEST_DIR/../../src/usr/local/containerbase/util.sh"
 
     # load test overwrites
     load "$TEST_DIR/util.sh"
@@ -20,7 +20,7 @@ setup() {
     setup_directories
 
     # copy containerbase files
-    cp -r "$TEST_DIR/../../src/usr/local/buildpack" "${ROOT_DIR}/buildpack"
+    cp -r "$TEST_DIR/../../src/usr/local/containerbase" "${ROOT_DIR}/containerbase"
 
     # set default test user is root
     TEST_ROOT_USER=1000

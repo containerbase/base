@@ -7,7 +7,7 @@ function install_v2_tool () {
 
   # load overrides needed for v2 tools
   # shellcheck source=/dev/null
-  . /usr/local/buildpack/utils/v2/overrides.sh
+  . "/${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
 
   # shellcheck source=/dev/null
   . "${path}"

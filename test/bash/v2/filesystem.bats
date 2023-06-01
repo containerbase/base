@@ -5,10 +5,10 @@ setup() {
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
 
-  load "$TEST_DIR/../../../src/usr/local/buildpack/util.sh"
+  load "$TEST_DIR/../../../src/usr/local/containerbase/util.sh"
 
   # load v2 overrides
-  load "$TEST_DIR/../../../src/usr/local/buildpack/utils/v2/overrides.sh"
+  load "$TEST_DIR/../../../src/usr/local/containerbase/utils/v2/overrides.sh"
 
   # load test overrides
   load "$TEST_DIR/../util.sh"

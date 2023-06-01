@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=/dev/null
-. "$(get_buildpack_path)/utils/node.sh"
+. "$(get_containerbase_path)/utils/node.sh"
 
 # Helper function to link to a globally installed node
 function prepare_global_config () {

@@ -33,7 +33,7 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
 COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
-COPY --from=containerbase /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
@@ -79,7 +79,7 @@ COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
 COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
-COPY --from=containerbase /usr/local/buildpack/ /usr/local/buildpack/
+COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 

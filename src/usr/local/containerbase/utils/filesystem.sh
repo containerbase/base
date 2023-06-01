@@ -137,8 +137,8 @@ function get_umask () {
 
 
 # Gets the path to the containerbase folder
-function get_buildpack_path () {
-  echo "${BUILDPACK_DIR}"
+function get_containerbase_path () {
+  echo "${CONTAINERBASE_DIR}"
 }
 
 # Own the file by default user and make it writable for root group
