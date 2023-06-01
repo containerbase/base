@@ -11,6 +11,10 @@ import {
   InstallToolNodeShortCommand,
 } from './install-tools/node';
 import { prepareToolVersion } from './install-tools/utils';
+import {
+  PrepareToolLegacyCommand,
+  PrepareToolLegacyShortCommand,
+} from './prepare-tool/legacy';
 
 export function prepareCommands(
   cli: Cli,
@@ -20,16 +24,22 @@ export function prepareCommands(
   logger.debug('prepare commands');
   /*
    * Workaround for linking the cli tool as different executables.
-   * So it can be called as `install-tool node 1.2.3`.
+   * So it can be called as
+   * - `install-tool node 1.2.3`
+   * - `prepare-tool node`
    */
   if (mode === 'install-tool') {
     cli.register(InstallToolLegacyShortCommand);
     cli.register(InstallToolNodeShortCommand);
     return prepareToolVersion(mode, args);
+  } else if (mode === 'prepare-tool') {
+    cli.register(PrepareToolLegacyShortCommand);
+    return prepareToolVersion(mode, args);
   }
 
   cli.register(InstallToolLegacyCommand);
   cli.register(InstallToolNodeCommand);
+  cli.register(PrepareToolLegacyCommand);
   return prepareToolVersion(mode, args);
 }
 
