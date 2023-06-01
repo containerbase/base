@@ -27,9 +27,13 @@ export class InstallToolNodeCommand extends Command {
 
   async execute(): Promise<number | void> {
     logger.info(`Installing node v${this.version}...`);
-    await execa('/usr/local/buildpack/install-tool', ['node', this.version], {
-      stdio: 'inherit',
-    });
+    await execa(
+      '/usr/local/containerbase/bin/install-tool',
+      ['node', this.version],
+      {
+        stdio: 'inherit',
+      }
+    );
   }
 }
 

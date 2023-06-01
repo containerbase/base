@@ -5,7 +5,8 @@
     "allowJs": true,
     "noEmit": true,
     "types": ["node"],
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "experimentalDecorators": true
   },
   "exclude": ["node_modules", "bin"]
 }

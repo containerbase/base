@@ -11,10 +11,7 @@ import {
   InstallToolNodeShortCommand,
 } from './install-tools/node';
 import { prepareToolVersion } from './install-tools/utils';
-import {
-  PrepareToolLegacyCommand,
-  PrepareToolLegacyShortCommand,
-} from './prepare-tool/legacy';
+import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 
 export function prepareCommands(
   cli: Cli,
@@ -33,13 +30,13 @@ export function prepareCommands(
     cli.register(InstallToolNodeShortCommand);
     return prepareToolVersion(mode, args);
   } else if (mode === 'prepare-tool') {
-    cli.register(PrepareToolLegacyShortCommand);
+    cli.register(PrepareToolShortCommand);
     return prepareToolVersion(mode, args);
   }
 
   cli.register(InstallToolLegacyCommand);
   cli.register(InstallToolNodeCommand);
-  cli.register(PrepareToolLegacyCommand);
+  cli.register(PrepareToolCommand);
   return prepareToolVersion(mode, args);
 }
 

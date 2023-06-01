@@ -28,11 +28,14 @@
     "test:docker": "node tools/test.js"
   },
   "dependencies": {
+    "@nestjs/common": "9.4.2",
+    "@nestjs/core": "9.4.2",
     "clipanion": "3.2.0",
     "execa": "7.1.1",
     "got": "12.6.0",
     "pino": "8.14.1",
     "pino-pretty": "10.0.0",
+    "reflect-metadata": "0.1.13",
     "semver": "7.5.1",
     "typanion": "3.12.1"
   },

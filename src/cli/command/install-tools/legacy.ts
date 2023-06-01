@@ -27,7 +27,7 @@ export class InstallToolLegacyCommand extends Command {
   async execute(): Promise<number | void> {
     logger.info(`Installing legacy tool ${this.name} v${this.version}...`);
     await execa(
-      '/usr/local/buildpack/install-tool',
+      '/usr/local/containerbase/bin/install-tool',
       [this.name, this.version],
       {
         stdio: 'inherit',
