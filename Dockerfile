@@ -24,11 +24,6 @@ COPY src/ /
 
 RUN install-containerbase
 
-RUN set -ex; \
-  ls -lah /opt/containerbase/bin/; \
-  ls -lah /usr/local/bin/; \
-  true
-
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.40.1
 
