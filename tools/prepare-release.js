@@ -3,12 +3,19 @@ import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
 
 class PrepareCommand extends Command {
-  release = Option.String('-r, --release', { required: true });
+  release = Option.String('-r,--release', { required: true });
+  dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
   async execute() {
     const version = this.release;
 
     shell.echo(`Preparing version: ${version}`);
+
+    if (this.dryRun) {
+      shell.echo('DRY-RUN: done.');
+      return;
+    }
+
     process.env.TAG = version;
     process.env.CONTAINERBASE_VERSION = version;
 

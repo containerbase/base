@@ -1,9 +1,9 @@
 import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
 
-class PrepareCommand extends Command {
-  release = Option.String('-r, --release', { required: true });
-  dryRun = Option.Boolean('-d, --dry-run', { required: false });
+class ReleaseCommand extends Command {
+  release = Option.String('-r,--release', { required: true });
+  dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
   execute() {
     const version = this.release;
@@ -44,4 +44,4 @@ class PrepareCommand extends Command {
   }
 }
 
-void runExit(PrepareCommand);
+void runExit(ReleaseCommand);
