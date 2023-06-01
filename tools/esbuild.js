@@ -43,7 +43,7 @@ await fs.writeFile(
 
 await exec([
   '--out-path',
-  './src/opt/containerbase/bin',
+  './src/usr/local/containerbase/bin',
   '--public',
   // '--debug',
   'dist',
