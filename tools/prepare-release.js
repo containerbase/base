@@ -4,6 +4,7 @@ import shell from 'shelljs';
 
 class PrepareCommand extends Command {
   release = Option.String('-r,--release', { required: true });
+  gitSha = Option.String('--sha', { required: false });
   dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
   async execute() {
