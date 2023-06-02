@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
 import * as t from 'typanion';
-import { installTool } from '../../install-tool';
-import { logger, validateVersion } from '../../utils';
+import { installTool } from '../install-tool';
+import { logger, validateVersion } from '../utils';
 
 export class InstallToolCommand extends Command {
   static override paths = [['install', 'tool'], ['it']];

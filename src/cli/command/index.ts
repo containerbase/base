@@ -2,9 +2,9 @@ import { argv0 } from 'node:process';
 import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
-import { InstallToolCommand, InstallToolShortCommand } from './install-tools';
-import { prepareToolVersion } from './install-tools/utils';
+import { InstallToolCommand, InstallToolShortCommand } from './install-tool';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
+import { prepareToolVersion } from './utils';
 
 export function prepareCommands(
   cli: Cli,

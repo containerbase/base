@@ -1,4 +1,4 @@
-import type { CliMode } from '../../utils';
+import type { CliMode } from '../utils';
 
 export function prepareToolVersion(
   mode: CliMode | null,
