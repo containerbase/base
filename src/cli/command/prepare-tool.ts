@@ -1,13 +1,11 @@
 import { Command, Option } from 'clipanion';
-import { PREPARE_TOOL_TOKEN, container } from '../prepare-tool';
-import type { BaseService } from '../prepare-tool/services/base.service';
-import { PrepareToolService } from '../prepare-tool/services/prepare-tool.service';
+import { execute } from '../prepare-tool';
 import { logger } from '../utils';
 
 export class PrepareToolCommand extends Command {
-  static paths = [['prepare', 'tool'], ['pt']];
+  static override paths = [['prepare', 'tool'], ['pt']];
 
-  static usage = Command.Usage({
+  static override usage = Command.Usage({
     description: 'Prepares a tool into the container.',
     examples: [
       ['Prepares node', '$0 prepare tool node'],
@@ -20,32 +18,8 @@ export class PrepareToolCommand extends Command {
   dryRun = Option.Boolean('-d,--dry-run', false);
 
   async execute(): Promise<number | void> {
-    const legacySvc = container.get(PrepareToolService);
-    const tools = container.getAll<BaseService>(PREPARE_TOOL_TOKEN);
-
-    logger.debug({ tools: tools.map((t) => t.name) }, 'supported tools');
-    if (this.dryRun) {
-      logger.info(
-        `Dry run: preparing legacy tools ${this.tools.join(', ')} ...`
-      );
-      return;
-    }
     try {
-      if (this.tools.length === 1 && this.tools[0] === 'all') {
-        for (const tool of tools) {
-          await tool.run();
-        }
-        await legacySvc.prepareTool(this.tools);
-      } else {
-        for (const tool of this.tools) {
-          const toolSvc = tools.find((t) => t.name === tool);
-          if (toolSvc) {
-            await toolSvc.run();
-          } else {
-            await legacySvc.prepareTool([tool]);
-          }
-        }
-      }
+      return await execute(this.tools, this.dryRun);
     } catch (err) {
       logger.fatal(err);
       return 1;
@@ -54,9 +28,9 @@ export class PrepareToolCommand extends Command {
 }
 
 export class PrepareToolShortCommand extends PrepareToolCommand {
-  static paths = [];
+  static override paths = [];
 
-  static usage = Command.Usage({
+  static override usage = Command.Usage({
     description: 'Prepares a tool into the container.',
     examples: [
       ['Prepares node', '$0 node'],

@@ -1,10 +1,10 @@
 import { injectable } from 'inversify';
 
 @injectable()
-export abstract class BaseService {
+export abstract class PrepareToolBaseService {
   abstract readonly name: string;
 
-  abstract run(): Promise<void> | void;
+  abstract execute(): Promise<void> | void;
 
   toString(): string {
     return this.name;

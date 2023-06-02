@@ -1,27 +1,27 @@
-import { Container, injectable } from 'inversify';
+import { Container } from 'inversify';
 import { logger } from '../utils';
-import { BaseService } from './services/base.service';
-import { PrepareToolService } from './services/prepare-tool.service';
+import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
+import { PrepareToolService } from './prepare-tool.service';
 
-@injectable()
-class Tool1 extends BaseService {
-  readonly name = 'tool1';
-  run(): Promise<void> | void {
-    logger.info(`prepare ${this.name}`);
-  }
+function prepareContainer(): Container {
+  logger.trace('preparing container');
+  const container = new Container();
+
+  // core services
+  container.bind(PrepareToolService).toSelf();
+  container.bind(PrepareLegacyToolsService).toSelf();
+
+  // tool services
+  // TODO: add real services when tools are implemented
+
+  logger.trace('preparing container done');
+  return container;
 }
 
-@injectable()
-class Tool2 extends BaseService {
-  readonly name = 'tool2';
-  run(): Promise<void> | void {
-    logger.info(`prepare ${this.name}`);
-  }
+export function execute(
+  tools: string[],
+  dryRun = false
+): Promise<number | void> {
+  const container = prepareContainer();
+  return container.get(PrepareToolService).execute(tools, dryRun);
 }
-
-export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');
-
-export const container = new Container();
-container.bind(PrepareToolService).toSelf();
-container.bind(PREPARE_TOOL_TOKEN).to(Tool1);
-container.bind(PREPARE_TOOL_TOKEN).to(Tool2);

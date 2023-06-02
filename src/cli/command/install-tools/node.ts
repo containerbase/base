@@ -4,12 +4,12 @@ import * as t from 'typanion';
 import { logger, validateSemver } from '../../utils';
 
 export class InstallToolNodeCommand extends Command {
-  static paths = [
+  static override paths = [
     ['install', 'tool', 'node'],
     ['it', 'node'],
   ];
 
-  static usage = Command.Usage({
+  static override usage = Command.Usage({
     description: 'Installs Node.js into the container.',
     examples: [
       ['Installs node 14.17.0', '$0 install tool node 14.17.0'],
@@ -38,9 +38,9 @@ export class InstallToolNodeCommand extends Command {
 }
 
 export class InstallToolNodeShortCommand extends InstallToolNodeCommand {
-  static paths = [['node']];
+  static override paths = [['node']];
 
-  static usage = Command.Usage({
+  static override usage = Command.Usage({
     description: 'Installs Node.js into the container.',
     examples: [
       ['Installs node v14.17.0', '$0 node 14.17.0'],
