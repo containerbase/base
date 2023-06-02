@@ -5,6 +5,7 @@ import { pipeline } from 'node:stream/promises';
 import { execa } from 'execa';
 import { got } from 'got';
 import { inject, injectable } from 'inversify';
+import tar from 'tar';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
 import { EnvService, PathService } from '../../services';
@@ -47,25 +48,17 @@ export class InstallDockerService extends InstallToolBaseService {
   override async install(version: string): Promise<void> {
     const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
     logger.debug({ url }, 'download docker');
-    await pipeline(got.stream(url), createWriteStream('/tmp/docker.tgz'));
+    const file = '/tmp/docker.tgz';
+    await pipeline(got.stream(url), createWriteStream(file));
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),
       'bin'
     );
     await fs.mkdir(path);
-    // TODO: use nodejs buildins
-    await execa('bsdtar', [
-      '-C',
-      path,
-      '--strip',
-      '1',
-      '-xf',
-      '/tmp/docker.tgz',
-      'docker/docker',
-    ]);
 
-    await fs.rm('/tmp/docker.tgz');
+    await tar.x({ cwd: path, file, strip: 1 }, ['docker/docker']);
+    await fs.rm(file);
   }
 
   override async link(version: string): Promise<void> {

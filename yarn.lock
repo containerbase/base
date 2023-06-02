@@ -1092,6 +1092,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/tar@npm:6.1.5":
+  version: 6.1.5
+  resolution: "@types/tar@npm:6.1.5"
+  dependencies:
+    "@types/node": "*"
+    minipass: ^4.0.0
+  checksum: 1efa71c8d72f2b02d16ffecb65c4a96be9dacce000c4207532a686477386524dd99b6e26904319354be3ac9ac4d41296a0cb9cf87d05f8f21ae31c68fe446348
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:5.59.8":
   version: 5.59.8
   resolution: "@typescript-eslint/eslint-plugin@npm:5.59.8"
@@ -2123,6 +2133,7 @@ __metadata:
     "@types/node": 18.16.16
     "@types/semver": 7.5.0
     "@types/shelljs": 0.8.12
+    "@types/tar": 6.1.5
     "@typescript-eslint/eslint-plugin": 5.59.8
     "@typescript-eslint/parser": 5.59.8
     bats: 1.9.0
@@ -2156,6 +2167,7 @@ __metadata:
     semantic-release: 21.0.2
     semver: 7.5.1
     shelljs: 0.8.5
+    tar: 6.1.15
     tsx: 3.12.7
     typanion: 3.12.1
     typescript: 5.0.4
@@ -5268,6 +5280,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"minipass@npm:^4.0.0":
+  version: 4.2.8
+  resolution: "minipass@npm:4.2.8"
+  checksum: 7f4914d5295a9a30807cae5227a37a926e6d910c03f315930fde52332cf0575dfbc20295318f91f0baf0e6bb11a6f668e30cde8027dea7a11b9d159867a3c830
+  languageName: node
+  linkType: hard
+
 "minipass@npm:^5.0.0":
   version: 5.0.0
   resolution: "minipass@npm:5.0.0"
@@ -7574,7 +7593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^6.1.11, tar@npm:^6.1.13, tar@npm:^6.1.14, tar@npm:^6.1.2":
+"tar@npm:6.1.15, tar@npm:^6.1.11, tar@npm:^6.1.13, tar@npm:^6.1.14, tar@npm:^6.1.2":
   version: 6.1.15
   resolution: "tar@npm:6.1.15"
   dependencies:
