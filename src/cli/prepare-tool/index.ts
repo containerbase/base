@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Container, injectable } from 'inversify';
 import { logger } from '../utils';
-import { PREPARE_TOOL_TOKEN } from './common';
 import { BaseService } from './services/base.service';
 import { PrepareToolService } from './services/prepare-tool.service';
 
+@injectable()
 class Tool1 extends BaseService {
   readonly name = 'tool1';
   run(): Promise<void> | void {
@@ -11,6 +11,7 @@ class Tool1 extends BaseService {
   }
 }
 
+@injectable()
 class Tool2 extends BaseService {
   readonly name = 'tool2';
   run(): Promise<void> | void {
@@ -18,17 +19,9 @@ class Tool2 extends BaseService {
   }
 }
 
-const tools = [Tool1, Tool2];
+export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');
 
-@Module({
-  providers: [
-    PrepareToolService,
-    ...tools,
-    {
-      provide: PREPARE_TOOL_TOKEN,
-      useFactory: (...args) => args,
-      inject: tools,
-    },
-  ],
-})
-export class PrepareToolModule {}
+export const container = new Container();
+container.bind(PrepareToolService).toSelf();
+container.bind(PREPARE_TOOL_TOKEN).to(Tool1);
+container.bind(PREPARE_TOOL_TOKEN).to(Tool2);

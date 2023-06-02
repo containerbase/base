@@ -1,6 +1,5 @@
 import { Command, Option } from 'clipanion';
-import { createApp } from '../common';
-import { PREPARE_TOOL_TOKEN } from '../prepare-tool/common';
+import { PREPARE_TOOL_TOKEN, container } from '../prepare-tool';
 import type { BaseService } from '../prepare-tool/services/base.service';
 import { PrepareToolService } from '../prepare-tool/services/prepare-tool.service';
 import { logger } from '../utils';
@@ -21,9 +20,8 @@ export class PrepareToolCommand extends Command {
   dryRun = Option.Boolean('-d,--dry-run', false);
 
   async execute(): Promise<number | void> {
-    const app = await createApp('prepare-tool');
-    const legacySvc = app.get(PrepareToolService);
-    const tools = app.get<unknown, BaseService[]>(PREPARE_TOOL_TOKEN);
+    const legacySvc = container.get(PrepareToolService);
+    const tools = container.getAll<BaseService>(PREPARE_TOOL_TOKEN);
 
     logger.debug({ tools: tools.map((t) => t.name) }, 'supported tools');
     if (this.dryRun) {

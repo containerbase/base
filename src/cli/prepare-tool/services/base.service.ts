@@ -1,3 +1,6 @@
+import { injectable } from 'inversify';
+
+@injectable()
 export abstract class BaseService {
   abstract readonly name: string;
 
