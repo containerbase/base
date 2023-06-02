@@ -9,6 +9,7 @@ class PrepareCommand extends Command {
 
   async execute() {
     const version = this.release;
+
     shell.echo(`Preparing version: ${version}`);
 
     if (this.dryRun) {
@@ -19,7 +20,7 @@ class PrepareCommand extends Command {
     process.env.TAG = version;
     process.env.CONTAINERBASE_VERSION = version;
 
-    shell.mkdir('-p', 'bin', 'src/opt/containerbase');
+    shell.mkdir('-p', 'bin');
 
     await fs.writeFile('src/usr/local/containerbase/version', version);
 
