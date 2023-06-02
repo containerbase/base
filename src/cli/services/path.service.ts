@@ -16,6 +16,11 @@ export class PathService {
   get toolsPath(): string {
     return join(this.installDir, 'tools');
   }
+
+  get versionPath(): string {
+    return join(this.installDir, 'versions');
+  }
+
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createToolPath(tool: string): Promise<string> {

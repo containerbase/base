@@ -1,6 +1,6 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
-import { EnvService, PathService } from '../services';
+import { EnvService, PathService, VersionService } from '../services';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import type { InstallToolBaseService } from './install-tool-base.service';
@@ -16,7 +16,8 @@ export class InstallToolService {
     @optional()
     private toolSvcs: InstallToolBaseService[] = [],
     @inject(EnvService) private envSvc: EnvService,
-    @inject(PathService) private pathSvc: PathService
+    @inject(PathService) private pathSvc: PathService,
+    @inject(VersionService) private versionSvc: VersionService
   ) {}
 
   async execute(
@@ -33,7 +34,6 @@ export class InstallToolService {
     if (toolSvc) {
       if (await toolSvc.isInstalled(version)) {
         logger.info({ tool }, 'tool already installed');
-
         await this.linkAndTest(toolSvc, version);
         return;
       }
@@ -73,8 +73,13 @@ export class InstallToolService {
     toolSvc: InstallToolBaseService,
     version: string
   ): Promise<void> {
+    if (version === (await this.versionSvc.find(toolSvc.name))) {
+      logger.debug({ tool: toolSvc.name }, 'tool already linked');
+      return;
+    }
     logger.debug({ tool: toolSvc.name }, 'link tool');
     await toolSvc.link(version);
+    await this.versionSvc.update(toolSvc.name, version);
     logger.debug({ tool: toolSvc.name }, 'test tool');
     if (!this.envSvc.skipTests) {
       await toolSvc.test(version);
