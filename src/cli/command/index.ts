@@ -2,14 +2,7 @@ import { argv0 } from 'node:process';
 import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
-import {
-  InstallToolLegacyCommand,
-  InstallToolLegacyShortCommand,
-} from './install-tools/legacy';
-import {
-  InstallToolNodeCommand,
-  InstallToolNodeShortCommand,
-} from './install-tools/node';
+import { InstallToolCommand, InstallToolShortCommand } from './install-tools';
 import { prepareToolVersion } from './install-tools/utils';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 
@@ -26,16 +19,14 @@ export function prepareCommands(
    * - `prepare-tool node`
    */
   if (mode === 'install-tool') {
-    cli.register(InstallToolLegacyShortCommand);
-    cli.register(InstallToolNodeShortCommand);
+    cli.register(InstallToolShortCommand);
     return prepareToolVersion(mode, args);
   } else if (mode === 'prepare-tool') {
     cli.register(PrepareToolShortCommand);
-    return prepareToolVersion(mode, args);
+    return args;
   }
 
-  cli.register(InstallToolLegacyCommand);
-  cli.register(InstallToolNodeCommand);
+  cli.register(InstallToolCommand);
   cli.register(PrepareToolCommand);
   return prepareToolVersion(mode, args);
 }

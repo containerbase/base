@@ -5,7 +5,9 @@ import { EnvService } from './env.service';
 
 @injectable()
 export class PathService {
-  constructor(@inject(EnvService) private envSvc: EnvService) {}
+  get binDir(): string {
+    return '/usr/local/bin';
+  }
 
   get installDir(): string {
     return '/opt/containerbase';
@@ -14,14 +16,20 @@ export class PathService {
   get toolsPath(): string {
     return join(this.installDir, 'tools');
   }
-
-  toolPath(tool: string): string {
-    return join(this.toolsPath, tool);
-  }
+  constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
     await mkdir(toolPath, { recursive: true, mode: 0o775 });
+    return toolPath;
+  }
+
+  async createVersionedToolPath(
+    tool: string,
+    version: string
+  ): Promise<string> {
+    const toolPath = this.versionedToolPath(tool, version);
+    await mkdir(toolPath, { recursive: true, mode: this.envSvc.umask });
     return toolPath;
   }
 
@@ -36,5 +44,29 @@ export class PathService {
       return null;
     }
     return toolPath;
+  }
+
+  async findVersionedToolPath(
+    tool: string,
+    version: string
+  ): Promise<string | null> {
+    const versionedToolPath = this.versionedToolPath(tool, version);
+
+    if (
+      await stat(versionedToolPath)
+        .then((s) => !s.isDirectory())
+        .catch(() => true)
+    ) {
+      return null;
+    }
+    return versionedToolPath;
+  }
+
+  toolPath(tool: string): string {
+    return join(this.toolsPath, tool);
+  }
+
+  versionedToolPath(tool: string, version: string): string {
+    return join(this.toolPath(tool), version);
   }
 }

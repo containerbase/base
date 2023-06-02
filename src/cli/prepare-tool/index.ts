@@ -21,7 +21,7 @@ function prepareContainer(): Container {
   return container;
 }
 
-export function execute(
+export function prepareTools(
   tools: string[],
   dryRun = false
 ): Promise<number | void> {

@@ -1,5 +1,5 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { PathService } from '../services';
+import { EnvService, PathService } from '../services';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
 import type { PrepareToolBaseService } from './prepare-tool-base.service';
@@ -14,7 +14,8 @@ export class PrepareToolService {
     @multiInject(PREPARE_TOOL_TOKEN)
     @optional()
     private toolSvcs: PrepareToolBaseService[] = [],
-    @inject(PathService) private pathSvc: PathService
+    @inject(PathService) private pathSvc: PathService,
+    @inject(EnvService) private envSvc: EnvService
   ) {}
 
   async execute(tools: string[], dryRun = false): Promise<number | void> {
@@ -26,6 +27,10 @@ export class PrepareToolService {
       logger.info(`Dry run: preparing tools ${tools.join(', ')} ...`);
       return;
     }
+    if (!this.envSvc.isRoot) {
+      logger.fatal('prepare tools must be run as root');
+      return 1;
+    }
     if (tools.length === 1 && tools[0] === 'all') {
       for (const tool of this.toolSvcs) {
         if (await this.pathSvc.findToolPath(tool.name)) {
@@ -36,7 +41,7 @@ export class PrepareToolService {
         await tool.execute();
         await this.pathSvc.createToolPath(tool.name);
       }
-      await this.legacySvc.prepareTool(tools);
+      await this.legacySvc.execute(tools);
     } else {
       for (const tool of tools) {
         const toolSvc = this.toolSvcs.find((t) => t.name === tool);
@@ -49,7 +54,7 @@ export class PrepareToolService {
           await toolSvc.execute();
           await this.pathSvc.createToolPath(tool);
         } else {
-          await this.legacySvc.prepareTool([tool]);
+          await this.legacySvc.execute([tool]);
         }
       }
     }

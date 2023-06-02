@@ -1,5 +1,5 @@
 import { Command, Option } from 'clipanion';
-import { execute } from '../prepare-tool';
+import { prepareTools } from '../prepare-tool';
 import { logger } from '../utils';
 
 export class PrepareToolCommand extends Command {
@@ -18,11 +18,17 @@ export class PrepareToolCommand extends Command {
   dryRun = Option.Boolean('-d,--dry-run', false);
 
   async execute(): Promise<number | void> {
+    const start = Date.now();
+    logger.info(`Preparing tools ${this.tools.join(', ')}...`);
     try {
-      return await execute(this.tools, this.dryRun);
+      return await prepareTools(this.tools, this.dryRun);
     } catch (err) {
       logger.fatal(err);
       return 1;
+    } finally {
+      logger.info(
+        `Prepared tools ${this.tools.join(', ')} in ${Date.now() - start}ms.`
+      );
     }
   }
 }
