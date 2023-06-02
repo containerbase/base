@@ -1,4 +1,4 @@
-import { mkdir, stat } from 'node:fs/promises';
+import { chmod, mkdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
 import { EnvService } from './env.service';
@@ -25,7 +25,8 @@ export class PathService {
 
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
-    await mkdir(toolPath, { recursive: true, mode: 0o775 });
+    await mkdir(toolPath);
+    await chmod(toolPath, 0o775);
     return toolPath;
   }
 
@@ -34,7 +35,8 @@ export class PathService {
     version: string
   ): Promise<string> {
     const toolPath = this.versionedToolPath(tool, version);
-    await mkdir(toolPath, { recursive: true, mode: this.envSvc.umask });
+    await mkdir(toolPath);
+    await chmod(toolPath, this.envSvc.umask);
     return toolPath;
   }
 

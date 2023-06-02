@@ -53,3 +53,6 @@ async function readDistro(): Promise<Distro> {
   );
   return { name, versionCode, versionId };
 }
+
+export const fileRights =
+  fs.constants.S_IRWXU | fs.constants.S_IRWXG | fs.constants.S_IRWXO;

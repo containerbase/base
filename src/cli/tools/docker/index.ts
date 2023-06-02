@@ -38,10 +38,10 @@ export class InstallDockerService extends InstallToolBaseService {
   }
 
   constructor(
-    @inject(EnvService) private envSvc: EnvService,
+    @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService
   ) {
-    super(pathSvc);
+    super(pathSvc, envSvc);
   }
 
   override async install(version: string): Promise<void> {
@@ -64,15 +64,14 @@ export class InstallDockerService extends InstallToolBaseService {
       '/tmp/docker.tgz',
       'docker/docker',
     ]);
+
+    await fs.rm('/tmp/docker.tgz');
   }
 
   override async link(version: string): Promise<void> {
-    const src = join(
-      this.pathSvc.versionedToolPath(this.name, version),
-      'bin',
-      'docker'
-    );
-    await fs.link(src, join(this.pathSvc.binDir, 'docker'));
+    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
+
+    await this.shellwrapper({ name: 'docker', srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {

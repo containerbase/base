@@ -1,7 +1,7 @@
 import { Container } from 'inversify';
 import { EnvService } from './env.service';
 import { PathService } from './path.service';
-import { VersionService } from './version.servies';
+import { VersionService } from './version.service';
 
 export { EnvService, PathService, VersionService };
 

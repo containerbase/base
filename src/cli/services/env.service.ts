@@ -1,14 +1,15 @@
-import { type UserInfo, arch, userInfo } from 'node:os';
+import { arch } from 'node:os';
+import { geteuid } from 'node:process';
 import { injectable } from 'inversify';
 import type { Arch } from '../utils';
 
 @injectable()
 export class EnvService {
-  private userInfo: UserInfo<string>;
   readonly arch: Arch;
+  private uid: number;
 
   constructor() {
-    this.userInfo = userInfo();
+    this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
     switch (arch()) {
       case 'arm64':
         this.arch = 'arm64';
@@ -23,7 +24,7 @@ export class EnvService {
   }
 
   get isRoot(): boolean {
-    return this.userInfo.uid === 0;
+    return this.uid === 0;
   }
 
   get userHome(): string {
@@ -32,6 +33,10 @@ export class EnvService {
 
   get userName(): string {
     return process.env.USER_NAME ?? 'ubuntu';
+  }
+
+  get userId(): number {
+    return parseInt(process.env.USER_ID ?? '1000', 10);
   }
 
   get umask(): number {
