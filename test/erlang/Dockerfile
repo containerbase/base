@@ -33,7 +33,7 @@ FROM base as testa
 
 # https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 25.3.2.0
+RUN install-tool erlang 25.3.2.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.14.5
@@ -56,7 +56,7 @@ USER 1001
 # https://hexdocs.pm/elixir/1.14.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # no major update, pin elixir if newer version doesn't support v24
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.11
+RUN install-tool erlang 24.3.4.12
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.14.5
