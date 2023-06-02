@@ -13,7 +13,11 @@ export class VersionService {
     try {
       return (await readFile(path, { encoding: 'utf8' })) ?? null;
     } catch (err) {
-      logger.debug({ tool, err }, 'tool version not found');
+      if (err instanceof Error && err.code === 'ENOENT') {
+        logger.debug({ tool }, 'tool version not found');
+      } else {
+        logger.error({ tool, err }, 'tool version not found');
+      }
       return null;
     }
   }
