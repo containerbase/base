@@ -17,7 +17,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.1
+RUN install-tool git v2.41.0
 
 COPY --chown=1000:0 test/java/test test
 WORKDIR /test
