@@ -73,7 +73,7 @@ RUN set -ex; \
 FROM build as testb
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.11.3
+ARG PYTHON_VERSION=3.11.4
 RUN install-tool python
 
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
