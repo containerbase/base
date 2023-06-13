@@ -11,7 +11,7 @@ COPY src/ /
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.1
+RUN install-tool git v2.41.0
 
 #--------------------------------------
 # Image: build
@@ -48,7 +48,7 @@ RUN install-tool flux v0.41.2
 RUN install-tool git-lfs v3.3.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.20.4
+RUN install-tool golang 1.20.5
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.12.0
@@ -60,16 +60,16 @@ RUN install-tool helmfile v0.154.0
 RUN install-tool kustomize 5.0.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.16.0
+RUN install-tool nix 2.16.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.3.4
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.69.0
+RUN install-tool rust 1.70.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.8.0
+RUN install-tool swift 5.8.1
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.4.6
@@ -78,7 +78,7 @@ RUN install-tool terraform 1.4.6
 RUN install-tool jb v0.5.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.33.2
+RUN install-tool vendir v0.34.0
 
 #--------------------------------------
 # Image: test-erlang
@@ -108,7 +108,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v18.16.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.5.1
+RUN install-tool pnpm 8.6.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
@@ -130,7 +130,7 @@ RUN install-tool composer 2.5.7
 FROM build as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.3
+RUN install-tool python 3.11.4
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.6.2
 # renovate: datasource=pypi
@@ -138,7 +138,7 @@ RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.5.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.7.0
+RUN install-tool pdm 2.7.1
 
 #--------------------------------------
 # Image: test-ruby

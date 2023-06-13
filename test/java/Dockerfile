@@ -17,7 +17,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.1
+RUN install-tool git v2.41.0
 
 COPY --chown=1000:0 test/java/test test
 WORKDIR /test
@@ -174,10 +174,10 @@ WORKDIR /
 
 # not required / used for sbt
 # renovate: datasource=github-releases packageName=scala/scala
-RUN install-tool scala v2.13.10
+RUN install-tool scala v2.13.11
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.8.3
+RUN install-tool sbt v1.9.0
 
 # doesn't work for arbitrary users
 USER 1000

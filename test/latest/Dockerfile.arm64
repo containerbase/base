@@ -30,7 +30,7 @@ RUN install-tool docker v24.0.2
 FROM base as test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.40.1
+RUN install-tool git v2.41.0
 
 #--------------------------------------
 # Image: git-lfs
@@ -70,7 +70,7 @@ RUN install-tool terraform 1.4.6
 FROM base as test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.33.2
+RUN install-tool vendir v0.34.0
 
 #--------------------------------------
 # Image: final

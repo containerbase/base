@@ -101,7 +101,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 8.5.1
+RUN install-tool pnpm 8.6.0
 
 RUN set -ex; \
   pnpm --version;
@@ -410,13 +410,13 @@ RUN install-tool corepack 0.18.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 8.5.1
+RUN install-tool pnpm 8.6.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.18.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=8.5.1
+ARG PNPM_VERSION=8.6.0
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -463,7 +463,7 @@ FROM build as testq
 
 
 # renovate: datasource=npm
-RUN install-tool renovate 35.103.0
+RUN install-tool renovate 35.110.1
 
 RUN set -ex; \
   renovate --version; \
