@@ -18,12 +18,12 @@ function install_tool () {
   local expected_checksum
 
   if [[ "$(file_exists "${URL}/${file_url}.sha512")" -eq 200 ]]; then
-    checksum_file=$(get_from_url "${URL}/${file_url}.sha512")
+    checksum_file=$(get_from_url "${URL}/${file_url}.sha512" | cut -d' ' -f1)
     checksum_algo=sha512sum
     # get checksum from file
     expected_checksum=$(cat "${checksum_file}")
   elif [[ "$(file_exists "${URL}/${file_url}.sha1")" -eq 200 ]]; then
-    checksum_file=$(get_from_url "${URL}/${file_url}.sha1")
+    checksum_file=$(get_from_url "${URL}/${file_url}.sha1" | cut -d' ' -f1)
     checksum_algo=sha1sum
     # get checksum from file
     expected_checksum=$(cat "${checksum_file}")

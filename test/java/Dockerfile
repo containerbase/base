@@ -154,7 +154,7 @@ FROM build as teste
 # test openshift userid missmatch
 USER 1001
 
-RUN install-tool maven 3.5.0
+RUN install-tool maven 3.5.4
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
 RUN install-tool maven 3.9.2
