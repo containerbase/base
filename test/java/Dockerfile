@@ -66,7 +66,7 @@ USER 1000
 # stay on v6
 RUN install-tool gradle 6.9
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 6.9.4
+RUN install-tool gradle 8.1.1
 
 
 RUN set -ex; \
@@ -117,7 +117,7 @@ FROM build as testc
 RUN install-tool java 8.0.342+7
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 7.6.1
+RUN install-tool gradle 8.1.1
 
 # test openshift userid missmatch
 USER 1001
