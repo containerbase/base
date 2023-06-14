@@ -36,7 +36,7 @@
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
-    "conventional-changelog-conventionalcommits": "5.0.0",
+    "conventional-changelog-conventionalcommits": "6.0.0",
     "eslint": "8.42.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-formatter-gha": "1.4.2",
