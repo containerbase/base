@@ -23,7 +23,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "${DIR}/utils/prepare.sh"
 
 check_debug() {
-  local bool="${CONTAINERBASE_DEBUG:-${BUILDPACK_DEBUG:-false}}"
+  local bool="${CONTAINERBASE_DEBUG:-false}"
   # comparison is performed without regard to the case of alphabetic characters
   shopt -s nocasematch
   if [[ "$bool" = 1 || "$bool" =~ ^(yes|true)$ ]]; then
