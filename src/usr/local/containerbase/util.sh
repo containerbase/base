@@ -147,10 +147,7 @@ function require_distro () {
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
   "focal") ;; #supported
-  "jammy") #supported (partial)
-    echo "WARNING: Not all tools are yet supported!" >&2
-    echo "  -> https://github.com/containerbase/base/issues/361" >&2
-    ;;
+  "jammy") ;; #supported
   *)
     echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal' or 'jammy'." >&2
     exit 1
