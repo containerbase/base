@@ -230,7 +230,7 @@ function cache_folder () {
   check path true
   check key true
 
-  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS:-$BUILDPACK_CACHE_FOLDERS}" ]; then
+  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     return
   fi
@@ -266,7 +266,7 @@ function restore_folder_from_cache () {
   check path true
   check key true
 
-  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS:-$BUILDPACK_CACHE_FOLDERS}" ]; then
+  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ -z "${CONTAINERBASE_CACHE_FOLDERS}" ]; then
     # BUILD_CACHE_DIR is not set
     echo 1
     return
