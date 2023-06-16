@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 # shellcheck source=/dev/null
 . "$(get_containerbase_path)/utils/python.sh"
 

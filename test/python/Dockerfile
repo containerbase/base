@@ -208,6 +208,8 @@ RUN install-tool pdm 2.7.4
 #--------------------------------------
 FROM build as test-conan
 
+RUN prepare-tool conan
+
 USER 1000
 
 # renovate: datasource=pypi
