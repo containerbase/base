@@ -7,10 +7,17 @@ shell.config.fatal = true;
 class TestCommand extends Command {
   tests = Option.Rest({ required: false });
   dryRun = Option.Boolean('-d,--dry-run', { required: false });
+  target = Option.String('-t,--target', { required: false, default: 'test' });
+  build = Option.Boolean('-b,--build', { required: false, default: false });
 
   async execute() {
     let tests = this.tests;
     let explicit = true;
+
+    if (this.build) {
+      shell.echo('Compiling sources');
+      shell.exec('yarn build');
+    }
 
     if (!tests.length) {
       tests = shell.ls('test');
@@ -29,7 +36,7 @@ class TestCommand extends Command {
         continue;
       }
       shell.echo('Processing:', d);
-      shell.exec('docker buildx bake test', {
+      shell.exec(`docker buildx bake ${this.target}`, {
         env: { ...process.env, TAG: d },
       });
     }

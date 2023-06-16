@@ -9,6 +9,10 @@ export class PathService {
     return '/usr/local/bin';
   }
 
+  get tmpDir(): string {
+    return '/tmp';
+  }
+
   get installDir(): string {
     return '/opt/containerbase';
   }
@@ -67,6 +71,15 @@ export class PathService {
       return null;
     }
     return versionedToolPath;
+  }
+
+  async fileExists(filePath: string): Promise<boolean> {
+    try {
+      const fstat = await stat(filePath);
+      return fstat.isFile();
+    } catch {
+      return false;
+    }
   }
 
   toolPath(tool: string): string {

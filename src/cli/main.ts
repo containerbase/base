@@ -22,7 +22,9 @@ export async function main(): Promise<void> {
     binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
   });
 
+  cli.register(Builtins.DefinitionsCommand);
   cli.register(Builtins.HelpCommand);
+  cli.register(Builtins.VersionCommand);
 
   await cli.runExit(prepareCommands(cli, mode, args));
 }

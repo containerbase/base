@@ -1,14 +1,13 @@
-import { createWriteStream } from 'node:fs';
+import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { execa } from 'execa';
-import { got } from 'got';
 import { inject, injectable } from 'inversify';
 import tar from 'tar';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
-import { EnvService, PathService } from '../../services';
+import { EnvService, HttpService, PathService } from '../../services';
 import { logger } from '../../utils';
 
 @injectable()
@@ -40,7 +39,8 @@ export class InstallDockerService extends InstallToolBaseService {
 
   constructor(
     @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService
+    @inject(PathService) pathSvc: PathService,
+    @inject(HttpService) private http: HttpService
   ) {
     super(pathSvc, envSvc);
   }
@@ -48,17 +48,17 @@ export class InstallDockerService extends InstallToolBaseService {
   override async install(version: string): Promise<void> {
     const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
     logger.debug({ url }, 'download docker');
-    const file = '/tmp/docker.tgz';
-    await pipeline(got.stream(url), createWriteStream(file));
+    const file = await this.http.download({ url });
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),
       'bin'
     );
     await fs.mkdir(path);
-
-    await tar.x({ cwd: path, file, strip: 1 }, ['docker/docker']);
-    await fs.rm(file);
+    await pipeline(
+      createReadStream(file),
+      tar.x({ cwd: path, strip: 1 }, ['docker/docker'])
+    );
   }
 
   override async link(version: string): Promise<void> {

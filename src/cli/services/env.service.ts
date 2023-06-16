@@ -23,6 +23,10 @@ export class EnvService {
     }
   }
 
+  get cacheDir(): string | null {
+    return process.env.CONTAINERBASE_CACHE_DIR ?? null;
+  }
+
   get isRoot(): boolean {
     return this.uid === 0;
   }
