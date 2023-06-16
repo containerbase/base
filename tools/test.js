@@ -6,7 +6,7 @@ shell.config.fatal = true;
 
 class TestCommand extends Command {
   tests = Option.Rest({ required: false });
-  dryRun = Option.Boolean('-d, --dry-run', { required: false });
+  dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
   async execute() {
     let tests = this.tests;

@@ -22,14 +22,14 @@ RUN install-containerbase
 FROM base as test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.6
+RUN install-tool php 8.2.7
 #--------------------------------------
 # Image: composer
 #--------------------------------------
 FROM test-php as test-composer
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.5.7
+RUN install-tool composer 2.5.8
 
 #--------------------------------------
 # Image: final

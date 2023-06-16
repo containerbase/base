@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 25.3.2.1
+RUN install-tool erlang 25.3.2.2
 
 #--------------------------------------
 # Image: elixir
