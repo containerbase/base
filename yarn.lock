@@ -2250,7 +2250,7 @@ __metadata:
     prettier: 2.8.8
     prettier-plugin-package: 1.3.0
     reflect-metadata: 0.1.13
-    semantic-release: 21.0.3
+    semantic-release: 21.0.4
     semver: 7.5.1
     shelljs: 0.8.5
     tar: 6.1.15
@@ -7071,12 +7071,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semantic-release@npm:21.0.3":
-  version: 21.0.3
-  resolution: "semantic-release@npm:21.0.3"
+"semantic-release@npm:21.0.4":
+  version: 21.0.4
+  resolution: "semantic-release@npm:21.0.4"
   dependencies:
     "@semantic-release/commit-analyzer": ^10.0.0
-    "@semantic-release/error": ^3.0.0
+    "@semantic-release/error": ^4.0.0
     "@semantic-release/github": ^9.0.0
     "@semantic-release/npm": ^10.0.2
     "@semantic-release/release-notes-generator": ^11.0.0
@@ -7105,7 +7105,7 @@ __metadata:
     yargs: ^17.5.1
   bin:
     semantic-release: bin/semantic-release.js
-  checksum: bbfed3497df4e4066374eca3c0162fbe4f38aa30a26fa402b5044b2d0b4dd17ec9656dd54236ba44835a6456b2d28bd196c8feca95b62cb0fcada2979526110c
+  checksum: bbeabb5d8eea8f840922964f63f3ef6921de4a079dffd507c03404fba842e64457774035836391f706788b507d5f926b60424c20b7e19f81d9677e773e74f08e
   languageName: node
   linkType: hard
 
