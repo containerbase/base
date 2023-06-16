@@ -5,6 +5,10 @@ function check_tool_requirements () {
   check_semver "$TOOL_VERSION" "all"
 }
 
+function prepare_tool () {
+  create_tool_path > /dev/null
+}
+
 function get_python_minor_version() {
   local python_version=$1
   if [[ ! "${python_version}" =~ ${SEMVER_REGEX} ]]; then
@@ -37,6 +41,14 @@ function install_tool() {
   local python_minor_version
   local python_version
   local tool_path
+
+  if [[ ! -d "$(find_tool_path)" ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prepare_tool
+  fi
 
   python_version=$(get_tool_version python)
   python_minor_version=$(get_python_minor_version "${python_version}")
