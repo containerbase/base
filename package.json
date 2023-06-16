@@ -30,7 +30,7 @@
   "dependencies": {
     "clipanion": "3.2.1",
     "execa": "7.1.1",
-    "got": "12.6.0",
+    "got": "13.0.0",
     "hasha": "5.2.2",
     "inversify": "6.0.1",
     "pino": "8.14.1",
