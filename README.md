@@ -13,7 +13,12 @@ Commits to `main` branch are automatically build and published.
 
 You need a recent [docker](https://www.docker.com) version with [buildx](https://github.com/docker/buildx) [`>= v0.4.0`](https://github.com/docker/buildx/releases/tag/v0.4.0) plugin installed.
 
-You should use
+You first need to build the cli before building the docker images.
+
+```console
+> yarn install
+> yarn build
+```
 
 ### Base image
 

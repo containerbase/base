@@ -24,7 +24,9 @@ class PrepareCommand extends Command {
 
     await fs.writeFile('src/usr/local/containerbase/version', version);
 
-    let r = shell.exec('tar -cJf ./bin/containerbase.tar.xz -C ./src .');
+    let r = shell.exec(
+      `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`
+    );
     if (r.code) {
       return 1;
     }
