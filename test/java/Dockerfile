@@ -65,7 +65,7 @@ USER 1000
 
 # stay on v6
 RUN install-tool gradle 6.9
-# renovate: datasource=gradle-version versioning=gradle
+# disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 6.9.4
 
 
@@ -116,7 +116,7 @@ FROM build as testc
 # disable renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.342+7
 
-# renovate: datasource=gradle-version versioning=gradle
+# disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.6.1
 
 # test openshift userid missmatch
