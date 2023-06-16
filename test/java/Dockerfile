@@ -116,8 +116,8 @@ FROM build as testc
 # disable renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.342+7
 
-# renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.1.1
+# disable renovate: datasource=gradle-version versioning=gradle
+RUN install-tool gradle 7.6.1
 
 # test openshift userid missmatch
 USER 1001
