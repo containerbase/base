@@ -90,6 +90,8 @@ function link_tool () {
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/containerbase-cli
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/prepare-tool
+
+  containerbase-cli --version
 }
 link_tool
 

@@ -37,6 +37,11 @@ class PrepareCommand extends Command {
     }
     r.to('./bin/containerbase.tar.xz.sha512');
 
+    r = shell.exec('yarn build');
+    if (r.code) {
+      return 1;
+    }
+
     r = shell.exec(
       'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
     );
