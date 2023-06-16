@@ -23,7 +23,7 @@ class ReleaseCommand extends Command {
     shell.echo('Pushing docker images');
 
     r = shell.exec(
-      'docker buildx bake --provenance=false --set settings.platform=linux/amd64,linux/arm64 push'
+      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 push'
     );
     if (r.code) {
       return 1;
