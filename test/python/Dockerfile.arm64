@@ -49,6 +49,14 @@ FROM test-python as test-poetry
 RUN install-tool poetry 1.5.1
 
 #--------------------------------------
+# Image: conan
+#--------------------------------------
+FROM test-python as test-conan
+
+# renovate: datasource=pypi
+RUN install-tool conan 2.0.6
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
@@ -56,3 +64,4 @@ FROM base
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
+COPY --from=test-conan /.dummy /.dummy
