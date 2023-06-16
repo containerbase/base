@@ -14,6 +14,7 @@ class ReleaseCommand extends Command {
 
     shell.echo(`Publish version: ${version}`);
     process.env.TAG = version;
+    process.env.CONTAINERBASE_VERSION = version;
 
     if (dry) {
       shell.echo('DRY-RUN: done.');
