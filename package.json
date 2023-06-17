@@ -43,7 +43,7 @@
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
     "@tsconfig/node18": "2.0.1",
-    "@types/node": "18.16.16",
+    "@types/node": "18.16.17",
     "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
     "@types/tar": "6.1.5",
