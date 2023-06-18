@@ -54,7 +54,7 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "6.0.0",
-    "esbuild": "0.18.0",
+    "esbuild": "0.18.4",
     "esbuild-plugin-pino": "2.0.0",
     "eslint": "8.42.0",
     "eslint-config-prettier": "8.8.0",
