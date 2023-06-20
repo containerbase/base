@@ -106,7 +106,7 @@ RUN install-tool gradle 8.1.1
 FROM build as test-node
 
 # renovate: datasource=node
-RUN install-tool node v18.16.0
+RUN install-tool node v18.16.1
 # renovate: datasource=npm
 RUN install-tool pnpm 8.6.2
 # renovate: datasource=npm

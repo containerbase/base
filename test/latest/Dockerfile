@@ -87,7 +87,7 @@ RUN set -ex; \
 FROM build as testc
 
 # renovate: datasource=node
-RUN install-tool node v18.16.0
+RUN install-tool node v18.16.1
 
 RUN set -ex; \
   nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
@@ -194,7 +194,7 @@ RUN install-tool git-lfs v3.3.0
 RUN install-tool powershell v7.3.4
 
 # renovate: datasource=node
-RUN install-tool node v18.16.0
+RUN install-tool node v18.16.1
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v24.0.2
