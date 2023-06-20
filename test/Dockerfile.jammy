@@ -112,7 +112,7 @@ RUN install-tool pnpm 8.6.2
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.19
 # renovate: datasource=npm
-RUN install-tool lerna 7.0.0
+RUN install-tool lerna 7.0.1
 
 #--------------------------------------
 # Image: test-python
