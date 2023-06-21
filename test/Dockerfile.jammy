@@ -88,7 +88,7 @@ FROM build as test-erlang
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 25.3.2.2
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.14.5
+RUN install-tool elixir 1.15.0
 
 #--------------------------------------
 # Image: test-java
