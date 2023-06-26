@@ -2303,7 +2303,7 @@ __metadata:
     pino-pretty: 10.0.0
     pkg: 5.8.1
     prettier: 2.8.8
-    prettier-plugin-package: 1.3.0
+    prettier-plugin-package: 1.3.1
     reflect-metadata: 0.1.13
     semantic-release: 21.0.5
     semver: 7.5.3
@@ -6551,12 +6551,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-package@npm:1.3.0":
-  version: 1.3.0
-  resolution: "prettier-plugin-package@npm:1.3.0"
+"prettier-plugin-package@npm:1.3.1":
+  version: 1.3.1
+  resolution: "prettier-plugin-package@npm:1.3.1"
   peerDependencies:
     prettier: ^2.0.0
-  checksum: 830c105865ab3bde0cdfdce28d410cd8391ee4725e07e90f7570f43f6a3f30a5568b5b7391338b04dd512a4a6ded1670a1dd806cfc141264e79b3444fa629057
+  checksum: d907c80dbabb1d81157697eca537f4e51d57c808dd7b69a5825d730a8be0026ac13372f8b1a0d70b966a278276a5b495d4445d09a30af7f0e3a4331fd05243b9
   languageName: node
   linkType: hard
 
