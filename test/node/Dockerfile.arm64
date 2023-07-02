@@ -30,7 +30,7 @@ RUN install-tool node v18.16.1
 FROM test-node as test-lerna
 
 # renovate: datasource=npm
-RUN install-tool lerna 7.1.0
+RUN install-tool lerna 7.1.1
 
 #--------------------------------------
 # Image: pnpm
