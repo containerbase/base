@@ -20,17 +20,19 @@ export class PrepareToolCommand extends Command {
 
   async execute(): Promise<number | void> {
     const start = Date.now();
+    let error = false;
     logger.info(`Preparing tools ${this.tools.join(', ')}...`);
     try {
       return await prepareTools(this.tools, this.dryRun);
     } catch (err) {
       logger.fatal(err);
+      error = true;
       return 1;
     } finally {
       logger.info(
-        `Prepared tools ${this.tools.join(', ')} in ${prettyMilliseconds(
-          Date.now() - start
-        )}.`
+        `Prepared tools ${this.tools.join(', ')} ${
+          error ? 'with errors ' : ''
+        } in ${prettyMilliseconds(Date.now() - start)}.`
       );
     }
   }

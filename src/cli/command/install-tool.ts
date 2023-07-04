@@ -29,18 +29,20 @@ export class InstallToolCommand extends Command {
 
   async execute(): Promise<number | void> {
     const start = Date.now();
+    let error = false;
 
     logger.info(`Installing tool ${this.name} v${this.version}...`);
     try {
       return await installTool(this.name, this.version, this.dryRun);
     } catch (err) {
       logger.fatal(err);
+      error = true;
       return 1;
     } finally {
       logger.info(
-        `Installed tool ${this.name} in ${prettyMilliseconds(
-          Date.now() - start
-        )}.`
+        `Installed tool ${this.name} ${
+          error ? 'with errors ' : ''
+        }in ${prettyMilliseconds(Date.now() - start)}.`
       );
     }
   }
