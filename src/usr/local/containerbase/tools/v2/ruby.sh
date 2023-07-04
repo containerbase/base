@@ -14,7 +14,7 @@ function prepare_tool() {
     ;;
   esac
   apt_install \
-    build-essential \
+    gcc \
     libffi-dev \
     libyaml-0-2 \
     ;
