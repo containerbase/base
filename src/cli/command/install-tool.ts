@@ -40,7 +40,7 @@ export class InstallToolCommand extends Command {
       logger.info(
         `Installed tool ${this.name} in ${prettyMilliseconds(
           Date.now() - start
-        )}ms.`
+        )}.`
       );
     }
   }

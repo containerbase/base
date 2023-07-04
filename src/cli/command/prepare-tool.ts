@@ -30,7 +30,7 @@ export class PrepareToolCommand extends Command {
       logger.info(
         `Prepared tools ${this.tools.join(', ')} in ${prettyMilliseconds(
           Date.now() - start
-        )}ms.`
+        )}.`
       );
     }
   }
