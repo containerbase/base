@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion';
+import prettyMilliseconds from 'pretty-ms';
 import { prepareTools } from '../prepare-tool';
 import { logger } from '../utils';
 
@@ -27,7 +28,9 @@ export class PrepareToolCommand extends Command {
       return 1;
     } finally {
       logger.info(
-        `Prepared tools ${this.tools.join(', ')} in ${Date.now() - start}ms.`
+        `Prepared tools ${this.tools.join(', ')} in ${prettyMilliseconds(
+          Date.now() - start
+        )}ms.`
       );
     }
   }

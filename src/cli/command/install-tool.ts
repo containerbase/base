@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion';
+import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
 import { installTool } from '../install-tool';
 import { logger, validateVersion } from '../utils';
@@ -36,7 +37,11 @@ export class InstallToolCommand extends Command {
       logger.fatal(err);
       return 1;
     } finally {
-      logger.info(`Installed tool ${this.name} in ${Date.now() - start}ms.`);
+      logger.info(
+        `Installed tool ${this.name} in ${prettyMilliseconds(
+          Date.now() - start
+        )}ms.`
+      );
     }
   }
 }
