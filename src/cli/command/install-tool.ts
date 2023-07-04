@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion';
+import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
 import { installTool } from '../install-tool';
 import { logger, validateVersion } from '../utils';
@@ -28,15 +29,21 @@ export class InstallToolCommand extends Command {
 
   async execute(): Promise<number | void> {
     const start = Date.now();
+    let error = false;
 
     logger.info(`Installing tool ${this.name} v${this.version}...`);
     try {
       return await installTool(this.name, this.version, this.dryRun);
     } catch (err) {
       logger.fatal(err);
+      error = true;
       return 1;
     } finally {
-      logger.info(`Installed tool ${this.name} in ${Date.now() - start}ms.`);
+      logger.info(
+        `Installed tool ${this.name} ${
+          error ? 'with errors ' : ''
+        }in ${prettyMilliseconds(Date.now() - start)}.`
+      );
     }
   }
 }

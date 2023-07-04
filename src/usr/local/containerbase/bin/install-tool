@@ -15,22 +15,16 @@ if [[ $(ignore_tool) -eq 1 ]]; then
   exit 0;
 fi
 
-TOOL="/${CONTAINERBASE_DIR}/tools/${TOOL_NAME}.sh"
-V2_TOOL="/${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"
+TOOL="${CONTAINERBASE_DIR}/tools/${TOOL_NAME}.sh"
+V2_TOOL="${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"
 
 if [[ -f "$V2_TOOL" ]]; then
   # install v2 tool
-  start=$(date +%s)
   install_v2_tool "${V2_TOOL}"
-  duration=$(($(date +%s) - start))
-  echo "Installed v2 ${V2_TOOL} in ${duration} seconds"
 elif [[ -f "$TOOL" ]]; then
   echo "Installing v1 tool ${TOOL_NAME} v${TOOL_VERSION}"
-  start=$(date +%s)
   # shellcheck source=/dev/null
   . "$TOOL"
-  duration=$(($(date +%s) - start))
-  echo "Installed v1 ${TOOL_NAME} in ${duration} seconds"
 else
   echo "No tool defined - skipping: ${TOOL_NAME}" >&2
   exit 1;

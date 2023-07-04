@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion';
+import prettyMilliseconds from 'pretty-ms';
 import { prepareTools } from '../prepare-tool';
 import { logger } from '../utils';
 
@@ -19,15 +20,19 @@ export class PrepareToolCommand extends Command {
 
   async execute(): Promise<number | void> {
     const start = Date.now();
+    let error = false;
     logger.info(`Preparing tools ${this.tools.join(', ')}...`);
     try {
       return await prepareTools(this.tools, this.dryRun);
     } catch (err) {
       logger.fatal(err);
+      error = true;
       return 1;
     } finally {
       logger.info(
-        `Prepared tools ${this.tools.join(', ')} in ${Date.now() - start}ms.`
+        `Prepared tools ${this.tools.join(', ')} ${
+          error ? 'with errors ' : ''
+        } in ${prettyMilliseconds(Date.now() - start)}.`
       );
     }
   }
