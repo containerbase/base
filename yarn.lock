@@ -2376,7 +2376,7 @@ __metadata:
     prettier-plugin-package: 1.3.1
     pretty-ms: 7.0.1
     reflect-metadata: 0.1.13
-    semantic-release: 21.0.5
+    semantic-release: 21.0.6
     semver: 7.5.3
     shelljs: 0.8.5
     tar: 6.1.15
@@ -7191,9 +7191,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semantic-release@npm:21.0.5":
-  version: 21.0.5
-  resolution: "semantic-release@npm:21.0.5"
+"semantic-release@npm:21.0.6":
+  version: 21.0.6
+  resolution: "semantic-release@npm:21.0.6"
   dependencies:
     "@semantic-release/commit-analyzer": ^10.0.0
     "@semantic-release/error": ^4.0.0
@@ -7225,7 +7225,7 @@ __metadata:
     yargs: ^17.5.1
   bin:
     semantic-release: bin/semantic-release.js
-  checksum: 9b45d24392c24a7f147e4560d36a0f70447b719b0e7371c400834b9a1a98f4b6a3e23420480505f03b0b690c2eaaea2db53c870435a28f8946721ad96f63d3e1
+  checksum: 9f2429ca64aef109fa4de6cdef8fbfdabdc72cf369818b1a698305d3643b64288395b7292432979c7591b2927281e3761e6537799e69cc64aa3421b7ecc0b842
   languageName: node
   linkType: hard
 
