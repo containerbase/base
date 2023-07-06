@@ -57,7 +57,7 @@ RUN install-tool helm v3.12.1
 RUN install-tool helmfile v0.155.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.0.0
+RUN install-tool kustomize 5.0.3
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.16.1
