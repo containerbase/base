@@ -54,7 +54,7 @@ RUN install-tool helmfile v0.155.0
 FROM base as test-kustomize
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.0.3
+RUN install-tool kustomize 5.1.0
 
 #--------------------------------------
 # Image: terraform
