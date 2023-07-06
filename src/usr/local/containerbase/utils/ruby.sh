@@ -43,7 +43,7 @@ function install_tool() {
     # restore from cache not possible
     # either not in cache or error, install
 
-    gem install --install-dir "${tool_path}" --bindir "${tool_path}/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}" --silent
+    gem install --install-dir "${tool_path}" --bindir "${tool_path}/bin" "${TOOL_NAME}" -v "${TOOL_VERSION}" # --silent
 
     # TODO: clear gem cache
 

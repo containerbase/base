@@ -14,9 +14,10 @@ function prepare_tool() {
     ;;
   esac
   apt_install \
-    build-essential \
+    g++ \
     libffi-dev \
     libyaml-0-2 \
+    make \
     ;
   tool_path=$(create_tool_path)
 
