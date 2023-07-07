@@ -2381,7 +2381,7 @@ __metadata:
     shelljs: 0.8.5
     tar: 6.1.15
     tsx: 3.12.7
-    typanion: 3.12.1
+    typanion: 3.13.0
     typescript: 5.1.6
   languageName: unknown
   linkType: soft
@@ -8064,7 +8064,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typanion@npm:3.12.1, typanion@npm:^3.8.0":
+"typanion@npm:3.13.0":
+  version: 3.13.0
+  resolution: "typanion@npm:3.13.0"
+  checksum: 7d1506ab3a635ca5aaf84696829092f4cf6949c7995e950e0a744f55b4d4a824e2cf22278d37c323396188240d0003bd10de14a64da8e1ded3ddd71dcec2d146
+  languageName: node
+  linkType: hard
+
+"typanion@npm:^3.8.0":
   version: 3.12.1
   resolution: "typanion@npm:3.12.1"
   checksum: a2e26fa216f8a1dbd2ffbaacb75b1e2dc042a0356e9702fba05a968cad95d9f661b24e37f6c6d8c3adad2c8582c99fca4826ff26a2d07cd2ae617ea87e6187eb
