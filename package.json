@@ -39,7 +39,7 @@
     "reflect-metadata": "0.1.13",
     "semver": "7.5.3",
     "tar": "6.1.15",
-    "typanion": "3.12.1"
+    "typanion": "3.13.0"
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
