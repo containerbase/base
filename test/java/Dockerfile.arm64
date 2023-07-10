@@ -30,7 +30,7 @@ RUN install-tool java 17.0.7+7
 FROM test-java as test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.2
+RUN install-tool gradle 8.2.1
 
 #--------------------------------------
 # Image: maven
