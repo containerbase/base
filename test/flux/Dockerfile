@@ -29,7 +29,7 @@ RUN install-tool flux "${FLUX_VERSION}"
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN flux -v | grep "${FLUX_VERSION}"
+RUN flux -v | grep "${FLUX_VERSION#v}"
 
 #--------------------------------------
 # install flux as user
@@ -42,7 +42,7 @@ RUN install-tool flux "${FLUX_VERSION}"
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN flux -v | grep "${FLUX_VERSION}"
+RUN flux -v | grep "${FLUX_VERSION#v}"
 
 #--------------------------------------
 # install flux as user when already installed
