@@ -22,5 +22,5 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await fs.rmdir(cacheDir, { recursive: true });
+  await fs.rm(cacheDir, { recursive: true });
 });
