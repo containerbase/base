@@ -90,3 +90,19 @@ RUN install-tool node 14.17.3
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker 20.10.7
 ```
+
+### Url replacement
+
+You can replace the default urls used to download the tools.
+This is currently only supported by the `docker` tool installer.
+Checkout #1067 for additional support.
+
+```Dockerfile
+FROM containerbase/base
+
+ENV URL_REPLACE_0_FROM=https://download.docker.com/linux/static/stable
+ENV URL_REPLACE_0_TO=https://artifactory.proxy.test/some/virtual/patch/docker
+
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v24.0.2
+```

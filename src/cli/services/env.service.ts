@@ -1,12 +1,15 @@
 import { arch } from 'node:os';
-import { geteuid } from 'node:process';
+import { env, geteuid } from 'node:process';
 import { injectable } from 'inversify';
-import type { Arch } from '../utils';
+import { type Arch, logger } from '../utils';
+
+export type Replacements = Record<string, string>;
 
 @injectable()
 export class EnvService {
   readonly arch: Arch;
   private uid: number;
+  private replacements: Replacements | undefined;
 
   constructor() {
     this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
@@ -24,7 +27,7 @@ export class EnvService {
   }
 
   get cacheDir(): string | null {
-    return process.env.CONTAINERBASE_CACHE_DIR ?? null;
+    return env.CONTAINERBASE_CACHE_DIR ?? null;
   }
 
   get isRoot(): boolean {
@@ -32,15 +35,15 @@ export class EnvService {
   }
 
   get userHome(): string {
-    return process.env.USER_HOME ?? `/home/${this.userName}`;
+    return env.USER_HOME ?? `/home/${this.userName}`;
   }
 
   get userName(): string {
-    return process.env.USER_NAME ?? 'ubuntu';
+    return env.USER_NAME ?? 'ubuntu';
   }
 
   get userId(): number {
-    return parseInt(process.env.USER_ID ?? '1000', 10);
+    return parseInt(env.USER_ID ?? '1000', 10);
   }
 
   get umask(): number {
@@ -48,6 +51,26 @@ export class EnvService {
   }
 
   get skipTests(): boolean {
-    return !!process.env.SKIP_VERSION;
+    return !!env.SKIP_VERSION;
+  }
+
+  get urlReplacements(): Record<string, string> {
+    if (this.replacements) {
+      return this.replacements;
+    }
+    const replacements: Record<string, string> = {};
+    const fromRe = /^URL_REPLACE_\d+_FROM$/;
+    for (const from of Object.keys(env).filter((key) => fromRe.test(key))) {
+      const to = from.replace(/_FROM$/, '_TO');
+      if (env[from] && env[to]) {
+        replacements[env[from]!] = env[to]!;
+      } else {
+        logger.warn(
+          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`
+        );
+      }
+    }
+
+    return (this.replacements = replacements);
   }
 }

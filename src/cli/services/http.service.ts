@@ -1,5 +1,5 @@
 import { createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { got } from 'got';
@@ -65,9 +65,11 @@ export class HttpService {
 
     await mkdir(cachePath, { recursive: true });
 
+    const nUrl = this.replaceUrl(url);
+
     for (const run of [1, 2, 3]) {
       try {
-        await pipeline(got.stream(url), createWriteStream(filePath));
+        await pipeline(got.stream(nUrl), createWriteStream(filePath));
         return filePath;
       } catch (err) {
         if (run === 3) {
@@ -77,6 +79,19 @@ export class HttpService {
         }
       }
     }
+    await rm(cachePath, { recursive: true });
     throw new Error('download failed');
+  }
+  private replaceUrl(src: string): string {
+    let tgt = src;
+    const replacements = this.envSvc.urlReplacements;
+
+    for (const from of Object.keys(replacements)) {
+      tgt = tgt.replace(from, replacements[from]);
+    }
+    if (tgt !== src) {
+      logger.debug({ src, tgt }, 'url replaced');
+    }
+    return tgt;
   }
 }
