@@ -178,11 +178,17 @@ RUN npm --version
 RUN npm --version | grep '7.24.2'
 
 #--------------------------------------
-# test: unused
+# test: use npm from node to install
 #--------------------------------------
 FROM build as testf
 
-# unused
+RUN install-tool node 10.24.0
+# intentionally fails
+RUN install-tool npm 9.5.1 || true
+RUN install-tool yarn-slim 1.22.19
+RUN install-tool node v18.16.1
+RUN install-tool yarn-slim 1.22.19
+RUN yarn --version
 
 
 #--------------------------------------
@@ -480,7 +486,7 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
 COPY --from=testh /.dummy /.dummy
 COPY --from=testi /.dummy /.dummy
