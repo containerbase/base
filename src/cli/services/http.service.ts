@@ -3,9 +3,9 @@ import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { got } from 'got';
-import hasha from 'hasha';
 import { inject, injectable } from 'inversify';
 import { logger } from '../utils';
+import { hash, hashFile } from '../utils/hash';
 import { EnvService } from './env.service';
 import { PathService } from './path.service';
 
@@ -36,7 +36,7 @@ export class HttpService {
     checksumType,
     fileName,
   }: HttpDownloadConfig): Promise<string> {
-    const urlChecksum = hasha(url, { algorithm: 'sha256' });
+    const urlChecksum = hash(url, 'sha256');
 
     const cacheDir = this.envSvc.cacheDir ?? this.pathSvc.tmpDir;
     const cachePath = join(cacheDir, urlChecksum);
@@ -46,9 +46,7 @@ export class HttpService {
 
     if (await this.pathSvc.fileExists(filePath)) {
       if (expectedChecksum && checksumType) {
-        const actualChecksum = await hasha.fromFile(filePath, {
-          algorithm: checksumType,
-        });
+        const actualChecksum = await hashFile(filePath, checksumType);
 
         if (actualChecksum === expectedChecksum) {
           return filePath;
@@ -70,6 +68,19 @@ export class HttpService {
     for (const run of [1, 2, 3]) {
       try {
         await pipeline(got.stream(nUrl), createWriteStream(filePath));
+        if (expectedChecksum && checksumType) {
+          const actualChecksum = await hashFile(filePath, checksumType);
+
+          if (actualChecksum === expectedChecksum) {
+            return filePath;
+          } else {
+            logger.debug(
+              { url, expectedChecksum, actualChecksum, checksumType },
+              'checksum mismatch'
+            );
+            throw new Error('checksum mismatch');
+          }
+        }
         return filePath;
       } catch (err) {
         if (run === 3) {
