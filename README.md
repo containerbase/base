@@ -94,8 +94,12 @@ RUN install-tool docker 20.10.7
 ### Url replacement
 
 You can replace the default urls used to download the tools.
-This is currently only supported by the `docker` tool installer.
-Checkout #1067 for additional support.
+This is currently only supported by these tool installers:
+
+- `docker`
+- `dart`
+
+Checkout [#1067](https://github.com/containerbase/base/issues/1067) for additional support.
 
 ```Dockerfile
 FROM containerbase/base
