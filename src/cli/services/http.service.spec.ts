@@ -12,7 +12,7 @@ describe('http.service', () => {
   });
 
   test('throws', async () => {
-    scope('https://example.com').get('/fail.txt').times(6).reply(404);
+    scope('https://example.com').get('/fail.txt').times(3).reply(404);
     const http = child.get(HttpService);
 
     await expect(
