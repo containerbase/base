@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
-    "@tsconfig/node18": "2.0.1",
+    "@tsconfig/node18": "18.2.0",
     "@types/node": "18.16.19",
     "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
