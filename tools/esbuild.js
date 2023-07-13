@@ -9,7 +9,7 @@ await build({
   platform: 'node',
   target: 'node18',
   minify: false,
-  tsconfig: 'src/cli/tsconfig.json',
+  tsconfig: 'tsconfig.json',
   // format: "esm", // not supported https://github.com/vercel/pkg/issues/1291
   outdir: './dist/',
   define: {
