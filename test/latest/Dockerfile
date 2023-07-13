@@ -15,11 +15,6 @@ COPY src/ /
 
 RUN install-containerbase
 
-ENV LOG_LEVEL=debug
-RUN set -ex; \
-  install-tool docker v24.0.2; \
-  false
-
 #--------------------------------------
 # build
 #--------------------------------------
