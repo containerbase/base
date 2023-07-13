@@ -25,7 +25,8 @@
     "release:publish": "node tools/publish-release.js",
     "start": "tsx src/cli/index.ts",
     "test:bats": "node_modules/bats/bin/bats --timing --verbose-run test/bash/ test/bash/v2",
-    "test:docker": "node tools/test.js"
+    "test:docker": "node tools/test.js",
+    "test:vitest": "vitest"
   },
   "dependencies": {
     "clipanion": "3.2.1",
@@ -50,6 +51,7 @@
     "@types/tar": "6.1.5",
     "@typescript-eslint/eslint-plugin": "5.61.0",
     "@typescript-eslint/parser": "5.61.0",
+    "@vitest/coverage-v8": "0.33.0",
     "bats": "1.9.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
@@ -68,6 +70,7 @@
     "eslint-plugin-typescript-enum": "2.1.0",
     "husky": "8.0.3",
     "lint-staged": "13.2.3",
+    "nock": "13.3.1",
     "npm-run-all": "4.1.5",
     "pkg": "5.8.1",
     "prettier": "2.8.8",
@@ -75,7 +78,9 @@
     "semantic-release": "21.0.7",
     "shelljs": "0.8.5",
     "tsx": "3.12.7",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "vite-tsconfig-paths": "4.2.0",
+    "vitest": "0.33.0"
   },
   "contributors": [
     "Michael Kriese <michael.kriese@visualon.de>"

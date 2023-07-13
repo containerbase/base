@@ -7,7 +7,12 @@
     "types": ["node"],
     "verbatimModuleSyntax": true,
     "noImplicitOverride": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "~test/*": ["./test/*"]
+    }
   },
   "exclude": ["node_modules", "bin"]
 }
