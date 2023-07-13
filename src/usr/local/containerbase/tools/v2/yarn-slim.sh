@@ -7,6 +7,7 @@ function check_tool_requirements () {
 
 function install_tool () {
   local versioned_tool_path
+  local npm
   versioned_tool_path=$(create_versioned_tool_path)
 
   if [[ $(restore_folder_from_cache "${versioned_tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
@@ -15,9 +16,10 @@ function install_tool () {
 
     # shellcheck source=/dev/null
     . "$(get_containerbase_path)/utils/node.sh"
+    npm="$(get_node_npm)"
 
     npm_init
-    npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "${versioned_tool_path}" --cache "${NPM_CONFIG_CACHE}" 2>&1
+    $npm install "yarn@${TOOL_VERSION}" --global --no-audit --prefix "${versioned_tool_path}" --cache "${NPM_CONFIG_CACHE}" 2>&1
     npm_clean
 
     # patch yarn
