@@ -94,6 +94,9 @@ RUN install-tool docker 20.10.7
 ### Url replacement
 
 You can replace the default urls used to download the tools.
+The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables must match.
+Theses variables are case sensitive.
+The numbers will be processed in numerical order and can have gaps.
 This is currently only supported by these tool installers:
 
 - `docker`
@@ -104,9 +107,15 @@ Checkout [#1067](https://github.com/containerbase/base/issues/1067) for addition
 ```Dockerfile
 FROM containerbase/base
 
-ENV URL_REPLACE_0_FROM=https://download.docker.com/linux/static/stable
-ENV URL_REPLACE_0_TO=https://artifactory.proxy.test/some/virtual/patch/docker
+ENV URL_REPLACE_5_FROM=https://storage.googleapis.com/dart-archive/channels/stable/release/
+ENV URL_REPLACE_5_TO=https://artifactory.proxy.test/virtual/dart-archive/
+
+ENV URL_REPLACE_0_FROM=https://download.docker.com/linux/static/stable/
+ENV URL_REPLACE_0_TO=https://artifactory.proxy.test/virtual/docker-com/
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v24.0.2
+
+# renovate datasource=docker
+RUN install-tool dart 2.18.0
 ```
