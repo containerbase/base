@@ -1,13 +1,15 @@
-import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { pipeline } from 'node:stream/promises';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import tar from 'tar';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
-import { EnvService, HttpService, PathService } from '../../services';
+import {
+  CompressionService,
+  EnvService,
+  HttpService,
+  PathService,
+} from '../../services';
 
 @injectable()
 export class PrepareDockerService extends PrepareToolBaseService {
@@ -39,7 +41,8 @@ export class InstallDockerService extends InstallToolBaseService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService
+    @inject(HttpService) private http: HttpService,
+    @inject(CompressionService) private compress: CompressionService
   ) {
     super(pathSvc, envSvc);
   }
@@ -53,10 +56,12 @@ export class InstallDockerService extends InstallToolBaseService {
       'bin'
     );
     await fs.mkdir(path);
-    await pipeline(
-      createReadStream(file),
-      tar.x({ cwd: path, strip: 1 }, ['docker/docker'])
-    );
+    await this.compress.extract({
+      file,
+      cwd: path,
+      strip: 1,
+      files: ['docker/docker'],
+    });
   }
 
   override async link(version: string): Promise<void> {
