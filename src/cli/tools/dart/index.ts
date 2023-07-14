@@ -5,7 +5,12 @@ import { inject, injectable } from 'inversify';
 import semver from 'semver';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
-import { EnvService, HttpService, PathService } from '../../services';
+import {
+  EnvService,
+  ExtractService,
+  HttpService,
+  PathService,
+} from '../../services';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip
@@ -60,7 +65,8 @@ export class InstallDartService extends InstallToolBaseService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService
+    @inject(HttpService) private http: HttpService,
+    @inject(ExtractService) private extract: ExtractService
   ) {
     super(pathSvc, envSvc);
   }
@@ -91,7 +97,7 @@ export class InstallDartService extends InstallToolBaseService {
     });
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-    await execa('bsdtar', ['-xf', file, '-C', path, '--strip', '1']);
+    await this.extract.extract({ file, cwd: path, strip: 1 });
   }
 
   override async link(version: string): Promise<void> {
