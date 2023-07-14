@@ -161,6 +161,7 @@ module.exports = {
         project: './tsconfig.lint.json',
       },
     },
+    'import/external-module-folders': ['node_modules', '.yarn'],
   },
   overrides: [
     {
