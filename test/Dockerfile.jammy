@@ -36,13 +36,13 @@ RUN install-tool dart 2.18.0
 RUN install-tool docker v24.0.4
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.305
+RUN install-tool dotnet 7.0.306
 
 # renovate datasource=flutter-version
 RUN install-tool flutter 3.0.2
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.41.2
+RUN install-tool flux v2.0.1
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.3.0
@@ -51,7 +51,7 @@ RUN install-tool git-lfs v3.3.0
 RUN install-tool golang 1.20.6
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.12.1
+RUN install-tool helm v3.12.2
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 RUN install-tool helmfile v0.155.0
@@ -63,10 +63,10 @@ RUN install-tool kustomize 5.1.0
 RUN install-tool nix 2.16.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.5
+RUN install-tool powershell v7.3.6
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.70.0
+RUN install-tool rust 1.71.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.8.1

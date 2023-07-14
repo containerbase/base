@@ -1,5 +1,6 @@
 import { Container } from 'inversify';
 import { rootContainer } from '../services';
+import { PrepareDartService } from '../tools/dart';
 import { PrepareDockerService } from '../tools/docker';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
@@ -16,6 +17,7 @@ function prepareContainer(): Container {
 
   // tool services
   container.bind(PREPARE_TOOL_TOKEN).to(PrepareDockerService);
+  container.bind(PREPARE_TOOL_TOKEN).to(PrepareDartService);
 
   logger.trace('preparing container done');
   return container;

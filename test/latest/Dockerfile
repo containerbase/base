@@ -126,7 +126,7 @@ RUN set -ex; \
 FROM build as testf
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.5
+RUN install-tool powershell v7.3.6
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
@@ -185,13 +185,13 @@ USER 1000
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v0.41.2
+RUN install-tool flux v2.0.1
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.3.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.5
+RUN install-tool powershell v7.3.6
 
 # renovate: datasource=node
 RUN install-tool node v18.16.1

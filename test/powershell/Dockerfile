@@ -43,7 +43,7 @@ RUN pwsh --version
 FROM base as testb
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.5
+RUN install-tool powershell v7.3.6
 
 USER 1000
 

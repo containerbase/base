@@ -30,6 +30,11 @@ export class EnvService {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
   }
 
+  get home(): string {
+    // TODO: validate
+    return env.HOME!;
+  }
+
   get isRoot(): boolean {
     return this.uid === 0;
   }
