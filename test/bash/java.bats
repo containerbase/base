@@ -1,8 +1,8 @@
 # shellcheck disable=SC2034,SC2148
 
 setup() {
-  load '../../node_modules/bats-support/load'
-  load '../../node_modules/bats-assert/load'
+  load $BATS_SUPPORT_LOAD_PATH
+  load $BATS_ASSERT_LOAD_PATH
 
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)

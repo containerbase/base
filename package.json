@@ -11,7 +11,7 @@
     "yarn": "^3.2.0"
   },
   "scripts": {
-    "bats": "node_modules/bats/bin/bats --timing --verbose-run",
+    "bats": "node --experimental-import-meta-resolve tools/bats.js --timing --verbose-run",
     "build": "run-s 'build:*'",
     "build:cli": "node tools/esbuild.js",
     "eslint": "eslint --cache --report-unused-disable-directives .",
@@ -24,7 +24,7 @@
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js",
     "start": "tsx src/cli/index.ts",
-    "test:bats": "node_modules/bats/bin/bats --timing --verbose-run test/bash/ test/bash/v2",
+    "test:bats": "node --experimental-import-meta-resolve tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",
     "test:docker": "node tools/test.js",
     "test:vitest": "vitest"
   },
@@ -87,5 +87,16 @@
   "contributors": [
     "Michael Kriese <michael.kriese@visualon.de>"
   ],
+  "dependenciesMeta": {
+    "bats@1.9.0": {
+      "unplugged": true
+    },
+    "bats-assert@2.0.0": {
+      "unplugged": true
+    },
+    "bats-support@0.3.0": {
+      "unplugged": true
+    }
+  },
   "packageManager": "yarn@3.6.1"
 }

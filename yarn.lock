@@ -2973,6 +2973,13 @@ __metadata:
     vite: 4.4.4
     vite-tsconfig-paths: 4.2.0
     vitest: 0.33.0
+  dependenciesMeta:
+    bats-assert@2.0.0:
+      unplugged: true
+    bats-support@0.3.0:
+      unplugged: true
+    bats@1.9.0:
+      unplugged: true
   languageName: unknown
   linkType: soft
 
