@@ -6,8 +6,8 @@ import semver from 'semver';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
 import {
+  CompressionService,
   EnvService,
-  ExtractService,
   HttpService,
   PathService,
 } from '../../services';
@@ -66,7 +66,7 @@ export class InstallDartService extends InstallToolBaseService {
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(HttpService) private http: HttpService,
-    @inject(ExtractService) private extract: ExtractService
+    @inject(CompressionService) private compress: CompressionService
   ) {
     super(pathSvc, envSvc);
   }
@@ -97,7 +97,7 @@ export class InstallDartService extends InstallToolBaseService {
     });
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-    await this.extract.extract({ file, cwd: path, strip: 1 });
+    await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
   override async link(version: string): Promise<void> {

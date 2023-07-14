@@ -10,7 +10,7 @@ export {
   PathService,
   VersionService,
   HttpService,
-  CompressionService as ExtractService,
+  CompressionService,
 };
 
 export const rootContainer = new Container();
