@@ -66,7 +66,7 @@ export abstract class InstallToolBaseService {
       content += `export ${exports}\n`;
     }
 
-    content += `${srcDir}/${name} "$@"\n`;
+    content += `${srcDir}/${name ?? this.name} "$@"\n`;
 
     await writeFile(tgt, content, { encoding: 'utf8' });
     await this.setOwner({ file: tgt });
