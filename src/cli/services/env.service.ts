@@ -3,7 +3,15 @@ import { env, geteuid } from 'node:process';
 import { injectable } from 'inversify';
 import { type Arch, logger } from '../utils';
 
-export type Replacements = Record<string, string>;
+export type Replacements = [string, string][];
+
+const compare = (() => {
+  const collator = new Intl.Collator('en', {
+    sensitivity: 'base',
+    numeric: true,
+  });
+  return (a: string, b: string) => collator.compare(a, b);
+})();
 
 @injectable()
 export class EnvService {
@@ -59,16 +67,20 @@ export class EnvService {
     return !!env.SKIP_VERSION;
   }
 
-  get urlReplacements(): Record<string, string> {
+  get urlReplacements(): [string, string][] {
     if (this.replacements) {
       return this.replacements;
     }
-    const replacements: Record<string, string> = {};
+
+    const replacements: [string, string][] = [];
     const fromRe = /^URL_REPLACE_\d+_FROM$/;
-    for (const from of Object.keys(env).filter((key) => fromRe.test(key))) {
+
+    for (const from of Object.keys(env)
+      .filter((key) => fromRe.test(key))
+      .sort(compare)) {
       const to = from.replace(/_FROM$/, '_TO');
       if (env[from] && env[to]) {
-        replacements[env[from]!] = env[to]!;
+        replacements.push([env[from]!, env[to]!]);
       } else {
         logger.warn(
           `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`

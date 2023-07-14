@@ -8,7 +8,6 @@ import tar from 'tar';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
 import { EnvService, HttpService, PathService } from '../../services';
-import { logger } from '../../utils';
 
 @injectable()
 export class PrepareDockerService extends PrepareToolBaseService {
@@ -47,7 +46,6 @@ export class InstallDockerService extends InstallToolBaseService {
 
   override async install(version: string): Promise<void> {
     const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
-    logger.debug({ url }, 'download docker');
     const file = await this.http.download({ url });
 
     const path = join(

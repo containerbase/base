@@ -1,6 +1,7 @@
 import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
+import { logger } from '../utils';
 import { HttpService, rootContainer } from '.';
 import { scope } from '~test/http-mock';
 import { cacheFile } from '~test/path';
@@ -92,7 +93,16 @@ describe('http.service', () => {
     scope('https://example.org').get('/replace.txt').reply(200, 'ok');
 
     env.URL_REPLACE_0_FROM = baseUrl;
-    env.URL_REPLACE_0_TO = 'https://example.org';
+    env.URL_REPLACE_0_TO = 'https://example.test';
+
+    env.URL_REPLACE_11_FROM = 'https://example.test';
+    env.URL_REPLACE_11_TO = 'https://example.corp';
+
+    env.URL_REPLACE_10_FROM = 'https://example.test';
+    env.URL_REPLACE_10_TO = 'https://example.org';
+
+    // coverage
+    env.URL_REPLACE_1_FROM = 'https://example.test';
 
     const http = child.get(HttpService);
     const expected = cacheFile(
@@ -105,6 +115,10 @@ describe('http.service', () => {
     // uses cache
     expect(await http.download({ url: `${baseUrl}/replace.txt` })).toBe(
       expected
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Invalid URL replacement: URL_REPLACE_1_FROM=https://example.test URL_REPLACE_1_TO=undefined'
     );
   });
 });

@@ -6,7 +6,6 @@ import semver from 'semver';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
 import { EnvService, HttpService, PathService } from '../../services';
-import { logger } from '../../utils';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip
@@ -79,14 +78,12 @@ export class InstallDartService extends InstallToolBaseService {
     const sdkFile = `dartsdk-linux-${this.arch}-release.zip`;
     const url = `${sdkUrl}/${sdkFile}`;
 
-    logger.debug({ url: `${url}.sha256sum` }, `download ${this.name} checksum`);
     const checksumFile = await this.http.download({ url: `${url}.sha256sum` });
     const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
       .split('\n')
       .find((l) => l.includes(sdkFile))
       ?.split(' ')[0];
 
-    logger.debug({ url }, `download ${this.name}`);
     const file = await this.http.download({
       url,
       expectedChecksum,

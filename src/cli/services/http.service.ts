@@ -36,6 +36,8 @@ export class HttpService {
     checksumType,
     fileName,
   }: HttpDownloadConfig): Promise<string> {
+    logger.debug({ url, expectedChecksum, checksumType }, 'downloading file');
+
     const urlChecksum = hash(url, 'sha256');
 
     const cacheDir = this.envSvc.cacheDir ?? this.pathSvc.tmpDir;
@@ -93,11 +95,12 @@ export class HttpService {
     await rm(cachePath, { recursive: true });
     throw new Error('download failed');
   }
+
   private replaceUrl(src: string): string {
     let tgt = src;
     const replacements = this.envSvc.urlReplacements;
 
-    for (const [from, to] of Object.entries(replacements)) {
+    for (const [from, to] of replacements) {
       tgt = tgt.replace(from, to);
     }
     if (tgt !== src) {
