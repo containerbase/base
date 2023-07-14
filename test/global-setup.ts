@@ -5,22 +5,12 @@ import { afterAll, beforeAll, vi } from 'vitest';
 
 vi.mock('../src/cli/utils/logger');
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface ProcessEnv {
-      CONTAINERBASE_CACHE_DIR: string;
-    }
-  }
-}
-
-let cacheDir: string;
-
 beforeAll(async () => {
-  cacheDir = await fs.mkdtemp('/tmp/containerbase-test-');
-  env.CONTAINERBASE_CACHE_DIR = cacheDir;
+  globalThis.cacheDir = await fs.mkdtemp('/tmp/containerbase-test-');
+
+  env.CONTAINERBASE_CACHE_DIR = globalThis.cacheDir;
 });
 
 afterAll(async () => {
-  await fs.rm(cacheDir, { recursive: true });
+  await fs.rm(globalThis.cacheDir, { recursive: true });
 });

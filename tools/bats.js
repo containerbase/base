@@ -1,20 +1,16 @@
+import { createRequire } from 'node:module';
 import { Command, Option, runExit } from 'clipanion';
 import { execa } from 'execa';
 
+const require = createRequire(import.meta.url);
+
 class BatsCommand extends Command {
-  args = Option.Proxy({ required: false });
+  args = Option.Proxy();
 
   async execute() {
-    const bats = (await import.meta.resolve('bats/bin/bats')).replace(
-      'file://',
-      ''
-    );
-    const batsAssert = (
-      await import.meta.resolve('bats-assert/load.bash')
-    ).replace('file://', '');
-    const batsSupport = (
-      await import.meta.resolve('bats-support/load.bash')
-    ).replace('file://', '');
+    const bats = require.resolve('bats/bin/bats');
+    const batsAssert = require.resolve('bats-assert/load.bash');
+    const batsSupport = require.resolve('bats-support/load.bash');
 
     await execa(bats, this.args, {
       env: {

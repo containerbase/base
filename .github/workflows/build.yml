@@ -55,6 +55,7 @@ jobs:
         run: |
           yarn eslint -f gha
           yarn prettier
+          yarn lint:types
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
@@ -102,7 +103,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: vitest
-        run: yarn vitest run --coverage
+        run: yarn test:vitest
 
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4

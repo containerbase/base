@@ -5,10 +5,10 @@ import shell from 'shelljs';
 shell.config.fatal = true;
 
 class TestCommand extends Command {
-  tests = Option.Rest({ required: false });
-  dryRun = Option.Boolean('-d,--dry-run', { required: false });
-  target = Option.String('-t,--target', { required: false, default: 'test' });
-  build = Option.Boolean('-b,--build', { required: false, default: false });
+  tests = Option.Rest();
+  dryRun = Option.Boolean('-d,--dry-run');
+  target = Option.String('-t,--target');
+  build = Option.Boolean('-b,--build');
 
   async execute() {
     let tests = this.tests;
@@ -40,6 +40,7 @@ class TestCommand extends Command {
         env: { ...process.env, TAG: d },
       });
     }
+    return 0;
   }
 }
 

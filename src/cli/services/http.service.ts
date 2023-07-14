@@ -18,7 +18,7 @@ export type HttpChecksumType =
 
 export interface HttpDownloadConfig {
   url: string;
-  expectedChecksum?: string;
+  expectedChecksum?: string | undefined;
   checksumType?: HttpChecksumType;
   fileName?: string;
 }
@@ -97,8 +97,8 @@ export class HttpService {
     let tgt = src;
     const replacements = this.envSvc.urlReplacements;
 
-    for (const from of Object.keys(replacements)) {
-      tgt = tgt.replace(from, replacements[from]);
+    for (const [from, to] of Object.entries(replacements)) {
+      tgt = tgt.replace(from, to);
     }
     if (tgt !== src) {
       logger.debug({ src, tgt }, 'url replaced');

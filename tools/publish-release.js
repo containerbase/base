@@ -6,7 +6,8 @@ class ReleaseCommand extends Command {
   gitSha = Option.String('--sha', { required: false });
   dryRun = Option.Boolean('-d,--dry-run', { required: false });
 
-  execute() {
+  async execute() {
+    await Promise.resolve();
     const version = this.release;
     const dry = this.dryRun;
     /** @type {shell.ShellString} */
@@ -18,7 +19,7 @@ class ReleaseCommand extends Command {
 
     if (dry) {
       shell.echo('DRY-RUN: done.');
-      return;
+      return 0;
     }
 
     shell.echo('Pushing docker images');
@@ -43,6 +44,8 @@ class ReleaseCommand extends Command {
     if (r.code) {
       return 1;
     }
+
+    return 0;
   }
 }
 

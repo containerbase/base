@@ -1,5 +1,8 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": [
+    "@tsconfig/strictest/tsconfig.json",
+    "@tsconfig/node18/tsconfig.json"
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "allowJs": true,
@@ -7,6 +10,7 @@
     "types": ["node"],
     "verbatimModuleSyntax": true,
     "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
     "experimentalDecorators": true,
     "module": "ES2022",
     "moduleResolution": "Bundler",
@@ -14,5 +18,5 @@
       "~test/*": ["./test/*"]
     }
   },
-  "exclude": ["node_modules", "bin"]
+  "exclude": ["node_modules", "bin", "dist", "coverage"]
 }

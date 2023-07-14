@@ -16,7 +16,10 @@
     "build:cli": "node tools/esbuild.js",
     "eslint": "eslint --cache --report-unused-disable-directives .",
     "eslint-fix": "eslint --cache --fix --report-unused-disable-directives .",
-    "lint": "run-s prettier eslint",
+    "lint": "run-s prettier eslint lint:types",
+    "lint:types": "run-p 'lint:types:*'",
+    "lint:types:default": "tsc",
+    "lint:types:dist": "tsc -p tsconfig.dist.json",
     "postinstall": "husky install",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "prettier": "prettier  --cache -c -u \"**/*.*\"",
@@ -24,9 +27,10 @@
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js",
     "start": "tsx src/cli/index.ts",
-    "test:bats": "node --experimental-import-meta-resolve tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",
+    "test": "run-s 'test:*'",
+    "test:bats": "node tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",
     "test:docker": "node tools/test.js",
-    "test:vitest": "vitest"
+    "test:vitest": "vitest run --coverage"
   },
   "dependencies": {
     "clipanion": "3.2.1",
@@ -44,6 +48,7 @@
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
     "@tsconfig/node18": "18.2.0",
+    "@tsconfig/strictest": "2.0.1",
     "@types/node": "18.16.19",
     "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
@@ -84,6 +89,9 @@
     "vite-tsconfig-paths": "4.2.0",
     "vitest": "0.33.0",
     "vitest-github-actions-reporter": "0.10.0"
+  },
+  "resolutions": {
+    "tsconfig-paths": "4.2.0"
   },
   "contributors": [
     "Michael Kriese <michael.kriese@visualon.de>"

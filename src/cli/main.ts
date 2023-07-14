@@ -18,7 +18,7 @@ export async function main(): Promise<void> {
 
   const cli = new Cli({
     binaryLabel: `containerbase-cli`,
-    binaryName: parseBinaryName(mode, node, app),
+    binaryName: parseBinaryName(mode, node!, app!)!,
     binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
   });
 
