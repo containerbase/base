@@ -1,0 +1,76 @@
+name: 'Setup Node.js'
+description: 'Setup Node and install dependencies using cache'
+inputs:
+  node-version:
+    description: 'Node version to use'
+    required: true
+  save-cache:
+    description: 'Save cache when needed'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ⚙️ Setup Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: ⚙️ Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - name: ⚙️ Expose yarn config as "$GITHUB_OUTPUT"
+      id: yarn-config
+      shell: bash
+      env:
+        YARN_ENABLE_GLOBAL_CACHE: 'false'
+      run: |
+        echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+    - name: ⚙️ Calculate `CACHE_KEY`
+      shell: bash
+      run: |
+        echo 'CACHE_KEY=yarn-cache-${{
+          inputs.node-version
+        }}-${{
+          hashFiles('yarn.lock', '.yarnrc.yml')
+        }}' >> "$GITHUB_ENV"
+
+    - name: ♻️ Restore yarn cache
+      uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      id: yarn-cache-restore
+      with:
+        path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+        key: ${{ env.CACHE_KEY }}
+        restore-keys: |
+          yarn-cache-${{ inputs.node-version }}-
+          yarn-cache-
+
+    - name: Calculate `CACHE_HIT`
+      shell: bash
+      run: |
+        echo 'CACHE_HIT=${{
+          (steps.yarn-cache-restore.outputs.cache-hit == 'true') && 'true' || ''
+        }}' >> "$GITHUB_ENV"
+
+    - name: 📥 Install dependencies
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        # Overrides/align yarnrc.yml options (v3, v4) for a CI context
+        YARN_ENABLE_GLOBAL_CACHE: 'false' # Use local cache folder to keep downloaded archives
+        YARN_ENABLE_MIRROR: 'false' # Prevent populating global cache for caches misses (local cache only)
+        # YARN_NM_MODE: 'hardlinks-local'    # Reduce node_modules size
+        # YARN_INSTALL_STATE_PATH: '.yarn/ci-cache/install-state.gz' # Might speed up resolution step when node_modules present
+        # Other environment variables
+        HUSKY: '0' # By default do not run HUSKY install
+
+    - name: ♻️ Save yarn cache
+      if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+        key: ${{ env.CACHE_KEY }}
