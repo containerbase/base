@@ -6,7 +6,7 @@ import type { Distro } from './types';
 
 let distro: undefined | Promise<Distro>;
 
-export async function validateSystem(): Promise<never | void> {
+export async function validateSystem(): Promise<void> {
   if (os.platform() !== 'linux') {
     logger.fatal(`Unsupported platform: ${os.platform()}! Please use Linux.`);
     exit(1);
