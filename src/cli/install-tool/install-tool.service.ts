@@ -38,7 +38,7 @@ export class InstallToolService {
         return;
       }
 
-      if (!(await this.pathSvc.findToolPath(tool))) {
+      if (toolSvc.needsPrepare() && !(await this.pathSvc.findToolPath(tool))) {
         logger.debug({ tool }, 'tool not prepared');
         const res = await prepareTools([tool], dryRun);
         if (res) {

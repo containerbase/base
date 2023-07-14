@@ -2,10 +2,10 @@ import { chmod, chown, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
-import { fileRights, logger } from '../utils';
+import { fileRights, isValid, logger } from '../utils';
 
 export interface ShellWrapperConfig {
-  name: string;
+  name?: string;
   srcDir: string;
   exports?: string;
 }
@@ -32,6 +32,10 @@ export abstract class InstallToolBaseService {
 
   abstract link(version: string): Promise<void>;
 
+  needsPrepare(): boolean {
+    return true;
+  }
+
   test(_version: string): Promise<void> {
     return Promise.resolve();
   }
@@ -40,8 +44,8 @@ export abstract class InstallToolBaseService {
     return this.name;
   }
 
-  validate(_version: string): boolean {
-    return true;
+  validate(version: string): boolean {
+    return isValid(version);
   }
 
   protected async shellwrapper({
@@ -49,7 +53,7 @@ export abstract class InstallToolBaseService {
     srcDir,
     exports,
   }: ShellWrapperConfig): Promise<void> {
-    const tgt = join(this.pathSvc.binDir, name);
+    const tgt = join(this.pathSvc.binDir, name ?? this.name);
 
     let content = `#!/bin/bash
 
