@@ -20,7 +20,7 @@ runs:
 
     - name: ⚙️ Enable Corepack
       shell: bash
-      run: corepack enable
+      run: sudo corepack enable
 
     - name: ⚙️ Expose yarn config as "$GITHUB_OUTPUT"
       id: yarn-config
