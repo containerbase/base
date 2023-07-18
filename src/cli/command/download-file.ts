@@ -1,5 +1,5 @@
 import { createWriteStream } from 'node:fs';
-import { mkdir, rm } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
@@ -33,7 +33,6 @@ export class DownloadFileCommand extends Command {
       const env = container.get(EnvService);
       const path = dirname(this.output);
 
-      await rm(this.output, { force: true });
       await mkdir(path, { recursive: true });
 
       const nUrl = env.replaceUrl(this.url);
