@@ -4,6 +4,7 @@
 ![Docker Image Size (latest)](https://img.shields.io/docker/image-size/containerbase/base/latest)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/containerbase/base)
 ![Licence: MIT](https://img.shields.io/github/license/containerbase/base)
+[![codecov](https://codecov.io/gh/containerbase/base/branch/main/graph/badge.svg?token=GYS2ZZAXDP)](https://codecov.io/gh/containerbase/base)
 
 This repository is the source for the Docker images [`containerbase/base`](https://hub.docker.com/r/containerbase/base) and `ghcr.io/containerbase/base`.
 It is not associated with or compatible with the `buildpacks.io` project.
