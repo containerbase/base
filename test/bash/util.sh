@@ -19,3 +19,15 @@ function is_root () {
     echo 0
   fi
 }
+
+function link_cli_tool () {
+  local arch=x64
+
+  if [[ "${ARCHITECTURE}" = "aarch64" ]];then
+    arch=arm64
+  fi
+  mkdir -p "${BIN_DIR}"
+  export PATH="${BIN_DIR}:${PATH}"
+  ln -sf "${CONTAINERBASE_DIR}/bin/containerbase-cli-${arch}" "${BIN_DIR}/containerbase-cli"
+}
+link_cli_tool

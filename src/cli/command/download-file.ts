@@ -1,5 +1,5 @@
 import { createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
@@ -26,12 +26,14 @@ export class DownloadFileCommand extends Command {
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
-    logger.info({ url: this.url }, `Downloading file ...`);
+    logger.info({ url: this.url, output: this.output }, `Downloading file ...`);
     try {
       const container = rootContainer.createChild();
 
       const env = container.get(EnvService);
       const path = dirname(this.output);
+
+      await rm(this.output, { force: true });
       await mkdir(path, { recursive: true });
 
       const nUrl = env.replaceUrl(this.url);

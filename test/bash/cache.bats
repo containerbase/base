@@ -156,11 +156,11 @@ teardown() {
 
   run download_file "${file}"
   assert_success
-  assert_output "${CONTAINERBASE_CACHE_DIR}/containerbase.tar.xz"
+  assert_line "${CONTAINERBASE_CACHE_DIR}/containerbase.tar.xz"
 
   run download_file "${file}" "foobar"
   assert_success
-  assert_output "${CONTAINERBASE_CACHE_DIR}/foobar"
+  assert_line "${CONTAINERBASE_CACHE_DIR}/foobar"
 
   CONTAINERBASE_CACHE_DIR= \
   tmp_file=$(download_file "${file}")
@@ -178,11 +178,11 @@ teardown() {
 
   run get_from_url "${file}"
   assert_success
-  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
+  assert_line --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   run get_from_url "${file}" test
   assert_success
-  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_line --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # overwrite donwload function to fail
   function download_file () {
@@ -209,13 +209,13 @@ teardown() {
 
   run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
   assert_success
-  assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
+  assert_line --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
   rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
   run get_from_url "${file}" test "${checksum}" "sha512sum"
   assert_success
-  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_line --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
   rm -rf "${CONTAINERBASE_CACHE_DIR}"
 
@@ -236,6 +236,7 @@ teardown() {
 }
 
 @test "get_from_url_with_cache_and_checksum" {
+  bats_require_minimum_version 1.5.0
   # create cache dir
   CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
   mkdir -p "${CONTAINERBASE_CACHE_DIR}"
@@ -244,7 +245,7 @@ teardown() {
   local checksum="233c335a7f10e9f0dfd7e9d0cda802a38c15a7f13b6678c55980814f22799a70590d56888a819b6591881ec1939240d9dbe68e7e495021b4d6c6a49cdee24d80"
   local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
 
-  run get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
+  run --separate-stderr get_from_url "${file}" $(basename "${file}") "${checksum}" "sha512sum"
   assert_success
   assert_output --regexp "^${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/containerbase\.tar\.xz"
 
@@ -252,7 +253,7 @@ teardown() {
 
   run get_from_url "${file}" test "${checksum}" "sha512sum"
   assert_success
-  assert_output --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
+  assert_line --regexp "${CONTAINERBASE_CACHE_DIR}/[0-9a-f]{64}/test"
 
   # change checksum of cached file
   echo "a" >> "${file_path}"

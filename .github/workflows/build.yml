@@ -86,6 +86,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: build
+        run: yarn build
+
       - name: bats
         run: yarn test:bats
 
