@@ -101,7 +101,7 @@ export class EnvService {
 
     return this.ignoredTools.has(tool.toUpperCase());
   }
-  
+
   public replaceUrl(src: string): string {
     let tgt = src;
     const replacements = this.urlReplacements;
