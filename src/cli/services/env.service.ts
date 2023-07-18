@@ -91,7 +91,6 @@ export class EnvService {
 
     return (this.replacements = replacements);
   }
-  
   public isToolIgnored(tool: string): boolean {
     if (!this.ignoredTools) {
       this.ignoredTools = new Set(
