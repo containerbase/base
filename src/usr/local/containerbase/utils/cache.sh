@@ -90,8 +90,9 @@ function download_file () {
   local temp_folder=${CONTAINERBASE_CACHE_DIR:-${TEMP_DIR}}
   while [ "${retry}" -gt 0 ]; do
     retry=$((retry-1))
-    if ! curl --retry 3 --create-dirs -sSfLo "${temp_folder}/${name}" "${url}" ; then
+    if ! containerbase-cli df "${url}" "${temp_folder}/${name}" >&2; then
       echo "Download failed: ${url}" >&2
+      env >&2
       exit 1
     fi;
 
@@ -119,7 +120,7 @@ function download_file () {
 # First argument is the path to the file
 # Second argument is the checksum
 # Third argument is the type, currently supported:
-# * sha1
+# * sha1sum
 # * sha224sum
 # * sha256sum
 # * sha384sum

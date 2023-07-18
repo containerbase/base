@@ -2,6 +2,7 @@ import { argv0 } from 'node:process';
 import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
+import { DownloadFileCommand } from './download-file';
 import { InstallToolCommand, InstallToolShortCommand } from './install-tool';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 import { prepareToolVersion } from './utils';
@@ -28,6 +29,7 @@ export function prepareCommands(
 
   cli.register(InstallToolCommand);
   cli.register(PrepareToolCommand);
+  cli.register(DownloadFileCommand);
   return prepareToolVersion(mode, args);
 }
 

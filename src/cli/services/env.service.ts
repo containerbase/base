@@ -90,4 +90,17 @@ export class EnvService {
 
     return (this.replacements = replacements);
   }
+
+  public replaceUrl(src: string): string {
+    let tgt = src;
+    const replacements = this.urlReplacements;
+
+    for (const [from, to] of replacements) {
+      tgt = tgt.replace(from, to);
+    }
+    if (tgt !== src) {
+      logger.debug({ src, tgt }, 'url replaced');
+    }
+    return tgt;
+  }
 }

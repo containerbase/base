@@ -5,6 +5,8 @@ export function prepareToolVersion(
   args: string[]
 ): string[] {
   switch (mode) {
+    case 'prepare-tool':
+      break;
     case 'install-tool': {
       if (args.length === 1) {
         // install-tool node
@@ -14,10 +16,14 @@ export function prepareToolVersion(
     }
     case 'containerbase-cli':
     default: {
-      if (args.length === 2) {
+      if (args.length === 2 && args[0] === 'it') {
         // containerbase-cli it node
         appendVersion(args, 1);
-      } else if (args.length === 3) {
+      } else if (
+        args.length === 3 &&
+        args[0] === 'install' &&
+        args[1] === 'tool'
+      ) {
         // containerbase-cli install tool node
         appendVersion(args, 2);
       }
