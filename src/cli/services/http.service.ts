@@ -65,7 +65,7 @@ export class HttpService {
 
     await mkdir(cachePath, { recursive: true });
 
-    const nUrl = this.replaceUrl(url);
+    const nUrl = this.envSvc.replaceUrl(url);
 
     for (const run of [1, 2, 3]) {
       try {
@@ -94,18 +94,5 @@ export class HttpService {
     }
     await rm(cachePath, { recursive: true });
     throw new Error('download failed');
-  }
-
-  private replaceUrl(src: string): string {
-    let tgt = src;
-    const replacements = this.envSvc.urlReplacements;
-
-    for (const [from, to] of replacements) {
-      tgt = tgt.replace(from, to);
-    }
-    if (tgt !== src) {
-      logger.debug({ src, tgt }, 'url replaced');
-    }
-    return tgt;
   }
 }
