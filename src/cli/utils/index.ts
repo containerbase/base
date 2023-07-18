@@ -13,7 +13,7 @@ export function cliMode(): CliMode | null {
   if (argv0.endsWith('/prepare-tool') || argv0 === 'prepare-tool') {
     return 'prepare-tool';
   }
-  if (argv0.endsWith('/install-tool') || argv0 === 'install-tool') {
+  if (argv0.endsWith('/containerbase-cli') || argv0 === 'containerbase-cli') {
     return 'containerbase-cli';
   }
 
