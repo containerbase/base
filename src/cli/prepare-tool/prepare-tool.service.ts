@@ -33,6 +33,10 @@ export class PrepareToolService {
     }
     if (tools.length === 1 && tools[0] === 'all') {
       for (const tool of this.toolSvcs) {
+        if (this.envSvc.isToolIgnored(tool.name)) {
+          logger.info({ tool }, 'tool ignored');
+          continue;
+        }
         if (await this.pathSvc.findToolPath(tool.name)) {
           logger.debug({ tool: tool.name }, 'tool already prepared');
           continue;
@@ -44,6 +48,10 @@ export class PrepareToolService {
       await this.legacySvc.execute(tools);
     } else {
       for (const tool of tools) {
+        if (this.envSvc.isToolIgnored(tool)) {
+          logger.info({ tool }, 'tool ignored');
+          continue;
+        }
         const toolSvc = this.toolSvcs.find((t) => t.name === tool);
         if (toolSvc) {
           if (await this.pathSvc.findToolPath(tool)) {

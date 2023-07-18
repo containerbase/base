@@ -18,6 +18,7 @@ export class EnvService {
   readonly arch: Arch;
   private uid: number;
   private replacements: Replacements | undefined;
+  private ignoredTools: Set<string> | undefined;
 
   constructor() {
     this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
@@ -89,5 +90,15 @@ export class EnvService {
     }
 
     return (this.replacements = replacements);
+  }
+
+  public isToolIgnored(tool: string): boolean {
+    if (!this.ignoredTools) {
+      this.ignoredTools = new Set(
+        (env.IGNORED_TOOLS ?? '').toUpperCase().split(',')
+      );
+    }
+
+    return this.ignoredTools.has(tool.toUpperCase());
   }
 }

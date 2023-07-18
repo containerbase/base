@@ -30,6 +30,11 @@ export class InstallToolService {
       'supported tools'
     );
 
+    if (this.envSvc.isToolIgnored(tool)) {
+      logger.info({ tool }, 'tool ignored');
+      return 0;
+    }
+
     const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (toolSvc) {
       if (await toolSvc.isInstalled(version)) {
