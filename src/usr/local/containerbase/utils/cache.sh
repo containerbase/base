@@ -92,7 +92,6 @@ function download_file () {
     retry=$((retry-1))
     if ! containerbase-cli df "${url}" "${temp_folder}/${name}" >&2; then
       echo "Download failed: ${url}" >&2
-      env >&2
       exit 1
     fi;
 
