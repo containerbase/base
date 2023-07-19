@@ -36,7 +36,7 @@ FROM base as testa
 RUN install-tool erlang 26.0.2.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.15.1
+RUN install-tool elixir 1.15.4
 
 
 USER 1001
@@ -59,7 +59,7 @@ USER 1001
 RUN install-tool erlang 24.3.4.13
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.15.1
+RUN install-tool elixir 1.15.4
 
 
 RUN set -ex; \
