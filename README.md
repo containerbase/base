@@ -98,10 +98,9 @@ You can replace the default urls used to download the tools.
 The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables must match.
 Theses variables are case sensitive.
 The numbers will be processed in numerical order and can have gaps.
-This is currently only supported by these tool installers:
-
-- `docker`
-- `dart`
+Almost all tools are now supported.
+Only tools which are installed by `gem`, `npm` or `pip` are not supported.
+They can be configured via thier own environment variables.
 
 Checkout [#1067](https://github.com/containerbase/base/issues/1067) for additional support.
 
