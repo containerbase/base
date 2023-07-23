@@ -2148,12 +2148,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bats@npm:1.9.0":
-  version: 1.9.0
-  resolution: "bats@npm:1.9.0"
+"bats@npm:1.10.0":
+  version: 1.10.0
+  resolution: "bats@npm:1.10.0"
   bin:
     bats: bin/bats
-  checksum: 74a744bf79fa08848c9f8ef8931cb4a0f7625a409cc96729b9f8883ed5bc1de1615aa065fcf2b6aaaf2520cbef16bfb362584972979bc0bc76bb3a3ad2069aed
+  checksum: a23afe6857e4358ae33006e66bb57e34822a7318a616292299de886b6bb0c94ae1eea25ca98fa50a641334cb358b6cf2013fa74bd11bf6d69281b6466e736576
   languageName: node
   linkType: hard
 
@@ -2762,7 +2762,7 @@ __metadata:
     "@typescript-eslint/parser": 6.1.0
     "@vitest/coverage-v8": 0.33.0
     "@yarnpkg/sdks": 3.0.0-rc.48
-    bats: 1.9.0
+    bats: 1.10.0
     bats-assert: 2.0.0
     bats-support: 0.3.0
     clipanion: 3.2.1
@@ -2809,7 +2809,7 @@ __metadata:
       unplugged: true
     bats-support@0.3.0:
       unplugged: true
-    bats@1.9.0:
+    bats@1.10.0:
       unplugged: true
   languageName: unknown
   linkType: soft
