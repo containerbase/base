@@ -57,7 +57,7 @@
     "@typescript-eslint/parser": "6.1.0",
     "@vitest/coverage-v8": "0.33.0",
     "@yarnpkg/sdks": "3.0.0-rc.48",
-    "bats": "1.9.0",
+    "bats": "1.10.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
@@ -97,7 +97,7 @@
     "Michael Kriese <michael.kriese@visualon.de>"
   ],
   "dependenciesMeta": {
-    "bats@1.9.0": {
+    "bats@1.10.0": {
       "unplugged": true
     },
     "bats-assert@2.0.0": {
