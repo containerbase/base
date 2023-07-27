@@ -33,8 +33,10 @@
     "test:vitest": "vitest run --coverage"
   },
   "dependencies": {
+    "@sindresorhus/is": "5.6.0",
     "clipanion": "3.2.1",
     "execa": "7.1.1",
+    "global-agent": "3.0.0",
     "got": "13.0.0",
     "inversify": "6.0.1",
     "pino": "8.14.1",
@@ -49,6 +51,7 @@
     "@semantic-release/exec": "6.0.3",
     "@tsconfig/node18": "18.2.0",
     "@tsconfig/strictest": "2.0.1",
+    "@types/global-agent": "2.1.1",
     "@types/node": "18.16.19",
     "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
