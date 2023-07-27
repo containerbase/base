@@ -38,7 +38,7 @@ RUN install-tool git v2.41.0
 FROM test-git as test-git-lfs
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.3.0
+RUN install-tool git-lfs v3.4.0
 
 #--------------------------------------
 # Image: helmfile
