@@ -10,6 +10,7 @@ export default defineConfig({
   test: {
     coverage: {
       reporter: ci ? ['lcovonly', 'text'] : ['html', 'text'],
+      include: ['src/cli/**/*.ts'],
     },
     reporters: ci ? ['default', new GithubActionsReporter()] : ['default'],
     restoreMocks: true,

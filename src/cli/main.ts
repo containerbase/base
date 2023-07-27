@@ -1,6 +1,7 @@
 import { argv, argv0 } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
 import { parseBinaryName, prepareCommands } from './command';
+import { bootstrap } from './proxy';
 import { cliMode, logger, validateSystem } from './utils';
 
 declare global {
@@ -11,6 +12,7 @@ declare global {
 
 export async function main(): Promise<void> {
   logger.trace({ argv0, argv }, 'main');
+  bootstrap();
   await validateSystem();
 
   const mode = cliMode();
