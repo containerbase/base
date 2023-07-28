@@ -2813,7 +2813,7 @@ __metadata:
     nock: 13.3.2
     npm-run-all: 4.1.5
     pino: 8.14.1
-    pino-pretty: 10.1.0
+    pino-pretty: 10.2.0
     pkg: 5.8.1
     prettier: 2.8.8
     prettier-plugin-package: 1.3.1
@@ -7249,9 +7249,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:10.1.0":
-  version: 10.1.0
-  resolution: "pino-pretty@npm:10.1.0"
+"pino-pretty@npm:10.2.0":
+  version: 10.2.0
+  resolution: "pino-pretty@npm:10.2.0"
   dependencies:
     colorette: ^2.0.7
     dateformat: ^4.6.3
@@ -7269,7 +7269,7 @@ __metadata:
     strip-json-comments: ^3.1.1
   bin:
     pino-pretty: bin.js
-  checksum: 543a658b0b1d00a0dce5d1015a4fa581ea2b8b4937d3cbef6d03cc9c0bbc2425493d302adbab3a03aa20d0a9c102222b378336a2241e6c493a086c21ad3288d3
+  checksum: 8e8220ab647d11e05349adde37aac116dab1a96ce479297820475b7e2246ea5e56e3764b625c5877821ae66dcea62bdda563cc49eccbd4628c80952998068f48
   languageName: node
   linkType: hard
 
