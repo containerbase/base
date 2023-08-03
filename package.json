@@ -2,14 +2,13 @@
   "name": "containerbase",
   "version": "0.0.0-semantic-release",
   "private": true,
-  "license": "MIT",
   "repository": "https://github.com/containerbase/base.git",
+  "license": "MIT",
   "author": "Rhys Arkins <rhys@arkins.net>",
+  "contributors": [
+    "Michael Kriese <michael.kriese@visualon.de>"
+  ],
   "type": "module",
-  "engines": {
-    "node": ">=18.12.0",
-    "yarn": "^3.2.0"
-  },
   "scripts": {
     "bats": "node --experimental-import-meta-resolve tools/bats.js --timing --verbose-run",
     "build": "run-s 'build:*'",
@@ -31,6 +30,9 @@
     "test:bats": "node tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",
     "test:docker": "node tools/test.js",
     "test:vitest": "vitest run --coverage"
+  },
+  "resolutions": {
+    "tsconfig-paths": "4.2.0"
   },
   "dependencies": {
     "@sindresorhus/is": "5.6.0",
@@ -82,7 +84,7 @@
     "npm-run-all": "4.1.5",
     "pkg": "5.8.1",
     "prettier": "2.8.8",
-    "prettier-plugin-package": "1.3.1",
+    "prettier-plugin-packagejson": "2.4.5",
     "semantic-release": "21.0.7",
     "shelljs": "0.8.5",
     "tsx": "3.12.7",
@@ -93,22 +95,20 @@
     "vitest": "0.33.0",
     "vitest-github-actions-reporter": "0.10.0"
   },
-  "resolutions": {
-    "tsconfig-paths": "4.2.0"
-  },
-  "contributors": [
-    "Michael Kriese <michael.kriese@visualon.de>"
-  ],
   "dependenciesMeta": {
-    "bats@1.10.0": {
-      "unplugged": true
-    },
     "bats-assert@2.0.0": {
       "unplugged": true
     },
     "bats-support@0.3.0": {
       "unplugged": true
+    },
+    "bats@1.10.0": {
+      "unplugged": true
     }
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@3.6.1",
+  "engines": {
+    "node": ">=18.12.0",
+    "yarn": "^3.2.0"
+  }
 }
