@@ -1,5 +1,4 @@
 {
   "singleQuote": true,
-  "trailingComma": "es5",
-  "plugins": ["prettier-plugin-packagejson"]
+  "trailingComma": "es5"
 }

@@ -96,13 +96,13 @@
     "vitest-github-actions-reporter": "0.10.0"
   },
   "dependenciesMeta": {
+    "bats@1.10.0": {
+      "unplugged": true
+    },
     "bats-assert@2.0.0": {
       "unplugged": true
     },
     "bats-support@0.3.0": {
-      "unplugged": true
-    },
-    "bats@1.10.0": {
       "unplugged": true
     }
   },
