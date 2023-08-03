@@ -35,7 +35,7 @@
   "dependencies": {
     "@sindresorhus/is": "5.6.0",
     "clipanion": "3.2.1",
-    "execa": "7.1.1",
+    "execa": "7.2.0",
     "global-agent": "3.0.0",
     "got": "13.0.0",
     "inversify": "6.0.1",
