@@ -30,7 +30,7 @@ RUN install-tool ruby 3.2.2
 FROM test-ruby as test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.4.16
+RUN install-tool bundler 2.4.18
 
 #--------------------------------------
 # Image: cocoapods
