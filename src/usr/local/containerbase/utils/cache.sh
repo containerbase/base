@@ -90,8 +90,8 @@ function download_file () {
   local temp_folder=${CONTAINERBASE_CACHE_DIR:-${TEMP_DIR}}
   while [ "${retry}" -gt 0 ]; do
     retry=$((retry-1))
-    if ! containerbase-cli df "${url}" "${temp_folder}/${name}" >&2; then
-      echo "Download failed: ${url}" >&2
+    if ! log=$(containerbase-cli df "${url}" "${temp_folder}/${name}"); then
+      echo "${log}" >&2
       exit 1
     fi;
 
