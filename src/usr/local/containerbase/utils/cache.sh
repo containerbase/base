@@ -91,6 +91,7 @@ function download_file () {
   while [ "${retry}" -gt 0 ]; do
     retry=$((retry-1))
     if ! log=$(containerbase-cli df "${url}" "${temp_folder}/${name}"); then
+      echo "Download failed: ${url}" >&2
       echo "${log}" >&2
       exit 1
     fi;
