@@ -11,7 +11,7 @@ import {
   InstallRenovateService,
   InstallYarnService,
   InstallYarnSlimService,
-} from '../tools/npm';
+} from '../tools/node/npm';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
