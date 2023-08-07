@@ -60,7 +60,7 @@
     "@types/tar": "6.1.5",
     "@typescript-eslint/eslint-plugin": "6.2.1",
     "@typescript-eslint/parser": "6.2.1",
-    "@vitest/coverage-v8": "0.33.0",
+    "@vitest/coverage-v8": "0.34.1",
     "@yarnpkg/sdks": "3.0.0-rc.48",
     "bats": "1.10.0",
     "bats-assert": "2.0.0",
@@ -92,7 +92,7 @@
     "typescript": "5.1.6",
     "vite": "4.4.7",
     "vite-tsconfig-paths": "4.2.0",
-    "vitest": "0.33.0",
+    "vitest": "0.34.1",
     "vitest-github-actions-reporter": "0.10.0"
   },
   "dependenciesMeta": {
