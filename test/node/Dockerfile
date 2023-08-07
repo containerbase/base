@@ -438,6 +438,9 @@ ARG PNPM_VERSION=6.0.0
 ARG YARN_VERSION=1.22.0
 ARG YARN_SLIM_VERSION=1.22.5
 
+ENV URL_REPLACE_0_FROM=https://registry.npmjs.org/
+ENV URL_REPLACE_0_TO=https://registry.yarnpkg.com/
+
 RUN install-tool pnpm
 RUN install-tool yarn
 RUN install-tool yarn-slim

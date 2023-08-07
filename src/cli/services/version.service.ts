@@ -11,7 +11,7 @@ export class VersionService {
   async find(tool: string): Promise<string | null> {
     const path = join(this.pathSvc.versionPath, tool);
     try {
-      return (await readFile(path, { encoding: 'utf8' })) ?? null;
+      return (await readFile(path, { encoding: 'utf8' })).trim() ?? null;
     } catch (err) {
       if (err instanceof Error && err.code === 'ENOENT') {
         logger.debug({ tool }, 'tool version not found');

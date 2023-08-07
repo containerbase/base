@@ -67,10 +67,6 @@ export class InstallFluxService extends InstallToolBaseService {
     await this.shellwrapper({ srcDir: src });
   }
 
-  override needsPrepare(): boolean {
-    return false;
-  }
-
   override async test(_version: string): Promise<void> {
     await execa('flux', ['--version'], { stdio: 'inherit' });
   }

@@ -38,7 +38,6 @@ function check_tool_requirements () {
 
 function install_tool () {
   local versioned_tool_path
-  local npm # temp npm executable
   local arch=${ARCHITECTURE}
   local name=${TOOL_NAME}
   local version=${TOOL_VERSION}
@@ -92,7 +91,6 @@ function install_tool () {
   # init temp dir
   npm_init
 
-  npm=${versioned_tool_path}/bin/npm
 
   if [[ $(is_root) -eq 0 ]]; then
     # redirect root install
@@ -105,13 +103,10 @@ function install_tool () {
     prepare_global_config "${USER_HOME}/.npm-global"
   fi
 
-  # required for npm
-  link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-
   if [[ ${MAJOR} -lt 15 ]]; then
     echo "updating node-gyp"
     # update to latest node-gyp to fully support python3
-    $npm explore npm -g --prefix "$versioned_tool_path" --silent -- "$npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
+    PATH=${versioned_tool_path}/bin:$PATH npm explore npm -g --prefix "$versioned_tool_path" --silent -- "npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
   fi
 
   # clean temp dir
@@ -126,16 +121,12 @@ function link_tool () {
 
   reset_tool_env
 
-  link_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
-  if [[ ! -f "$(get_bin_path)/npm" ]]; then
-    link_wrapper npm "${versioned_tool_path}/bin"
-    link_wrapper npx "${versioned_tool_path}/bin"
-  fi
+  post_install
 
   export_tool_path "${USER_HOME}/.npm-global/bin"
   export_tool_env NO_UPDATE_NOTIFIER 1
-  export_tool_env NPM_CONFIG_UPDATE_NOTIFIER false
-  export_tool_env NPM_CONFIG_FUND false
+  export_tool_env npm_config_update_notifier false
+  export_tool_env npm_config_fund false
 
   tool_env=$(find_tool_env)
 
@@ -143,10 +134,18 @@ function link_tool () {
   cat >> "$tool_env" <<- EOM
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
-  export NPM_CONFIG_PREFIX="${USER_HOME}/.npm-global"
+  export npm_config_prefix="${USER_HOME}/.npm-global"
 fi
 EOM
 
   [[ -n $SKIP_VERSION ]] || echo "node: $(node --version) $(command -v node)"
   [[ -n $SKIP_VERSION ]] || echo "npm: $(npm --version)  $(command -v npm)"
+}
+
+
+
+function post_install () {
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  shell_wrapper npm "${versioned_tool_path}/bin"
+  shell_wrapper npx "${versioned_tool_path}/bin"
 }
