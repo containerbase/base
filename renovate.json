@@ -32,6 +32,12 @@
       "enabled": true
     },
     {
+      "description": "Disable pin digest for test/",
+      "matchPaths": ["test/**"],
+      "matchUpdateTypes": ["pinDigest"],
+      "enabled": false
+    },
+    {
       "description": "Separate patch updates in test/ so that we can automerge them",
       "matchPaths": ["test/**"],
       "separateMinorPatch": true
