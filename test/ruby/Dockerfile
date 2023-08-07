@@ -72,7 +72,7 @@ FROM build as test-bundler-b
 RUN gem install bundler -v 1.17.2
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.4.16
+RUN install-tool bundler 2.4.18
 
 USER 1000
 
@@ -107,7 +107,7 @@ USER 1000
 
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.4.16
+ENV BUNDLER_VERSION=2.4.18
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -127,7 +127,7 @@ RUN set -ex; \
 FROM build3 as test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.4.16
+ENV BUNDLER_VERSION=2.4.18
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
@@ -138,7 +138,7 @@ USER 1000
 RUN install-tool ruby 3.1.0
 
 # renovate: datasource=rubygems depName=bundler versioning=ruby
-ENV BUNDLER_VERSION=2.4.16
+ENV BUNDLER_VERSION=2.4.18
 RUN install-tool bundler
 
 #--------------------------------------
