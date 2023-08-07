@@ -140,6 +140,9 @@ EOM
 
   [[ -n $SKIP_VERSION ]] || echo "node: $(node --version) $(command -v node)"
   [[ -n $SKIP_VERSION ]] || echo "npm: $(npm --version)  $(command -v npm)"
+  if [[ -n $SKIP_VERSION && -e "${versioned_tool_path}/bin/corepack" ]];then
+    echo "corepack: $(corepack --version)  $(command -v corepack)"
+  fi
 }
 
 
@@ -151,4 +154,7 @@ function post_install () {
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper npm "${versioned_tool_path}/bin"
   shell_wrapper npx "${versioned_tool_path}/bin"
+  if [[ -e "${versioned_tool_path}/bin/corepack" ]];then
+    shell_wrapper corepack "${versioned_tool_path}/bin"
+  fi
 }

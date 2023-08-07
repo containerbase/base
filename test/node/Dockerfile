@@ -69,7 +69,7 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
-RUN set -ex; cd a; yarn
+RUN set -ex; cd a; yarn; [[ -d node_modules/.bin ]] || exit 1
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -164,11 +164,11 @@ RUN npm --version | grep '8.0.0'
 
 USER 1000
 
-# don't update!! Should not overwrite npm
+# don't update!! Should overwrite npm
 RUN install-tool node 18.13.0
 
 RUN set -ex; npm --version
-RUN set -ex; npm --version | grep '8.0.0'
+RUN set -ex; npm --version | grep '8.19.3'
 
 # don't update!!
 RUN install-tool npm 7.24.2
@@ -227,7 +227,7 @@ FROM build as testh
 RUN install-tool yarn-slim 1.22.19
 
 RUN set -ex; yarn --version
-RUN set -ex; cd a; yarn install
+RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
 
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
@@ -338,6 +338,9 @@ RUN set -ex; \
 FROM build as testl
 
 SHELL [ "/bin/sh", "-c" ]
+RUN set -ex; \
+  [ "$(command -v corepack)" = "/usr/local/bin/corepack" ] && echo "works" || exit 1;
+
 
 USER root
 
