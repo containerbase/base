@@ -32,7 +32,8 @@
     "test:vitest": "vitest run --coverage"
   },
   "resolutions": {
-    "tsconfig-paths": "4.2.0"
+    "tsconfig-paths": "4.2.0",
+    "esbuild": "0.18.17"
   },
   "dependencies": {
     "@sindresorhus/is": "5.6.0",
