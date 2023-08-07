@@ -145,6 +145,9 @@ EOM
 
 
 function post_install () {
+  local versioned_tool_path
+  versioned_tool_path=$(find_versioned_tool_path)
+
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper npm "${versioned_tool_path}/bin"
   shell_wrapper npx "${versioned_tool_path}/bin"
