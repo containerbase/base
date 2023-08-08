@@ -2,6 +2,7 @@ import { chmod, chown, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
+import { NoPrepareTools } from '../tools';
 import { fileRights, isValid, logger } from '../utils';
 
 export interface ShellWrapperConfig {
@@ -33,7 +34,11 @@ export abstract class InstallToolBaseService {
   abstract link(version: string): Promise<void>;
 
   needsPrepare(): boolean {
-    return true;
+    return !NoPrepareTools.includes(this.name);
+  }
+
+  postInstall(_version: string): Promise<void> {
+    return Promise.resolve();
   }
 
   test(_version: string): Promise<void> {
@@ -44,8 +49,8 @@ export abstract class InstallToolBaseService {
     return this.name;
   }
 
-  validate(version: string): boolean {
-    return isValid(version);
+  validate(version: string): Promise<boolean> {
+    return Promise.resolve(isValid(version));
   }
 
   protected async shellwrapper({

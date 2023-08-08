@@ -1,5 +1,6 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { EnvService, PathService } from '../services';
+import { NoPrepareTools } from '../tools';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
 import type { PrepareToolBaseService } from './prepare-tool-base.service';
@@ -50,6 +51,10 @@ export class PrepareToolService {
       for (const tool of tools) {
         if (this.envSvc.isToolIgnored(tool)) {
           logger.info({ tool }, 'tool ignored');
+          continue;
+        }
+        if (NoPrepareTools.includes(tool)) {
+          logger.info({ tool }, 'tool does not need to be prepared');
           continue;
         }
         const toolSvc = this.toolSvcs.find((t) => t.name === tool);

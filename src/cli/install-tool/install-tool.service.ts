@@ -52,8 +52,8 @@ export class InstallToolService {
       }
 
       logger.debug({ tool }, 'validate tool');
-      if (!toolSvc.validate(version)) {
-        logger.fatal({ tool }, 'tool version not supported');
+      if (!(await toolSvc.validate(version))) {
+        logger.fatal({ tool, version }, 'tool version not supported');
         return 1;
       }
 
@@ -80,11 +80,16 @@ export class InstallToolService {
   ): Promise<void> {
     if (version === (await this.versionSvc.find(toolSvc.name))) {
       logger.debug({ tool: toolSvc.name }, 'tool already linked');
-      return;
+    } else {
+      logger.debug({ tool: toolSvc.name }, 'link tool');
+      await toolSvc.link(version);
     }
-    logger.debug({ tool: toolSvc.name }, 'link tool');
-    await toolSvc.link(version);
+
     await this.versionSvc.update(toolSvc.name, version);
+
+    logger.debug({ tool: toolSvc.name }, 'post-install tool');
+    await toolSvc.postInstall(version);
+
     logger.debug({ tool: toolSvc.name }, 'test tool');
     if (!this.envSvc.skipTests) {
       await toolSvc.test(version);

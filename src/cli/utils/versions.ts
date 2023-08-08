@@ -1,8 +1,12 @@
-import semver from 'semver';
+import semver, { type SemVer } from 'semver';
 import { type StrictValidator, makeValidator } from 'typanion';
 
 export function isValid(version: string): boolean {
   return semver.valid(version) !== null;
+}
+
+export function parse(version: string): SemVer | null {
+  return semver.parse(version);
 }
 
 export function validateSemver(): StrictValidator<string, string> {
