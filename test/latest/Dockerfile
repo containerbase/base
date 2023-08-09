@@ -81,6 +81,14 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME}
 
+# install root ca
+RUN  set -ex \
+  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
+  && update-ca-certificates
+
+RUN set -ex; \
+  nginx && su -c 'python request.py' ${USER_NAME}
+
 #--------------------------------------
 # test: node
 #--------------------------------------
@@ -105,6 +113,13 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME}
 
+# install root ca
+RUN  set -ex \
+  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
+  && update-ca-certificates
+
+RUN set -ex; \
+  nginx && su -c 'php request.php' ${USER_NAME}
 
 #--------------------------------------
 # test: ruby
@@ -119,6 +134,13 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 RUN set -ex; \
   nginx && su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME}
 
+# install root ca
+RUN  set -ex \
+  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
+  && update-ca-certificates
+
+RUN set -ex; \
+  nginx && su -c 'ruby request.rb' ${USER_NAME}
 
 #--------------------------------------
 # test: powershell
@@ -130,6 +152,14 @@ RUN install-tool powershell v7.3.6
 
 RUN set -ex; cat /etc/hosts; \
   nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
+
+# install root ca
+RUN  set -ex \
+  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
+  && update-ca-certificates
+
+RUN set -ex; \
+  nginx && pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
 
 #--------------------------------------
 # test: terraform
