@@ -13,9 +13,6 @@ FROM containerbase/base
 
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 RUN update-ca-certificates
-
-# configure node
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/my-root-ca.crt
 ```
 
 ### Buildtime Java install
@@ -40,7 +37,6 @@ Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environmen
 docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
   -e SSL_CERT_FILE=/my-root-ca.crt \
-  -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
   containerbase/base bash
 ```
 
@@ -53,6 +49,5 @@ docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
   -v my-root-cert-store.jks:/opt/containerbase/ssl/cacerts \
   -e SSL_CERT_FILE=/my-root-ca.crt \
-  -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
   containerbase/base bash
 ```

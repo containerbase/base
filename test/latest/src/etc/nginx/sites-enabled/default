@@ -16,6 +16,11 @@ server {
 
   server_name _;
 
+  location /-/ping {
+    default_type application/json;
+    return 200 "{}";
+  }
+
   location / {
     try_files $uri $uri/ =404;
   }

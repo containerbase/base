@@ -45,6 +45,8 @@ await exec([
   '--out-path',
   './src/usr/local/containerbase/bin',
   '--public',
+  '--options',
+  'use-openssl-ca',
   // '--debug',
   'dist',
 ]);

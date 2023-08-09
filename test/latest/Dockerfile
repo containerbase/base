@@ -72,14 +72,15 @@ RUN set -ex; \
   openssl x509 -noout -text -in renovate.pem;
 
 RUN set -ex; \
-  nginx \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://localhost' ${USER_NAME} \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://buildkitsandbox' ${USER_NAME} \
-  && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME} \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME} \
-  && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }" \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME} \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME} \
+  nginx; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://localhost' ${USER_NAME}; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem node request.mjs' ${USER_NAME}; \
+  su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME}; \
+  SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME}; \
+  su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME}; \
   true
 
 
@@ -90,13 +91,14 @@ RUN  set -ex \
 
 # use global root certs
 RUN set -ex; \
-  nginx \
-  && su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME} \
-  && su -c 'node --use-openssl-ca request.mjs' ${USER_NAME} \
-  && su -c 'php request.php' ${USER_NAME} \
-  && pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }" \
-  && su -c 'python request.py' ${USER_NAME} \
-  && su -c 'ruby request.rb' ${USER_NAME} \
+  nginx; \
+  su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}; \
+  su -c 'node request.mjs' ${USER_NAME}; \
+  su -c 'npm_config_registry=https://localhost npm ping' ${USER_NAME}; \
+  su -c 'php request.php' ${USER_NAME}; \
+  pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"; \
+  su -c 'python request.py' ${USER_NAME}; \
+  su -c 'ruby request.rb' ${USER_NAME}; \
   true
 
 
