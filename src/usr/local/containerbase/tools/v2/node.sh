@@ -69,7 +69,7 @@ function install_tool () {
 
     checksum_file=$(get_from_url "https://nodejs.org/dist/v${version}/SHASUMS256.txt")
     # get checksum from file
-    expected_checksum=$(grep "${name}-v${version}-${arch}.tar.xz" "${checksum_file}" | cut -d' ' -f1)
+    expected_checksum=$(grep "${name}-v${version}-linux-${arch}.tar.xz" "${checksum_file}" | cut -d' ' -f1)
     # download file
     file=$(get_from_url \
       "https://nodejs.org/dist/v${version}/${name}-v${version}-linux-${arch}.tar.xz" \
