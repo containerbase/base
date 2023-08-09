@@ -25,7 +25,7 @@ function prepareContainer(): Container {
 
 export function prepareTools(
   tools: string[],
-  dryRun = false
+  dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
   return container.get(PrepareToolService).execute(tools, dryRun);

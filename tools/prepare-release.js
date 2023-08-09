@@ -25,7 +25,7 @@ class PrepareCommand extends Command {
     await fs.writeFile('src/usr/local/containerbase/version', version);
 
     let r = shell.exec(
-      `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`
+      `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`,
     );
     if (r.code) {
       return 1;
@@ -43,7 +43,7 @@ class PrepareCommand extends Command {
     }
 
     r = shell.exec(
-      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build'
+      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build',
     );
     if (r.code) {
       return 1;

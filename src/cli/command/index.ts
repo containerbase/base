@@ -10,7 +10,7 @@ import { prepareToolVersion } from './utils';
 export function prepareCommands(
   cli: Cli,
   mode: CliMode | null,
-  args: string[]
+  args: string[],
 ): string[] {
   logger.debug('prepare commands');
   /*
@@ -36,7 +36,7 @@ export function prepareCommands(
 export function parseBinaryName(
   mode: CliMode | null,
   node: string,
-  app: string
+  app: string,
 ): string | undefined {
   if (mode) {
     return mode;

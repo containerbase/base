@@ -42,7 +42,7 @@ export class InstallDockerService extends InstallToolBaseService {
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService
+    @inject(CompressionService) private compress: CompressionService,
   ) {
     super(pathSvc, envSvc);
   }
@@ -53,7 +53,7 @@ export class InstallDockerService extends InstallToolBaseService {
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),
-      'bin'
+      'bin',
     );
     await fs.mkdir(path);
     await this.compress.extract({

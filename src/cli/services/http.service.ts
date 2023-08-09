@@ -27,7 +27,7 @@ export interface HttpDownloadConfig {
 export class HttpService {
   constructor(
     @inject(EnvService) private envSvc: EnvService,
-    @inject(PathService) private pathSvc: PathService
+    @inject(PathService) private pathSvc: PathService,
   ) {}
 
   async download({
@@ -55,7 +55,7 @@ export class HttpService {
         } else {
           logger.debug(
             { url, expectedChecksum, actualChecksum, checksumType },
-            'checksum mismatch'
+            'checksum mismatch',
           );
         }
       } else {
@@ -78,7 +78,7 @@ export class HttpService {
           } else {
             logger.debug(
               { url, expectedChecksum, actualChecksum, checksumType },
-              'checksum mismatch'
+              'checksum mismatch',
             );
             throw new Error('checksum mismatch');
           }

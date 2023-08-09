@@ -18,7 +18,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
-    @inject(VersionService) protected versionSvc: VersionService
+    @inject(VersionService) protected versionSvc: VersionService,
   ) {
     super(pathSvc, envSvc);
   }
@@ -26,7 +26,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
   override async install(version: string): Promise<void> {
     const npm = await this.getNodeNpm();
     const tmp = await fs.mkdtemp(
-      join(this.pathSvc.tmpDir, 'containerbase-npm-')
+      join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
     const env: NodeJS.ProcessEnv = {
       NO_UPDATE_NOTIFIER: '1',
@@ -52,7 +52,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
 
     const prefix = await this.pathSvc.createVersionedToolPath(
       this.name,
-      version
+      version,
     );
 
     await execa(
@@ -68,7 +68,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
         tmp,
         '--silent',
       ],
-      { stdio: ['inherit', 'inherit', 1], env }
+      { stdio: ['inherit', 'inherit', 1], env },
     );
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
@@ -94,7 +94,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
           tmp,
           '--silent',
         ],
-        { stdio: ['inherit', 'inherit', 1], env }
+        { stdio: ['inherit', 'inherit', 1], env },
       );
     }
 

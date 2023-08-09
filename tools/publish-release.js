@@ -25,21 +25,21 @@ class ReleaseCommand extends Command {
     shell.echo('Pushing docker images');
 
     r = shell.exec(
-      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 push'
+      'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 push',
     );
     if (r.code) {
       return 1;
     }
 
     r = shell.exec(
-      `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+      `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`,
     );
     if (r.code) {
       return 1;
     }
 
     r = shell.exec(
-      `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`
+      `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:${process.env.TAG}`,
     );
     if (r.code) {
       return 1;

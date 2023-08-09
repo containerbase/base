@@ -47,7 +47,7 @@ export class DownloadFileCommand extends Command {
       logger.info(
         `Download completed ${
           error ? 'with errors ' : ''
-        } in ${prettyMilliseconds(Date.now() - start)}.`
+        } in ${prettyMilliseconds(Date.now() - start)}.`,
       );
     }
   }

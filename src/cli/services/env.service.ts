@@ -84,7 +84,7 @@ export class EnvService {
         replacements.push([env[from]!, env[to]!]);
       } else {
         logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`
+          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`,
         );
       }
     }
@@ -95,7 +95,7 @@ export class EnvService {
   public isToolIgnored(tool: string): boolean {
     if (!this.ignoredTools) {
       this.ignoredTools = new Set(
-        (env.IGNORED_TOOLS ?? '').toUpperCase().split(',')
+        (env.IGNORED_TOOLS ?? '').toUpperCase().split(','),
       );
     }
 

@@ -16,13 +16,13 @@ export class PrepareToolService {
     @optional()
     private toolSvcs: PrepareToolBaseService[] = [],
     @inject(PathService) private pathSvc: PathService,
-    @inject(EnvService) private envSvc: EnvService
+    @inject(EnvService) private envSvc: EnvService,
   ) {}
 
   async execute(tools: string[], dryRun = false): Promise<number | void> {
     logger.debug(
       { tools: this.toolSvcs.map((t) => t.name) },
-      'supported tools'
+      'supported tools',
     );
     if (dryRun) {
       logger.info(`Dry run: preparing tools ${tools.join(', ')} ...`);

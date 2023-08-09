@@ -36,7 +36,7 @@ export class PathService {
 
   async createVersionedToolPath(
     tool: string,
-    version: string
+    version: string,
   ): Promise<string> {
     const toolPath = this.versionedToolPath(tool, version);
     await mkdir(toolPath);
@@ -59,7 +59,7 @@ export class PathService {
 
   async findVersionedToolPath(
     tool: string,
-    version: string
+    version: string,
   ): Promise<string | null> {
     const versionedToolPath = this.versionedToolPath(tool, version);
 

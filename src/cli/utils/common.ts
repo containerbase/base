@@ -13,7 +13,7 @@ export async function validateSystem(): Promise<void> {
   }
   if (os.arch() !== 'x64' && os.arch() !== 'arm64') {
     logger.fatal(
-      `Unsupported architecture: ${os.arch()}! Please use 'x64' or 'arm64'.`
+      `Unsupported architecture: ${os.arch()}! Please use 'x64' or 'arm64'.`,
     );
     exit(1);
   }
@@ -25,7 +25,7 @@ export async function validateSystem(): Promise<void> {
     default:
       logger.fatal(
         { distro: d },
-        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal' or 'jammy'.`
+        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal' or 'jammy'.`,
       );
       exit(1);
   }
@@ -43,13 +43,13 @@ async function readDistro(): Promise<Distro> {
   if (!name || !versionCode || !versionId) {
     logger.error(
       { data, d: { name, versionCode, versionId } },
-      `Couldn't detect distro from '/etc/os-release'.`
+      `Couldn't detect distro from '/etc/os-release'.`,
     );
     return { name: 'Unknown', versionCode: 'unknown', versionId: '00.00' };
   }
   logger.debug(
     { distro: { name, versionCode, versionId } },
-    'discovered distro'
+    'discovered distro',
   );
   return { name, versionCode, versionId };
 }

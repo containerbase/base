@@ -67,7 +67,7 @@ export class InstallYarnSlimService extends InstallNpmBaseService {
         's/ steps,/ steps.slice(0,1),/',
         `${prefix}/node_modules/yarn/lib/cli.js`,
       ],
-      { stdio: 'inherit' }
+      { stdio: 'inherit' },
     );
   }
 }

@@ -32,7 +32,7 @@ export class PrepareToolCommand extends Command {
       logger.info(
         `Prepared tools ${this.tools.join(', ')} ${
           error ? 'with errors ' : ''
-        } in ${prettyMilliseconds(Date.now() - start)}.`
+        } in ${prettyMilliseconds(Date.now() - start)}.`,
       );
     }
   }

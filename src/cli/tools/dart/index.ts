@@ -31,12 +31,12 @@ export class PrepareDartService extends PrepareToolBaseService {
     await fs.mkdir(`${this.envSvc.home}/.dart`);
     await fs.writeFile(
       `${this.envSvc.home}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }'
+      '{ "firstRun": false, "enabled": false }',
     );
     await fs.mkdir(`${this.envSvc.userHome}/.dart`);
     await fs.writeFile(
       `${this.envSvc.userHome}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }'
+      '{ "firstRun": false, "enabled": false }',
     );
 
     // fs isn't recursive, so we use system binaries
@@ -66,7 +66,7 @@ export class InstallDartService extends InstallToolBaseService {
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService
+    @inject(CompressionService) private compress: CompressionService,
   ) {
     super(pathSvc, envSvc);
   }

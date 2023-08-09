@@ -44,7 +44,7 @@ function prepareContainer(): Container {
 export function installTool(
   tool: string,
   version: string,
-  dryRun = false
+  dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
   return container.get(InstallToolService).execute(tool, version, dryRun);

@@ -17,17 +17,17 @@ export class InstallToolService {
     private toolSvcs: InstallToolBaseService[] = [],
     @inject(EnvService) private envSvc: EnvService,
     @inject(PathService) private pathSvc: PathService,
-    @inject(VersionService) private versionSvc: VersionService
+    @inject(VersionService) private versionSvc: VersionService,
   ) {}
 
   async execute(
     tool: string,
     version: string,
-    dryRun = false
+    dryRun = false,
   ): Promise<number | void> {
     logger.debug(
       { tools: this.toolSvcs.map((t) => t.name) },
-      'supported tools'
+      'supported tools',
     );
 
     if (this.envSvc.isToolIgnored(tool)) {
@@ -76,7 +76,7 @@ export class InstallToolService {
   }
   private async linkAndTest(
     toolSvc: InstallToolBaseService,
-    version: string
+    version: string,
   ): Promise<void> {
     if (version === (await this.versionSvc.find(toolSvc.name))) {
       logger.debug({ tool: toolSvc.name }, 'tool already linked');

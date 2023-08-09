@@ -42,7 +42,7 @@ export class InstallToolCommand extends Command {
       logger.info(
         `Installed tool ${this.name} ${
           error ? 'with errors ' : ''
-        }in ${prettyMilliseconds(Date.now() - start)}.`
+        }in ${prettyMilliseconds(Date.now() - start)}.`,
       );
     }
   }

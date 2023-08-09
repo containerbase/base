@@ -37,8 +37,8 @@ await fs.writeFile(
       },
     },
     undefined,
-    2
-  )
+    2,
+  ),
 );
 
 await exec([

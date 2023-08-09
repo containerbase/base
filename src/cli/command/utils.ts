@@ -2,7 +2,7 @@ import type { CliMode } from '../utils';
 
 export function prepareToolVersion(
   mode: CliMode | null,
-  args: string[]
+  args: string[],
 ): string[] {
   switch (mode) {
     case 'prepare-tool':

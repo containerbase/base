@@ -26,10 +26,10 @@ describe('http.service', () => {
     const http = child.get(HttpService);
 
     await expect(
-      http.download({ url: `${baseUrl}/fail.txt` })
+      http.download({ url: `${baseUrl}/fail.txt` }),
     ).rejects.toThrow();
     await expect(
-      http.download({ url: `${baseUrl}/fail.txt` })
+      http.download({ url: `${baseUrl}/fail.txt` }),
     ).rejects.toThrow();
   });
 
@@ -45,7 +45,7 @@ describe('http.service', () => {
         url: `${baseUrl}/checksum.txt`,
         expectedChecksum,
         checksumType,
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -54,7 +54,7 @@ describe('http.service', () => {
 
     const http = child.get(HttpService);
     const expected = cacheFile(
-      `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`
+      `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`,
     );
 
     expect(await http.download({ url: `${baseUrl}/test.txt` })).toBe(expected);
@@ -69,7 +69,7 @@ describe('http.service', () => {
     const expectedChecksum =
       'd1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020';
     const expected = cacheFile(
-      `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`
+      `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`,
     );
 
     expect(
@@ -77,7 +77,7 @@ describe('http.service', () => {
         url: `${baseUrl}/test.txt`,
         expectedChecksum,
         checksumType: 'sha256',
-      })
+      }),
     ).toBe(expected);
     // uses cache
     expect(
@@ -85,7 +85,7 @@ describe('http.service', () => {
         url: `${baseUrl}/test.txt`,
         expectedChecksum,
         checksumType: 'sha256',
-      })
+      }),
     ).toBe(expected);
   });
 
@@ -106,19 +106,19 @@ describe('http.service', () => {
 
     const http = child.get(HttpService);
     const expected = cacheFile(
-      `f4eba41457a330d0fa5289e49836326c6a0208bbc639862e70bb378c88c62642/replace.txt`
+      `f4eba41457a330d0fa5289e49836326c6a0208bbc639862e70bb378c88c62642/replace.txt`,
     );
 
     expect(await http.download({ url: `${baseUrl}/replace.txt` })).toBe(
-      expected
+      expected,
     );
     // uses cache
     expect(await http.download({ url: `${baseUrl}/replace.txt` })).toBe(
-      expected
+      expected,
     );
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Invalid URL replacement: URL_REPLACE_1_FROM=https://example.test URL_REPLACE_1_TO=undefined'
+      'Invalid URL replacement: URL_REPLACE_1_FROM=https://example.test URL_REPLACE_1_TO=undefined',
     );
   });
 });

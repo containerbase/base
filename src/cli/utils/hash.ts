@@ -15,7 +15,7 @@ export function hash(data: string | Buffer, algorithm: AlgorithmName): string {
 
 export async function hashFile(
   file: string,
-  algorithm: AlgorithmName
+  algorithm: AlgorithmName,
 ): Promise<string> {
   const data = await fs.readFile(file);
   const hash = crypto.createHash(algorithm);

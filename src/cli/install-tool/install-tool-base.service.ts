@@ -22,7 +22,7 @@ export abstract class InstallToolBaseService {
 
   constructor(
     protected readonly pathSvc: PathService,
-    protected envSvc: EnvService
+    protected envSvc: EnvService,
   ) {}
 
   abstract install(version: string): Promise<void>;
