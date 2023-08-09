@@ -106,7 +106,8 @@ function install_tool () {
   if [[ ${MAJOR} -lt 15 ]]; then
     echo "updating node-gyp"
     # update to latest node-gyp to fully support python3
-    PATH=${versioned_tool_path}/bin:$PATH npm explore npm -g --prefix "$versioned_tool_path" --silent -- "npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
+    PATH=${versioned_tool_path}/bin:$PATH NODE_OPTIONS=--use-openssl-ca \
+      npm explore npm -g --prefix "$versioned_tool_path" --silent -- "npm" install node-gyp@latest --no-audit --cache "${NPM_CONFIG_CACHE}" --silent 2>&1
   fi
 
   # clean temp dir
@@ -130,7 +131,7 @@ function link_tool () {
 
   tool_env=$(find_tool_env)
 
-  # if not root, set the npmprefix config option to the user folder
+  # if not root, set the npm prefix config option to the user folder
   cat >> "$tool_env" <<- EOM
 # openshift override unknown user home
 if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${USER_ID} ]; then
@@ -151,7 +152,7 @@ function post_install () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "NODE_OPTIONS=\"\$NODE_OPTIONS --use-openssl-ca\""
   shell_wrapper npm "${versioned_tool_path}/bin"
   shell_wrapper npx "${versioned_tool_path}/bin"
   if [[ -e "${versioned_tool_path}/bin/corepack" ]];then
