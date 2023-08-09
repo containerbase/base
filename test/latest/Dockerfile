@@ -92,6 +92,7 @@ RUN  set -ex \
 RUN set -ex; \
   nginx \
   && su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME} \
+  && su -c 'node --use-openssl-ca request.mjs' ${USER_NAME} \
   && su -c 'php request.php' ${USER_NAME} \
   && pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }" \
   && su -c 'python request.py' ${USER_NAME} \
