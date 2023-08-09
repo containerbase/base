@@ -32,9 +32,9 @@ function install_tool () {
     prepare_tool
   fi
 
-  # fix version
+  # fix version, only for go 1.20 and below
   GOLANG_FILE_VERSION=${TOOL_VERSION}
-  if [[ "${PATCH}" == "0" ]]; then
+  if [[ ($MAJOR -lt 1 || ($MAJOR -eq 1 && $MINOR -lt 21)) && "${PATCH}" == "0" ]]; then
     GOLANG_FILE_VERSION="${MAJOR}.${MINOR}"
   fi
 
