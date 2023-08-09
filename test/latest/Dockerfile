@@ -44,9 +44,28 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: curl
+# test: custom root ca
 #--------------------------------------
 FROM build as testa
+
+# renovate: datasource=node
+RUN install-tool node v18.17.0
+
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool php 7.4.14
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
+
+# renovate: datasource=github-releases packageName=PowerShell/PowerShell
+RUN install-tool powershell v7.3.6
+
+# renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
+ARG PYTHON_VERSION=3.11.4
+RUN install-tool python
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
+
+# Do not renovate ruby 2.x
+RUN install-tool ruby 2.6.4
+RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 
 RUN set -ex; \
   openssl x509 -noout -text -in ca.pem; \
@@ -55,7 +74,14 @@ RUN set -ex; \
 RUN set -ex; \
   nginx \
   && su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://localhost' ${USER_NAME} \
-  && su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}
+  && su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://buildkitsandbox' ${USER_NAME} \
+  && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME} \
+  && su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME} \
+  && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }" \
+  && su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME} \
+  && su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME} \
+  true
+
 
 # install root ca
 RUN  set -ex \
@@ -65,106 +91,18 @@ RUN  set -ex \
 # use global root certs
 RUN set -ex; \
   nginx \
-  && su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}
+  && su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME} \
+  && su -c 'php request.php' ${USER_NAME} \
+  && pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }" \
+  && su -c 'python request.py' ${USER_NAME} \
+  && su -c 'ruby request.rb' ${USER_NAME} \
+  true
 
-#--------------------------------------
-# test: python
-#--------------------------------------
-FROM build as testb
-
-# renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.11.4
-RUN install-tool python
-
-RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
-
-RUN set -ex; \
-  nginx && su -c 'SSL_CERT_FILE=/test/ca.pem python request.py' ${USER_NAME}
-
-# install root ca
-RUN  set -ex \
-  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
-  && update-ca-certificates
-
-RUN set -ex; \
-  nginx && su -c 'python request.py' ${USER_NAME}
-
-#--------------------------------------
-# test: node
-#--------------------------------------
-FROM build as testc
-
-# renovate: datasource=node
-RUN install-tool node v18.17.0
-
-RUN set -ex; \
-  nginx && su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}
-
-#--------------------------------------
-# test: php
-#--------------------------------------
-FROM build as testd
-
-# renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool php 7.4.14
-
-RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
-
-RUN set -ex; \
-  nginx && su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME}
-
-# install root ca
-RUN  set -ex \
-  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
-  && update-ca-certificates
-
-RUN set -ex; \
-  nginx && su -c 'php request.php' ${USER_NAME}
-
-#--------------------------------------
-# test: ruby
-#--------------------------------------
-FROM build as teste
-
-# Do not renovate ruby 2.x
-RUN install-tool ruby 2.6.4
-
-RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
-
-RUN set -ex; \
-  nginx && su -c 'SSL_CERT_FILE=/test/ca.pem ruby request.rb' ${USER_NAME}
-
-# install root ca
-RUN  set -ex \
-  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
-  && update-ca-certificates
-
-RUN set -ex; \
-  nginx && su -c 'ruby request.rb' ${USER_NAME}
-
-#--------------------------------------
-# test: powershell
-#--------------------------------------
-FROM build as testf
-
-# renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.3.6
-
-RUN set -ex; cat /etc/hosts; \
-  nginx && SSL_CERT_FILE=/test/ca.pem pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
-
-# install root ca
-RUN  set -ex \
-  && cp ca.pem /usr/local/share/ca-certificates/renovate-ca.crt \
-  && update-ca-certificates
-
-RUN set -ex; \
-  nginx && pwsh -c "&{ \$ErrorActionPreference='Stop'; invoke-webrequest https://buildkitsandbox }"
 
 #--------------------------------------
 # test: terraform
 #--------------------------------------
-FROM ubuntu:focal as testg
+FROM ubuntu:focal as testb
 
 ARG USER_NAME=terraform
 ARG USER_ID=1005
@@ -202,7 +140,7 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 # test: ignore tools
 #--------------------------------------
-FROM build as testh
+FROM build as testc
 
 RUN prepare-tool docker
 
@@ -232,7 +170,7 @@ RUN install-tool docker v24.0.5
 #--------------------------------------
 # test: bin path has 775
 #--------------------------------------
-FROM base as testi
+FROM base as testd
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
@@ -243,7 +181,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 #--------------------------------------
 # test: vendir, helmfile, kustomize
 #--------------------------------------
-FROM base as testj
+FROM base as teste
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
@@ -293,8 +231,3 @@ COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
-COPY --from=testj /.dummy /.dummy
