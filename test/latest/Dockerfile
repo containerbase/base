@@ -49,7 +49,7 @@ RUN set -ex; \
 FROM build as testa
 
 # renovate: datasource=node
-RUN install-tool node v18.17.0
+RUN install-tool node v18.17.1
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -165,7 +165,7 @@ RUN install-tool git-lfs v3.4.0
 RUN install-tool powershell v7.3.6
 
 # renovate: datasource=node
-RUN install-tool node v18.17.0
+RUN install-tool node v18.17.1
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v24.0.5
