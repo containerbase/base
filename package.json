@@ -65,7 +65,7 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "6.1.0",
-    "esbuild": "0.18.18",
+    "esbuild": "0.19.1",
     "esbuild-plugin-pino": "2.0.0",
     "eslint": "8.46.0",
     "eslint-config-prettier": "9.0.0",
@@ -94,7 +94,7 @@
     "vitest-github-actions-reporter": "0.10.0"
   },
   "resolutions": {
-    "esbuild": "0.18.18",
+    "esbuild": "0.19.1",
     "tsconfig-paths": "4.2.0"
   },
   "contributors": [
