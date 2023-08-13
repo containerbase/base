@@ -2681,7 +2681,7 @@ __metadata:
     shelljs: 0.8.5
     tar: 6.1.15
     tsx: 3.12.7
-    typanion: 3.13.0
+    typanion: 3.14.0
     type-fest: 4.1.0
     typescript: 5.1.6
     vite: 4.4.9
@@ -8837,14 +8837,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typanion@npm:3.13.0":
-  version: 3.13.0
-  resolution: "typanion@npm:3.13.0"
-  checksum: 7d1506ab3a635ca5aaf84696829092f4cf6949c7995e950e0a744f55b4d4a824e2cf22278d37c323396188240d0003bd10de14a64da8e1ded3ddd71dcec2d146
-  languageName: node
-  linkType: hard
-
-"typanion@npm:^3.8.0":
+"typanion@npm:3.14.0, typanion@npm:^3.8.0":
   version: 3.14.0
   resolution: "typanion@npm:3.14.0"
   checksum: fc0590d02c13c659eb1689e8adf7777e6c00dc911377e44cd36fe1b1271cfaca71547149f12cdc275058c0de5562a14e5273adbae66d47e6e0320e36007f5912
