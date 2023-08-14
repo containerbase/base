@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-helm
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.12.2
+RUN install-tool helm v3.12.3
 
 #--------------------------------------
 # Image: final
