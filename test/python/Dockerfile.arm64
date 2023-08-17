@@ -25,6 +25,14 @@ FROM base as test-python
 RUN install-tool python 3.11.4
 
 #--------------------------------------
+# Image: checkov
+#--------------------------------------
+FROM test-python as test-checkov
+
+# renovate: datasource=pypi
+RUN install-tool checkov 2.4.2
+
+#--------------------------------------
 # Image: hashin
 #--------------------------------------
 FROM test-python as test-hashin
@@ -53,6 +61,7 @@ RUN install-tool poetry 1.5.1
 #--------------------------------------
 FROM base
 
+COPY --from=test-checkov /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy

@@ -172,6 +172,10 @@ RUN set -ex \
   && cat requirements.txt \
   ;
 
+
+# renovate: datasource=pypi
+RUN install-tool checkov 2.4.2
+
 #--------------------------------------
 # test pipenv-b: pipenv (multiple python)
 #--------------------------------------
