@@ -5,6 +5,7 @@ function shell_wrapper () {
   local TARGET
   local SOURCE=$2
   local EXPORTS=$3
+  local args=$4
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
@@ -27,7 +28,7 @@ EOM
     echo "export $EXPORTS" >> "$TARGET"
   fi
 
-  echo "${SOURCE} \"\$@\"" >> "$TARGET"
+  echo "${SOURCE} ${args} \"\$@\"" >> "$TARGET"
 
   set_file_owner "${TARGET}" 775
 }

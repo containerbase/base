@@ -152,7 +152,7 @@ function post_install () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "NODE_OPTIONS=\"\$NODE_OPTIONS --use-openssl-ca\""
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "" "--use-openssl-ca"
   shell_wrapper npm "${versioned_tool_path}/bin"
   shell_wrapper npx "${versioned_tool_path}/bin"
   if [[ -e "${versioned_tool_path}/bin/corepack" ]];then
