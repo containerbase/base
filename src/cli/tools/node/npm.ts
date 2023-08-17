@@ -4,6 +4,11 @@ import { injectable } from 'inversify';
 import { InstallNpmBaseService } from './utils';
 
 @injectable()
+export class InstallBowerService extends InstallNpmBaseService {
+  override readonly name: string = 'bower';
+}
+
+@injectable()
 export class InstallCorepackService extends InstallNpmBaseService {
   override name: string = 'corepack';
 

@@ -4,6 +4,7 @@ import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
 import { InstallFluxService } from '../tools/flux';
 import {
+  InstallBowerService,
   InstallCorepackService,
   InstallLernaService,
   InstallNpmService,
@@ -26,6 +27,7 @@ function prepareContainer(): Container {
   container.bind(InstallLegacyToolService).toSelf();
 
   // tool services
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallBowerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
