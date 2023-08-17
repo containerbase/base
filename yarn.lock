@@ -1001,10 +1001,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sindresorhus/is@npm:5.6.0, @sindresorhus/is@npm:^5.2.0":
-  version: 5.6.0
-  resolution: "@sindresorhus/is@npm:5.6.0"
-  checksum: 2e6e0c3acf188dcd9aea0f324ac1b6ad04c9fc672392a7b5a1218512fcde066965797eba8b9fe2108657a504388bd4a6664e6e6602555168e828a6df08b9f10e
+"@sindresorhus/is@npm:6.0.0":
+  version: 6.0.0
+  resolution: "@sindresorhus/is@npm:6.0.0"
+  checksum: 488fe23fa1485a0e66eb6330214a075097f6656348727711c5e7ecf8692a4a662cd61c8439abfe2cca68745fd5f746c49a9b21750f3aef4a71320fd2364cc8cc
   languageName: node
   linkType: hard
 
@@ -1012,6 +1012,13 @@ __metadata:
   version: 4.6.0
   resolution: "@sindresorhus/is@npm:4.6.0"
   checksum: 83839f13da2c29d55c97abc3bc2c55b250d33a0447554997a85c539e058e57b8da092da396e252b11ec24a0279a0bed1f537fa26302209327060643e327f81d2
+  languageName: node
+  linkType: hard
+
+"@sindresorhus/is@npm:^5.2.0":
+  version: 5.6.0
+  resolution: "@sindresorhus/is@npm:5.6.0"
+  checksum: 2e6e0c3acf188dcd9aea0f324ac1b6ad04c9fc672392a7b5a1218512fcde066965797eba8b9fe2108657a504388bd4a6664e6e6602555168e828a6df08b9f10e
   languageName: node
   linkType: hard
 
@@ -2598,7 +2605,7 @@ __metadata:
   resolution: "containerbase@workspace:."
   dependencies:
     "@semantic-release/exec": 6.0.3
-    "@sindresorhus/is": 5.6.0
+    "@sindresorhus/is": 6.0.0
     "@tsconfig/node18": 18.2.0
     "@tsconfig/strictest": 2.0.1
     "@types/global-agent": 2.1.1
