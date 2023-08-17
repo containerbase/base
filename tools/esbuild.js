@@ -32,8 +32,22 @@ await fs.writeFile(
         'containerbase-cli': './containerbase-cli.js',
       },
       pkg: {
-        scripts: ['*.js'],
+        scripts: ['pino-*.js', 'thread-stream-worker.js'],
         targets: ['node18-linux-x64', 'node18-linux-arm64'],
+        patches: {
+          './containerbase-cli.js': [
+            'pinoBundlerAbsolutePath("./pino-file.js")',
+            '"/snapshot/dist/pino-file.js"',
+            'pinoBundlerAbsolutePath("./pino-pipeline-worker.js")',
+            '"/snapshot/dist/pino-pipeline-worker.js"',
+            'pinoBundlerAbsolutePath("./pino-pretty.js")',
+            '"/snapshot/dist/pino-pretty.js"',
+            'pinoBundlerAbsolutePath("./pino-worker.js")',
+            '"/snapshot/dist/pino-worker.js"',
+            'pinoBundlerAbsolutePath("./thread-stream-worker.js")',
+            '"/snapshot/dist/thread-stream-worker.js"',
+          ],
+        },
       },
     },
     undefined,
