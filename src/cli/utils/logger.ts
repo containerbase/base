@@ -1,11 +1,37 @@
 import { env } from 'node:process';
-import { type Level, pino } from 'pino';
-import pretty from 'pino-pretty';
+import is from '@sindresorhus/is';
+import { type TransportTargetOptions, levels, pino, transport } from 'pino';
 
-const level: Level =
-  (env.LOG_LEVEL as Level | undefined) ??
+const level: string =
+  env.CONTAINERBASE_LOG_LEVEL ??
   (env.CONTAINERBASE_DEBUG ? 'debug' : undefined) ??
+  env.LOG_LEVEL ??
   'info';
 
-// TODO: support file and ndjson logging
-export const logger = pino({ level }, pretty());
+let fileLevel: string = 'silent';
+
+const targets: TransportTargetOptions[] = [
+  { target: 'pino-pretty', level, options: {} },
+];
+
+if (is.nonEmptyStringAndNotWhitespace(env.CONTAINERBASE_LOG_FILE)) {
+  fileLevel = env.CONTAINERBASE_LOG_FILE_LEVEL ?? 'debug';
+  targets.push({
+    target: 'pino/file',
+    level: fileLevel,
+    options: {
+      destination: env.CONTAINERBASE_LOG_FILE,
+    },
+  });
+}
+
+const transports = transport({
+  targets,
+});
+
+const numLevel = levels.values[level] ?? Infinity;
+const numFileLevel = levels.values[fileLevel] ?? Infinity;
+export const logger = pino(
+  { level: numLevel < numFileLevel ? level : fileLevel },
+  transports,
+);

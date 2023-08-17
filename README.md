@@ -119,3 +119,14 @@ RUN install-tool docker v24.0.2
 # renovate datasource=docker
 RUN install-tool dart 2.18.0
 ```
+
+### Logging
+
+The new cli has some new logging features.
+You can change the default `info` log level by setting the `CONTAINERBASE_LOG_LEVEL`[^1] environment variable.
+If `CONTAINERBASE_DEBUG` is set to `true` the cli will automatically set log level to `debug` if not explicit set.
+
+You can also log to a ndjson file via `CONTAINERBASE_LOG_FILE` and `CONTAINERBASE_LOG_FILE_LEVEL` environment variables.
+The default value for `CONTAINERBASE_LOG_FILE_LEVEL` is `debug`.
+
+[^1]: <https://getpino.io/#/docs/api?id=level-string>
