@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { env } from 'node:process';
 import { afterAll, beforeAll, vi } from 'vitest';
 
-vi.mock('../src/cli/utils/logger');
+vi.mock('pino');
 
 beforeAll(async () => {
   globalThis.cacheDir = await fs.mkdtemp('/tmp/containerbase-test-');
