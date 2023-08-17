@@ -76,6 +76,7 @@
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "6.1.1",
     "eslint-plugin-typescript-enum": "2.1.0",
+    "eslint-plugin-vitest": "0.2.8",
     "husky": "8.0.3",
     "lint-staged": "13.2.3",
     "nock": "13.3.2",

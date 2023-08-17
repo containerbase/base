@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['typescript-enum'], // , 'jest-formatting'
+  plugins: ['typescript-enum', 'vitest'], // , 'jest-formatting'
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
+    'plugin:vitest/recommended',
     // 'plugin:jest-formatting/recommended',
     'prettier',
   ],
@@ -84,7 +85,18 @@ module.exports = {
     // disallow `path` in favor of `upath`
     'no-restricted-imports': [
       2,
-      { paths: ['nock', 'parse-link-header', 'path'] },
+      {
+        paths: [
+          'nock',
+          'parse-link-header',
+          'path',
+          {
+            name: 'vitest',
+            importNames: ['it'],
+            message: 'Please use `vitest.test` instead.',
+          },
+        ],
+      },
     ],
 
     '@typescript-eslint/consistent-type-assertions': [
@@ -185,10 +197,9 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/unbound-method': 0,
 
-        'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
         'max-classes-per-file': 0,
         'class-methods-use-this': 0,
-        'no-console': 0, // allow console in tests
+        'no-console': 0, // allow console in tests,
       },
     },
     {
@@ -201,7 +212,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.{ts,js,mjs,cjs}'],
+      files: ['tools/**/*.{ts,js,mjs,cjs}', '__mocks__/*.ts'],
       env: {
         node: true,
       },

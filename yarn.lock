@@ -1390,7 +1390,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:6.4.0":
+"@typescript-eslint/utils@npm:6.4.0, @typescript-eslint/utils@npm:^6.2.0":
   version: 6.4.0
   resolution: "@typescript-eslint/utils@npm:6.4.0"
   dependencies:
@@ -2626,6 +2626,7 @@ __metadata:
     eslint-plugin-jest-formatting: 3.1.0
     eslint-plugin-promise: 6.1.1
     eslint-plugin-typescript-enum: 2.1.0
+    eslint-plugin-vitest: 0.2.8
     execa: 7.2.0
     global-agent: 3.0.0
     got: 13.0.0
@@ -3426,6 +3427,21 @@ __metadata:
   dependencies:
     "@typescript-eslint/experimental-utils": ^5.3.0
   checksum: 541aa06f493a08243720dedc31a8388f88b31cbf7d74ef39251ceb687a259ce3d79dc54cc66ab9414b4a6d486ea707d0a204191831ac9c671ca01adf5dce36db
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-vitest@npm:0.2.8":
+  version: 0.2.8
+  resolution: "eslint-plugin-vitest@npm:0.2.8"
+  dependencies:
+    "@typescript-eslint/utils": ^6.2.0
+  peerDependencies:
+    eslint: ">=8.0.0"
+    vitest: "*"
+  peerDependenciesMeta:
+    vite:
+      optional: true
+  checksum: bf09a8da8b564277b7bfcac37d24b3db16b35c61293bccfeb45651a3810c919da74e29e5a264eaf611af35c91b971dbbf28f6fba34166cf6a263d40ad91a48a6
   languageName: node
   linkType: hard
 
