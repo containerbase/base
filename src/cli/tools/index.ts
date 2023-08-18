@@ -1,4 +1,5 @@
 export const NoPrepareTools = [
+  'bower',
   'corepack',
   'flux',
   'lerna',
