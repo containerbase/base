@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { env as penv } from 'node:process';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import {
@@ -9,7 +10,7 @@ import {
   PathService,
   VersionService,
 } from '../../services';
-import { getDistro, parse } from '../../utils';
+import { getDistro, isValid, parse } from '../../utils';
 import {
   InstallNodeBaseService,
   prepareGlobalConfig,
@@ -107,35 +108,23 @@ export class InstallNodeService extends InstallNodeBaseService {
         versionedToolPath: path,
       });
     }
+
     const ver = parse(version)!;
     if (ver.major < 15) {
-      const npm = await this.getNodeNpm();
       const tmp = await fs.mkdtemp(
         join(this.pathSvc.tmpDir, 'containerbase-npm-'),
       );
       const env = this.prepareEnv(tmp);
-      env.PATH = `${path}/bin:${env.PATH}`;
+      env.PATH = `${path}/bin:${penv.PATH}`;
       env.NODE_OPTIONS = '--use-openssl-ca';
-      await execa(
-        npm,
-        [
-          'explore',
-          'npm',
-          '-g',
-          '--prefix',
-          path,
-          '--silent',
-          '--',
-          'npm',
-          'install',
-          'node-gyp@latest',
-          '--no-audit',
-          '--cache',
-          tmp,
-          '--silent',
-        ],
-        { stdio: ['inherit', 'inherit', 1], env },
-      );
+      // update to latest node-gyp to fully support python3
+      await this.updateNodeGyp(path, tmp, env, true);
+      await fs.rm(tmp, { recursive: true, force: true });
+
+      await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
+        recursive: true,
+        force: true,
+      });
     }
   }
 
@@ -187,5 +176,9 @@ fi
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
       await execa('corepack', ['--version'], { stdio: 'inherit' });
     }
+  }
+
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(isValid(version));
   }
 }

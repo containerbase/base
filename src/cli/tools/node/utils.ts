@@ -62,25 +62,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
     if (this.name === 'npm' && ver.major < 7) {
       // update to latest node-gyp to fully support python3
-      await execa(
-        join(prefix, 'bin/npm'),
-        [
-          'explore',
-          'npm',
-          '--prefix',
-          prefix,
-          '--silent',
-          '--',
-          'npm',
-          'install',
-          'node-gyp@latest',
-          '--no-audit',
-          '--cache',
-          tmp,
-          '--silent',
-        ],
-        { stdio: ['inherit', 'inherit', 1], env },
-      );
+      await this.updateNodeGyp(prefix, tmp, env);
     }
 
     await fs.rm(tmp, { recursive: true, force: true });
@@ -112,7 +94,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     return (await this.versionSvc.find('node')) !== null;
   }
 
-  protected async getNodeNpm(): Promise<string> {
+  private async getNodeNpm(): Promise<string> {
     const nodeVersion = await this.versionSvc.find('node');
 
     if (!nodeVersion) {
@@ -141,6 +123,34 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     }
 
     return env;
+  }
+
+  protected async updateNodeGyp(
+    prefix: string,
+    tmp: string,
+    env: NodeJS.ProcessEnv,
+    global = false,
+  ): Promise<void> {
+    await execa(
+      join(prefix, 'bin/npm'),
+      [
+        'explore',
+        'npm',
+        ...(global ? ['-g'] : []),
+        '--prefix',
+        prefix,
+        // '--silent',
+        '--',
+        'npm',
+        'install',
+        'node-gyp@latest',
+        '--no-audit',
+        '--cache',
+        tmp,
+        // '--silent',
+      ],
+      { stdio: ['inherit', 'inherit', 1], env },
+    );
   }
 }
 
