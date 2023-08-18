@@ -147,7 +147,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         '--no-audit',
         '--cache',
         tmp,
-        // '--silent',
+        '--silent',
       ],
       { stdio: ['inherit', 'inherit', 1], env },
     );
