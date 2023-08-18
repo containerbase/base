@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import fs, { stat } from 'node:fs/promises';
 import os from 'node:os';
 import { exit } from 'node:process';
 import { logger } from './logger';
@@ -56,3 +56,12 @@ async function readDistro(): Promise<Distro> {
 
 export const fileRights =
   fs.constants.S_IRWXU | fs.constants.S_IRWXG | fs.constants.S_IRWXO;
+
+export async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    const fstat = await stat(filePath);
+    return fstat.isFile();
+  } catch {
+    return false;
+  }
+}

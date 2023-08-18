@@ -3,6 +3,7 @@ export const NoPrepareTools = [
   'corepack',
   'flux',
   'lerna',
+  'node',
   'npm',
   'pnpm',
   'renovate',

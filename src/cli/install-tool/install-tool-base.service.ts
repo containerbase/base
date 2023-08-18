@@ -1,19 +1,16 @@
-import { chmod, chown, stat, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
 import { NoPrepareTools } from '../tools';
-import { fileRights, isValid, logger } from '../utils';
+import { isValid } from '../utils';
 
 export interface ShellWrapperConfig {
   name?: string;
   srcDir: string;
   exports?: string;
-}
 
-export interface FileOwnerConfig {
-  file: string;
-  mode?: number;
+  args?: string;
 }
 
 @injectable()
@@ -54,6 +51,7 @@ export abstract class InstallToolBaseService {
   }
 
   protected async shellwrapper({
+    args,
     name,
     srcDir,
     exports,
@@ -71,23 +69,13 @@ export abstract class InstallToolBaseService {
       content += `export ${exports}\n`;
     }
 
-    content += `${srcDir}/${name ?? this.name} "$@"\n`;
+    content += `${srcDir}/${name ?? this.name}`;
+    if (args) {
+      content += ` ${args}`;
+    }
+    content += ` "$@"\n`;
 
     await writeFile(tgt, content, { encoding: 'utf8' });
-    await this.setOwner({ file: tgt });
-  }
-
-  protected async setOwner({
-    file,
-    mode = 509,
-  }: FileOwnerConfig): Promise<void> {
-    const s = await stat(file);
-    if ((s.mode & fileRights) !== mode) {
-      logger.debug({ file, mode, s: s.mode & fileRights }, 'setting file mode');
-      await chmod(file, mode);
-    }
-    if (this.envSvc.isRoot && s.uid === 0) {
-      await chown(file, this.envSvc.userId, 0);
-    }
+    await this.pathSvc.setOwner({ file: tgt });
   }
 }
