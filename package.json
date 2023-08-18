@@ -52,7 +52,7 @@
     "@tsconfig/node18": "18.2.0",
     "@tsconfig/strictest": "2.0.1",
     "@types/global-agent": "2.1.1",
-    "@types/node": "18.17.4",
+    "@types/node": "18.17.5",
     "@types/semver": "7.5.0",
     "@types/shelljs": "0.8.12",
     "@types/tar": "6.1.5",
