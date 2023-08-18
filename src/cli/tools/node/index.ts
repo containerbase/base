@@ -2,18 +2,22 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
+  VersionService,
 } from '../../services';
-import { getDistro } from '../../utils';
-import { prepareGlobalConfig, prepareUserConfig } from './utils';
+import { getDistro, parse } from '../../utils';
+import {
+  InstallNodeBaseService,
+  prepareGlobalConfig,
+  prepareUserConfig,
+} from './utils';
 
 @injectable()
-export class InstallNodeService extends InstallToolBaseService {
+export class InstallNodeService extends InstallNodeBaseService {
   readonly name = 'node';
 
   private get arch(): string {
@@ -39,8 +43,9 @@ export class InstallNodeService extends InstallToolBaseService {
     @inject(PathService) pathSvc: PathService,
     @inject(HttpService) private http: HttpService,
     @inject(CompressionService) private compress: CompressionService,
+    @inject(VersionService) versionSvc: VersionService,
   ) {
-    super(pathSvc, envSvc);
+    super(envSvc, pathSvc, versionSvc);
   }
 
   override async install(version: string): Promise<void> {
@@ -101,6 +106,36 @@ export class InstallNodeService extends InstallToolBaseService {
         prefix: `${this.envSvc.userHome}/.npm-global`,
         versionedToolPath: path,
       });
+    }
+    const ver = parse(version)!;
+    if (ver.major < 15) {
+      const npm = await this.getNodeNpm();
+      const tmp = await fs.mkdtemp(
+        join(this.pathSvc.tmpDir, 'containerbase-npm-'),
+      );
+      const env = this.prepareEnv(tmp);
+      env.PATH = `${path}/bin:${env.PATH}`;
+      env.NODE_OPTIONS = '--use-openssl-ca';
+      await execa(
+        npm,
+        [
+          'explore',
+          'npm',
+          '-g',
+          '--prefix',
+          path,
+          '--silent',
+          '--',
+          'npm',
+          'install',
+          'node-gyp@latest',
+          '--no-audit',
+          '--cache',
+          tmp,
+          '--silent',
+        ],
+        { stdio: ['inherit', 'inherit', 1], env },
+      );
     }
   }
 

@@ -10,7 +10,7 @@ import { fileExists, parse } from '../../utils';
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
-export abstract class InstallNpmBaseService extends InstallToolBaseService {
+export abstract class InstallNodeBaseService extends InstallToolBaseService {
   protected get tool(): string {
     return this.name;
   }
@@ -28,22 +28,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
-    const env: NodeJS.ProcessEnv = {
-      NO_UPDATE_NOTIFIER: '1',
-      npm_config_update_notifier: 'false',
-      npm_config_fund: 'false',
-    };
-
-    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
-      env.npm_config_cache = tmp;
-    }
-
-    if (!penv.npm_config_registry && !penv.NPM_CONFIG_REGISTRY) {
-      const registry = this.envSvc.replaceUrl(defaultRegistry);
-      if (registry !== defaultRegistry) {
-        env.npm_config_registry = registry;
-      }
-    }
+    const env = this.prepareEnv(tmp);
 
     // TODO: create recursive
     if (!(await this.pathSvc.findToolPath(this.name))) {
@@ -135,6 +120,27 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
     }
 
     return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
+  }
+
+  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
+    const env: NodeJS.ProcessEnv = {
+      NO_UPDATE_NOTIFIER: '1',
+      npm_config_update_notifier: 'false',
+      npm_config_fund: 'false',
+    };
+
+    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
+      env.npm_config_cache = tmp;
+    }
+
+    if (!penv.npm_config_registry && !penv.NPM_CONFIG_REGISTRY) {
+      const registry = this.envSvc.replaceUrl(defaultRegistry);
+      if (registry !== defaultRegistry) {
+        env.npm_config_registry = registry;
+      }
+    }
+
+    return env;
   }
 }
 
