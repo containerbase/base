@@ -19,7 +19,7 @@ export abstract class InstallToolBaseService {
 
   constructor(
     protected readonly pathSvc: PathService,
-    protected envSvc: EnvService,
+    protected readonly envSvc: EnvService,
   ) {}
 
   abstract install(version: string): Promise<void>;
@@ -61,7 +61,7 @@ export abstract class InstallToolBaseService {
     let content = `#!/bin/bash
 
     if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
-      . $ENV_FILE
+      . ${this.pathSvc.envFile}
     fi
     `;
 

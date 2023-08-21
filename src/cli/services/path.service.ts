@@ -16,6 +16,10 @@ export class PathService {
     return join(this.envSvc.rootDir, 'usr/local/bin');
   }
 
+  get envFile(): string {
+    return join(this.envSvc.rootDir, 'usr/local/etc/env');
+  }
+
   get tmpDir(): string {
     return join(this.envSvc.rootDir, 'tmp');
   }
