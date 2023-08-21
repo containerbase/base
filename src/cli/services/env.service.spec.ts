@@ -3,7 +3,7 @@ import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { EnvService, rootContainer } from '.';
-import { rootFile } from '~test/path';
+import { rootPath } from '~test/path';
 
 const mocks = vi.hoisted(() => ({ arch: vi.fn() }));
 
@@ -45,7 +45,7 @@ describe('env.service', () => {
   });
 
   test('userHome', () => {
-    expect(child.get(EnvService).userHome).toBe(rootFile('home/ubuntu'));
+    expect(child.get(EnvService).userHome).toBe(rootPath('home/ubuntu'));
   });
 
   test('userId', () => {
@@ -71,7 +71,7 @@ describe('env.service', () => {
   describe('rootDir', () => {
     test('uses test root', () => {
       const e = child.get(EnvService);
-      expect(e.rootDir).toBe(rootFile());
+      expect(e.rootDir).toBe(rootPath());
     });
 
     test('uses default root', () => {

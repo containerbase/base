@@ -5,7 +5,7 @@ import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights } from '../utils';
 import { PathService, rootContainer } from '.';
-import { rootFile } from '~test/path';
+import { rootPath } from '~test/path';
 
 describe('path.service', () => {
   const path = env.PATH;
@@ -16,15 +16,23 @@ describe('path.service', () => {
     env.PATH = path;
   });
 
+  test('envFile', () => {
+    expect(child.get(PathService).envFile).toBe(rootPath('usr/local/etc/env'));
+  });
+
+  test('tmpDir', () => {
+    expect(child.get(PathService).tmpDir).toBe(rootPath('tmp'));
+  });
+
   test('toolsPath', () => {
     expect(child.get(PathService).toolsPath).toBe(
-      rootFile('opt/containerbase/tools'),
+      rootPath('opt/containerbase/tools'),
     );
   });
 
   test('versionPath', () => {
     expect(child.get(PathService).versionPath).toBe(
-      rootFile('opt/containerbase/versions'),
+      rootPath('opt/containerbase/versions'),
     );
   });
 
@@ -44,6 +52,27 @@ describe('path.service', () => {
     expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o644);
     expect(await readFile(`${pathSvc.installDir}/env.d/node.sh`, 'utf8')).toBe(
       'export NODE_VERSION=v14.17.0\n',
+    );
+  });
+
+  test('versionedToolPath', () => {
+    expect(child.get(PathService).versionedToolPath('node', '18.0.1')).toBe(
+      rootPath('opt/containerbase/tools/node/18.0.1'),
+    );
+  });
+
+  test('creates and finds tool paths', async () => {
+    await mkdir(rootPath('opt/containerbase/tools'), { recursive: true });
+    const svc = child.get(PathService);
+    expect(await svc.findToolPath('node')).toBeNull();
+    await svc.createToolPath('node');
+    expect(await svc.findToolPath('node')).toBe(
+      rootPath('opt/containerbase/tools/node'),
+    );
+    expect(await svc.findVersionedToolPath('node', '18.0.1')).toBeNull();
+    await svc.createVersionedToolPath('node', '18.0.1');
+    expect(await svc.findVersionedToolPath('node', '18.0.1')).toBe(
+      rootPath('opt/containerbase/tools/node/18.0.1'),
     );
   });
 

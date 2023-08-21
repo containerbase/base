@@ -12,7 +12,9 @@ export default defineConfig({
       reporter: ci ? ['lcovonly', 'text'] : ['html', 'text'],
       include: ['src/cli/**/*.ts'],
     },
-    reporters: ci ? ['default', new GithubActionsReporter()] : ['default'],
+    reporters: ci
+      ? ['default', new GithubActionsReporter()]
+      : ['default', 'html'],
     restoreMocks: true,
     setupFiles: './test/global-setup.ts',
     deps: { moduleDirectories: ['node_modules', '.yarn/'] },

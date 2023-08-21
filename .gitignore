@@ -3,6 +3,7 @@ node_modules/
 /bin
 /dist
 /coverage
+/html/
 
 # generated files
 /src/usr/local/containerbase/version

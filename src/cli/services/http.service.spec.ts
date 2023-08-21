@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { logger } from '../utils';
 import { HttpService, rootContainer } from '.';
 import { scope } from '~test/http-mock';
-import { cacheFile } from '~test/path';
+import { cachePath } from '~test/path';
 
 const baseUrl = 'https://example.com';
 describe('http.service', () => {
@@ -53,7 +53,7 @@ describe('http.service', () => {
     scope(baseUrl).get('/test.txt').reply(200, 'ok');
 
     const http = child.get(HttpService);
-    const expected = cacheFile(
+    const expected = cachePath(
       `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`,
     );
 
@@ -68,7 +68,7 @@ describe('http.service', () => {
     const http = child.get(HttpService);
     const expectedChecksum =
       'd1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020';
-    const expected = cacheFile(
+    const expected = cachePath(
       `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`,
     );
 
@@ -87,6 +87,22 @@ describe('http.service', () => {
         checksumType: 'sha256',
       }),
     ).toBe(expected);
+  });
+
+  test('exists', async () => {
+    scope(baseUrl)
+      .head('/test.txt')
+      .reply(200)
+      .head('/test.txt')
+      .reply(404)
+      .head('/test.txt')
+      .times(3)
+      .reply(500);
+
+    const http = child.get(HttpService);
+    expect(await http.exists(`${baseUrl}/test.txt`)).toBe(true);
+    expect(await http.exists(`${baseUrl}/test.txt`)).toBe(false);
+    await expect(http.exists(`${baseUrl}/test.txt`)).rejects.toThrow();
   });
 
   test('replaces url', async () => {
@@ -105,7 +121,7 @@ describe('http.service', () => {
     env.URL_REPLACE_1_FROM = 'https://example.test';
 
     const http = child.get(HttpService);
-    const expected = cacheFile(
+    const expected = cachePath(
       `f4eba41457a330d0fa5289e49836326c6a0208bbc639862e70bb378c88c62642/replace.txt`,
     );
 
