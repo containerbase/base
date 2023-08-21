@@ -1,4 +1,5 @@
 import { arch } from 'node:os';
+import { join } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { injectable } from 'inversify';
 import { type Arch, logger } from '../utils';
@@ -31,7 +32,7 @@ export class EnvService {
         break;
       default:
         // should never happen
-        throw new Error('Unsupported architecture');
+        throw new Error('Unsupported architecture: ' + arch());
     }
   }
 
@@ -48,8 +49,12 @@ export class EnvService {
     return this.uid === 0;
   }
 
+  get rootDir(): string {
+    return join('/', env.CONTAINERBASE_ROOT_DIR ?? '');
+  }
+
   get userHome(): string {
-    return env.USER_HOME ?? `/home/${this.userName}`;
+    return env.USER_HOME ?? join(this.rootDir, `home/${this.userName}`);
   }
 
   get userName(): string {

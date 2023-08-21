@@ -2,7 +2,7 @@ import { createWriteStream } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import { got } from 'got';
+import { HTTPError, got } from 'got';
 import { inject, injectable } from 'inversify';
 import { logger } from '../utils';
 import { hash, hashFile } from '../utils/hash';
@@ -94,5 +94,19 @@ export class HttpService {
     }
     await rm(cachePath, { recursive: true });
     throw new Error('download failed');
+  }
+
+  async exists(url: string): Promise<boolean> {
+    try {
+      await got.head(url);
+      return true;
+    } catch (err) {
+      if (err instanceof HTTPError && err.response?.statusCode === 404) {
+        return false;
+      }
+
+      logger.error({ err, url }, 'failed to check url');
+      throw err;
+    }
   }
 }

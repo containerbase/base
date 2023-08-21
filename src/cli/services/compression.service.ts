@@ -15,7 +15,11 @@ export interface ExtractConfig {
 @injectable()
 export class CompressionService {
   async extract({ file, cwd, strip, files }: ExtractConfig): Promise<void> {
-    if (file.endsWith('.zip')) {
+    if (
+      file.endsWith('.zip') ||
+      file.endsWith('.tar.xz') ||
+      file.endsWith('.txz')
+    ) {
       await execa('bsdtar', [
         '-xf',
         file,

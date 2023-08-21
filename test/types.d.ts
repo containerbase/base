@@ -1,4 +1,5 @@
+/* eslint-disable no-var */
 declare module globalThis {
-  // eslint-disable-next-line no-var
   var cacheDir: string;
+  var rootDir: string;
 }

@@ -3,6 +3,7 @@ import { rootContainer } from '../services';
 import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
 import { InstallFluxService } from '../tools/flux';
+import { InstallNodeService } from '../tools/node';
 import {
   InstallBowerService,
   InstallCorepackService,
@@ -29,10 +30,11 @@ function prepareContainer(): Container {
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBowerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallLernaService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNpmService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallPnpmService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);

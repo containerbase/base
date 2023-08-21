@@ -1,16 +1,16 @@
-import fs from 'node:fs/promises';
+import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { parse } from '../../utils';
+import { fileExists, parse } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
-export abstract class InstallNpmBaseService extends InstallToolBaseService {
+export abstract class InstallNodeBaseService extends InstallToolBaseService {
   protected get tool(): string {
     return this.name;
   }
@@ -28,22 +28,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
-    const env: NodeJS.ProcessEnv = {
-      NO_UPDATE_NOTIFIER: '1',
-      npm_config_update_notifier: 'false',
-      npm_config_fund: 'false',
-    };
-
-    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
-      env.npm_config_cache = tmp;
-    }
-
-    if (!penv.npm_config_registry && !penv.NPM_CONFIG_REGISTRY) {
-      const registry = this.envSvc.replaceUrl(defaultRegistry);
-      if (registry !== defaultRegistry) {
-        env.npm_config_registry = registry;
-      }
-    }
+    const env = this.prepareEnv(tmp);
 
     // TODO: create recursive
     if (!(await this.pathSvc.findToolPath(this.name))) {
@@ -77,25 +62,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
 
     if (this.name === 'npm' && ver.major < 7) {
       // update to latest node-gyp to fully support python3
-      await execa(
-        join(prefix, 'bin/npm'),
-        [
-          'explore',
-          'npm',
-          '--prefix',
-          prefix,
-          '--silent',
-          '--',
-          'npm',
-          'install',
-          'node-gyp@latest',
-          '--no-audit',
-          '--cache',
-          tmp,
-          '--silent',
-        ],
-        { stdio: ['inherit', 'inherit', 1], env },
-      );
+      await this.updateNodeGyp(prefix, tmp, env);
     }
 
     await fs.rm(tmp, { recursive: true, force: true });
@@ -127,7 +94,7 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
     return (await this.versionSvc.find('node')) !== null;
   }
 
-  protected async getNodeNpm(): Promise<string> {
+  private async getNodeNpm(): Promise<string> {
     const nodeVersion = await this.versionSvc.find('node');
 
     if (!nodeVersion) {
@@ -136,4 +103,101 @@ export abstract class InstallNpmBaseService extends InstallToolBaseService {
 
     return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
   }
+
+  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
+    const env: NodeJS.ProcessEnv = {
+      NO_UPDATE_NOTIFIER: '1',
+      npm_config_update_notifier: 'false',
+      npm_config_fund: 'false',
+    };
+
+    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
+      env.npm_config_cache = tmp;
+    }
+
+    if (!penv.npm_config_registry && !penv.NPM_CONFIG_REGISTRY) {
+      const registry = this.envSvc.replaceUrl(defaultRegistry);
+      if (registry !== defaultRegistry) {
+        env.npm_config_registry = registry;
+      }
+    }
+
+    return env;
+  }
+
+  protected async updateNodeGyp(
+    prefix: string,
+    tmp: string,
+    env: NodeJS.ProcessEnv,
+    global = false,
+  ): Promise<void> {
+    await execa(
+      join(prefix, 'bin/npm'),
+      [
+        'explore',
+        'npm',
+        ...(global ? ['-g'] : []),
+        '--prefix',
+        prefix,
+        // '--silent',
+        '--',
+        'npm',
+        'install',
+        'node-gyp@latest',
+        '--no-audit',
+        '--cache',
+        tmp,
+        '--silent',
+      ],
+      { stdio: ['inherit', 'inherit', 1], env },
+    );
+  }
+}
+
+async function preparePrefix(prefix: string): Promise<Promise<void>> {
+  // npm 7 bug
+  await mkdir(`${prefix}/bin`, { recursive: true });
+  await mkdir(`${prefix}/lib`, { recursive: true });
+}
+
+/**
+ * Helper function to link to a globally installed node
+ */
+export async function prepareGlobalConfig({
+  prefix,
+  versionedToolPath,
+}: {
+  prefix: string;
+  versionedToolPath: string;
+}): Promise<Promise<void>> {
+  await preparePrefix(prefix);
+  await mkdir(`${versionedToolPath}/etc`, { recursive: true });
+  await appendFile(`${versionedToolPath}/etc/npmrc`, `prefix = "${prefix}"`);
+}
+/**
+ * Helper function to link to a user installed node
+ */
+export async function prepareUserConfig({
+  prefix,
+  home,
+  name,
+}: {
+  prefix: string;
+  home: string;
+  name: string;
+}): Promise<void> {
+  const npmrc = `${home}/.npmrc`;
+  if (
+    (await fileExists(npmrc)) &&
+    (await readFile(npmrc, { encoding: 'utf8' })).includes('prefix')
+  ) {
+    return;
+  }
+
+  await preparePrefix(prefix);
+  await appendFile(npmrc, `prefix = "${prefix}"`);
+  await mkdir(`${home}/.npm/_logs`, { recursive: true });
+  // fs isn't recursive, so we use system binaries
+  await execa('chown', ['-R', name, prefix, npmrc, `${home}/.npm`]);
+  await execa('chmod', ['-R', 'g+w', prefix, npmrc, `${home}/.npm`]);
 }

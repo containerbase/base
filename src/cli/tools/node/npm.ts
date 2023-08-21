@@ -1,15 +1,15 @@
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { InstallNpmBaseService } from './utils';
+import { InstallNodeBaseService } from './utils';
 
 @injectable()
-export class InstallBowerService extends InstallNpmBaseService {
+export class InstallBowerService extends InstallNodeBaseService {
   override readonly name: string = 'bower';
 }
 
 @injectable()
-export class InstallCorepackService extends InstallNpmBaseService {
+export class InstallCorepackService extends InstallNodeBaseService {
   override name: string = 'corepack';
 
   override async postInstall(version: string): Promise<void> {
@@ -22,22 +22,22 @@ export class InstallCorepackService extends InstallNpmBaseService {
 }
 
 @injectable()
-export class InstallLernaService extends InstallNpmBaseService {
+export class InstallLernaService extends InstallNodeBaseService {
   override readonly name: string = 'lerna';
 }
 
 @injectable()
-export class InstallNpmService extends InstallNpmBaseService {
+export class InstallNpmService extends InstallNodeBaseService {
   override readonly name: string = 'npm';
 }
 
 @injectable()
-export class InstallPnpmService extends InstallNpmBaseService {
+export class InstallPnpmService extends InstallNodeBaseService {
   override readonly name: string = 'pnpm';
 }
 
 @injectable()
-export class InstallRenovateService extends InstallNpmBaseService {
+export class InstallRenovateService extends InstallNodeBaseService {
   override readonly name: string = 'renovate';
 
   override async postInstall(version: string): Promise<void> {
@@ -49,12 +49,12 @@ export class InstallRenovateService extends InstallNpmBaseService {
 }
 
 @injectable()
-export class InstallYarnService extends InstallNpmBaseService {
+export class InstallYarnService extends InstallNodeBaseService {
   override readonly name: string = 'yarn';
 }
 
 @injectable()
-export class InstallYarnSlimService extends InstallNpmBaseService {
+export class InstallYarnSlimService extends InstallNodeBaseService {
   override readonly name: string = 'yarn-slim';
 
   protected override get tool(): string {
