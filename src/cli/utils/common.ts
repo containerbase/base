@@ -35,6 +35,16 @@ export async function getDistro(): Promise<Distro> {
   return await (distro ??= readDistro());
 }
 
+/**
+ * For testing purposes only.
+ * @private
+ * @internal
+ */
+/* c8 ignore next 3 */
+export function resetDistro(): void {
+  distro = undefined;
+}
+
 async function readDistro(): Promise<Distro> {
   const data = await fs.readFile('/etc/os-release', { encoding: 'utf-8' });
   const name = /^NAME="?(\w+)"?$/m.exec(data)?.[1];
