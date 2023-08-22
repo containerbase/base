@@ -1,0 +1,33 @@
+diff --git a/lib/platform/package.json b/lib/platform/package.json
+index 5ea9d43740d1bdb509612376c0e9ce91d20f8b20..2802dcd72971987c4567957e73d73b1bef1edc9e 100644
+--- a/lib/platform/package.json
++++ b/lib/platform/package.json
+@@ -1,4 +1,4 @@
+ {
+-    "main": "./node",
+-    "browser": "./browser"
++    "main": "./node.js",
++    "browser": "./browser.js"
+ }
+diff --git a/package.json b/package.json
+index cbf943bcc31a864f2771e457d327e5106eba9afe..74c10ad057ebe7ce5289ae25e9cca4f17479a639 100644
+--- a/package.json
++++ b/package.json
+@@ -13,7 +13,7 @@
+     "command"
+   ],
+   "version": "3.2.1",
+-  "main": "lib/advanced/index",
++  "main": "lib/advanced/index.js",
+   "license": "MIT",
+   "sideEffects": false,
+   "repository": {
+@@ -65,7 +65,7 @@
+     "demo": "node --require ts-node/register demos/advanced.ts"
+   },
+   "publishConfig": {
+-    "main": "lib/advanced/index"
++    "main": "lib/advanced/index.js"
+   },
+   "files": [
+     "lib"

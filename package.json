@@ -96,6 +96,7 @@
     "vitest-github-actions-reporter": "0.10.0"
   },
   "resolutions": {
+    "clipanion@3.2.1": "patch:clipanion@npm%3A3.2.1#./.yarn/patches/clipanion-npm-3.2.1-fc9187f56c.patch",
     "esbuild": "0.19.2",
     "tsconfig-paths": "4.2.0"
   },

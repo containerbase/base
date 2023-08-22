@@ -2459,6 +2459,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clipanion@patch:clipanion@npm%3A3.2.1#./.yarn/patches/clipanion-npm-3.2.1-fc9187f56c.patch::locator=containerbase%40workspace%3A.":
+  version: 3.2.1
+  resolution: "clipanion@patch:clipanion@npm%3A3.2.1#./.yarn/patches/clipanion-npm-3.2.1-fc9187f56c.patch::version=3.2.1&hash=1e1bfd&locator=containerbase%40workspace%3A."
+  dependencies:
+    typanion: ^3.8.0
+  peerDependencies:
+    typanion: "*"
+  checksum: 1f9d29b9cf38036edd5ea0cfa4d2d64b39a6bd011c22547c27816d87fbe15bd3a84ffe8c2401e32c732bd9c24183d36ebddd107d16659f0e3000f521e6dd5b5a
+  languageName: node
+  linkType: hard
+
 "cliui@npm:^7.0.2":
   version: 7.0.4
   resolution: "cliui@npm:7.0.4"
