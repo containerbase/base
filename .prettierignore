@@ -1,6 +1,7 @@
 node_modules/
 /coverage
 /dist
+/html/
 
 # yarn 2+
 .yarn/
