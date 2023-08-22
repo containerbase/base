@@ -26,6 +26,7 @@ vi.mock('node:fs/promises', async () => {
 });
 vi.mock('node:os', () => ({ ...osMocks, default: osMocks }));
 vi.mock('node:process', () => ({ ...procMocks, default: procMocks }));
+vi.mock('del');
 
 describe('common', () => {
   beforeEach(() => {
