@@ -107,6 +107,6 @@ export class InstallDartService extends InstallToolBaseService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('dart', ['--version'], { stdio: 'inherit' });
+    await execa('dart', ['--version'], { stdio: ['inherit', 'inherit', 1] });
   }
 }

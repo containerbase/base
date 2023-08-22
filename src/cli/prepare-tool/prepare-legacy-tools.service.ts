@@ -7,7 +7,7 @@ export class PrepareLegacyToolsService {
   async execute(tools: string[]): Promise<void> {
     logger.debug(`Preparing legacy tools ${tools.join(', ')} ...`);
     await execa('/usr/local/containerbase/bin/prepare-tool', tools, {
-      stdio: 'inherit',
+      stdio: ['inherit', 'inherit', 1],
     });
   }
 }

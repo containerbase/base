@@ -68,6 +68,6 @@ export class InstallFluxService extends InstallToolBaseService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('flux', ['--version'], { stdio: 'inherit' });
+    await execa('flux', ['--version'], { stdio: ['inherit', 'inherit', 1] });
   }
 }

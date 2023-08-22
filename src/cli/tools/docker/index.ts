@@ -71,6 +71,6 @@ export class InstallDockerService extends InstallToolBaseService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('docker', ['--version'], { stdio: 'inherit' });
+    await execa('docker', ['--version'], { stdio: ['inherit', 'inherit', 1] });
   }
 }

@@ -171,10 +171,14 @@ fi
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     // pkg bug, using `node` causes module load error
-    await execa('/usr/local/bin/node', ['--version'], { stdio: 'inherit' });
-    await execa('npm', ['--version'], { stdio: 'inherit' });
+    await execa('/usr/local/bin/node', ['--version'], {
+      stdio: ['inherit', 'inherit', 1],
+    });
+    await execa('npm', ['--version'], { stdio: ['inherit', 'inherit', 1] });
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
-      await execa('corepack', ['--version'], { stdio: 'inherit' });
+      await execa('corepack', ['--version'], {
+        stdio: ['inherit', 'inherit', 1],
+      });
     }
   }
 
