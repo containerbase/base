@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
 import { InstallNodeBaseService } from './utils';
@@ -11,14 +10,6 @@ export class InstallBowerService extends InstallNodeBaseService {
 @injectable()
 export class InstallCorepackService extends InstallNodeBaseService {
   override name: string = 'corepack';
-
-  override async postInstall(version: string): Promise<void> {
-    await super.postInstall(version);
-
-    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src, name: 'pnpm' });
-    await this.shellwrapper({ srcDir: src, name: 'yarn' });
-  }
 }
 
 @injectable()
@@ -39,13 +30,6 @@ export class InstallPnpmService extends InstallNodeBaseService {
 @injectable()
 export class InstallRenovateService extends InstallNodeBaseService {
   override readonly name: string = 'renovate';
-
-  override async postInstall(version: string): Promise<void> {
-    await super.postInstall(version);
-
-    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src, name: 'renovate-config-validator' });
-  }
 }
 
 @injectable()
@@ -72,7 +56,7 @@ export class InstallYarnSlimService extends InstallNodeBaseService {
         's/ steps,/ steps.slice(0,1),/',
         `${prefix}/node_modules/yarn/lib/cli.js`,
       ],
-      { stdio: 'inherit' },
+      { stdio: ['inherit', 'inherit', 1] },
     );
   }
 }
