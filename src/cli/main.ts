@@ -1,8 +1,8 @@
 import { argv, argv0 } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
-import { parseBinaryName, prepareCommands } from './command';
+import { prepareCommands } from './command';
 import { bootstrap } from './proxy';
-import { cliMode, logger, validateSystem } from './utils';
+import { cliMode, logger, parseBinaryName, validateSystem } from './utils';
 
 declare global {
   // needs to be this to make eslint happy
@@ -28,5 +28,7 @@ export async function main(): Promise<void> {
   cli.register(Builtins.HelpCommand);
   cli.register(Builtins.VersionCommand);
 
-  await cli.runExit(prepareCommands(cli, mode, args));
+  prepareCommands(cli, mode);
+
+  await cli.runExit(args);
 }

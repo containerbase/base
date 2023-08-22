@@ -1,8 +1,8 @@
 import fs, { stat } from 'node:fs/promises';
 import os from 'node:os';
-import { exit } from 'node:process';
+import { argv0, exit } from 'node:process';
 import { logger } from './logger';
-import type { Distro } from './types';
+import type { CliMode, Distro } from './types';
 
 let distro: undefined | Promise<Distro>;
 
@@ -74,4 +74,16 @@ export async function fileExists(filePath: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export function parseBinaryName(
+  mode: CliMode | null,
+  node: string,
+  app: string,
+): string | undefined {
+  if (mode) {
+    return mode;
+  }
+
+  return argv0.endsWith('/node') || argv0 === 'node' ? `${node} ${app}` : argv0;
 }

@@ -3,14 +3,14 @@ import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
 import { installTool } from '../install-tool';
 import { logger, validateVersion } from '../utils';
+import { getVersion } from './utils';
 
-export class InstallNpmCommand extends Command {
+export class InstallNpmEnvCommand extends Command {
   static override paths = [['install', 'npm']];
 
   static override usage = Command.Usage({
     description: 'Installs a npm package into the container.',
     examples: [
-      ['Installs corepack 0.9.0', '$0 install npm corepack 0.9.0'],
       [
         'Installs corepack with version via environment variable',
         'COREPACK_VERSION=0.9.0 $0 install npm corepack',
@@ -18,16 +18,39 @@ export class InstallNpmCommand extends Command {
     ],
   });
 
-  name = Option.String({ required: true });
+  name = Option.String();
+
+  dryRun = Option.Boolean('-d,--dry-run', false);
+
+  override async execute(): Promise<number | void> {
+    const version = getVersion(this.name);
+
+    if (!version) {
+      logger.fatal(`No version found for ${this.name}`);
+      return 1;
+    }
+
+    return await this.cli.run([
+      ...this.path,
+      ...(this.dryRun ? ['-d'] : []),
+      this.name,
+      version,
+    ]);
+  }
+}
+
+export class InstallNpmCommand extends InstallNpmEnvCommand {
+  static override usage = Command.Usage({
+    description: 'Installs a npm package into the container.',
+    examples: [['Installs corepack 0.9.0', '$0 install npm corepack 0.9.0']],
+  });
 
   version = Option.String({
     required: true,
     validator: t.cascade(t.isString(), validateVersion()),
   });
 
-  dryRun = Option.Boolean('-d,--dry-run', false);
-
-  async execute(): Promise<number | void> {
+  override async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
 
@@ -48,17 +71,25 @@ export class InstallNpmCommand extends Command {
   }
 }
 
-export class InstallNpmShortCommand extends InstallNpmCommand {
-  static override paths = [];
+export class InstallNpmShortEnvCommand extends InstallNpmEnvCommand {
+  static override paths = [Command.Default];
 
   static override usage = Command.Usage({
     description: 'Installs a npm package into the container.',
     examples: [
-      ['Installs corepack v0.9.0', '$0 corepack 0.9.0'],
       [
         'Installs corepack with version via environment variable',
         'NODE_VERSION=0.9.0 $0 corepack',
       ],
     ],
+  });
+}
+
+export class InstallNpmShortCommand extends InstallNpmCommand {
+  static override paths = [Command.Default];
+
+  static override usage = Command.Usage({
+    description: 'Installs a npm package into the container.',
+    examples: [['Installs corepack v0.9.0', '$0 corepack 0.9.0']],
   });
 }

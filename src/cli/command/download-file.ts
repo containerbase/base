@@ -15,8 +15,8 @@ export class DownloadFileCommand extends Command {
     description: 'Downloads a file and optionally validates the checksum.',
   });
 
-  url = Option.String({ required: true });
-  output = Option.String({ required: true });
+  url = Option.String();
+  output = Option.String();
 
   // checksum = Option.String('-c,--checksum');
   // algo = Option.String('-a,--algo');

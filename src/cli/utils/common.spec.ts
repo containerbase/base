@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { fileExists, getDistro, resetDistro, validateSystem } from '.';
+import {
+  fileExists,
+  getDistro,
+  parseBinaryName,
+  resetDistro,
+  validateSystem,
+} from '.';
 
 const osMocks = vi.hoisted(() => ({
   platform: vi.fn(),
   arch: vi.fn(),
 }));
 const fsMocks = vi.hoisted(() => ({ readFile: vi.fn(), stat: vi.fn() }));
-const procMocks = vi.hoisted(() => ({ exit: vi.fn(), env: {} }));
+const procMocks = vi.hoisted(() => ({ exit: vi.fn(), env: {}, argv0: 'node' }));
 
 vi.mock('node:fs/promises', async () => {
   const origFs = await vi.importActual<any>('node:fs/promises');
@@ -77,5 +83,12 @@ UBUNTU_CODENAME=jammy`);
     fsMocks.stat.mockResolvedValueOnce({ isFile: () => true });
     expect(await fileExists('/etc/os-release')).toBe(true);
     expect(await fileExists('/etc/os-release')).toBe(false);
+  });
+
+  test('parseBinaryName', () => {
+    expect(parseBinaryName(null, 'node', 'app')).toBe('node app');
+    expect(parseBinaryName('containerbase-cli', 'node', 'app')).toBe(
+      'containerbase-cli',
+    );
   });
 });
