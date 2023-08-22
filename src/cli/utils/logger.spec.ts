@@ -1,6 +1,5 @@
 import { env } from 'node:process';
-import { beforeEach } from 'node:test';
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // TODO: can't do full coverage because of some vitest mock issues.
 

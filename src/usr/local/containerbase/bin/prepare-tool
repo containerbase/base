@@ -26,6 +26,3 @@ do
   . "/${CONTAINERBASE_DIR}/util.sh"
   prepare_tools "${tool}"
 done
-
-# cleanup
-rm -rf /var/lib/apt/lists/* "${TEMP_DIR:?}"/*

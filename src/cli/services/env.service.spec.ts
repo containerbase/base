@@ -22,6 +22,7 @@ describe('env.service', () => {
   beforeEach(() => {
     child = rootContainer.createChild();
     env.CONTAINERBASE_ROOT_DIR = globalThis.rootDir;
+    env.HOSTNAME = 'buildkitsandbox';
     mocks.arch.mockReturnValue('x64');
   });
 
@@ -34,6 +35,13 @@ describe('env.service', () => {
 
     mocks.arch.mockReturnValue('invalid');
     expect(() => child.get(EnvService).arch).toThrow();
+  });
+
+  test('isDocker', () => {
+    const svc = child.get(EnvService);
+    expect(svc.isDocker).toBe(true);
+    env.HOSTNAME = 'some';
+    expect(svc.isDocker).toBe(false);
   });
 
   test('isRoot', () => {

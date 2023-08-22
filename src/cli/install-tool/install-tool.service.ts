@@ -1,7 +1,7 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
-import { logger } from '../utils';
+import { cleanAptFiles, cleanTmpFiles, logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import type { InstallToolBaseService } from './install-tool-base.service';
 
@@ -35,45 +35,62 @@ export class InstallToolService {
       return 0;
     }
 
-    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
-    if (toolSvc) {
-      if (await toolSvc.isInstalled(version)) {
-        logger.info({ tool }, 'tool already installed');
-        await this.linkAndTest(toolSvc, version);
-        return;
-      }
-
-      if (toolSvc.needsPrepare() && !(await this.pathSvc.findToolPath(tool))) {
-        logger.debug({ tool }, 'tool not prepared');
-        const res = await prepareTools([tool], dryRun);
-        if (res) {
-          return res;
+    try {
+      const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+      if (toolSvc) {
+        if (await toolSvc.isInstalled(version)) {
+          logger.info({ tool }, 'tool already installed');
+          await this.linkAndTest(toolSvc, version);
+          return;
         }
-      }
 
-      logger.debug({ tool }, 'validate tool');
-      if (!(await toolSvc.validate(version))) {
-        logger.fatal({ tool, version }, 'tool version not supported');
-        return 1;
-      }
+        if (
+          toolSvc.needsPrepare() &&
+          !(await this.pathSvc.findToolPath(tool))
+        ) {
+          logger.debug({ tool }, 'tool not prepared');
+          const res = await prepareTools([tool], dryRun);
+          if (res) {
+            return res;
+          }
+        }
 
-      if (dryRun) {
-        logger.info(`Dry run: install tool ${tool} ...`);
-        return;
+        logger.debug({ tool }, 'validate tool');
+        if (!(await toolSvc.validate(version))) {
+          logger.fatal({ tool, version }, 'tool version not supported');
+          return 1;
+        }
+
+        if (dryRun) {
+          logger.info(`Dry run: install tool ${tool} ...`);
+          return;
+        } else {
+          logger.debug({ tool }, 'install tool');
+          await toolSvc.install(version);
+          // TODO delete versioned tool path on error
+          await this.linkAndTest(toolSvc, version);
+        }
       } else {
-        logger.debug({ tool }, 'install tool');
-        await toolSvc.install(version);
-        // TODO delete versioned tool path on error
-        await this.linkAndTest(toolSvc, version);
+        if (dryRun) {
+          logger.info(`Dry run: install tool ${tool} v${version} ...`);
+          return;
+        }
+        await this.legacySvc.execute(tool, version);
       }
-    } else {
-      if (dryRun) {
-        logger.info(`Dry run: install tool ${tool} v${version} ...`);
-        return;
+    } finally {
+      if (this.envSvc.isRoot) {
+        logger.debug('cleaning apt files');
+        await cleanAptFiles(dryRun);
       }
-      await this.legacySvc.execute(tool, version);
+
+      // workaround no hostname assumes docker build env
+      if (this.envSvc.isDocker) {
+        logger.debug('cleaning tmp files');
+        await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
+      }
     }
   }
+
   private async linkAndTest(
     toolSvc: InstallToolBaseService,
     version: string,

@@ -29,12 +29,3 @@ else
   echo "No tool defined - skipping: ${TOOL_NAME}" >&2
   exit 1;
 fi
-
-# cleanup
-if [ "$(is_root)" -eq 0 ]; then
-  rm -rf /var/lib/apt/lists/* /var/log/dpkg.* /var/log/apt
-fi
-# workaround no hostname assumes docker build env
-if [ -z "${HOSTNAME}" ] || [ "${HOSTNAME}" = "buildkitsandbox" ]; then
-  rm -rf "${TEMP_DIR:?}"/*
-fi

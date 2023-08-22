@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
+  cleanAptFiles,
+  cleanTmpFiles,
   fileExists,
   getDistro,
   parseBinaryName,
   resetDistro,
   validateSystem,
 } from '.';
+import { rootPath } from '~test/path';
 
 const osMocks = vi.hoisted(() => ({
   platform: vi.fn(),
@@ -90,5 +93,13 @@ UBUNTU_CODENAME=jammy`);
     expect(parseBinaryName('containerbase-cli', 'node', 'app')).toBe(
       'containerbase-cli',
     );
+  });
+
+  test('cleanAptFiles', async () => {
+    await expect(cleanAptFiles(true)).resolves.toBeUndefined();
+  });
+
+  test('cleanTmpFiles', async () => {
+    await expect(cleanTmpFiles(rootPath('tmp'), true)).resolves.toBeUndefined();
   });
 });

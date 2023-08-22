@@ -1,6 +1,7 @@
 import fs, { stat } from 'node:fs/promises';
 import os from 'node:os';
 import { argv0, exit } from 'node:process';
+import { deleteAsync } from 'del';
 import { logger } from './logger';
 import type { CliMode, Distro } from './types';
 
@@ -86,4 +87,18 @@ export function parseBinaryName(
   }
 
   return argv0.endsWith('/node') || argv0 === 'node' ? `${node} ${app}` : argv0;
+}
+
+export async function cleanAptFiles(dryRun = false): Promise<void> {
+  await deleteAsync(
+    ['/var/lib/apt/lists/**', '/var/log/dpkg.*', '/var/log/apt'],
+    { dot: true, dryRun, force: true },
+  );
+}
+
+export async function cleanTmpFiles(
+  tmp: string,
+  dryRun = false,
+): Promise<void> {
+  await deleteAsync(`${tmp}/**`, { dot: true, dryRun, force: true });
 }
