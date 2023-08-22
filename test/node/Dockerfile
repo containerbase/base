@@ -358,8 +358,10 @@ RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
 
 RUN set -ex; \
+  [ "$(command -v pnpm)" = "/usr/local/bin/pnpm" ] && echo "works" || exit 1; \
+  [ "$(command -v pnpx)" = "/usr/local/bin/pnpx" ] && echo "works" || exit 1; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
-  [ "$(command -v pnpm)" = "/usr/local/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v yarnpkg)" = "/usr/local/bin/yarnpkg" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: yarn (corepack)

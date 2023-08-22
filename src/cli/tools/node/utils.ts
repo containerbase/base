@@ -1,11 +1,13 @@
 import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
+import is from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import type { PackageJson } from 'type-fest';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { fileExists, parse } from '../../utils';
+import { fileExists, logger, parse } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
@@ -77,9 +79,26 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
   }
 
   override async postInstall(version: string): Promise<void> {
-    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
+    const vtPath = this.pathSvc.versionedToolPath(this.name, version);
+    const src = join(vtPath, 'bin');
+    const pkg = await readPackageJson(join(vtPath, 'node_modules', this.tool));
 
-    await this.shellwrapper({ srcDir: src, name: this.tool });
+    if (!pkg.bin) {
+      logger.warn(
+        { tool: this.name, version },
+        "Missing 'bin' in package.json",
+      );
+      return;
+    }
+
+    if (is.string(pkg.bin)) {
+      await this.shellwrapper({ srcDir: src, name: pkg.name ?? this.tool });
+      return;
+    }
+
+    for (const name of Object.keys(pkg.bin)) {
+      await this.shellwrapper({ srcDir: src, name });
+    }
   }
 
   override async test(_version: string): Promise<void> {
@@ -200,4 +219,9 @@ export async function prepareUserConfig({
   // fs isn't recursive, so we use system binaries
   await execa('chown', ['-R', name, prefix, npmrc, `${home}/.npm`]);
   await execa('chmod', ['-R', 'g+w', prefix, npmrc, `${home}/.npm`]);
+}
+
+async function readPackageJson(path: string): Promise<PackageJson> {
+  const data = await readFile(join(path, 'package.json'), { encoding: 'utf8' });
+  return JSON.parse(data);
 }
