@@ -90,6 +90,7 @@ module.exports = {
           'nock',
           'parse-link-header',
           'path',
+          'node:test',
           {
             name: 'vitest',
             importNames: ['it'],

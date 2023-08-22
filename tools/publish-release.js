@@ -3,8 +3,8 @@ import shell from 'shelljs';
 
 class ReleaseCommand extends Command {
   release = Option.String('-r,--release', { required: true });
-  gitSha = Option.String('--sha', { required: false });
-  dryRun = Option.Boolean('-d,--dry-run', { required: false });
+  gitSha = Option.String('--sha');
+  dryRun = Option.Boolean('-d,--dry-run');
 
   async execute() {
     await Promise.resolve();
