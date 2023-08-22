@@ -1,4 +1,4 @@
-import { Container } from 'inversify';
+import { Container, injectable } from 'inversify';
 import { rootContainer } from '../services';
 import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
@@ -14,9 +14,12 @@ import {
   InstallYarnService,
   InstallYarnSlimService,
 } from '../tools/node/npm';
+import { InstallNodeBaseService } from '../tools/node/utils';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
+
+export type InstallToolType = 'npm';
 
 function prepareContainer(): Container {
   logger.trace('preparing container');
@@ -49,7 +52,33 @@ export function installTool(
   tool: string,
   version: string,
   dryRun = false,
+  type?: InstallToolType,
 ): Promise<number | void> {
   const container = prepareContainer();
+  if (type) {
+    switch (type) {
+      case 'npm': {
+        @injectable()
+        class InstallGenericNpmService extends InstallNodeBaseService {
+          override readonly name: string = tool;
+
+          override needsPrepare(): boolean {
+            return false;
+          }
+
+          override async test(version: string): Promise<void> {
+            try {
+              // some npm packages may not have a `--version` flag
+              await super.test(version);
+            } catch (err) {
+              logger.debug(err);
+            }
+          }
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericNpmService);
+        break;
+      }
+    }
+  }
   return container.get(InstallToolService).execute(tool, version, dryRun);
 }

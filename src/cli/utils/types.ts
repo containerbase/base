@@ -4,6 +4,10 @@ export interface Distro {
   readonly versionId: string;
 }
 
-export type CliMode = 'containerbase-cli' | 'install-tool' | 'prepare-tool';
+export type CliMode =
+  | 'containerbase-cli'
+  | 'install-npm'
+  | 'install-tool'
+  | 'prepare-tool';
 
 export type Arch = 'arm64' | 'amd64';

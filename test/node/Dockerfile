@@ -148,6 +148,10 @@ RUN set -ex; \
 
 RUN set -ex; cd test/a; npm i
 
+# renovate: datasource=npm
+RUN install-npm del-cli 5.0.0
+RUN del -d test/a/**
+
 #--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------

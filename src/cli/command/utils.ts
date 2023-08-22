@@ -7,9 +7,11 @@ export function prepareToolVersion(
   switch (mode) {
     case 'prepare-tool':
       break;
-    case 'install-tool': {
+    case 'install-tool':
+    case 'install-npm': {
       if (args.length === 1) {
         // install-tool node
+        // install-npm corepack
         appendVersion(args, 0);
       }
       break;
@@ -22,9 +24,10 @@ export function prepareToolVersion(
       } else if (
         args.length === 3 &&
         args[0] === 'install' &&
-        args[1] === 'tool'
+        (args[1] === 'tool' || args[1] === 'npm')
       ) {
         // containerbase-cli install tool node
+        // containerbase-cli install npm corepack
         appendVersion(args, 2);
       }
       break;
