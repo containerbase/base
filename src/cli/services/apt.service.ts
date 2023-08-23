@@ -54,7 +54,8 @@ export class AptService {
       }
     }
   }
-  async isInstalled(pkg: string): Promise<boolean> {
+
+  private async isInstalled(pkg: string): Promise<boolean> {
     try {
       const res = await execa('dpkg', ['-s', pkg]);
       return res.stdout.includes('Status: install ok installed');
