@@ -20,7 +20,6 @@ export class PrepareDotnetService extends PrepareToolBaseService {
   constructor(
     @inject(EnvService) private readonly envSvc: EnvService,
     @inject(AptService) private readonly aptSvc: AptService,
-    @inject(PathService) private readonly pathSvc: PathService,
   ) {
     super();
   }
