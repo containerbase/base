@@ -36,6 +36,10 @@ export class EnvService {
     }
   }
 
+  get aptProxy(): string | null {
+    return env.APT_HTTP_PROXY ?? null;
+  }
+
   get cacheDir(): string | null {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
   }

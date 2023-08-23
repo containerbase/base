@@ -31,6 +31,9 @@ export class CompressionService {
       return;
     }
 
-    await pipeline(createReadStream(file), tar.x({ cwd, strip }, files));
+    await pipeline(
+      createReadStream(file),
+      tar.x({ cwd, strip, newer: true, keep: false }, files),
+    );
   }
 }
