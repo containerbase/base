@@ -2,6 +2,7 @@ import { Container, injectable } from 'inversify';
 import { rootContainer } from '../services';
 import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
+import { InstallDotnetService } from '../tools/dotnet';
 import { InstallFluxService } from '../tools/flux';
 import { InstallNodeService } from '../tools/node';
 import {
@@ -35,6 +36,7 @@ function prepareContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallLernaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
