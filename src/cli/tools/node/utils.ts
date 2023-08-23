@@ -55,7 +55,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         tmp,
         '--silent',
       ],
-      { stdio: ['inherit', 'inherit', 1], env },
+      { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
     );
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
@@ -168,7 +168,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         tmp,
         '--silent',
       ],
-      { stdio: ['inherit', 'inherit', 1], env },
+      { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
     );
   }
 }
