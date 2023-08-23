@@ -14,6 +14,7 @@ describe('path.service', () => {
   beforeEach(() => {
     child = rootContainer.createChild();
     env.PATH = path;
+    delete env.NODE_VERSION;
   });
 
   test('envFile', () => {
@@ -76,6 +77,24 @@ describe('path.service', () => {
     );
   });
 
+  test('exportEnv', async () => {
+    await mkdir(rootPath('usr/local/etc'), { recursive: true });
+    await child.get(PathService).exportEnv({ NODE_VERSION: 'v14.17.1' });
+
+    expect(env).toMatchObject({ NODE_VERSION: 'v14.17.1' });
+    const content = await readFile(rootPath('usr/local/etc/env'), 'utf8');
+    expect(content).toContain('export NODE_VERSION=${NODE_VERSION-v14.17.1}\n');
+  });
+
+  test('exportPath', async () => {
+    await mkdir(rootPath('usr/local/etc'), { recursive: true });
+    await child.get(PathService).exportPath('/some/path');
+
+    expect(env).toMatchObject({ PATH: `/some/path:${path}` });
+    const content = await readFile(rootPath('usr/local/etc/env'), 'utf8');
+    expect(content).toContain('export PATH=/some/path:$PATH\n');
+  });
+
   describe('exportToolEnv', () => {
     test('node', async () => {
       const pathSvc = child.get(PathService);
@@ -112,5 +131,11 @@ describe('path.service', () => {
         PATH: `/some/path:${path}:/some/path`,
       });
     });
+  });
+
+  test('fileExists', async () => {
+    expect(
+      await child.get(PathService).fileExists(rootPath('usr/local/etc/env123')),
+    ).toBe(false);
   });
 });

@@ -20,6 +20,7 @@ export class PrepareDotnetService extends PrepareToolBaseService {
   constructor(
     @inject(EnvService) private readonly envSvc: EnvService,
     @inject(AptService) private readonly aptSvc: AptService,
+    @inject(PathService) private readonly pathSvc: PathService,
   ) {
     super();
   }
@@ -51,6 +52,12 @@ export class PrepareDotnetService extends PrepareToolBaseService {
         );
         break;
     }
+
+    await this.pathSvc.exportEnv({
+      DOTNET_ROOT: this.pathSvc.toolPath(this.name),
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1',
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1',
+    });
 
     const nuget = join(this.envSvc.userHome, '.nuget');
     await mkdir(nuget);

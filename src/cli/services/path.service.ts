@@ -96,6 +96,22 @@ export class PathService {
     return join(this.toolPath(tool), version);
   }
 
+  async exportEnv(values: Record<string, string>): Promise<void> {
+    let content = '';
+
+    for (const [key, value] of Object.entries(values)) {
+      env[key] = value;
+      content += `export ${key}=\${${key}-${value}}\n`;
+    }
+
+    await appendFile(this.envFile, content);
+  }
+
+  async exportPath(value: string): Promise<void> {
+    env.PATH = `${value}:${env.PATH}`;
+    await appendFile(this.envFile, `export PATH=${value}:$PATH\n`);
+  }
+
   async resetToolEnv(tool: string): Promise<Promise<void>> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
     if (!(await fileExists(file))) {
