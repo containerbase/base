@@ -1,4 +1,4 @@
-import fs, { stat } from 'node:fs/promises';
+import fs, { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
 import { argv0, exit } from 'node:process';
 import { deleteAsync } from 'del';
@@ -6,6 +6,7 @@ import { logger } from './logger';
 import type { CliMode, Distro } from './types';
 
 let distro: undefined | Promise<Distro>;
+let isDocker: undefined | Promise<boolean>;
 
 export async function validateSystem(): Promise<void> {
   if (os.platform() !== 'linux') {
@@ -42,12 +43,13 @@ export async function getDistro(): Promise<Distro> {
  * @internal
  */
 /* c8 ignore next 3 */
-export function resetDistro(): void {
+export function reset(): void {
   distro = undefined;
+  isDocker = undefined;
 }
 
 async function readDistro(): Promise<Distro> {
-  const data = await fs.readFile('/etc/os-release', { encoding: 'utf-8' });
+  const data = await readFile('/etc/os-release', { encoding: 'utf-8' });
   const name = /^NAME="?(\w+)"?$/m.exec(data)?.[1];
   const versionCode = /^VERSION_CODENAME="?(\w+)"?$/m.exec(data)?.[1];
   const versionId = /^VERSION_ID="?(\d+\.\d+)"?$/m.exec(data)?.[1];
@@ -101,4 +103,17 @@ export async function cleanTmpFiles(
   dryRun = false,
 ): Promise<void> {
   await deleteAsync(`${tmp}/**`, { dot: true, dryRun, force: true });
+}
+
+async function checkDocker(): Promise<boolean> {
+  try {
+    const cgroup = await readFile('/proc/self/cgroup', { encoding: 'utf8' });
+    return cgroup.includes(':cpuset:/docker/buildkit/');
+  } catch {
+    return false;
+  }
+}
+
+export function isDockerBuild(): Promise<boolean> {
+  return (isDocker ??= checkDocker());
 }

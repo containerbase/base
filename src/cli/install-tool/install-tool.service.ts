@@ -1,7 +1,7 @@
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
-import { cleanAptFiles, cleanTmpFiles, logger } from '../utils';
+import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import type { InstallToolBaseService } from './install-tool-base.service';
 
@@ -83,8 +83,7 @@ export class InstallToolService {
         await cleanAptFiles(dryRun);
       }
 
-      // workaround no hostname assumes docker build env
-      if (this.envSvc.isDocker) {
+      if (await isDockerBuild()) {
         logger.debug('cleaning tmp files');
         await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
       }

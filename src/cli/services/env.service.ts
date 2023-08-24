@@ -49,10 +49,6 @@ export class EnvService {
     return env.HOME!;
   }
 
-  get isDocker(): boolean {
-    return env.HOSTNAME === 'buildkitsandbox';
-  }
-
   get isRoot(): boolean {
     return this.uid === 0;
   }

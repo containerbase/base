@@ -4,8 +4,9 @@ import {
   cleanTmpFiles,
   fileExists,
   getDistro,
+  isDockerBuild,
   parseBinaryName,
-  resetDistro,
+  reset,
   validateSystem,
 } from '.';
 import { rootPath } from '~test/path';
@@ -30,7 +31,7 @@ vi.mock('del');
 
 describe('common', () => {
   beforeEach(() => {
-    resetDistro();
+    reset();
     fsMocks.readFile.mockResolvedValueOnce(`PRETTY_NAME="Ubuntu 22.04.2 LTS"
 NAME="Ubuntu"
 VERSION_ID="22.04"
@@ -57,7 +58,7 @@ UBUNTU_CODENAME=jammy`);
 
       await expect(validateSystem()).resolves.toBeUndefined();
 
-      resetDistro();
+      reset();
       await expect(validateSystem()).rejects.toThrow();
 
       expect(fsMocks.readFile).toHaveBeenCalledWith('/etc/os-release', {
@@ -72,7 +73,7 @@ UBUNTU_CODENAME=jammy`);
       versionCode: 'jammy',
       versionId: '22.04',
     });
-    resetDistro();
+    reset();
     expect(await getDistro()).toEqual({
       name: 'Unknown',
       versionCode: 'unknown',
@@ -102,5 +103,17 @@ UBUNTU_CODENAME=jammy`);
 
   test('cleanTmpFiles', async () => {
     await expect(cleanTmpFiles(rootPath('tmp'), true)).resolves.toBeUndefined();
+  });
+
+  test('isDockerBuild', async () => {
+    fsMocks.readFile.mockRestore();
+    fsMocks.readFile.mockResolvedValueOnce(
+      '1::cpuset:/docker/buildkit/be83f0ab1e216fcc746981346eff2df356b181a6c368c3a8803570d989b76107\n',
+    );
+    expect(await isDockerBuild()).toBe(true);
+    fsMocks.readFile.mockRejectedValueOnce(new Error());
+    expect(await isDockerBuild()).toBe(true);
+    reset();
+    expect(await isDockerBuild()).toBe(false);
   });
 });
