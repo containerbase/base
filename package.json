@@ -61,7 +61,7 @@
     "@typescript-eslint/parser": "6.4.0",
     "@vitest/coverage-v8": "0.34.2",
     "@vitest/ui": "0.34.2",
-    "@yarnpkg/sdks": "3.0.0-rc.48",
+    "@yarnpkg/sdks": "3.0.0-rc.49",
     "bats": "1.10.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
@@ -115,5 +115,5 @@
       "unplugged": true
     }
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@3.6.2"
 }
