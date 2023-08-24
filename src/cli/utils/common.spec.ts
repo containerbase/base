@@ -131,4 +131,17 @@ UBUNTU_CODENAME=jammy`);
       expect(await isDockerBuild()).toBe(false);
     });
   });
+
+  test('dummy', () => {
+    const match = /\s+s\.executables\s+=\s+\[([^\]]+)\]\s+/.exec(
+      '  s.executables = [/"rake/".freeze]\n',
+    );
+    expect(match).toMatchInlineSnapshot(`
+      [
+        "  s.executables = [/\\"rake/\\".freeze]
+      ",
+        "/\\"rake/\\".freeze",
+      ]
+    `);
+  });
 });

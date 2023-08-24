@@ -60,10 +60,10 @@ export abstract class InstallToolBaseService {
 
     let content = `#!/bin/bash
 
-    if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
-      . ${this.pathSvc.envFile}
-    fi
-    `;
+if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
+  . ${this.pathSvc.envFile}
+fi
+`;
 
     if (exports) {
       content += `export ${exports}\n`;

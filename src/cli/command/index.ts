@@ -3,6 +3,12 @@ import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
 import { DownloadFileCommand } from './download-file';
 import {
+  InstallGemCommand,
+  InstallGemEnvCommand,
+  InstallGemShortCommand,
+  InstallGemShortEnvCommand,
+} from './install-gem';
+import {
   InstallNpmCommand,
   InstallNpmEnvCommand,
   InstallNpmShortCommand,
@@ -36,9 +42,15 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
     cli.register(InstallNpmShortCommand);
     cli.register(InstallNpmShortEnvCommand);
     return;
+  } else if (mode === 'install-gem') {
+    cli.register(InstallGemShortCommand);
+    cli.register(InstallGemShortEnvCommand);
+    return;
   }
 
   cli.register(DownloadFileCommand);
+  cli.register(InstallGemCommand);
+  cli.register(InstallGemEnvCommand);
   cli.register(InstallNpmCommand);
   cli.register(InstallNpmEnvCommand);
   cli.register(InstallToolCommand);

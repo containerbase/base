@@ -6,6 +6,7 @@ export interface Distro {
 
 export type CliMode =
   | 'containerbase-cli'
+  | 'install-gem'
   | 'install-npm'
   | 'install-tool'
   | 'prepare-tool';

@@ -10,6 +10,9 @@ export function cliMode(): CliMode | null {
   if (argv0.endsWith('/containerbase-cli') || argv0 === 'containerbase-cli') {
     return 'containerbase-cli';
   }
+  if (argv0.endsWith('/install-gem') || argv0 === 'install-gem') {
+    return 'install-gem';
+  }
   if (argv0.endsWith('/install-npm') || argv0 === 'install-npm') {
     return 'install-npm';
   }

@@ -16,11 +16,16 @@ import {
   InstallYarnSlimService,
 } from '../tools/node/npm';
 import { InstallNodeBaseService } from '../tools/node/utils';
+import {
+  InstallBundlerService,
+  InstallCocoapodsService,
+} from '../tools/ruby/gem';
+import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 
-export type InstallToolType = 'npm';
+export type InstallToolType = 'gem' | 'npm';
 
 function prepareContainer(): Container {
   logger.trace('preparing container');
@@ -33,6 +38,8 @@ function prepareContainer(): Container {
 
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBowerService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallBundlerService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
@@ -59,6 +66,27 @@ export function installTool(
   const container = prepareContainer();
   if (type) {
     switch (type) {
+      case 'gem': {
+        @injectable()
+        class InstallGenericDemService extends InstallRubyBaseService {
+          override readonly name: string = tool;
+
+          override needsPrepare(): boolean {
+            return false;
+          }
+
+          override async test(version: string): Promise<void> {
+            try {
+              // some npm packages may not have a `--version` flag
+              await super.test(version);
+            } catch (err) {
+              logger.debug(err);
+            }
+          }
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericDemService);
+        break;
+      }
       case 'npm': {
         @injectable()
         class InstallGenericNpmService extends InstallNodeBaseService {
