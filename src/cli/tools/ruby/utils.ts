@@ -1,6 +1,5 @@
 import { chmod, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { env as penv } from 'node:process';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
@@ -22,11 +21,9 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
 
-    if (!penv.RUBYGEMS_HOST) {
-      const registry = this.envSvc.replaceUrl(defaultRegistry);
-      if (registry !== defaultRegistry) {
-        env.RUBYGEMS_HOST = registry;
-      }
+    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    if (registry !== defaultRegistry) {
+      env.RUBYGEMS_HOST = registry;
     }
 
     const gem = await this.getRubyGem();

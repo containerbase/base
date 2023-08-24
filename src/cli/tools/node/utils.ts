@@ -134,11 +134,9 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       env.npm_config_cache = tmp;
     }
 
-    if (!penv.npm_config_registry && !penv.NPM_CONFIG_REGISTRY) {
-      const registry = this.envSvc.replaceUrl(defaultRegistry);
-      if (registry !== defaultRegistry) {
-        env.npm_config_registry = registry;
-      }
+    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    if (registry !== defaultRegistry) {
+      env.npm_config_registry = registry;
     }
 
     return env;
