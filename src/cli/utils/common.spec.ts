@@ -105,15 +105,30 @@ UBUNTU_CODENAME=jammy`);
     await expect(cleanTmpFiles(rootPath('tmp'), true)).resolves.toBeUndefined();
   });
 
-  test('isDockerBuild', async () => {
-    fsMocks.readFile.mockRestore();
-    fsMocks.readFile.mockResolvedValueOnce(
-      '1::cpuset:/docker/buildkit/be83f0ab1e216fcc746981346eff2df356b181a6c368c3a8803570d989b76107\n',
-    );
-    expect(await isDockerBuild()).toBe(true);
-    fsMocks.readFile.mockRejectedValueOnce(new Error());
-    expect(await isDockerBuild()).toBe(true);
-    reset();
-    expect(await isDockerBuild()).toBe(false);
+  describe('isDockerBuild', () => {
+    beforeEach(() => {
+      fsMocks.readFile.mockRestore();
+    });
+
+    test('cgroup v1', async () => {
+      fsMocks.readFile.mockResolvedValueOnce(
+        '2279 2272 8:64 /version-pack-data/community/docker/volumes/buildx_buildkit_renovatebot-builder0_state/_data/runc-overlayfs/executor/resolv.conf' +
+          '/etc/resolv.conf ro,nosuid,nodev,noexec,relatime master:346 - ext4 /dev/sde rw,discard,errors=remount-ro,data=ordered\n',
+      );
+      expect(await isDockerBuild()).toBe(true);
+      expect(await isDockerBuild()).toBe(true);
+    });
+
+    test('cgroup v2', async () => {
+      fsMocks.readFile.mockResolvedValueOnce(
+        '4854 4821 0:37 /docker-lib/buildkit/executor/resolv.conf /etc/resolv.conf ro,nosuid,nodev,noexec,relatime master:63 - btrfs /dev/sdb rw,compress=zlib:3,space_cache,subvolid=332,subvol=/docker-lib\n',
+      );
+      expect(await isDockerBuild()).toBe(true);
+    });
+
+    test('catches errors', async () => {
+      fsMocks.readFile.mockRejectedValueOnce(new Error());
+      expect(await isDockerBuild()).toBe(false);
+    });
   });
 });

@@ -105,13 +105,17 @@ export async function cleanTmpFiles(
   await deleteAsync(`${tmp}/**`, { dot: true, dryRun, force: true });
 }
 
+const buildKitMounts = [
+  '/volumes/buildx_buildkit_',
+  '/buildkit/executor/resolv.conf',
+];
+
 async function checkDocker(): Promise<boolean> {
   try {
-    const cgroup = await readFile('/proc/self/cgroup', { encoding: 'utf8' });
-    return (
-      cgroup.includes(':/actions_job/buildkit/') ||
-      cgroup.includes(':cpuset:/docker/buildkit/')
-    );
+    const mountInfo = await readFile('/proc/self/mountinfo', {
+      encoding: 'utf8',
+    });
+    return buildKitMounts.some((mount) => mountInfo.includes(mount));
   } catch (err) {
     logger.debug({ err }, 'failed to check docker build');
     return false;
