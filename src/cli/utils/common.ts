@@ -108,7 +108,10 @@ export async function cleanTmpFiles(
 async function checkDocker(): Promise<boolean> {
   try {
     const cgroup = await readFile('/proc/self/cgroup', { encoding: 'utf8' });
-    return cgroup.includes(':cpuset:/docker/buildkit/');
+    return (
+      cgroup.includes(':/actions_job/buildkit/') ||
+      cgroup.includes(':cpuset:/docker/buildkit/')
+    );
   } catch (err) {
     logger.debug({ err }, 'failed to check docker build');
     return false;

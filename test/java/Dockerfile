@@ -36,7 +36,7 @@ RUN set -ex; \
   find /tmp -type f; \
   exit 0
 
-ARG CONTAINERBASE_DEBUG=true
+ENV CONTAINERBASE_LOG_LEVEL=debug
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 11.0.20+8
