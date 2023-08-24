@@ -5,15 +5,15 @@ import { installTool } from '../install-tool';
 import { logger, validateVersion } from '../utils';
 import { getVersion } from './utils';
 
-export class InstallNpmEnvCommand extends Command {
-  static override paths = [['install', 'npm']];
+export class InstallGemEnvCommand extends Command {
+  static override paths = [['install', 'gem']];
 
   static override usage = Command.Usage({
-    description: 'Installs a npm package into the container.',
+    description: 'Installs a gem package into the container.',
     examples: [
       [
-        'Installs del-cli with version via environment variable',
-        'DEL_CLI_VERSION=5.0.0 $0 install npm del-cli',
+        'Installs rake with version via environment variable',
+        'RAKE_VERSION=13.0.6 $0 install gem rake',
       ],
     ],
   });
@@ -39,10 +39,10 @@ export class InstallNpmEnvCommand extends Command {
   }
 }
 
-export class InstallNpmCommand extends InstallNpmEnvCommand {
+export class InstallGemCommand extends InstallGemEnvCommand {
   static override usage = Command.Usage({
-    description: 'Installs a npm package into the container.',
-    examples: [['Installs del-cli 5.0.0', '$0 install npm del-cli 5.0.0']],
+    description: 'Installs a gem package into the container.',
+    examples: [['Installs rake 13.0.6', '$0 install gem rake 13.0.6']],
   });
 
   version = Option.String({
@@ -54,16 +54,16 @@ export class InstallNpmCommand extends InstallNpmEnvCommand {
     const start = Date.now();
     let error = false;
 
-    logger.info(`Installing npm package ${this.name} v${this.version}...`);
+    logger.info(`Installing gem package ${this.name} v${this.version}...`);
     try {
-      return await installTool(this.name, this.version, this.dryRun, 'npm');
+      return await installTool(this.name, this.version, this.dryRun, 'gem');
     } catch (err) {
       logger.fatal(err);
       error = true;
       return 1;
     } finally {
       logger.info(
-        `Installed npm package ${this.name} ${
+        `Installed gem package ${this.name} ${
           error ? 'with errors ' : ''
         }in ${prettyMilliseconds(Date.now() - start)}.`,
       );
@@ -71,25 +71,25 @@ export class InstallNpmCommand extends InstallNpmEnvCommand {
   }
 }
 
-export class InstallNpmShortEnvCommand extends InstallNpmEnvCommand {
+export class InstallGemShortEnvCommand extends InstallGemEnvCommand {
   static override paths = [Command.Default];
 
   static override usage = Command.Usage({
-    description: 'Installs a npm package into the container.',
+    description: 'Installs a gem package into the container.',
     examples: [
       [
-        'Installs del-cli with version via environment variable',
-        'DEL_CLI_VERSION=5.0.0 $0 del-cli',
+        'Installs rake with version via environment variable',
+        'RAKE_VERSION=13.0.6 $0 rake',
       ],
     ],
   });
 }
 
-export class InstallNpmShortCommand extends InstallNpmCommand {
+export class InstallGemShortCommand extends InstallGemCommand {
   static override paths = [Command.Default];
 
   static override usage = Command.Usage({
-    description: 'Installs a npm package into the container.',
-    examples: [['Installs del-cli v5.0.0', '$0 del-cli 5.0.0']],
+    description: 'Installs a gem package into the container.',
+    examples: [['Installs rake v13.0.6', '$0 rake 13.0.6']],
   });
 }

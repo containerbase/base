@@ -97,8 +97,11 @@ RUN install-tool bundler
 
 
 RUN set -ex; \
+  command -v bundler; \
+  bundler --version; \
   bundler --version | grep ${BUNDLER_VERSION}; \
   [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
+  [ "$(command -v bundle)" = "/usr/local/bin/bundle" ] && echo "works" || exit 1; \
   true
 
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
@@ -113,6 +116,7 @@ RUN install-tool bundler
 RUN set -ex; \
   bundler --version | grep ${BUNDLER_VERSION}; \
   [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
+  [ "$(command -v bundle)" = "/usr/local/bin/bundle" ] && echo "works" || exit 1; \
   true
 
 RUN bundler env
@@ -183,6 +187,19 @@ RUN set -ex; \
   pod install;
 
 #--------------------------------------
+# test: install-gem
+#--------------------------------------
+FROM build3 as test-gem
+
+USER 1000
+
+# renovate: datasource=rubygems versioning=ruby
+RUN install-gem rake 13.0.6
+
+RUN rake --help
+
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -194,3 +211,4 @@ COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 # COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
+COPY --from=test-gem /.dummy /.dummy

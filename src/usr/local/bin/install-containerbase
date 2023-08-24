@@ -88,6 +88,7 @@ function link_tool () {
     arch=arm64
   fi
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/containerbase-cli
+  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-gem
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-npm
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
   ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/prepare-tool
