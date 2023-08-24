@@ -137,11 +137,6 @@ jobs:
       # - name: test distro
       #   run: docker buildx bake
 
-      - name: docker-config
-        uses: containerbase/internal-tools@a2eb489b908609773490b08e7ff52bdeb196f5c6 # v1.21.14
-        with:
-          command: docker-config
-
       - name: test
         run: docker buildx bake build-test
         env:
