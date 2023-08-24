@@ -45,6 +45,7 @@ RUN set -ex; \
   ls -la /tmp; \
   find /tmp -type f; \
   cat /proc/self/cgroup; \
+  env; \
   exit 0
 
 
