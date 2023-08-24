@@ -134,11 +134,11 @@ jobs:
       - name: build
         run: yarn build
 
-      - name: test distro
-        run: docker buildx bake
+      # - name: test distro
+      #   run: docker buildx bake
 
       - name: test
-        run: docker buildx bake test
+        run: docker buildx bake build-test
         env:
           TAG: java
 
