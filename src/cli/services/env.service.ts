@@ -50,7 +50,7 @@ export class EnvService {
   }
 
   get isDocker(): boolean {
-    return !env.HOSTNAME || env.HOSTNAME === 'buildkitsandbox';
+    return env.HOSTNAME === 'buildkitsandbox';
   }
 
   get isRoot(): boolean {
