@@ -1532,7 +1532,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/core@npm:^4.0.0-rc.49":
+"@yarnpkg/core@npm:^4.0.0-rc.50":
   version: 4.0.0-rc.50
   resolution: "@yarnpkg/core@npm:4.0.0-rc.50"
   dependencies:
@@ -1566,7 +1566,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/fslib@npm:^3.0.0-rc.49, @yarnpkg/fslib@npm:^3.0.0-rc.50":
+"@yarnpkg/fslib@npm:^3.0.0-rc.50":
   version: 3.0.0-rc.50
   resolution: "@yarnpkg/fslib@npm:3.0.0-rc.50"
   dependencies:
@@ -1588,7 +1588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/parsers@npm:^3.0.0-rc.49, @yarnpkg/parsers@npm:^3.0.0-rc.50":
+"@yarnpkg/parsers@npm:^3.0.0-rc.50":
   version: 3.0.0-rc.50
   resolution: "@yarnpkg/parsers@npm:3.0.0-rc.50"
   dependencies:
@@ -1598,13 +1598,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/sdks@npm:3.0.0-rc.49":
-  version: 3.0.0-rc.49
-  resolution: "@yarnpkg/sdks@npm:3.0.0-rc.49"
+"@yarnpkg/sdks@npm:3.0.0-rc.50":
+  version: 3.0.0-rc.50
+  resolution: "@yarnpkg/sdks@npm:3.0.0-rc.50"
   dependencies:
-    "@yarnpkg/core": ^4.0.0-rc.49
-    "@yarnpkg/fslib": ^3.0.0-rc.49
-    "@yarnpkg/parsers": ^3.0.0-rc.49
+    "@yarnpkg/core": ^4.0.0-rc.50
+    "@yarnpkg/fslib": ^3.0.0-rc.50
+    "@yarnpkg/parsers": ^3.0.0-rc.50
     chalk: ^3.0.0
     clipanion: ^4.0.0-rc.2
     comment-json: ^2.2.0
@@ -1612,7 +1612,7 @@ __metadata:
     tslib: ^2.4.0
   bin:
     sdks: ./lib/cli.js
-  checksum: 0b4d2b807348df64ce51b4dec2efbe775b69b9b9114983a3a7fe52c5311e9af5eba91abb321b5cead749620da03dfd5a1433f41eb5089df1f9c622e0dc72a9c6
+  checksum: c6364f044ae8d628604c387cc49cc55ebf55f76cda5902cd9e1d1838551bb68b7a51fa6b23c1e3439be649812e6476573fbe97214ca5de3082d27915e7bbf053
   languageName: node
   linkType: hard
 
@@ -2639,7 +2639,7 @@ __metadata:
     "@typescript-eslint/parser": 6.4.0
     "@vitest/coverage-v8": 0.34.2
     "@vitest/ui": 0.34.2
-    "@yarnpkg/sdks": 3.0.0-rc.49
+    "@yarnpkg/sdks": 3.0.0-rc.50
     bats: 1.10.0
     bats-assert: 2.0.0
     bats-support: 0.3.0
