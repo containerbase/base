@@ -36,7 +36,6 @@ RUN set -ex; \
   find /tmp -type f; \
   exit 0
 
-ENV CONTAINERBASE_LOG_LEVEL=debug
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 11.0.20+8
@@ -44,8 +43,6 @@ RUN install-tool java 11.0.20+8
 RUN set -ex; \
   ls -la /tmp; \
   find /tmp -type f; \
-  cat /proc/self/cgroup; \
-  env; \
   exit 0
 
 
@@ -197,8 +194,8 @@ RUN set -ex; \
 FROM base
 
 COPY --from=testa /.dummy /.dummy
-# COPY --from=testb /.dummy /.dummy
-# COPY --from=testc /.dummy /.dummy
-# COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy

@@ -134,13 +134,8 @@ jobs:
       - name: build
         run: yarn build
 
-      # - name: test distro
-      #   run: docker buildx bake
-
-      - name: test
-        run: docker buildx bake build-test
-        env:
-          TAG: java
+      - name: test distro
+        run: docker buildx bake
 
   distro:
     runs-on: ubuntu-latest
