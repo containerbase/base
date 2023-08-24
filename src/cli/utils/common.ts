@@ -109,7 +109,8 @@ async function checkDocker(): Promise<boolean> {
   try {
     const cgroup = await readFile('/proc/self/cgroup', { encoding: 'utf8' });
     return cgroup.includes(':cpuset:/docker/buildkit/');
-  } catch {
+  } catch (err) {
+    logger.debug({ err }, 'failed to check docker build');
     return false;
   }
 }

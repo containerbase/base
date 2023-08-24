@@ -137,6 +137,11 @@ jobs:
       - name: test distro
         run: docker buildx bake
 
+      - name: test
+        run: docker buildx bake test
+        env:
+          TAG: java
+
   distro:
     runs-on: ubuntu-latest
     needs:
