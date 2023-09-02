@@ -38,7 +38,7 @@ RUN install-tool lerna 7.1.5
 FROM test-node as test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 8.6.12
+RUN install-tool pnpm 8.7.0
 
 #--------------------------------------
 # Image: yarn
