@@ -48,7 +48,7 @@ RUN install-tool flux v2.1.0
 RUN install-tool git-lfs v3.4.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.21.0
+RUN install-tool golang 1.21.1
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.12.3
