@@ -149,7 +149,7 @@ RUN set -ex; \
 RUN set -ex; cd test/a; npm i
 
 # renovate: datasource=npm
-RUN install-npm del-cli 5.0.1
+RUN install-npm del-cli 5.1.0
 RUN del -d test/a/**
 
 #--------------------------------------
