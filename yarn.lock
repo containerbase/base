@@ -151,13 +151,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild-kit/core-utils@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "@esbuild-kit/core-utils@npm:3.1.0"
+"@esbuild-kit/core-utils@npm:^3.0.0, @esbuild-kit/core-utils@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@esbuild-kit/core-utils@npm:3.2.2"
   dependencies:
-    esbuild: ~0.17.6
+    esbuild: ~0.18.20
     source-map-support: ^0.5.21
-  checksum: d54fd5adb3ce6784d84bb025ad54ddcfbab99267071a7f65298e547f56696f0b9d0dba96c535f9678a30d4887ec71cd445fdd277d65fbec1f3b504f6808f693e
+  checksum: c2822ff9953475ab55f4c0b2e84721c4ddfe835c5cd9f58adf74bfc2d3f71ea8414b661ddd590815d284330a436e966586916a0e41501e730d11877e5c07d2c8
   languageName: node
   linkType: hard
 
@@ -2677,7 +2677,7 @@ __metadata:
     semver: 7.5.4
     shelljs: 0.8.5
     tar: 6.1.15
-    tsx: 3.12.7
+    tsx: 3.12.8
     typanion: 3.14.0
     type-fest: 4.3.1
     typescript: 5.2.2
@@ -8809,12 +8809,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:3.12.7":
-  version: 3.12.7
-  resolution: "tsx@npm:3.12.7"
+"tsx@npm:3.12.8":
+  version: 3.12.8
+  resolution: "tsx@npm:3.12.8"
   dependencies:
     "@esbuild-kit/cjs-loader": ^2.4.2
-    "@esbuild-kit/core-utils": ^3.0.0
+    "@esbuild-kit/core-utils": ^3.2.2
     "@esbuild-kit/esm-loader": ^2.5.5
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -8822,7 +8822,7 @@ __metadata:
       optional: true
   bin:
     tsx: dist/cli.js
-  checksum: ddec149ad263e5c75fc8fde5c6ba7ec2ee390934c0a2e2c23897bacab83bc8c665955a23b608a19c42f49c14a7362cf74ad793b52cc94eda684be5c2c13fdb4d
+  checksum: b27575672693e648106c0230587b5d4d901f0c714517b173e6b220d9907971f465c46cccfbf59ef68dcc0cdf7b30867b0d08aa1995d28b9ed0a580afe0e22cec
   languageName: node
   linkType: hard
 
