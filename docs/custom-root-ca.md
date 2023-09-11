@@ -4,6 +4,12 @@ Most tools support two ways to extend the default Root CA certificates list.
 
 If you are using a custom base image, checkout [Custom base image](./custom-base-image.md) docs.
 
+## Notes
+
+1. `Bun` doesn't support custom root ca certificates[^1].
+
+[^1]: <https://github.com/oven-sh/bun/issues/271>
+
 ## Buildtime install
 
 This is the easiest method.

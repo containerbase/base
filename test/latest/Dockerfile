@@ -48,9 +48,6 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as testa
 
-# renovate: datasource=npm
-RUN install-tool bun v1.0.0
-
 # renovate: datasource=node
 RUN install-tool node v18.17.1
 
@@ -78,7 +75,6 @@ RUN set -ex; \
   nginx; \
   su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://localhost' ${USER_NAME}; \
   su -c 'SSL_CERT_FILE=/test/ca.pem curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}; \
-  su -c 'SSL_CERT_FILE=/test/ca.pem bun run request.mjs' ${USER_NAME}; \
   su -c 'SSL_CERT_FILE=/test/ca.pem node request.mjs' ${USER_NAME}; \
   su -c 'NODE_EXTRA_CA_CERTS=/test/ca.pem node request.mjs' ${USER_NAME}; \
   su -c 'SSL_CERT_FILE=/test/ca.pem php request.php' ${USER_NAME}; \
@@ -97,7 +93,6 @@ RUN  set -ex \
 RUN set -ex; \
   nginx; \
   su -c 'curl -svo /dev/null https://buildkitsandbox' ${USER_NAME}; \
-  su -c 'bun run request.mjs' ${USER_NAME}; \
   su -c 'node request.mjs' ${USER_NAME}; \
   su -c 'npm_config_registry=https://localhost npm ping' ${USER_NAME}; \
   su -c 'php request.php' ${USER_NAME}; \
@@ -187,9 +182,12 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: vendir, helmfile, kustomize
+# test: bun, vendir, helmfile, kustomize
 #--------------------------------------
 FROM base as teste
+
+# renovate: datasource=npm
+RUN install-tool bun v1.0.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
