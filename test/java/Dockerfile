@@ -174,7 +174,7 @@ WORKDIR /
 
 # not required / used for sbt
 # renovate: datasource=github-releases packageName=scala/scala
-RUN install-tool scala v2.13.11
+RUN install-tool scala v2.13.12
 
 # renovate: datasource=github-releases packageName=sbt/sbt
 RUN install-tool sbt v1.9.4
