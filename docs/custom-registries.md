@@ -25,6 +25,20 @@ RUN install-tool docker v24.0.2
 RUN install-tool dart 2.18.0
 ```
 
+## bun
+
+Bun releases are downloaded from:
+
+- `https://github.com/oven-sh/bun/releases/download`
+
+Samples:
+
+```txt
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-x64.zip
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-aarch64.zip
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/SHASUMS256.txt
+```
+
 ## dart
 
 Dart releases are downloaded from:
@@ -39,7 +53,6 @@ https://storage.googleapis.com/dart-archive/channels/stable/release/2.18.0/sdk/d
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-x64-release.zip.sha256sum
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
-
 ```
 
 ## docker
@@ -53,7 +66,6 @@ Samples:
 ```txt
 https://download.docker.com/linux/static/stable/x86_64/docker-20.10.7.tgz
 https://download.docker.com/linux/static/stable/aarch64/docker-24.0.5.tgz
-
 ```
 
 ## dotnet

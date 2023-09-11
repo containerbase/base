@@ -182,9 +182,12 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: vendir, helmfile, kustomize
+# test: bun, vendir, helmfile, kustomize
 #--------------------------------------
 FROM base as teste
+
+# renovate: datasource=npm
+RUN install-tool bun v1.0.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2

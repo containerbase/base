@@ -1,5 +1,6 @@
 import { Container, injectable } from 'inversify';
 import { rootContainer } from '../services';
+import { InstallBunService } from '../tools/bun';
 import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
 import { InstallDotnetService } from '../tools/dotnet';
@@ -38,6 +39,7 @@ function prepareContainer(): Container {
 
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBowerService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBundlerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);

@@ -17,6 +17,14 @@ COPY src/ /
 RUN install-containerbase
 
 #--------------------------------------
+# Image: bun
+#--------------------------------------
+FROM base as test-bun
+
+# renovate: datasource=npm
+RUN install-tool bun v1.0.0
+
+#--------------------------------------
 # Image: docker
 #--------------------------------------
 FROM base as test-docker
@@ -77,6 +85,7 @@ RUN install-tool vendir v0.34.4
 #--------------------------------------
 FROM base
 
+COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
 COPY --from=test-git-lfs /.dummy /.dummy
