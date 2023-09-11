@@ -68,7 +68,7 @@ export function installTool(
     switch (type) {
       case 'gem': {
         @injectable()
-        class InstallGenericDemService extends InstallRubyBaseService {
+        class InstallGenericGemService extends InstallRubyBaseService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -84,7 +84,7 @@ export function installTool(
             }
           }
         }
-        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericDemService);
+        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericGemService);
         break;
       }
       case 'npm': {
