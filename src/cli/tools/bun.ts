@@ -34,7 +34,7 @@ export class InstallBunService extends InstallToolBaseService {
 
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/oven-sh/bun/releases/download/bun-v${version}/`;
-    const filename = `linux_${this.ghArch}.zip`;
+    const filename = `bun-linux_${this.ghArch}.zip`;
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}SHASUMS256.txt`,
