@@ -2864,7 +2864,7 @@ __metadata:
     semantic-release: 21.1.1
     semver: 7.5.4
     shelljs: 0.8.5
-    tar: 6.1.15
+    tar: 6.2.0
     tsx: 3.12.8
     typanion: 3.14.0
     type-fest: 4.3.1
@@ -8882,21 +8882,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:6.1.15":
-  version: 6.1.15
-  resolution: "tar@npm:6.1.15"
-  dependencies:
-    chownr: ^2.0.0
-    fs-minipass: ^2.0.0
-    minipass: ^5.0.0
-    minizlib: ^2.1.1
-    mkdirp: ^1.0.3
-    yallist: ^4.0.0
-  checksum: f23832fceeba7578bf31907aac744ae21e74a66f4a17a9e94507acf460e48f6db598c7023882db33bab75b80e027c21f276d405e4a0322d58f51c7088d428268
-  languageName: node
-  linkType: hard
-
-"tar@npm:^6.0.5, tar@npm:^6.1.11, tar@npm:^6.1.13, tar@npm:^6.1.15, tar@npm:^6.1.2":
+"tar@npm:6.2.0, tar@npm:^6.0.5, tar@npm:^6.1.11, tar@npm:^6.1.13, tar@npm:^6.1.15, tar@npm:^6.1.2":
   version: 6.2.0
   resolution: "tar@npm:6.2.0"
   dependencies:
