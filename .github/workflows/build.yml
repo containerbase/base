@@ -211,7 +211,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@06e391ca36b64a991b32b8b5534db7be3fe1d2b2 # v1.21.22
+        uses: containerbase/internal-tools@30fa0d52210d8df5817b58ba6003f5a58a22364b # v1.21.23
         with:
           command: docker-config
 
