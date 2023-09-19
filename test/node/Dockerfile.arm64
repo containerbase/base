@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-node
 
 # renovate: datasource=node
-RUN install-tool node v18.17.1
+RUN install-tool node v18.18.0
 
 #--------------------------------------
 # Image: lerna
