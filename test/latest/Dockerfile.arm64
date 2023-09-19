@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun v1.0.0
+RUN install-tool bun 1.0.1
 
 #--------------------------------------
 # Image: docker
