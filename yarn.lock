@@ -161,7 +161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild-kit/esm-loader@npm:^2.6.1":
+"@esbuild-kit/esm-loader@npm:^2.6.3":
   version: 2.6.5
   resolution: "@esbuild-kit/esm-loader@npm:2.6.5"
   dependencies:
@@ -2891,7 +2891,7 @@ __metadata:
     semver: 7.5.4
     shelljs: 0.8.5
     tar: 6.2.0
-    tsx: 3.12.9
+    tsx: 3.12.10
     typanion: 3.14.0
     type-fest: 4.3.1
     typescript: 5.2.2
@@ -9157,20 +9157,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:3.12.9":
-  version: 3.12.9
-  resolution: "tsx@npm:3.12.9"
+"tsx@npm:3.12.10":
+  version: 3.12.10
+  resolution: "tsx@npm:3.12.10"
   dependencies:
     "@esbuild-kit/cjs-loader": ^2.4.2
     "@esbuild-kit/core-utils": ^3.3.0
-    "@esbuild-kit/esm-loader": ^2.6.1
+    "@esbuild-kit/esm-loader": ^2.6.3
     fsevents: ~2.3.2
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     tsx: dist/cli.js
-  checksum: cf9044300b15205a1e10879a5cc3a7ce9e666d2f4a23f58af270e315cba3566af4e22847ab7b82e6229b16d0bb70a477a5d812d81c3e24f45c14001cf25c1cc3
+  checksum: 84fbbdbb90a05ecc764aee92fbe234b45939ccba34a08298fcec2bb9cb2ecb7676b21e676dd12681279490a7ac55bb81897ce503775cbcce0f76703eb282bb37
   languageName: node
   linkType: hard
 
