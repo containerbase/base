@@ -72,7 +72,7 @@ RUN install-tool powershell v7.3.7
 RUN install-tool rust 1.72.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.8.1
+RUN install-tool swift 5.9.0
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.5.7
