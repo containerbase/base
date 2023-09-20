@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
-    "@tsconfig/node18": "18.2.1",
+    "@tsconfig/node18": "18.2.2",
     "@tsconfig/strictest": "2.0.2",
     "@types/global-agent": "2.1.1",
     "@types/node": "18.17.12",
