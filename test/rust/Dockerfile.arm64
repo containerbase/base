@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-rust
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.72.0
+RUN install-tool rust 1.72.1
 
 #--------------------------------------
 # Image: final
