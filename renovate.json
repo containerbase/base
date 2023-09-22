@@ -49,6 +49,30 @@
       "automerge": false
     },
     {
+      "description": "Don't separate minor and patch updates in tests",
+      "matchPaths": ["test/**"],
+      "matchPackageNames": [
+        "bundler",
+        "docker",
+        "dotnet",
+        "git",
+        "kustomize",
+        "helm",
+        "helmfile",
+        "lerna",
+        "npm",
+        "pdm",
+        "pipenv",
+        "poetry",
+        "pnpm",
+        "renovate",
+        "rust",
+        "swift",
+        "vendir"
+      ],
+      "separateMinorPatch": false
+    },
+    {
       "description": "Automerge test selected minor updates in tests",
       "matchPaths": ["test/**"],
       "matchPackageNames": [
