@@ -65,11 +65,14 @@
         "pipenv",
         "poetry",
         "pnpm",
+        "renovate",
         "rust",
-        "swift"
+        "swift",
+        "vendir"
       ],
       "matchUpdateTypes": ["minor"],
-      "automerge": true
+      "automerge": true,
+      "separateMinorPatch": false
     },
     {
       "description": "Trigger fix release for git updates",
@@ -108,11 +111,10 @@
       "additionalBranchPrefix": "test-major-"
     },
     {
-      "description": "Update renovate only weekly",
-      "matchPackageNames": ["renovate"],
+      "description": "Update some deps only weekly",
+      "matchPackageNames": ["checkov", "renovate"],
       "extends": ["schedule:weekly"],
-      "automerge": true,
-      "separateMinorPatch": false
+      "automerge": true
     }
   ]
 }
