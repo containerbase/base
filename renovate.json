@@ -70,9 +70,8 @@
         "swift",
         "vendir"
       ],
-      "matchUpdateTypes": ["minor"],
-      "automerge": true,
-      "separateMinorPatch": false
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
     },
     {
       "description": "Trigger fix release for git updates",
