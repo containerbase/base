@@ -205,7 +205,7 @@ FROM build as test-pdm
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.9.2
+RUN install-tool pdm 2.9.3
 
 #--------------------------------------
 # test c: python2.7

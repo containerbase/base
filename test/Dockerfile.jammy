@@ -141,7 +141,7 @@ RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.6.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.9.2
+RUN install-tool pdm 2.9.3
 
 #--------------------------------------
 # Image: test-ruby
