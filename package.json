@@ -36,7 +36,7 @@
     "@sindresorhus/is": "6.0.0",
     "clipanion": "3.2.1",
     "del": "7.1.0",
-    "execa": "7.2.0",
+    "execa": "8.0.1",
     "global-agent": "3.0.0",
     "got": "13.0.0",
     "inversify": "6.0.1",
