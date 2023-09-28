@@ -2851,7 +2851,7 @@ __metadata:
     bats-assert: 2.0.0
     bats-support: 0.3.0
     clipanion: 3.2.1
-    conventional-changelog-conventionalcommits: 6.1.0
+    conventional-changelog-conventionalcommits: 7.0.2
     del: 7.1.0
     esbuild: 0.19.3
     esbuild-plugin-pino: 2.0.1
@@ -2911,12 +2911,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"conventional-changelog-conventionalcommits@npm:6.1.0":
-  version: 6.1.0
-  resolution: "conventional-changelog-conventionalcommits@npm:6.1.0"
+"conventional-changelog-conventionalcommits@npm:7.0.2":
+  version: 7.0.2
+  resolution: "conventional-changelog-conventionalcommits@npm:7.0.2"
   dependencies:
     compare-func: ^2.0.0
-  checksum: 4383a35cdf72f5964e194a1146e7f78276e301f73bd993b71627bb93586b6470d411b9613507ceb37e0fed0b023199c95e941541fa47172b4e6a7916fc3a53ff
+  checksum: e17ac5970ae09d6e9b0c3a7edaed075b836c0c09c34c514589cbe06554f46ed525067fa8150a8467cc03b1cf9af2073e7ecf48790d4f5ea399921b1cbe313711
   languageName: node
   linkType: hard
 
