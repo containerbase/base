@@ -187,7 +187,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base as teste
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.2
+RUN install-tool bun 1.0.3
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
