@@ -1193,14 +1193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:7.5.2":
-  version: 7.5.2
-  resolution: "@types/semver@npm:7.5.2"
-  checksum: 743aa8a2b58e20b329c19bd2459152cb049d12fafab7279b90ac11e0f268c97efbcb606ea0c681cca03f79015381b40d9b1244349b354270bec3f939ed49f6e9
-  languageName: node
-  linkType: hard
-
-"@types/semver@npm:^7.1.0, @types/semver@npm:^7.3.12, @types/semver@npm:^7.5.0":
+"@types/semver@npm:7.5.3, @types/semver@npm:^7.1.0, @types/semver@npm:^7.3.12, @types/semver@npm:^7.5.0":
   version: 7.5.3
   resolution: "@types/semver@npm:7.5.3"
   checksum: 349fdd1ab6c213bac5c991bac766bd07b8b12e63762462bb058740dcd2eb09c8193d068bb226f134661275f2022976214c0e727a4e5eb83ec1b131127c980d3e
@@ -2652,7 +2645,7 @@ __metadata:
     "@tsconfig/strictest": 2.0.2
     "@types/global-agent": 2.1.1
     "@types/node": 18.18.1
-    "@types/semver": 7.5.2
+    "@types/semver": 7.5.3
     "@types/shelljs": 0.8.12
     "@types/tar": 6.1.6
     "@typescript-eslint/eslint-plugin": 6.7.3
