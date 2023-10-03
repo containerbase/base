@@ -133,7 +133,7 @@ RUN install-tool composer 2.6.4
 FROM build as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.5
+RUN install-tool python 3.11.6
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.9.8
 # renovate: datasource=pypi
