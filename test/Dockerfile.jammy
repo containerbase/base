@@ -135,7 +135,7 @@ FROM build as test-python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.11.6
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.9.8
+RUN install-tool pipenv 2023.10.3
 # renovate: datasource=pypi
 RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
