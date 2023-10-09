@@ -2679,7 +2679,7 @@ __metadata:
     lint-staged: 14.0.1
     nock: 13.3.3
     npm-run-all: 4.1.5
-    pino: 8.15.3
+    pino: 8.16.0
     pino-pretty: 10.2.0
     pkg: 5.8.1
     prettier: 2.8.8
@@ -6969,9 +6969,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:8.15.3":
-  version: 8.15.3
-  resolution: "pino@npm:8.15.3"
+"pino@npm:8.16.0":
+  version: 8.16.0
+  resolution: "pino@npm:8.16.0"
   dependencies:
     atomic-sleep: ^1.0.0
     fast-redact: ^3.1.1
@@ -6982,11 +6982,11 @@ __metadata:
     quick-format-unescaped: ^4.0.3
     real-require: ^0.2.0
     safe-stable-stringify: ^2.3.1
-    sonic-boom: ^3.1.0
+    sonic-boom: ^3.7.0
     thread-stream: ^2.0.0
   bin:
     pino: bin.js
-  checksum: 69a76be26842f4e97d8553f1f907950ffcc32f353e25888399d58d1515037d8ecf284f8d1895358d662925cc5f2afb88aefee5c08f7ff711eca6b914f5074c9c
+  checksum: c3af0d1d80d0a7ec59530e6c3668895ac813762829ea0b7e316057370f58011d09e128e67289665652904367a1f27f87cca4e564eb3ff2a0d46219f12fcf896e
   languageName: node
   linkType: hard
 
@@ -8014,12 +8014,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sonic-boom@npm:^3.0.0, sonic-boom@npm:^3.1.0":
-  version: 3.4.0
-  resolution: "sonic-boom@npm:3.4.0"
+"sonic-boom@npm:^3.0.0, sonic-boom@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "sonic-boom@npm:3.7.0"
   dependencies:
     atomic-sleep: ^1.0.0
-  checksum: 5ebbff96bd7c434b58a80c2ce2f57dfa24b397fdceeffc516b6fddc437b6887a0d2e14de172c601c8ee690d5de97b7a5e574b9d5c60582850a5590b280b473ab
+  checksum: 528f0f7f7e09dcdb02ad5985039f66554266cbd8813f9920781607c9248e01f468598c1334eab2cc740c016a63c8b2a20e15c3f618cddb08ea1cfb4a390a796e
   languageName: node
   linkType: hard
 
