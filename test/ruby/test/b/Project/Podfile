@@ -1,4 +1,4 @@
-plugin 'cocoapods-acknowledgements'
+#plugin 'cocoapods-acknowledgements'
 
 target "Demo Project" do
 	pod "CPDAcknowledgements", :path => "../CPDAcknowledgements.podspec"

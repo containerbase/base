@@ -58,6 +58,8 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
       ],
       { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
     );
+
+    await this._postInstall(gem, version, prefix, env);
   }
 
   override async isInstalled(version: string): Promise<boolean> {
@@ -104,6 +106,13 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
 
     return (await this.versionSvc.find('ruby')) !== null;
   }
+
+  protected _postInstall(
+    _gem: string,
+    _version: string,
+    _prefix: string,
+    _env: NodeJS.ProcessEnv,
+  ): Promise<void> | void {}
 
   private async getRubyGem(): Promise<string> {
     const rubyVersion = await this.getRubyVersion();

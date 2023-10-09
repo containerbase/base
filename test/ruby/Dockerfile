@@ -146,7 +146,7 @@ ENV BUNDLER_VERSION=2.4.20
 RUN install-tool bundler
 
 #--------------------------------------
-# test: cocoapods
+# test: cocoapods (gem install)
 #--------------------------------------
 FROM build as test-cocoapods-a
 
@@ -158,16 +158,22 @@ RUN gem install cocoapods -v 1.9.1
 
 RUN set -ex; \
   cd b/Project; \
-  gem install cocoapods-acknowledgements; \
   pod install;
 
 #--------------------------------------
-# test: unused
+# test: cocoapods v1.11.3 (install-tool)
 #--------------------------------------
 FROM build3 as test-cocoapods-b
 
-# unused
+USER 1000
 
+RUN install-tool cocoapods 1.11.3
+
+RUN pod env
+
+RUN set -ex; \
+  cd b/Project; \
+  pod install;
 
 #--------------------------------------
 # test: cocoapods (install-tool)
@@ -183,7 +189,6 @@ RUN pod env
 
 RUN set -ex; \
   cd b/Project; \
-  gem install cocoapods-acknowledgements; \
   pod install;
 
 #--------------------------------------
@@ -209,6 +214,6 @@ COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
-# COPY --from=test-cocoapods-b /.dummy /.dummy
+COPY --from=test-cocoapods-b /.dummy /.dummy
 COPY --from=test-cocoapods-c /.dummy /.dummy
 COPY --from=test-gem /.dummy /.dummy
