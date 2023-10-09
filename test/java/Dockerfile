@@ -90,7 +90,7 @@ FROM base as testb
 RUN install-tool java-jre 18.0.2+9
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.3
+RUN install-tool gradle 8.4
 
 USER 1000
 

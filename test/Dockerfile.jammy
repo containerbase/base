@@ -101,7 +101,7 @@ FROM build as test-java
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 17.0.8+101
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.3
+RUN install-tool gradle 8.4
 
 #--------------------------------------
 # Image: test-node
