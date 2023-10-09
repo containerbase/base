@@ -1170,10 +1170,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.18.3":
-  version: 18.18.3
-  resolution: "@types/node@npm:18.18.3"
-  checksum: ed97a832179e0cfbb93738021fe16d0bc5c0f34bea35269c23c9dd5f0ecc8be93dbe5efd51630189a099b31786a47c1bde115508831a7245613a55c3ad1a7d6b
+"@types/node@npm:18.18.4":
+  version: 18.18.4
+  resolution: "@types/node@npm:18.18.4"
+  checksum: 4901e91c4cc479bb58acbcd79236a97a0ad6db4a53cb1f4ba4cf32af15324c61b16faa6e31c1b09bf538a20feb5f5274239157ce5237f5741db0b9ab71e69c52
   languageName: node
   linkType: hard
 
@@ -2644,7 +2644,7 @@ __metadata:
     "@tsconfig/node18": 18.2.2
     "@tsconfig/strictest": 2.0.2
     "@types/global-agent": 2.1.1
-    "@types/node": 18.18.3
+    "@types/node": 18.18.4
     "@types/semver": 7.5.3
     "@types/shelljs": 0.8.13
     "@types/tar": 6.1.6
