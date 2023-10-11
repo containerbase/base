@@ -123,7 +123,7 @@ RUN install-tool lerna 7.3.0
 FROM build as test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.10
+RUN install-tool php 8.2.11
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.6.5
 
