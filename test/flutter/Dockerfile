@@ -75,7 +75,7 @@ FROM build as testc
 USER 1000
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 2.2.2
+RUN install-tool flutter 2.2.3
 
 RUN set -ex; \
     cd c; \
