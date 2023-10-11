@@ -21,7 +21,7 @@ ENV URL_REPLACE_0_TO=https://artifactory.proxy.test/virtual/docker-com/
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v24.0.2
 
-# renovate datasource=docker
+# renovate: datasource=docker
 RUN install-tool dart 2.18.0
 ```
 

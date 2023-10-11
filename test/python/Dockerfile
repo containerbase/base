@@ -18,6 +18,16 @@ RUN install-containerbase
 COPY --chown=1000:0 test/python/test test
 WORKDIR /test
 
+# RUN install-tool python 3.11.4
+# RUN install-tool checkov 2.4.7
+
+# RUN set -ex; \
+#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/bin; \
+#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info; \
+#   # cat /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info/RECORD; \
+#   cat /opt/containerbase/tools/checkov/2.4.7/3.11/bin/unidiff; \
+#   false
+
 #--------------------------------------
 # build
 #--------------------------------------

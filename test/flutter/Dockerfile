@@ -34,7 +34,7 @@ RUN prepare-tool flutter
 #--------------------------------------
 FROM build as testa
 
-# renovate datasource=flutter-version
+# renovate: datasource=flutter-version
 RUN install-tool flutter 1.22.6
 
 USER 1000
@@ -55,7 +55,7 @@ FROM build as testb
 
 USER 1000
 
-# renovate datasource=flutter-version
+# renovate: datasource=flutter-version
 RUN install-tool flutter 1.22.6
 
 RUN set -ex; \
@@ -74,7 +74,7 @@ FROM build as testc
 
 USER 1000
 
-# renovate datasource=flutter-version
+# renovate: datasource=flutter-version
 RUN install-tool flutter 2.2.2
 
 RUN set -ex; \
@@ -88,7 +88,7 @@ FROM build as testd
 
 USER 1000
 
-# renovate datasource=flutter-version
+# renovate: datasource=flutter-version
 RUN install-tool flutter 3.0.2
 
 RUN set -ex; \
@@ -105,7 +105,7 @@ RUN chown -R 1001 .
 
 USER 1001
 
-# renovate datasource=flutter-version
+# renovate: datasource=flutter-version
 RUN install-tool flutter 3.0.2
 
 RUN set -ex; \

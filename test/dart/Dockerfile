@@ -35,7 +35,7 @@ USER 1000
 
 RUN install-tool dart 2.0.0
 
-# renovate datasource=docker
+# renovate: datasource=docker
 RUN install-tool dart 2.18.0
 
 
@@ -49,7 +49,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM base as testb
 
-# renovate datasource=docker
+# renovate: datasource=docker
 RUN install-tool dart 2.18.0
 
 # fix test file perms for openstack
