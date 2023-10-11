@@ -44,10 +44,9 @@ function get_java_install_url () {
   local arch
   local json
   local base_url=https://api.adoptium.net/v3/assets/version
-  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk'
+  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&semver=true'
   local version=${1}
   local type=${2:-jre}
-  local patched_version
 
   if [ -z "${version}" ]; then
     echo "Missing Java version"
@@ -56,14 +55,10 @@ function get_java_install_url () {
 
   # https://github.com/adoptium/api.adoptium.net/issues/468
   arch=$(uname -m)
-  # https://github.com/adoptium/api.adoptium.net/issues/492
-  patched_version=$(patch_java_version "$version")
 
-  if ! json=$(curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}/${version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1) && [ "$patched_version" != "$version" ]; then
-    if ! json=$(curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}/${patched_version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1); then
-      echo "Invalid java version: $version" >&2
-      exit 1
-    fi
+  if ! json=$(curl --retry 3 -sSLf -H 'accept: application/json' "${base_url}/${version}?architecture=${arch}&image_type=${type}&${api_args}" 2>&1); then
+    echo "Invalid java version: $version" >&2
+    exit 1
   fi
 
   echo "${json}" | jq --raw-output '.[0].binaries[0].package.link'
@@ -137,7 +132,7 @@ function get_latest_java_version () {
   local arch
   local version
   local base_url=https://api.adoptium.net/v3/info/release_versions
-  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&release_type=ga&lts=true'
+  local api_args='heap_size=normal&os=linux&page=0&page_size=1&project=jdk&release_type=ga&lts=true&semver=true'
   local type=${1:-jre}
 
   # https://github.com/adoptium/api.adoptium.net/issues/468
