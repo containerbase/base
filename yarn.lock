@@ -2722,7 +2722,7 @@ __metadata:
     conventional-changelog-conventionalcommits: 7.0.2
     del: 7.1.0
     esbuild: 0.19.4
-    esbuild-plugin-pino: 2.0.1
+    esbuild-plugin-pino: 2.0.2
     eslint: 8.50.0
     eslint-config-prettier: 9.0.0
     eslint-formatter-gha: 1.4.2
@@ -3280,12 +3280,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-pino@npm:2.0.1":
-  version: 2.0.1
-  resolution: "esbuild-plugin-pino@npm:2.0.1"
+"esbuild-plugin-pino@npm:2.0.2":
+  version: 2.0.2
+  resolution: "esbuild-plugin-pino@npm:2.0.2"
   peerDependencies:
     esbuild: ^0.17.1 || ^0.18.0 || ^0.19.0
-  checksum: 2e11d3ef7d5b9881f400498abc117d505075cc363e92426b03778d246f89c22d28702b991651ac4c70b66307cc7612233c84ef117c1893782afe60620bc76294
+  checksum: 727f17a7d3a7ead3fea0ee9e8c55133b8c019711f7199b2a1e73e868ffa7a2f94b4c7e9156530a621df7997c044261ae348c9fb34dc5bf8de107800aca719d8a
   languageName: node
   linkType: hard
 
