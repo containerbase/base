@@ -54,12 +54,13 @@ export class InstallNodeService extends InstallNodeBaseService {
     const arch = this.arch;
     const name = this.name;
     const versionCode = distro.versionCode;
-    let filename = ` ${version}/${name}-${version}-${versionCode}-${this.ghArch}.tar.xz`;
+    let filename = `${version}/${name}-${version}-${this.ghArch}.tar.xz`;
     let checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    const isOnGithub = await this.http.exists(checksumFileUrl);
+    let isOnGithub = await this.http.exists(checksumFileUrl);
     let file: string;
 
     if (isOnGithub) {
+      // no distro specific prebuilds
       const checksumFile = await this.http.download({ url: checksumFileUrl });
       const expectedChecksum = (
         await fs.readFile(checksumFile, 'utf-8')
@@ -70,18 +71,35 @@ export class InstallNodeService extends InstallNodeBaseService {
         expectedChecksum,
       });
     } else {
-      checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
-      filename = `${name}-v${version}-linux-${arch}.tar.xz`;
-      const checksumFile = await this.http.download({ url: checksumFileUrl });
-      const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-        .split('\n')
-        .find((l) => l.includes(filename))
-        ?.split(' ')[0];
-      file = await this.http.download({
-        url: `https://nodejs.org/dist/v${version}/${filename}`,
-        checksumType: 'sha256',
-        expectedChecksum,
-      });
+      // distro specific prebuilds
+      filename = ` ${version}/${name}-${version}-${versionCode}-${this.ghArch}.tar.xz`;
+      checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
+      isOnGithub = await this.http.exists(checksumFileUrl);
+      if (isOnGithub) {
+        const checksumFile = await this.http.download({ url: checksumFileUrl });
+        const expectedChecksum = (
+          await fs.readFile(checksumFile, 'utf-8')
+        ).trim();
+        file = await this.http.download({
+          url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
+          checksumType: 'sha512',
+          expectedChecksum,
+        });
+      } else {
+        // fallback to nodejs.org
+        checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
+        filename = `${name}-v${version}-linux-${arch}.tar.xz`;
+        const checksumFile = await this.http.download({ url: checksumFileUrl });
+        const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
+          .split('\n')
+          .find((l) => l.includes(filename))
+          ?.split(' ')[0];
+        file = await this.http.download({
+          url: `https://nodejs.org/dist/v${version}/${filename}`,
+          checksumType: 'sha256',
+          expectedChecksum,
+        });
+      }
     }
 
     // TODO: create recursive
