@@ -122,6 +122,13 @@
       "semanticCommitType": "build"
     },
     {
+      "description": "Use `chore` semantic commit scope for Actions updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "semanticCommitType": "chore"
+    },
+    {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/**"],
       "additionalBranchPrefix": "test-",
