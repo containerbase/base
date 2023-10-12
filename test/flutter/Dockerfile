@@ -35,7 +35,7 @@ RUN prepare-tool flutter
 FROM build as testa
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 1.22.6
+RUN install-tool flutter 3.13.7
 
 USER 1000
 
@@ -56,7 +56,7 @@ FROM build as testb
 USER 1000
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 1.22.6
+RUN install-tool flutter 3.13.7
 
 RUN set -ex; \
     ls -la /opt/containerbase/tools/flutter/1.22.6; \
@@ -75,7 +75,7 @@ FROM build as testc
 USER 1000
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 2.10.5
+RUN install-tool flutter 3.13.7
 
 RUN set -ex; \
     cd c; \
