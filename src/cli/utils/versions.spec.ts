@@ -9,7 +9,7 @@ describe('versions', () => {
 
   test('parse', () => {
     expect(parse('1.0.0')).not.toBeNull();
-    expect(parse('abc')).toBeNull();
+    expect(() => parse('abc')).toThrow('Invalid version: abc');
   });
 
   test('validateSemver', () => {

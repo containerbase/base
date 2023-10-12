@@ -60,7 +60,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
 
-    const ver = parse(version)!;
+    const ver = parse(version);
 
     if (this.name === 'npm' && ver.major < 7) {
       // update to latest node-gyp to fully support python3

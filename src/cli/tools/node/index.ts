@@ -127,7 +127,7 @@ export class InstallNodeService extends InstallNodeBaseService {
       });
     }
 
-    const ver = parse(version)!;
+    const ver = parse(version);
     if (ver.major < 15) {
       const tmp = await fs.mkdtemp(
         join(this.pathSvc.tmpDir, 'containerbase-npm-'),

@@ -19,7 +19,7 @@ export type HttpChecksumType =
 export interface HttpDownloadConfig {
   url: string;
   expectedChecksum?: string | undefined;
-  checksumType?: HttpChecksumType;
+  checksumType?: HttpChecksumType | undefined;
   fileName?: string;
 }
 

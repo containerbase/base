@@ -7,7 +7,7 @@ import tar from 'tar';
 export interface ExtractConfig {
   file: string;
   cwd: string;
-  strip?: number;
+  strip?: number | undefined;
 
   files?: string[];
 }

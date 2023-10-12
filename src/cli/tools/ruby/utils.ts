@@ -122,7 +122,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
 
   private async getRubyMinor(): Promise<string> {
     const rubyVersion = await this.getRubyVersion();
-    const ver = parse(rubyVersion)!;
+    const ver = parse(rubyVersion);
     return `${ver.major}.${ver.minor}`;
   }
 
