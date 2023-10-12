@@ -1,4 +1,4 @@
-import { chmod, chown, mkdir } from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
@@ -60,9 +60,10 @@ export class PrepareDotnetService extends PrepareToolBaseService {
     });
 
     const nuget = join(this.envSvc.userHome, '.nuget');
-    await mkdir(nuget);
-    await chown(nuget, this.envSvc.userId, 0);
-    await chmod(nuget, 0o775);
+    await fs.mkdir(join(nuget, 'NuGet'), { recursive: true });
+    // fs isn't recursive, so we use system binaries
+    await execa('chown', ['-R', this.envSvc.userName, nuget]);
+    await execa('chmod', ['-R', 'g+w', nuget]);
   }
 }
 
@@ -120,15 +121,11 @@ export class InstallDotnetService extends InstallToolBaseService {
         ';',
       ]);
     }
-  }
 
-  override async link(version: string): Promise<void> {
-    const src = this.pathSvc.toolPath(this.name);
-    await this.shellwrapper({ srcDir: src });
-
-    await execa('dotnet', ['new']);
+    const dotnet = join(toolPath, 'dotnet');
+    await execa(dotnet, ['new']);
     if (this.envSvc.isRoot) {
-      await execa('su', [this.envSvc.userName, '-c', 'dotnet new']);
+      await execa('su', [this.envSvc.userName, '-c', `${dotnet} new`]);
     }
 
     const ver = parse(version);
@@ -136,26 +133,32 @@ export class InstallDotnetService extends InstallToolBaseService {
     // https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source
     if (ver.major > 3 || (ver.major === 3 && ver.minor >= 1)) {
       // See https://github.com/NuGet/Home/issues/11607
-      await execa('dotnet', ['nuget', 'list', 'source']);
+      await execa(dotnet, ['nuget', 'list', 'source']);
       if (this.envSvc.isRoot) {
         await execa('su', [
           this.envSvc.userName,
           '-c',
-          'dotnet nuget list source',
+          `${dotnet} nuget list source`,
         ]);
       }
     }
-    const nuget = join(
-      this.envSvc.userHome,
-      '.config',
-      'NuGet',
-      'NuGet.Config',
-    );
+    const nuget = join(this.envSvc.userHome, '.nuget', 'NuGet', 'NuGet.Config');
     if (await this.pathSvc.fileExists(nuget)) {
+      await this.pathSvc.setOwner({
+        file: join(this.envSvc.userHome, '.nuget'),
+      });
+      await this.pathSvc.setOwner({
+        file: join(this.envSvc.userHome, '.nuget', 'NuGet'),
+      });
       await this.pathSvc.setOwner({
         file: nuget,
       });
     }
+  }
+
+  override async link(_version: string): Promise<void> {
+    const src = this.pathSvc.toolPath(this.name);
+    await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {

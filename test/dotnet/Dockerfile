@@ -26,6 +26,8 @@ FROM base as net3
 RUN install-tool dotnet 3.1.426
 RUN set -ex; dotnet --version | grep 3.1.
 
+RUN ls -la $USER_HOME/.nuget/NuGet
+
 USER 1000
 
 RUN dotnet --info

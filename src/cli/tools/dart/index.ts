@@ -45,7 +45,7 @@ export class PrepareDartService extends PrepareToolBaseService {
       this.envSvc.userName,
       `${this.envSvc.userHome}/.dart`,
     ]);
-    await execa('chmod', ['-R', 'g=u', `${this.envSvc.userHome}/.dart`]);
+    await execa('chmod', ['-R', 'g+w', `${this.envSvc.userHome}/.dart`]);
   }
 }
 
