@@ -51,7 +51,7 @@ RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 #--------------------------------------
 # test: gradle 6
 #--------------------------------------
-FROM build as testa
+FROM build as test-gradle-a
 
 RUN prepare-tool gradle
 
@@ -84,7 +84,7 @@ RUN gradle --version
 #--------------------------------------
 # test: java 18 + gradle 8
 #--------------------------------------
-FROM base as testb
+FROM base as test-gradle-b
 
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java-jre 18.0.2+9
@@ -110,7 +110,7 @@ RUN gradle --version
 #--------------------------------------
 # test: java 8 + gradle 7
 #--------------------------------------
-FROM build as testc
+FROM build as test-gradle-c
 
 # need to stay old
 # disable renovate: datasource=adoptium-java packageName=java-jre
@@ -127,7 +127,7 @@ RUN gradle --version
 #--------------------------------------
 # test: java 17 (non-root)
 #--------------------------------------
-FROM base as testd
+FROM base as test-gradle-d
 
 RUN prepare-tool java gradle
 
@@ -149,10 +149,13 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 #--------------------------------------
 # test: maven
 #--------------------------------------
-FROM build as teste
+FROM build as test-maven-a
 
 # test openshift userid missmatch
 USER 1001
+
+# test archive.apache.org
+RUN install-tool maven 3.1.0-alpha-1
 
 RUN install-tool maven 3.5.4
 
@@ -167,7 +170,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: scala / sbt
 #--------------------------------------
-FROM build as testf
+FROM build as test-others
 
 
 WORKDIR /
@@ -193,9 +196,9 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
-COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
+COPY --from=test-gradle-a /.dummy /.dummy
+COPY --from=test-gradle-b /.dummy /.dummy
+COPY --from=test-gradle-c /.dummy /.dummy
+COPY --from=test-gradle-d /.dummy /.dummy
+COPY --from=test-maven-a /.dummy /.dummy
+COPY --from=test-others /.dummy /.dummy

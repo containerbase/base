@@ -6,6 +6,7 @@ export const NoPrepareTools = [
   'corepack',
   'flux',
   'lerna',
+  'maven',
   'node',
   'npm',
   'pnpm',

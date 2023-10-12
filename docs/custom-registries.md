@@ -94,6 +94,26 @@ https://github.com/fluxcd/flux2/releases/download/v0.19.0/flux_0.19.0_linux_amd6
 https://github.com/fluxcd/flux2/releases/download/v2.1.0/flux_2.1.0_linux_arm64.tar.gz
 ```
 
+## maven
+
+Maven releases are downloaded from:
+
+- `https://github.com/containerbase/maven-prebuild/releases/download`
+- `https://archive.apache.org/dist/maven`
+
+The first url is preferred and the second is used as fallback for older versions.
+
+Samples:
+
+```txt
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz.sha512
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz
+https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz
+https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz.sha1
+https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar
+https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz.sha512
+```
+
 ## node
 
 Node releases are downloaded from:

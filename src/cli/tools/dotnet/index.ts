@@ -131,7 +131,7 @@ export class InstallDotnetService extends InstallToolBaseService {
       await execa('su', [this.envSvc.userName, '-c', 'dotnet new']);
     }
 
-    const ver = parse(version)!;
+    const ver = parse(version);
     // command available since net core 3.1
     // https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source
     if (ver.major > 3 || (ver.major === 3 && ver.minor >= 1)) {
