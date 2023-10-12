@@ -81,6 +81,25 @@ https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.
 https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-arm64.tar.gz
 ```
 
+## flutter
+
+Flutter releases are downloaded from:
+
+- `https://github.com/containerbase/flutter-prebuild/releases/download`
+- `https://github.com/flutter/flutter.git`
+
+The first url is preferred and the second is used as fallback for older versions.
+
+Samples:
+
+```txt
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-x86-64.tar.xz
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-x86-64.tar.xz.sha512
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-aarch64.tar.xz
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-aarch64.tar.xz.sha512
+https://github.com/flutter/flutter.git
+```
+
 ## flux
 
 Flux releases are downloaded from:

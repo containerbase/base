@@ -4,6 +4,7 @@ import { InstallBunService } from '../tools/bun';
 import { InstallDartService } from '../tools/dart';
 import { InstallDockerService } from '../tools/docker';
 import { InstallDotnetService } from '../tools/dotnet';
+import { InstallFlutterService } from '../tools/flutter';
 import { InstallFluxService } from '../tools/flux';
 import { InstallMavenService } from '../tools/java/maven';
 import { InstallNodeService } from '../tools/node';
@@ -47,6 +48,7 @@ function prepareContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallLernaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);

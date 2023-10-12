@@ -34,13 +34,13 @@ RUN prepare-tool flutter
 #--------------------------------------
 FROM build as testa
 
-# renovate: datasource=flutter-version
-RUN install-tool flutter 1.22.6
+# EOL, use source, not prebuild
+RUN install-tool flutter 1.22.5
 
 USER 1000
 
 RUN set -ex; \
-    ls -la /opt/containerbase/tools/flutter/1.22.6 $USER_HOME; \
+    ls -la /opt/containerbase/tools/flutter/1.22.5 $USER_HOME; \
     cd a; \
     flutter pub upgrade;
 
@@ -55,7 +55,7 @@ FROM build as testb
 
 USER 1000
 
-# renovate: datasource=flutter-version
+# EOL
 RUN install-tool flutter 1.22.6
 
 RUN set -ex; \
@@ -74,7 +74,7 @@ FROM build as testc
 
 USER 1000
 
-# renovate: datasource=flutter-version
+# EOL
 RUN install-tool flutter 2.10.5
 
 RUN set -ex; \
