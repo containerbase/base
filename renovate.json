@@ -123,9 +123,7 @@
     },
     {
       "description": "Use `chore` semantic commit scope for Actions updates",
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": ["github-actions"],
       "semanticCommitType": "chore"
     },
     {
