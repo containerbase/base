@@ -1,4 +1,4 @@
-FROM ghcr.io/containerbase/node:18.18.1
+FROM ghcr.io/containerbase/node:18.18.2
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.20.0
