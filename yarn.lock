@@ -1015,10 +1015,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sindresorhus/is@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@sindresorhus/is@npm:6.0.0"
-  checksum: 488fe23fa1485a0e66eb6330214a075097f6656348727711c5e7ecf8692a4a662cd61c8439abfe2cca68745fd5f746c49a9b21750f3aef4a71320fd2364cc8cc
+"@sindresorhus/is@npm:6.0.1":
+  version: 6.0.1
+  resolution: "@sindresorhus/is@npm:6.0.1"
+  checksum: b6bbd41366a0817dcf7e6fef3f42ed113cb254ac30b9b944d2f15031be55fb77ff770d25514b7039dcaf76d7b5cc93a6dec4e08faf4ac8e24a5de63e79c4ac3e
   languageName: node
   linkType: hard
 
@@ -2667,7 +2667,7 @@ __metadata:
   resolution: "containerbase@workspace:."
   dependencies:
     "@semantic-release/exec": 6.0.3
-    "@sindresorhus/is": 6.0.0
+    "@sindresorhus/is": 6.0.1
     "@tsconfig/node18": 18.2.2
     "@tsconfig/strictest": 2.0.2
     "@types/global-agent": 2.1.1
