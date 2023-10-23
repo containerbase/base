@@ -30,7 +30,7 @@ RUN install-tool python 3.11.6
 FROM test-python as test-checkov
 
 # renovate: datasource=pypi
-RUN install-tool checkov 2.5.9
+RUN install-tool checkov 2.5.18
 
 #--------------------------------------
 # Image: hashin
