@@ -7,7 +7,6 @@
 [![codecov](https://codecov.io/gh/containerbase/base/branch/main/graph/badge.svg?token=GYS2ZZAXDP)](https://codecov.io/gh/containerbase/base)
 
 This repository is the source for the Docker images [`containerbase/base`](https://hub.docker.com/r/containerbase/base) and `ghcr.io/containerbase/base`.
-It is not associated with or compatible with the `buildpacks.io` project.
 Commits to `main` branch are automatically build and published.
 
 ## Local development
