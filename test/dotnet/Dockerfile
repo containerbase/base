@@ -58,11 +58,11 @@ RUN install-tool dotnet 2.2.207
 RUN install-tool dotnet 3.1.415
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.415
+RUN install-tool dotnet 6.0.416
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.415
+RUN install-tool dotnet 6.0.416
 RUN set -ex; dotnet --version | grep 6.0.
 
 USER 1000
@@ -85,7 +85,7 @@ FROM net3 as testc
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 6.0.415
+RUN install-tool dotnet 6.0.416
 RUN set -ex; dotnet --version | grep 6.0.
 
 RUN set -ex; \
@@ -103,7 +103,7 @@ FROM net3 as testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 7.0.402
+RUN install-tool dotnet 7.0.403
 RUN set -ex; dotnet --version | grep 7.0.
 
 RUN set -ex; \
