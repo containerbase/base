@@ -1144,10 +1144,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/global-agent@npm:2.1.1":
-  version: 2.1.1
-  resolution: "@types/global-agent@npm:2.1.1"
-  checksum: 33fddd83781706b60996d42e6e60a8a96b4163f5b54f5052c97b448edf8e7c834e9395613cec37a39da8d1d5286382e85ec09ba6b908fab5638055f7d6f76397
+"@types/global-agent@npm:2.1.2":
+  version: 2.1.2
+  resolution: "@types/global-agent@npm:2.1.2"
+  checksum: 2a2dcc186ce87d5f558709162793c3ddc2640484eac55a183adcc3e8e4447273e8e601bbc498bddf04d46da79409a6281b033e85f381736becf4027ec5e48606
   languageName: node
   linkType: hard
 
@@ -2677,7 +2677,7 @@ __metadata:
     "@sindresorhus/is": 6.0.1
     "@tsconfig/node18": 18.2.2
     "@tsconfig/strictest": 2.0.2
-    "@types/global-agent": 2.1.1
+    "@types/global-agent": 2.1.2
     "@types/node": 18.18.6
     "@types/semver": 7.5.3
     "@types/shelljs": 0.8.13
