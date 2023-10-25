@@ -35,7 +35,7 @@ export class InstallNodeService extends InstallNodeBaseService {
       case 'arm64':
         return 'aarch64';
       case 'amd64':
-        return 'x86_x64';
+        return 'x86_64';
     }
   }
 
