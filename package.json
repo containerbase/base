@@ -100,7 +100,8 @@
   "resolutions": {
     "clipanion@3.2.1": "patch:clipanion@npm%3A3.2.1#./.yarn/patches/clipanion-npm-3.2.1-fc9187f56c.patch",
     "esbuild": "0.19.5",
-    "tsconfig-paths": "4.2.0"
+    "tsconfig-paths": "4.2.0",
+    "vite": "4.5.0"
   },
   "contributors": [
     "Michael Kriese <michael.kriese@visualon.de>"
