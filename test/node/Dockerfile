@@ -54,7 +54,7 @@ RUN npm --version
 USER 0
 
 # renovate: datasource=npm
-RUN npm install -g re2@1.16.0
+RUN npm install -g re2@1.20.0
 
 #--------------------------------------
 # test: yarn
