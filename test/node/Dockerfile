@@ -25,7 +25,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=node
-RUN install-tool node v16.20.2
+RUN install-tool node v20.9.0
 
 USER 1000
 
@@ -126,7 +126,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.9.0
 
 RUN npm install -g yarn
 RUN set -ex; \
