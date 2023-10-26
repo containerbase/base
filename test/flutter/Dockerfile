@@ -92,7 +92,7 @@ USER 1000
 RUN install-tool flutter 3.0.5
 
 RUN set -ex; \
-    cd c; \
+    cd d; \
     flutter pub upgrade;
 
 #--------------------------------------
@@ -109,7 +109,7 @@ USER 1001
 RUN install-tool flutter 3.0.5
 
 RUN set -ex; \
-    cd c; \
+    cd d; \
     flutter pub upgrade;
 
 #--------------------------------------
