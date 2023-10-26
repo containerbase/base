@@ -183,7 +183,7 @@ FROM build3 as test-cocoapods-c
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.12.1
+RUN install-tool cocoapods 1.13.0
 
 RUN pod env
 
