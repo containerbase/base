@@ -199,7 +199,7 @@ FROM build3 as test-gem
 USER 1000
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-gem rake 13.0.6
+RUN install-gem rake 13.1.0
 
 RUN rake --help
 
