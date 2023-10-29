@@ -62,7 +62,7 @@
     "@typescript-eslint/parser": "6.9.0",
     "@vitest/coverage-v8": "0.34.6",
     "@vitest/ui": "0.34.6",
-    "@yarnpkg/sdks": "3.0.0-rc.53",
+    "@yarnpkg/sdks": "3.0.0",
     "bats": "1.10.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
