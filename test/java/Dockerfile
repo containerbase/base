@@ -82,12 +82,12 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: java 18 + gradle 8
+# test: java 21 LTS + gradle 8
 #--------------------------------------
 FROM base as test-gradle-b
 
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java-jre 18.0.2+9
+RUN install-tool java-jre 21.0.1+12.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 8.4

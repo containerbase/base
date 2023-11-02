@@ -96,6 +96,11 @@ teardown() {
   assert [ "${MINOR}" = "0" ]
   assert [ "${PATCH}" = "14" ]
 
+  check_semver 21.0.1+12.1.LTS
+  assert [ "${MAJOR}" = "21" ]
+  assert [ "${MINOR}" = "0" ]
+  assert [ "${PATCH}" = "1" ]
+
   run check_semver 1.2.3
   assert_success
 
