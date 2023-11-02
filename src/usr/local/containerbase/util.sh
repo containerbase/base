@@ -59,7 +59,7 @@ function check_command () {
 }
 
 
-SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
+SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9.]+)?([a-z-].*)?$"
 
 # will extract the given version into MAJOR, MINOR and PATCH components
 # the optional second argument gives the highest component required.
