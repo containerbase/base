@@ -33,7 +33,7 @@
     "test:vitest": "vitest run --coverage"
   },
   "dependencies": {
-    "@sindresorhus/is": "6.0.1",
+    "@sindresorhus/is": "6.1.0",
     "clipanion": "3.2.1",
     "del": "7.1.0",
     "execa": "8.0.1",
