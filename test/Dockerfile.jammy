@@ -139,7 +139,7 @@ RUN install-tool pipenv 2023.10.24
 # renovate: datasource=pypi
 RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
-RUN install-tool poetry 1.6.1
+RUN install-tool poetry 1.7.0
 # renovate: datasource=pypi
 RUN install-tool pdm 2.10.0
 
