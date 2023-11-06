@@ -42,7 +42,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       version,
     );
 
-    await execa(
+    const res = await execa(
       npm,
       [
         'install',
@@ -53,10 +53,14 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         prefix,
         '--cache',
         tmp,
-        '--silent',
       ],
-      { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
+
+    if (res.failed) {
+      logger.warn(`Npm error:\n${res.all}`);
+      throw new Error('npm install command failed');
+    }
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
 
@@ -148,7 +152,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     env: NodeJS.ProcessEnv,
     global = false,
   ): Promise<void> {
-    await execa(
+    const res = await execa(
       join(prefix, 'bin/npm'),
       [
         'explore',
@@ -166,8 +170,13 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         tmp,
         '--silent',
       ],
-      { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
+
+    if (res.failed) {
+      logger.warn(`Npm error:\n${res.all}`);
+      throw new Error('node-gyp update command failed');
+    }
   }
 }
 
