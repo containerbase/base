@@ -1,4 +1,4 @@
-import { chmod, mkdir, readFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
@@ -44,7 +44,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     prefix = join(prefix, ruby);
     await mkdir(prefix);
 
-    await execa(
+    const res = await execa(
       gem,
       [
         'install',
@@ -56,8 +56,14 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
         '--version',
         version,
       ],
-      { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
+
+    if (res.failed) {
+      logger.warn(`Gem error:\n${res.all}`);
+      await rm(prefix, { recursive: true, force: true });
+      throw new Error('gem install command failed');
+    }
 
     await this._postInstall(gem, version, prefix, env);
   }

@@ -59,6 +59,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
     if (res.failed) {
       logger.warn(`Npm error:\n${res.all}`);
+      await fs.rm(prefix, { recursive: true, force: true });
       throw new Error('npm install command failed');
     }
 
