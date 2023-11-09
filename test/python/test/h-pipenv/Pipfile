@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 numpy = ">=1.18.0"
+psycopg2 = "*"
 
 [dev-packages]
 flake8 = "*"
