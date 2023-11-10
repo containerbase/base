@@ -54,7 +54,7 @@ RUN install-tool git-lfs v3.4.0
 RUN install-tool golang 1.21.4
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.13.1
+RUN install-tool helm v3.13.2
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 RUN install-tool helmfile v0.158.1
