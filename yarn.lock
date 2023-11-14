@@ -1236,13 +1236,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/shelljs@npm:0.8.14":
-  version: 0.8.14
-  resolution: "@types/shelljs@npm:0.8.14"
+"@types/shelljs@npm:0.8.15":
+  version: 0.8.15
+  resolution: "@types/shelljs@npm:0.8.15"
   dependencies:
     "@types/glob": ~7.2.0
     "@types/node": "*"
-  checksum: d49ed5e5494e30a9d22c0d1104af8587a748da8ff372a6bb0aadf4329b4ae88360238473841f444a8eb067b8478829e55570c627c94f50ea45489bd36e99e567
+  checksum: 94939421c6c83d3075e1c56bf940eb3c34567c6b2ac0b553ec81de7f4c7e7cdfc729117d821c22418d64c45fcd4f96a6ec7ae21ed0d7a80e3e9a008672dde35f
   languageName: node
   linkType: hard
 
@@ -2644,7 +2644,7 @@ __metadata:
     "@types/global-agent": 2.1.3
     "@types/node": 18.18.8
     "@types/semver": 7.5.4
-    "@types/shelljs": 0.8.14
+    "@types/shelljs": 0.8.15
     "@types/tar": 6.1.7
     "@typescript-eslint/eslint-plugin": 6.10.0
     "@typescript-eslint/parser": 6.10.0
