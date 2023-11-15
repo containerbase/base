@@ -1,4 +1,5 @@
 export const NoPrepareTools = [
+  'bazelisk',
   'bower',
   'bun',
   'bundler',
