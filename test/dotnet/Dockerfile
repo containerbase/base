@@ -19,12 +19,12 @@ COPY --chown=1000:0 test/dotnet/test test
 WORKDIR /test
 
 #--------------------------------------
-# net3: dotnet 3.1 base image (LTS)
+# build: dotnet 6.0 base image (LTS)
 #--------------------------------------
-FROM base as net3
+FROM base as build
 
-RUN install-tool dotnet 3.1.426
-RUN set -ex; dotnet --version | grep 3.1.
+RUN install-tool dotnet 6.0.416
+RUN set -ex; dotnet --version | grep 6.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
 
@@ -36,9 +36,9 @@ SHELL [ "/bin/sh", "-c" ]
 RUN dotnet --info
 
 #--------------------------------------
-# test: dotnet 3.1 (LTS)
+# test: dotnet 6.0 (LTS)
 #--------------------------------------
-FROM net3 as testa
+FROM build as testa
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -49,13 +49,12 @@ RUN set -ex;  \
 
 
 #--------------------------------------
-# test: dotnet 6.0 (LTS)
+# test: dotnet 8.0 (LTS)
 #--------------------------------------
 FROM base as testb
 
 # Do not change
-RUN install-tool dotnet 2.2.207
-RUN install-tool dotnet 3.1.415
+RUN install-tool dotnet 6.0.416
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.100
@@ -63,7 +62,7 @@ RUN install-tool dotnet 8.0.100
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.100
-RUN set -ex; dotnet --version | grep 6.0.
+RUN set -ex; dotnet --version | grep 8.0.
 
 USER 1000
 
@@ -79,14 +78,14 @@ RUN set -ex;  \
     dotnet build
 
 #--------------------------------------
-# test: dotnet 6.0 (non-root, LTS)
+# test: dotnet 8.0 (non-root, LTS)
 #--------------------------------------
-FROM net3 as testc
+FROM build as testc
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.100
-RUN set -ex; dotnet --version | grep 6.0.
+RUN set -ex; dotnet --version | grep 8.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -97,14 +96,14 @@ RUN set -ex;  \
 
 
 #--------------------------------------
-# test: dotnet 7.0 (non-root)
+# test: dotnet latest (non-root)
 #--------------------------------------
-FROM net3 as testd
+FROM build as testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.100
-RUN set -ex; dotnet --version | grep 7.0.
+RUN set -ex; dotnet --version | grep 8.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -121,4 +120,5 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
+# TODO: enable for net 9.0
+# COPY --from=testd /.dummy /.dummy
