@@ -90,7 +90,7 @@
     "semantic-release": "22.0.7",
     "shelljs": "0.8.5",
     "tsx": "3.14.0",
-    "type-fest": "4.6.0",
+    "type-fest": "4.7.1",
     "typescript": "5.2.2",
     "vite": "4.5.0",
     "vite-tsconfig-paths": "4.2.1",
