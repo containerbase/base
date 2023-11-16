@@ -2684,7 +2684,7 @@ __metadata:
     tar: 6.2.0
     tsx: 3.14.0
     typanion: 3.14.0
-    type-fest: 4.6.0
+    type-fest: 4.7.1
     typescript: 5.2.2
     vite: 4.5.0
     vite-tsconfig-paths: 4.2.1
@@ -8588,10 +8588,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:4.6.0":
-  version: 4.6.0
-  resolution: "type-fest@npm:4.6.0"
-  checksum: e38f2b4b35e912bf60dbe7d4350653fb76b241a456e849fab85002ba08e938a26a7c44a330dd5620dd48ce57566be7c97e997064dc0d5066d5b6949b8c444430
+"type-fest@npm:4.7.1, type-fest@npm:^4.6.0, type-fest@npm:^4.7.1":
+  version: 4.7.1
+  resolution: "type-fest@npm:4.7.1"
+  checksum: 95d31b2421955e8e3d58508515e02061fa7fe05d7097b20feb33fa7ee392959a5a38b302957485895a7a287556d14c8d6721b66bebb71391be151ce128755413
   languageName: node
   linkType: hard
 
@@ -8627,13 +8627,6 @@ __metadata:
   version: 3.13.1
   resolution: "type-fest@npm:3.13.1"
   checksum: c06b0901d54391dc46de3802375f5579868949d71f93b425ce564e19a428a0d411ae8d8cb0e300d330071d86152c3ea86e744c3f2860a42a79585b6ec2fdae8e
-  languageName: node
-  linkType: hard
-
-"type-fest@npm:^4.6.0, type-fest@npm:^4.7.1":
-  version: 4.7.1
-  resolution: "type-fest@npm:4.7.1"
-  checksum: 95d31b2421955e8e3d58508515e02061fa7fe05d7097b20feb33fa7ee392959a5a38b302957485895a7a287556d14c8d6721b66bebb71391be151ce128755413
   languageName: node
   linkType: hard
 
