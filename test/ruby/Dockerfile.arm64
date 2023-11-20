@@ -42,7 +42,7 @@ FROM test-ruby as test-cocoapods
 RUN install-tool git v2.42.1
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.14.2
+RUN install-tool cocoapods 1.14.3
 
 #--------------------------------------
 # Image: final
