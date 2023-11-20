@@ -25,7 +25,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=node
-RUN install-tool node v16.20.2
+RUN install-tool node v18.18.2
 
 USER 1000
 
@@ -126,7 +126,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.9.0
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -190,7 +190,7 @@ RUN install-tool node 10.24.0
 # intentionally fails
 RUN install-tool npm 9.5.1 || true
 RUN install-tool yarn-slim 1.22.19
-RUN install-tool node v18.16.1
+RUN install-tool node v20.9.0
 RUN install-tool yarn-slim 1.22.19
 RUN yarn --version
 
