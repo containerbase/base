@@ -53,7 +53,10 @@ export class InstallBazeliskService extends InstallToolBaseService {
     await this.shellwrapper({
       srcDir: src,
     });
-    await fs.symlink('bazelisk', join(this.pathSvc.binDir, 'bazel'));
+    await fs.symlink(
+      join(this.pathSvc.binDir, 'bazelisk'),
+      join(this.pathSvc.binDir, 'bazel'),
+    );
   }
 
   override async test(_version: string): Promise<void> {
