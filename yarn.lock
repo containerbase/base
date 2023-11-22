@@ -2670,7 +2670,7 @@ __metadata:
     lint-staged: 15.1.0
     nock: 13.3.8
     npm-run-all: 4.1.5
-    pino: 8.16.1
+    pino: 8.16.2
     pino-pretty: 10.2.3
     pkg: 5.8.1
     prettier: 2.8.8
@@ -6855,9 +6855,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:8.16.1":
-  version: 8.16.1
-  resolution: "pino@npm:8.16.1"
+"pino@npm:8.16.2":
+  version: 8.16.2
+  resolution: "pino@npm:8.16.2"
   dependencies:
     atomic-sleep: ^1.0.0
     fast-redact: ^3.1.1
@@ -6872,7 +6872,7 @@ __metadata:
     thread-stream: ^2.0.0
   bin:
     pino: bin.js
-  checksum: a52730479e526de7fbfb7bed492a365da0dfabaacc71fc9b67831b413f8d6948c7f984a385e47483c58099872d7e1a2c630c882eeccb6e237215540a96f61787
+  checksum: 78d194112f09f82471ec7e0022bc114ddb833375d60236be40ac55bf8a8ae26b88c8780d54912687c7cd6d0321ba5b1a78ffa89c5e9d5855ef849c3b9273c7ab
   languageName: node
   linkType: hard
 
