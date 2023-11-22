@@ -228,7 +228,7 @@ RUN set -ex; cd a; npm install
 FROM build as testh
 
 # renovate: datasource=npm packageName=yarn
-RUN install-tool yarn-slim 1.22.19
+RUN install-tool yarn-slim 1.22.21
 
 RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
