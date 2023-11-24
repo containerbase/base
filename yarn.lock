@@ -2684,7 +2684,7 @@ __metadata:
     tar: 6.2.0
     tsx: 3.14.0
     typanion: 3.14.0
-    type-fest: 4.8.0
+    type-fest: 4.8.1
     typescript: 5.2.2
     vite: 4.5.0
     vite-tsconfig-paths: 4.2.1
@@ -8590,10 +8590,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:4.8.0, type-fest@npm:^4.6.0, type-fest@npm:^4.7.1":
-  version: 4.8.0
-  resolution: "type-fest@npm:4.8.0"
-  checksum: ad048066d077aad72c0ca92725fe91ca334b0c133470b6541d15d13b49bcd90d81872f8cd98f8e97adb493ec585a8b9772fe0ca2dfcbe07cf3c511194c9153c2
+"type-fest@npm:4.8.1, type-fest@npm:^4.6.0, type-fest@npm:^4.7.1":
+  version: 4.8.1
+  resolution: "type-fest@npm:4.8.1"
+  checksum: faffb32d9ab7fe28c91ca6ee6a69da290b66550e114c3f03dccd1c46d7b8e8e73dec3bd8e39e70be2a8e88ad6460e31eda97f9a314bb929a9010c21a1332f663
   languageName: node
   linkType: hard
 
