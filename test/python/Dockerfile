@@ -35,7 +35,7 @@ FROM base as build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.6
+RUN install-tool python 3.12.0
 
 #--------------------------------------
 # build-rootless
@@ -47,7 +47,7 @@ RUN prepare-tool python
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.6
+RUN install-tool python 3.12.0
 
 #--------------------------------------
 # build: pipenv
@@ -76,7 +76,7 @@ FROM build as test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.6
+RUN install-tool python 3.12.0
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.7.1
@@ -201,7 +201,7 @@ RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.6
+RUN install-tool python 3.12.0
 
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.11.15
