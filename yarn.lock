@@ -2689,7 +2689,7 @@ __metadata:
     vite: 4.5.0
     vite-tsconfig-paths: 4.2.1
     vitest: 0.34.6
-    vitest-github-actions-reporter: 0.10.0
+    vitest-github-actions-reporter: 0.11.0
   dependenciesMeta:
     bats-assert@2.0.0:
       unplugged: true
@@ -8932,14 +8932,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-github-actions-reporter@npm:0.10.0":
-  version: 0.10.0
-  resolution: "vitest-github-actions-reporter@npm:0.10.0"
+"vitest-github-actions-reporter@npm:0.11.0":
+  version: 0.11.0
+  resolution: "vitest-github-actions-reporter@npm:0.11.0"
   dependencies:
     "@actions/core": ^1.10.0
   peerDependencies:
     vitest: ">=0.28.5"
-  checksum: 935054ddb83340bd4b8b22230d7a3627afe8943138e66df4ba0a243cb70fb5cf2d9eab0daf74adc45501be263a4f82cde08cf8efca0bcdca4de2b915a9040b03
+  checksum: 88c1aa92f2a9a2773c28eda2a04271b779dd5ed43e4a907cf80cba4da9112b673690589d6fa5578a60baa36ce732cdc4f1b28758d91a208dd2dae68b53585311
   languageName: node
   linkType: hard
 
