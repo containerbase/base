@@ -68,7 +68,7 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "7.0.2",
-    "esbuild": "0.19.6",
+    "esbuild": "0.19.7",
     "esbuild-plugin-pino": "2.1.0",
     "eslint": "8.54.0",
     "eslint-config-prettier": "9.0.0",
@@ -99,7 +99,7 @@
   },
   "resolutions": {
     "clipanion@3.2.1": "patch:clipanion@npm%3A3.2.1#./.yarn/patches/clipanion-npm-3.2.1-fc9187f56c.patch",
-    "esbuild": "0.19.6",
+    "esbuild": "0.19.7",
     "tsconfig-paths": "4.2.0",
     "vite": "4.5.0"
   },
