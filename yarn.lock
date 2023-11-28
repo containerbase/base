@@ -1239,13 +1239,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/tar@npm:6.1.9":
-  version: 6.1.9
-  resolution: "@types/tar@npm:6.1.9"
+"@types/tar@npm:6.1.10":
+  version: 6.1.10
+  resolution: "@types/tar@npm:6.1.10"
   dependencies:
     "@types/node": "*"
     minipass: ^4.0.0
-  checksum: d3765d47ab1d4ae35e40a1fd5f460e3413eea960e960443ed3de257425a62ba4d900dbe9ee5a2a740f4c68aa310597f56f74d274de070a06f45b8a913178a325
+  checksum: 82d46f1246e830b98833ed94fbdfbcb3ffb8a5d7173609622d56c9326124523a3cc541607876c63a6ab9117eb59fb37ef8a6284b194164ab1d1d8c03a8ba59c6
   languageName: node
   linkType: hard
 
@@ -2638,7 +2638,7 @@ __metadata:
     "@types/node": 18.18.13
     "@types/semver": 7.5.6
     "@types/shelljs": 0.8.15
-    "@types/tar": 6.1.9
+    "@types/tar": 6.1.10
     "@typescript-eslint/eslint-plugin": 6.12.0
     "@typescript-eslint/parser": 6.12.0
     "@vitest/coverage-v8": 0.34.6
