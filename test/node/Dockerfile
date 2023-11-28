@@ -25,7 +25,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=node
-RUN install-tool node v16.20.2
+RUN install-tool node v18.18.2
 
 USER 1000
 
@@ -77,7 +77,7 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 
 # renovate: datasource=npm
 RUN install-tool lerna 7.4.2
@@ -126,7 +126,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -134,7 +134,7 @@ RUN set -ex; \
   yarn --version;
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
@@ -190,7 +190,7 @@ RUN install-tool node 10.24.0
 # intentionally fails
 RUN install-tool npm 9.5.1 || true
 RUN install-tool yarn-slim 1.22.19
-RUN install-tool node v18.16.1
+RUN install-tool node v20.9.0
 RUN install-tool yarn-slim 1.22.19
 RUN yarn --version
 
@@ -228,7 +228,7 @@ RUN set -ex; cd a; npm install
 FROM build as testh
 
 # renovate: datasource=npm packageName=yarn
-RUN install-tool yarn-slim 1.22.19
+RUN install-tool yarn-slim 1.22.21
 
 RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
@@ -281,7 +281,7 @@ RUN set -ex; ls -lah /test/a; cd a; yarn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 
 # renovate: datasource=npm
 RUN install-tool lerna 7.4.2
@@ -378,7 +378,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool corepack 0.23.0
 
 # renovate: datasource=npm depName=yarn
-ARG YARN_VERSION=1.22.19
+ARG YARN_VERSION=1.22.20
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
@@ -397,7 +397,7 @@ RUN install-tool corepack 0.23.0
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.23.0
@@ -481,7 +481,7 @@ FROM build as testq
 
 
 # renovate: datasource=npm
-RUN install-tool renovate 37.56.3
+RUN install-tool renovate 37.68.3
 
 RUN set -ex; \
   renovate --version; \

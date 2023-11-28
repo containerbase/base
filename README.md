@@ -85,7 +85,7 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool powershell v7.1.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool node 14.17.3
+RUN install-tool node 20.9.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker 20.10.7

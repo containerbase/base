@@ -11,7 +11,7 @@ COPY src/ /
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.42.1
+RUN install-tool git v2.43.0
 
 #--------------------------------------
 # Image: build
@@ -33,7 +33,7 @@ FROM build as test
 RUN install-tool bazelisk v1.18.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.11
+RUN install-tool bun 1.0.14
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6
@@ -66,7 +66,7 @@ RUN install-tool helmfile v0.158.1
 RUN install-tool kustomize 5.2.1
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.18.1
+RUN install-tool nix 2.19.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.4.0
@@ -112,11 +112,11 @@ RUN install-tool gradle 8.4
 FROM build as test-node
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 # renovate: datasource=npm
 RUN install-tool pnpm 8.10.5
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 # renovate: datasource=npm
 RUN install-tool lerna 7.4.2
 
@@ -126,7 +126,7 @@ RUN install-tool lerna 7.4.2
 FROM build as test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.12
+RUN install-tool php 8.2.13
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.6.5
 
@@ -136,7 +136,7 @@ RUN install-tool composer 2.6.5
 FROM build as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.11.6
+RUN install-tool python 3.12.0
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.11.15
 # renovate: datasource=pypi
@@ -144,7 +144,7 @@ RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.7.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.10.3
+RUN install-tool pdm 2.10.4
 
 #--------------------------------------
 # Image: test-ruby

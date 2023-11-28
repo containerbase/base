@@ -19,7 +19,7 @@ env:
   FILE: base
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
-  NODE_VERSION: 20.9.0 # renovate: datasource=node depName=node
+  NODE_VERSION: 20.10.0 # renovate: datasource=node depName=node
   CONTAINERBASE_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@7a59f600b6c288314c259e5b71671ef179ca3f44 # v3.0.14
+        uses: containerbase/internal-tools@cce4ed496d2180a0ea727e82ec3e838c68d107b0 # v3.0.18
         with:
           command: docker-config
 

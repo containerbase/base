@@ -31,7 +31,7 @@ RUN install-tool bazelisk v1.18.0
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.11
+RUN install-tool bun 1.0.14
 
 #--------------------------------------
 # Image: docker
@@ -47,7 +47,7 @@ RUN install-tool docker v24.0.7
 FROM base as test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.42.1
+RUN install-tool git v2.43.0
 
 #--------------------------------------
 # Image: git-lfs

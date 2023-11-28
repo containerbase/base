@@ -49,7 +49,7 @@ RUN set -ex; \
 FROM build as testa
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -59,7 +59,7 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN install-tool powershell v7.4.0
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.11.6
+ARG PYTHON_VERSION=3.12.0
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -149,7 +149,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.42.1
+RUN install-tool git v2.43.0
 
 USER 1000
 
@@ -165,7 +165,7 @@ RUN install-tool git-lfs v3.4.0
 RUN install-tool powershell v7.4.0
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v24.0.7
@@ -187,7 +187,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base as teste
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.11
+RUN install-tool bun 1.0.14
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2

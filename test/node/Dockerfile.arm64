@@ -22,7 +22,7 @@ RUN install-containerbase
 FROM base as test-node
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 
 #--------------------------------------
 # Image: lerna
@@ -46,7 +46,7 @@ RUN install-tool pnpm 8.10.5
 FROM test-node as test-yarn
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool yarn 1.22.20
 
 #--------------------------------------
 # Image: final

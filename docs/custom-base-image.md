@@ -40,7 +40,7 @@ RUN install-containerbase
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
 # renovate: datasource=node versioning=node
-RUN install-tool node 14.15.4
+RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
 
@@ -86,7 +86,7 @@ RUN install-containerbase
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
 # renovate: datasource=node versioning=node
-RUN install-tool node 14.15.4
+RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
 
