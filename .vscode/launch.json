@@ -18,7 +18,7 @@
       "name": "Debug Current Test File",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "pnpm",
       "args": ["vitest", "run", "${relativeFile}"],
       "smartStep": true,
       "console": "integratedTerminal"

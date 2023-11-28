@@ -16,8 +16,8 @@ You need a recent [docker](https://www.docker.com) version with [buildx](https:/
 You first need to build the cli before building the docker images.
 
 ```console
-> yarn install
-> yarn build
+> pnpm install
+> pnpm build
 ```
 
 ### Base image

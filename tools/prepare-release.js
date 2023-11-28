@@ -37,7 +37,7 @@ class PrepareCommand extends Command {
     }
     r.to('./bin/containerbase.tar.xz.sha512');
 
-    r = shell.exec('yarn build');
+    r = shell.exec('pnpm build');
     if (r.code) {
       return 1;
     }

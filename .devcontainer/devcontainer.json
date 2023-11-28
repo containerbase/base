@@ -15,5 +15,5 @@
       "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
     }
   },
-  "postCreateCommand": "yarn install"
+  "postCreateCommand": "pnpm install"
 }

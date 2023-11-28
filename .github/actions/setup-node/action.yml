@@ -13,64 +13,56 @@ runs:
   using: 'composite'
 
   steps:
-    - name: ⚙️ Setup Node.js ${{ inputs.node-version }}
-      uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
-      with:
-        node-version: ${{ inputs.node-version }}
-
     - name: ⚙️ Enable Corepack
       shell: bash
       run: sudo corepack enable
 
-    - name: ⚙️ Expose yarn config as "$GITHUB_OUTPUT"
-      id: yarn-config
-      shell: bash
-      env:
-        YARN_ENABLE_GLOBAL_CACHE: 'false'
-      run: |
-        echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
     - name: ⚙️ Calculate `CACHE_KEY`
       shell: bash
       run: |
-        echo 'CACHE_KEY=yarn-cache-${{
+        echo 'CACHE_KEY=node_modules-${{
           inputs.node-version
         }}-${{
-          hashFiles('yarn.lock', '.yarnrc.yml')
+          hashFiles('pnpm-lock.yaml')
         }}' >> "$GITHUB_ENV"
 
-    - name: ♻️ Restore yarn cache
+    - name: ♻️ Restore `node_modules`
       uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-      id: yarn-cache-restore
+      id: node-modules-restore
       with:
-        path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+        path: node_modules
         key: ${{ env.CACHE_KEY }}
-        restore-keys: |
-          yarn-cache-${{ inputs.node-version }}-
-          yarn-cache-
+        enableCrossOsArchive: true
 
     - name: Calculate `CACHE_HIT`
       shell: bash
       run: |
         echo 'CACHE_HIT=${{
-          (steps.yarn-cache-restore.outputs.cache-hit == 'true') && 'true' || ''
+          (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
         }}' >> "$GITHUB_ENV"
 
-    - name: 📥 Install dependencies
+    - name: ⚙️ Setup Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
+
+    - name: ⚙️ Enable Corepack
       shell: bash
-      run: yarn install --immutable --inline-builds
+      run: sudo corepack enable
+
+    - name: 📥 Install dependencies
+      if: env.CACHE_HIT != 'true'
+      shell: bash
+      run: pnpm install
       env:
-        # Overrides/align yarnrc.yml options (v3, v4) for a CI context
-        YARN_ENABLE_GLOBAL_CACHE: 'false' # Use local cache folder to keep downloaded archives
-        YARN_ENABLE_MIRROR: 'false' # Prevent populating global cache for caches misses (local cache only)
-        # YARN_NM_MODE: 'hardlinks-local'    # Reduce node_modules size
-        # YARN_INSTALL_STATE_PATH: '.yarn/ci-cache/install-state.gz' # Might speed up resolution step when node_modules present
         # Other environment variables
         HUSKY: '0' # By default do not run HUSKY install
 
-    - name: ♻️ Save yarn cache
+    - name: ♻️ Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
       uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
       with:
-        path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+        path: node_modules
         key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true

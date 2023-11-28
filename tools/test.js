@@ -18,7 +18,7 @@ class TestCommand extends Command {
 
     if (this.build) {
       shell.echo('Compiling sources');
-      shell.exec('yarn build');
+      shell.exec('pnpm build');
     }
 
     if (!tests.length) {
