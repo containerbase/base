@@ -102,9 +102,13 @@
   },
   "pnpm": {
     "overrides": {
+      "bats-support": "0.3.0",
       "esbuild": "0.19.7",
       "tsconfig-paths": "4.2.0",
       "vite": "4.5.0"
+    },
+    "patchedDependencies": {
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
     },
     "supportedArchitectures": {
       "os": [
