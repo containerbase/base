@@ -1,4 +1,4 @@
-import { argv, argv0 } from 'node:process';
+import { argv, argv0, version } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
 import { prepareCommands } from './command';
 import { bootstrap } from './proxy';
@@ -11,7 +11,7 @@ declare global {
 }
 
 export async function main(): Promise<void> {
-  logger.trace({ argv0, argv }, 'main');
+  logger.trace({ argv0, argv, version }, 'main');
   bootstrap();
   await validateSystem();
 
@@ -21,7 +21,9 @@ export async function main(): Promise<void> {
   const cli = new Cli({
     binaryLabel: `containerbase-cli`,
     binaryName: parseBinaryName(mode, node!, app!)!,
-    binaryVersion: globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
+    binaryVersion: `${
+      globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER'
+    } (Node ${version})`,
   });
 
   cli.register(Builtins.DefinitionsCommand);
