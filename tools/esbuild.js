@@ -56,6 +56,7 @@ await fs.writeFile(
 );
 
 await exec([
+  '--no-bytecode',
   '--out-path',
   './src/usr/local/containerbase/bin',
   '--public',
