@@ -45,7 +45,7 @@ RUN install-tool docker v24.0.7
 RUN install-tool dotnet 8.0.100
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.0.5
+RUN install-tool flutter 3.16.1
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.1.2
@@ -60,7 +60,7 @@ RUN install-tool golang 1.21.4
 RUN install-tool helm v3.13.2
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.158.1
+RUN install-tool helmfile v0.159.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.2.1
@@ -116,7 +116,7 @@ RUN install-tool node v20.10.0
 # renovate: datasource=npm
 RUN install-tool pnpm 8.10.5
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.20
+RUN install-tool yarn 1.22.21
 # renovate: datasource=npm
 RUN install-tool lerna 7.4.2
 

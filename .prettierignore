@@ -6,3 +6,6 @@ node_modules/
 # yarn 2+
 .yarn/
 .pnp.*
+
+# pnpm
+pnpm-lock.yaml

@@ -57,9 +57,9 @@ jobs:
 
       - name: lint
         run: |
-          yarn eslint -f gha
-          yarn prettier
-          yarn lint:types
+          pnpm eslint -f gha
+          pnpm prettier
+          pnpm lint:types
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
@@ -93,10 +93,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: build
-        run: yarn build
+        run: pnpm build
 
       - name: bats
-        run: yarn test:bats
+        run: pnpm test:bats
 
   vitest:
     runs-on: ubuntu-latest
@@ -114,7 +114,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: vitest
-        run: yarn test:vitest
+        run: pnpm test:vitest
 
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
@@ -139,10 +139,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+        run: sudo pnpm prepare:proxy
 
       - name: build
-        run: yarn build
+        run: pnpm build
 
       - name: test distro
         run: docker buildx bake
@@ -179,10 +179,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+        run: sudo pnpm prepare:proxy
 
       - name: build
-        run: yarn build
+        run: pnpm build
 
       - name: test distro
         run: docker buildx bake test-distro
@@ -241,10 +241,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: prepare apt proxy
-        run: sudo yarn prepare:proxy
+        run: sudo pnpm prepare:proxy
 
       - name: build
-        run: yarn build
+        run: pnpm build
 
       - name: test
         run: docker buildx bake test
