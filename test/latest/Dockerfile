@@ -182,9 +182,12 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bun, vendir, helmfile, kustomize
+# test: bazelisk, bun, vendir, helmfile, kustomize
 #--------------------------------------
 FROM base as teste
+
+# renovate: datasource=github-releases packageName=bazelbuild/bazelisk
+RUN install-tool bazelisk v1.18.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.0.14
@@ -220,12 +223,13 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
 USER 1000
 
+RUN bazel --version
+
 RUN vendir --version | grep "${VENDIR_VERSION}"
 
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
-
 
 #--------------------------------------
 # final
