@@ -9,10 +9,6 @@ import { EnvService, HttpService, PathService } from '../../services';
 export class InstallBazeliskService extends InstallToolBaseService {
   readonly name = 'bazelisk';
 
-  private get arch(): string {
-    return this.envSvc.arch;
-  }
-
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -23,7 +19,7 @@ export class InstallBazeliskService extends InstallToolBaseService {
 
   override async install(version: string): Promise<void> {
     const baseurl = `https://github.com/bazelbuild/bazelisk/releases/download/v${version}/`;
-    const filename = `bazelisk-linux-${this.arch}`;
+    const filename = `bazelisk-linux-${this.envSvc.arch}`;
 
     const file = await this.http.download({
       url: `${baseurl}${filename}`,

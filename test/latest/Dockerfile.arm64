@@ -22,8 +22,9 @@ RUN install-containerbase
 FROM base as test-bazelisk
 
 
-# renovate: datasource=github-tags packageName=bazelbuild/bazelisk
+# renovate: datasource=github-releases packageName=bazelbuild/bazelisk
 RUN install-tool bazelisk v1.18.0
+RUN bazel --version
 
 #--------------------------------------
 # Image: bun
