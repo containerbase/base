@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
+import { exec } from '@yao-pkg/pkg';
 import { build } from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
-import { exec } from 'pkg';
 
 await build({
   entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
