@@ -113,7 +113,7 @@ RUN install-tool node v20.10.0
 # renovate: datasource=npm
 RUN install-tool pnpm 8.10.5
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.20
+RUN install-tool yarn 1.22.21
 # renovate: datasource=npm
 RUN install-tool lerna 7.4.2
 
