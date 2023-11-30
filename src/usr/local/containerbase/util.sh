@@ -115,7 +115,12 @@ function apt_install () {
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy.conf
   fi
   apt-get -qq update
-  apt-get -qq install -y "${packages[@]}"
+
+  if ! log=$(apt-get -qq install -y "${packages[@]}" 2>&1) ; then
+    echo "Apt install failed" >&2
+    echo "${log}" >&2
+    exit 1
+  fi
 
   rm -f /etc/apt/apt.conf.d/containerbase-proxy.conf
 }
@@ -126,7 +131,12 @@ function apt_upgrade () {
     echo "Acquire::HTTP::Proxy \"${APT_HTTP_PROXY}\";" | tee -a /etc/apt/apt.conf.d/containerbase-proxy.conf
   fi
   apt-get -qq update
-  apt-get -qq upgrade -y
+
+  if ! log=$(apt-get -qq upgrade -y 2>&1) ; then
+    echo "Apt upgrade failed" >&2
+    echo "${log}" >&2
+    exit 1
+  fi
 
   rm -f /etc/apt/apt.conf.d/containerbase-proxy.conf
 }
