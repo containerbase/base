@@ -53,6 +53,9 @@ if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
   echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> "$ENV_FILE"
 fi
 
+# OpenShift
+chmod -R g+w "/home/${USER_NAME}"
+
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
 export_env LANG "C.UTF-8"
