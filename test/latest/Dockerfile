@@ -103,12 +103,13 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: terraform
+# test: gitpod
 #--------------------------------------
-FROM ubuntu:focal as testb
+FROM ubuntu:focal as testb-gitpod
 
-ARG USER_NAME=terraform
-ARG USER_ID=1005
+ARG USER_NAME=gitpod
+ARG USER_ID=33333
+ARG PRIMARY_GROUP_ID=${USER_ID}
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
@@ -130,9 +131,11 @@ RUN openssl verify /renovate.pem
 # Test start
 RUN touch /.dummy
 
-USER ${USER_ID}
+USER $USER_NAME
 
 SHELL ["/bin/sh", "-c"]
+
+RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.6.5
@@ -152,6 +155,8 @@ RUN prepare-tool docker
 RUN install-tool git v2.43.0
 
 USER 1000
+
+RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
 ARG IGNORED_TOOLS=powershell,node
 
@@ -237,7 +242,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 FROM base
 
 COPY --from=testa /.dummy /.dummy
-COPY --from=testb /.dummy /.dummy
+COPY --from=testb-gitpod /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy

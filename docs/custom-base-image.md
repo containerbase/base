@@ -15,7 +15,7 @@ Use this template for using a custom base image with our default user named `ubu
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:focal as base
+FROM amd64/ubuntu:jammy as base
 
 # Allows custom apt proxy usage
 ARG APT_HTTP_PROXY
@@ -58,7 +58,7 @@ You can also customize username or userid by using this template.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:focal as base
+FROM amd64/ubuntu:jammy as base
 
 # The containerbase supports custom user
 ARG USER_NAME=custom
@@ -94,4 +94,41 @@ WORKDIR /usr/src/app
 
 # must be numeric if this should work with openshift
 USER 1005
+```
+
+## Custom primary group id
+
+By default the primary group id is `0` to support OpenShift.
+You can change the primary group id by setting `PRIMARY_GROUP_ID` build arg.
+This is is required for gitpod, where the primary group id must be `33333`.
+The group must already exist.
+
+```dockerfile
+# This containerbase is used for tool intallation and user/directory setup
+FROM containerbase/base AS containerbase
+
+FROM amd64/ubuntu:jammy as base
+
+ARG USER_NAME=gitpod
+ARG USER_ID=33333
+ARG PRIMARY_GROUP_ID=33333
+
+# Set env and shell
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
+SHELL ["/bin/bash" , "-c"]
+
+# This entry point ensures that dumb-init is run
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+CMD [ "bash" ]
+
+# Set up containerbase
+COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
+RUN install-containerbase
+
+
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.30.0
+
+USER $USER_NAME
 ```

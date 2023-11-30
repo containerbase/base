@@ -24,6 +24,8 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "${DIR}/utils/install.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/prepare.sh"
+# shellcheck source=/dev/null
+. "${DIR}/utils/user.sh"
 
 check_debug() {
   local bool="${CONTAINERBASE_DEBUG:-false}"
