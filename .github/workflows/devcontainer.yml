@@ -1,4 +1,4 @@
-name: DevContainer
+name: devcontainer
 on:
   push:
     branches:
