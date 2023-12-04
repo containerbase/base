@@ -37,8 +37,9 @@ export class InstallRenovateService extends InstallNodeBaseService {
 
   override prepareEnv(tmp: string): NodeJS.ProcessEnv {
     const env = super.prepareEnv(tmp);
-    env.RE2_DOWNLOAD_MIRROR =
-      'https://github.com/containerbase/node-re2-prebuild/releases/download';
+    env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
+      'https://github.com/containerbase/node-re2-prebuild/releases/download',
+    );
     env.RE2_DOWNLOAD_SKIP_PATH = '1';
     return env;
   }
