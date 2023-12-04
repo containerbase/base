@@ -159,6 +159,7 @@ https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-arm64.tar.xz
 Npm tools are downloaded from:
 
 - `https://registry.npmjs.org`
+- `https://github.com/containerbase/node-re2-prebuild/releases/download` (renovate only)
 
 Those tools are installed via `npm` package manager.
 
@@ -174,6 +175,13 @@ Known tools:
 - `yarn-slim`
 
 The `install-npm` command uses those urls too.
+
+Renovate additionally uses the following urls for downloading `re2` binaries.
+
+```txt
+https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-arm64-115.br
+https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-x64-108.br
+```
 
 ## ruby
 

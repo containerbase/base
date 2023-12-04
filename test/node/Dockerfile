@@ -25,7 +25,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=node
-RUN install-tool node v18.18.2
+RUN install-tool node v20.10.0
 
 USER 1000
 
@@ -53,8 +53,9 @@ RUN npm --version
 ## Test for #136
 USER 0
 
+ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # renovate: datasource=npm
-RUN npm install -g re2@1.20.0
+RUN npm install -g re2@1.20.9
 
 #--------------------------------------
 # test: yarn
@@ -79,18 +80,12 @@ USER root
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
-# renovate: datasource=npm
-RUN install-tool lerna 7.4.2
-
 USER 1000
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
-RUN set -ex; \
-  [ "$(command -v lerna)" = "/usr/local/bin/lerna" ] && echo "works" || exit 1; \
-  lerna --version
 
 #--------------------------------------
 # test: pnpm
@@ -126,7 +121,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v20.10.0
+RUN install-tool node v18.18.2
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -259,7 +254,8 @@ RUN install-tool npm 6.14.15
 RUN node --version
 RUN npm --version
 RUN npm --version | grep '6.14.15'
-RUN set -ex; cd a; npm install
+# ignore scripts to speedup test (re2 is no longer compatible with node 14)
+RUN set -ex; cd a; npm install --ignore-scripts
 
 #--------------------------------------
 # test: openshift yarn
@@ -283,16 +279,9 @@ SHELL [ "/bin/sh", "-c" ]
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
-# renovate: datasource=npm
-RUN install-tool lerna 7.4.2
-
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
-
-RUN set -ex; \
-  [ "$(command -v lerna)" = "/usr/local/bin/lerna" ] && echo "works" || exit 1; \
-  lerna --version
 
 RUN install-tool yarn 1.22.15
 
@@ -480,12 +469,15 @@ RUN set -ex; \
 FROM build as testq
 
 
-# renovate: datasource=npm
-RUN install-tool renovate 37.81.4
+# renovate: datasource=npm depName=renovate
+ARG RENOVATE_VERSION=37.81.4
+RUN install-tool renovate
 
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
+  ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/node_modules ./node_modules; \
+  node -e "new require('re2')('.*').exec('test'); console.log('re2 usable')"; \
   true
 
 #--------------------------------------

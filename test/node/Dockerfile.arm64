@@ -24,13 +24,6 @@ FROM base as test-node
 # renovate: datasource=node
 RUN install-tool node v20.10.0
 
-#--------------------------------------
-# Image: lerna
-#--------------------------------------
-FROM test-node as test-lerna
-
-# renovate: datasource=npm
-RUN install-tool lerna 7.4.2
 
 #--------------------------------------
 # Image: pnpm
@@ -49,13 +42,23 @@ FROM test-node as test-yarn
 RUN install-tool yarn 1.22.21
 
 #--------------------------------------
+# Image: renovate
+#--------------------------------------
+FROM test-node as test-renovate
+
+# renovate: datasource=npm
+RUN install-tool renovate 37.81.4
+
+# ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
+# # renovate: datasource=npm
+# RUN npm install -g re2@1.20.9
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
 
 COPY --from=test-node /.dummy /.dummy
-# fails locally
-# COPY --from=test-lerna /.dummy /.dummy
 COPY --from=test-pnpm /.dummy /.dummy
 COPY --from=test-yarn /.dummy /.dummy
-
+COPY --from=test-renovate /.dummy /.dummy

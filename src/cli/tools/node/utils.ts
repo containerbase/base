@@ -53,6 +53,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
         prefix,
         '--cache',
         tmp,
+        ...this.getAdditionalArgs(),
       ],
       { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
@@ -126,6 +127,10 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     }
 
     return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
+  }
+
+  protected getAdditionalArgs(): string[] {
+    return [];
   }
 
   protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
