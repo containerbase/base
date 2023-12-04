@@ -254,7 +254,8 @@ RUN install-tool npm 6.14.15
 RUN node --version
 RUN npm --version
 RUN npm --version | grep '6.14.15'
-RUN set -ex; cd a; npm install
+# ignore scripts to speedup test (re2 is no longer compatible with node 14)
+RUN set -ex; cd a; npm install --ignore-scripts
 
 #--------------------------------------
 # test: openshift yarn
