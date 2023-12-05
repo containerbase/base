@@ -54,7 +54,7 @@ runs:
     - name: 📥 Install dependencies
       if: env.CACHE_HIT != 'true'
       shell: bash
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
       env:
         # Other environment variables
         HUSKY: '0' # By default do not run HUSKY install
