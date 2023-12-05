@@ -1,64 +1,30 @@
-import { Command, Option } from 'clipanion';
+import { Command } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import * as t from 'typanion';
 import { installTool } from '../install-tool';
-import { logger, validateVersion } from '../utils';
-import { getVersion } from './utils';
+import { logger } from '../utils';
+import { InstallToolBaseCommand } from './utils';
 
-abstract class InstallToolBaseCommand extends Command {
+export class InstallToolCommand extends InstallToolBaseCommand {
   static override paths = [['install', 'tool'], ['it']];
 
-  name = Option.String();
-
-  dryRun = Option.Boolean('-d,--dry-run', false);
-}
-
-export class InstallToolEnvCommand extends InstallToolBaseCommand {
   static override usage = Command.Usage({
     description: 'Installs a tool into the container.',
     examples: [
+      ['Installs node 14.17.0', '$0 install tool node 14.17.0'],
       [
         'Installs node with version via environment variable',
         'NODE_VERSION=14.17.0 $0 install tool node',
       ],
+      ['Installs latest pnpm version', '$0 install tool pnpm'],
     ],
   });
 
-  override async execute(): Promise<number | void> {
-    const version = getVersion(this.name);
-
-    if (!version) {
-      logger.fatal(`No version found for ${this.name}`);
-      return 1;
-    }
-
-    logger.debug("Forwarding to 'install tool' command");
-    return await this.cli.run([
-      ...this.path,
-      ...(this.dryRun ? ['-d'] : []),
-      this.name,
-      version,
-    ]);
-  }
-}
-
-export class InstallToolCommand extends InstallToolBaseCommand {
-  static override usage = Command.Usage({
-    description: 'Installs a tool into the container.',
-    examples: [['Installs node 14.17.0', '$0 install tool node 14.17.0']],
-  });
-
-  version = Option.String({
-    validator: t.cascade(t.isString(), validateVersion()),
-  });
-
-  override async execute(): Promise<number | void> {
+  override async _execute(version: string | undefined): Promise<number | void> {
     const start = Date.now();
     let error = false;
-
-    logger.info(`Installing tool ${this.name} v${this.version}...`);
+    logger.info(`Installing tool ${this.name}@${version ?? 'latest'}...`);
     try {
-      return await installTool(this.name, this.version, this.dryRun);
+      return await installTool(this.name, version, this.dryRun);
     } catch (err) {
       logger.fatal(err);
       error = true;
@@ -73,24 +39,17 @@ export class InstallToolCommand extends InstallToolBaseCommand {
   }
 }
 
-export class InstallToolShortEnvCommand extends InstallToolEnvCommand {
-  static override paths = [Command.Default];
-
-  static override usage = Command.Usage({
-    description: 'Installs a tool into the container.',
-    examples: [
-      [
-        'Installs node with version via environment variable',
-        'NODE_VERSION=14.17.0 $0 node',
-      ],
-    ],
-  });
-}
-
 export class InstallToolShortCommand extends InstallToolCommand {
   static override paths = [Command.Default];
   static override usage = Command.Usage({
     description: 'Installs a tool into the container.',
-    examples: [['Installs node v14.17.0', '$0 node 14.17.0']],
+    examples: [
+      ['Installs node v14.17.0', '$0 node 14.17.0'],
+      [
+        'Installs node with version via environment variable',
+        'NODE_VERSION=14.17.0 $0 node',
+      ],
+      ['Installs latest pnpm version', '$0 pnpm'],
+    ],
   });
 }

@@ -20,10 +20,11 @@ describe('index', () => {
     const cli = new Cli({ binaryName: 'install-tool' });
     prepareCommands(cli, 'install-tool');
 
-    expect(await cli.run(['node'])).toBe(1);
+    expect(await cli.run(['node'])).toBe(0);
     env.NODE_VERSION = '16.13.0';
     expect(await cli.run(['node'])).toBe(0);
-    expect(mocks.installTool).toHaveBeenCalledOnce();
+    expect(mocks.installTool).toHaveBeenCalledTimes(2);
+    expect(mocks.installTool).toHaveBeenCalledWith('node', undefined, false);
     expect(mocks.installTool).toHaveBeenCalledWith('node', '16.13.0', false);
     expect(await cli.run(['node', '-d'])).toBe(0);
 

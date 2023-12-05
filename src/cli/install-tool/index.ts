@@ -67,7 +67,7 @@ function prepareContainer(): Container {
 
 export function installTool(
   tool: string,
-  version: string,
+  version: string | undefined,
   dryRun = false,
   type?: InstallToolType,
 ): Promise<number | void> {

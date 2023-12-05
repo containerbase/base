@@ -1,62 +1,31 @@
-import { Command, Option } from 'clipanion';
+import { Command } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import * as t from 'typanion';
 import { installTool } from '../install-tool';
-import { logger, validateVersion } from '../utils';
-import { getVersion } from './utils';
+import { logger } from '../utils';
+import { InstallToolBaseCommand } from './utils';
 
-export class InstallGemEnvCommand extends Command {
-  static override paths = [['install', 'gem']];
-
+export class InstallGemCommand extends InstallToolBaseCommand {
   static override usage = Command.Usage({
     description: 'Installs a gem package into the container.',
     examples: [
+      ['Installs rake 13.0.6', '$0 install gem rake 13.0.6'],
       [
         'Installs rake with version via environment variable',
         'RAKE_VERSION=13.0.6 $0 install gem rake',
       ],
+      // ['Installs latest rake version', '$0 install gem rake'], // not yet supported
     ],
   });
 
-  name = Option.String();
-
-  dryRun = Option.Boolean('-d,--dry-run', false);
-
-  override async execute(): Promise<number | void> {
-    const version = getVersion(this.name);
-
-    if (!version) {
-      logger.fatal(`No version found for ${this.name}`);
-      return 1;
-    }
-
-    return await this.cli.run([
-      ...this.path,
-      ...(this.dryRun ? ['-d'] : []),
-      this.name,
-      version,
-    ]);
-  }
-}
-
-export class InstallGemCommand extends InstallGemEnvCommand {
-  static override usage = Command.Usage({
-    description: 'Installs a gem package into the container.',
-    examples: [['Installs rake 13.0.6', '$0 install gem rake 13.0.6']],
-  });
-
-  version = Option.String({
-    required: true,
-    validator: t.cascade(t.isString(), validateVersion()),
-  });
-
-  override async execute(): Promise<number | void> {
+  override async _execute(version: string | undefined): Promise<number | void> {
     const start = Date.now();
     let error = false;
 
-    logger.info(`Installing gem package ${this.name} v${this.version}...`);
+    logger.info(
+      `Installing gem package ${this.name}@${version ?? 'latest'}...`,
+    );
     try {
-      return await installTool(this.name, this.version, this.dryRun, 'gem');
+      return await installTool(this.name, version, this.dryRun, 'gem');
     } catch (err) {
       logger.fatal(err);
       error = true;
@@ -71,25 +40,18 @@ export class InstallGemCommand extends InstallGemEnvCommand {
   }
 }
 
-export class InstallGemShortEnvCommand extends InstallGemEnvCommand {
-  static override paths = [Command.Default];
-
-  static override usage = Command.Usage({
-    description: 'Installs a gem package into the container.',
-    examples: [
-      [
-        'Installs rake with version via environment variable',
-        'RAKE_VERSION=13.0.6 $0 rake',
-      ],
-    ],
-  });
-}
-
 export class InstallGemShortCommand extends InstallGemCommand {
   static override paths = [Command.Default];
 
   static override usage = Command.Usage({
     description: 'Installs a gem package into the container.',
-    examples: [['Installs rake v13.0.6', '$0 rake 13.0.6']],
+    examples: [
+      ['Installs rake v13.0.6', '$0 rake 13.0.6'],
+      [
+        'Installs rake with version via environment variable',
+        'RAKE_VERSION=13.0.6 $0 rake',
+      ],
+      // ['Installs latest rake version', '$0 rake'], // not yet supported
+    ],
   });
 }

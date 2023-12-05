@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import is from '@sindresorhus/is';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
 import { NoPrepareTools } from '../tools';
@@ -21,6 +22,13 @@ export abstract class InstallToolBaseService {
     protected readonly pathSvc: PathService,
     protected readonly envSvc: EnvService,
   ) {}
+
+  findVersion(version: string | undefined): Promise<string | undefined> {
+    if (is.nonEmptyStringAndNotWhitespace(version)) {
+      return Promise.resolve(version);
+    }
+    return Promise.resolve(undefined);
+  }
 
   abstract install(version: string): Promise<void>;
 

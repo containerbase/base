@@ -20,11 +20,17 @@ describe('index', () => {
     const cli = new Cli({ binaryName: 'install-gem' });
     prepareCommands(cli, 'install-gem');
 
-    expect(await cli.run(['rake'])).toBe(1);
+    expect(await cli.run(['rake'])).toBe(0);
 
     env.RAKE_VERSION = '13.0.6';
     expect(await cli.run(['rake'])).toBe(0);
-    expect(mocks.installTool).toHaveBeenCalledOnce();
+    expect(mocks.installTool).toHaveBeenCalledTimes(2);
+    expect(mocks.installTool).toHaveBeenCalledWith(
+      'rake',
+      undefined,
+      false,
+      'gem',
+    );
     expect(mocks.installTool).toHaveBeenCalledWith(
       'rake',
       '13.0.6',

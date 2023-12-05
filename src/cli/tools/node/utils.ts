@@ -6,10 +6,20 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { EnvService, PathService, VersionService } from '../../services';
+import {
+  EnvService,
+  HttpService,
+  PathService,
+  VersionService,
+} from '../../services';
 import { fileExists, logger, parse } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
+
+interface NpmPackageMeta {
+  'dist-tags': Record<string, string>;
+  name: string;
+}
 
 @injectable()
 export abstract class InstallNodeBaseService extends InstallToolBaseService {
@@ -21,8 +31,27 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(VersionService) protected versionSvc: VersionService,
+    @inject(HttpService) protected http: HttpService,
   ) {
     super(pathSvc, envSvc);
+  }
+
+  override async findVersion(
+    version: string | undefined,
+  ): Promise<string | undefined> {
+    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      const meta = await this.http.getJson<NpmPackageMeta>(
+        `https://registry.npmjs.org/${this.tool}`,
+        {
+          headers: {
+            accept:
+              'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
+          },
+        },
+      );
+      return Promise.resolve(meta['dist-tags'].latest);
+    }
+    return Promise.resolve(version);
   }
 
   override async install(version: string): Promise<void> {
@@ -65,12 +94,15 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     }
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
-
-    const ver = parse(version);
-
-    if (this.name === 'npm' && ver.major < 7) {
-      // update to latest node-gyp to fully support python3
-      await this.updateNodeGyp(prefix, tmp, env);
+    if (this.name === 'npm') {
+      const pkg = await readPackageJson(
+        join(prefix, 'node_modules', this.tool),
+      );
+      const ver = parse(pkg.version);
+      if (ver.major < 7) {
+        // update to latest node-gyp to fully support python3
+        await this.updateNodeGyp(prefix, tmp, env);
+      }
     }
 
     await fs.rm(tmp, { recursive: true, force: true });
