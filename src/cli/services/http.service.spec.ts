@@ -106,7 +106,11 @@ describe('http.service', () => {
   });
 
   test('replaces url', async () => {
-    scope('https://example.org').get('/replace.txt').reply(200, 'ok');
+    scope('https://example.org')
+      .get('/replace.txt')
+      .reply(200, 'ok')
+      .head('/replace.txt')
+      .reply(200);
 
     env.URL_REPLACE_0_FROM = baseUrl;
     env.URL_REPLACE_0_TO = 'https://example.test';
@@ -132,6 +136,8 @@ describe('http.service', () => {
     expect(await http.download({ url: `${baseUrl}/replace.txt` })).toBe(
       expected,
     );
+
+    expect(await http.exists(`${baseUrl}/replace.txt`)).toBe(true);
 
     expect(logger.warn).toHaveBeenCalledWith(
       'Invalid URL replacement: URL_REPLACE_1_FROM=https://example.test URL_REPLACE_1_TO=undefined',

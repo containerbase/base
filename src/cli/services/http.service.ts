@@ -111,7 +111,7 @@ export class HttpService {
 
   async exists(url: string): Promise<boolean> {
     try {
-      await got.head(url, this._opts);
+      await got.head(this.envSvc.replaceUrl(url), this._opts);
       return true;
     } catch (err) {
       if (err instanceof HTTPError && err.response?.statusCode === 404) {
