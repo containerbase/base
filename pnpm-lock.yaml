@@ -66,9 +66,9 @@ devDependencies:
   '@semantic-release/exec':
     specifier: 6.0.3
     version: 6.0.3(semantic-release@22.0.8)
-  '@tsconfig/node18':
-    specifier: 18.2.2
-    version: 18.2.2
+  '@tsconfig/node20':
+    specifier: 20.1.2
+    version: 20.1.2
   '@tsconfig/strictest':
     specifier: 2.0.2
     version: 2.0.2
@@ -902,8 +902,8 @@ packages:
       defer-to-connect: 2.0.1
     dev: false
 
-  /@tsconfig/node18@18.2.2:
-    resolution: {integrity: sha512-d6McJeGsuoRlwWZmVIeE8CUA27lu6jLjvv1JzqmpsytOYYbVi1tHZEnwCNVOXnj4pyLvneZlFlpXUK+X9wBWyw==}
+  /@tsconfig/node20@20.1.2:
+    resolution: {integrity: sha512-madaWq2k+LYMEhmcp0fs+OGaLFk0OenpHa4gmI4VEmCKX4PJntQ6fnnGADVFrVkBj0wIdAlQnK/MrlYTHsa1gQ==}
     dev: true
 
   /@tsconfig/strictest@2.0.2:
