@@ -73,6 +73,10 @@ export class EnvService {
     return this.isRoot ? 0o755 : 0o775;
   }
 
+  get version(): string {
+    return globalThis.CONTAINERBASE_VERSION ?? 'dev';
+  }
+
   get skipTests(): boolean {
     return !!env.SKIP_VERSION;
   }
