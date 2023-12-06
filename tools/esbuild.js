@@ -3,11 +3,13 @@ import { exec } from '@yao-pkg/pkg';
 import { build } from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
 
+const nodeVersion = 20;
+
 await build({
   entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
   bundle: true,
   platform: 'node',
-  target: 'node18',
+  target: `node${nodeVersion}`,
   minify: false,
   tsconfig: 'tsconfig.dist.json',
   // format: "esm", // not supported https://github.com/vercel/pkg/issues/1291
@@ -33,7 +35,10 @@ await fs.writeFile(
       },
       pkg: {
         scripts: ['pino-*.js', 'thread-stream-worker.js'],
-        targets: ['node18-linux-x64', 'node18-linux-arm64'],
+        targets: [
+          `node${nodeVersion}-linux-x64`,
+          `node${nodeVersion}-linux-arm64`,
+        ],
         patches: {
           './containerbase-cli.js': [
             'pinoBundlerAbsolutePath("./pino-file.js")',
