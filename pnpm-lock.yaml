@@ -103,8 +103,8 @@ devDependencies:
     specifier: 0.34.7
     version: 0.34.7(vitest@0.34.6)
   '@yao-pkg/pkg':
-    specifier: 5.10.0
-    version: 5.10.0
+    specifier: 5.11.0
+    version: 5.11.0
   bats:
     specifier: 1.10.0
     version: 1.10.0
@@ -1331,8 +1331,8 @@ packages:
       pretty-format: 29.7.0
     dev: true
 
-  /@yao-pkg/pkg-fetch@3.5.6:
-    resolution: {integrity: sha512-8/RcR0OO44CZbmiwsplcpM3QC/tikpKXaZsoswb9ifIOd9oGM+2ZsffNWzVDfJmRDF1j/wjAu/9EyXvTU1HDgA==}
+  /@yao-pkg/pkg-fetch@3.5.7:
+    resolution: {integrity: sha512-DhuvjBZsdrUrkXC+eYZljxCxZ8QrjPQRGhJEA8+hUsKhmPyg+FUn6ebOfN6B7ioiJg7GsVpUJt57hALBCj9epA==}
     hasBin: true
     dependencies:
       chalk: 4.1.2
@@ -1348,14 +1348,14 @@ packages:
       - supports-color
     dev: true
 
-  /@yao-pkg/pkg@5.10.0:
-    resolution: {integrity: sha512-R0Rz2NrRaOnh0CghEFvCq9kz/fQh9Ih/S10oJwiSO8WurDJ7DYTvef7mEE8tvQpAFu7T0aL0utPos5IENLy2/w==}
+  /@yao-pkg/pkg@5.11.0:
+    resolution: {integrity: sha512-+lxJyyyou1t9A8ZFKqJF0kGNtq09Mz8Bx+J6iFEOvIrZSKPuGUQP4dwv3JziAHbSKGFp4RWbo0UFkc0n4JoxDA==}
     hasBin: true
     dependencies:
       '@babel/generator': 7.23.0
       '@babel/parser': 7.23.0
       '@babel/types': 7.23.0
-      '@yao-pkg/pkg-fetch': 3.5.6
+      '@yao-pkg/pkg-fetch': 3.5.7
       chalk: 4.1.2
       fs-extra: 9.1.0
       globby: 11.1.0
