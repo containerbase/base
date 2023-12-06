@@ -19,7 +19,6 @@ env:
   FILE: base
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
-  NODE_VERSION: 20.10.0 # renovate: datasource=node depName=node
   CONTAINERBASE_VERSION: ${{ github.sha }}
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
@@ -64,8 +63,6 @@ jobs:
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Docker registry login
         if: github.ref_name == 'main'
