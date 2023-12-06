@@ -96,8 +96,7 @@ describe('http.service', () => {
       .head('/test.txt')
       .reply(404)
       .head('/test.txt')
-      .times(3)
-      .reply(500);
+      .reply(501);
 
     const http = child.get(HttpService);
     expect(await http.exists(`${baseUrl}/test.txt`)).toBe(true);
@@ -105,8 +104,54 @@ describe('http.service', () => {
     await expect(http.exists(`${baseUrl}/test.txt`)).rejects.toThrow();
   });
 
+  test(
+    'get',
+    async () => {
+      scope(baseUrl, { reqheaders: { 'x-test': 'test' } })
+        .get('/test.txt')
+        .reply(200, 'test')
+        .get('/test.txt')
+        .times(3)
+        .reply(501);
+
+      const http = child.get(HttpService);
+      expect(
+        await http.get(`${baseUrl}/test.txt`, {
+          headers: { 'x-test': 'test' },
+        }),
+      ).toBe('test');
+      await expect(
+        http.get(`${baseUrl}/test.txt`, { headers: { 'x-test': 'test' } }),
+      ).rejects.toThrow();
+    },
+    10 * 1000,
+  );
+
+  test('getJson', async () => {
+    scope(baseUrl, { reqheaders: { 'x-test': 'test' } })
+      .get('/test.json')
+      .reply(200, { test: true })
+      .get('/test.json')
+      .times(3)
+      .reply(501);
+
+    const http = child.get(HttpService);
+    expect(
+      await http.getJson(`${baseUrl}/test.json`, {
+        headers: { 'x-test': 'test' },
+      }),
+    ).toEqual({ test: true });
+    await expect(
+      http.getJson(`${baseUrl}/test.json`, { headers: { 'x-test': 'test' } }),
+    ).rejects.toThrow();
+  });
+
   test('replaces url', async () => {
-    scope('https://example.org').get('/replace.txt').reply(200, 'ok');
+    scope('https://example.org')
+      .get('/replace.txt')
+      .reply(200, 'ok')
+      .head('/replace.txt')
+      .reply(200);
 
     env.URL_REPLACE_0_FROM = baseUrl;
     env.URL_REPLACE_0_TO = 'https://example.test';
@@ -132,6 +177,8 @@ describe('http.service', () => {
     expect(await http.download({ url: `${baseUrl}/replace.txt` })).toBe(
       expected,
     );
+
+    expect(await http.exists(`${baseUrl}/replace.txt`)).toBe(true);
 
     expect(logger.warn).toHaveBeenCalledWith(
       'Invalid URL replacement: URL_REPLACE_1_FROM=https://example.test URL_REPLACE_1_TO=undefined',

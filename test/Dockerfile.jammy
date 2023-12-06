@@ -54,7 +54,7 @@ RUN install-tool flux v2.1.2
 RUN install-tool git-lfs v3.4.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.21.4
+RUN install-tool golang 1.21.5
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.13.2
@@ -84,7 +84,7 @@ RUN install-tool terraform 1.6.5
 RUN install-tool jb v0.5.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.37.0
+RUN install-tool vendir v0.38.0
 
 #--------------------------------------
 # Image: test-erlang

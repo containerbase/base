@@ -1,6 +1,7 @@
 import { createWriteStream } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import merge from 'deepmerge';
 import {
@@ -30,14 +31,21 @@ export interface HttpDownloadConfig {
   fileName?: string;
 }
 
-const _opts: OptionsInit = {};
-
 @injectable()
 export class HttpService {
+  private _opts: Pick<OptionsInit, 'headers'>;
   constructor(
     @inject(EnvService) private envSvc: EnvService,
     @inject(PathService) private pathSvc: PathService,
-  ) {}
+  ) {
+    this._opts = {
+      headers: {
+        'user-agent': `containerbase/${
+          this.envSvc.version
+        } node/${version.replace(/^v/, '')} (https://github.com/containerbase)`,
+      },
+    };
+  }
 
   async download({
     url,
@@ -78,7 +86,10 @@ export class HttpService {
 
     for (const run of [1, 2, 3]) {
       try {
-        await pipeline(got.stream(nUrl), createWriteStream(filePath));
+        await pipeline(
+          got.stream(nUrl, this._opts),
+          createWriteStream(filePath),
+        );
         if (expectedChecksum && checksumType) {
           const actualChecksum = await hashFile(filePath, checksumType);
 
@@ -107,7 +118,7 @@ export class HttpService {
 
   async exists(url: string): Promise<boolean> {
     try {
-      await got.head(url);
+      await got.head(this.envSvc.replaceUrl(url), this._opts);
       return true;
     } catch (err) {
       if (err instanceof HTTPError && err.response?.statusCode === 404) {
@@ -128,11 +139,11 @@ export class HttpService {
       try {
         return await got
           .get(
+            nUrl,
             merge.all([
-              _opts,
+              this._opts,
               opts,
               {
-                url: nUrl,
                 resolveBodyOnly: false,
               },
             ]),
@@ -159,7 +170,7 @@ export class HttpService {
         return await got
           .get(
             merge.all([
-              _opts,
+              this._opts,
               opts,
               {
                 url: nUrl,
