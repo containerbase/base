@@ -1,10 +1,13 @@
-import { Command } from 'clipanion';
+import is from '@sindresorhus/is';
+import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import { installTool } from '../install-tool';
-import { logger } from '../utils';
-import { InstallToolBaseCommand } from './utils';
+import * as t from 'typanion';
+import { type InstallToolType, installTool } from '../install-tool';
+import { logger, validateVersion } from '../utils';
+import { MissingVersion } from '../utils/codes';
+import { getVersion } from './utils';
 
-export class InstallToolCommand extends InstallToolBaseCommand {
+export class InstallToolCommand extends Command {
   static override paths = [['install', 'tool'], ['it']];
 
   static override usage = Command.Usage({
@@ -19,19 +22,41 @@ export class InstallToolCommand extends InstallToolBaseCommand {
     ],
   });
 
-  override async _execute(version: string): Promise<number | void> {
+  name = Option.String();
+
+  dryRun = Option.Boolean('-d,--dry-run', false);
+
+  version = Option.String({
+    validator: t.cascade(t.isString(), validateVersion()),
+    required: false,
+  });
+
+  protected type: InstallToolType | undefined;
+
+  override async execute(): Promise<number | void> {
+    let version = this.version;
+
+    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+      version = getVersion(this.name);
+    }
+
+    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+      logger.error(`No version found for ${this.name}`);
+      return MissingVersion;
+    }
+
     const start = Date.now();
     let error = false;
-    logger.info(`Installing tool ${this.name}@${version}...`);
+    logger.info(`Installing ${this.type ?? 'tool'} ${this.name}@${version}...`);
     try {
-      return await installTool(this.name, version, this.dryRun);
+      return await installTool(this.name, version, this.dryRun, this.type);
     } catch (err) {
       logger.fatal(err);
       error = true;
       return 1;
     } finally {
       logger.info(
-        `Installed tool ${this.name} ${
+        `Installed ${this.type ?? 'tool'} ${this.name} ${
           error ? 'with errors ' : ''
         }in ${prettyMilliseconds(Date.now() - start)}.`,
       );

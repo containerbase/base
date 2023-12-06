@@ -25,7 +25,12 @@ describe('index', () => {
     env.NODE_VERSION = '16.13.0';
     expect(await cli.run(['node'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
-    expect(mocks.installTool).toHaveBeenCalledWith('node', '16.13.0', false);
+    expect(mocks.installTool).toHaveBeenCalledWith(
+      'node',
+      '16.13.0',
+      false,
+      undefined,
+    );
     expect(await cli.run(['node', '-d'])).toBe(0);
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
