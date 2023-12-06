@@ -1,9 +1,6 @@
 name: 'Setup Node.js'
 description: 'Setup Node and install dependencies using cache'
 inputs:
-  node-version:
-    description: 'Node version to use'
-    required: true
   save-cache:
     description: 'Save cache when needed'
     required: false
@@ -21,9 +18,7 @@ runs:
       shell: bash
       run: |
         echo 'CACHE_KEY=node_modules-${{
-          inputs.node-version
-        }}-${{
-          hashFiles('pnpm-lock.yaml')
+          hashFiles('.node-version', 'pnpm-lock.yaml')
         }}' >> "$GITHUB_ENV"
 
     - name: ♻️ Restore `node_modules`
@@ -41,10 +36,10 @@ runs:
           (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
         }}' >> "$GITHUB_ENV"
 
-    - name: ⚙️ Setup Node.js ${{ inputs.node-version }}
+    - name: ⚙️ Setup Node.js
       uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version-file: .node-version
         cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: ⚙️ Enable Corepack
