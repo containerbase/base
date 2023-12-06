@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import * as t from 'typanion';
 import { logger, validateVersion } from '../utils';
+import { MissingVersion } from '../utils/codes';
 
 export function getVersion(tool: string): string | undefined {
   return env[tool.replace('-', '_').toUpperCase() + '_VERSION'];
@@ -26,11 +27,10 @@ export abstract class InstallToolBaseCommand extends Command {
     }
 
     if (!is.nonEmptyStringAndNotWhitespace(version)) {
-      logger.debug(`No version found for ${this.name}`);
+      logger.error(`No version found for ${this.name}`);
+      return Promise.resolve(MissingVersion);
     }
     return this._execute(version);
   }
-  protected abstract _execute(
-    version: string | undefined,
-  ): Promise<number | void>;
+  protected abstract _execute(version: string): Promise<number | void>;
 }

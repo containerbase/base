@@ -1,9 +1,7 @@
-import is from '@sindresorhus/is';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { MissingVersion } from '../utils/codes';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import type { InstallToolBaseService } from './install-tool-base.service';
 
@@ -24,7 +22,7 @@ export class InstallToolService {
 
   async execute(
     tool: string,
-    version: string | undefined,
+    version: string,
     dryRun = false,
   ): Promise<number | void> {
     logger.debug(
@@ -40,13 +38,6 @@ export class InstallToolService {
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       if (toolSvc) {
-        // eslint-disable-next-line no-param-reassign
-        version = await toolSvc.findVersion(version);
-        if (!is.nonEmptyStringAndNotWhitespace(version)) {
-          logger.error('Missing version to install');
-          return MissingVersion;
-        }
-
         if (await toolSvc.isInstalled(version)) {
           logger.info({ tool }, 'tool already installed');
           await this.linkAndTest(toolSvc, version);
@@ -80,10 +71,6 @@ export class InstallToolService {
           await this.linkAndTest(toolSvc, version);
         }
       } else {
-        if (!is.nonEmptyStringAndNotWhitespace(version)) {
-          logger.error('Missing version to install');
-          return MissingVersion;
-        }
         if (dryRun) {
           logger.info(`Dry run: install tool ${tool} v${version} ...`);
           return;

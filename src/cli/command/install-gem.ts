@@ -17,13 +17,11 @@ export class InstallGemCommand extends InstallToolBaseCommand {
     ],
   });
 
-  override async _execute(version: string | undefined): Promise<number | void> {
+  override async _execute(version: string): Promise<number | void> {
     const start = Date.now();
     let error = false;
 
-    logger.info(
-      `Installing gem package ${this.name}@${version ?? 'latest'}...`,
-    );
+    logger.info(`Installing gem package ${this.name}@${version}...`);
     try {
       return await installTool(this.name, version, this.dryRun, 'gem');
     } catch (err) {

@@ -16,11 +16,6 @@ import { fileExists, logger, parse } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
-interface NpmPackageMeta {
-  'dist-tags': Record<string, string>;
-  name: string;
-}
-
 @injectable()
 export abstract class InstallNodeBaseService extends InstallToolBaseService {
   protected get tool(): string {
@@ -34,24 +29,6 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     @inject(HttpService) protected http: HttpService,
   ) {
     super(pathSvc, envSvc);
-  }
-
-  override async findVersion(
-    version: string | undefined,
-  ): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const meta = await this.http.getJson<NpmPackageMeta>(
-        `https://registry.npmjs.org/${this.tool}`,
-        {
-          headers: {
-            accept:
-              'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
-          },
-        },
-      );
-      return Promise.resolve(meta['dist-tags'].latest);
-    }
-    return Promise.resolve(version);
   }
 
   override async install(version: string): Promise<void> {

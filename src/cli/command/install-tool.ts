@@ -19,10 +19,10 @@ export class InstallToolCommand extends InstallToolBaseCommand {
     ],
   });
 
-  override async _execute(version: string | undefined): Promise<number | void> {
+  override async _execute(version: string): Promise<number | void> {
     const start = Date.now();
     let error = false;
-    logger.info(`Installing tool ${this.name}@${version ?? 'latest'}...`);
+    logger.info(`Installing tool ${this.name}@${version}...`);
     try {
       return await installTool(this.name, version, this.dryRun);
     } catch (err) {
