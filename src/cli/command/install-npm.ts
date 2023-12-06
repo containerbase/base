@@ -1,10 +1,7 @@
 import { Command } from 'clipanion';
-import prettyMilliseconds from 'pretty-ms';
-import { installTool } from '../install-tool';
-import { logger } from '../utils';
-import { InstallToolBaseCommand } from './utils';
+import { InstallToolCommand } from './install-tool';
 
-export class InstallNpmCommand extends InstallToolBaseCommand {
+export class InstallNpmCommand extends InstallToolCommand {
   static override paths = [['install', 'npm']];
   static override usage = Command.Usage({
     description: 'Installs a npm package into the container.',
@@ -18,27 +15,7 @@ export class InstallNpmCommand extends InstallToolBaseCommand {
     ],
   });
 
-  override async _execute(version: string | undefined): Promise<number | void> {
-    const start = Date.now();
-    let error = false;
-
-    logger.info(
-      `Installing npm package ${this.name}@${version ?? 'latest'}...`,
-    );
-    try {
-      return await installTool(this.name, version, this.dryRun, 'npm');
-    } catch (err) {
-      logger.fatal(err);
-      error = true;
-      return 1;
-    } finally {
-      logger.info(
-        `Installed npm package ${this.name} ${
-          error ? 'with errors ' : ''
-        }in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
-    }
-  }
+  protected override type = 'npm' as const;
 }
 
 export class InstallNpmShortCommand extends InstallNpmCommand {

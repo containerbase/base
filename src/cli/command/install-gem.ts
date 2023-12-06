@@ -1,10 +1,7 @@
 import { Command } from 'clipanion';
-import prettyMilliseconds from 'pretty-ms';
-import { installTool } from '../install-tool';
-import { logger } from '../utils';
-import { InstallToolBaseCommand } from './utils';
+import { InstallToolCommand } from './install-tool';
 
-export class InstallGemCommand extends InstallToolBaseCommand {
+export class InstallGemCommand extends InstallToolCommand {
   static override usage = Command.Usage({
     description: 'Installs a gem package into the container.',
     examples: [
@@ -17,27 +14,7 @@ export class InstallGemCommand extends InstallToolBaseCommand {
     ],
   });
 
-  override async _execute(version: string | undefined): Promise<number | void> {
-    const start = Date.now();
-    let error = false;
-
-    logger.info(
-      `Installing gem package ${this.name}@${version ?? 'latest'}...`,
-    );
-    try {
-      return await installTool(this.name, version, this.dryRun, 'gem');
-    } catch (err) {
-      logger.fatal(err);
-      error = true;
-      return 1;
-    } finally {
-      logger.info(
-        `Installed gem package ${this.name} ${
-          error ? 'with errors ' : ''
-        }in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
-    }
-  }
+  protected override type = 'gem' as const;
 }
 
 export class InstallGemShortCommand extends InstallGemCommand {
