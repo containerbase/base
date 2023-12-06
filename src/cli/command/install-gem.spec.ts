@@ -1,6 +1,7 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { MissingVersion } from '../utils/codes';
 import { prepareCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
@@ -20,17 +21,11 @@ describe('index', () => {
     const cli = new Cli({ binaryName: 'install-gem' });
     prepareCommands(cli, 'install-gem');
 
-    expect(await cli.run(['rake'])).toBe(0);
+    expect(await cli.run(['rake'])).toBe(MissingVersion);
 
     env.RAKE_VERSION = '13.0.6';
     expect(await cli.run(['rake'])).toBe(0);
-    expect(mocks.installTool).toHaveBeenCalledTimes(2);
-    expect(mocks.installTool).toHaveBeenCalledWith(
-      'rake',
-      undefined,
-      false,
-      'gem',
-    );
+    expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'rake',
       '13.0.6',
