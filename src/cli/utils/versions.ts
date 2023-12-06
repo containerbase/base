@@ -5,7 +5,7 @@ export function isValid(version: string): boolean {
   return semver.valid(version) !== null;
 }
 
-export function parse(version: string): SemVer {
+export function parse(version: string | undefined): SemVer {
   const res = semver.parse(version);
   if (!res) {
     throw new Error(`Invalid version: ${version}`);

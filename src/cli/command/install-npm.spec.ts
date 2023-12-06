@@ -1,6 +1,7 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { MissingVersion } from '../utils/codes';
 import { prepareCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
@@ -20,11 +21,11 @@ describe('index', () => {
     const cli = new Cli({ binaryName: 'install-npm' });
     prepareCommands(cli, 'install-npm');
 
-    expect(await cli.run(['del-cli'])).toBe(1);
+    expect(await cli.run(['del-cli'])).toBe(MissingVersion);
 
     env.DEL_CLI_VERSION = '5.0.0';
     expect(await cli.run(['del-cli'])).toBe(0);
-    expect(mocks.installTool).toHaveBeenCalledOnce();
+    expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'del-cli',
       '5.0.0',

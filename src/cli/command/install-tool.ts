@@ -1,71 +1,62 @@
+import is from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
-import { installTool } from '../install-tool';
+import { type InstallToolType, installTool } from '../install-tool';
 import { logger, validateVersion } from '../utils';
+import { MissingVersion } from '../utils/codes';
 import { getVersion } from './utils';
 
-abstract class InstallToolBaseCommand extends Command {
+export class InstallToolCommand extends Command {
   static override paths = [['install', 'tool'], ['it']];
 
-  name = Option.String();
-
-  dryRun = Option.Boolean('-d,--dry-run', false);
-}
-
-export class InstallToolEnvCommand extends InstallToolBaseCommand {
   static override usage = Command.Usage({
     description: 'Installs a tool into the container.',
     examples: [
+      ['Installs node 14.17.0', '$0 install tool node 14.17.0'],
       [
         'Installs node with version via environment variable',
         'NODE_VERSION=14.17.0 $0 install tool node',
       ],
+      ['Installs latest pnpm version', '$0 install tool pnpm'],
     ],
   });
 
-  override async execute(): Promise<number | void> {
-    const version = getVersion(this.name);
+  name = Option.String();
 
-    if (!version) {
-      logger.fatal(`No version found for ${this.name}`);
-      return 1;
-    }
-
-    logger.debug("Forwarding to 'install tool' command");
-    return await this.cli.run([
-      ...this.path,
-      ...(this.dryRun ? ['-d'] : []),
-      this.name,
-      version,
-    ]);
-  }
-}
-
-export class InstallToolCommand extends InstallToolBaseCommand {
-  static override usage = Command.Usage({
-    description: 'Installs a tool into the container.',
-    examples: [['Installs node 14.17.0', '$0 install tool node 14.17.0']],
-  });
+  dryRun = Option.Boolean('-d,--dry-run', false);
 
   version = Option.String({
     validator: t.cascade(t.isString(), validateVersion()),
+    required: false,
   });
 
+  protected type: InstallToolType | undefined;
+
   override async execute(): Promise<number | void> {
+    let version = this.version;
+
+    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+      version = getVersion(this.name);
+    }
+
+    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+      logger.error(`No version found for ${this.name}`);
+      return MissingVersion;
+    }
+
     const start = Date.now();
     let error = false;
-
-    logger.info(`Installing tool ${this.name} v${this.version}...`);
+    logger.info(`Installing ${this.type ?? 'tool'} ${this.name}@${version}...`);
     try {
-      return await installTool(this.name, this.version, this.dryRun);
+      return await installTool(this.name, version, this.dryRun, this.type);
     } catch (err) {
       logger.fatal(err);
       error = true;
       return 1;
     } finally {
       logger.info(
-        `Installed tool ${this.name} ${
+        `Installed ${this.type ?? 'tool'} ${this.name} ${
           error ? 'with errors ' : ''
         }in ${prettyMilliseconds(Date.now() - start)}.`,
       );
@@ -73,24 +64,17 @@ export class InstallToolCommand extends InstallToolBaseCommand {
   }
 }
 
-export class InstallToolShortEnvCommand extends InstallToolEnvCommand {
-  static override paths = [Command.Default];
-
-  static override usage = Command.Usage({
-    description: 'Installs a tool into the container.',
-    examples: [
-      [
-        'Installs node with version via environment variable',
-        'NODE_VERSION=14.17.0 $0 node',
-      ],
-    ],
-  });
-}
-
 export class InstallToolShortCommand extends InstallToolCommand {
   static override paths = [Command.Default];
   static override usage = Command.Usage({
     description: 'Installs a tool into the container.',
-    examples: [['Installs node v14.17.0', '$0 node 14.17.0']],
+    examples: [
+      ['Installs node v14.17.0', '$0 node 14.17.0'],
+      [
+        'Installs node with version via environment variable',
+        'NODE_VERSION=14.17.0 $0 node',
+      ],
+      ['Installs latest pnpm version', '$0 pnpm'],
+    ],
   });
 }
