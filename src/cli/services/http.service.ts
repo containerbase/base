@@ -3,7 +3,14 @@ import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
-import { HTTPError, type OptionsInit, got } from 'got';
+import merge from 'deepmerge';
+import {
+  HTTPError,
+  type OptionsInit,
+  type OptionsOfJSONResponseBody,
+  type OptionsOfTextResponseBody,
+  got,
+} from 'got';
 import { inject, injectable } from 'inversify';
 import { logger } from '../utils';
 import { hash, hashFile } from '../utils/hash';
@@ -121,5 +128,65 @@ export class HttpService {
       logger.error({ err, url }, 'failed to check url');
       throw err;
     }
+  }
+
+  async get(
+    url: string,
+    opts: OptionsOfTextResponseBody = {},
+  ): Promise<string> {
+    const nUrl = this.envSvc.replaceUrl(url);
+    for (const run of [1, 2, 3]) {
+      try {
+        return await got
+          .get(
+            nUrl,
+            merge.all([
+              this._opts,
+              opts,
+              {
+                resolveBodyOnly: false,
+              },
+            ]),
+          )
+          .text();
+      } catch (err) {
+        if (run === 3) {
+          logger.error({ err, run }, 'download failed');
+        } else {
+          logger.debug({ err, run }, 'download failed');
+        }
+      }
+    }
+    throw new Error('download failed');
+  }
+
+  async getJson<T = unknown>(
+    url: string,
+    opts: OptionsOfJSONResponseBody = {},
+  ): Promise<T> {
+    const nUrl = this.envSvc.replaceUrl(url);
+    for (const run of [1, 2, 3]) {
+      try {
+        return await got
+          .get(
+            merge.all([
+              this._opts,
+              opts,
+              {
+                url: nUrl,
+                resolveBodyOnly: false,
+              },
+            ]),
+          )
+          .json();
+      } catch (err) {
+        if (run === 3) {
+          logger.error({ err, run }, 'download failed');
+        } else {
+          logger.debug({ err, run }, 'download failed');
+        }
+      }
+    }
+    throw new Error('download failed');
   }
 }
