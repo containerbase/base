@@ -94,7 +94,7 @@
     "vite": "4.5.1",
     "vite-tsconfig-paths": "4.2.1",
     "vitest": "0.34.6",
-    "vitest-github-actions-reporter": "0.11.0"
+    "vitest-github-actions-reporter": "0.11.1"
   },
   "packageManager": "pnpm@8.11.0",
   "engines": {
