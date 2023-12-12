@@ -16,7 +16,7 @@ COPY src/ /
 RUN install-containerbase
 
 # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-ARG FLUX_VERSION=v2.1.2
+ARG FLUX_VERSION=v2.2.0
 
 USER 1000
 
