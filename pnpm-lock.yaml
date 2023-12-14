@@ -50,8 +50,8 @@ dependencies:
     specifier: 8.0.0
     version: 8.0.0
   reflect-metadata:
-    specifier: 0.1.13
-    version: 0.1.13
+    specifier: 0.1.14
+    version: 0.1.14
   semver:
     specifier: 7.5.4
     version: 7.5.4
@@ -4757,8 +4757,8 @@ packages:
       esprima: 4.0.1
     dev: true
 
-  /reflect-metadata@0.1.13:
-    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+  /reflect-metadata@0.1.14:
+    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
     dev: false
 
   /regexp.prototype.flags@1.5.1:
