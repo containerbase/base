@@ -51,7 +51,7 @@ RUN install-tool flutter 3.16.3
 RUN install-tool flux v2.2.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.4.0
+RUN install-tool git-lfs v3.4.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.21.5
