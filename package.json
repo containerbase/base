@@ -49,7 +49,7 @@
     "pino": "8.16.2",
     "pino-pretty": "10.2.3",
     "pretty-ms": "8.0.0",
-    "reflect-metadata": "0.1.13",
+    "reflect-metadata": "0.1.14",
     "semver": "7.5.4",
     "simple-git": "3.21.0",
     "tar": "6.2.0",
