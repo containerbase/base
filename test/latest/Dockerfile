@@ -195,7 +195,7 @@ FROM base as teste
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.15
+RUN install-tool bun 1.0.16
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
