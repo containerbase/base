@@ -178,8 +178,8 @@ devDependencies:
     specifier: 0.8.5
     version: 0.8.5
   tsx:
-    specifier: 4.6.2
-    version: 4.6.2
+    specifier: 4.7.0
+    version: 4.7.0
   type-fest:
     specifier: 4.8.3
     version: 4.8.3
@@ -5481,8 +5481,8 @@ packages:
       typescript: 5.3.3
     dev: true
 
-  /tsx@4.6.2:
-    resolution: {integrity: sha512-QPpBdJo+ZDtqZgAnq86iY/PD2KYCUPSUGIunHdGwyII99GKH+f3z3FZ8XNFLSGQIA4I365ui8wnQpl8OKLqcsg==}
+  /tsx@4.7.0:
+    resolution: {integrity: sha512-I+t79RYPlEYlHn9a+KzwrvEwhJg35h/1zHsLC2JXvhC2mdynMv6Zxzvhv5EMV6VF5qJlLlkSnMVvdZV3PSIGcg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     dependencies:
