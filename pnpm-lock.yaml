@@ -151,8 +151,8 @@ devDependencies:
     specifier: 2.1.0
     version: 2.1.0(eslint@8.56.0)(typescript@5.3.3)
   eslint-plugin-vitest:
-    specifier: 0.3.19
-    version: 0.3.19(@typescript-eslint/eslint-plugin@6.15.0)(eslint@8.56.0)(typescript@5.3.3)(vitest@0.34.6)
+    specifier: 0.3.20
+    version: 0.3.20(@typescript-eslint/eslint-plugin@6.15.0)(eslint@8.56.0)(typescript@5.3.3)(vitest@0.34.6)
   husky:
     specifier: 8.0.3
     version: 8.0.3
@@ -2465,8 +2465,8 @@ packages:
       - typescript
     dev: true
 
-  /eslint-plugin-vitest@0.3.19(@typescript-eslint/eslint-plugin@6.15.0)(eslint@8.56.0)(typescript@5.3.3)(vitest@0.34.6):
-    resolution: {integrity: sha512-uyGYZ8jw+lUKtjfnKZ5ryyVHneMPMpOM68Nt1rWN6ElWK3YBuNpmQcEohYUpaSM45aslE+GmGUyq7POIggHNJQ==}
+  /eslint-plugin-vitest@0.3.20(@typescript-eslint/eslint-plugin@6.15.0)(eslint@8.56.0)(typescript@5.3.3)(vitest@0.34.6):
+    resolution: {integrity: sha512-O05k4j9TGMOkkghj9dRgpeLDyOSiVIxQWgNDPfhYPm5ioJsehcYV/zkRLekQs+c8+RBCVXucSED3fYOyy2EoWA==}
     engines: {node: ^18.0.0 || >= 20.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': '*'
