@@ -466,7 +466,12 @@ RUN set -ex; \
 #--------------------------------------
 # test: renovate
 #--------------------------------------
-FROM build as testq
+FROM base as testq
+
+# install latest version
+RUN install-tool node
+RUN install-tool yarn
+RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
 ARG RENOVATE_VERSION=37.115.0

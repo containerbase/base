@@ -2,7 +2,12 @@ import is from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
-import { type InstallToolType, installTool } from '../install-tool';
+import {
+  type InstallToolType,
+  installTool,
+  resolveVersion,
+} from '../install-tool';
+import { ResolverMap } from '../tools';
 import { logger, validateVersion } from '../utils';
 import { MissingVersion } from '../utils/codes';
 import { getVersion } from './utils';
@@ -36,9 +41,14 @@ export class InstallToolCommand extends Command {
   override async execute(): Promise<number | void> {
     let version = this.version;
 
+    const type = ResolverMap[this.name] ?? this.type;
+
     if (!is.nonEmptyStringAndNotWhitespace(version)) {
       version = getVersion(this.name);
     }
+
+    logger.debug(`Try resolving version for ${this.name}@${version} ...`);
+    version = await resolveVersion(this.name, version, type);
 
     if (!is.nonEmptyStringAndNotWhitespace(version)) {
       logger.error(`No version found for ${this.name}`);
@@ -47,9 +57,9 @@ export class InstallToolCommand extends Command {
 
     const start = Date.now();
     let error = false;
-    logger.info(`Installing ${this.type ?? 'tool'} ${this.name}@${version}...`);
+    logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
     try {
-      return await installTool(this.name, version, this.dryRun, this.type);
+      return await installTool(this.name, version, this.dryRun, type);
     } catch (err) {
       logger.fatal(err);
       error = true;

@@ -6,18 +6,19 @@ import { prepareCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
+  resolveVersion: vi.fn((_, v) => v),
   prepareTools: vi.fn(),
 }));
 
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('index', () => {
+describe('install-gem', () => {
   beforeEach(() => {
     delete env.RAKE_VERSION;
   });
 
-  test('install-gem', async () => {
+  test('works', async () => {
     const cli = new Cli({ binaryName: 'install-gem' });
     prepareCommands(cli, 'install-gem');
 

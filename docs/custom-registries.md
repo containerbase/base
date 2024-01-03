@@ -152,7 +152,10 @@ https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18
 https://nodejs.org/dist/v20.0.0/SHASUMS256.txt
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-x64.tar.xz
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-arm64.tar.xz
+https://nodejs.org/dist/index.json
 ```
+
+The url `https://nodejs.org/dist/index.json` is used to find the latest version if no version was provided.
 
 ### npm tools
 

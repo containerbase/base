@@ -42,11 +42,11 @@ export class InstallNodeService extends InstallNodeBaseService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) http: HttpService,
+    @inject(HttpService) private http: HttpService,
     @inject(CompressionService) private compress: CompressionService,
     @inject(VersionService) versionSvc: VersionService,
   ) {
-    super(envSvc, pathSvc, versionSvc, http);
+    super(envSvc, pathSvc, versionSvc);
   }
 
   override async install(version: string): Promise<void> {

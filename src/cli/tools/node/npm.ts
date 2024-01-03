@@ -5,6 +5,7 @@ import { InstallNodeBaseService } from './utils';
 @injectable()
 export class InstallBowerService extends InstallNodeBaseService {
   override readonly name: string = 'bower';
+  protected override readonly deprecated: boolean = true;
 }
 
 @injectable()
@@ -15,6 +16,7 @@ export class InstallCorepackService extends InstallNodeBaseService {
 @injectable()
 export class InstallLernaService extends InstallNodeBaseService {
   override readonly name: string = 'lerna';
+  protected override readonly deprecated: boolean = true;
 }
 
 @injectable()

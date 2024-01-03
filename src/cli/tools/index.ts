@@ -1,3 +1,5 @@
+import type { InstallToolType } from '../install-tool';
+
 export const NoPrepareTools = [
   'bazelisk',
   'bower',
@@ -15,3 +17,13 @@ export const NoPrepareTools = [
   'yarn',
   'yarn-slim',
 ];
+
+export const ResolverMap: Record<string, InstallToolType | undefined> = {
+  corepack: 'npm',
+  lerna: 'npm',
+  npm: 'npm',
+  pnpm: 'npm',
+  renovate: 'npm',
+  yarn: 'npm',
+  'yarn-slim': 'npm',
+};
