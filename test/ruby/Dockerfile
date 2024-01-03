@@ -37,6 +37,9 @@ FROM build as test-bundler-a
 
 ENV PATH=/home/ubuntu/bin:$PATH
 
+# fix perms
+RUN chown -R 1005:0 /test
+
 # openshift
 USER 1005
 
