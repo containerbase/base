@@ -26,7 +26,7 @@ RUN install-tool git v2.43.0
 FROM base as test-flutter
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.16.2
+RUN install-tool flutter 3.16.5
 
 #--------------------------------------
 # Image: final

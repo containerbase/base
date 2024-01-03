@@ -117,14 +117,7 @@
     },
     {
       "description": "Use `build` semantic commit scope for build deps",
-      "matchDepNames": [
-        "commander",
-        "conventional-changelog-conventionalcommits",
-        "node",
-        "semantic-release",
-        "@semantic-release/exec",
-        "shelljs"
-      ],
+      "matchDepNames": ["@yao-pkg/pkg"],
       "semanticCommitType": "build"
     },
     {

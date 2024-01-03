@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@65162034524a6097c333ae1134496890cb5959c1 # v3.0.25
+        uses: containerbase/internal-tools@5dd052d10c7f2cb0584d40d1f00be6e1328feff0 # v3.0.42
         with:
           command: docker-config
 
@@ -54,7 +54,7 @@ jobs:
           fetch-depth: 0
           show-progress: false
 
-      - uses: sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # v3.2.0
+      - uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
 
       - name: init
         run: |

@@ -33,10 +33,10 @@ FROM base as testa
 
 # https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.1.2.0
+RUN install-tool erlang 26.2.1.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.15.7
+RUN install-tool elixir 1.16.0
 
 
 USER 1001
@@ -59,7 +59,7 @@ USER 1001
 RUN install-tool erlang 24.3.4.13
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.15.7
+RUN install-tool elixir 1.16.0
 
 
 RUN set -ex; \

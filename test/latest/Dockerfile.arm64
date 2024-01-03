@@ -30,7 +30,7 @@ RUN install-tool bazelisk v1.19.0
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.14
+RUN install-tool bun 1.0.20
 
 #--------------------------------------
 # Image: docker
@@ -54,7 +54,7 @@ RUN install-tool git v2.43.0
 FROM test-git as test-git-lfs
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.4.0
+RUN install-tool git-lfs v3.4.1
 
 #--------------------------------------
 # Image: helmfile
@@ -62,7 +62,7 @@ RUN install-tool git-lfs v3.4.0
 FROM base as test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.159.0
+RUN install-tool helmfile v0.160.0
 
 #--------------------------------------
 # Image: kustomize
@@ -70,7 +70,7 @@ RUN install-tool helmfile v0.159.0
 FROM base as test-kustomize
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.2.1
+RUN install-tool kustomize 5.3.0
 
 #--------------------------------------
 # Image: terraform
@@ -78,7 +78,7 @@ RUN install-tool kustomize 5.2.1
 FROM base as test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.6.5
+RUN install-tool terraform 1.6.6
 
 #--------------------------------------
 # Image: vendir

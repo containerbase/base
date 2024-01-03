@@ -180,7 +180,7 @@ WORKDIR /
 RUN install-tool scala v2.13.12
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.9.7
+RUN install-tool sbt v1.9.8
 
 # doesn't work for arbitrary users
 USER 1000

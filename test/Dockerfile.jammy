@@ -33,7 +33,7 @@ FROM build as test
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.14
+RUN install-tool bun 1.0.20
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6
@@ -45,25 +45,25 @@ RUN install-tool docker v24.0.7
 RUN install-tool dotnet 8.0.100
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.16.2
+RUN install-tool flutter 3.16.5
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.1.2
+RUN install-tool flux v2.2.2
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.4.0
+RUN install-tool git-lfs v3.4.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.21.5
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.13.2
+RUN install-tool helm v3.13.3
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.159.0
+RUN install-tool helmfile v0.160.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.2.1
+RUN install-tool kustomize 5.3.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.19.2
@@ -72,13 +72,13 @@ RUN install-tool nix 2.19.2
 RUN install-tool powershell v7.4.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.74.0
+RUN install-tool rust 1.75.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.9.1
+RUN install-tool swift 5.9.2
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.6.5
+RUN install-tool terraform 1.6.6
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
@@ -92,9 +92,9 @@ RUN install-tool vendir v0.38.0
 FROM build as test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.1.2.0
+RUN install-tool erlang 26.2.1.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.15.7
+RUN install-tool elixir 1.16.0
 
 #--------------------------------------
 # Image: test-java
@@ -114,7 +114,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.10.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.11.0
+RUN install-tool pnpm 8.13.1
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
@@ -124,9 +124,9 @@ RUN install-tool yarn 1.22.21
 FROM build as test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.2.13
+RUN install-tool php 8.3.1
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.6.5
+RUN install-tool composer 2.6.6
 
 #--------------------------------------
 # Image: test-python
@@ -134,7 +134,7 @@ RUN install-tool composer 2.6.5
 FROM build as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.0
+RUN install-tool python 3.12.1
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.11.15
 # renovate: datasource=pypi
@@ -142,7 +142,7 @@ RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.7.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.10.4
+RUN install-tool pdm 2.11.2
 
 #--------------------------------------
 # Image: test-ruby

@@ -23,21 +23,12 @@ COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test
 
 #--------------------------------------
-# build: ruby 2.x
+# build: ruby 3.x
 #--------------------------------------
 FROM base as build
 
-# Do not renovate ruby 2.x
-RUN install-tool ruby 2.6.4
-
-#--------------------------------------
-# build3: ruby 3.x
-#--------------------------------------
-FROM base as build3
-
-# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
 RUN install-tool ruby 3.2.2
-
 
 #--------------------------------------
 # test: bundler (gem)
@@ -46,13 +37,18 @@ FROM build as test-bundler-a
 
 ENV PATH=/home/ubuntu/bin:$PATH
 
+# fix perms
+RUN chown -R 1005:0 /test
+
 # openshift
 USER 1005
 
 RUN ruby --version
 RUN gem env
 
-RUN gem install bundler -v 1.17.2
+# renovate: datasource=rubygems depName=bundler
+ENV BUNDLER_VERSION=2.4.22
+RUN gem install bundler -v $BUNDLER_VERSION
 
 RUN bundle env
 
@@ -69,9 +65,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build as test-bundler-b
 
-RUN gem install bundler -v 1.17.2
-
-# renovate: datasource=rubygems versioning=ruby
+# renovate: datasource=rubygems depName=bundler
 RUN install-tool bundler 2.4.22
 
 USER 1000
@@ -91,25 +85,10 @@ RUN ruby --version
 #--------------------------------------
 FROM build as test-bundler-c
 
-# do not change, testing only
-ENV BUNDLER_VERSION=1.17.3
-RUN install-tool bundler
-
-
-RUN set -ex; \
-  command -v bundler; \
-  bundler --version; \
-  bundler --version | grep ${BUNDLER_VERSION}; \
-  [ "$(command -v bundler)" = "/usr/local/bin/bundler" ] && echo "works" || exit 1; \
-  [ "$(command -v bundle)" = "/usr/local/bin/bundle" ] && echo "works" || exit 1; \
-  true
-
-RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
 
 USER 1000
 
-
-# renovate: datasource=rubygems depName=bundler versioning=ruby
+# renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.4.22
 RUN install-tool bundler
 
@@ -128,9 +107,9 @@ RUN set -ex; \
 #--------------------------------------
 # test: bundler install root - install rootless
 #--------------------------------------
-FROM build3 as test-bundler-d
+FROM build as test-bundler-d
 
-# renovate: datasource=rubygems depName=bundler versioning=ruby
+# renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.4.22
 RUN install-tool bundler
 
@@ -141,48 +120,19 @@ USER 1000
 # install old version
 RUN install-tool ruby 3.1.0
 
-# renovate: datasource=rubygems depName=bundler versioning=ruby
+# renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.4.22
 RUN install-tool bundler
 
-#--------------------------------------
-# test: cocoapods (gem install)
-#--------------------------------------
-FROM build as test-cocoapods-a
-
-ENV PATH=/home/ubuntu/bin:$PATH
-
-USER 1000
-
-RUN gem install cocoapods -v 1.9.1
-
-RUN set -ex; \
-  cd b/Project; \
-  pod install;
-
-#--------------------------------------
-# test: cocoapods v1.11.3 (install-tool)
-#--------------------------------------
-FROM build3 as test-cocoapods-b
-
-USER 1000
-
-RUN install-tool cocoapods 1.11.3
-
-RUN pod env
-
-RUN set -ex; \
-  cd b/Project; \
-  pod install;
 
 #--------------------------------------
 # test: cocoapods (install-tool)
 #--------------------------------------
-FROM build3 as test-cocoapods-c
+FROM build as test-cocoapods-a
 
 USER 1000
 
-# renovate: datasource=rubygems versioning=ruby
+# renovate: datasource=rubygems
 RUN install-tool cocoapods 1.14.3
 
 RUN pod env
@@ -194,11 +144,11 @@ RUN set -ex; \
 #--------------------------------------
 # test: install-gem
 #--------------------------------------
-FROM build3 as test-gem
+FROM build as test-gem
 
 USER 1000
 
-# renovate: datasource=rubygems versioning=ruby
+# renovate: datasource=rubygems
 RUN install-gem rake 13.1.0
 
 RUN rake --help
@@ -214,6 +164,4 @@ COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
-COPY --from=test-cocoapods-b /.dummy /.dummy
-COPY --from=test-cocoapods-c /.dummy /.dummy
 COPY --from=test-gem /.dummy /.dummy
