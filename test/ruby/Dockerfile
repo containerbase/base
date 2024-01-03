@@ -71,7 +71,6 @@ FROM build as test-bundler-b
 
 RUN gem install bundler -v 1.17.2
 
-# renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.4.22
 
 USER 1000
