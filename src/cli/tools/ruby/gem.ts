@@ -5,11 +5,6 @@ import { satisfies } from 'semver';
 import { InstallRubyBaseService } from './utils';
 
 @injectable()
-export class InstallBundlerService extends InstallRubyBaseService {
-  override readonly name: string = 'bundler';
-}
-
-@injectable()
 export class InstallCocoapodsService extends InstallRubyBaseService {
   override readonly name: string = 'cocoapods';
 

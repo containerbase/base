@@ -19,6 +19,7 @@ export const NoPrepareTools = [
 ];
 
 export const ResolverMap: Record<string, InstallToolType | undefined> = {
+  bundler: 'gem',
   corepack: 'npm',
   npm: 'npm',
   pnpm: 'npm',

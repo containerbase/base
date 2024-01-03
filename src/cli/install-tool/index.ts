@@ -18,10 +18,7 @@ import {
   NpmVersionResolver,
 } from '../tools/node/resolver';
 import { InstallNodeBaseService } from '../tools/node/utils';
-import {
-  InstallBundlerService,
-  InstallCocoapodsService,
-} from '../tools/ruby/gem';
+import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
@@ -43,7 +40,6 @@ function prepareInstallContainer(): Container {
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallBundlerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
