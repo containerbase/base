@@ -17,8 +17,6 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     return this.name;
   }
 
-  protected readonly deprecated: boolean = false;
-
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -28,11 +26,6 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
   }
 
   override async install(version: string): Promise<void> {
-    if (this.deprecated) {
-      logger.info(
-        `Installing install-tool ${this.name} is deprecated, used install-npm instead.`,
-      );
-    }
     const npm = await this.getNodeNpm();
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),

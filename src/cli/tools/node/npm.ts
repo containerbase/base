@@ -3,33 +3,6 @@ import { injectable } from 'inversify';
 import { InstallNodeBaseService } from './utils';
 
 @injectable()
-export class InstallBowerService extends InstallNodeBaseService {
-  override readonly name: string = 'bower';
-  protected override readonly deprecated: boolean = true;
-}
-
-@injectable()
-export class InstallCorepackService extends InstallNodeBaseService {
-  override name: string = 'corepack';
-}
-
-@injectable()
-export class InstallLernaService extends InstallNodeBaseService {
-  override readonly name: string = 'lerna';
-  protected override readonly deprecated: boolean = true;
-}
-
-@injectable()
-export class InstallNpmService extends InstallNodeBaseService {
-  override readonly name: string = 'npm';
-}
-
-@injectable()
-export class InstallPnpmService extends InstallNodeBaseService {
-  override readonly name: string = 'pnpm';
-}
-
-@injectable()
 export class InstallRenovateService extends InstallNodeBaseService {
   override readonly name: string = 'renovate';
 
@@ -45,11 +18,6 @@ export class InstallRenovateService extends InstallNodeBaseService {
     env.RE2_DOWNLOAD_SKIP_PATH = '1';
     return env;
   }
-}
-
-@injectable()
-export class InstallYarnService extends InstallNodeBaseService {
-  override readonly name: string = 'yarn';
 }
 
 @injectable()

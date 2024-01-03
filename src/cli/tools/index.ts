@@ -20,10 +20,14 @@ export const NoPrepareTools = [
 
 export const ResolverMap: Record<string, InstallToolType | undefined> = {
   corepack: 'npm',
-  lerna: 'npm',
   npm: 'npm',
   pnpm: 'npm',
   renovate: 'npm',
   yarn: 'npm',
   'yarn-slim': 'npm',
+};
+
+export const DeprecatedTools: Record<string, InstallToolType | undefined> = {
+  bower: 'npm',
+  lerna: 'npm',
 };

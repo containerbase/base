@@ -7,7 +7,7 @@ import {
   installTool,
   resolveVersion,
 } from '../install-tool';
-import { ResolverMap } from '../tools';
+import { DeprecatedTools, ResolverMap } from '../tools';
 import { logger, validateVersion } from '../utils';
 import { MissingVersion } from '../utils/codes';
 import { getVersion } from './utils';
@@ -41,13 +41,23 @@ export class InstallToolCommand extends Command {
   override async execute(): Promise<number | void> {
     let version = this.version;
 
-    const type = ResolverMap[this.name] ?? this.type;
+    let type = DeprecatedTools[this.name];
+
+    if (type) {
+      logger.warn(
+        `The 'install-tool ${this.name}' command is deprecated. Please use the 'install-${type} ${this.name}'.`,
+      );
+    } else {
+      type = ResolverMap[this.name] ?? this.type;
+    }
 
     if (!is.nonEmptyStringAndNotWhitespace(version)) {
       version = getVersion(this.name);
     }
 
-    logger.debug(`Try resolving version for ${this.name}@${version} ...`);
+    logger.debug(
+      `Try resolving version for ${this.name}@${version ?? 'latest'} ...`,
+    );
     version = await resolveVersion(this.name, version, type);
 
     if (!is.nonEmptyStringAndNotWhitespace(version)) {

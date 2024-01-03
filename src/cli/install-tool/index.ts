@@ -10,13 +10,7 @@ import { InstallFluxService } from '../tools/flux';
 import { InstallMavenService } from '../tools/java/maven';
 import { InstallNodeService } from '../tools/node';
 import {
-  InstallBowerService,
-  InstallCorepackService,
-  InstallLernaService,
-  InstallNpmService,
-  InstallPnpmService,
   InstallRenovateService,
-  InstallYarnService,
   InstallYarnSlimService,
 } from '../tools/node/npm';
 import {
@@ -48,23 +42,17 @@ function prepareInstallContainer(): Container {
 
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallBowerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBundlerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallCorepackService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallLernaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallNpmService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallPnpmService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnSlimService);
 
   logger.trace('preparing install container done');
