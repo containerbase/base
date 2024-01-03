@@ -6,20 +6,10 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import {
-  EnvService,
-  HttpService,
-  PathService,
-  VersionService,
-} from '../../services';
+import { EnvService, PathService, VersionService } from '../../services';
 import { fileExists, logger, parse } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
-
-interface NpmPackageMeta {
-  'dist-tags': Record<string, string>;
-  name: string;
-}
 
 @injectable()
 export abstract class InstallNodeBaseService extends InstallToolBaseService {
@@ -27,34 +17,22 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     return this.name;
   }
 
+  protected readonly deprecated: boolean = false;
+
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(VersionService) protected versionSvc: VersionService,
-    @inject(HttpService) protected http: HttpService,
   ) {
     super(pathSvc, envSvc);
   }
 
-  override async findVersion(
-    version: string | undefined,
-  ): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const meta = await this.http.getJson<NpmPackageMeta>(
-        `https://registry.npmjs.org/${this.tool}`,
-        {
-          headers: {
-            accept:
-              'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
-          },
-        },
-      );
-      return Promise.resolve(meta['dist-tags'].latest);
-    }
-    return Promise.resolve(version);
-  }
-
   override async install(version: string): Promise<void> {
+    if (this.deprecated) {
+      logger.info(
+        `Installing install-tool ${this.name} is deprecated, used install-npm instead.`,
+      );
+    }
     const npm = await this.getNodeNpm();
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),

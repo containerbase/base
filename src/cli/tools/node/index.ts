@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import is from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import {
@@ -17,11 +16,6 @@ import {
   prepareGlobalConfig,
   prepareUserConfig,
 } from './utils';
-
-interface NodeVersionMeta {
-  version: string;
-  lts?: boolean;
-}
 
 @injectable()
 export class InstallNodeService extends InstallNodeBaseService {
@@ -48,28 +42,11 @@ export class InstallNodeService extends InstallNodeBaseService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) http: HttpService,
+    @inject(HttpService) private http: HttpService,
     @inject(CompressionService) private compress: CompressionService,
     @inject(VersionService) versionSvc: VersionService,
   ) {
-    super(envSvc, pathSvc, versionSvc, http);
-  }
-
-  override async findVersion(
-    version: string | undefined,
-  ): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const url = this.envSvc.replaceUrl('https://nodejs.org/dist/index.json');
-      const meta = await this.http.getJson<NodeVersionMeta[]>(url, {
-        headers: {
-          accept:
-            'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
-        },
-      });
-      // we know that the latest version is the first entry, so search for first lts
-      return meta.find((v) => v.lts)?.version.replace(/^v/, '');
-    }
-    return version;
+    super(envSvc, pathSvc, versionSvc);
   }
 
   override async install(version: string): Promise<void> {
