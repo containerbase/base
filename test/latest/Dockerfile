@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -121,7 +121,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS testb-gitpod
+FROM ghcr.io/containerbase/ubuntu:24.04 AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
