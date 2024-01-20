@@ -57,6 +57,14 @@ FROM test-git as test-git-lfs
 RUN install-tool git-lfs v3.4.1
 
 #--------------------------------------
+# Image: gleam
+#--------------------------------------
+FROM base as test-gleam
+
+# renovate: datasource=npm
+RUN install-tool gleam 0.34.1
+
+#--------------------------------------
 # Image: helmfile
 #--------------------------------------
 FROM base as test-helmfile

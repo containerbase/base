@@ -4,6 +4,7 @@ node_modules/
 /dist
 /coverage
 /html/
+/.pnpm-store
 
 # generated files
 /src/usr/local/containerbase/version
