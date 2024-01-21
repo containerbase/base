@@ -1,3 +1,5 @@
 /dist
 /coverage
 /html/
+node_modules/
+/.pnpm-store

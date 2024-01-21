@@ -1,5 +1,6 @@
 .cache/
 node_modules/
+/.pnpm-store
 /bin
 /dist
 /coverage
