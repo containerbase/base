@@ -53,14 +53,8 @@ USER 1000
 # renovate: datasource=docker versioning=docker
 RUN install-tool gleam 0.34.1
 
-RUN set -ex; \
-    cd a; \
-    cargo update; \
-    cargo update --manifest-path Cargo.toml --package serde;
-
 SHELL [ "/bin/sh", "-c" ]
-RUN gleamc --version
-RUN cargo --version
+RUN gleam --version
 
 #--------------------------------------
 # final
