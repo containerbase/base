@@ -39,10 +39,6 @@ USER 1000
 #--------------------------------------
 FROM build as testa
 
-RUN set -ex; \
-    cd a; \
-    cargo update; \
-    cargo update --manifest-path Cargo.toml --package serde;
 
 SHELL [ "/bin/sh", "-c" ]
 RUN gleamc --version
