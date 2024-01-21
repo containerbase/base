@@ -41,8 +41,7 @@ FROM build as testa
 
 
 SHELL [ "/bin/sh", "-c" ]
-RUN gleamc --version
-RUN cargo --version
+RUN gleam --version
 
 #--------------------------------------
 # test b: non-root
