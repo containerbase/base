@@ -62,17 +62,15 @@ export class InstallGleamService extends InstallToolBaseService {
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
 
-    await fs.mkdir(path);
     await this.compress.extract({
       file,
       cwd: path,
-      strip: 1,
+      strip: 0,
     });
   }
 
   override async link(version: string): Promise<void> {
-    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-
+    const src = join(this.pathSvc.versionedToolPath(this.name, version));
     await this.shellwrapper({ srcDir: src });
   }
 
