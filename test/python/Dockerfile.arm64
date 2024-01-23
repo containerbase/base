@@ -30,7 +30,7 @@ RUN install-tool python 3.12.1
 FROM test-python as test-checkov
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.1.60
+RUN install-tool checkov 3.1.67
 
 #--------------------------------------
 # Image: hashin
@@ -46,7 +46,7 @@ RUN install-tool hashin 0.17.0
 FROM test-python as test-pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.15
+RUN install-tool pipenv 2023.11.17
 
 #--------------------------------------
 # Image: poetry
