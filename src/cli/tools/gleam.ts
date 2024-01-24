@@ -19,7 +19,7 @@ export class InstallGleamService extends InstallToolBaseService {
       case 'arm64':
         return 'aarch64';
       case 'amd64':
-        return 'x64';
+        return 'x86_64';
     }
   }
 
