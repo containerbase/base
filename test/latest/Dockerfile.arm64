@@ -38,7 +38,7 @@ RUN install-tool bun 1.0.25
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.0
+RUN install-tool docker v25.0.1
 
 #--------------------------------------
 # Image: git
