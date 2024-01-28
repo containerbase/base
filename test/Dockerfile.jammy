@@ -154,7 +154,7 @@ RUN install-tool ruby 3.2.3
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.5.5
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.14.3
+RUN install-tool cocoapods 1.15.0
 
 #--------------------------------------
 # Image: final
