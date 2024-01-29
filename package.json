@@ -44,7 +44,7 @@
     "del": "7.1.0",
     "execa": "8.0.1",
     "global-agent": "3.0.0",
-    "got": "13.0.0",
+    "got": "14.0.0",
     "inversify": "6.0.2",
     "pino": "8.17.2",
     "pino-pretty": "10.3.1",
