@@ -48,7 +48,7 @@
     "inversify": "6.0.2",
     "pino": "8.17.2",
     "pino-pretty": "10.3.1",
-    "pretty-ms": "8.0.0",
+    "pretty-ms": "9.0.0",
     "reflect-metadata": "0.2.1",
     "semver": "7.5.4",
     "simple-git": "3.22.0",
