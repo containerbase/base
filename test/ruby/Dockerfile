@@ -133,7 +133,7 @@ FROM build as test-cocoapods-a
 USER 1000
 
 # renovate: datasource=rubygems
-RUN install-tool cocoapods 1.14.3
+RUN install-tool cocoapods 1.15.0
 
 RUN pod env
 
