@@ -45,7 +45,7 @@ RUN install-tool docker v25.0.1
 RUN install-tool dotnet 8.0.101
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.16.8
+RUN install-tool flutter 3.16.9
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.2.2
@@ -81,7 +81,7 @@ RUN install-tool rust 1.75.0
 RUN install-tool swift 5.9.2
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.0
+RUN install-tool terraform 1.7.1
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
@@ -117,7 +117,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.11.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.14.1
+RUN install-tool pnpm 8.15.0
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
@@ -157,7 +157,7 @@ RUN install-tool ruby 3.2.3
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.5.5
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.14.3
+RUN install-tool cocoapods 1.15.0
 
 #--------------------------------------
 # Image: final

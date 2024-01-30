@@ -109,7 +109,7 @@ jobs:
         run: pnpm test:vitest
 
       - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        uses: codecov/codecov-action@4fe8c5f003fae66aa5ebb77cfd3e7bfbbda0b6b0 # v3.1.5
 
   base:
     runs-on: ubuntu-latest
@@ -211,7 +211,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@9260121e8a5b13c1dc200f952833a3973723ca80 # v3.0.48
+        uses: containerbase/internal-tools@6bbc5c952921fd03b8bb242934e57dc8d3d2be1b # v3.0.51
         with:
           command: docker-config
 
