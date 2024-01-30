@@ -43,7 +43,7 @@ export class InstallGleamService extends InstallToolBaseService {
     const url = `${baseUrl}${filename}`;
 
     const checksumFile = await this.http.download({
-      url: `${url}.sha256`,
+      url: `${url}.sha512`,
     });
     const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
       .split('\n')
@@ -52,7 +52,7 @@ export class InstallGleamService extends InstallToolBaseService {
 
     const file = await this.http.download({
       url,
-      checksumType: 'sha256',
+      checksumType: 'sha512',
       expectedChecksum,
     });
 
