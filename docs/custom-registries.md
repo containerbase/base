@@ -113,6 +113,21 @@ https://github.com/fluxcd/flux2/releases/download/v0.19.0/flux_0.19.0_linux_amd6
 https://github.com/fluxcd/flux2/releases/download/v2.1.0/flux_2.1.0_linux_arm64.tar.gz
 ```
 
+## gleam
+
+Gleam releases are downloaded from:
+
+- `https://github.com/gleam-lang/gleam/releases/download`
+
+Samples:
+
+```txt
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-aarch64-unknown-linux-musl.tar.gz
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-aarch64-unknown-linux-musl.tar.gz.sha256
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_64-unknown-linux-musl.tar.gz
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_64-unknown-linux-musl.tar.gz.sha512
+```
+
 ## maven
 
 Maven releases are downloaded from:
