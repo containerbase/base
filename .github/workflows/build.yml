@@ -28,11 +28,11 @@ jobs:
           # macos-14 is missing colima
           brew install colima docker
 
-          colima --help
+          colima start --help
 
           colima list
 
-      - run: colima start
+      - run: colima start --verbose
 
   setup:
     runs-on: ubuntu-latest
