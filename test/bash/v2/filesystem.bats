@@ -1,6 +1,8 @@
+# shellcheck disable=SC2034,SC2148
+
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
@@ -12,13 +14,6 @@ setup() {
 
   # load test overrides
   load "$TEST_DIR/../util.sh"
-
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-
-  # set default test user
-  TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -49,7 +44,7 @@ teardown() {
     run create_tool_path
     assert_success
     assert_output "${TEST_ROOT_DIR}/root/tools/foo"
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo")" -eq 775 ]
 
     # user
     run find_tool_path
@@ -73,8 +68,8 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/tools/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/tools/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 755 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo")" -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3")" -eq 755 ]
 }
 
 @test "overwrite: can create a versioned tool path as user" {
@@ -85,6 +80,6 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/tools/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/tools/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo") -eq 775 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3") -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo")" -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/tools/foo/1.2.3")" -eq 775 ]
 }

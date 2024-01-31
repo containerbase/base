@@ -1,7 +1,8 @@
+# shellcheck disable=SC2148,SC2155
 
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
@@ -10,15 +11,6 @@ setup() {
 
     # load test overwrites
     load "$TEST_DIR/util.sh"
-
-    # set directories for test
-    ROOT_DIR="${TEST_ROOT_DIR}/root"
-    BIN_DIR="${TEST_ROOT_DIR}/bin"
-    USER_HOME="${TEST_ROOT_DIR}/user"
-    ENV_FILE="${TEST_ROOT_DIR}/env"
-
-    # set default test user
-    TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -37,11 +29,11 @@ teardown() {
   run set_tool_version
   assert_failure
 
-  TOOL_NAME=foo TOOL_VERSION= \
+  TOOL_NAME=foo TOOL_VERSION='' \
   run set_tool_version
   assert_failure
 
-  TOOL_NAME= TOOL_VERSION= \
+  TOOL_NAME='' TOOL_VERSION='' \
   run set_tool_version
   assert_failure
 
@@ -104,7 +96,7 @@ teardown() {
   assert_success
   assert_output "1.2.3"
 
-  assert [ $(stat --format '%a' "${version_path}/foo") -eq 777 ]
+  assert [ "$(stat --format '%a' "${version_path}/foo")" -eq 777 ]
 
   run set_tool_version bar 1.2.4
   assert_success
@@ -113,7 +105,7 @@ teardown() {
   assert_success
   assert_output "1.2.4"
 
-  assert [ $(stat --format '%a' "${version_path}/bar") -eq 660 ]
+  assert [ "$(stat --format '%a' "${version_path}/bar")" -eq 660 ]
 }
 
 @test "get_tool_version_env" {

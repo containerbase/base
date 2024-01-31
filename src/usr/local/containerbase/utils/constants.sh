@@ -8,6 +8,7 @@ export BASH_RC=/etc/bash.bashrc
 export ROOT_DIR=/usr/local
 # defines the directory where shims to tools will be installed
 export BIN_DIR=/usr/local/bin
+export LIB_DIR=/usr/local/lib
 # defines the directory where user tools will be installed
 # shellcheck disable=SC2153
 export USER_HOME="/home/${USER_NAME}"

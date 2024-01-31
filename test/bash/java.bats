@@ -1,8 +1,8 @@
 # shellcheck disable=SC2034,SC2148
 
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
@@ -15,20 +15,12 @@ setup() {
   # load test overwrites
   load "$TEST_DIR/util.sh"
 
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  USER_HOME="${TEST_ROOT_DIR}/user"
-  ENV_FILE="${TEST_ROOT_DIR}/env"
-
   setup_directories
 
   # copy containerbase files
   cp -r "$TEST_DIR/../../src/usr/local/containerbase" "${ROOT_DIR}/containerbase"
 
-  # set default test user is root
-  TEST_ROOT_USER=1000
-  # load helm
+  # load java
   load "$TEST_DIR/../../src/usr/local/containerbase/utils/java.sh"
 }
 
@@ -98,8 +90,8 @@ teardown() {
   assert_success
   assert_output "Gradle settings already found"
 
-  assert [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]
-  assert [ $(stat --format '%a' "${USER_HOME}/.gradle/gradle.properties") -eq 664 ]
+  assert [ "$(stat --format '%a' "${USER_HOME}/.gradle")" -eq 775 ]
+  assert [ "$(stat --format '%a' "${USER_HOME}/.gradle/gradle.properties")" -eq 664 ]
 }
 
 @test "create_maven_settings" {
@@ -111,6 +103,6 @@ teardown() {
   assert_success
   assert_output "Maven settings already found"
 
-  assert [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]
-  assert [ $(stat --format '%a' "${USER_HOME}/.m2/settings.xml") -eq 664 ]
+  assert [ "$(stat --format '%a' "${USER_HOME}/.m2")" -eq 775 ]
+  assert [ "$(stat --format '%a' "${USER_HOME}/.m2/settings.xml")" -eq 664 ]
 }

@@ -1,7 +1,8 @@
+# shellcheck disable=SC2148,SC2034
 
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
   TEST_DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
 
@@ -49,7 +50,7 @@ teardown() {
   assert_output --partial "No USER_NAME defined"
   assert_failure
 
-  USER_NAME= run require_user
+  USER_NAME='' run require_user
   assert_output --partial "No USER_NAME defined"
   assert_failure
 
@@ -178,7 +179,8 @@ teardown() {
 }
 
 @test "require_distro" {
-  if ! check_command "lsb_release" || [ ! $(lsb_release -si) =~ "Ubuntu" ]; then
+  # shellcheck disable=SC2074
+  if ! check_command "lsb_release" || [ ! "$(lsb_release -si)" =~ "Ubuntu" ]; then
     skip "not ubuntu"
   fi
 
@@ -186,7 +188,8 @@ teardown() {
 }
 
 @test "get_distro" {
-  if ! check_command "lsb_release" || [ ! $(lsb_release -si) =~ "Ubuntu" ]; then
+  # shellcheck disable=SC2074
+  if ! check_command "lsb_release" || [ ! "$(lsb_release -si)" =~ "Ubuntu" ]; then
     skip "not ubuntu"
   fi
 
@@ -196,13 +199,13 @@ teardown() {
 @test "ignore_tool" {
 
   # This is fine as the tool is normally checked before
-  TOOL_NAME= \
-  IGNORED_TOOLS= \
+  TOOL_NAME='' \
+  IGNORED_TOOLS='' \
   run ignore_tool
   assert_output "1"
 
   TOOL_NAME=foo \
-  IGNORED_TOOLS= \
+  IGNORED_TOOLS='' \
   run ignore_tool
   assert_output "0"
 
