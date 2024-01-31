@@ -34,7 +34,7 @@ jobs:
 
       - run: colima start --verbose --very-verbose
 
-      - run: cat /Users/admin/.colima/_lima/colima/serial.log
+      - run: cat /Users/runner/.colima/_lima/colima/serial.log
         if: always()
 
   setup:
