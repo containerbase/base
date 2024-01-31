@@ -35,16 +35,6 @@ jobs:
         with:
           save-cache: true
 
-      - name: build
-        run: pnpm build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build
-          path: ./src/usr/local/containerbase/bin/containerbase-cli-*
-          if-no-files-found: error
-          retention-days: 1
-
   lint:
     runs-on: ubuntu-latest
     needs: setup
@@ -96,10 +86,8 @@ jobs:
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: ./src/usr/local/containerbase/bin/
+      - name: build
+        run: pnpm build
 
       - name: bats
         run: pnpm test:bats
@@ -143,10 +131,8 @@ jobs:
       - name: prepare apt proxy
         run: sudo pnpm prepare:proxy
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: ./src/usr/local/containerbase/bin/
+      - name: build
+        run: pnpm build
 
       - name: test distro
         run: docker buildx bake
@@ -183,10 +169,8 @@ jobs:
       - name: prepare apt proxy
         run: sudo pnpm prepare:proxy
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: ./src/usr/local/containerbase/bin/
+      - name: build
+        run: pnpm build
 
       - name: test distro
         run: docker buildx bake test-distro
@@ -249,10 +233,8 @@ jobs:
       - name: prepare apt proxy
         run: sudo pnpm prepare:proxy
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: ./src/usr/local/containerbase/bin/
+      - name: build
+        run: pnpm build
 
       - name: test
         run: docker buildx bake test-${{ runner.arch }}
