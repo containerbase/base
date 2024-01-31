@@ -20,7 +20,10 @@ SHELL ["/bin/bash" , "-c"]
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["bash"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 

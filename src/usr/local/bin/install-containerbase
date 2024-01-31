@@ -85,16 +85,11 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
 fi
 
 function link_tool () {
-  local arch=x64
-
-  if [[ "${ARCHITECTURE}" = "aarch64" ]];then
-    arch=arm64
-  fi
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/containerbase-cli
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-gem
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-npm
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/install-tool
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/bin/prepare-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/containerbase-cli
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-gem
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/prepare-tool
 
   containerbase-cli --version
 }
