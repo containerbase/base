@@ -43,6 +43,14 @@ group "test-distro" {
   targets = ["build-distro"]
 }
 
+group "test-X64" {
+  targets = ["build-test"]
+}
+
+group "test-ARM64" {
+  targets = ["build-arm64"]
+}
+
 
 target "settings" {
   context = "."
