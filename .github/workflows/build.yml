@@ -32,6 +32,8 @@ jobs:
 
           colima list
 
+          qemu-system-aarch64 --version
+
       - run: colima start --verbose --very-verbose
 
       - run: ls -la /Users/runner/.colima/_lima/colima/*.log
