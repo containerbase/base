@@ -215,9 +215,10 @@ jobs:
 
     steps:
       - name: install docker
-        if: ${{ matrix.os == 'macos-14' }}
+        if: runner.os == 'macos'
         run: |
-          brew install docker docker-buildx
+          # macos-14 is missing colima
+          brew install colima docker docker-buildx
 
           # Link plugins to docker
           mkdir -p ~/.docker/cli-plugins
@@ -225,6 +226,9 @@ jobs:
 
           # start docker
           colima start --mount-type 9p
+
+          # disable apt proxy on macos
+          echo 'APT_HTTP_PROXY=' >> $GITHUB_ENV
 
       - name: docker-config
         uses: containerbase/internal-tools@6bbc5c952921fd03b8bb242934e57dc8d3d2be1b # v3.0.51
@@ -243,6 +247,7 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
+        if: runner.os == 'linux'
         run: sudo pnpm prepare:proxy
 
       - name: build
