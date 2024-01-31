@@ -217,8 +217,14 @@ jobs:
       - name: install docker
         if: ${{ matrix.os == 'macos-14' }}
         run: |
-          brew install docker colima
-          colima start
+          brew install docker docker-buildx
+
+          # Link plugins to docker
+          mkdir -p ~/.docker/cli-plugins
+          ln -sfn $(which docker-buildx) ~/.docker/cli-plugins
+
+          # start docker
+          colima start --mount-type 9p
 
       - name: docker-config
         uses: containerbase/internal-tools@6bbc5c952921fd03b8bb242934e57dc8d3d2be1b # v3.0.51
