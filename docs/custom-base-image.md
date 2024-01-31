@@ -32,7 +32,7 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -78,7 +78,7 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -122,7 +122,7 @@ ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 

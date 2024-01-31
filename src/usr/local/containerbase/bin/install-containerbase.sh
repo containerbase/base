@@ -111,6 +111,14 @@ function prepare_v2_tools () {
   . /usr/local/containerbase/utils/v2/overrides.sh
 
   setup_directories
+
+  # symlink v2 tools bin to /usr/local/bin
+  rm -rf /usr/local/bin /usr/local/lib
+  ln -sf "${ROOT_DIR}/bin" /usr/local/bin
+  ln -sf "${ROOT_DIR}/lib" /usr/local/lib
+
+  # compability with current custom images
+  ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
 }
 prepare_v2_tools
 
