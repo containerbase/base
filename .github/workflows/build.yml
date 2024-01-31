@@ -26,9 +26,11 @@ jobs:
       - name: install docker
         run: |
           # macos-14 is missing colima
-          brew install colima
+          brew install colima docker
 
           colima --help
+
+          colima list
 
       - run: colima start
 
