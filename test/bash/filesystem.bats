@@ -1,6 +1,8 @@
+# shellcheck disable=SC2034,SC2148,SC2155
+
 setup() {
-    load $BATS_SUPPORT_LOAD_PATH
-    load $BATS_ASSERT_LOAD_PATH
+    load "$BATS_SUPPORT_LOAD_PATH"
+    load "$BATS_ASSERT_LOAD_PATH"
 
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
@@ -9,14 +11,6 @@ setup() {
 
     # load test overwrites
     load "$TEST_DIR/util.sh"
-
-    # set directories for test
-    ROOT_DIR="${TEST_ROOT_DIR}/root"
-    BIN_DIR="${TEST_ROOT_DIR}/bin"
-    USER_HOME="${TEST_ROOT_DIR}/user"
-
-    # set default test user
-    TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -41,8 +35,8 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/user/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/user/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/user/foo") -eq 775 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/user/foo/1.2.3") -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/user/foo")" -eq 775 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/user/foo/1.2.3")" -eq 775 ]
 }
 
 @test "can create a versioned tool path as root" {
@@ -55,8 +49,8 @@ teardown() {
 
     assert_output "${TEST_ROOT_DIR}/root/foo/1.2.3"
     assert [ -d "${TEST_ROOT_DIR}/root/foo/1.2.3" ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/foo") -eq 755 ]
-    assert [ $(stat --format '%a' "${TEST_ROOT_DIR}/root/foo/1.2.3") -eq 755 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/foo")" -eq 755 ]
+    assert [ "$(stat --format '%a' "${TEST_ROOT_DIR}/root/foo/1.2.3")" -eq 755 ]
 }
 
 @test "finds the versioned tool path" {
@@ -114,7 +108,7 @@ teardown() {
     run find_tool_env
     assert_output "${TEST_ROOT_DIR}/root/env.d/foo.sh"
 
-    TOOL_NAME= run find_tool_env
+    TOOL_NAME='' run find_tool_env
     assert_failure
 }
 
@@ -125,13 +119,13 @@ teardown() {
   assert_success
 
   assert [ -d "${install_dir}/tools" ]
-  assert [ $(stat --format '%a' "${install_dir}/tools") -eq 775 ]
+  assert [ "$(stat --format '%a' "${install_dir}/tools")" -eq 775 ]
   assert [ -d "${install_dir}/versions" ]
-  assert [ $(stat --format '%a' "${install_dir}/versions") -eq 775 ]
+  assert [ "$(stat --format '%a' "${install_dir}/versions")" -eq 775 ]
   assert [ -d "${BIN_DIR}" ]
-  assert [ $(stat --format '%a' "${BIN_DIR}") -eq 775 ]
+  assert [ "$(stat --format '%a' "${BIN_DIR}")" -eq 775 ]
   assert [ -d "${install_dir}/env.d" ]
-  assert [ $(stat --format '%a' "${install_dir}/env.d") -eq 775 ]
+  assert [ "$(stat --format '%a' "${install_dir}/env.d")" -eq 775 ]
 }
 
 @test "creates a folder with correct permissions" {
@@ -145,26 +139,26 @@ teardown() {
   assert_success
 
   assert [ -d "${install_dir}/foo" ]
-  assert [ $(stat --format '%a' "${install_dir}/foo") -eq "${USER_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/foo")" -eq "${USER_UMASK}" ]
 
   run create_folder "${install_dir}/foo2" 777
   assert_success
 
   assert [ -d "${install_dir}/foo2" ]
-  assert [ $(stat --format '%a' "${install_dir}/foo2") -eq "777" ]
+  assert [ "$(stat --format '%a' "${install_dir}/foo2")" -eq "777" ]
 
   TEST_ROOT_USER=0
   run create_folder "${install_dir}/bar"
   assert_success
 
   assert [ -d "${install_dir}/bar" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar") -eq "${ROOT_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar")" -eq "${ROOT_UMASK}" ]
 
   run create_folder "${install_dir}/bar2" 777
   assert_success
 
   assert [ -d "${install_dir}/bar2" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar2") -eq "777" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar2")" -eq "777" ]
 }
 
 @test "creates deep folder with correct permissions" {
@@ -174,23 +168,23 @@ teardown() {
   run create_folder "${install_dir}/test/foo/bar/baz"
 
   assert [ -d "${install_dir}/test" ]
-  assert [ $(stat --format '%a' "${install_dir}/test") -eq "${USER_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/test")" -eq "${USER_UMASK}" ]
   assert [ -d "${install_dir}/test/foo" ]
-  assert [ $(stat --format '%a' "${install_dir}/test/foo") -eq "${USER_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/test/foo")" -eq "${USER_UMASK}" ]
   assert [ -d "${install_dir}/test/foo/bar" ]
-  assert [ $(stat --format '%a' "${install_dir}/test/foo/bar") -eq "${USER_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/test/foo/bar")" -eq "${USER_UMASK}" ]
   assert [ -d "${install_dir}/test/foo/bar/baz" ]
-  assert [ $(stat --format '%a' "${install_dir}/test/foo/bar/baz") -eq "${USER_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/test/foo/bar/baz")" -eq "${USER_UMASK}" ]
 
   TEST_ROOT_USER=0
   run create_folder "${install_dir}/bar/foo/bar/baz"
 
   assert [ -d "${install_dir}/bar" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar") -eq "${ROOT_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar")" -eq "${ROOT_UMASK}" ]
   assert [ -d "${install_dir}/bar/foo" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar/foo") -eq "${ROOT_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar/foo")" -eq "${ROOT_UMASK}" ]
   assert [ -d "${install_dir}/bar/foo/bar" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar/foo/bar") -eq "${ROOT_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar/foo/bar")" -eq "${ROOT_UMASK}" ]
   assert [ -d "${install_dir}/bar/foo/bar/baz" ]
-  assert [ $(stat --format '%a' "${install_dir}/bar/foo/bar/baz") -eq "${ROOT_UMASK}" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bar/foo/bar/baz")" -eq "${ROOT_UMASK}" ]
 }
