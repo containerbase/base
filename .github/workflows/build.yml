@@ -32,14 +32,14 @@ jobs:
 
           colima list
 
-          qemu-system-aarch64 --version
+      - run: colima version && limactl --version && qemu-img --version
 
       - run: colima start --verbose --very-verbose
 
       - run: ls -la /Users/runner/.colima/_lima/colima/*.log
         if: always()
 
-      - run: cat /Users/runner/.colima/_lima/colima/serial.log
+      - run: cat /Users/runner/.colima/_lima/colima/serial*.log
         if: always()
       - run: cat /Users/runner/.colima/_lima/colima/ha.stderr.log
         if: always()
