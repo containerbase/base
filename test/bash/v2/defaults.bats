@@ -1,6 +1,8 @@
+# shellcheck disable=SC2034,SC2148
+
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
@@ -12,12 +14,6 @@ setup() {
 
   # load test overwrites
   load "$TEST_DIR/../util.sh"
-
-  # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-
-  # set default test user
-  TEST_ROOT_USER=1000
 }
 
 teardown() {
