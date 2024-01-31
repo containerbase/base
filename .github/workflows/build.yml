@@ -193,7 +193,7 @@ jobs:
 
   lang:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.tag }} (${{ runner.arch }})
+    name: ${{ matrix.tag }} (${{ matrix.os == 'Linux' && 'amd64' || 'arm64' }})
     needs:
       - base
       - bats
