@@ -27,6 +27,10 @@ variable "GITHUB_TOKEN" {
   default = ""
 }
 
+variable "BASE_IMAGE" {
+  default = ""
+}
+
 group "default" {
   targets = ["build-docker"]
 }
@@ -51,6 +55,7 @@ target "settings" {
     CONTAINERBASE_DEBUG   = "${CONTAINERBASE_DEBUG}"
     CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
     GITHUB_TOKEN          = "${GITHUB_TOKEN}"
+    BASE_IMAGE            = "${BASE_IMAGE}"
   }
 }
 
@@ -69,6 +74,15 @@ target "push-cache" {
     "ghcr.io/${OWNER}/cache:${FILE}",
   ]
   cache-to = ["type=inline,mode=max"]
+}
+
+target "push-ttl" {
+  inherits   = ["settings", "cache"]
+  output     = ["type=registry"]
+  platforms  = ["linux/amd64", "linux/arm64"]
+  tags = [
+    "${OWNER}/${FILE}",
+  ]
 }
 
 target "build" {
