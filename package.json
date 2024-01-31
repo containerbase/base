@@ -88,7 +88,7 @@
     "eslint-plugin-vitest": "0.3.20",
     "husky": "9.0.6",
     "lint-staged": "15.2.0",
-    "nock": "13.5.0",
+    "nock": "13.5.1",
     "npm-run-all2": "6.1.1",
     "prettier": "3.2.4",
     "prettier-plugin-packagejson": "2.4.10",
