@@ -23,10 +23,6 @@ import {
 export class PrepareDartService extends PrepareToolBaseService {
   readonly name = 'dart';
 
-  constructor(@inject(EnvService) private envSvc: EnvService) {
-    super();
-  }
-
   async execute(): Promise<void> {
     await fs.mkdir(`${this.envSvc.home}/.dart`);
     await fs.writeFile(

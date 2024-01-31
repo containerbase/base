@@ -75,7 +75,7 @@ fi
     }
     content += ` "$@"\n`;
 
-    await writeFile(tgt, content, { encoding: 'utf8' });
+    await writeFile(tgt, content.replace(/^\s+/gm, ''), { encoding: 'utf8' });
     await this.pathSvc.setOwner({ file: tgt });
   }
 }

@@ -59,15 +59,11 @@ function setup_directories () {
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_bin_path)"
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "${install_dir}/lib"
   # contains the certificates for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_ssl_path)"
-
-  # if the bin path exists and does not have 775, force it
-  if [ "$(stat --format '%a' "$(get_bin_path)")" -ne 775 ]; then
-    echo "Forcing 775 on '$(get_bin_path)' ..."
-    chmod 775 "$(get_bin_path)"
-  fi
 }
 
 # Creates the given folder path with root and user umask depending on the caller
@@ -95,7 +91,9 @@ function create_folder () {
 
 # Gets the path to the bin folder
 function get_bin_path () {
-  echo "${BIN_DIR}"
+  local install_dir
+  install_dir=$(get_install_dir)
+  echo "${install_dir}/bin"
 }
 
 # Gets the path to the versions folder

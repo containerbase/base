@@ -6,7 +6,7 @@ import { logger } from '../utils';
 export class PrepareLegacyToolsService {
   async execute(tools: string[]): Promise<void> {
     logger.debug(`Preparing legacy tools ${tools.join(', ')} ...`);
-    await execa('/usr/local/containerbase/bin/prepare-tool', tools, {
+    await execa('/usr/local/containerbase/bin/prepare-tool.sh', tools, {
       stdio: ['inherit', 'inherit', 1],
     });
   }

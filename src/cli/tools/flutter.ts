@@ -17,11 +17,7 @@ import { logger } from '../utils';
 export class PrepareFlutterService extends PrepareToolBaseService {
   readonly name = 'flutter';
 
-  constructor(@inject(EnvService) private readonly envSvc: EnvService) {
-    super();
-  }
-
-  override async execute(): Promise<void> {
+  async execute(): Promise<void> {
     const flutter = join(this.envSvc.userHome, '.flutter');
     await fs.writeFile(flutter, '{ "firstRun": false, "enabled": false }');
     await fs.chown(flutter, this.envSvc.userId, 0);
