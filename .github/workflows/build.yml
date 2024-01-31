@@ -32,7 +32,7 @@ jobs:
 
           colima list
 
-      - run: colima start --verbose
+      - run: colima start --vm-type vz --verbose
 
   setup:
     runs-on: ubuntu-latest
