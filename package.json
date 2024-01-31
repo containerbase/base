@@ -86,7 +86,7 @@
     "eslint-plugin-promise": "6.1.1",
     "eslint-plugin-typescript-enum": "2.1.0",
     "eslint-plugin-vitest": "0.3.20",
-    "husky": "8.0.3",
+    "husky": "9.0.6",
     "lint-staged": "15.2.0",
     "nock": "13.5.0",
     "npm-run-all2": "6.1.1",
