@@ -28,7 +28,7 @@ jobs:
           # macos-14 is missing colima
           brew install colima
 
-          colima status
+          colima --help
 
       - run: colima start
 
