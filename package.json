@@ -19,7 +19,7 @@
     "lint:types": "run-p 'lint:types:*'",
     "lint:types:default": "tsc",
     "lint:types:dist": "tsc -p tsconfig.dist.json",
-    "postinstall": "husky install",
+    "prepare": "husky",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "prettier": "prettier --cache -c -u \"**/*.*\"",
     "prettier-fix": "prettier --cache -w -u \"**/*.*\"",
