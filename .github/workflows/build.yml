@@ -20,8 +20,21 @@ permissions:
   contents: read
 
 jobs:
+  test-mac:
+    runs-on: macos-14
+    steps:
+      - name: install docker
+        run: |
+          # macos-14 is missing colima
+          brew install colima
+
+          colima status
+
+      - run: colima start
+
   setup:
     runs-on: ubuntu-latest
+    needs: test-mac
     permissions:
       contents: read
       checks: write
