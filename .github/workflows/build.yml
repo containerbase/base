@@ -177,7 +177,7 @@ jobs:
 
   lang:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.tag }} (${{ matrix.os == 'Linux' && 'amd64' || 'arm64' }})
+    name: ${{ matrix.tag }} (${{ matrix.os == 'ubuntu-latest' && 'amd64' || 'arm64' }})
     needs:
       - base
       - bats
@@ -214,6 +214,12 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
+      - name: install docker
+        if: ${{ matrix.os == 'macos-14' }}
+        run: |
+          brew install docker colima
+          colima start
+
       - name: docker-config
         uses: containerbase/internal-tools@6bbc5c952921fd03b8bb242934e57dc8d3d2be1b # v3.0.51
         with:
