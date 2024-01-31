@@ -22,27 +22,28 @@ permissions:
 jobs:
   test-mac:
     runs-on: macos-14
+
+    strategy:
+      matrix:
+        os:
+          - macos-12
+          - macos-13
+          - macos-14
+
     steps:
       - name: install docker
         run: |
           # macos-14 is missing colima
           brew install colima docker
 
-          colima start --help
-
-          colima list
-
       - run: colima version && limactl --version && qemu-img --version
 
-      - run: colima start --verbose --very-verbose -t vz
+      - run: colima start
 
-      - run: ls -la /Users/runner/.colima/_lima/colima/*.log
-        if: always()
-
-      - run: cat /Users/runner/.colima/_lima/colima/serial*.log
-        if: always()
       - run: cat /Users/runner/.colima/_lima/colima/ha.stderr.log
         if: always()
+
+      - run: colima status
 
   setup:
     runs-on: ubuntu-latest
