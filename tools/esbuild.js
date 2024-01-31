@@ -2,8 +2,18 @@ import fs from 'node:fs/promises';
 import { exec } from '@yao-pkg/pkg';
 import { build } from 'esbuild';
 import esbuildPluginPino from 'esbuild-plugin-pino';
+import shell from 'shelljs';
+
+shell.config.fatal = true;
 
 const nodeVersion = 20;
+const version = process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
+
+shell.rm('-rf', 'dist/docker');
+shell.mkdir('-p', 'dist/docker');
+shell.cp('-r', 'src/usr', 'dist/docker/');
+
+await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
 
 await build({
   entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
@@ -13,11 +23,9 @@ await build({
   minify: false,
   tsconfig: 'tsconfig.dist.json',
   // format: "esm", // not supported https://github.com/vercel/pkg/issues/1291
-  outdir: './dist/',
+  outdir: './dist',
   define: {
-    'globalThis.CONTAINERBASE_VERSION': `"${
-      process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER'
-    }"`,
+    'globalThis.CONTAINERBASE_VERSION': `"${version}"`,
   },
   plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
 });
@@ -27,13 +35,14 @@ await fs.writeFile(
   JSON.stringify(
     {
       name: 'containerbase-cli',
-      version: process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER',
+      version,
       private: true,
       type: 'commonjs',
       bin: {
         'containerbase-cli': './containerbase-cli.js',
       },
       pkg: {
+        outputPath: './dist/cli',
         scripts: ['pino-*.js', 'thread-stream-worker.js'],
         targets: [
           `node${nodeVersion}-linux-x64`,
@@ -62,11 +71,14 @@ await fs.writeFile(
 
 await exec([
   '--no-bytecode',
-  '--out-path',
-  './src/usr/local/containerbase/bin',
   '--public',
   '--options',
   'use-openssl-ca',
   // '--debug',
   'dist',
 ]);
+
+await fs.rename(
+  './dist/cli/containerbase-cli-x64',
+  './dist/cli/containerbase-cli-amd64',
+);
