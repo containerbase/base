@@ -113,7 +113,6 @@ teardown() {
 }
 
 @test "setup directories with correct permissions" {
-  local TEST_ROOT_USER=0 # root
   local install_dir=$(get_install_dir)
 
   run setup_directories

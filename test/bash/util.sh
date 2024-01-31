@@ -34,5 +34,5 @@ function link_cli_tool () {
 }
 
 # ensure directories exist
-mkdir -p "${TEST_ROOT_DIR}"/{sbin,root,user}
+mkdir -p "${TEST_ROOT_DIR}"/{bin,sbin,root/bin,user}
 link_cli_tool
