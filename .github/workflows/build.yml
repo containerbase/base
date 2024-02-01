@@ -115,6 +115,8 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@f30e4959ba63075080d4f7f90cacc18d9f3fafd7 # v4.0.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   base:
     runs-on: ubuntu-latest
