@@ -102,7 +102,7 @@
     "vitest": "1.2.2",
     "vitest-github-actions-reporter": "0.11.1"
   },
-  "packageManager": "pnpm@8.15.0",
+  "packageManager": "pnpm@8.15.1",
   "engines": {
     "node": ">=20.9.0",
     "pnpm": "^8.0.0"
