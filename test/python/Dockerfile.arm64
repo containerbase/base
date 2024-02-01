@@ -5,11 +5,13 @@ ARG BASE_IMAGE=containerbase/base
 
 FROM ${BASE_IMAGE} as base
 
-RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
+ARG GITHUB_TOKEN
+
+RUN uname -p | tee | grep aarch64
 
 #--------------------------------------
 # Image: python

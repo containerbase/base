@@ -9,6 +9,7 @@ RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
+ARG GITHUB_TOKEN
 
 COPY --chown=1000:0 test/python/test test
 WORKDIR /test

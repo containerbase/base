@@ -1,26 +1,15 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase/base
+
+FROM ${BASE_IMAGE} as base
 
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
-
-ENV BASH_ENV=/usr/local/etc/env
-SHELL ["/bin/bash" , "-c"]
-
-ARG TARGETARCH
-
-COPY dist/docker/ /
-COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
-RUN install-containerbase
-
-# TODO: move to prepare for bundler and cocoapods
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.0
+ARG GITHUB_TOKEN
 
 COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test

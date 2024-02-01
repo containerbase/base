@@ -1,22 +1,15 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase/base
+
+FROM ${BASE_IMAGE} as base
 
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
-
-ENV BASH_ENV=/usr/local/etc/env
-SHELL ["/bin/bash" , "-c"]
-
-ARG TARGETARCH
-
-COPY dist/docker/ /
-COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
-RUN install-containerbase
+ARG GITHUB_TOKEN
 
 # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
 ARG FLUX_VERSION=v2.2.2

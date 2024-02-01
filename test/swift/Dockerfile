@@ -1,22 +1,15 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase/base
+
+FROM ${BASE_IMAGE} as base
 
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
-
-ENV BASH_ENV=/usr/local/etc/env
-SHELL ["/bin/bash" , "-c"]
-
-ARG TARGETARCH
-
-COPY dist/docker/ /
-COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
-RUN install-containerbase
+ARG GITHUB_TOKEN
 
 COPY --chown=1000:0 test/swift/test test
 WORKDIR /test
@@ -25,10 +18,6 @@ WORKDIR /test
 # build
 #--------------------------------------
 FROM base as build
-
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.9.2

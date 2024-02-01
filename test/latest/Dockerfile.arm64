@@ -1,23 +1,17 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase/base
 
-RUN uname -p | tee | grep aarch64
+FROM ${BASE_IMAGE} as base
+
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
+ARG GITHUB_TOKEN
 
-ENV BASH_ENV=/usr/local/etc/env
-SHELL ["/bin/bash" , "-c"]
-
-ARG TARGETARCH
-
-COPY dist/docker/ /
-COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
-RUN install-containerbase
+RUN uname -p | tee | grep aarch64
 
 #--------------------------------------
 # Image: bazelisk
@@ -44,17 +38,9 @@ FROM base as test-docker
 RUN install-tool docker v25.0.2
 
 #--------------------------------------
-# Image: git
-#--------------------------------------
-FROM base as test-git
-
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.0
-
-#--------------------------------------
 # Image: git-lfs
 #--------------------------------------
-FROM test-git as test-git-lfs
+FROM base as test-git-lfs
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.4.1
@@ -99,7 +85,6 @@ FROM base
 COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
-COPY --from=test-git /.dummy /.dummy
 COPY --from=test-git-lfs /.dummy /.dummy
 COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy

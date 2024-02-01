@@ -1,26 +1,17 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase/base
 
-RUN uname -p | tee | grep aarch64
+FROM ${BASE_IMAGE} as base
+
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
+ARG GITHUB_TOKEN
 
-ENV BASH_ENV=/usr/local/etc/env
-SHELL ["/bin/bash" , "-c"]
-
-ARG TARGETARCH
-
-COPY dist/docker/ /
-COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
-RUN install-containerbase
-
-# renovate: datasource=github-tags packageName=git/git
-# RUN install-tool git v2.40.0
+RUN uname -p | tee | grep aarch64
 
 #--------------------------------------
 # Image: swift
