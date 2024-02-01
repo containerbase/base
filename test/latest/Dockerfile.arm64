@@ -41,7 +41,7 @@ RUN install-tool bun 1.0.25
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.1
+RUN install-tool docker v25.0.2
 
 #--------------------------------------
 # Image: git
@@ -81,7 +81,7 @@ RUN install-tool kustomize 5.3.0
 FROM base as test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.1
+RUN install-tool terraform 1.7.2
 
 #--------------------------------------
 # Image: vendir
