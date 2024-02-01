@@ -117,7 +117,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.11.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.0
+RUN install-tool pnpm 8.15.1
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
