@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import semver from 'semver';
 import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
 import {
   CompressionService,
@@ -43,7 +44,7 @@ export class InstallGleamService extends InstallToolBaseService {
     const url = `${baseUrl}${filename}`;
 
     const checksumFile = await this.http.download({
-      url: `${url}.sha256`,
+      url: `${url}.sha512`,
     });
     const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
       .split('\n')
@@ -52,7 +53,7 @@ export class InstallGleamService extends InstallToolBaseService {
 
     const file = await this.http.download({
       url,
-      checksumType: 'sha256',
+      checksumType: 'sha512',
       expectedChecksum,
     });
 
@@ -76,5 +77,9 @@ export class InstallGleamService extends InstallToolBaseService {
 
   override async test(_version: string): Promise<void> {
     await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
+  }
+
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(semver.gt(version, '0.19.0-rc1'));
   }
 }
