@@ -1,7 +1,8 @@
+# shellcheck disable=SC2148
 
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
@@ -11,16 +12,7 @@ setup() {
     # load test overwrites
     load "$TEST_DIR/util.sh"
 
-    # set directories for test
-    ROOT_DIR="${TEST_ROOT_DIR}/root"
-    BIN_DIR="${TEST_ROOT_DIR}/bin"
-    USER_HOME="${TEST_ROOT_DIR}/user"
-    ENV_FILE="${TEST_ROOT_DIR}/env"
-
     setup_directories
-
-    # set default test user
-    TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -43,7 +35,7 @@ teardown() {
   assert_success
   assert [ -f "${BIN_DIR}/git" ]
 
-  echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin2/foobar"
+  printf "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin2/foobar"
   chmod +x "${USER_HOME}/bin2/foobar"
 
   run link_wrapper foobar "${USER_HOME}/bin2/foobar"
@@ -51,7 +43,7 @@ teardown() {
   assert [ -f "${BIN_DIR}/foobar" ]
   rm "${BIN_DIR}/foobar"
 
-  echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin3/foobar"
+  printf "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin3/foobar"
   chmod +x "${USER_HOME}/bin3/foobar"
 
   run link_wrapper foobar "${USER_HOME}/bin3"
@@ -63,7 +55,7 @@ teardown() {
 @test "shell_wrapper" {
 
   mkdir -p "${USER_HOME}/bin"
-  echo "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin/foobar"
+  printf "#!/bin/bash\n\necho 'foobar'" > "${USER_HOME}/bin/foobar"
   chmod +x "${USER_HOME}/bin/foobar"
 
   run shell_wrapper
@@ -77,10 +69,10 @@ teardown() {
   run shell_wrapper ls
   assert_success
   assert [ -f "${BIN_DIR}/ls" ]
-  assert [ $(stat --format '%a' "${BIN_DIR}/ls") -eq 775 ]
+  assert [ "$(stat --format '%a' "${BIN_DIR}/ls")" -eq 775 ]
 
   PATH="${USER_HOME}/bin":$PATH run shell_wrapper foobar
   assert_success
   assert [ -f "${BIN_DIR}/foobar" ]
-  assert [ $(stat --format '%a' "${BIN_DIR}/ls") -eq 775 ]
+  assert [ "$(stat --format '%a' "${BIN_DIR}/ls")" -eq 775 ]
 }

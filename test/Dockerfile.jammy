@@ -6,7 +6,10 @@ FROM ubuntu:jammy as base
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -39,7 +42,7 @@ RUN install-tool bun 1.0.25
 RUN install-tool dart 2.19.6
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.1
+RUN install-tool docker v25.0.2
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.101
@@ -69,7 +72,7 @@ RUN install-tool helmfile v0.161.0
 RUN install-tool kustomize 5.3.0
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.19.3
+RUN install-tool nix 2.20.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.4.1
@@ -81,7 +84,7 @@ RUN install-tool rust 1.75.0
 RUN install-tool swift 5.9.2
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.1
+RUN install-tool terraform 1.7.2
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
@@ -117,7 +120,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.11.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.0
+RUN install-tool pnpm 8.15.1
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
@@ -139,13 +142,13 @@ FROM build as test-python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.1
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.0
 # renovate: datasource=pypi
 RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.7.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.12.2
+RUN install-tool pdm 2.12.3
 
 #--------------------------------------
 # Image: test-ruby

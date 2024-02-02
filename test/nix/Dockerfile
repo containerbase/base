@@ -12,7 +12,10 @@ ARG GITHUB_TOKEN
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -55,7 +58,7 @@ FROM base as testb
 USER 1000
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.19.3
+RUN install-tool nix 2.20.1
 
 RUN set -ex; \
   nix --version

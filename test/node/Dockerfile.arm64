@@ -12,7 +12,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -31,7 +34,7 @@ RUN install-tool node v20.11.0
 FROM test-node as test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.0
+RUN install-tool pnpm 8.15.1
 
 #--------------------------------------
 # Image: yarn

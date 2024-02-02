@@ -1,6 +1,8 @@
+# shellcheck disable=SC2034,SC2148,SC2155
+
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
   TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
   TEST_ROOT_DIR=$(mktemp -u)
@@ -11,14 +13,7 @@ setup() {
   load "$TEST_DIR/util.sh"
 
   # set directories for test
-  ROOT_DIR="${TEST_ROOT_DIR}/root"
-  BIN_DIR="${TEST_ROOT_DIR}/bin"
-  USER_HOME="${TEST_ROOT_DIR}/user"
-  ENV_FILE="${TEST_ROOT_DIR}/env"
   BASH_RC="${TEST_ROOT_DIR}/bash.bashrc"
-
-  # set default test user
-  TEST_ROOT_USER=1000
 }
 
 teardown() {
@@ -32,7 +27,7 @@ teardown() {
 
   mkdir -p "${TEST_ROOT_DIR}/user/env.d"
 
-  TOOL_NAME= run export_tool_env
+  TOOL_NAME='' run export_tool_env
   assert_failure
 
   export_tool_env FOO_HOME 123
@@ -40,7 +35,7 @@ teardown() {
   run cat "${install_dir}/env.d/foo.sh"
   assert_success
   assert_output --partial "FOO_HOME=\${FOO_HOME-123}"
-  assert [ $(stat --format '%a' "${install_dir}/env.d/foo.sh") -eq 664 ]
+  assert [ "$(stat --format '%a' "${install_dir}/env.d/foo.sh")" -eq 664 ]
 
   run reset_tool_env
   assert_success
@@ -58,7 +53,7 @@ teardown() {
 
   setup_env_files
 
-  TOOL_NAME= run export_tool_env
+  TOOL_NAME='' run export_tool_env
   assert_failure
 
   export_tool_env FOO_HOME 123
@@ -72,6 +67,7 @@ teardown() {
   assert [ -n "${TEST_ROOT_DIR}" ]
   assert [ -n "${ENV_FILE}" ]
 
+  # shellcheck source=/dev/null
   . "${ENV_FILE}"
   assert [ "${FOO_HOME}" = "123" ]
 
@@ -102,7 +98,7 @@ teardown() {
 
   local old_path=$PATH
 
-  TOOL_NAME= run export_tool_path
+  TOOL_NAME='' run export_tool_path
   assert_failure
 
   export_tool_path /foo

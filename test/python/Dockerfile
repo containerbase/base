@@ -11,7 +11,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -55,7 +58,7 @@ RUN install-tool python 3.12.1
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.0
 
 USER 1000
 
@@ -161,7 +164,7 @@ RUN set -ex; \
 FROM build-rootless as testb
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.0
 
 RUN set -ex; \
   cd a; \
@@ -204,7 +207,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.12.1
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.0
 
 RUN set -ex; \
   cd h-pipenv; \
@@ -218,7 +221,7 @@ FROM build as test-pdm
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.12.2
+RUN install-tool pdm 2.12.3
 
 #--------------------------------------
 # test c: python2.7
