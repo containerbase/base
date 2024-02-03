@@ -80,6 +80,6 @@ export class InstallGleamService extends InstallToolBaseService {
   }
 
   override validate(version: string): Promise<boolean> {
-    return Promise.resolve(semver.gt(version, '0.19.0-rc1'));
+    return (await super.validate(version)) && semver.gte(version, '0.19.0-rc1');
   }
 }
