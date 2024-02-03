@@ -79,7 +79,7 @@ export class InstallGleamService extends InstallToolBaseService {
     await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
   }
 
-  override validate(version: string): Promise<boolean> {
+  override async validate(version: string): Promise<boolean> {
     return (await super.validate(version)) && semver.gte(version, '0.19.0-rc1');
   }
 }
