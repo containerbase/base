@@ -31,7 +31,7 @@ function link_cli_tool () {
     arch=arm64
   fi
   export PATH="${TEST_ROOT_DIR}/sbin:${PATH}"
-  ln -sf "${CONTAINERBASE_DIR}/bin/containerbase-cli-${arch}" "${TEST_ROOT_DIR}/sbin/containerbase-cli"
+  ln -sf "${REPO_DIR}/dist/cli/containerbase-cli-${arch}" "${TEST_ROOT_DIR}/sbin/containerbase-cli"
 }
 
 # ensure directories exist
