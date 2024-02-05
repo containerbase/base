@@ -84,7 +84,8 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
   update-ca-certificates
 fi
 
-function link_tool () {
+function link_tools () {
+  ln -sf /usr/local/containerbase/bin/docker-entrypoint.sh /usr/local/sbin/docker-entrypoint.sh
   ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/sbin/install-apt
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/containerbase-cli
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-gem
@@ -94,7 +95,7 @@ function link_tool () {
 
   containerbase-cli --version
 }
-link_tool
+link_tools
 
 
 # do this at the end as we are overwriting certain env vars and functions
