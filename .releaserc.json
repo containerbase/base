@@ -64,10 +64,6 @@
         "section": "Features"
       },
       {
-        "type": "feature",
-        "section": "Features"
-      },
-      {
         "type": "fix",
         "section": "Bug Fixes"
       },
@@ -88,10 +84,6 @@
         "section": "Styles"
       },
       {
-        "type": "chore",
-        "section": "Miscellaneous Chores"
-      },
-      {
         "type": "refactor",
         "section": "Code Refactoring"
       },
@@ -106,6 +98,10 @@
       {
         "type": "ci",
         "section": "Continuous Integration"
+      },
+      {
+        "type": "chore",
+        "section": "Miscellaneous Chores"
       }
     ]
   },
