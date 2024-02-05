@@ -8,6 +8,7 @@ export const NoPrepareTools = [
   'cocoapods',
   'corepack',
   'flux',
+  'gleam',
   'lerna',
   'maven',
   'node',

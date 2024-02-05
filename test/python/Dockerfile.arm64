@@ -12,7 +12,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -30,7 +33,7 @@ RUN install-tool python 3.12.1
 FROM test-python as test-checkov
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.0
+RUN install-tool checkov 3.2.7
 
 #--------------------------------------
 # Image: hashin
@@ -46,7 +49,7 @@ RUN install-tool hashin 0.17.0
 FROM test-python as test-pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.1
 
 #--------------------------------------
 # Image: poetry

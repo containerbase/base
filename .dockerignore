@@ -1,4 +1,4 @@
 *
-!src
 !test
-src/cli
+!dist/docker
+!dist/cli

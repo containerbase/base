@@ -1,11 +1,9 @@
 node_modules/
-/coverage
-/dist
+/coverage/
+/dist/
+/bin/
+/tmp/
 /html/
-
-# yarn 2+
-.yarn/
-.pnp.*
 
 # pnpm
 pnpm-lock.yaml

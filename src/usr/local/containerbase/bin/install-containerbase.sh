@@ -84,19 +84,13 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
   update-ca-certificates
 fi
 
-function link_tools () {
-  local arch=x64
-
-  if [[ "${ARCHITECTURE}" = "aarch64" ]];then
-    arch=arm64
-  fi
-
+function link_tool () {
   ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/sbin/install-apt
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/sbin/containerbase-cli
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/sbin/install-gem
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/sbin/install-npm
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/sbin/install-tool
-  ln -sf /usr/local/containerbase/bin/containerbase-cli-${arch} /usr/local/sbin/prepare-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/containerbase-cli
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-gem
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/prepare-tool
 
   containerbase-cli --version
 }

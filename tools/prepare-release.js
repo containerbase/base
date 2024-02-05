@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import { Command, Option, runExit } from 'clipanion';
 import shell from 'shelljs';
+import { hashFile } from './utils.js';
+
+shell.config.fatal = true;
 
 class PrepareCommand extends Command {
   release = Option.String('-r,--release', { required: true });
@@ -22,32 +25,18 @@ class PrepareCommand extends Command {
 
     shell.mkdir('-p', 'bin');
 
-    await fs.writeFile('src/usr/local/containerbase/version', version);
+    shell.exec('pnpm build');
 
-    let r = shell.exec(
-      `tar --exclude='./cli' -cJf ./bin/containerbase.tar.xz -C ./src .`,
-    );
-    if (r.code) {
-      return 1;
-    }
+    await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
+    shell.exec(`tar -cJf ./bin/containerbase.tar.xz -C ./dist/docker .`);
 
-    r = shell.exec('sha512sum ./bin/containerbase.tar.xz');
-    if (r.code) {
-      return 1;
-    }
-    r.to('./bin/containerbase.tar.xz.sha512');
+    await hashFile('./bin/containerbase.tar.xz', 'sha512');
+    await hashFile('./dist/cli/containerbase-cli-amd64', 'sha512');
+    await hashFile('./dist/cli/containerbase-cli-arm64', 'sha512');
 
-    r = shell.exec('pnpm build');
-    if (r.code) {
-      return 1;
-    }
-
-    r = shell.exec(
+    shell.exec(
       'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build',
     );
-    if (r.code) {
-      return 1;
-    }
 
     return 0;
   }

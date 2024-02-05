@@ -1,22 +1,10 @@
 .cache/
 node_modules/
 /.pnpm-store
-/bin
-/dist
+/bin/
+/tmp/
+/dist/
 /coverage
 /html/
 
-# generated files
-/src/usr/local/containerbase/version
-/src/usr/local/containerbase/bin/containerbase-cli-*
-
 .eslintcache
-
-# yarn v2+ https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-# !.yarn/releases
-!.yarn/sdks
-!.yarn/versions

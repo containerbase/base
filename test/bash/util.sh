@@ -3,7 +3,8 @@
 # Will overwrite certain util functions to make them testable
 
 # set directories for test
-export CONTAINERBASE_DIR="${TEST_DIR}/../../src/usr/local/containerbase"
+export REPO_DIR="${TEST_DIR}/../.."
+export CONTAINERBASE_DIR="${REPO_DIR}/src/usr/local/containerbase"
 export ROOT_DIR="${TEST_ROOT_DIR}/root"
 export BIN_DIR="${TEST_ROOT_DIR}/bin"
 export LIB_DIR="${TEST_ROOT_DIR}/lib"
@@ -24,7 +25,7 @@ function is_root () {
 }
 
 function link_cli_tool () {
-  local arch=x64
+  local arch=amd64
 
   if [[ "${ARCHITECTURE}" = "aarch64" ]];then
     arch=arm64

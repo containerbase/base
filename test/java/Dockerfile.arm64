@@ -12,7 +12,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -30,7 +33,7 @@ RUN install-tool java 17.0.10+7
 FROM test-java as test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.5
+RUN install-tool gradle 8.6
 
 #--------------------------------------
 # Image: maven
