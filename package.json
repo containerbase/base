@@ -111,7 +111,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
+      "@yao-pkg/pkg@5.11.1": "patches/@yao-pkg__pkg@5.11.1.patch"
     },
     "supportedArchitectures": {
       "os": [

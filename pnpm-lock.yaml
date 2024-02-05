@@ -11,6 +11,9 @@ overrides:
   vite: 5.0.12
 
 patchedDependencies:
+  '@yao-pkg/pkg@5.11.1':
+    hash: fb6cn5vkrnldric4eq2yxxfize
+    path: patches/@yao-pkg__pkg@5.11.1.patch
   clipanion@3.2.1:
     hash: fhbb5gvkz3xnkjsqqxesufv7h4
     path: patches/clipanion@3.2.1.patch
@@ -110,7 +113,7 @@ devDependencies:
     version: 1.2.2(vitest@1.2.2)
   '@yao-pkg/pkg':
     specifier: 5.11.1
-    version: 5.11.1
+    version: 5.11.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
   bats:
     specifier: 1.10.0
     version: 1.10.0
@@ -1405,7 +1408,7 @@ packages:
       - supports-color
     dev: true
 
-  /@yao-pkg/pkg@5.11.1:
+  /@yao-pkg/pkg@5.11.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize):
     resolution: {integrity: sha512-y++Kd/kMZcp0UeI2GWB9+55WsDqZp3XCjHGzC4Nsao0tlGjhnNOB+TPhZhLTOCL1V4ApaKkH8zzPcpaTCtvM8g==}
     hasBin: true
     dependencies:
@@ -1427,6 +1430,7 @@ packages:
       - encoding
       - supports-color
     dev: true
+    patched: true
 
   /JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
