@@ -29,8 +29,7 @@ jobs:
       contents: read
       checks: write
     secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   release:
     needs: [build]
