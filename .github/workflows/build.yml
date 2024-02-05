@@ -3,9 +3,7 @@ name: build
 on:
   workflow_call:
     secrets:
-      DOCKER_USERNAME:
-        required: false
-      DOCKER_PASSWORD:
+      CODECOV_TOKEN:
         required: false
 
 env:
