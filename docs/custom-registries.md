@@ -178,6 +178,21 @@ Samples:
 https://github.com/git-lfs/git-lfs/releases/v3.4.1/git-lfs-linux-amd64-v3.4.1.tar.gz
 ```
 
+## gleam
+
+Gleam releases are downloaded from:
+
+- `https://github.com/gleam-lang/gleam/releases/download`
+
+Samples:
+
+```txt
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-aarch64-unknown-linux-musl.tar.gz
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-aarch64-unknown-linux-musl.tar.gz.sha512
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_64-unknown-linux-musl.tar.gz
+https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_64-unknown-linux-musl.tar.gz.sha512
+```
+
 ## `golang`
 
 Go releases are downloaded from:

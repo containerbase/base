@@ -51,7 +51,7 @@ RUN install-tool python 3.12.1
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.1
 
 USER 1000
 
@@ -157,7 +157,7 @@ RUN set -ex; \
 FROM build-rootless as testb
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.1
 
 RUN set -ex; \
   cd a; \
@@ -183,7 +183,7 @@ RUN set -ex \
 
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.0
+RUN install-tool checkov 3.2.7
 
 #--------------------------------------
 # test pipenv-b: pipenv (multiple python)
@@ -200,7 +200,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.12.1
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.1
 
 RUN set -ex; \
   cd h-pipenv; \

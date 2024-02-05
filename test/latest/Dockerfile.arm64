@@ -30,6 +30,14 @@ FROM base as test-bun
 RUN install-tool bun 1.0.25
 
 #--------------------------------------
+# Image: gleam
+#--------------------------------------
+FROM base as test-gleam
+
+# renovate: datasource=github-releases packageName=gleam-lang/gleam
+RUN install-tool gleam 0.34.1
+
+#--------------------------------------
 # Image: docker
 #--------------------------------------
 FROM base as test-docker
@@ -86,6 +94,7 @@ COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git-lfs /.dummy /.dummy
+COPY --from=test-gleam /.dummy /.dummy
 COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy
 COPY --from=test-terraform /.dummy /.dummy

@@ -56,6 +56,9 @@ RUN install-tool flux v2.2.2
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.4.1
 
+# renovate: datasource=github-releases packageName=gleam-lang/gleam
+RUN install-tool gleam 0.34.1
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.21.6
 
@@ -107,7 +110,7 @@ FROM build as test-java
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 17.0.10+7
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.5
+RUN install-tool gradle 8.6
 
 #--------------------------------------
 # Image: test-node
@@ -117,7 +120,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.11.0
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.0
+RUN install-tool pnpm 8.15.1
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.21
 
@@ -139,7 +142,7 @@ FROM build as test-python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.1
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.11.17
+RUN install-tool pipenv 2023.12.1
 # renovate: datasource=pypi
 RUN install-tool hashin 0.17.0
 # renovate: datasource=pypi
