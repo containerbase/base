@@ -25,7 +25,7 @@ RUN install-containerbase
 FROM base as test-flux
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.2.2
+RUN install-tool flux v2.2.3
 
 #--------------------------------------
 # Image: final
