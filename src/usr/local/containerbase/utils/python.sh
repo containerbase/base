@@ -30,6 +30,7 @@ function check_tool_installed() {
   test -n "$(find_pip_versioned_path)"
 }
 
+# shellcheck disable=2120
 function install_python_tool() {
   # always install with user umask
   # shellcheck disable=SC2034
@@ -70,6 +71,10 @@ function install_python_tool() {
     # store in cache
     cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}"
   fi
+}
+
+function install_tool() {
+  install_python_tool
 }
 
 function python_shell_wrapper () {

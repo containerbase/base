@@ -3,7 +3,7 @@
 # shellcheck source=/dev/null
 . "$(get_containerbase_path)/utils/python.sh"
 
-function install_tool() {
+function install_tool () {
   install_python_tool setuptools
 }
 
