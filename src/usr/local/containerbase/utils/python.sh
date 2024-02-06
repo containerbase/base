@@ -30,7 +30,7 @@ function check_tool_installed() {
   test -n "$(find_pip_versioned_path)"
 }
 
-function install_tool() {
+function install_python_tool() {
   # always install with user umask
   # shellcheck disable=SC2034
   local ROOT_UMASK=${USER_UMASK}
@@ -61,7 +61,8 @@ function install_tool() {
         --no-warn-script-location \
         --no-cache-dir \
         --quiet \
-        "${TOOL_NAME}==${TOOL_VERSION}"
+        "${TOOL_NAME}==${TOOL_VERSION}" \
+        "$@"
 
     # remove virtualenv app-data
     rm -rf ~/.local/share/virtualenv
