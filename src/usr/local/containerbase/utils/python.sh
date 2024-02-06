@@ -30,7 +30,7 @@ function check_tool_installed() {
   test -n "$(find_pip_versioned_path)"
 }
 
-# shellcheck disable=2120
+# shellcheck disable=SC2120
 function install_python_tool() {
   # always install with user umask
   # shellcheck disable=SC2034
