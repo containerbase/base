@@ -19,7 +19,7 @@ function install_tool () {
   python_version=$(get_tool_version python)
   split_python_version "${python_version}"
 
-  if [[ ${PYTHON_MAJOR} == 3 && ${PYTHON_MINOR} -ge 9 ]]; then
+  if [[ (${PYTHON_MAJOR} == 3 && ${PYTHON_MINOR} -ge 9) || ${PYTHON_MAJOR} -gt 3 ]]; then
       install_python_tool 'keyrings.envvars >= 1.1.0'
   else
       # The keyrings.envvars package does not support python versions lower than 3.9
