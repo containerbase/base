@@ -1,7 +1,8 @@
+# shellcheck disable=SC2148
 
 setup() {
-  load $BATS_SUPPORT_LOAD_PATH
-  load $BATS_ASSERT_LOAD_PATH
+  load "$BATS_SUPPORT_LOAD_PATH"
+  load "$BATS_ASSERT_LOAD_PATH"
 
     TEST_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" >/dev/null 2>&1 && pwd)"
     TEST_ROOT_DIR=$(mktemp -u)
@@ -11,19 +12,10 @@ setup() {
     # load test overwrites
     load "$TEST_DIR/util.sh"
 
-    # set directories for test
-    ROOT_DIR="${TEST_ROOT_DIR}/root"
-    BIN_DIR="${TEST_ROOT_DIR}/bin"
-    USER_HOME="${TEST_ROOT_DIR}/user"
-    ENV_FILE="${TEST_ROOT_DIR}/env"
-
     setup_directories
 
     # copy containerbase files
     cp -r "$TEST_DIR/../../src/usr/local/containerbase" "${ROOT_DIR}/containerbase"
-
-    # set default test user is root
-    TEST_ROOT_USER=1000
 }
 
 teardown() {

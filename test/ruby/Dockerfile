@@ -11,7 +11,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -47,7 +50,7 @@ RUN ruby --version
 RUN gem env
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.5
+ENV BUNDLER_VERSION=2.5.6
 RUN gem install bundler -v $BUNDLER_VERSION
 
 RUN bundle env
@@ -89,7 +92,7 @@ FROM build as test-bundler-c
 USER 1000
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.5
+ENV BUNDLER_VERSION=2.5.6
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -110,7 +113,7 @@ RUN set -ex; \
 FROM build as test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.5
+ENV BUNDLER_VERSION=2.5.6
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
@@ -121,7 +124,7 @@ USER 1000
 RUN install-tool ruby 3.1.0
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.5
+ENV BUNDLER_VERSION=2.5.6
 RUN install-tool bundler
 
 
@@ -133,7 +136,7 @@ FROM build as test-cocoapods-a
 USER 1000
 
 # renovate: datasource=rubygems
-RUN install-tool cocoapods 1.15.0
+RUN install-tool cocoapods 1.15.2
 
 RUN pod env
 

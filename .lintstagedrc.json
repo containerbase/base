@@ -1,7 +1,9 @@
 {
   "*.sh": "shellcheck",
+  "*.bats": "shellcheck",
   ".husky/*": "shellcheck",
   "src/usr/local/bin/*": "shellcheck",
-  "*.{js,ts,cjs,mjs}": "eslint --fix",
-  "*": "prettier --ignore-unknown --write"
+  "src/usr/local/containerbase/bin/*": "shellcheck",
+  "*.{js,ts,cjs,mjs}": ["eslint --fix", "prettier --write"],
+  "!*.{js,ts,cjs,mjs}": "prettier --ignore-unknown --write"
 }

@@ -15,6 +15,22 @@
           {
             "path": "bin/containerbase.tar.xz.sha512",
             "label": "containerbase.tar.xz.sha512"
+          },
+          {
+            "path": "dist/cli/containerbase-cli-amd64",
+            "label": "containerbase-cli-amd64"
+          },
+          {
+            "path": "dist/cli/containerbase-cli-amd64.sha512",
+            "label": "containerbase-cli-amd64.sha512"
+          },
+          {
+            "path": "dist/cli/containerbase-cli-arm64",
+            "label": "containerbase-cli-arm64"
+          },
+          {
+            "path": "dist/cli/containerbase-cli-arm64.sha512",
+            "label": "containerbase-cli-arm64.sha512"
           }
         ]
       }
@@ -48,10 +64,6 @@
         "section": "Features"
       },
       {
-        "type": "feature",
-        "section": "Features"
-      },
-      {
         "type": "fix",
         "section": "Bug Fixes"
       },
@@ -72,10 +84,6 @@
         "section": "Styles"
       },
       {
-        "type": "chore",
-        "section": "Miscellaneous Chores"
-      },
-      {
         "type": "refactor",
         "section": "Code Refactoring"
       },
@@ -90,6 +98,10 @@
       {
         "type": "ci",
         "section": "Continuous Integration"
+      },
+      {
+        "type": "chore",
+        "section": "Miscellaneous Chores"
       }
     ]
   },

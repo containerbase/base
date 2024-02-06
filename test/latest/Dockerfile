@@ -11,7 +11,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -138,7 +141,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.1
+RUN install-tool terraform 1.7.2
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -161,7 +164,7 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.2.2
+RUN install-tool flux v2.2.3
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.4.1
@@ -173,7 +176,7 @@ RUN install-tool powershell v7.4.1
 RUN install-tool node v20.11.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.1
+RUN install-tool docker v25.0.2
 
 #--------------------------------------
 # test: bin path has 775
@@ -195,7 +198,10 @@ FROM base as teste
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.25
+RUN install-tool bun 1.0.26
+
+# renovate: datasource=github-releases packageName=gleam-lang/gleam
+RUN install-tool gleam 0.34.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2

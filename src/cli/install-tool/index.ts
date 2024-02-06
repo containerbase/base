@@ -7,6 +7,7 @@ import { InstallDockerService } from '../tools/docker';
 import { InstallDotnetService } from '../tools/dotnet';
 import { InstallFlutterService } from '../tools/flutter';
 import { InstallFluxService } from '../tools/flux';
+import { InstallGleamService } from '../tools/gleam';
 import { InstallMavenService } from '../tools/java/maven';
 import { InstallNodeService } from '../tools/node';
 import {
@@ -40,6 +41,7 @@ function prepareInstallContainer(): Container {
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
