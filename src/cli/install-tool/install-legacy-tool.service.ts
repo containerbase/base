@@ -18,9 +18,13 @@ export class InstallLegacyToolService {
       env.PIP_INDEX_URL = pipIndex;
     }
 
-    await execa('/usr/local/containerbase/bin/install-tool', [tool, version], {
-      stdio: ['inherit', 'inherit', 1],
-      env,
-    });
+    await execa(
+      '/usr/local/containerbase/bin/install-tool.sh',
+      [tool, version],
+      {
+        stdio: ['inherit', 'inherit', 1],
+        env,
+      },
+    );
   }
 }

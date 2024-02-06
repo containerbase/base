@@ -12,7 +12,10 @@ ARG CONTAINERBASE_DEBUG
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
-COPY src/ /
+ARG TARGETARCH
+
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
 RUN install-containerbase
 
@@ -30,7 +33,7 @@ RUN install-tool ruby 3.2.3
 FROM test-ruby as test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.5
+RUN install-tool bundler 2.5.6
 
 #--------------------------------------
 # Image: cocoapods
@@ -42,7 +45,7 @@ FROM test-ruby as test-cocoapods
 RUN install-tool git v2.43.0
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.15.0
+RUN install-tool cocoapods 1.15.2
 
 #--------------------------------------
 # Image: final

@@ -18,11 +18,11 @@ export class PrepareDotnetService extends PrepareToolBaseService {
   readonly name = 'dotnet';
 
   constructor(
-    @inject(EnvService) private readonly envSvc: EnvService,
+    @inject(EnvService) envSvc: EnvService,
     @inject(AptService) private readonly aptSvc: AptService,
-    @inject(PathService) private readonly pathSvc: PathService,
+    @inject(PathService) pathSvc: PathService,
   ) {
-    super();
+    super(pathSvc, envSvc);
   }
 
   async execute(): Promise<void> {

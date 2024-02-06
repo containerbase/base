@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { codeBlock } from 'common-tags';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
 import { NoPrepareTools } from '../tools';
@@ -58,18 +59,19 @@ export abstract class InstallToolBaseService {
   }: ShellWrapperConfig): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name ?? this.name);
 
-    let content = `#!/bin/bash
+    let content = codeBlock`
+      #!/bin/bash
 
-if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
-  . ${this.pathSvc.envFile}
-fi
-`;
+      if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
+        . ${this.pathSvc.envFile}
+      fi
+      `;
 
     if (exports) {
-      content += `export ${exports}\n`;
+      content += `\nexport ${exports}`;
     }
 
-    content += `${srcDir}/${name ?? this.name}`;
+    content += `\n${srcDir}/${name ?? this.name}`;
     if (args) {
       content += ` ${args}`;
     }
