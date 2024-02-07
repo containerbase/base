@@ -60,7 +60,7 @@ RUN install-tool git-lfs v3.4.1
 RUN install-tool gleam 0.34.1
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.21.6
+RUN install-tool golang 1.22.0
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.14.0
@@ -100,7 +100,7 @@ FROM build as test-erlang
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 26.2.1.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.16.0
+RUN install-tool elixir 1.16.1
 
 #--------------------------------------
 # Image: test-java

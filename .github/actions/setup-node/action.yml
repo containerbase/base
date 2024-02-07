@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         echo 'CACHE_KEY=node_modules-${{
-          hashFiles('.node-version', 'pnpm-lock.yaml')
+          hashFiles('.node-version', 'pnpm-lock.yaml', 'package.json')
         }}' >> "$GITHUB_ENV"
 
     - name: ♻️ Restore `node_modules`
@@ -37,7 +37,7 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: ⚙️ Setup Node.js
-      uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
       with:
         node-version-file: .node-version
         cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
