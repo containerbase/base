@@ -143,5 +143,15 @@
       "extends": ["schedule:weekly"],
       "automerge": true
     }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^package\\.json$"],
+      "matchStrings": [
+        "\"(?<depName>@yao-pkg/pkg|clipanion)@(?<currentValue>\\d+\\.\\d+\\.\\d+)\":"
+      ],
+      "datasourceTemplate": "npm"
+    }
   ]
 }

@@ -70,7 +70,7 @@
     "@typescript-eslint/parser": "6.20.0",
     "@vitest/coverage-v8": "1.2.2",
     "@vitest/ui": "1.2.2",
-    "@yao-pkg/pkg": "5.11.1",
+    "@yao-pkg/pkg": "5.11.2",
     "bats": "1.10.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
@@ -112,8 +112,9 @@
   "pnpm": {
     "patchedDependencies": {
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
-      "@yao-pkg/pkg@5.11.1": "patches/@yao-pkg__pkg@5.11.1.patch"
+      "@yao-pkg/pkg@5.11.2": "patches/@yao-pkg__pkg@5.11.1.patch"
     },
+    "allowNonAppliedPatches": true,
     "supportedArchitectures": {
       "os": [
         "linux",

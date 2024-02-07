@@ -49,7 +49,7 @@ RUN install-tool gleam 0.34.1
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.2
+RUN install-tool docker v25.0.3
 
 #--------------------------------------
 # Image: git
