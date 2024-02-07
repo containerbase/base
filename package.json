@@ -92,7 +92,7 @@
     "lint-staged": "15.2.1",
     "nock": "13.5.1",
     "npm-run-all2": "6.1.2",
-    "prettier": "3.2.4",
+    "prettier": "3.2.5",
     "prettier-plugin-packagejson": "2.4.10",
     "semantic-release": "23.0.0",
     "shelljs": "0.8.5",
