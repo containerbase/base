@@ -111,7 +111,7 @@ RUN install-tool php 8.3.2
 
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.6.6
+RUN install-tool composer 2.7.0
 
 RUN install-tool composer latest
 
@@ -154,7 +154,7 @@ RUN install-tool php 8.3.2
 RUN install-tool composer latest
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.6.6
+RUN install-tool composer 2.7.0
 
 
 RUN set -ex; \
