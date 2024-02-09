@@ -132,7 +132,7 @@ FROM build as test-php
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.3.2
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.7.0
+RUN install-tool composer 2.7.1
 
 #--------------------------------------
 # Image: test-python
