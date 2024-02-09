@@ -31,10 +31,6 @@ group "default" {
   targets = ["build-docker"]
 }
 
-group "push" {
-  targets = ["push-ghcr", "push-hub", "push-cache"]
-}
-
 group "test" {
   targets = ["build-test", "build-arm64"]
 }
@@ -52,27 +48,13 @@ target "settings" {
     CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
     GITHUB_TOKEN          = "${GITHUB_TOKEN}"
   }
-}
-
-target "cache" {
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
   ]
-}
-
-target "push-cache" {
-  inherits = ["settings", "cache"]
-  output   = ["type=registry"]
-  tags = [
-    "ghcr.io/${OWNER}/cache:${FILE}-${TAG}",
-    "ghcr.io/${OWNER}/cache:${FILE}",
-  ]
-  cache-to = ["type=inline,mode=max"]
 }
 
 target "build" {
-  inherits = ["settings", "cache"]
+  inherits = ["settings"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
@@ -82,7 +64,7 @@ target "build" {
 }
 
 target "build-docker" {
-  inherits = ["settings", "cache"]
+  inherits = ["settings"]
   output   = ["type=docker"]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
@@ -109,15 +91,14 @@ target "build-arm64" {
   dockerfile = "./test/${TAG}/Dockerfile.arm64"
 }
 
-target "push-ghcr" {
-  inherits = ["settings", "cache"]
+target "push" {
+  inherits = ["settings"]
   output   = ["type=registry"]
-  tags     = ["ghcr.io/${OWNER}/${FILE}", "ghcr.io/${OWNER}/${FILE}:${TAG}", ]
+  cache-to = ["type=registry,ref=ghcr.io/${OWNER}/${FILE},mode=max,image-manifest=true,ignore-error=true"]
+  tags     = [
+    "ghcr.io/${OWNER}/${FILE}",
+    "ghcr.io/${OWNER}/${FILE}:${TAG}",
+     "${OWNER}/${FILE}",
+     "${OWNER}/${FILE}:${TAG}",
+  ]
 }
-
-target "push-hub" {
-  inherits = ["settings", "cache"]
-  output   = ["type=registry"]
-  tags     = ["${OWNER}/${FILE}", "${OWNER}/${FILE}:${TAG}"]
-}
-
