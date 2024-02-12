@@ -62,7 +62,7 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN install-tool powershell v7.4.1
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.12.1
+ARG PYTHON_VERSION=3.12.2
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -141,7 +141,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.2
+RUN install-tool terraform 1.7.3
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -176,7 +176,7 @@ RUN install-tool powershell v7.4.1
 RUN install-tool node v20.11.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.2
+RUN install-tool docker v25.0.3
 
 #--------------------------------------
 # test: bin path has 775
