@@ -1,7 +1,7 @@
 {
   "extends": [
     "@tsconfig/strictest/tsconfig.json",
-    "@tsconfig/node20/tsconfig.json",
+    "@tsconfig/node20/tsconfig.json"
   ],
   "compilerOptions": {
     "baseUrl": ".",
@@ -15,8 +15,8 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "paths": {
-      "~test/*": ["./test/*"],
-    },
+      "~test/*": ["./test/*"]
+    }
   },
-  "exclude": ["node_modules", "bin", "dist", "coverage", "html"],
+  "exclude": ["node_modules", "bin", "dist", "coverage", "html"]
 }

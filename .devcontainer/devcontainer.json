@@ -1,7 +1,7 @@
 {
   "name": "containerbase",
   "build": {
-    "dockerfile": "Dockerfile",
+    "dockerfile": "Dockerfile"
   },
   "customizations": {
     "vscode": {
@@ -9,13 +9,13 @@
         "terminal.integrated.profiles.linux": {
           "bash": {
             "path": "bash",
-            "icon": "terminal-bash",
-          },
+            "icon": "terminal-bash"
+          }
         },
-        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
-    },
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
   },
-  "postCreateCommand": "pnpm install",
+  "postCreateCommand": "pnpm install"
 }
