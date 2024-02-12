@@ -94,7 +94,7 @@ target "build-arm64" {
 target "push" {
   inherits = ["settings"]
   output   = ["type=registry"]
-  cache-to = ["type=registry,ref=ghcr.io/${OWNER}/${FILE},mode=max,image-manifest=true,ignore-error=true"]
+  cache-to = ["type=registry,ref=ghcr.io/${OWNER}/cache:${FILE},mode=max,image-manifest=true,ignore-error=true"]
   tags     = [
     "ghcr.io/${OWNER}/${FILE}",
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
