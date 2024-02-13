@@ -5,20 +5,11 @@ function check_tool_requirements () {
   check_semver "$TOOL_VERSION" "all"
 }
 
-function get_ruby_minor_version() {
-  local ruby_version=$1
-  if [[ ! "${ruby_version}" =~ ${SEMVER_REGEX} ]]; then
-    echo Ruby is not a semver like version - aborting: "${ruby_version}"
-    exit 1
-  fi
-  echo "${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
-}
-
 function find_gem_versioned_path() {
   local ruby_version
   local tool_dir
   ruby_version=$(get_tool_version ruby)
-  tool_dir="$(find_versioned_tool_path)/$(get_ruby_minor_version "${ruby_version}")"
+  tool_dir="$(find_versioned_tool_path)/${ruby_version}"
 
   if [[ -d "${tool_dir}" ]]; then
     echo "${tool_dir}"
@@ -36,10 +27,10 @@ function install_tool() {
   local ruby_version
   local tool_path
   ruby_version=$(get_tool_version ruby)
-  tool_path="$(create_versioned_tool_path)/$(get_ruby_minor_version "${ruby_version}")"
+  tool_path="$(create_versioned_tool_path)/${ruby_version}"
   mkdir -p "${tool_path}"
 
-  if [[ $(restore_folder_from_cache "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
+  if [[ $(restore_folder_from_cache "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}/${ruby_version}") -ne 0 ]]; then
     # restore from cache not possible
     # either not in cache or error, install
 
@@ -48,7 +39,7 @@ function install_tool() {
     # TODO: clear gem cache
 
     # store in cache
-    cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}"
+    cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}/${ruby_version}"
   fi
 }
 
