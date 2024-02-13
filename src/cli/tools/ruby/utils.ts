@@ -4,7 +4,7 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { logger, parse } from '../../utils';
+import { logger } from '../../utils';
 
 const defaultRegistry = 'https://rubygems.org/';
 
@@ -27,7 +27,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     }
 
     const gem = await this.getRubyGem();
-    const ruby = await this.getRubyMinor();
+    const ruby = await this.getRubyVersion();
 
     // TODO: create recursive
     if (!(await this.pathSvc.findToolPath(this.name))) {
@@ -69,7 +69,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
   }
 
   override async isInstalled(version: string): Promise<boolean> {
-    const ruby = await this.getRubyMinor();
+    const ruby = await this.getRubyVersion();
     return this.pathSvc.fileExists(this.getGemSpec(version, ruby));
   }
 
@@ -78,7 +78,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
   }
 
   override async postInstall(version: string): Promise<void> {
-    const ruby = await this.getRubyMinor();
+    const ruby = await this.getRubyVersion();
     const vtPath = this.pathSvc.versionedToolPath(this.name, version);
     const path = join(vtPath, ruby);
     const src = join(path, 'bin');
@@ -124,12 +124,6 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     const rubyVersion = await this.getRubyVersion();
 
     return join(this.pathSvc.versionedToolPath('ruby', rubyVersion), 'bin/gem');
-  }
-
-  private async getRubyMinor(): Promise<string> {
-    const rubyVersion = await this.getRubyVersion();
-    const ver = parse(rubyVersion);
-    return `${ver.major}.${ver.minor}`;
   }
 
   private async getRubyVersion(): Promise<string> {
