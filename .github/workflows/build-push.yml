@@ -52,6 +52,7 @@ jobs:
         with:
           fetch-depth: 0
           show-progress: false
+          filter: blob:none # we don't need all blobs
 
       - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
 
