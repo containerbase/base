@@ -10,7 +10,7 @@ import {
   PathService,
   VersionService,
 } from '../../services';
-import { getDistro, isValid, parse } from '../../utils';
+import { getDistro, parse } from '../../utils';
 import {
   InstallNodeBaseService,
   prepareGlobalConfig,
@@ -197,9 +197,5 @@ fi
         stdio: ['inherit', 'inherit', 1],
       });
     }
-  }
-
-  override validate(version: string): Promise<boolean> {
-    return Promise.resolve(isValid(version));
   }
 }

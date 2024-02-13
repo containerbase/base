@@ -13,16 +13,71 @@ const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
 export abstract class InstallNodeBaseService extends InstallToolBaseService {
-  protected get tool(): string {
-    return this.name;
-  }
-
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(VersionService) protected versionSvc: VersionService,
   ) {
     super(pathSvc, envSvc);
+  }
+
+  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
+    const env: NodeJS.ProcessEnv = {
+      NO_UPDATE_NOTIFIER: '1',
+      npm_config_update_notifier: 'false',
+      npm_config_fund: 'false',
+    };
+
+    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
+      env.npm_config_cache = tmp;
+    }
+
+    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    if (registry !== defaultRegistry) {
+      env.npm_config_registry = registry;
+    }
+
+    return env;
+  }
+
+  protected async updateNodeGyp(
+    prefix: string,
+    tmp: string,
+    env: NodeJS.ProcessEnv,
+    global = false,
+  ): Promise<void> {
+    const res = await execa(
+      join(prefix, 'bin/npm'),
+      [
+        'explore',
+        'npm',
+        ...(global ? ['-g'] : []),
+        '--prefix',
+        prefix,
+        // '--silent',
+        '--',
+        'npm',
+        'install',
+        'node-gyp@latest',
+        '--no-audit',
+        '--cache',
+        tmp,
+        '--silent',
+      ],
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
+    );
+
+    if (res.failed) {
+      logger.warn(`Npm error:\n${res.all}`);
+      throw new Error('node-gyp update command failed');
+    }
+  }
+}
+
+@injectable()
+export abstract class InstallNpmBaseService extends InstallNodeBaseService {
+  protected get tool(): string {
+    return this.name;
   }
 
   override async install(version: string): Promise<void> {
@@ -150,58 +205,6 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
   protected getAdditionalArgs(): string[] {
     return [];
-  }
-
-  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
-    const env: NodeJS.ProcessEnv = {
-      NO_UPDATE_NOTIFIER: '1',
-      npm_config_update_notifier: 'false',
-      npm_config_fund: 'false',
-    };
-
-    if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
-      env.npm_config_cache = tmp;
-    }
-
-    const registry = this.envSvc.replaceUrl(defaultRegistry);
-    if (registry !== defaultRegistry) {
-      env.npm_config_registry = registry;
-    }
-
-    return env;
-  }
-
-  protected async updateNodeGyp(
-    prefix: string,
-    tmp: string,
-    env: NodeJS.ProcessEnv,
-    global = false,
-  ): Promise<void> {
-    const res = await execa(
-      join(prefix, 'bin/npm'),
-      [
-        'explore',
-        'npm',
-        ...(global ? ['-g'] : []),
-        '--prefix',
-        prefix,
-        // '--silent',
-        '--',
-        'npm',
-        'install',
-        'node-gyp@latest',
-        '--no-audit',
-        '--cache',
-        tmp,
-        '--silent',
-      ],
-      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
-    );
-
-    if (res.failed) {
-      logger.warn(`Npm error:\n${res.all}`);
-      throw new Error('node-gyp update command failed');
-    }
   }
 
   private packageJsonPath(version: string, node: string): string {

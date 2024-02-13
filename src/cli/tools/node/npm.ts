@@ -1,9 +1,9 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { InstallNodeBaseService } from './utils';
+import { InstallNpmBaseService } from './utils';
 
 @injectable()
-export class InstallRenovateService extends InstallNodeBaseService {
+export class InstallRenovateService extends InstallNpmBaseService {
   override readonly name: string = 'renovate';
 
   protected override getAdditionalArgs(): string[] {
@@ -21,7 +21,7 @@ export class InstallRenovateService extends InstallNodeBaseService {
 }
 
 @injectable()
-export class InstallYarnSlimService extends InstallNodeBaseService {
+export class InstallYarnSlimService extends InstallNpmBaseService {
   override readonly name: string = 'yarn-slim';
 
   protected override get tool(): string {
