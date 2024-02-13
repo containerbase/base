@@ -5,21 +5,11 @@ function check_tool_requirements () {
   check_semver "$TOOL_VERSION" "all"
 }
 
-function get_python_minor_version() {
-  local python_version=$1
-  if [[ ! "${python_version}" =~ ${SEMVER_REGEX} ]]; then
-    echo Python is not a semver like version - aborting: "${python_version}"
-    exit 1
-  fi
-  export PYTHON_MAJOR=${BASH_REMATCH[1]}
-  echo "${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
-}
-
 function find_pip_versioned_path() {
   local python_version
   local tool_dir
   python_version=$(get_tool_version python)
-  tool_dir="$(find_versioned_tool_path)/$(get_python_minor_version "${python_version}")"
+  tool_dir="$(find_versioned_tool_path)/${python_version}"
 
   if [[ -d "${tool_dir}" ]]; then
     echo "${tool_dir}"
@@ -35,16 +25,14 @@ function install_python_tool() {
   # always install with user umask
   # shellcheck disable=SC2034
   local ROOT_UMASK=${USER_UMASK}
-  local python_minor_version
   local python_version
   local tool_path
 
   python_version=$(get_tool_version python)
-  python_minor_version=$(get_python_minor_version "${python_version}")
-  tool_path="$(create_versioned_tool_path)/${python_minor_version}"
+  tool_path="$(create_versioned_tool_path)/${python_version}"
   mkdir -p "${tool_path}"
 
-  if [[ $(restore_folder_from_cache "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}") -ne 0 ]]; then
+  if [[ $(restore_folder_from_cache "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}/${python_version}") -ne 0 ]]; then
     # restore from cache not possible
     # either not in cache or error, install
 
@@ -69,7 +57,7 @@ function install_python_tool() {
     rm -rf ~/.local/share/virtualenv
 
     # store in cache
-    cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}"
+    cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}/${python_version}"
   fi
 }
 
