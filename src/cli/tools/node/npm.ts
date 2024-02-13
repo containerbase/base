@@ -1,9 +1,9 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { InstallNodeBaseService } from './utils';
+import { InstallNpmBaseService } from './utils';
 
 @injectable()
-export class InstallRenovateService extends InstallNodeBaseService {
+export class InstallRenovateService extends InstallNpmBaseService {
   override readonly name: string = 'renovate';
 
   protected override getAdditionalArgs(): string[] {
@@ -21,7 +21,7 @@ export class InstallRenovateService extends InstallNodeBaseService {
 }
 
 @injectable()
-export class InstallYarnSlimService extends InstallNodeBaseService {
+export class InstallYarnSlimService extends InstallNpmBaseService {
   override readonly name: string = 'yarn-slim';
 
   protected override get tool(): string {
@@ -30,14 +30,15 @@ export class InstallYarnSlimService extends InstallNodeBaseService {
 
   override async install(version: string): Promise<void> {
     await super.install(version);
+    const node = await this.getNodeVersion();
     // TODO: replace with javascript
-    const prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
+    const prefix = this.pathSvc.versionedToolPath(this.name, version);
     await execa(
       'sed',
       [
         '-i',
         's/ steps,/ steps.slice(0,1),/',
-        `${prefix}/node_modules/yarn/lib/cli.js`,
+        `${prefix}/${node}/node_modules/yarn/lib/cli.js`,
       ],
       { stdio: ['inherit', 'inherit', 1] },
     );

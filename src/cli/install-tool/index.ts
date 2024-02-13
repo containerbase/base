@@ -18,7 +18,7 @@ import {
   NodeVersionResolver,
   NpmVersionResolver,
 } from '../tools/node/resolver';
-import { InstallNodeBaseService } from '../tools/node/utils';
+import { InstallNpmBaseService } from '../tools/node/utils';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
@@ -104,7 +104,7 @@ export function installTool(
       }
       case 'npm': {
         @injectable()
-        class InstallGenericNpmService extends InstallNodeBaseService {
+        class InstallGenericNpmService extends InstallNpmBaseService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
