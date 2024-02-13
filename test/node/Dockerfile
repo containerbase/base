@@ -71,7 +71,7 @@ ARG APT_HTTP_PROXY
 RUN npm install -g yarn
 
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 RUN set -ex; cd a; yarn; [[ -d node_modules/.bin ]] || exit 1
@@ -117,7 +117,7 @@ RUN set -ex; cd a; pnpm i
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
   pnpm --version \
-  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v pnpm)" = "/opt/containerbase/home/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: node 18
@@ -134,13 +134,13 @@ RUN install-tool node v18.20.3
 
 RUN npm install -g yarn
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 
@@ -278,7 +278,7 @@ ARG APT_HTTP_PROXY
 RUN npm install -g yarn
 
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 RUN set -ex; ls -lah /test/a; cd a; yarn

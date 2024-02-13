@@ -10,6 +10,10 @@ export ROOT_DIR_LEGACY="${ROOT_DIR}"
 # shellcheck disable=SC2168,SC2034
 export ROOT_DIR=/opt/containerbase
 
+# we need to set the user home directory to the new root directory
+# shellcheck disable=SC2153
+export USER_HOME="${ROOT_DIR}/home"
+
 # get path location
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi

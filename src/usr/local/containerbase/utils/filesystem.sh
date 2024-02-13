@@ -46,6 +46,8 @@ function setup_directories () {
   local install_dir
   install_dir=$(get_install_dir)
 
+  echo "Setting up directories in ${install_dir}"
+
   mkdir -p "${install_dir}"
   # contains the installed tools
   # shellcheck disable=SC2174

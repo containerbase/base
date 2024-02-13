@@ -21,6 +21,8 @@ fi
 
 # shellcheck source=/dev/null
 . /usr/local/containerbase/util.sh
+# shellcheck source=/dev/null
+. /usr/local/containerbase/utils/v2/overrides.sh
 
 if [[ -n "${BASH_ENV}" && "${BASH_ENV}" != "${ENV_FILE}" ]]; then
   echo "Wrong BASH_ENV defined - skipping: ${BASH_ENV}"
@@ -41,26 +43,6 @@ setup_env_files
 
 echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
-
-# happens on ubuntu noble
-if grep 'ubuntu:x:1000:' /etc/passwd > /dev/null; then
-  echo "User already exists, deleting" >&2
-  userdel -r ubuntu
-fi
-
-# Set up user and home directory
-createUser
-
-# create env helper paths
-mkdir /usr/local/env.d
-su "${USER_NAME}" -c "mkdir -p \"/home/${USER_NAME}/\"{env.d,bin}"
-
-if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
-  echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> "$ENV_FILE"
-fi
-
-# OpenShift
-chmod -R g+w "/home/${USER_NAME}"
 
 export_env DEBIAN_FRONTEND "noninteractive"
 export_env LC_ALL "C.UTF-8"
@@ -105,11 +87,10 @@ link_tools
 
 
 # do this at the end as we are overwriting certain env vars and functions
-function prepare_v2_tools () {
-  # setup directories for v2 tools
-  # shellcheck source=/dev/null
-  . /usr/local/containerbase/utils/v2/overrides.sh
+function prepare_system () {
+  echo "Setting up system"
 
+  # setup directories for v2 tools
   setup_directories
 
   # compability with current custom images
@@ -123,7 +104,37 @@ function prepare_v2_tools () {
   # set cache path to /opt/containerbase/cache
   export_env XDG_CACHE_HOME "$(get_cache_path)" true
 }
-prepare_v2_tools
+prepare_system
+
+function prepare_user() {
+  echo "Setting up user"
+  local install_dir
+  install_dir=$(get_install_dir)
+
+  # happens on ubuntu noble
+  if grep 'ubuntu:x:1000:' /etc/passwd > /dev/null; then
+    echo "User already exists, deleting" >&2
+    userdel -r ubuntu
+  fi
+
+  # Set up user and home directory
+  createUser "${install_dir}/home"
+
+  # create symlink for compabillity
+  ln -sf "${install_dir}/home" "/home/${USER_NAME}"
+
+  # create env helper paths
+  mkdir /usr/local/env.d
+  su "${USER_NAME}" -c "mkdir -p \"/home/${USER_NAME}/\"{env.d,bin}"
+
+  if [[ "$PATH" =~ (^|:)"/home/${USER_NAME}/bin"(:|$) ]]; then
+    echo "export PATH=\"/home/${USER_NAME}/bin:\${PATH}\"" >> "$ENV_FILE"
+  fi
+
+  # OpenShift
+  chmod -R g+w "${install_dir}/home"
+}
+prepare_user
 
 # cleanup
 rm -rf /var/lib/apt/lists/* /var/log/dpkg.* /var/log/apt
