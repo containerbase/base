@@ -1,0 +1,89 @@
+diff --git a/prelude/bootstrap.js b/prelude/bootstrap.js
+index 36aa2a4d1448fa33869181fe0a9ab5fd92abd0bd..809eeaee0943875745e1d82ae81c5bb427332b3d 100644
+--- a/prelude/bootstrap.js
++++ b/prelude/bootstrap.js
+@@ -2113,7 +2113,7 @@ function payloadFileSync(pointer) {
+     modifyLong(args, 0);
+     return ancestor.execSync.apply(childProcess, args);
+   };
+-})();
++}); // fix: disable child_process patch ();
+ 
+ // /////////////////////////////////////////////////////////////////
+ // PROMISIFY ///////////////////////////////////////////////////////
+@@ -2147,40 +2147,41 @@ function payloadFileSync(pointer) {
+   // /////////////////////////////////////////////////////////////
+   // CHILD_PROCESS ///////////////////////////////////////////////
+   // /////////////////////////////////////////////////////////////
+-
+-  const customPromiseExecFunction =
+-    (o) =>
+-    (...args) => {
+-      let resolve;
+-      let reject;
+-      const p = new Promise((res, rej) => {
+-        resolve = res;
+-        reject = rej;
+-      });
+-
+-      p.child = o.apply(
+-        undefined,
+-        args.concat((error, stdout, stderr) => {
+-          if (error !== null) {
+-            error.stdout = stdout;
+-            error.stderr = stderr;
+-            reject(error);
+-          } else {
+-            resolve({ stdout, stderr });
+-          }
+-        }),
+-      );
+-
+-      return p;
+-    };
+-
+-  Object.defineProperty(childProcess.exec, custom, {
+-    value: customPromiseExecFunction(childProcess.exec),
+-  });
+-
+-  Object.defineProperty(childProcess.execFile, custom, {
+-    value: customPromiseExecFunction(childProcess.execFile),
+-  });
++  
++  // fix: disable child_process patch
++  // const customPromiseExecFunction =
++  //   (o) =>
++  //   (...args) => {
++  //     let resolve;
++  //     let reject;
++  //     const p = new Promise((res, rej) => {
++  //       resolve = res;
++  //       reject = rej;
++  //     });
++
++  //     p.child = o.apply(
++  //       undefined,
++  //       args.concat((error, stdout, stderr) => {
++  //         if (error !== null) {
++  //           error.stdout = stdout;
++  //           error.stderr = stderr;
++  //           reject(error);
++  //         } else {
++  //           resolve({ stdout, stderr });
++  //         }
++  //       }),
++  //     );
++
++  //     return p;
++  //   };
++
++  // Object.defineProperty(childProcess.exec, custom, {
++  //   value: customPromiseExecFunction(childProcess.exec),
++  // });
++
++  // Object.defineProperty(childProcess.execFile, custom, {
++  //   value: customPromiseExecFunction(childProcess.execFile),
++  // });
+ })();
+ 
+ // /////////////////////////////////////////////////////////////////

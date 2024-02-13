@@ -5,7 +5,7 @@
     "github>containerbase/.github//merge-queue.json"
   ],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
-  "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
+  "enabledManagers": ["dockerfile", "github-actions", "nodenv", "npm", "regex"],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
   "packageRules": [
@@ -142,6 +142,16 @@
       "matchPackageNames": ["checkov", "renovate"],
       "extends": ["schedule:weekly"],
       "automerge": true
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^package\\.json$"],
+      "matchStrings": [
+        "\"(?<depName>@yao-pkg/pkg|clipanion)@(?<currentValue>\\d+\\.\\d+\\.\\d+)\":"
+      ],
+      "datasourceTemplate": "npm"
     }
   ]
 }

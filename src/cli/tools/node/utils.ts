@@ -1,4 +1,4 @@
-import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
+import fs, { appendFile, chmod, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import is from '@sindresorhus/is';
@@ -13,127 +13,12 @@ const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
 export abstract class InstallNodeBaseService extends InstallToolBaseService {
-  protected get tool(): string {
-    return this.name;
-  }
-
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
     @inject(VersionService) protected versionSvc: VersionService,
   ) {
     super(pathSvc, envSvc);
-  }
-
-  override async install(version: string): Promise<void> {
-    const npm = await this.getNodeNpm();
-    const tmp = await fs.mkdtemp(
-      join(this.pathSvc.tmpDir, 'containerbase-npm-'),
-    );
-    const env = this.prepareEnv(tmp);
-
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
-
-    const prefix = await this.pathSvc.createVersionedToolPath(
-      this.name,
-      version,
-    );
-
-    const res = await execa(
-      npm,
-      [
-        'install',
-        `${this.tool}@${version}`,
-        '--save-exact',
-        '--no-audit',
-        '--prefix',
-        prefix,
-        '--cache',
-        tmp,
-        ...this.getAdditionalArgs(),
-      ],
-      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
-    );
-
-    if (res.failed) {
-      logger.warn(`Npm error:\n${res.all}`);
-      await fs.rm(prefix, { recursive: true, force: true });
-      throw new Error('npm install command failed');
-    }
-
-    await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
-    if (this.name === 'npm') {
-      const pkg = await readPackageJson(
-        join(prefix, 'node_modules', this.tool),
-      );
-      const ver = parse(pkg.version);
-      if (ver.major < 7) {
-        // update to latest node-gyp to fully support python3
-        await this.updateNodeGyp(prefix, tmp, env);
-      }
-    }
-
-    await fs.rm(tmp, { recursive: true, force: true });
-    await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
-      recursive: true,
-      force: true,
-    });
-  }
-
-  override async link(version: string): Promise<void> {
-    await this.postInstall(version);
-  }
-
-  override async postInstall(version: string): Promise<void> {
-    const vtPath = this.pathSvc.versionedToolPath(this.name, version);
-    const src = join(vtPath, 'bin');
-    const pkg = await readPackageJson(join(vtPath, 'node_modules', this.tool));
-
-    if (!pkg.bin) {
-      logger.warn(
-        { tool: this.name, version },
-        "Missing 'bin' in package.json",
-      );
-      return;
-    }
-
-    if (is.string(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name: pkg.name ?? this.tool });
-      return;
-    }
-
-    for (const name of Object.keys(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name });
-    }
-  }
-
-  override async test(_version: string): Promise<void> {
-    await execa(this.tool, ['--version'], { stdio: 'inherit' });
-  }
-
-  override async validate(version: string): Promise<boolean> {
-    if (!(await super.validate(version))) {
-      return false;
-    }
-
-    return (await this.versionSvc.find('node')) !== null;
-  }
-
-  private async getNodeNpm(): Promise<string> {
-    const nodeVersion = await this.versionSvc.find('node');
-
-    if (!nodeVersion) {
-      throw new Error('Node not installed');
-    }
-
-    return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
-  }
-
-  protected getAdditionalArgs(): string[] {
-    return [];
   }
 
   protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
@@ -189,6 +74,150 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
   }
 }
 
+@injectable()
+export abstract class InstallNpmBaseService extends InstallNodeBaseService {
+  protected get tool(): string {
+    return this.name;
+  }
+
+  override async install(version: string): Promise<void> {
+    const node = await this.getNodeVersion();
+    const npm = this.getNodeNpm(node);
+    const tmp = await fs.mkdtemp(
+      join(this.pathSvc.tmpDir, 'containerbase-npm-'),
+    );
+    const env = this.prepareEnv(tmp);
+
+    // TODO: create recursive
+    if (!(await this.pathSvc.findToolPath(this.name))) {
+      await this.pathSvc.createToolPath(this.name);
+    }
+
+    let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
+    if (!prefix) {
+      prefix = await this.pathSvc.createVersionedToolPath(this.name, version);
+      // fix perms for later user installs
+      await chmod(prefix, 0o775);
+    }
+
+    prefix = join(prefix, node);
+    await mkdir(prefix);
+
+    const res = await execa(
+      npm,
+      [
+        'install',
+        `${this.tool}@${version}`,
+        '--save-exact',
+        '--no-audit',
+        '--prefix',
+        prefix,
+        '--cache',
+        tmp,
+        ...this.getAdditionalArgs(),
+      ],
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
+    );
+
+    if (res.failed) {
+      logger.warn(`Npm error:\n${res.all}`);
+      await fs.rm(prefix, { recursive: true, force: true });
+      throw new Error('npm install command failed');
+    }
+
+    await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
+    if (this.name === 'npm') {
+      const pkg = await readPackageJson(this.packageJsonPath(version, node));
+      const ver = parse(pkg.version);
+      if (ver.major < 7) {
+        // update to latest node-gyp to fully support python3
+        await this.updateNodeGyp(prefix, tmp, env);
+      }
+    }
+
+    await fs.rm(tmp, { recursive: true, force: true });
+    await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
+      recursive: true,
+      force: true,
+    });
+  }
+
+  override async isInstalled(version: string): Promise<boolean> {
+    const node = await this.getNodeVersion();
+    return await this.pathSvc.fileExists(this.packageJsonPath(version, node));
+  }
+
+  override async link(version: string): Promise<void> {
+    await this.postInstall(version);
+  }
+
+  override async postInstall(version: string): Promise<void> {
+    const node = await this.getNodeVersion();
+    const src = join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      node,
+      'bin',
+    );
+    const pkg = await readPackageJson(this.packageJsonPath(version, node));
+
+    if (!pkg.bin) {
+      logger.warn(
+        { tool: this.name, version },
+        "Missing 'bin' in package.json",
+      );
+      return;
+    }
+
+    if (is.string(pkg.bin)) {
+      await this.shellwrapper({ srcDir: src, name: pkg.name ?? this.tool });
+      return;
+    }
+
+    for (const name of Object.keys(pkg.bin)) {
+      await this.shellwrapper({ srcDir: src, name });
+    }
+  }
+
+  override async test(_version: string): Promise<void> {
+    await execa(this.tool, ['--version'], { stdio: 'inherit' });
+  }
+
+  override async validate(version: string): Promise<boolean> {
+    if (!(await super.validate(version))) {
+      return false;
+    }
+
+    return (await this.versionSvc.find('node')) !== null;
+  }
+
+  private getNodeNpm(nodeVersion: string): string {
+    return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
+  }
+
+  protected async getNodeVersion(): Promise<string> {
+    const nodeVersion = await this.versionSvc.find('node');
+
+    if (!nodeVersion) {
+      throw new Error('Node not installed');
+    }
+    return nodeVersion;
+  }
+
+  protected getAdditionalArgs(): string[] {
+    return [];
+  }
+
+  private packageJsonPath(version: string, node: string): string {
+    return join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      node,
+      'node_modules',
+      this.tool,
+      'package.json',
+    );
+  }
+}
+
 async function preparePrefix(prefix: string): Promise<Promise<void>> {
   // npm 7 bug
   await mkdir(`${prefix}/bin`, { recursive: true });
@@ -238,6 +267,6 @@ export async function prepareUserConfig({
 }
 
 async function readPackageJson(path: string): Promise<PackageJson> {
-  const data = await readFile(join(path, 'package.json'), { encoding: 'utf8' });
+  const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
 }

@@ -10,7 +10,7 @@ import {
   PathService,
   VersionService,
 } from '../../services';
-import { getDistro, isValid, parse } from '../../utils';
+import { getDistro, parse } from '../../utils';
 import {
   InstallNodeBaseService,
   prepareGlobalConfig,
@@ -188,8 +188,7 @@ fi
   override async test(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
-    // pkg bug, using `node` causes module load error
-    await execa('/usr/local/bin/node', ['--version'], {
+    await execa('node', ['--version'], {
       stdio: ['inherit', 'inherit', 1],
     });
     await execa('npm', ['--version'], { stdio: ['inherit', 'inherit', 1] });
@@ -198,9 +197,5 @@ fi
         stdio: ['inherit', 'inherit', 1],
       });
     }
-  }
-
-  override validate(version: string): Promise<boolean> {
-    return Promise.resolve(isValid(version));
   }
 }

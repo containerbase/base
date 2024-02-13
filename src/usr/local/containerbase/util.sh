@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# https://github.com/vercel/pkg/issues/1861
-unset PKG_EXECPATH
-
 # get path location
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
