@@ -267,6 +267,6 @@ export async function prepareUserConfig({
 }
 
 async function readPackageJson(path: string): Promise<PackageJson> {
-  const data = await readFile(join(path, 'package.json'), { encoding: 'utf8' });
+  const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
 }
