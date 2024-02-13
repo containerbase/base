@@ -1,4 +1,4 @@
-import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
+import fs, { appendFile, chmod, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import is from '@sindresorhus/is';
@@ -26,7 +26,8 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
   }
 
   override async install(version: string): Promise<void> {
-    const npm = await this.getNodeNpm();
+    const node = await this.getNodeVersion();
+    const npm = this.getNodeNpm(node);
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
@@ -37,10 +38,15 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       await this.pathSvc.createToolPath(this.name);
     }
 
-    const prefix = await this.pathSvc.createVersionedToolPath(
-      this.name,
-      version,
-    );
+    let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
+    if (!prefix) {
+      prefix = await this.pathSvc.createVersionedToolPath(this.name, version);
+      // fix perms for later user installs
+      await chmod(prefix, 0o775);
+    }
+
+    prefix = join(prefix, node);
+    await mkdir(prefix);
 
     const res = await execa(
       npm,
@@ -66,9 +72,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
     if (this.name === 'npm') {
-      const pkg = await readPackageJson(
-        join(prefix, 'node_modules', this.tool),
-      );
+      const pkg = await readPackageJson(this.packageJsonPath(version, node));
       const ver = parse(pkg.version);
       if (ver.major < 7) {
         // update to latest node-gyp to fully support python3
@@ -83,14 +87,23 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     });
   }
 
+  override async isInstalled(version: string): Promise<boolean> {
+    const node = await this.getNodeVersion();
+    return await this.pathSvc.fileExists(this.packageJsonPath(version, node));
+  }
+
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
   override async postInstall(version: string): Promise<void> {
-    const vtPath = this.pathSvc.versionedToolPath(this.name, version);
-    const src = join(vtPath, 'bin');
-    const pkg = await readPackageJson(join(vtPath, 'node_modules', this.tool));
+    const node = await this.getNodeVersion();
+    const src = join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      node,
+      'bin',
+    );
+    const pkg = await readPackageJson(this.packageJsonPath(version, node));
 
     if (!pkg.bin) {
       logger.warn(
@@ -122,14 +135,17 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     return (await this.versionSvc.find('node')) !== null;
   }
 
-  private async getNodeNpm(): Promise<string> {
+  private getNodeNpm(nodeVersion: string): string {
+    return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
+  }
+
+  protected async getNodeVersion(): Promise<string> {
     const nodeVersion = await this.versionSvc.find('node');
 
     if (!nodeVersion) {
       throw new Error('Node not installed');
     }
-
-    return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
+    return nodeVersion;
   }
 
   protected getAdditionalArgs(): string[] {
@@ -186,6 +202,16 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       logger.warn(`Npm error:\n${res.all}`);
       throw new Error('node-gyp update command failed');
     }
+  }
+
+  private packageJsonPath(version: string, node: string): string {
+    return join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      node,
+      'node_modules',
+      this.tool,
+      'package.json',
+    );
   }
 }
 

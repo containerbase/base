@@ -30,14 +30,15 @@ export class InstallYarnSlimService extends InstallNodeBaseService {
 
   override async install(version: string): Promise<void> {
     await super.install(version);
+    const node = await this.getNodeVersion();
     // TODO: replace with javascript
-    const prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
+    const prefix = this.pathSvc.versionedToolPath(this.name, version);
     await execa(
       'sed',
       [
         '-i',
         's/ steps,/ steps.slice(0,1),/',
-        `${prefix}/node_modules/yarn/lib/cli.js`,
+        `${prefix}/${node}/node_modules/yarn/lib/cli.js`,
       ],
       { stdio: ['inherit', 'inherit', 1] },
     );
