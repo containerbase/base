@@ -324,8 +324,9 @@ RUN npm --version | grep "${NPM_VERSION}"
 
 # TODO: use bats test
 RUN set -ex; \
-  [ -r /opt/containerbase/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
-  [ "$(cat /opt/containerbase/tools/npm/${NPM_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
+  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
+  [ -r /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
+  [ "$(cat /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
   && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
 
 #--------------------------------------
@@ -483,7 +484,8 @@ RUN install-tool renovate
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
-  ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/node_modules ./node_modules; \
+  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
+  ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/${NODE_VERSION}/node_modules ./node_modules; \
   node -e "new require('re2')('.*').exec('test'); console.log('re2 usable')"; \
   true
 
