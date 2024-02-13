@@ -5,7 +5,7 @@
     "github>containerbase/.github//merge-queue.json"
   ],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
-  "enabledManagers": ["npm", "dockerfile", "github-actions", "regex"],
+  "enabledManagers": ["dockerfile", "github-actions", "nodenv", "npm", "regex"],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
   "packageRules": [
