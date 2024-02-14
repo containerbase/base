@@ -20,7 +20,7 @@ RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.0
+RUN install-tool git v2.43.1
 
 COPY --chown=1000:0 test/ruby/test test
 WORKDIR /test
