@@ -11,7 +11,7 @@ overrides:
   vite: 5.1.1
 
 patchedDependencies:
-  '@yao-pkg/pkg@5.11.2':
+  '@yao-pkg/pkg@5.11.3':
     hash: fb6cn5vkrnldric4eq2yxxfize
     path: patches/@yao-pkg__pkg@5.11.1.patch
   clipanion@3.2.1:
@@ -112,8 +112,8 @@ devDependencies:
     specifier: 1.2.2
     version: 1.2.2(vitest@1.2.2)
   '@yao-pkg/pkg':
-    specifier: 5.11.2
-    version: 5.11.2(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+    specifier: 5.11.3
+    version: 5.11.3(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
   bats:
     specifier: 1.10.0
     version: 1.10.0
@@ -249,7 +249,7 @@ packages:
     resolution: {integrity: sha512-lN85QRR+5IbYrMWM6Y4pE/noaQtg4pNiqeNGX60eqOfo6gtEj6uw/JagelB8vVztSd7R6M5n1+PQkDbHbBRU4g==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.23.9
       '@jridgewell/gen-mapping': 0.3.3
       '@jridgewell/trace-mapping': 0.3.22
       jsesc: 2.5.2
@@ -279,7 +279,7 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.23.9
     dev: true
 
   /@babel/parser@7.23.9:
@@ -1408,8 +1408,8 @@ packages:
       - supports-color
     dev: true
 
-  /@yao-pkg/pkg@5.11.2(patch_hash=fb6cn5vkrnldric4eq2yxxfize):
-    resolution: {integrity: sha512-1BVXLxGgC7vhSD2xHpOjP1f8N6J/HEfSixPae34Ra16HWIVS6AaEtNpipk2AUTe/68eriGaFG/PPpKeZspYLzw==}
+  /@yao-pkg/pkg@5.11.3(patch_hash=fb6cn5vkrnldric4eq2yxxfize):
+    resolution: {integrity: sha512-pUYf2IIqr28ivh1usPId5O7ULvssEdvi4bowD0RAc9uTu5z5d2cwnsQPWtU0Sw3D9Ca/FtTs7xmXzyHZLHz1wA==}
     hasBin: true
     dependencies:
       '@babel/generator': 7.23.0
