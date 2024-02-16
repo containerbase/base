@@ -20,6 +20,8 @@ function install_tool () {
   split_python_version "${python_version}"
 
   if [[ (${PYTHON_MAJOR} == 3 && ${PYTHON_MINOR} -ge 9) || ${PYTHON_MAJOR} -gt 3 ]]; then
+      # keyrings.envvars added support for looking up credentials by service name only,
+      # which is needed by the Renovate pip-compile manager
       install_python_tool 'keyrings.envvars >= 1.1.0'
   else
       # The keyrings.envvars package does not support python versions lower than 3.9
