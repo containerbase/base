@@ -45,7 +45,7 @@ RUN install-tool dart 2.19.6
 RUN install-tool docker v25.0.3
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.200
+RUN install-tool dotnet 8.0.201
 
 # renovate: datasource=flutter-version
 RUN install-tool flutter 3.16.9
