@@ -44,6 +44,14 @@ FROM test-python as test-hashin
 RUN install-tool hashin 0.17.0
 
 #--------------------------------------
+# Image: pip-tools
+#--------------------------------------
+FROM test-python as test-pip-tools
+
+# renovate: datasource=pypi
+RUN install-tool pip-tools 7.4.0
+
+#--------------------------------------
 # Image: pipenv
 #--------------------------------------
 FROM test-python as test-pipenv
@@ -66,5 +74,6 @@ FROM base
 
 COPY --from=test-checkov /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
+COPY --from=test-pip-tools /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy

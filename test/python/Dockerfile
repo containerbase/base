@@ -73,6 +73,26 @@ RUN install-tool poetry 1.7.1
 USER 1000
 
 #--------------------------------------
+# test pip-tools-a: pip-tools
+#--------------------------------------
+FROM build as test-pip-tools-a
+
+# renovate: datasource=pypi
+RUN install-tool pip-tools 7.4.0
+
+#--------------------------------------
+# test pip-tools-b: pip-tools (older python)
+#--------------------------------------
+FROM base as test-pip-tools-b
+
+# python < 3.9 is not supported by the keyrings.envvars library that is installed along with pip-tools,
+# so make sure we can still install on an older version
+RUN install-tool python 3.8.18
+
+# renovate: datasource=pypi
+RUN install-tool pip-tools 7.4.0
+
+#--------------------------------------
 # test poetry-a: build
 #--------------------------------------
 FROM build as test-poetry-a
@@ -255,6 +275,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
+COPY --from=test-pip-tools-a /.dummy /.dummy
+COPY --from=test-pip-tools-b /.dummy /.dummy
 COPY --from=test-poetry-a /.dummy /.dummy
 COPY --from=test-poetry-b /.dummy /.dummy
 COPY --from=test-poetry-c /.dummy /.dummy
