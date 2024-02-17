@@ -130,8 +130,8 @@ devDependencies:
     specifier: 0.20.0
     version: 0.20.0
   esbuild-plugin-pino:
-    specifier: 2.1.0
-    version: 2.1.0(esbuild@0.20.0)
+    specifier: 2.1.1
+    version: 2.1.1(esbuild@0.20.0)
   eslint:
     specifier: 8.56.0
     version: 8.56.0
@@ -2335,8 +2335,8 @@ packages:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
     dev: false
 
-  /esbuild-plugin-pino@2.1.0(esbuild@0.20.0):
-    resolution: {integrity: sha512-Uv50QtnJR3x7kWFHrSonEGAlj54V9sJ6sgNUZYpHRXHeIjlGW8vhZy5ZmiWLvJy7peqMLelGnYtuMm2+uophSg==}
+  /esbuild-plugin-pino@2.1.1(esbuild@0.20.0):
+    resolution: {integrity: sha512-NdcTruRCq7tCv/vQENeGRmV0mK/54tvKWT5J2+tDaAdSX7TVUiykEbtZ0xDZA1rJfyzd5rx1G8TqwXv1zBlK5w==}
     peerDependencies:
       esbuild: 0.20.0
     dependencies:
