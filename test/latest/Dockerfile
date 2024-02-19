@@ -155,7 +155,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.1
+RUN install-tool git v2.43.2
 
 USER 1000
 
