@@ -63,7 +63,7 @@ RUN install-tool gleam 0.34.1
 RUN install-tool golang 1.22.0
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.14.1
+RUN install-tool helm v3.14.2
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 RUN install-tool helmfile v0.162.0
