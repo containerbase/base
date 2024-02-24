@@ -190,7 +190,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, vendir, helmfile, kustomize
+# test: bazelisk, bun, gleam, helmfile, kustomize, vendir, wally
 #--------------------------------------
 FROM base as teste
 
@@ -203,44 +203,55 @@ RUN install-tool bun 1.0.28
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 0.34.1
 
-# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=0.32.2
-
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=0.150.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.0.0
 
-RUN install-tool vendir "v${VENDIR_VERSION}"
+# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
+ARG VENDIR_VERSION=0.32.2
+
+# renovate: datasource=github-releases packageName=UpliftGames/wally
+ARG WALLY_VERSION=0.3.2
 
 RUN install-tool helmfile "v${HELMFILE_VERSION}"
 
 RUN install-tool kustomize "${KUSTOMIZE_VERSION}"
 
-RUN set -ex; vendir --version
+RUN install-tool vendir "v${VENDIR_VERSION}"
+
+RUN install-tool wally "v${WALLY_VERSION}"
 
 RUN set -ex; helmfile version
 
 RUN set -ex; kustomize version
 
-SHELL [ "/bin/sh", "-c" ]
+RUN set -ex; vendir --version
 
-RUN vendir --version | grep "${VENDIR_VERSION}"
+RUN set -ex; wally --version
+
+SHELL [ "/bin/sh", "-c" ]
 
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
+
+RUN vendir --version | grep "${VENDIR_VERSION}"
+
+RUN wally --version | grep "${WALLY_VERSION}"
 
 USER 1000
 
 RUN bazel --version
 
-RUN vendir --version | grep "${VENDIR_VERSION}"
-
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
+
+RUN vendir --version | grep "${VENDIR_VERSION}"
+
+RUN wally --version | grep "${WALLY_VERSION}"
 
 #--------------------------------------
 # final

@@ -15,6 +15,7 @@ export const NoPrepareTools = [
   'npm',
   'pnpm',
   'renovate',
+  'wally',
   'yarn',
   'yarn-slim',
 ];

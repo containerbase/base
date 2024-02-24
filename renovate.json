@@ -71,7 +71,8 @@
         "renovate",
         "rust",
         "swift",
-        "vendir"
+        "vendir",
+        "wally"
       ],
       "separateMinorPatch": false
     },
@@ -98,7 +99,8 @@
         "renovate",
         "rust",
         "swift",
-        "vendir"
+        "vendir",
+        "wally"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true

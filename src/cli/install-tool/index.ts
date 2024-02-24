@@ -21,6 +21,7 @@ import {
 import { InstallNpmBaseService } from '../tools/node/utils';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
+import { InstallWallyService } from '../tools/wally';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
@@ -51,6 +52,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallWallyService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnSlimService);
 
   logger.trace('preparing install container done');
