@@ -92,7 +92,7 @@ FROM build as testd
 USER 1000
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.16.9
+RUN install-tool flutter 3.19.1
 
 RUN set -ex; \
     cd d; \
@@ -109,7 +109,7 @@ RUN chown -R 1001 .
 USER 1001
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.16.9
+RUN install-tool flutter 3.19.1
 
 RUN set -ex; \
     cd d; \
