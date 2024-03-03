@@ -20,8 +20,8 @@ patchedDependencies:
 
 dependencies:
   '@sindresorhus/is':
-    specifier: 6.1.0
-    version: 6.1.0
+    specifier: 6.2.0
+    version: 6.2.0
   clipanion:
     specifier: 3.2.1
     version: 3.2.1(patch_hash=fhbb5gvkz3xnkjsqqxesufv7h4)(typanion@3.14.0)
@@ -1015,8 +1015,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /@sindresorhus/is@6.1.0:
-    resolution: {integrity: sha512-BuvU07zq3tQ/2SIgBsEuxKYDyDjC0n7Zir52bpHy2xnBbW81+po43aLFPLbeV3HRAheFbGud1qgcqSYfhtHMAg==}
+  /@sindresorhus/is@6.2.0:
+    resolution: {integrity: sha512-yM/IGPkVnYGblhDosFBwq0ZGdnVSBkNV4onUtipGMOjZd4kB6GAu3ys91aftSbyMHh6A2GPdt+KDI5NoWP63MQ==}
     engines: {node: '>=16'}
     dev: false
 
@@ -3110,7 +3110,7 @@ packages:
     resolution: {integrity: sha512-dBq2KkHcQl3AwPoIWsLsQScCPpUgRulz1qZVthjPYKYOPmYfBnekR3vxecjZbm91Vc3JUGnV9mqFX7B+Fe2quw==}
     engines: {node: '>=20'}
     dependencies:
-      '@sindresorhus/is': 6.1.0
+      '@sindresorhus/is': 6.2.0
       '@szmarczak/http-timer': 5.0.1
       cacheable-lookup: 7.0.0
       cacheable-request: 10.2.14
