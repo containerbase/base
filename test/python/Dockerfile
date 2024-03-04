@@ -210,7 +210,7 @@ RUN set -ex \
 
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.22
+RUN install-tool checkov 3.2.29
 
 #--------------------------------------
 # test pipenv-b: pipenv (multiple python)
