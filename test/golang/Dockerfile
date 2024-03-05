@@ -31,7 +31,7 @@ WORKDIR /test
 FROM base as testa
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.0
+RUN install-tool golang 1.22.1
 
 USER 1000
 
@@ -79,7 +79,7 @@ RUN prepare-tool golang
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.0
+RUN install-tool golang 1.22.1
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
