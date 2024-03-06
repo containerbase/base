@@ -78,7 +78,7 @@ USER 1000
 FROM build as test-pip-tools-a
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.4.0
+RUN install-tool pip-tools 7.4.1
 
 #--------------------------------------
 # test pip-tools-b: pip-tools (older python)
@@ -90,7 +90,7 @@ FROM base as test-pip-tools-b
 RUN install-tool python 3.8.18
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.4.0
+RUN install-tool pip-tools 7.4.1
 
 #--------------------------------------
 # test poetry-a: build
