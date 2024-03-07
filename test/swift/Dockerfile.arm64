@@ -28,7 +28,7 @@ RUN install-containerbase
 FROM base as test-swift
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.9.2
+RUN install-tool swift 5.10.0
 
 #--------------------------------------
 # Image: final
