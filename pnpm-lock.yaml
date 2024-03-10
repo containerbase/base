@@ -41,8 +41,8 @@ dependencies:
     specifier: 3.0.0
     version: 3.0.0
   got:
-    specifier: 14.2.0
-    version: 14.2.0
+    specifier: 14.2.1
+    version: 14.2.1
   inversify:
     specifier: 6.0.2
     version: 6.0.2
@@ -3116,8 +3116,8 @@ packages:
     dependencies:
       get-intrinsic: 1.2.4
 
-  /got@14.2.0:
-    resolution: {integrity: sha512-dBq2KkHcQl3AwPoIWsLsQScCPpUgRulz1qZVthjPYKYOPmYfBnekR3vxecjZbm91Vc3JUGnV9mqFX7B+Fe2quw==}
+  /got@14.2.1:
+    resolution: {integrity: sha512-KOaPMremmsvx6l9BLC04LYE6ZFW4x7e4HkTe3LwBmtuYYQwpeS4XKqzhubTIkaQ1Nr+eXxeori0zuwupXMovBQ==}
     engines: {node: '>=20'}
     dependencies:
       '@sindresorhus/is': 6.2.0
