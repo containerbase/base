@@ -81,7 +81,7 @@ SHELL [ "/bin/sh", "-c" ]
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
 USER 1000
 
@@ -132,7 +132,7 @@ RUN set -ex; \
   yarn --version;
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 RUN set -ex; \
   [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
@@ -280,7 +280,7 @@ RUN set -ex; ls -lah /test/a; cd a; yarn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -371,7 +371,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool corepack 0.26.0
 
 # renovate: datasource=npm depName=yarn
-ARG YARN_VERSION=1.22.21
+ARG YARN_VERSION=1.22.22
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
@@ -390,7 +390,7 @@ RUN install-tool corepack 0.26.0
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.26.0
