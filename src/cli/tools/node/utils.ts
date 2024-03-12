@@ -21,7 +21,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     super(pathSvc, envSvc);
   }
 
-  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
+  protected prepareEnv(_version: string, tmp: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
@@ -86,7 +86,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
-    const env = this.prepareEnv(tmp);
+    const env = this.prepareEnv(version, tmp);
 
     // TODO: create recursive
     if (!(await this.pathSvc.findToolPath(this.name))) {

@@ -132,7 +132,7 @@ export class InstallNodeService extends InstallNodeBaseService {
       const tmp = await fs.mkdtemp(
         join(this.pathSvc.tmpDir, 'containerbase-npm-'),
       );
-      const env = this.prepareEnv(tmp);
+      const env = this.prepareEnv(version, tmp);
       env.PATH = `${path}/bin:${penv.PATH}`;
       env.NODE_OPTIONS = '--use-openssl-ca';
       // update to latest node-gyp to fully support python3
