@@ -1,5 +1,6 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
+import { satisfies } from 'semver';
 import { InstallNpmBaseService } from './utils';
 
 @injectable()
@@ -10,12 +11,15 @@ export class InstallRenovateService extends InstallNpmBaseService {
     return ['--no-optional', 're2'];
   }
 
-  override prepareEnv(tmp: string): NodeJS.ProcessEnv {
-    const env = super.prepareEnv(tmp);
-    env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
-      'https://github.com/containerbase/node-re2-prebuild/releases/download',
-    );
-    env.RE2_DOWNLOAD_SKIP_PATH = '1';
+  override prepareEnv(version: string, tmp: string): NodeJS.ProcessEnv {
+    const env = super.prepareEnv(version, tmp);
+
+    if (satisfies(version, '<37.234.0')) {
+      env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
+        'https://github.com/containerbase/node-re2-prebuild/releases/download',
+      );
+      env.RE2_DOWNLOAD_SKIP_PATH = '1';
+    }
     return env;
   }
 }
