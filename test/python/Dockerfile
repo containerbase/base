@@ -171,7 +171,7 @@ RUN install-tool poetry 1.8.2
 FROM build as testa
 
 # renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
+RUN install-tool hashin 1.0.1
 
 RUN set -ex; \
   cd f; \
@@ -200,7 +200,7 @@ RUN set -ex \
   ;
 
 # renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
+RUN install-tool hashin 1.0.1
 
 RUN set -ex \
   && cd f \

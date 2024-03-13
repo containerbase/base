@@ -41,7 +41,7 @@ RUN install-tool checkov 3.2.34
 FROM test-python as test-hashin
 
 # renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
+RUN install-tool hashin 1.0.1
 
 #--------------------------------------
 # Image: pipenv
