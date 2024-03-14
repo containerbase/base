@@ -63,7 +63,7 @@
         "kustomize",
         "helm",
         "helmfile",
-        "nix"
+        "nix",
         "node",
         "npm",
         "pdm",
