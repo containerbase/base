@@ -16,7 +16,15 @@ ARG TARGETARCH
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+RUN set -ex; ls -la /usr/local/bin/; ls -la /usr/local/sbin;
+
 RUN install-containerbase
+
+RUN set -ex; \
+  ls -la /home/; \
+  ls -la /opt/containerbase/; \
+  ls -la /opt/containerbase/home; \
+  true
 
 COPY --chown=1000:0 test/node/test test
 RUN chmod -R 775 /test
@@ -70,7 +78,7 @@ ARG APT_HTTP_PROXY
 RUN npm install -g yarn
 
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 RUN set -ex; cd a; yarn; [[ -d node_modules/.bin ]] || exit 1
@@ -111,7 +119,7 @@ RUN set -ex; cd a; pnpm i
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
   pnpm --version \
-  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
+  [ "$(command -v pnpm)" = "/opt/containerbase/home/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: node 18
@@ -128,13 +136,13 @@ RUN install-tool node v18.19.1
 
 RUN npm install -g yarn
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 
@@ -272,7 +280,7 @@ ARG APT_HTTP_PROXY
 RUN npm install -g yarn
 
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/opt/containerbase/home/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 RUN set -ex; ls -lah /test/a; cd a; yarn
