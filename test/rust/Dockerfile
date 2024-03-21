@@ -29,10 +29,10 @@ RUN prepare-tool rust
 FROM base as build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.77.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.77.0
 
 
 USER 1000
@@ -59,7 +59,7 @@ FROM base as testb
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.77.0
 
 RUN set -ex; \
     cd a; \
