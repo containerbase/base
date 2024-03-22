@@ -5,6 +5,16 @@ function check_tool_requirements () {
   check_semver "$TOOL_VERSION" "all"
 }
 
+function get_python_minor_version() {
+  local python_version=$1
+  if [[ ! "${python_version}" =~ ${SEMVER_REGEX} ]]; then
+    echo Python is not a semver like version - aborting: "${python_version}"
+    exit 1
+  fi
+  export PYTHON_MAJOR=${BASH_REMATCH[1]}
+  echo "${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
+}
+
 function find_pip_versioned_path() {
   local python_version
   local tool_dir
