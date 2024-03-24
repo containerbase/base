@@ -65,8 +65,8 @@ dependencies:
     specifier: 3.23.0
     version: 3.23.0
   tar:
-    specifier: 6.2.0
-    version: 6.2.0
+    specifier: 6.2.1
+    version: 6.2.1
   typanion:
     specifier: 3.14.0
     version: 3.14.0
@@ -5552,8 +5552,8 @@ packages:
       readable-stream: 3.6.2
     dev: true
 
-  /tar@6.2.0:
-    resolution: {integrity: sha512-/Wo7DcT0u5HUV486xg675HtjNd3BXZ6xDbzsCUZPt5iw8bTQ63bP0Raut3mvro9u+CUyq7YQd8Cx55fsZXxqLQ==}
+  /tar@6.2.1:
+    resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
     dependencies:
       chownr: 2.0.0
