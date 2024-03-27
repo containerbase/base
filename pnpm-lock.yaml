@@ -115,14 +115,14 @@ devDependencies:
     specifier: 5.11.5
     version: 5.11.5(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
   bats:
-    specifier: 1.10.0
-    version: 1.10.0
+    specifier: 1.11.0
+    version: 1.11.0
   bats-assert:
     specifier: 2.0.0
     version: 2.0.0(bats-support@0.3.0)
   bats-support:
     specifier: 0.3.0
-    version: 0.3.0(bats@1.10.0)
+    version: 0.3.0(bats@1.11.0)
   conventional-changelog-conventionalcommits:
     specifier: 7.0.2
     version: 7.0.2
@@ -1675,19 +1675,19 @@ packages:
     peerDependencies:
       bats-support: 0.3.0
     dependencies:
-      bats-support: 0.3.0(bats@1.10.0)
+      bats-support: 0.3.0(bats@1.11.0)
     dev: true
 
-  /bats-support@0.3.0(bats@1.10.0):
+  /bats-support@0.3.0(bats@1.11.0):
     resolution: {integrity: sha512-z+2WzXbI4OZgLnynydqH8GpI3+DcOtepO66PlK47SfEzTkiuV9hxn9eIQX+uLVFbt2Oqoc7Ky3TJ/N83lqD+cg==}
     peerDependencies:
       bats: 0.4 || ^1
     dependencies:
-      bats: 1.10.0
+      bats: 1.11.0
     dev: true
 
-  /bats@1.10.0:
-    resolution: {integrity: sha512-yOQrC7npuCrN+Ic3TyjTjJlzHa0qlK3oEO6VAYPWwFeutx/GmpljIyB6uNSl/UTASyc2w4FgVuA/QMMf9OdsCw==}
+  /bats@1.11.0:
+    resolution: {integrity: sha512-qiKdnS4ID3bJ1MaEOKuZe12R4w+t+psJF0ICj+UdkiHBBoObPMHv8xmD3w6F4a5qwUyZUHS+413lxENBNy8xcQ==}
     hasBin: true
     dev: true
 
