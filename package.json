@@ -71,7 +71,7 @@
     "@vitest/coverage-v8": "1.4.0",
     "@vitest/ui": "1.4.0",
     "@yao-pkg/pkg": "5.11.5",
-    "bats": "1.10.0",
+    "bats": "1.11.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
