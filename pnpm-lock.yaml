@@ -56,8 +56,8 @@ dependencies:
     specifier: 9.0.0
     version: 9.0.0
   reflect-metadata:
-    specifier: 0.2.1
-    version: 0.2.1
+    specifier: 0.2.2
+    version: 0.2.2
   semver:
     specifier: 7.6.0
     version: 7.6.0
@@ -4819,9 +4819,8 @@ packages:
       resolve: 1.22.8
     dev: true
 
-  /reflect-metadata@0.2.1:
-    resolution: {integrity: sha512-i5lLI6iw9AU3Uu4szRNPPEkomnkjRTaVt9hy/bn5g/oSzekBSMeLZblcjP74AW0vBabqERLLIrz+gR8QYR54Tw==}
-    deprecated: This version has a critical bug in fallback handling. Please upgrade to reflect-metadata@0.2.2 or newer.
+  /reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
     dev: false
 
   /regexp.prototype.flags@1.5.2:
