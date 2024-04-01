@@ -50,7 +50,7 @@ RUN install-tool yarn 1.22.22
 FROM test-node as test-renovate
 
 # renovate: datasource=npm
-RUN install-tool renovate 37.269.3
+RUN install-tool renovate 37.278.0
 
 # ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # # renovate: datasource=npm
