@@ -124,7 +124,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.20.0
+RUN install-tool node v18.20.1
 
 RUN npm install -g yarn
 RUN set -ex; \
