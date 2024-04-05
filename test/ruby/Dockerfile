@@ -152,7 +152,7 @@ FROM build as test-gem
 USER 1000
 
 # renovate: datasource=rubygems
-RUN install-gem rake 13.1.0
+RUN install-gem rake 13.2.1
 
 RUN rake --help
 
