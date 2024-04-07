@@ -97,8 +97,8 @@ devDependencies:
     specifier: 0.8.15
     version: 0.8.15
   '@types/tar':
-    specifier: 6.1.11
-    version: 6.1.11
+    specifier: 6.1.12
+    version: 6.1.12
   '@typescript-eslint/eslint-plugin':
     specifier: 7.5.0
     version: 7.5.0(@typescript-eslint/parser@7.5.0)(eslint@8.57.0)(typescript@5.4.3)
@@ -1111,8 +1111,8 @@ packages:
       '@types/node': 20.12.4
     dev: true
 
-  /@types/tar@6.1.11:
-    resolution: {integrity: sha512-ThA1WD8aDdVU4VLuyq5NEqriwXErF5gEIJeyT6gHBWU7JtSmW2a5qjNv3/vR82O20mW+1vhmeZJfBQPT3HCugg==}
+  /@types/tar@6.1.12:
+    resolution: {integrity: sha512-FwbJPi9YuovB6ilnHrz8Y4pb0Fh6N7guFkbnlCl39ua893Qi5gkXui7LSDpTQMJCmA4z5f6SeSrTPQEWLdtFVw==}
     dependencies:
       '@types/node': 20.12.4
       minipass: 4.2.8
