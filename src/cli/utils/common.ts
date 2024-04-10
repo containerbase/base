@@ -23,11 +23,12 @@ export async function validateSystem(): Promise<void> {
   switch (d.versionCode) {
     case 'focal':
     case 'jammy':
+    case 'noble':
       break;
     default:
       logger.fatal(
         { distro: d },
-        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal' or 'jammy'.`,
+        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal', 'jammy' or 'noble'.`,
       );
       exit(1);
   }
