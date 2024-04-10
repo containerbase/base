@@ -25,6 +25,7 @@ function check_tool_requirements () {
   case "${version_codename}" in
     "focal");;
     "jammy");;
+    "noble");;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
@@ -66,6 +67,10 @@ function install_tool () {
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
+
+  if [[ "${version_codename}" == "noble" ]]; then
+    version_codename="jammy"
+  fi
 
   # not all releases have checksums
   checksum_exists=$(file_exists "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
