@@ -36,7 +36,7 @@ FROM build as test
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.36
+RUN install-tool bun 1.1.2
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6
@@ -45,7 +45,7 @@ RUN install-tool dart 2.19.6
 RUN install-tool docker v26.0.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.203
+RUN install-tool dotnet 8.0.204
 
 # renovate: datasource=flutter-version
 RUN install-tool flutter 3.19.5
@@ -63,7 +63,7 @@ RUN install-tool gleam 1.0.0
 RUN install-tool golang 1.22.2
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.14.3
+RUN install-tool helm v3.14.4
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
 RUN install-tool helmfile v0.163.1
@@ -78,13 +78,13 @@ RUN install-tool nix 2.21.2
 RUN install-tool powershell v7.4.1
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.77.1
+RUN install-tool rust 1.77.2
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.10.0
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.5
+RUN install-tool terraform 1.8.0
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
@@ -118,7 +118,7 @@ RUN install-tool gradle 8.7
 FROM build as test-node
 
 # renovate: datasource=node
-RUN install-tool node v20.12.1
+RUN install-tool node v20.12.2
 # renovate: datasource=npm
 RUN install-tool pnpm 8.15.6
 # renovate: datasource=npm
@@ -140,7 +140,7 @@ RUN install-tool composer 2.7.2
 FROM build as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.3
 # renovate: datasource=pypi
 RUN install-tool pipenv 2023.12.1
 # renovate: datasource=pypi

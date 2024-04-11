@@ -25,7 +25,7 @@ RUN install-containerbase
 FROM base as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.3
 
 #--------------------------------------
 # Image: checkov

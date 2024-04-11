@@ -33,7 +33,7 @@ RUN install-tool bazelisk v1.19.0
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.36
+RUN install-tool bun 1.1.2
 
 #--------------------------------------
 # Image: gleam
@@ -89,7 +89,7 @@ RUN install-tool kustomize 5.4.1
 FROM base as test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.5
+RUN install-tool terraform 1.8.0
 
 #--------------------------------------
 # Image: vendir

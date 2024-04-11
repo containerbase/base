@@ -52,7 +52,7 @@ RUN set -ex; \
 FROM build as testa
 
 # renovate: datasource=node
-RUN install-tool node v20.12.1
+RUN install-tool node v20.12.2
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
@@ -62,7 +62,7 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN install-tool powershell v7.4.1
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12.3
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -141,7 +141,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.5
+RUN install-tool terraform 1.8.0
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -173,7 +173,7 @@ RUN install-tool git-lfs v3.5.1
 RUN install-tool powershell v7.4.1
 
 # renovate: datasource=node
-RUN install-tool node v20.12.1
+RUN install-tool node v20.12.2
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v26.0.0
@@ -198,7 +198,7 @@ FROM base as teste
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.36
+RUN install-tool bun 1.1.2
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.0.0

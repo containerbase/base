@@ -53,6 +53,7 @@
       "matchPaths": ["test/**"],
       "matchPackageNames": [
         "bazelisk",
+        "bun",
         "bundler",
         "conan",
         "corepack",
@@ -72,6 +73,7 @@
         "pipenv",
         "poetry",
         "pnpm",
+        "rake",
         "renovate",
         "rust",
         "swift",
@@ -84,6 +86,7 @@
       "matchPaths": ["test/**"],
       "matchPackageNames": [
         "bazelisk",
+        "bun",
         "bundler",
         "corepack",
         "conan",
@@ -103,6 +106,7 @@
         "pipenv",
         "poetry",
         "pnpm",
+        "rake",
         "renovate",
         "rust",
         "swift",
