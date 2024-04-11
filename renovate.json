@@ -54,6 +54,7 @@
       "matchPackageNames": [
         "bazelisk",
         "bundler",
+        "conan",
         "corepack",
         "docker",
         "dotnet",
@@ -85,6 +86,7 @@
         "bazelisk",
         "bundler",
         "corepack",
+        "conan",
         "docker",
         "dotnet",
         "git",

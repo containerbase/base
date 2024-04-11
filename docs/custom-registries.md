@@ -478,6 +478,7 @@ Those tools are installed via `pip` package manager.
 Known tools:
 
 - `checkov`
+- `conan`
 - `hashin`
 - `pdm`
 - `pip-tools`

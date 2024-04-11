@@ -1,0 +1,7 @@
+[requires]
+openssl/3.2.1
+[generators]
+CMakeDeps
+CMakeToolchain
+[layout]
+cmake_layout

@@ -248,6 +248,24 @@ USER 1000
 RUN install-tool pdm 2.13.3
 
 #--------------------------------------
+# test conan
+#--------------------------------------
+FROM build as test-conan
+
+RUN prepare-tool conan
+
+USER 1000
+
+# renovate: datasource=pypi
+RUN install-tool conan 2.2.2
+
+RUN set -ex; \
+    cd b-conan; \
+    conan lock create .; \
+    conan install . --build=missing; \
+    cat conan.lock
+
+#--------------------------------------
 # test c: python2.7
 #--------------------------------------
 FROM build-rootless as testc
@@ -289,6 +307,7 @@ COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=test-pdm /.dummy /.dummy
+COPY --from=test-conan /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
