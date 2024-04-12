@@ -36,10 +36,6 @@ function prepare_tool() {
   apt_install \
     default-libmysqlclient-dev \
     gcc \
-    clang \
-    make \
-    cmake \
-    perl \
     libpq-dev \
     ;
 
