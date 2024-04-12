@@ -33,7 +33,7 @@ RUN install-tool bazelisk v1.19.0
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.2
+RUN install-tool bun 1.1.3
 
 #--------------------------------------
 # Image: gleam
@@ -49,7 +49,7 @@ RUN install-tool gleam 1.0.0
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.0.0
+RUN install-tool docker v26.0.1
 
 #--------------------------------------
 # Image: git

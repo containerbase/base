@@ -59,7 +59,7 @@ USER 1001
 # https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # no major update, pin elixir if newer version doesn't support v24
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 24.3.4.16
+RUN install-tool erlang 24.3.4.17
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.16.2
