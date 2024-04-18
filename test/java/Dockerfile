@@ -41,7 +41,7 @@ RUN set -ex; \
 
 # TODO: only lts
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 11.0.22+7
+RUN install-tool java 11.0.23+9
 
 RUN set -ex; \
   ls -la /tmp; \
