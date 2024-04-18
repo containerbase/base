@@ -48,7 +48,7 @@ RUN install-tool docker v26.0.1
 RUN install-tool dotnet 8.0.204
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.19.5
+RUN install-tool flutter 3.19.6
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.2.3
@@ -84,13 +84,13 @@ RUN install-tool rust 1.77.2
 RUN install-tool swift 5.10.0
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.0
+RUN install-tool terraform 1.8.1
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.40.0
+RUN install-tool vendir v0.40.1
 
 #--------------------------------------
 # Image: test-erlang
@@ -98,7 +98,7 @@ RUN install-tool vendir v0.40.0
 FROM build as test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.2.2.0
+RUN install-tool erlang 26.2.4.0
 # renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.16.2
 
@@ -120,7 +120,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.12.2
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.6
+RUN install-tool pnpm 8.15.7
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
