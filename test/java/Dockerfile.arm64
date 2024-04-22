@@ -24,7 +24,7 @@ RUN install-containerbase
 #--------------------------------------
 FROM base as test-java
 
-# renovate: datasource=adoptium-java packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre
 RUN install-tool java 21.0.3+9.0.LTS
 
 #--------------------------------------

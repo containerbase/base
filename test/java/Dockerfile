@@ -39,8 +39,7 @@ RUN set -ex; \
   find /tmp -type f; \
   exit 0
 
-# TODO: only lts
-# renovate: datasource=adoptium-java packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre
 RUN install-tool java 21.0.3+9.0.LTS
 
 RUN set -ex; \
@@ -52,9 +51,11 @@ RUN set -ex; \
 RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 #--------------------------------------
-# test: gradle 6
+# test: Java 11 LTS + Gradle 6
 #--------------------------------------
 FROM build as test-gradle-a
+
+RUN install-tool java 11.0.23+9
 
 RUN prepare-tool gradle
 
@@ -85,7 +86,7 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: java 21 LTS + gradle 8
+# test: Java 21 LTS + Gradle 8
 #--------------------------------------
 FROM base as test-gradle-b
 
@@ -111,12 +112,11 @@ SHELL [ "/bin/sh", "-c" ]
 RUN gradle --version
 
 #--------------------------------------
-# test: java 8 + gradle 7
+# test: Java 8 LTS + Gradle 7
 #--------------------------------------
 FROM build as test-gradle-c
 
 # need to stay old
-# disable renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 8.0.342+7
 
 # disable renovate: datasource=gradle-version versioning=gradle
@@ -128,7 +128,7 @@ USER 1001
 RUN gradle --version
 
 #--------------------------------------
-# test: java 17 (non-root)
+# test: Java 17 LTS (non-root)
 #--------------------------------------
 FROM base as test-gradle-d
 
@@ -137,8 +137,8 @@ RUN prepare-tool java gradle
 # test openshift userid missmatch
 USER 1001
 
-# renovate: datasource=adoptium-java depName=java
-ARG JAVA_JDK_VERSION=21.0.3+9.0.LTS
+# renovate: datasource=java-version depName=java
+ARG JAVA_JDK_VERSION=17.0.11+9
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -171,7 +171,7 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: scala / sbt
+# test: Scala / sbt
 #--------------------------------------
 FROM build as test-others
 
