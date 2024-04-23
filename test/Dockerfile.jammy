@@ -156,7 +156,7 @@ RUN install-tool pdm 2.14.0
 FROM build as test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.2.3
+RUN install-tool ruby 3.3.1
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.5.9
 # renovate: datasource=rubygems versioning=ruby
