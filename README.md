@@ -22,7 +22,10 @@ You must first build the CLI, before you build the Docker images.
 
 ### Base image
 
-If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Dockerfile), you must rebuild the `containerbase/base` image.
+If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Dockerfile), you must:
+
+1. run `pnpm build`
+1. rebuild the `containerbase/base` image
 
 ```sh
 docker buildx bake
