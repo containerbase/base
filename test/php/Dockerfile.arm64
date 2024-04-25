@@ -32,7 +32,7 @@ RUN install-tool php 8.3.4
 FROM test-php as test-composer
 
 # renovate: datasource=github-releases packageName=composer/composer
-RUN install-tool composer 2.7.2
+RUN install-tool composer 2.7.4
 
 #--------------------------------------
 # Image: final

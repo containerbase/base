@@ -31,7 +31,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
-RUN install-tool ruby 3.2.3
+RUN install-tool ruby 3.3.1
 
 #--------------------------------------
 # test: bundler (gem)
