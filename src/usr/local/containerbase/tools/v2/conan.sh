@@ -26,8 +26,9 @@ function get_distribution() {
   case $distribution in
   "focal") echo "$distribution" ;;
   "jammy") echo "$distribution" ;;
+  "noble") echo "$distribution" ;;
   *)
-    echo "Distribution not supported: ${distribution}! Please use 'focal' or 'jammy'." >&2
+    echo "Distribution not supported: ${distribution}! Please use 'focal', 'jammy' or 'noble'." >&2
     return 1
    ;;
   esac
@@ -48,6 +49,30 @@ function create_conan_profile() {
 }
 
 function set_conan_profile() {
+  local architecture=$1
+  case "${architecture}" in
+    "x86_64")
+      architecture="x86_64"
+      ;;
+    "aarch64")
+      architecture="armv8"
+      ;;
+  esac
+
+  local compiler_version
+  local distribution=$2
+  case "${distribution}" in
+    "focal")
+      compiler_version="9"
+      ;;
+    "jammy")
+      compiler_version="11"
+      ;;
+    "noble")
+      compiler_version="13"
+      ;;
+  esac
+
   if [[ ! -f "${USER_HOME}/.conan2/profiles/default" ]]; then
     mkdir -p "${USER_HOME}/.conan2/profiles" > /dev/null
     touch "${USER_HOME}/.conan2/profiles/default"
@@ -55,21 +80,7 @@ function set_conan_profile() {
     chmod -R g+w "${USER_HOME}/.conan2"
   fi
 
-  local architecture_distribution=$1
-  case "${architecture_distribution}" in
-    "x86_64-focal")
-      create_conan_profile "x86_64" "9" > "${USER_HOME}/.conan2/profiles/default"
-      ;;
-    "aarch64-focal")
-      create_conan_profile "armv8" "9" > "${USER_HOME}/.conan2/profiles/default"
-      ;;
-    "x86_64-jammy")
-      create_conan_profile "x86_64" "11" > "${USER_HOME}/.conan2/profiles/default"
-      ;;
-    "aarch64-jammy")
-      create_conan_profile "armv8" "11" > "${USER_HOME}/.conan2/profiles/default"
-      ;;
-  esac
+  create_conan_profile "${architecture}" "${compiler_version}" > "${USER_HOME}/.conan2/profiles/default"
 }
 
 function prepare_tool () {
@@ -85,9 +96,9 @@ function prepare_tool () {
     return 1
   fi
 
-  apt_install gcc make cmake perl
+  set_conan_profile "${architecture}" "${distribution}"
 
-  set_conan_profile "${architecture}-${distribution}"
+  apt_install gcc g++ make cmake perl
 
   create_tool_path > /dev/null
 }

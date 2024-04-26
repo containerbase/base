@@ -257,7 +257,7 @@ RUN prepare-tool conan
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.2.2
+RUN install-tool conan 2.2.3
 
 RUN set -ex; \
     cd b-conan; \
@@ -297,6 +297,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
+COPY --from=test-conan /.dummy /.dummy
 COPY --from=test-pip-tools-a /.dummy /.dummy
 COPY --from=test-pip-tools-b /.dummy /.dummy
 COPY --from=test-poetry-a /.dummy /.dummy
@@ -307,7 +308,6 @@ COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=test-pdm /.dummy /.dummy
-COPY --from=test-conan /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy

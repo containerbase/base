@@ -65,7 +65,7 @@ RUN install-tool poetry 1.8.2
 FROM test-python as test-conan
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.2.2
+RUN install-tool conan 2.2.3
 
 #--------------------------------------
 # Image: final
@@ -73,7 +73,7 @@ RUN install-tool conan 2.2.2
 FROM base
 
 COPY --from=test-checkov /.dummy /.dummy
+COPY --from=test-conan /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
-COPY --from=test-conan /.dummy /.dummy
