@@ -31,7 +31,7 @@ WORKDIR /test
 FROM base as build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
-RUN install-tool ruby 3.2.3
+RUN install-tool ruby 3.3.1
 
 #--------------------------------------
 # test: bundler (gem)
@@ -50,7 +50,7 @@ RUN ruby --version
 RUN gem env
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.7
+ENV BUNDLER_VERSION=2.5.9
 RUN gem install bundler -v $BUNDLER_VERSION
 
 RUN bundle env
@@ -92,7 +92,7 @@ FROM build as test-bundler-c
 USER 1000
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.7
+ENV BUNDLER_VERSION=2.5.9
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -113,7 +113,7 @@ RUN set -ex; \
 FROM build as test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.7
+ENV BUNDLER_VERSION=2.5.9
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
@@ -124,7 +124,7 @@ USER 1000
 RUN install-tool ruby 3.1.0
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.7
+ENV BUNDLER_VERSION=2.5.9
 RUN install-tool bundler
 
 
@@ -152,7 +152,7 @@ FROM build as test-gem
 USER 1000
 
 # renovate: datasource=rubygems
-RUN install-gem rake 13.1.0
+RUN install-gem rake 13.2.1
 
 RUN rake --help
 

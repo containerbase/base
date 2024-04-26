@@ -33,7 +33,7 @@ RUN install-tool bazelisk v1.19.0
 FROM base as test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.36
+RUN install-tool bun 1.1.4
 
 #--------------------------------------
 # Image: gleam
@@ -41,7 +41,7 @@ RUN install-tool bun 1.0.36
 FROM base as test-gleam
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.0.0
+RUN install-tool gleam 1.1.0
 
 #--------------------------------------
 # Image: docker
@@ -49,7 +49,7 @@ RUN install-tool gleam 1.0.0
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.0.0
+RUN install-tool docker v26.1.0
 
 #--------------------------------------
 # Image: git
@@ -89,7 +89,7 @@ RUN install-tool kustomize 5.4.1
 FROM base as test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.5
+RUN install-tool terraform 1.8.2
 
 #--------------------------------------
 # Image: vendir
@@ -97,7 +97,7 @@ RUN install-tool terraform 1.7.5
 FROM base as test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.40.0
+RUN install-tool vendir v0.40.1
 
 #--------------------------------------
 # Image: final
