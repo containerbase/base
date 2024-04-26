@@ -42,12 +42,6 @@ setup_env_files
 echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 
-# happens on ubuntu noble
-if grep 'ubuntu:x:1000:' /etc/passwd > /dev/null; then
-  echo "User already exists, deleting"
-   userdel -r ubuntu
-fi
-
 # Set up user and home directory
 createUser
 
