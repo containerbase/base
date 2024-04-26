@@ -76,7 +76,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 
 @injectable()
 export abstract class InstallNpmBaseService extends InstallNodeBaseService {
-  protected get tool(): string {
+  protected tool(_version: string): string {
     return this.name;
   }
 
@@ -107,7 +107,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       npm,
       [
         'install',
-        `${this.tool}@${version}`,
+        `${this.tool(version)}@${version}`,
         '--save-exact',
         '--no-audit',
         '--prefix',
@@ -169,7 +169,10 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     }
 
     if (is.string(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name: pkg.name ?? this.tool });
+      await this.shellwrapper({
+        srcDir: src,
+        name: pkg.name ?? this.tool(version),
+      });
       return;
     }
 
@@ -178,8 +181,8 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     }
   }
 
-  override async test(_version: string): Promise<void> {
-    await execa(this.tool, ['--version'], { stdio: 'inherit' });
+  override async test(version: string): Promise<void> {
+    await execa(this.tool(version), ['--version'], { stdio: 'inherit' });
   }
 
   override async validate(version: string): Promise<boolean> {
@@ -212,7 +215,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       this.pathSvc.versionedToolPath(this.name, version),
       node,
       'node_modules',
-      this.tool,
+      this.tool(version),
       'package.json',
     );
   }

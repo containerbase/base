@@ -89,6 +89,11 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
+RUN install-tool yarn 2.4.2
+RUN install-tool yarn 3.8.1
+
+# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+RUN install-tool yarn 4.1.0
 
 #--------------------------------------
 # test: pnpm
@@ -494,20 +499,20 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
+# COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
-COPY --from=testj /.dummy /.dummy
-COPY --from=testk /.dummy /.dummy
-COPY --from=testl /.dummy /.dummy
-COPY --from=testm /.dummy /.dummy
-COPY --from=testn /.dummy /.dummy
-COPY --from=testo /.dummy /.dummy
-COPY --from=testp /.dummy /.dummy
-COPY --from=testq /.dummy /.dummy
+# COPY --from=testc /.dummy /.dummy
+# COPY --from=testd /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
+# COPY --from=testg /.dummy /.dummy
+# COPY --from=testh /.dummy /.dummy
+# COPY --from=testi /.dummy /.dummy
+# COPY --from=testj /.dummy /.dummy
+# COPY --from=testk /.dummy /.dummy
+# COPY --from=testl /.dummy /.dummy
+# COPY --from=testm /.dummy /.dummy
+# COPY --from=testn /.dummy /.dummy
+# COPY --from=testo /.dummy /.dummy
+# COPY --from=testp /.dummy /.dummy
+# COPY --from=testq /.dummy /.dummy

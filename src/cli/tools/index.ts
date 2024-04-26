@@ -28,7 +28,6 @@ export const ResolverMap: Record<string, InstallToolType | undefined> = {
   corepack: 'npm',
   npm: 'npm',
   pnpm: 'npm',
-  yarn: 'npm',
 };
 
 /**
