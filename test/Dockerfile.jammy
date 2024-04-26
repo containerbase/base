@@ -125,7 +125,7 @@ RUN install-tool pnpm 9.0.6
 RUN install-tool yarn 1.22.22
 
 #--------------------------------------
-# Image: test-python
+# Image: test-php
 #--------------------------------------
 FROM build as test-php
 
