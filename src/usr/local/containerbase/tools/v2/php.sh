@@ -15,7 +15,7 @@ function prepare_tool() {
       libxslt1.1 \
       libzip5 \
       ;;
-    "jammy") apt_install \
+    "jammy"|"noble") apt_install \
       libjpeg-turbo8 \
       libmcrypt4 \
       libonig5 \
@@ -57,6 +57,10 @@ function install_tool () {
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
+
+  if [[ "${version_codename}" == "noble" ]]; then
+    version_codename="jammy"
+  fi
 
   # not all releases have checksums
   checksum_exists=$(file_exists "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")

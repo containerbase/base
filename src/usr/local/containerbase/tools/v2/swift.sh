@@ -42,6 +42,25 @@ function prepare_tool() {
         unzip \
         zlib1g-dev \
         ;;
+    "noble")
+      apt_install \
+        binutils \
+        gnupg2 \
+        libc6-dev \
+        libcurl4-openssl-dev \
+        libedit2 \
+        libgcc-9-dev \
+        libncurses6 \
+        libpython3.8 \
+        libsqlite3-0 \
+        libstdc++-9-dev \
+        libxml2-dev \
+        libz3-dev \
+        pkg-config \
+        tzdata \
+        unzip \
+        zlib1g-dev \
+        ;;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
@@ -61,7 +80,6 @@ function install_tool () {
   local SWIFT_WEBROOT
   local SWIFT_WEBDIR
   local VERSION_ID
-  local version_codename
   local versioned_tool_path
   local version=$TOOL_VERSION
 
@@ -79,6 +97,10 @@ function install_tool () {
 
   # shellcheck source=/dev/null
   VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
+
+  if [[ "${VERSION_ID}" = "24.04" ]]; then
+   VERSION_ID="22.04"
+  fi
 
   # https://download.swift.org/swift-5.7-release/ubuntu2204/swift-5.7-RELEASE/swift-5.7-RELEASE-ubuntu22.04.tar.gz
   # https://download.swift.org/swift-5.7.3-release/ubuntu2204/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04.tar.gz

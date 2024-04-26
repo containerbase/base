@@ -8,6 +8,7 @@ function prepare_tool() {
   case "${version_codename}" in
     "focal");;
     "jammy");;
+    "noble");;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
@@ -55,6 +56,10 @@ function install_tool () {
   arch=$(uname -p)
   BASE_URL="https://github.com/containerbase/${TOOL_NAME}-prebuild/releases/download"
   version_codename=$(get_distro)
+
+  if [[ "${version_codename}" == "noble" ]]; then
+    version_codename="jammy"
+  fi
 
   file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
   tar -C "${tool_path}" -xf "${file}"

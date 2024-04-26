@@ -160,8 +160,9 @@ function require_distro () {
   case "$VERSION_CODENAME" in
   "focal") ;; #supported
   "jammy") ;; #supported
+  "noble") ;; #supported
   *)
-    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal' or 'jammy'." >&2
+    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal', 'jammy' or 'noble'." >&2
     exit 1
    ;;
   esac

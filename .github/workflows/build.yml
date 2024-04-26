@@ -156,6 +156,7 @@ jobs:
       matrix:
         distro:
           - jammy
+          - noble
 
     env:
       TAG: ${{ matrix.distro }}

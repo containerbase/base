@@ -51,6 +51,17 @@ export class PrepareDotnetService extends PrepareToolBaseService {
           'zlib1g',
         );
         break;
+      case 'noble':
+        await this.aptSvc.install(
+          'libc6',
+          'libgcc1',
+          'libgssapi-krb5-2',
+          'libicu74',
+          'libssl3',
+          'libstdc++6',
+          'zlib1g',
+        );
+        break;
     }
 
     await this.pathSvc.exportEnv({
