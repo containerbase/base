@@ -1,6 +1,7 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
 import { satisfies } from 'semver';
+import { logger, parse } from '../../utils';
 import { InstallNpmBaseService } from './utils';
 
 @injectable()
@@ -25,10 +26,28 @@ export class InstallRenovateService extends InstallNpmBaseService {
 }
 
 @injectable()
+export class InstallYarnService extends InstallNpmBaseService {
+  override readonly name: string = 'yarn';
+
+  protected override tool(version: string): string {
+    const ver = parse(version);
+    if (ver.major >= 2) {
+      logger.debug({ version }, 'Using yarnpkg/cli-dist');
+      return '@yarnpkg/cli-dist';
+    }
+    return this.name;
+  }
+
+  override async test(): Promise<void> {
+    await execa(this.name, ['--version'], { stdio: 'inherit' });
+  }
+}
+
+@injectable()
 export class InstallYarnSlimService extends InstallNpmBaseService {
   override readonly name: string = 'yarn-slim';
 
-  protected override get tool(): string {
+  protected override tool(): string {
     return 'yarn';
   }
 

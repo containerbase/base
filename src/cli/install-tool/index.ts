@@ -12,6 +12,7 @@ import { InstallMavenService } from '../tools/java/maven';
 import { InstallNodeService } from '../tools/node';
 import {
   InstallRenovateService,
+  InstallYarnService,
   InstallYarnSlimService,
 } from '../tools/node/npm';
 import {
@@ -51,6 +52,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnSlimService);
 
   logger.trace('preparing install container done');
