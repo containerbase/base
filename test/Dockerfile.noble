@@ -120,7 +120,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.12.1
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.6
+RUN install-tool pnpm 8.15.7
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
