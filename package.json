@@ -96,7 +96,7 @@
     "prettier-plugin-packagejson": "2.4.12",
     "semantic-release": "23.0.8",
     "shelljs": "0.8.5",
-    "tsx": "4.7.2",
+    "tsx": "4.7.3",
     "type-fest": "4.16.0",
     "typescript": "5.4.5",
     "vite": "5.2.10",
