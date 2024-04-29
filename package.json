@@ -47,7 +47,7 @@
     "global-agent": "3.0.0",
     "got": "14.2.1",
     "inversify": "6.0.2",
-    "pino": "8.20.0",
+    "pino": "8.21.0",
     "pino-pretty": "11.0.0",
     "pretty-ms": "9.0.0",
     "reflect-metadata": "0.2.2",
