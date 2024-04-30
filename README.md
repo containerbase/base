@@ -54,10 +54,10 @@ For other test images see the [`test`](./test/) folder.
 
 ### Distro test images
 
-To run the `jammy` tests use the following command, it will run the test from [`test/Dockerfile.jammy`](./test/Dockerfile.jammy).
+To run the `noble` tests use the following command, it will run the test from [`test/Dockerfile.noble`](./test/Dockerfile.noble).
 
 ```sh
-TAG=jammy docker buildx bake test-distro
+TAG=noble docker buildx bake test-distro
 ```
 
 ## Apt proxy
