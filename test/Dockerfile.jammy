@@ -36,7 +36,7 @@ FROM build as test
 RUN install-tool bazelisk v1.19.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.4
+RUN install-tool bun 1.1.6
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6
@@ -121,7 +121,7 @@ FROM build as test-node
 RUN install-tool node v20.12.2
 # renovate: datasource=npm
 RUN install-tool pnpm 9.0.6
-# renovate: datasource=npm
+# renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 1.22.22
 
 #--------------------------------------
@@ -142,13 +142,13 @@ FROM build as test-python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.3
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
-# renovate: datasource=pypi
 RUN install-tool hashin 1.0.1
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool pipenv 2023.12.1
 # renovate: datasource=pypi
 RUN install-tool pdm 2.15.1
+# renovate: datasource=pypi
+RUN install-tool poetry 1.8.2
 
 #--------------------------------------
 # Image: test-ruby
