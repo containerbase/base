@@ -89,6 +89,11 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
+RUN install-tool yarn 2.4.2
+RUN install-tool yarn 3.8.1
+
+# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+RUN install-tool yarn 4.1.1
 
 #--------------------------------------
 # test: pnpm
@@ -99,7 +104,7 @@ FROM build as testc
 ARG APT_HTTP_PROXY
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.0.4
+RUN install-tool pnpm 9.0.6
 
 RUN set -ex; \
   pnpm --version;
@@ -124,7 +129,7 @@ ARG APT_HTTP_PROXY
 USER 1000
 
 # renovate: datasource=node
-RUN install-tool node v18.20.1
+RUN install-tool node v18.20.2
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -418,13 +423,13 @@ RUN install-tool corepack 0.28.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 9.0.4
+RUN install-tool pnpm 9.0.6
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.28.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=9.0.4
+ARG PNPM_VERSION=9.0.6
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -494,20 +499,20 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
+# COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
-COPY --from=testj /.dummy /.dummy
-COPY --from=testk /.dummy /.dummy
-COPY --from=testl /.dummy /.dummy
-COPY --from=testm /.dummy /.dummy
-COPY --from=testn /.dummy /.dummy
-COPY --from=testo /.dummy /.dummy
-COPY --from=testp /.dummy /.dummy
-COPY --from=testq /.dummy /.dummy
+# COPY --from=testc /.dummy /.dummy
+# COPY --from=testd /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
+# COPY --from=testg /.dummy /.dummy
+# COPY --from=testh /.dummy /.dummy
+# COPY --from=testi /.dummy /.dummy
+# COPY --from=testj /.dummy /.dummy
+# COPY --from=testk /.dummy /.dummy
+# COPY --from=testl /.dummy /.dummy
+# COPY --from=testm /.dummy /.dummy
+# COPY --from=testn /.dummy /.dummy
+# COPY --from=testo /.dummy /.dummy
+# COPY --from=testp /.dummy /.dummy
+# COPY --from=testq /.dummy /.dummy
