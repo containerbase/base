@@ -15,7 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
-    'plugin:vitest/recommended',
+    'plugin:vitest/legacy-recommended',
     // 'plugin:jest-formatting/recommended',
     'prettier',
   ],
