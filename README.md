@@ -31,6 +31,7 @@ If you make changes to the [`src`](./src/) folder or the [`Dockerfile`](./Docker
 1. rebuild the `containerbase/base` image
 
 ```sh
+pnpm build
 docker buildx bake
 ```
 
