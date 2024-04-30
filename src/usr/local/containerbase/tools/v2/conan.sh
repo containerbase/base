@@ -43,7 +43,7 @@ function create_conan_profile() {
         build_type=Release
         compiler=gcc
         compiler.cppstd=gnu17
-        compiler.libcxx=libstdc++
+        compiler.libcxx=libstdc++11
         compiler.version=${compiler_version}
         os=Linux"
 }
