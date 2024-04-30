@@ -42,7 +42,7 @@ RUN install-tool bun 1.1.6
 RUN install-tool dart 2.19.6
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.0.0
+RUN install-tool docker v26.1.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.204
