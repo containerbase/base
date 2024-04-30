@@ -11,7 +11,10 @@ The commits to the `main` branch are automatically built and published.
 
 ## Local development
 
-You need a recent [Docker](https://www.docker.com) version and install the latest [`buildx`](https://github.com/docker/buildx) plugin.
+Install a recent version of:
+
+- [Docker](https://www.docker.com)
+- the [`buildx`](https://github.com/docker/buildx) plugin
 
 You must first build the CLI, before you build the Docker images.
 
