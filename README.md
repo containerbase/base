@@ -70,7 +70,6 @@ To run the `jammy` tests use the following command, it will run the test from [`
 TAG=jammy docker buildx bake test-distro
 ```
 
-
 ## Apt proxy
 
 You can configure an apt proxy for the build by setting an `APT_HTTP_PROXY` argument.
