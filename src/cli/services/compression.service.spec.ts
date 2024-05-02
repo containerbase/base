@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, rootContainer } from '.';
 
 vi.mock('execa');
-vi.mock('node:fs');
-vi.mock('node:stream/promises');
+vi.mock('tar/extract');
 
 describe('compression.service', () => {
   let child!: Container;

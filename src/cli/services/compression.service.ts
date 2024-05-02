@@ -1,8 +1,6 @@
-import { createReadStream } from 'node:fs';
-import { pipeline } from 'node:stream/promises';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import tar from 'tar';
+import { extract } from 'tar/extract';
 
 export interface ExtractConfig {
   file: string;
@@ -31,9 +29,9 @@ export class CompressionService {
       return;
     }
 
-    await pipeline(
-      createReadStream(file),
-      tar.x({ cwd, strip, newer: true, keep: false }, files),
+    await extract(
+      { cwd, ...(strip ? { strip } : {}), newer: true, keep: false, file },
+      files,
     );
   }
 }
