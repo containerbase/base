@@ -42,7 +42,7 @@ RUN install-tool bun 1.1.6
 RUN install-tool dart 2.19.6
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.0
+RUN install-tool docker v26.1.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.204
@@ -122,7 +122,7 @@ RUN install-tool node v20.12.2
 # renovate: datasource=npm
 RUN install-tool pnpm 9.0.6
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 1.22.22
+RUN install-tool yarn 4.1.1
 
 #--------------------------------------
 # Image: test-php
