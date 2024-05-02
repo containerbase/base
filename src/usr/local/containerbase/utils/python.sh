@@ -38,6 +38,14 @@ function install_python_tool() {
   local python_version
   local tool_path
 
+  if [[ ! -d "$(find_tool_path)" && "${NEEDS_PREPARE}" -eq 1 ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prepare_tool
+  fi
+
   python_version=$(get_tool_version python)
   tool_path="$(create_versioned_tool_path)/${python_version}"
   mkdir -p "${tool_path}"
