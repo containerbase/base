@@ -92,7 +92,7 @@
     "nock": "13.5.4",
     "npm-run-all2": "6.1.2",
     "prettier": "3.2.5",
-    "prettier-plugin-packagejson": "2.4.12",
+    "prettier-plugin-packagejson": "2.5.0",
     "semantic-release": "23.0.8",
     "shelljs": "0.8.5",
     "tsx": "4.7.3",
@@ -109,19 +109,19 @@
     "pnpm": "^9.0.0"
   },
   "pnpm": {
-    "patchedDependencies": {
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
-      "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch"
-    },
     "allowNonAppliedPatches": true,
     "supportedArchitectures": {
+      "cpu": [
+        "x64"
+      ],
       "os": [
         "linux",
         "win32"
-      ],
-      "cpu": [
-        "x64"
       ]
+    },
+    "patchedDependencies": {
+      "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch",
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
     }
   }
 }
