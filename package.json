@@ -110,19 +110,19 @@
     "pnpm": "^9.0.0"
   },
   "pnpm": {
-    "patchedDependencies": {
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
-      "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch"
-    },
     "allowNonAppliedPatches": true,
     "supportedArchitectures": {
+      "cpu": [
+        "x64"
+      ],
       "os": [
         "linux",
         "win32"
-      ],
-      "cpu": [
-        "x64"
       ]
+    },
+    "patchedDependencies": {
+      "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch",
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
     }
   }
 }
