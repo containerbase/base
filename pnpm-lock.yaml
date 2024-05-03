@@ -50,8 +50,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
       pino:
-        specifier: 8.21.0
-        version: 8.21.0
+        specifier: 9.0.0
+        version: 9.0.0
       pino-pretty:
         specifier: 11.0.0
         version: 11.0.0
@@ -2709,8 +2709,8 @@ packages:
   pino-std-serializers@6.2.2:
     resolution: {integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==}
 
-  pino@8.21.0:
-    resolution: {integrity: sha512-ip4qdzjkAyDDZklUaZkcRFb2iA118H9SgRh8yzTkSQK8HilsOJF7rSY8HoW5+I0M46AZgX/pxbprf2vvzQCE0Q==}
+  pino@9.0.0:
+    resolution: {integrity: sha512-uI1ThkzTShNSwvsUM6b4ND8ANzWURk9zTELMztFkmnCQeR/4wkomJ+echHee5GMWGovoSfjwdeu80DsFIt7mbA==}
     hasBin: true
 
   pkg-conf@2.1.0:
@@ -6186,7 +6186,7 @@ snapshots:
 
   pino-std-serializers@6.2.2: {}
 
-  pino@8.21.0:
+  pino@9.0.0:
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.5.0
