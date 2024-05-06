@@ -76,6 +76,7 @@
         "rake",
         "renovate",
         "rust",
+        "sbt",
         "swift",
         "vendir"
       ],
@@ -109,6 +110,7 @@
         "rake",
         "renovate",
         "rust",
+        "sbt",
         "swift",
         "vendir"
       ],
