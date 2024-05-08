@@ -68,7 +68,7 @@ USER 1000
 FROM build as poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool poetry 1.8.3
 
 USER 1000
 
@@ -102,7 +102,7 @@ FROM build as test-poetry-a
 RUN install-tool python 3.12.3
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool poetry 1.8.3
 
 USER 1000
 
@@ -155,7 +155,7 @@ RUN install-tool poetry 1.1.15
 FROM build as test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool poetry 1.8.3
 
 USER 1001
 
@@ -163,7 +163,7 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool poetry 1.8.3
 
 #--------------------------------------
 # test a: pip_requirements
@@ -191,7 +191,7 @@ RUN set -ex; \
   pipenv lock;
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.2
+RUN install-tool poetry 1.8.3
 
 RUN set -ex \
   && cd c-poetry \
