@@ -118,7 +118,7 @@ RUN install-tool gradle 8.7
 FROM build as test-node
 
 # renovate: datasource=node
-RUN install-tool node v20.12.2
+RUN install-tool node v20.13.1
 # renovate: datasource=npm
 RUN install-tool pnpm 9.1.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
