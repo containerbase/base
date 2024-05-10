@@ -51,7 +51,7 @@
     "pino-pretty": "11.0.0",
     "pretty-ms": "9.0.0",
     "reflect-metadata": "0.2.2",
-    "semver": "7.6.0",
+    "semver": "7.6.1",
     "simple-git": "3.24.0",
     "tar": "7.1.0",
     "typanion": "3.14.0"
