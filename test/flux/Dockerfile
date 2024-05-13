@@ -19,7 +19,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 RUN install-containerbase
 
 # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-ARG FLUX_VERSION=v2.2.3
+ARG FLUX_VERSION=v2.3.0
 
 USER 1000
 
