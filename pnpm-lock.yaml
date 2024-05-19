@@ -186,8 +186,8 @@ importers:
         specifier: 0.8.5
         version: 0.8.5
       tsx:
-        specifier: 4.10.3
-        version: 4.10.3
+        specifier: 4.10.5
+        version: 4.10.5
       type-fest:
         specifier: 4.18.2
         version: 4.18.2
@@ -3317,8 +3317,8 @@ packages:
     peerDependencies:
       typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
 
-  tsx@4.10.3:
-    resolution: {integrity: sha512-f0g60aFSVRVkzcQkEflh8fPLRfmt+HJHgWi/plG5UgvVaV+9TcpOwJ0sZJSACXmwmjMPg9yQR0BhTLbhkfV2uA==}
+  tsx@4.10.5:
+    resolution: {integrity: sha512-twDSbf7Gtea4I2copqovUiNTEDrT8XNFXsuHpfGbdpW/z9ZW4fTghzzhAG0WfrCuJmJiOEY1nLIjq4u3oujRWQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -6902,7 +6902,7 @@ snapshots:
       tslib: 1.14.1
       typescript: 5.4.5
 
-  tsx@4.10.3:
+  tsx@4.10.5:
     dependencies:
       esbuild: 0.21.3
       get-tsconfig: 4.7.5
