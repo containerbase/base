@@ -23,8 +23,8 @@ importers:
   .:
     dependencies:
       '@sindresorhus/is':
-        specifier: 6.3.0
-        version: 6.3.0
+        specifier: 6.3.1
+        version: 6.3.1
       clipanion:
         specifier: 3.2.1
         version: 3.2.1(patch_hash=fhbb5gvkz3xnkjsqqxesufv7h4)(typanion@3.14.0)
@@ -686,8 +686,8 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@sindresorhus/is@6.3.0':
-    resolution: {integrity: sha512-bOSPck7aIJjASXIg1qvXSIjXhVBpIEKdl2Wxg4pVqoTRPL8wWExKBrnGIh6CEnhkFQHfc36k7APhO3uXV4g5xg==}
+  '@sindresorhus/is@6.3.1':
+    resolution: {integrity: sha512-FX4MfcifwJyFOI2lPoX7PQxCqx8BG1HCho7WdiXwpEQx1Ycij0JxkfYtGK7yqNScrZGSlt6RE6sw8QYoH7eKnQ==}
     engines: {node: '>=16'}
 
   '@sindresorhus/merge-streams@2.3.0':
@@ -4039,7 +4039,7 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@sindresorhus/is@6.3.0': {}
+  '@sindresorhus/is@6.3.1': {}
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
@@ -5450,7 +5450,7 @@ snapshots:
 
   got@14.2.1:
     dependencies:
-      '@sindresorhus/is': 6.3.0
+      '@sindresorhus/is': 6.3.1
       '@szmarczak/http-timer': 5.0.1
       cacheable-lookup: 7.0.0
       cacheable-request: 10.2.14
