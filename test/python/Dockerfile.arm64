@@ -61,6 +61,17 @@ FROM test-python as test-poetry
 RUN install-tool poetry 1.8.3
 
 #--------------------------------------
+# build: rye
+#--------------------------------------
+FROM test-python as test-rye
+
+RUN prepare-tool rye
+# renovate: datasource=github-releases packageName=astral-sh/rye
+RUN install-tool rye 0.34.0
+
+USER 1000
+
+#--------------------------------------
 # Image: conan
 #--------------------------------------
 FROM test-python as test-conan
@@ -78,3 +89,4 @@ COPY --from=test-conan /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
+COPY --from=test-rye /.dummy /.dummy

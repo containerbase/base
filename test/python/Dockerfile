@@ -74,6 +74,17 @@ RUN install-tool poetry 1.8.3
 USER 1000
 
 #--------------------------------------
+# build: rye
+#--------------------------------------
+FROM build as rye
+
+RUN prepare-tool rye
+# renovate: datasource=github-releases packageName=astral-sh/rye
+RUN install-tool rye 0.34.0
+
+USER 1000
+
+#--------------------------------------
 # test pip-tools-a: pip-tools
 #--------------------------------------
 FROM build as test-pip-tools-a
@@ -249,6 +260,21 @@ USER 1000
 RUN install-tool pdm 2.15.3
 
 #--------------------------------------
+# test: rye: rye (multiple python)
+#--------------------------------------
+FROM build as test-rye
+
+RUN prepare-tool rye
+# renovate: datasource=github-releases packageName=astral-sh/rye
+RUN install-tool rye 0.34.0
+
+USER 1000
+
+SHELL [ "/bin/sh", "-c" ]
+RUN python --version
+RUN rye --version
+
+#--------------------------------------
 # test conan
 #--------------------------------------
 FROM build as test-conan
@@ -309,6 +335,7 @@ COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=test-pdm /.dummy /.dummy
+COPY --from=test-rye /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
