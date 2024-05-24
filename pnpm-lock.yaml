@@ -17,6 +17,9 @@ patchedDependencies:
   clipanion@3.2.1:
     hash: fhbb5gvkz3xnkjsqqxesufv7h4
     path: patches/clipanion@3.2.1.patch
+  esbuild-plugin-pino@2.1.1:
+    hash: ql5tvcjzmgrmlnnrpkanu5vzjy
+    path: patches/esbuild-plugin-pino@2.1.1.patch
 
 importers:
 
@@ -130,7 +133,7 @@ importers:
         version: 0.21.3
       esbuild-plugin-pino:
         specifier: 2.1.1
-        version: 2.1.1(esbuild@0.21.3)
+        version: 2.1.1(patch_hash=ql5tvcjzmgrmlnnrpkanu5vzjy)(esbuild@0.21.3)
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -4928,7 +4931,7 @@ snapshots:
 
   es6-error@4.1.1: {}
 
-  esbuild-plugin-pino@2.1.1(esbuild@0.21.3):
+  esbuild-plugin-pino@2.1.1(patch_hash=ql5tvcjzmgrmlnnrpkanu5vzjy)(esbuild@0.21.3):
     dependencies:
       esbuild: 0.21.3
 

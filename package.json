@@ -121,7 +121,8 @@
     },
     "patchedDependencies": {
       "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch",
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
+      "esbuild-plugin-pino@2.1.1": "patches/esbuild-plugin-pino@2.1.1.patch"
     }
   }
 }
