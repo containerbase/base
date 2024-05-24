@@ -210,7 +210,7 @@ RUN set -ex \
 
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.91
+RUN install-tool checkov 3.2.97
 
 # test old checkov with old python
 RUN install-tool python 3.7.17
@@ -245,7 +245,7 @@ FROM build as test-pdm
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.15.2
+RUN install-tool pdm 2.15.3
 
 #--------------------------------------
 # test conan

@@ -141,7 +141,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.3
+RUN install-tool terraform 1.8.4
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -176,7 +176,7 @@ RUN install-tool powershell v7.4.2
 RUN install-tool node v20.13.1
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.2
+RUN install-tool docker v26.1.3
 
 #--------------------------------------
 # test: bin path has 775
