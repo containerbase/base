@@ -88,7 +88,7 @@
     "eslint-plugin-typescript-enum": "2.1.0",
     "eslint-plugin-vitest": "0.5.4",
     "husky": "9.0.11",
-    "lint-staged": "15.2.2",
+    "lint-staged": "15.2.4",
     "nock": "13.5.4",
     "npm-run-all2": "6.2.0",
     "prettier": "3.2.5",
