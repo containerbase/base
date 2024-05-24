@@ -47,7 +47,7 @@
     "global-agent": "3.0.0",
     "got": "14.3.0",
     "inversify": "6.0.2",
-    "pino": "9.0.0",
+    "pino": "9.1.0",
     "pino-pretty": "11.0.0",
     "pretty-ms": "9.0.0",
     "reflect-metadata": "0.2.2",
@@ -121,7 +121,8 @@
     },
     "patchedDependencies": {
       "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch",
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
+      "esbuild-plugin-pino@2.1.1": "patches/esbuild-plugin-pino@2.1.1.patch"
     }
   }
 }
