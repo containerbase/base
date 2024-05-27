@@ -65,7 +65,6 @@ RUN install-tool poetry 1.8.3
 #--------------------------------------
 FROM test-python as test-rye
 
-RUN prepare-tool rye
 # renovate: datasource=github-releases packageName=astral-sh/rye
 RUN install-tool rye 0.34.0
 
