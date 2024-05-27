@@ -485,6 +485,19 @@ Known tools:
 - `pipenv`
 - `poetry`
 
+## `rye`
+
+Rye releases are downloaded from:
+
+- `https://github.com/astral-sh/rye/releases`
+
+Samples:
+
+```txt
+https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz.sha256
+https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz
+```
+
 ## `ruby`
 
 Ruby releases are downloaded from:

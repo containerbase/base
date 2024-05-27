@@ -265,10 +265,11 @@ RUN install-tool pdm 2.15.3
 FROM build as test-rye
 
 RUN prepare-tool rye
+USER 1000
+
 # renovate: datasource=github-releases packageName=astral-sh/rye
 RUN install-tool rye 0.34.0
 
-USER 1000
 
 SHELL [ "/bin/sh", "-c" ]
 RUN python --version

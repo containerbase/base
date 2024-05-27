@@ -1,4 +1,8 @@
 #!/bin/bash
+function check_tool_requirements () {
+  check_command rye
+  check_semver "$TOOL_VERSION" "all"
+}
 
 function prepare_tool() {
   local version_codename
@@ -10,7 +14,7 @@ function prepare_tool() {
       apt_install gzip
         ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
       exit 1
     ;;
   esac
@@ -27,11 +31,6 @@ function install_tool () {
   local version
   local platform
   local repo
-  arch=${ARCHITECTURE}
-  name=${TOOL_NAME}
-  version=${TOOL_VERSION}
-  platform=$(uname -s)
-  repo="astral-sh/rye"
 
   tool_path=$(find_tool_path)
 
@@ -44,9 +43,13 @@ function install_tool () {
     tool_path=$(find_tool_path)
   fi
 
-  if [[ $platform == "Darwin" ]]; then
-    platform="macos"
-  elif [[ $platform == "Linux" ]]; then
+  arch=${ARCHITECTURE}
+  name=$TOOL_NAME
+  version=${TOOL_VERSION}
+  platform=$(uname -s)
+  repo="astral-sh/$name"
+
+  if [[ $platform == "Linux" ]]; then
     platform="linux"
   fi
 
