@@ -1,0 +1,11 @@
+name: 'Prepare propxy'
+description: 'Prepares the apt proxy for the build'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ⚙️ Prepare proxy
+      shell: bash
+      run: |
+        sudo $(command -v node) tools/prepare-proxy.js

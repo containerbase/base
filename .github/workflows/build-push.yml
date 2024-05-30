@@ -71,7 +71,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: prepare apt proxy
-        run: sudo -E pnpm prepare:proxy
+        uses: ./.github/actions/prepare-proxy
 
       - name: semantic-release
         if: github.event_name == 'push'
