@@ -158,7 +158,7 @@ RUN install-tool poetry 1.8.3
 FROM build as test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.1
+RUN install-tool ruby 3.3.2
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.5.11
 # renovate: datasource=rubygems versioning=ruby
