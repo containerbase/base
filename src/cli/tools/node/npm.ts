@@ -8,10 +8,6 @@ import { InstallNpmBaseService } from './utils';
 export class InstallRenovateService extends InstallNpmBaseService {
   override readonly name: string = 'renovate';
 
-  protected override getAdditionalArgs(): string[] {
-    return ['--no-optional', 're2'];
-  }
-
   override prepareEnv(version: string, tmp: string): NodeJS.ProcessEnv {
     const env = super.prepareEnv(version, tmp);
 
