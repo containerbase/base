@@ -134,7 +134,7 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
-        run: sudo pnpm prepare:proxy
+        run: sudo PATH=$PATH pnpm prepare:proxy
 
       - name: build
         run: pnpm build
@@ -174,7 +174,7 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
-        run: sudo pnpm prepare:proxy
+        run: sudo PATH=$PATH pnpm prepare:proxy
 
       - name: build
         run: pnpm build
@@ -235,7 +235,7 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
-        run: sudo pnpm prepare:proxy
+        run: sudo PATH=$PATH pnpm prepare:proxy
 
       - name: build
         run: pnpm build
