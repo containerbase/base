@@ -33,7 +33,7 @@ RUN install-tool erlang 26.2.5.0
 FROM test-erlang as test-elixir
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.16.2
+RUN install-tool elixir 1.16.3
 
 #--------------------------------------
 # Image: final
