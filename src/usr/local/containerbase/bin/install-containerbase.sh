@@ -101,7 +101,7 @@ function link_tools () {
 
   containerbase-cli --version
 }
-link_tool
+link_tools
 
 
 # do this at the end as we are overwriting certain env vars and functions
