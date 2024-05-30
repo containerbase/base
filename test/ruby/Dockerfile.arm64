@@ -25,7 +25,7 @@ RUN install-containerbase
 FROM base as test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.1
+RUN install-tool ruby 3.3.2
 
 #--------------------------------------
 # Image: bundler
