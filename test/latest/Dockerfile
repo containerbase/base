@@ -201,7 +201,7 @@ RUN install-tool bazelisk v1.20.0
 RUN install-tool bun 1.1.10
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.2.0
+RUN install-tool gleam 1.2.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
