@@ -120,7 +120,7 @@ FROM build as test-node
 # renovate: datasource=node
 RUN install-tool node v20.14.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.1.3
+RUN install-tool pnpm 9.1.4
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.2.2
 
