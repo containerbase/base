@@ -104,12 +104,26 @@ export class PathService {
     return join(this.toolPath(tool), version);
   }
 
-  async exportEnv(values: Record<string, string>): Promise<void> {
+  async exportEnv(
+    values: Record<string, string>,
+    nonRootOnly = false,
+  ): Promise<void> {
     let content = '';
 
+    if (nonRootOnly) {
+      // eslint-disable-next-line no-template-curly-in-string
+      content += 'if [ "${EUID}" != 0 ]; then\n';
+    }
+
     for (const [key, value] of Object.entries(values)) {
-      env[key] = value;
+      if (nonRootOnly === false) {
+        env[key] = value;
+      }
       content += `export ${key}=\${${key}-${value}}\n`;
+    }
+
+    if (nonRootOnly) {
+      content += 'fi\n';
     }
 
     await appendFile(this.envFile, content);
@@ -138,13 +152,25 @@ export class PathService {
   async exportToolEnv(
     tool: string,
     values: Record<string, string>,
+    nonRootOnly = false,
   ): Promise<void> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
     let content = '';
 
+    if (nonRootOnly) {
+      // eslint-disable-next-line no-template-curly-in-string
+      content += 'if [ "${EUID}" != 0 ]; then\n';
+    }
+
     for (const [key, value] of Object.entries(values)) {
-      env[key] = value;
+      if (nonRootOnly === false) {
+        env[key] = value;
+      }
       content += `export ${key}=\${${key}-${value}}\n`;
+    }
+
+    if (nonRootOnly) {
+      content += 'fi\n';
     }
 
     await appendFile(file, content);
