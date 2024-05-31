@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
+# use this if custom env is required, creates a shell wrapper to /opt/containerbase/bin
 function shell_wrapper () {
   local TARGET
   local SOURCE=$2
@@ -33,7 +33,7 @@ EOM
   set_file_owner "${TARGET}" 775
 }
 
-# use this for simple symlink to /usr/local/bin
+# use this for simple symlink to /opt/containerbase/bin
 function link_wrapper () {
   local TARGET
   local SOURCE=$2
