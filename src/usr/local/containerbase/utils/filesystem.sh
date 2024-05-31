@@ -62,6 +62,12 @@ function setup_directories () {
   # contains the certificates for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_ssl_path)"
+  # contains the caches for the tools
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "$(get_cache_path)"
+  # contains the home for the tools
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "$(get_home_path)"
 
   # if the bin path exists and does not have 775, force it
   if [ "$(stat --format '%a' "$(get_bin_path)")" -ne 775 ]; then
@@ -124,6 +130,20 @@ function get_ssl_path () {
   local install_dir
   install_dir=$(get_install_dir)
   echo "${install_dir}/ssl"
+}
+
+# Gets the path to the cache folder
+function get_cache_path () {
+  local install_dir
+  install_dir=$(get_install_dir)
+  echo "${install_dir}/cache"
+}
+
+# Gets the path to the home folder
+function get_home_path () {
+  local install_dir
+  install_dir=$(get_install_dir)
+  echo "${install_dir}/home"
 }
 
 # will get the correct umask based on the caller id
