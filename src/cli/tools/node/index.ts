@@ -166,6 +166,10 @@ export class InstallNodeService extends InstallNodeBaseService {
 if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${this.envSvc.userId} ]; then
   export npm_config_prefix="${this.envSvc.userHome}/.npm-global"
 fi
+# corepack cache
+if [ "\${EUID}" != 0 ]; then
+  export COREPACK_HOME="${this.pathSvc.cachePath}/corepack"
+fi
 `,
     );
   }
