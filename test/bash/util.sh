@@ -7,6 +7,7 @@ export REPO_DIR="${TEST_DIR}/../.."
 export CONTAINERBASE_DIR="${REPO_DIR}/src/usr/local/containerbase"
 export ROOT_DIR="${TEST_ROOT_DIR}/root"
 export BIN_DIR="${TEST_ROOT_DIR}/bin"
+export LIB_DIR="${TEST_ROOT_DIR}/lib"
 export USER_HOME="${TEST_ROOT_DIR}/user"
 export ENV_FILE="${TEST_ROOT_DIR}/env"
 
@@ -29,9 +30,10 @@ function link_cli_tool () {
   if [[ "${ARCHITECTURE}" = "aarch64" ]];then
     arch=arm64
   fi
-  export PATH="${BIN_DIR}:${PATH}"
-  ln -sf "${REPO_DIR}/dist/cli/containerbase-cli-${arch}" "${BIN_DIR}/containerbase-cli"
+  export PATH="${TEST_ROOT_DIR}/sbin:${PATH}"
+  ln -sf "${REPO_DIR}/dist/cli/containerbase-cli-${arch}" "${TEST_ROOT_DIR}/sbin/containerbase-cli"
 }
 
-mkdir -p "${BIN_DIR}" "${ROOT_DIR}"
+# ensure directories exist
+mkdir -p "${TEST_ROOT_DIR}"/{sbin,root,user}
 link_cli_tool
