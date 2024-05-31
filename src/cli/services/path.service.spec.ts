@@ -92,10 +92,14 @@ describe('path.service', () => {
   test('exportEnv', async () => {
     await mkdir(rootPath('usr/local/etc'), { recursive: true });
     await child.get(PathService).exportEnv({ NODE_VERSION: 'v14.17.1' });
+    await child.get(PathService).exportEnv({ TEST: '/tmp/test' }, true);
 
     expect(env).toMatchObject({ NODE_VERSION: 'v14.17.1' });
     const content = await readFile(rootPath('usr/local/etc/env'), 'utf8');
     expect(content).toContain('export NODE_VERSION=${NODE_VERSION-v14.17.1}\n');
+    expect(content).toContain(
+      'if [ "${EUID}" != 0 ]; then\nexport TEST=${TEST-/tmp/test}\nfi\n',
+    );
   });
 
   test('exportPath', async () => {
@@ -113,6 +117,7 @@ describe('path.service', () => {
 
       await mkdir(`${pathSvc.installDir}/env.d`, { recursive: true });
       await pathSvc.exportToolEnv('node', { NODE_VERSION: 'v14.17.0' });
+      await pathSvc.exportToolEnv('node', { TEST: '/tmp/test' }, true);
       expect(env).toMatchObject({
         NODE_VERSION: 'v14.17.0',
       });
