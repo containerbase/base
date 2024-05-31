@@ -16,11 +16,7 @@ ARG TARGETARCH
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
-RUN set -ex; ls -la /usr/local/bin/; ls -la /usr/local/sbin;
-
 RUN install-containerbase
-
-RUN set -ex; ls -la /usr/local/bin/; ls -la /usr/local/sbin; ls -la /opt/containerbase/bin;
 
 COPY --chown=1000:0 test/node/test test
 RUN chmod -R 775 /test
