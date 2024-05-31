@@ -17,12 +17,24 @@ describe('path.service', () => {
     delete env.NODE_VERSION;
   });
 
+  test('cachePath', () => {
+    expect(child.get(PathService).cachePath).toBe(
+      rootPath('opt/containerbase/cache'),
+    );
+  });
+
   test('envFile', () => {
     expect(child.get(PathService).envFile).toBe(rootPath('usr/local/etc/env'));
   });
 
   test('tmpDir', () => {
     expect(child.get(PathService).tmpDir).toBe(rootPath('tmp'));
+  });
+
+  test('homePath', () => {
+    expect(child.get(PathService).homePath).toBe(
+      rootPath('opt/containerbase/home'),
+    );
   });
 
   test('toolsPath', () => {
