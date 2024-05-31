@@ -125,7 +125,7 @@ SHELL ["/bin/bash" , "-c"]
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
-COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/sbin/ /usr/local/sbin/
 COPY --from=build /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -181,11 +181,11 @@ RUN install-tool node v20.15.0
 RUN install-tool docker v27.0.3
 
 #--------------------------------------
-# test: bin path has 775
+# test: bin path has 777
 #--------------------------------------
 FROM base as testd
 
-RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
 RUN prepare-tool all
 

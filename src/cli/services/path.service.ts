@@ -13,7 +13,7 @@ export interface FileOwnerConfig {
 @injectable()
 export class PathService {
   get binDir(): string {
-    return join(this.envSvc.rootDir, 'usr/local/bin');
+    return join(this.installDir, 'bin');
   }
 
   get cachePath(): string {

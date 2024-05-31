@@ -91,13 +91,13 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
 fi
 
 function link_tools () {
-  ln -sf /usr/local/containerbase/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-  ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/bin/install-apt
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/containerbase-cli
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-gem
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-npm
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-tool
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/prepare-tool
+  ln -sf /usr/local/containerbase/bin/docker-entrypoint.sh /usr/local/sbin/docker-entrypoint.sh
+  ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/sbin/install-apt
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/containerbase-cli
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-gem
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/prepare-tool
 
   containerbase-cli --version
 }
@@ -111,6 +111,9 @@ function prepare_v2_tools () {
   . /usr/local/containerbase/utils/v2/overrides.sh
 
   setup_directories
+
+  # compability with current custom images
+  ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
 }
 prepare_v2_tools
 
