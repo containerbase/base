@@ -36,6 +36,14 @@ export class PathService {
     return join(this.installDir, 'versions');
   }
 
+  get homePath(): string {
+    return join(this.installDir, 'home');
+  }
+
+  get cachePath(): string {
+    return join(this.installDir, 'cache');
+  }
+
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createToolPath(tool: string): Promise<string> {
