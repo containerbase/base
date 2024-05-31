@@ -126,6 +126,10 @@ teardown() {
   assert [ "$(stat --format '%a' "${BIN_DIR}")" -eq 775 ]
   assert [ -d "${install_dir}/env.d" ]
   assert [ "$(stat --format '%a' "${install_dir}/env.d")" -eq 775 ]
+  assert [ -d "${install_dir}/cache" ]
+  assert [ "$(stat --format '%a' "${install_dir}/cache")" -eq 775 ]
+  assert [ -d "${install_dir}/home" ]
+  assert [ "$(stat --format '%a' "${install_dir}/home")" -eq 775 ]
 }
 
 @test "creates a folder with correct permissions" {
