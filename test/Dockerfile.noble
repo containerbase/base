@@ -110,7 +110,7 @@ FROM build as test-java
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java 21.0.3+9.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.7
+RUN install-tool gradle 8.8
 
 #--------------------------------------
 # Image: test-node
