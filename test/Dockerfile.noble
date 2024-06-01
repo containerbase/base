@@ -81,6 +81,9 @@ RUN install-tool powershell v7.4.2
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.78.0
 
+# renovate: datasource=github-releases packageName=astral-sh/rye
+RUN install-tool rye 0.34.0
+
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.10.0
 
@@ -152,8 +155,6 @@ RUN install-tool pipenv 2023.12.1
 RUN install-tool pdm 2.15.3
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
-# renovate: datasource=github-releases packageName=astral-sh/rye
-RUN install-tool rye 0.34.0
 
 #--------------------------------------
 # Image: test-ruby

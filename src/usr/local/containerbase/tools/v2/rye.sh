@@ -1,27 +1,14 @@
 #!/bin/bash
-function check_tool_requirements () {
-  check_command rye
-  check_semver "$TOOL_VERSION" "all"
-}
+
+# function check_tool_requirements () {
+#   check_command rye
+#   check_semver "$TOOL_VERSION" "all"
+# }
 
 function prepare_tool() {
-  local version_codename
-  local tool_path
-
-  version_codename="$(get_distro)"
-  case "${version_codename}" in
-    "focal" | "jammy" | "noble" )
-      apt_install gzip
-        ;;
-    *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
-      exit 1
-    ;;
-  esac
+  local versioned_tool_path
 
   create_tool_path > /dev/null
-  export_env RYE_HOME "${USER_HOME}/.rye"
-  export_path "\$RYE_HOME/shims"
 }
 
 function install_tool () {
@@ -45,7 +32,7 @@ function install_tool () {
 
   arch=${ARCHITECTURE}
   name=$TOOL_NAME
-  version=${TOOL_VERSION}
+  version=$TOOL_VERSION
   platform=$(uname -s)
   repo="astral-sh/$name"
 
@@ -73,16 +60,19 @@ function install_tool () {
   versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
 
-  gunzip -c "${file}" > "${versioned_tool_path}/bin/rye"
-  chmod +x "${versioned_tool_path}/bin/rye"
+  gunzip -c "${file}" > "${TEMP_DIR}/rye"
+  chmod +x "${TEMP_DIR}/rye"
 
-  "${versioned_tool_path}/bin/rye" self install --yes
+  export_env RYE_HOME "${versioned_tool_path}"
+  export_path "\$RYE_HOME/shims"
+
+  "${TEMP_DIR}/rye" self install --yes
 }
 
 function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "rye" "${versioned_tool_path}/bin"
-  rye --version
+  shell_wrapper "rye" "${versioned_tool_path}/shims"
+  [[ -n $SKIP_VERSION ]] || rye --version
 }
