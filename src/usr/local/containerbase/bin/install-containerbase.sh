@@ -114,6 +114,14 @@ function prepare_v2_tools () {
 
   # compability with current custom images
   ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
+
+  # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  # set home path to /opt/containerbase/home
+  export_env XDG_CONFIG_HOME "$(get_home_path)/.config" true
+  export_env XDG_DATA_HOME "$(get_home_path)/.local/share" true
+  export_env XDG_STATE_HOME "$(get_home_path)/.local/state" true
+  # set cache path to /opt/containerbase/cache
+  export_env XDG_CACHE_HOME "$(get_cache_path)" true
 }
 prepare_v2_tools
 
