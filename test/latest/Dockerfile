@@ -19,6 +19,8 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 
 RUN install-containerbase
 
+RUN set -ex; [[ -z "${XDG_CACHE_HOME}" ]] && echo "works" || exit 1;
+
 #--------------------------------------
 # build
 #--------------------------------------
@@ -161,6 +163,8 @@ RUN install-tool git v2.45.2
 
 USER 1000
 
+RUN set -ex; [[ "${XDG_CACHE_HOME}" = "/opt/containerbase/cache" ]] && echo "works" || exit 1;
+
 RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
 ARG IGNORED_TOOLS=powershell,node
@@ -184,6 +188,8 @@ RUN install-tool docker v27.0.3
 # test: bin path has 777
 #--------------------------------------
 FROM base as testd
+
+ARG CONTAINERBASE_DEBUG
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
