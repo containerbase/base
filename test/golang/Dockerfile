@@ -92,6 +92,17 @@ RUN set -ex; \
   go get -d ./...; \
   go mod tidy;
 
+# test go install
+RUN set -ex; \
+  go install github.com/marwan-at-work/mod/cmd/mod@latest; \
+  mod --help; \
+  command -v mod; \
+  ls -la ${USER_HOME}; \
+  true
+
+RUN set -ex; \
+  [ "$(command -v mod)" = "/usr/local/bin/mod" ] && echo "works" || exit 1;
+
 #--------------------------------------
 # final
 #--------------------------------------
