@@ -125,7 +125,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       await fs.rm(prefix, { recursive: true, force: true });
       throw new Error('npm install command failed');
     } else {
-      logger.trace({ res: res.all }, 'npm install');
+      logger.trace(`npm install:\n${res.all}`);
     }
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
