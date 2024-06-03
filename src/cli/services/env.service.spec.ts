@@ -96,6 +96,9 @@ describe('env.service', () => {
     const e = child.get(EnvService);
     env.URL_REPLACE_0_FROM = 'https://example.com';
     env.URL_REPLACE_0_TO = 'https://example.test';
+    env.URL_REPLACE_1_FROM = 'https://cdn.example.com/registry.npmjs.org';
+    env.URL_REPLACE_1_TO = 'https://npm.example.test';
+
     expect(e.replaceUrl('https://example.com/file.txt')).toBe(
       'https://example.test/file.txt',
     );
@@ -109,6 +112,9 @@ describe('env.service', () => {
     );
     expect(e.replaceUrl('https://example.test/file.txt')).toBe(
       'https://cdn.example.com/example.test/file.txt',
+    );
+    expect(e.replaceUrl('https://registry.npmjs.org')).toBe(
+      'https://npm.example.test',
     );
   });
 });

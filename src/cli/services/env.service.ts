@@ -120,12 +120,12 @@ export class EnvService {
 
     if (env.CONTAINERBASE_CDN) {
       tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
-    } else {
-      const replacements = this.urlReplacements;
+    }
 
-      for (const [from, to] of replacements) {
-        tgt = tgt.replace(from, to);
-      }
+    const replacements = this.urlReplacements;
+
+    for (const [from, to] of replacements) {
+      tgt = tgt.replace(from, to);
     }
     if (tgt !== src) {
       logger.debug({ src, tgt }, 'url replaced');
