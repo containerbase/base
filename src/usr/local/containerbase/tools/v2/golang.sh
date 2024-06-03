@@ -2,19 +2,20 @@
 
 
 function prepare_tool() {
+  local go_path
 
   # go suggests: git svn bzr mercurial
   apt_install bzr mercurial
 
-  export_env GOPATH "/go"
-  export_env CGO_ENABLED 0
-  export_env GOSUMDB off
+  go_path=$(get_home_path)/go
+
+  export_env GOPATH "${go_path}" true
   export_path "\$GOPATH/bin"
 
-  mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOPATH/pkg"
+  mkdir -p "${go_path}/src" "${go_path}/bin" "${go_path}/pkg"
 
-  chown -R "${USER_ID}" "$GOPATH"
-  chmod -R g+w "$GOPATH"
+  chown -R "${USER_ID}" "${go_path}"
+  chmod -R g+w "${go_path}"
   create_tool_path > /dev/null
 }
 
