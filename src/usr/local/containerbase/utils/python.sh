@@ -54,6 +54,11 @@ function install_python_tool() {
     # restore from cache not possible
     # either not in cache or error, install
 
+    if [[ -n "${CONTAINERBASE_CDN+x}" ]]; then
+      export PIP_INDEX_URL="${CONTAINERBASE_CDN%/}/pypi.org/simple"
+    fi
+    # export PIP_VERBOSE=3
+
     python -m virtualenv \
       --no-periodic-update \
       --quiet \
@@ -70,6 +75,8 @@ function install_python_tool() {
         --quiet \
         "${TOOL_NAME}==${TOOL_VERSION}" \
         "$@"
+
+    unset PIP_INDEX_URL PIP_VERBOSE
 
     # remove virtualenv app-data
     rm -rf ~/.local/share/virtualenv
