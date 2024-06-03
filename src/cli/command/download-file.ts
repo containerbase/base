@@ -1,6 +1,7 @@
 import { createWriteStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
 import { got } from 'got';
@@ -36,7 +37,16 @@ export class DownloadFileCommand extends Command {
       await mkdir(path, { recursive: true });
 
       const nUrl = env.replaceUrl(this.url);
-      await pipeline(got.stream(nUrl), createWriteStream(this.output));
+      await pipeline(
+        got.stream(nUrl, {
+          headers: {
+            'user-agent': `containerbase/${
+              env.version
+            } node/${version.replace(/^v/, '')} (https://github.com/containerbase)`,
+          },
+        }),
+        createWriteStream(this.output),
+      );
 
       return 0;
     } catch (err) {
