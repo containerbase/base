@@ -20,10 +20,11 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
 
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
+    const args: string[] = [];
 
     const registry = this.envSvc.replaceUrl(defaultRegistry);
     if (registry !== defaultRegistry) {
-      env.RUBYGEMS_HOST = registry;
+      args.push('--clear-sources', '--source', registry);
     }
 
     const gem = await this.getRubyGem();
@@ -55,6 +56,8 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
         join(prefix, 'bin'),
         '--version',
         version,
+        '--verbose',
+        ...args,
       ],
       { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
@@ -63,6 +66,8 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
       logger.warn(`Gem error:\n${res.all}`);
       await rm(prefix, { recursive: true, force: true });
       throw new Error('gem install command failed');
+    } else {
+      logger.trace(`gem install\n${res.all}`);
     }
 
     await this._postInstall(gem, version, prefix, env);
