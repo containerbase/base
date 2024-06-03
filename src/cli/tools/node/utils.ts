@@ -115,6 +115,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
         '--cache',
         tmp,
         ...this.getAdditionalArgs(),
+        '-d',
       ],
       { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
@@ -123,6 +124,8 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       logger.warn(`Npm error:\n${res.all}`);
       await fs.rm(prefix, { recursive: true, force: true });
       throw new Error('npm install command failed');
+    } else {
+      logger.trace(`npm install:\n${res.all}`);
     }
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);

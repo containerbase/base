@@ -8,6 +8,7 @@ ARG APT_HTTP_PROXY
 # Weekly cache buster
 ARG CACHE_WEEK
 
+ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_VERSION
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \

@@ -117,6 +117,11 @@ export class EnvService {
 
   public replaceUrl(src: string): string {
     let tgt = src;
+
+    if (env.CONTAINERBASE_CDN) {
+      tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
+    }
+
     const replacements = this.urlReplacements;
 
     for (const [from, to] of replacements) {

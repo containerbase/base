@@ -7,6 +7,11 @@ variable "FILE" {
 variable "TAG" {
   default = "latest"
 }
+
+variable "CONTAINERBASE_CDN" {
+  default = ""
+}
+
 variable "CONTAINERBASE_VERSION" {
   default = "unknown"
 }
@@ -44,6 +49,7 @@ target "settings" {
   context = "."
   args = {
     APT_HTTP_PROXY        = "${APT_HTTP_PROXY}"
+    CONTAINERBASE_CDN     = "${CONTAINERBASE_CDN}"
     CONTAINERBASE_DEBUG   = "${CONTAINERBASE_DEBUG}"
     CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
     GITHUB_TOKEN          = "${GITHUB_TOKEN}"
