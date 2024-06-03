@@ -27,6 +27,11 @@ export class PrepareFlutterService extends PrepareToolBaseService {
       join(this.envSvc.rootDir, '/root/.flutter'),
       '{ "firstRun": false, "enabled": false }',
     );
+
+    await this.pathSvc.exportEnv(
+      { PUB_CACHE: `${this.pathSvc.cachePath}/.pub-cache` },
+      true,
+    );
   }
 }
 
