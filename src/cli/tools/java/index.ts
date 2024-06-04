@@ -41,8 +41,25 @@ export class PrepareJavaService extends PrepareToolBaseService {
       return;
     }
 
-    await createMavenSettings(this.envSvc.userHome, this.envSvc.userId);
-    await createGradleSettings(this.envSvc.userHome, this.envSvc.userId);
+    await createMavenSettings(this.pathSvc);
+    await createGradleSettings(this.pathSvc);
+
+    // compatibility with gradle and maven
+    await fs.symlink(
+      path.join(this.pathSvc.homePath, '.m2'),
+      path.join(this.envSvc.userHome, '.m2'),
+    );
+    await fs.symlink(
+      path.join(this.pathSvc.homePath, '.gradle'),
+      path.join(this.envSvc.userHome, '.gradle'),
+    );
+
+    // fix: Failed to load native library 'libnative-platform.so' for Linux amd64.
+    await this.pathSvc.exportToolEnv(
+      'gradle',
+      { GRADLE_USER_HOME: path.join(this.pathSvc.homePath, '.gradle') },
+      true,
+    );
 
     const version = await resolveLatestJavaLtsVersion(
       this.httpSvc,

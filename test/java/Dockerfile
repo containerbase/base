@@ -33,6 +33,12 @@ FROM base AS build
 
 RUN prepare-tool java
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 777 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 777 ]; \
+  true
+
 RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 RUN set -ex; \
@@ -59,12 +65,6 @@ FROM build AS test-gradle-a
 RUN install-tool java 11.0.23+9
 
 RUN prepare-tool gradle
-
-RUN set -ex; \
-  ls -la $USER_HOME; \
-  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
-  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
-  exit 0
 
 USER 1000
 
@@ -122,6 +122,13 @@ RUN install-tool java 8.0.342+7
 
 # disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.6.1
+
+RUN set -ex; \
+  ls -la /root/; \
+  ls -la /opt/containerbase/; \
+  ls -la /opt/containerbase/home/; \
+  ls -la /opt/containerbase/home/.gradle; \
+  true
 
 # test openshift userid missmatch
 USER 1001

@@ -50,7 +50,7 @@ export class InstallGradleService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src, extraToolEnvs: ['java'] });
+    await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {
