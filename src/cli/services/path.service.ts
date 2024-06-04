@@ -44,6 +44,10 @@ export class PathService {
     return join(this.installDir, 'cache');
   }
 
+  get sslPath(): string {
+    return join(this.installDir, 'ssl');
+  }
+
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createToolPath(tool: string): Promise<string> {

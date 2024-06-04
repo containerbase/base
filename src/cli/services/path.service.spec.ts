@@ -43,6 +43,12 @@ describe('path.service', () => {
     );
   });
 
+  test('sslPath', () => {
+    expect(child.get(PathService).sslPath).toBe(
+      rootPath('opt/containerbase/ssl'),
+    );
+  });
+
   test('versionPath', () => {
     expect(child.get(PathService).versionPath).toBe(
       rootPath('opt/containerbase/versions'),

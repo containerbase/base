@@ -39,7 +39,7 @@ export class PrepareToolService {
             logger.info({ tool }, 'tool ignored');
             continue;
           }
-          if (await this.pathSvc.findToolPath(tool.name)) {
+          if (await tool.isPrepared()) {
             logger.debug({ tool: tool.name }, 'tool already prepared');
             continue;
           }
@@ -60,7 +60,7 @@ export class PrepareToolService {
           }
           const toolSvc = this.toolSvcs.find((t) => t.name === tool);
           if (toolSvc) {
-            if (await this.pathSvc.findToolPath(tool)) {
+            if (await toolSvc.isPrepared()) {
               logger.debug({ tool }, 'tool already prepared');
               continue;
             }
