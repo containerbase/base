@@ -3,6 +3,7 @@
 function prepare_tool() {
   local version_codename
   local tool_path
+  local cp_home
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
@@ -27,6 +28,13 @@ function prepare_tool() {
   } > "${USER_HOME}"/.gemrc
   chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
   chmod -R g+w "${USER_HOME}"/.gemrc
+
+  # Redirect cocoapods home
+  cp_home="$(get_home_path)/.cocoapods"
+  create_folder "${cp_home}" 775
+  chown  "${USER_ID}" "${cp_home}"
+  chmod g+w "${cp_home}"
+  ln -sf "${cp_home}" "${USER_HOME}/.cocoapods"
 
   # Workaround for compatibillity for Ruby hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
@@ -96,21 +104,9 @@ function install_tool () {
 }
 
 function link_tool () {
-  local tool_path
   local versioned_tool_path
-  local ruby_minor_version
 
-  tool_path=$(find_tool_path)
   versioned_tool_path=$(find_versioned_tool_path)
-  ruby_minor_version="${MAJOR}.${MINOR}.0"
-
-  reset_tool_env
-  # export ruby varsreset_tool_env
-  {
-    printf -- "if [ \"\${EUID}\" != 0 ] && [ -z \"\$GEM_HOME\" ]; then\n"
-    printf -- "  export GEM_HOME=\"%s/.gem/ruby/%s\"\n" "${USER_HOME}" "${ruby_minor_version}"
-    printf -- "fi\n"
-  } >> "$(find_tool_env)"
 
   shell_wrapper ruby "${versioned_tool_path}/bin"
   shell_wrapper gem "${versioned_tool_path}/bin"
