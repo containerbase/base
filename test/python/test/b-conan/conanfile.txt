@@ -1,5 +1,5 @@
 [requires]
-openssl/3.2.1
+lest/1.35.1
 [generators]
 CMakeDeps
 CMakeToolchain
