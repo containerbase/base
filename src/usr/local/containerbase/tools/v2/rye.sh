@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# function check_tool_requirements () {
-#   check_command rye
-#   check_semver "$TOOL_VERSION" "all"
-# }
-
-function prepare_tool() {
-  local versioned_tool_path
-
-  create_tool_path > /dev/null
-}
-
 function install_tool () {
   local versioned_tool_path
   local arch
@@ -18,17 +7,6 @@ function install_tool () {
   local version
   local platform
   local repo
-
-  tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   arch=${ARCHITECTURE}
   name=$TOOL_NAME
