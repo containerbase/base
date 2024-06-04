@@ -12,6 +12,10 @@ export abstract class PrepareToolBaseService {
 
   abstract execute(): Promise<void> | void;
 
+  async isPrepared(): Promise<boolean> {
+    return null !== (await this.pathSvc.findToolPath(this.name));
+  }
+
   toString(): string {
     return this.name;
   }
