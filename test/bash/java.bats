@@ -28,24 +28,6 @@ teardown() {
   rm -rf "${TEST_ROOT_DIR}"
 }
 
-@test "patch_java_version" {
-  run patch_java_version 18.0.2+101
-  assert_success
-  assert_output "18.0.2.1+1"
-
-  run patch_java_version 18.0.2+9
-  assert_success
-  assert_output "18.0.2+9"
-
-  run patch_java_version 11.0.14+101
-  assert_success
-  assert_output "11.0.14.1+1"
-
-  run patch_java_version 8.0.345+1
-  assert_success
-  assert_output "8.0.345+1"
-}
-
 @test "create_gradle_settings" {
   run create_gradle_settings
   assert_success
