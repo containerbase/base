@@ -1,3 +1,4 @@
+import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { EnvService, PathService } from '../services';
 import { NoPrepareTools } from '../tools';
@@ -75,6 +76,7 @@ export class PrepareToolService {
     } finally {
       await cleanAptFiles(dryRun);
       await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
+      await deleteAsync(['/root/.cache'], { force: true, dryRun, dot: true });
     }
   }
 }

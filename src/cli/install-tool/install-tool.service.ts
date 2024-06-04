@@ -1,3 +1,4 @@
+import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
@@ -76,8 +77,19 @@ export class InstallToolService {
       }
     } finally {
       if (this.envSvc.isRoot) {
-        logger.debug('cleaning apt files');
+        logger.debug('cleaning system caches');
         await cleanAptFiles(dryRun);
+        await deleteAsync(['/root/.cache'], { force: true, dryRun, dot: true });
+      } else {
+        logger.debug('cleaning user caches');
+        await deleteAsync(
+          [`${this.envSvc.userHome}/.cache`, `${this.pathSvc.cachePath}/**`],
+          {
+            force: true,
+            dryRun,
+            dot: true,
+          },
+        );
       }
 
       if (await isDockerBuild()) {
