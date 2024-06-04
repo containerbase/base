@@ -12,11 +12,7 @@ import {
   PathService,
 } from '../../services';
 import { logger } from '../../utils';
-import type { JavaReleases } from './schema';
-
-const baseUrl =
-  'https://github.com/joschi/java-metadata/raw/main/docs/metadata/ga/linux';
-const fileUrl = 'hotspot/temurin.json';
+import { resolveJavaDownloadUrl, resolveLatestJavaLtsVersion } from './utils';
 
 @injectable()
 export class PrepareJavaService extends PrepareToolBaseService {
@@ -40,25 +36,33 @@ export class PrepareJavaService extends PrepareToolBaseService {
       return;
     }
 
-    const url = `${baseUrl}/${this.envSvc.arch === 'amd64' ? 'x86_64' : 'aarch64'}/jre/${fileUrl}`;
+    const version = await resolveLatestJavaLtsVersion(
+      this.httpSvc,
+      'jre',
+      this.envSvc.arch,
+    );
+    if (!version) {
+      throw new Error('Could not resolve latest java version');
+    }
 
-    const releases = await this.httpSvc.getJson<JavaReleases>(url);
+    const pkg = await resolveJavaDownloadUrl(
+      this.httpSvc,
+      'jre',
+      this.envSvc.arch,
+      version,
+    );
 
-    // sadly no lts info in metadata, so using latest version
-    // also ignore alpine builds
-    const latest = releases
-      .filter((c) => !c.filename.includes('_alpine-linux_'))
-      .reduce((prev, curr) =>
-        prev && semver.compare(prev.version, curr.version) > 0 ? prev : curr,
-      );
+    if (!pkg) {
+      throw new Error(`Could not resolve download url for java ${version}`);
+    }
 
-    logger.debug(`downloading cacerts from ${latest.version}`);
+    logger.debug(`downloading cacerts from ${version}`);
 
     const jre = await this.httpSvc.download({
-      url: latest.url,
-      checksumType: 'sha512',
-      expectedChecksum: latest.sha512,
-      fileName: latest.filename,
+      url: pkg.link,
+      checksumType: 'sha256',
+      expectedChecksum: pkg.checksum,
+      fileName: pkg.name,
     });
 
     const tmp = path.join(this.pathSvc.tmpDir, 'java');
@@ -106,26 +110,26 @@ export class InstallJavaService extends InstallToolBaseService {
   }
 
   override async install(version: string): Promise<void> {
-    const arch = this.envSvc.arch === 'amd64' ? 'x86_64' : 'aarch64';
     const type = this.name === 'java-jre' ? 'jre' : 'jdk';
-    const url = `${baseUrl}/${arch}/${type}/${fileUrl}`;
 
-    const releases = await this.http.getJson<JavaReleases>(url);
+    const pkg = await resolveJavaDownloadUrl(
+      this.http,
+      type,
+      this.envSvc.arch,
+      version,
+    );
 
-    // Ignore alpine builds
-    const release = releases
-      .filter((c) => !c.filename.includes('_alpine-linux_'))
-      .find((r) => r.version === version);
-
-    if (!release) {
-      throw new Error(`Version ${version} not found`);
+    if (!pkg) {
+      throw new Error(
+        `Could not resolve download url for java ${version} and type ${type}`,
+      );
     }
 
     const file = await this.http.download({
-      url: release.url,
-      checksumType: 'sha512',
-      expectedChecksum: release.sha512,
-      fileName: release.filename,
+      url: pkg.link,
+      checksumType: 'sha256',
+      expectedChecksum: pkg.checksum,
+      fileName: pkg.name,
     });
 
     // TODO: create recursive
