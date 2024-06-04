@@ -41,8 +41,27 @@ export class PrepareJavaService extends PrepareToolBaseService {
       return;
     }
 
-    await createMavenSettings(this.envSvc.userHome, this.envSvc.userId);
-    await createGradleSettings(this.envSvc.userHome, this.envSvc.userId);
+    // https://github.com/gradle/gradle/issues/8262
+    await this.pathSvc.exportEnv(
+      {
+        GRADLE_USER_HOME: path.join(this.pathSvc.homePath, '.gradle'),
+        MAVEN_USER_HOME: path.join(this.pathSvc.homePath, '.m2'),
+      },
+      true,
+    );
+
+    await createMavenSettings(this.pathSvc.homePath, this.envSvc.userId);
+    await createGradleSettings(this.pathSvc.homePath, this.envSvc.userId);
+
+    // compatibility with gradle and maven
+    await fs.symlink(
+      path.join(this.pathSvc.homePath, '.m2'),
+      path.join(this.envSvc.userHome, '.m2'),
+    );
+    await fs.symlink(
+      path.join(this.pathSvc.homePath, '.gradle'),
+      path.join(this.envSvc.userHome, '.gradle'),
+    );
 
     const version = await resolveLatestJavaLtsVersion(
       this.httpSvc,
