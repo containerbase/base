@@ -33,6 +33,12 @@ FROM base as build
 
 RUN prepare-tool java
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 777 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 777 ]; \
+  true
+
 RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
 RUN set -ex; \
@@ -59,12 +65,6 @@ FROM build as test-gradle-a
 RUN install-tool java 11.0.23+9
 
 RUN prepare-tool gradle
-
-RUN set -ex; \
-  ls -la $USER_HOME; \
-  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
-  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
-  exit 0
 
 USER 1000
 

@@ -52,10 +52,7 @@ export class InstallGradleService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({
-      srcDir: src,
-      exports: 'GRADLE_USER_HOME=$HOME/.gradle',
-    });
+    await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {
