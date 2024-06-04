@@ -8,6 +8,11 @@ import { InstallDotnetService } from '../tools/dotnet';
 import { InstallFlutterService } from '../tools/flutter';
 import { InstallFluxService } from '../tools/flux';
 import { InstallGleamService } from '../tools/gleam';
+import {
+  InstallJavaJdkService,
+  InstallJavaJreService,
+  InstallJavaService,
+} from '../tools/java';
 import { InstallMavenService } from '../tools/java/maven';
 import { InstallNodeService } from '../tools/node';
 import {
@@ -49,6 +54,9 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJdkService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);

@@ -28,59 +28,6 @@ teardown() {
   rm -rf "${TEST_ROOT_DIR}"
 }
 
-@test "patch_java_version" {
-  run patch_java_version 18.0.2+101
-  assert_success
-  assert_output "18.0.2.1+1"
-
-  run patch_java_version 18.0.2+9
-  assert_success
-  assert_output "18.0.2+9"
-
-  run patch_java_version 11.0.14+101
-  assert_success
-  assert_output "11.0.14.1+1"
-
-  run patch_java_version 8.0.345+1
-  assert_success
-  assert_output "8.0.345+1"
-}
-
-
-@test "get_java_install_url" {
-
-  run get_java_install_url 18.0.2+9 jre
-  assert_success
-  assert_output "https://github.com/adoptium/temurin18-binaries/releases/download/jdk-18.0.2%2B9/OpenJDK18U-jre_x64_linux_hotspot_18.0.2_9.tar.gz"
-
-  run get_java_install_url 8.0.345+1 jre
-  assert_success
-  assert_output "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u345-b01/OpenJDK8U-jre_x64_linux_hotspot_8u345b01.tar.gz"
-
-  run get_java_install_url 18.0.2+101 jre
-  assert_success
-  assert_output "https://github.com/adoptium/temurin18-binaries/releases/download/jdk-18.0.2.1%2B1/OpenJDK18U-jre_x64_linux_hotspot_18.0.2.1_1.tar.gz"
-
-  run get_java_install_url 11.0.14+101 jre
-  assert_success
-  assert_output "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jre_x64_linux_hotspot_11.0.14.1_1.tar.gz"
-
-  run get_java_install_url 11.0.14+102 jre
-  assert_failure
-  assert_output "Invalid java version: 11.0.14+102"
-
-  run get_java_install_url
-  assert_failure
-  assert_output "Missing Java version"
-}
-
-
-@test "get_latest_java_version" {
-  run get_latest_java_version
-  assert_success
-  assert_output --regexp '^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+'
-}
-
 @test "create_gradle_settings" {
   run create_gradle_settings
   assert_success
