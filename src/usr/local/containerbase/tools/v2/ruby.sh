@@ -29,6 +29,7 @@ function prepare_tool() {
   chmod -R g+w "${USER_HOME}"/.gemrc
 
   export_env CP_HOME_DIR "$(get_home_path)/.cocoapods" true
+  export_env CP_CACHE_DIR "$(get_cache_path)/cocoapods" true
 
   # Workaround for compatibillity for Ruby hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
