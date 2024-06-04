@@ -1,5 +1,5 @@
-import { injectable } from 'inversify';
-import type { EnvService, HttpService } from '../services';
+import { inject, injectable } from 'inversify';
+import { HttpService } from '../services';
 
 export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 
@@ -7,10 +7,7 @@ export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 export abstract class ToolVersionResolver {
   abstract readonly tool: string;
 
-  constructor(
-    protected readonly http: HttpService,
-    protected readonly env: EnvService,
-  ) {}
+  constructor(@inject(HttpService) protected readonly http: HttpService) {}
 
   abstract resolve(version: string | undefined): Promise<string | undefined>;
 }
