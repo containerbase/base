@@ -16,16 +16,28 @@ export class PathService {
     return join(this.envSvc.rootDir, 'usr/local/bin');
   }
 
+  get cachePath(): string {
+    return join(this.installDir, 'cache');
+  }
+
   get envFile(): string {
     return join(this.envSvc.rootDir, 'usr/local/etc/env');
   }
 
-  get tmpDir(): string {
-    return join(this.envSvc.rootDir, 'tmp');
+  get homePath(): string {
+    return join(this.installDir, 'home');
   }
 
   get installDir(): string {
     return join(this.envSvc.rootDir, 'opt/containerbase');
+  }
+
+  get sslPath(): string {
+    return join(this.installDir, 'ssl');
+  }
+
+  get tmpDir(): string {
+    return join(this.envSvc.rootDir, 'tmp');
   }
 
   get toolsPath(): string {
@@ -34,14 +46,6 @@ export class PathService {
 
   get versionPath(): string {
     return join(this.installDir, 'versions');
-  }
-
-  get homePath(): string {
-    return join(this.installDir, 'home');
-  }
-
-  get cachePath(): string {
-    return join(this.installDir, 'cache');
   }
 
   constructor(@inject(EnvService) private envSvc: EnvService) {}
