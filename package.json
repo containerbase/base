@@ -54,7 +54,8 @@
     "semver": "7.6.2",
     "simple-git": "3.24.0",
     "tar": "7.1.0",
-    "typanion": "3.14.0"
+    "typanion": "3.14.0",
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@semantic-release/exec": "6.0.3",
