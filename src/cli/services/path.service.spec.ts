@@ -37,15 +37,15 @@ describe('path.service', () => {
     );
   });
 
-  test('toolsPath', () => {
-    expect(child.get(PathService).toolsPath).toBe(
-      rootPath('opt/containerbase/tools'),
-    );
-  });
-
   test('sslPath', () => {
     expect(child.get(PathService).sslPath).toBe(
       rootPath('opt/containerbase/ssl'),
+    );
+  });
+
+  test('toolsPath', () => {
+    expect(child.get(PathService).toolsPath).toBe(
+      rootPath('opt/containerbase/tools'),
     );
   });
 

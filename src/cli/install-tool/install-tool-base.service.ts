@@ -32,6 +32,10 @@ export abstract class InstallToolBaseService {
     return null !== (await this.pathSvc.findToolPath(this.name));
   }
 
+  async isPrepared(): Promise<boolean> {
+    return null !== (await this.pathSvc.findToolPath(this.name));
+  }
+
   abstract link(version: string): Promise<void>;
 
   needsPrepare(): boolean {
