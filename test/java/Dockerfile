@@ -186,6 +186,8 @@ RUN install-tool scala v2.13.14
 # renovate: datasource=github-releases packageName=sbt/sbt
 RUN install-tool sbt v1.10.0
 
+RUN install-tool gradle 8.8-rc-2
+
 # doesn't work for arbitrary users
 USER 1000
 
@@ -202,6 +204,7 @@ RUN set -ex; \
 FROM base as test-latest-version
 
 RUN install-tool java-jre
+RUN install-tool gradle
 
 
 #--------------------------------------

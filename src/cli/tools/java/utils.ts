@@ -1,5 +1,9 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { codeBlock } from 'common-tags';
+import { execa } from 'execa';
 import type { HttpService } from '../../services';
-import type { Arch } from '../../utils';
+import { type Arch, fileExists, logger } from '../../utils';
 import {
   type AdoptiumPackage,
   AdoptiumReleaseVersions,
@@ -41,4 +45,64 @@ export async function resolveJavaDownloadUrl(
   );
 
   return res?.[0]?.binaries?.[0]?.package;
+}
+
+export async function createMavenSettings(
+  home: string,
+  userId: number,
+): Promise<void> {
+  const dir = path.join(home, '.m2');
+  const file = path.join(dir, 'settings.xml');
+  if (await fileExists(file)) {
+    logger.debug('Maven settings already found');
+    return;
+  }
+  logger.debug('Creating Maven settings');
+
+  await fs.mkdir(dir);
+
+  await fs.writeFile(
+    file,
+    codeBlock`
+      <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                            http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+      </settings>
+    `,
+  );
+
+  // fs isn't recursive, so we use system binaries
+  await execa('chown', ['-R', `${userId}`, dir]);
+  await execa('chmod', ['-R', 'g+w', dir]);
+}
+
+export async function createGradleSettings(
+  home: string,
+  userId: number,
+): Promise<void> {
+  const dir = path.join(home, '.gradle');
+  const file = path.join(dir, 'gradle.properties');
+  if (await fileExists(file)) {
+    logger.debug('Gradle settings already found');
+    return;
+  }
+  logger.debug('Creating Gradle settings');
+
+  await fs.mkdir(dir);
+
+  await fs.writeFile(
+    file,
+    codeBlock`
+      org.gradle.parallel=true
+      org.gradle.configureondemand=true
+      org.gradle.daemon=false
+      org.gradle.caching=false
+    `,
+  );
+
+  // fs isn't recursive, so we use system binaries
+  await execa('chown', ['-R', `${userId}`, dir]);
+  await execa('chmod', ['-R', 'g+w', dir]);
 }

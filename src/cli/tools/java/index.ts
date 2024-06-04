@@ -12,7 +12,12 @@ import {
   PathService,
 } from '../../services';
 import { logger } from '../../utils';
-import { resolveJavaDownloadUrl, resolveLatestJavaLtsVersion } from './utils';
+import {
+  createGradleSettings,
+  createMavenSettings,
+  resolveJavaDownloadUrl,
+  resolveLatestJavaLtsVersion,
+} from './utils';
 
 @injectable()
 export class PrepareJavaService extends PrepareToolBaseService {
@@ -35,6 +40,9 @@ export class PrepareJavaService extends PrepareToolBaseService {
       // cert store already there
       return;
     }
+
+    await createMavenSettings(this.envSvc.userHome, this.envSvc.userId);
+    await createGradleSettings(this.envSvc.userHome, this.envSvc.userId);
 
     const version = await resolveLatestJavaLtsVersion(
       this.httpSvc,

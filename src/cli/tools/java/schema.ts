@@ -30,3 +30,7 @@ const AdoptiumRelease = z.object({
 });
 
 export const AdoptiumReleases = z.array(AdoptiumRelease);
+
+export const GradleVersionData = z.object({
+  version: z.string(),
+});

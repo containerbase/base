@@ -9,6 +9,7 @@ export const NoPrepareTools = [
   'corepack',
   'flux',
   'gleam',
+  'gradle',
   'lerna',
   'maven',
   'node',

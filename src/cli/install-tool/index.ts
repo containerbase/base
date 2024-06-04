@@ -13,6 +13,10 @@ import {
   InstallJavaJreService,
   InstallJavaService,
 } from '../tools/java';
+import {
+  GradleVersionResolver,
+  InstallGradleService,
+} from '../tools/java/gradle';
 import { InstallMavenService } from '../tools/java/maven';
 import {
   JavaJdkVersionResolver,
@@ -60,6 +64,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallGradleService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJdkService);
@@ -82,10 +87,11 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
-  container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
 
   logger.trace('preparing container done');
