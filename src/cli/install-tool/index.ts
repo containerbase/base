@@ -28,6 +28,7 @@ import {
 import {
   NodeVersionResolver,
   NpmVersionResolver,
+  YarnVersionResolver,
 } from '../tools/node/resolver';
 import { InstallNpmBaseService } from '../tools/node/utils';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
@@ -85,6 +86,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
 
   logger.trace('preparing container done');
   return container;
