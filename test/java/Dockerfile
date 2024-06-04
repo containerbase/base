@@ -195,6 +195,15 @@ RUN set -ex; \
   ls -la; env; \
   sbt compile
 
+
+#--------------------------------------
+# test: Resolve latest versions
+#--------------------------------------
+FROM base as test-latest-version
+
+RUN install-tool java-jre
+
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -206,3 +215,4 @@ COPY --from=test-gradle-c /.dummy /.dummy
 COPY --from=test-gradle-d /.dummy /.dummy
 COPY --from=test-maven-a /.dummy /.dummy
 COPY --from=test-others /.dummy /.dummy
+COPY --from=test-latest-version /.dummy /.dummy

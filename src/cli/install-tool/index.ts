@@ -14,6 +14,11 @@ import {
   InstallJavaService,
 } from '../tools/java';
 import { InstallMavenService } from '../tools/java/maven';
+import {
+  JavaJdkVersionResolver,
+  JavaJreVersionResolver,
+  JavaVersionResolver,
+} from '../tools/java/resolver';
 import { InstallNodeService } from '../tools/node';
 import {
   InstallRenovateService,
@@ -77,6 +82,9 @@ function prepareResolveContainer(): Container {
 
   // tool version resolver
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
 
   logger.trace('preparing container done');
   return container;
