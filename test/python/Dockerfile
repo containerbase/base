@@ -246,7 +246,7 @@ FROM build as test-pdm
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.15.3
+RUN install-tool pdm 2.15.4
 
 #--------------------------------------
 # test conan
@@ -258,7 +258,7 @@ RUN prepare-tool conan
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.3.2
+RUN install-tool conan 2.4.0
 
 RUN set -ex; \
     cd b-conan; \
