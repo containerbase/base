@@ -41,15 +41,20 @@ function install_tool () {
   gunzip -c "${file}" > "${TEMP_DIR}/rye"
   chmod +x "${TEMP_DIR}/rye"
 
-  export_env RYE_HOME "${versioned_tool_path}"
-  export_path "\$RYE_HOME/shims"
-
+  export RYE_HOME="${versioned_tool_path}"
   "${TEMP_DIR}/rye" self install --yes
 }
 
 function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
+
+  reset_tool_env
+  {
+    printf -- "if [ -z \"\$RYE_HOME\" ]; then\n"
+    printf -- "  export RYE_HOME=\"%s\"\n" "${versioned_tool_path}"
+    printf -- "fi\n"
+  } >> "$(find_tool_env)"
 
   shell_wrapper "rye" "${versioned_tool_path}/shims"
   [[ -n $SKIP_VERSION ]] || rye --version
