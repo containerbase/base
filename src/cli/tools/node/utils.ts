@@ -1,7 +1,7 @@
 import fs, { appendFile, chmod, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
@@ -32,7 +32,10 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       env.npm_config_cache = tmp;
     }
 
-    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    const registry = this.envSvc.replaceUrl(
+      defaultRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_NPM),
+    );
     if (registry !== defaultRegistry) {
       env.npm_config_registry = registry;
     }
@@ -171,7 +174,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       return;
     }
 
-    if (is.string(pkg.bin)) {
+    if (isString(pkg.bin)) {
       await this.shellwrapper({
         srcDir: src,
         name: pkg.name ?? this.tool(version),

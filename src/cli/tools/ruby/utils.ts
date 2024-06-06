@@ -1,5 +1,6 @@
 import { chmod, mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
@@ -22,7 +23,10 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     const env: NodeJS.ProcessEnv = {};
     const args: string[] = [];
 
-    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    const registry = this.envSvc.replaceUrl(
+      defaultRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_GEM),
+    );
     if (registry !== defaultRegistry) {
       args.push('--clear-sources', '--source', registry);
     }
