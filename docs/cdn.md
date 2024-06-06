@@ -21,7 +21,7 @@ The package managers `gem`, `npm`, `pip` need to be configured to use the CDN ex
 
 ## Sample
 
-With the folling sample the `java` tool will be installed from the CDN.
+With the following sample the `java` tool will be installed from the CDN.
 
 ```bash
 export CONTAINERBASE_CDN=https://cdn.example.test
