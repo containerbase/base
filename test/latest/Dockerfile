@@ -143,7 +143,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.4
+RUN install-tool terraform 1.8.5
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -157,7 +157,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.1
+RUN install-tool git v2.45.2
 
 USER 1000
 
@@ -178,7 +178,7 @@ RUN install-tool powershell v7.4.2
 RUN install-tool node v20.14.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.3
+RUN install-tool docker v26.1.4
 
 #--------------------------------------
 # test: bin path has 775

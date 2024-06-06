@@ -75,9 +75,6 @@ function install_python_tool() {
 
     unset PIP_VERBOSE
 
-    # remove virtualenv app-data
-    rm -rf ~/.local/share/virtualenv
-
     # store in cache
     cache_folder "${tool_path}" "${TOOL_NAME}/${TOOL_VERSION}/${python_version}"
   fi

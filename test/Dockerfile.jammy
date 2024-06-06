@@ -15,7 +15,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.1
+RUN install-tool git v2.45.2
 
 #--------------------------------------
 # Image: build
@@ -43,7 +43,7 @@ RUN install-tool bun 1.1.12
 RUN install-tool dart 2.19.6
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.3
+RUN install-tool docker v26.1.4
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.301
@@ -61,7 +61,7 @@ RUN install-tool git-lfs v3.5.1
 RUN install-tool gleam 1.2.1
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.3
+RUN install-tool golang 1.22.4
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.15.1
@@ -88,7 +88,7 @@ RUN install-tool rye 0.34.0
 RUN install-tool swift 5.10.0
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.4
+RUN install-tool terraform 1.8.5
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1

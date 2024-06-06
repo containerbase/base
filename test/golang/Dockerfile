@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # TODO: move to prepare
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.1
+RUN install-tool git v2.45.2
 
 COPY --chown=1000:0 test/golang/test test
 WORKDIR /test
@@ -32,7 +32,7 @@ WORKDIR /test
 FROM base as testa
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.3
+RUN install-tool golang 1.22.4
 
 USER 1000
 
@@ -80,7 +80,7 @@ RUN prepare-tool golang
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.3
+RUN install-tool golang 1.22.4
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum

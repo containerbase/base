@@ -76,7 +76,11 @@ export class PrepareToolService {
     } finally {
       await cleanAptFiles(dryRun);
       await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
-      await deleteAsync(['/root/.cache'], { force: true, dryRun, dot: true });
+      await deleteAsync(['/root/.cache', '/root/.local/share/virtualenv'], {
+        force: true,
+        dryRun,
+        dot: true,
+      });
     }
   }
 }

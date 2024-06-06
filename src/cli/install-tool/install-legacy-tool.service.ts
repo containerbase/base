@@ -1,3 +1,4 @@
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { EnvService } from '../services';
@@ -13,7 +14,10 @@ export class InstallLegacyToolService {
     logger.debug(`Installing legacy tool ${tool} v${version} ...`);
     const env: NodeJS.ProcessEnv = {};
 
-    const pipIndex = this.envSvc.replaceUrl(defaultPipRegistry);
+    const pipIndex = this.envSvc.replaceUrl(
+      defaultPipRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_PIP),
+    );
     if (pipIndex !== defaultPipRegistry) {
       env.PIP_INDEX_URL = pipIndex;
     }

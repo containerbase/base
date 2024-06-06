@@ -77,24 +77,36 @@ export class InstallToolService {
       }
     } finally {
       if (this.envSvc.isRoot) {
-        logger.debug('cleaning system caches');
+        logger.debug('cleaning apt caches');
         await cleanAptFiles(dryRun);
-        await deleteAsync(['/root/.cache'], { force: true, dryRun, dot: true });
-      } else {
-        logger.debug('cleaning user caches');
-        await deleteAsync(
-          [`${this.envSvc.userHome}/.cache`, `${this.pathSvc.cachePath}/**`],
-          {
-            force: true,
-            dryRun,
-            dot: true,
-          },
-        );
       }
 
       if (await isDockerBuild()) {
         logger.debug('cleaning tmp files');
         await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
+
+        if (this.envSvc.isRoot) {
+          logger.debug('cleaning root caches');
+          await deleteAsync(['/root/.cache', '/root/.local/share/virtualenv'], {
+            force: true,
+            dryRun,
+            dot: true,
+          });
+        } else {
+          logger.debug('cleaning user caches');
+          await deleteAsync(
+            [
+              `${this.envSvc.userHome}/.cache`,
+              `${this.envSvc.userHome}/.local/share/virtualenv`,
+              `${this.pathSvc.cachePath}/**`,
+            ],
+            {
+              force: true,
+              dryRun,
+              dot: true,
+            },
+          );
+        }
       }
     }
   }

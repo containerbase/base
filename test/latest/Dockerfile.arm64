@@ -50,7 +50,7 @@ RUN install-tool gleam 1.2.1
 FROM base as test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.3
+RUN install-tool docker v26.1.4
 
 #--------------------------------------
 # Image: git
@@ -58,7 +58,7 @@ RUN install-tool docker v26.1.3
 FROM base as test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.1
+RUN install-tool git v2.45.2
 
 #--------------------------------------
 # Image: git-lfs
@@ -90,7 +90,7 @@ RUN install-tool kustomize 5.4.2
 FROM base as test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.4
+RUN install-tool terraform 1.8.5
 
 #--------------------------------------
 # Image: vendir

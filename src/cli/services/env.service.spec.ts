@@ -116,5 +116,8 @@ describe('env.service', () => {
     expect(e.replaceUrl('https://registry.npmjs.org')).toBe(
       'https://npm.example.test',
     );
+    expect(e.replaceUrl('https://registry.npmjs.org', false)).toBe(
+      'https://registry.npmjs.org',
+    );
   });
 });
