@@ -115,10 +115,16 @@ export class EnvService {
     return this.ignoredTools.has(tool.toUpperCase());
   }
 
-  public replaceUrl(src: string): string {
+  /**
+   * Replace the source url with the optional cdn and replacement urls
+   * @param src the source url
+   * @param cdn should the cdn url be used
+   * @returns the replaced url
+   */
+  public replaceUrl(src: string, cdn = true): string {
     let tgt = src;
 
-    if (env.CONTAINERBASE_CDN) {
+    if (env.CONTAINERBASE_CDN && cdn) {
       tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
     }
 
