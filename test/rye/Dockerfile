@@ -49,9 +49,12 @@ RUN rye run python --version
 #--------------------------------------
 # test a2: non-root
 #--------------------------------------
-FROM build as test-a2
+FROM base as test-a2
 
 USER 1000
+
+# renovate: datasource=github-releases packageName=astral-sh/rye
+RUN install-tool rye 0.34.0
 
 RUN set -ex; \
   cd a; \
