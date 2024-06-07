@@ -25,7 +25,7 @@ RUN install-containerbase
 FROM base as test-rye
 
 # renovate: datasource=github-releases packageName=astral-sh/rye
-RUN install-tool rye 0.34.0.0
+RUN install-tool rye 0.34.0
 
 #--------------------------------------
 # Image: final
