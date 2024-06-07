@@ -32,7 +32,7 @@ FROM base as build
 RUN install-tool git v2.45.2
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.10.0
+RUN install-tool swift 5.10.1
 
 #--------------------------------------
 # testa: swift latest
