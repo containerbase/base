@@ -211,7 +211,7 @@ RUN set -ex \
 
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.124
+RUN install-tool checkov 3.2.130
 
 # test old checkov with old python
 RUN install-tool python 3.7.17
