@@ -192,8 +192,8 @@ importers:
         specifier: 4.15.1
         version: 4.15.1
       type-fest:
-        specifier: 4.19.0
-        version: 4.19.0
+        specifier: 4.20.0
+        version: 4.20.0
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -3267,8 +3267,8 @@ packages:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
     engines: {node: '>=12.20'}
 
-  type-fest@4.19.0:
-    resolution: {integrity: sha512-CN2l+hWACRiejlnr68vY0/7734Kzu+9+TOslUXbSCQ1ruY9XIHDBSceVXCcHm/oXrdzhtLMMdJEKfemf1yXiZQ==}
+  type-fest@4.20.0:
+    resolution: {integrity: sha512-MBh+PHUHHisjXf4tlx0CFWoMdjx8zCMLJHOjnV1prABYZFHqtFOyauCIK2/7w4oIfwkF8iNhLtnJEfVY2vn3iw==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.2:
@@ -5295,7 +5295,7 @@ snapshots:
       lowercase-keys: 3.0.0
       p-cancelable: 4.0.1
       responselike: 3.0.0
-      type-fest: 4.19.0
+      type-fest: 4.20.0
 
   graceful-fs@4.2.10: {}
 
@@ -5973,7 +5973,7 @@ snapshots:
     dependencies:
       '@babel/code-frame': 7.24.7
       index-to-position: 0.1.2
-      type-fest: 4.19.0
+      type-fest: 4.20.0
 
   parse-ms@4.0.0: {}
 
@@ -6149,20 +6149,20 @@ snapshots:
     dependencies:
       find-up-simple: 1.0.0
       read-pkg: 9.0.1
-      type-fest: 4.19.0
+      type-fest: 4.20.0
 
   read-pkg-up@11.0.0:
     dependencies:
       find-up-simple: 1.0.0
       read-pkg: 9.0.1
-      type-fest: 4.19.0
+      type-fest: 4.20.0
 
   read-pkg@9.0.1:
     dependencies:
       '@types/normalize-package-data': 2.4.4
       normalize-package-data: 6.0.1
       parse-json: 8.1.0
-      type-fest: 4.19.0
+      type-fest: 4.20.0
       unicorn-magic: 0.1.0
 
   readable-stream@2.3.8:
@@ -6720,7 +6720,7 @@ snapshots:
 
   type-fest@2.19.0: {}
 
-  type-fest@4.19.0: {}
+  type-fest@4.20.0: {}
 
   typed-array-buffer@1.0.2:
     dependencies:
