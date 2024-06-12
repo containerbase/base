@@ -14,7 +14,7 @@ function install_tool () {
     base_file=elixir-otp-23.zip
   elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -ge 17 ]; then
     base_file=elixir-otp-27.zip
-  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -ge 16 ]; then
+  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -ge 15 ]; then
     base_file=elixir-otp-26.zip
   fi
 
