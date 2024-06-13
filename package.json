@@ -76,7 +76,7 @@
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "7.0.2",
     "esbuild": "0.21.5",
-    "esbuild-plugin-pino": "2.1.1",
+    "esbuild-plugin-pino": "2.2.0",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-formatter-gha": "1.5.0",

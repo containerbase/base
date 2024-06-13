@@ -132,8 +132,8 @@ importers:
         specifier: 0.21.5
         version: 0.21.5
       esbuild-plugin-pino:
-        specifier: 2.1.1
-        version: 2.1.1(patch_hash=ql5tvcjzmgrmlnnrpkanu5vzjy)(esbuild@0.21.5)
+        specifier: 2.2.0
+        version: 2.2.0(esbuild@0.21.5)
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -1368,8 +1368,8 @@ packages:
   es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
 
-  esbuild-plugin-pino@2.1.1:
-    resolution: {integrity: sha512-NdcTruRCq7tCv/vQENeGRmV0mK/54tvKWT5J2+tDaAdSX7TVUiykEbtZ0xDZA1rJfyzd5rx1G8TqwXv1zBlK5w==}
+  esbuild-plugin-pino@2.2.0:
+    resolution: {integrity: sha512-6T92eXmkHwad/PGeXb/DyJhwxsVUsASQyEP84QTPBuzhDp1eGRXr9CK2y/VCKiEbO2TX2v4zZ6M40W46eZZPQg==}
     peerDependencies:
       esbuild: 0.21.5
 
@@ -4777,7 +4777,7 @@ snapshots:
 
   es6-error@4.1.1: {}
 
-  esbuild-plugin-pino@2.1.1(patch_hash=ql5tvcjzmgrmlnnrpkanu5vzjy)(esbuild@0.21.5):
+  esbuild-plugin-pino@2.2.0(esbuild@0.21.5):
     dependencies:
       esbuild: 0.21.5
 
