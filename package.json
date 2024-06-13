@@ -52,7 +52,7 @@
     "pretty-ms": "9.0.0",
     "reflect-metadata": "0.2.2",
     "semver": "7.6.2",
-    "simple-git": "3.24.0",
+    "simple-git": "3.25.0",
     "typanion": "3.14.0",
     "zod": "3.23.8"
   },
