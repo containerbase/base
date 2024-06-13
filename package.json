@@ -69,7 +69,7 @@
     "@typescript-eslint/parser": "7.12.0",
     "@vitest/coverage-v8": "1.6.0",
     "@vitest/ui": "1.6.0",
-    "@yao-pkg/pkg": "5.11.5",
+    "@yao-pkg/pkg": "5.12.0",
     "bats": "1.11.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
@@ -120,7 +120,7 @@
       ]
     },
     "patchedDependencies": {
-      "@yao-pkg/pkg@5.11.5": "patches/@yao-pkg__pkg@5.11.1.patch",
+      "@yao-pkg/pkg@5.12.0": "patches/@yao-pkg__pkg@5.11.1.patch",
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
       "esbuild-plugin-pino@2.1.1": "patches/esbuild-plugin-pino@2.1.1.patch"
     }
