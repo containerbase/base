@@ -8,12 +8,14 @@ function install_tool () {
 
   check_command erl
 
-
   # https://github.com/elixir-lang/elixir/releases/tag/v1.14.0
-  if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -eq 14 ]; then
-    base_file=elixir-otp-23.zip
-  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -gt 14 ]; then
+  # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+  if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -ge 17 ]; then
+    base_file=elixir-otp-25.zip
+  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -ge 15 ]; then
     base_file=elixir-otp-24.zip
+  elif [ "$MAJOR" -eq 1 ] && [ "$MINOR" -eq 14 ]; then
+    base_file=elixir-otp-23.zip
   fi
 
   file=$(get_from_url "${base_url}/v${TOOL_VERSION}/${base_file}")
