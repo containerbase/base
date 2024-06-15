@@ -52,7 +52,11 @@ function link_tool () {
   reset_tool_env
   {
     printf -- "if [ -z \"\$RYE_HOME\" ]; then\n"
+    printf -- "if [ \"\${EUID}\" != 0 ]; then\n"
+    printf -- "  export RYE_HOME=\"%s/.rye\"\n" "${USER_HOME}"
+    printf -- "else\n"
     printf -- "  export RYE_HOME=\"%s\"\n" "${versioned_tool_path}"
+    printf -- "fi\n"
     printf -- "fi\n"
   } >> "$(find_tool_env)"
 
