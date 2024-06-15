@@ -30,7 +30,12 @@ function install_tool () {
   chmod +x "${TEMP_DIR}/rye"
 
   export RYE_HOME="${versioned_tool_path}"
-  "${TEMP_DIR}/rye" self install --yes
+  "${TEMP_DIR}/rye" self install --yes --no-modify-path
+
+  # Fetch every conceivable toolchain
+  for toolchain in $(rye toolchain list --include-downloadable |grep downloadable | cut -d ' ' -f 1); do
+    rye toolchain fetch "${toolchain}"
+  done
 }
 
 function link_tool () {
