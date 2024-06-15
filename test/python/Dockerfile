@@ -39,7 +39,7 @@ FROM base as build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.3
+RUN install-tool python 3.12.4
 
 #--------------------------------------
 # build-rootless
@@ -51,7 +51,7 @@ RUN prepare-tool python
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.3
+RUN install-tool python 3.12.4
 
 #--------------------------------------
 # build: pipenv
@@ -59,7 +59,7 @@ RUN install-tool python 3.12.3
 FROM build as pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.0.1
 
 USER 1000
 
@@ -100,7 +100,7 @@ FROM build as test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.3
+RUN install-tool python 3.12.4
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
@@ -185,7 +185,7 @@ RUN set -ex; \
 FROM build-rootless as testb
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.0.1
 
 RUN set -ex; \
   cd a; \
@@ -211,7 +211,7 @@ RUN set -ex \
 
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.124
+RUN install-tool checkov 3.2.130
 
 # test old checkov with old python
 RUN install-tool python 3.7.17
@@ -229,10 +229,10 @@ RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.3
+RUN install-tool python 3.12.4
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.0.1
 
 RUN set -ex; \
   cd h-pipenv; \
@@ -258,7 +258,7 @@ RUN prepare-tool conan
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.4.0
+RUN install-tool conan 2.4.1
 
 RUN set -ex; \
     cd b-conan; \

@@ -26,7 +26,7 @@ RUN install-containerbase
 FROM base as test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.3
+RUN install-tool python 3.12.4
 
 #--------------------------------------
 # Image: checkov
@@ -34,7 +34,7 @@ RUN install-tool python 3.12.3
 FROM test-python as test-checkov
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.124
+RUN install-tool checkov 3.2.130
 
 #--------------------------------------
 # Image: hashin
@@ -50,7 +50,7 @@ RUN install-tool hashin 1.0.1
 FROM test-python as test-pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.0.1
 
 #--------------------------------------
 # Image: poetry
@@ -66,7 +66,7 @@ RUN install-tool poetry 1.8.3
 FROM test-python as test-conan
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.4.0
+RUN install-tool conan 2.4.1
 
 #--------------------------------------
 # Image: final
