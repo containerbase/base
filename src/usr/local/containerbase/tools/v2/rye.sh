@@ -5,26 +5,14 @@ function install_tool () {
   local arch
   local name
   local version
-  local platform
   local repo
 
   arch=${ARCHITECTURE}
   name=$TOOL_NAME
   version=$TOOL_VERSION
-  platform=$(uname -s)
   repo="astral-sh/$name"
 
-  if [[ $platform == "Linux" ]]; then
-    platform="linux"
-  fi
-
-  if [[ $arch == armv8* ]] || [[ $arch == arm64* ]] || [[ $arch == aarch64* ]]; then
-    arch="aarch64"
-  elif [[ $arch == i686* ]]; then
-    arch="x86"
-  fi
-
-  binary="${name}-${arch}-${platform}"
+  binary="${name}-${arch}-linux"
   file_name="${binary}.gz"
   base_url="https://github.com/${repo}/releases/download/${version}"
   file_url="${base_url}/${file_name}"
