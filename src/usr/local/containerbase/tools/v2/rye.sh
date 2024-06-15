@@ -26,7 +26,7 @@ function install_tool () {
   versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
 
-  gunzip -c "${file}" > "${TEMP_DIR}/rye"
+  bsdtar -x -f "${file}" -C "${TEMP_DIR}/rye"
   chmod +x "${TEMP_DIR}/rye"
 
   export RYE_HOME="${versioned_tool_path}"
