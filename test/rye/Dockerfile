@@ -38,11 +38,14 @@ USER 1000
 #--------------------------------------
 FROM build as test-a1
 
+RUN export python --version
+
 RUN set -ex; \
     cd a; \
     rye sync;
 
 SHELL [ "/bin/sh", "-c" ]
+
 RUN rye --version
 RUN rye run python --version
 
