@@ -176,6 +176,9 @@ RUN set -ex; \
 RUN php --version
 RUN composer --version
 
+# test from getcomposer.org
+RUN install-tool composer 2.0.0
+
 #--------------------------------------
 # final
 #--------------------------------------

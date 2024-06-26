@@ -6,6 +6,7 @@ export const NoPrepareTools = [
   'bun',
   'bundler',
   'cocoapods',
+  'composer',
   'corepack',
   'flux',
   'gleam',

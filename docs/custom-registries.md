@@ -424,15 +424,16 @@ https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86
 
 Composer releases are downloaded from:
 
+- `https://github.com/containerbase/maven-prebuild/releases`
 - `https://getcomposer.org/download`
-- `https://api.github.com/repos/composer/composer/releases/latest`
 
-The second url is only used when `latest` is passed as version.
-Then we try to find the latest version from GitHub.
+The first url is preferred and the second is used as fallback for older versions.
 
 Samples:
 
 ```txt
+https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz.sha512
+https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz
 https://getcomposer.org/download/2.6.6/composer.phar.sha256sum
 https://getcomposer.org/download/2.6.6/composer.phar
 ```

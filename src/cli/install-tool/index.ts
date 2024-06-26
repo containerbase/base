@@ -35,6 +35,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver';
 import { InstallNpmBaseService } from '../tools/node/utils';
+import { InstallComposerService } from '../tools/php/composer';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
@@ -57,13 +58,14 @@ function prepareInstallContainer(): Container {
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallComposerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallGradleService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
