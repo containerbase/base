@@ -35,6 +35,10 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver';
 import { InstallNpmBaseService } from '../tools/node/utils';
+import {
+  ComposerInstallService,
+  ComposerVersionResolver,
+} from '../tools/php/composer';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
@@ -55,15 +59,16 @@ function prepareInstallContainer(): Container {
   container.bind(InstallLegacyToolService).toSelf();
 
   // tool services
+  container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
+  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallGradleService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
@@ -87,6 +92,7 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
+  container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
