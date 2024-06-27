@@ -426,8 +426,11 @@ Composer releases are downloaded from:
 
 - `https://github.com/containerbase/maven-prebuild/releases`
 - `https://getcomposer.org/download`
+- `https://getcomposer.org/versions`
 
 The first url is preferred and the second is used as fallback for older versions.
+The last url is only used when `latest` or nothing is passed as version.
+Then we try to find the latest version from getcomposer.org.
 
 Samples:
 
@@ -436,6 +439,7 @@ https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7
 https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz
 https://getcomposer.org/download/2.6.6/composer.phar.sha256sum
 https://getcomposer.org/download/2.6.6/composer.phar
+https://getcomposer.org/versions
 ```
 
 ## `powershell`
