@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import { sort } from 'semver';
+import { z } from 'zod';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
   EnvService,
@@ -13,7 +17,7 @@ import type { HttpChecksumType } from '../../services/http.service';
 import { logger } from '../../utils';
 
 @injectable()
-export class InstallComposerService extends InstallToolBaseService {
+export class ComposerInstallService extends InstallToolBaseService {
   readonly name = 'composer';
 
   constructor(
@@ -105,3 +109,27 @@ export class InstallComposerService extends InstallToolBaseService {
     return (await fs.readFile(checksumFile, 'utf-8')).split(' ')[0]?.trim();
   }
 }
+
+@injectable()
+export class ComposerVersionResolver extends ToolVersionResolver {
+  readonly tool = 'composer';
+
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      const meta = ComposerVersionsSchema.parse(
+        await this.http.getJson('https://getcomposer.org/versions'),
+      );
+      // we know that the latest version is the first entry, so search for first lts
+      return meta;
+    }
+    return version;
+  }
+}
+
+const ComposerVersionsSchema = z
+  .object({
+    stable: z.array(z.object({ version: z.string() })),
+  })
+  .transform(({ stable }) => {
+    return sort(stable.map((v) => v.version)).pop();
+  });

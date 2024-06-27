@@ -114,8 +114,8 @@ RUN install-tool php 8.3.7
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
 
-# TODO: add verison resolver
-#RUN install-tool composer latest
+# test with latest version
+RUN install-tool composer latest
 
 USER 1000
 
@@ -153,8 +153,8 @@ USER 1000
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.3.7
 
-# TODO: add verison resolver
-#RUN install-tool composer latest
+# test without version
+RUN install-tool composer
 
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
