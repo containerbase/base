@@ -131,7 +131,7 @@ RUN install-tool yarn 4.3.1
 FROM build as test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.7
+RUN install-tool php 8.3.8
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
 
