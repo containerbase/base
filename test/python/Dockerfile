@@ -246,7 +246,7 @@ FROM build as test-pdm
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.15.4
+RUN install-tool pdm 2.16.1
 
 #--------------------------------------
 # test conan
