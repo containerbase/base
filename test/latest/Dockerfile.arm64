@@ -98,7 +98,7 @@ RUN install-tool terraform 1.8.5
 FROM base as test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.40.1
+RUN install-tool vendir v0.40.2
 
 #--------------------------------------
 # Image: final
