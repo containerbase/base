@@ -94,7 +94,7 @@ RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.2.2
+RUN install-tool yarn 4.3.1
 
 #--------------------------------------
 # test: pnpm
