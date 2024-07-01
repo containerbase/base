@@ -180,7 +180,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     }
 
     for (const name of Object.keys(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name });
+      await this.shellwrapper({ srcDir: src, name, extraToolEnvs: ['node'] });
     }
   }
 

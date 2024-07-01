@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
+import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import {
@@ -141,26 +142,28 @@ export class InstallNodeService extends InstallNodeBaseService {
         force: true,
       });
     }
+
+    if (!(await this.pathSvc.toolEnvExists(this.name))) {
+      await this.pathSvc.exportToolEnv(this.name, {
+        NO_UPDATE_NOTIFIER: '1',
+        npm_config_update_notifier: 'false',
+        npm_config_fund: 'false',
+      });
+
+      await this.pathSvc.exportToolEnvContent(
+        this.name,
+        codeBlock`
+          # openshift override unknown user home
+          if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${this.envSvc.userId} ]; then
+            export npm_config_prefix="${this.envSvc.userHome}/.npm-global"
+          fi
+          `,
+      );
+    }
   }
 
   override async link(version: string): Promise<void> {
-    await this.pathSvc.resetToolEnv(this.name);
     await this.postInstall(version);
-
-    await this.pathSvc.exportToolEnv(this.name, {
-      NO_UPDATE_NOTIFIER: '1',
-      npm_config_update_notifier: 'false',
-      npm_config_fund: 'false',
-    });
-
-    await this.pathSvc.exportToolEnvContent(
-      this.name,
-      `# openshift override unknown user home
-if [ "\${EUID}" != 0 ] && [ "\${EUID}" != ${this.envSvc.userId} ]; then
-  export npm_config_prefix="${this.envSvc.userHome}/.npm-global"
-fi
-`,
-    );
   }
 
   override async postInstall(version: string): Promise<void> {

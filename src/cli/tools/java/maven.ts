@@ -92,7 +92,11 @@ export class InstallMavenService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src, name: 'mvn' });
+    await this.shellwrapper({
+      srcDir: src,
+      name: 'mvn',
+      extraToolEnvs: ['java'],
+    });
   }
 
   override async test(_version: string): Promise<void> {

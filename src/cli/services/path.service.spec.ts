@@ -61,19 +61,24 @@ describe('path.service', () => {
     expect(await child.get(PathService).resetToolEnv('node')).toBeUndefined();
   });
 
+  test('toolEnvExists', async () => {
+    expect(await child.get(PathService).toolEnvExists('node')).toBe(false);
+  });
+
   test('exportToolEnvContent', async () => {
     const pathSvc = child.get(PathService);
 
-    await mkdir(`${pathSvc.installDir}/env.d`, { recursive: true });
+    await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
+
     await pathSvc.exportToolEnvContent(
       'node',
       'export NODE_VERSION=v14.17.0\n',
     );
-    const s = await stat(`${pathSvc.installDir}/env.d/node.sh`);
-    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o664);
-    expect(await readFile(`${pathSvc.installDir}/env.d/node.sh`, 'utf8')).toBe(
-      '\nexport NODE_VERSION=v14.17.0\n',
-    );
+    const s = await stat(`${pathSvc.installDir}/tools/node/env.sh`);
+    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o644);
+    expect(
+      await readFile(`${pathSvc.installDir}/tools/node/env.sh`, 'utf8'),
+    ).toBe('\nexport NODE_VERSION=v14.17.0\n');
   });
 
   test('versionedToolPath', () => {
@@ -123,21 +128,21 @@ describe('path.service', () => {
     test('node', async () => {
       const pathSvc = child.get(PathService);
 
-      await mkdir(`${pathSvc.installDir}/env.d`, { recursive: true });
+      await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
       await pathSvc.exportToolEnv('node', { NODE_VERSION: 'v14.17.0' });
       await pathSvc.exportToolEnv('node', { TEST: '/tmp/test' }, true);
       expect(env).toMatchObject({
         NODE_VERSION: 'v14.17.0',
       });
 
-      const s = await stat(`${pathSvc.installDir}/env.d/node.sh`);
+      const s = await stat(`${pathSvc.installDir}/tools/node/env.sh`);
 
       expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o664);
 
-      await child.get(PathService).resetToolEnv('node');
-      await expect(stat(`${pathSvc.installDir}/env.d/node.sh`)).rejects.toThrow(
-        'ENOENT',
-      );
+      await pathSvc.resetToolEnv('node');
+      await expect(
+        stat(`${pathSvc.installDir}/tools/node/env.sh`),
+      ).rejects.toThrow('ENOENT');
     });
   });
 
@@ -145,7 +150,7 @@ describe('path.service', () => {
     test('node', async () => {
       const pathSvc = child.get(PathService);
 
-      await mkdir(`${pathSvc.installDir}/env.d`, { recursive: true });
+      await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
       await pathSvc.exportToolPath('node', '/some/path');
       expect(env).toMatchObject({
         PATH: `/some/path:${path}`,
