@@ -57,6 +57,10 @@ export class PathService {
     return toolPath;
   }
 
+  async ensureToolPath(tool: string): Promise<string> {
+    return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));
+  }
+
   async createVersionedToolPath(
     tool: string,
     version: string,
@@ -138,8 +142,13 @@ export class PathService {
     await appendFile(this.envFile, `export PATH=${value}:$PATH\n`);
   }
 
+  async toolEnvExists(tool: string): Promise<boolean> {
+    const file = `${this.toolsPath}/${tool}/env.sh`;
+    return await fileExists(file);
+  }
+
   async resetToolEnv(tool: string): Promise<Promise<void>> {
-    const file = `${this.installDir}/env.d/${tool}.sh`;
+    const file = `${this.toolsPath}/${tool}/env.sh`;
     if (!(await fileExists(file))) {
       return;
     }
@@ -148,8 +157,8 @@ export class PathService {
   }
 
   async exportToolEnvContent(tool: string, content: string): Promise<void> {
-    const file = `${this.installDir}/env.d/${tool}.sh`;
-    await appendFile(file, content);
+    const file = `${await this.ensureToolPath(tool)}/env.sh`;
+    await appendFile(file, `\n${content.trim()}\n`);
     await this.setOwner({ file, mode: 0o644 });
   }
 
@@ -158,7 +167,7 @@ export class PathService {
     values: Record<string, string>,
     nonRootOnly = false,
   ): Promise<void> {
-    const file = `${this.installDir}/env.d/${tool}.sh`;
+    const file = `${await this.ensureToolPath(tool)}/env.sh`;
     let content = '';
 
     if (nonRootOnly) {
@@ -186,7 +195,7 @@ export class PathService {
     value: string,
     toEnd = false,
   ): Promise<void> {
-    const file = `${this.installDir}/env.d/${tool}.sh`;
+    const file = `${await this.ensureToolPath(tool)}/env.sh`;
 
     if (toEnd) {
       env.PATH = `${env.PATH}:${value}`;

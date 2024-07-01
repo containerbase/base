@@ -42,7 +42,8 @@ export class PrepareJavaService extends PrepareToolBaseService {
     }
 
     // https://github.com/gradle/gradle/issues/8262
-    await this.pathSvc.exportEnv(
+    await this.pathSvc.exportToolEnv(
+      'java',
       {
         GRADLE_USER_HOME: path.join(this.pathSvc.homePath, '.gradle'),
         MAVEN_USER_HOME: path.join(this.pathSvc.homePath, '.m2'),

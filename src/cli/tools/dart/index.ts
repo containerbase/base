@@ -43,7 +43,8 @@ export class PrepareDartService extends PrepareToolBaseService {
     ]);
     await execa('chmod', ['-R', 'g+w', `${this.envSvc.userHome}/.dart`]);
 
-    await this.pathSvc.exportEnv(
+    await this.pathSvc.exportToolEnv(
+      this.name,
       { PUB_CACHE: `${this.pathSvc.cachePath}/.pub-cache` },
       true,
     );
