@@ -205,6 +205,7 @@ FROM base as test-latest-version
 
 RUN install-tool java-jre
 RUN install-tool gradle
+RUN install-tool maven
 
 
 #--------------------------------------

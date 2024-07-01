@@ -278,8 +278,9 @@ The first url is preferred and the second is used as fallback for older versions
 Samples:
 
 ```txt
-https://github.com/containerbase/maven-prebuild/releases/3.0.4/maven-3.0.4.tar.xz.sha512
-https://github.com/containerbase/maven-prebuild/releases/3.0.4/maven-3.0.4.tar.xz
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz.sha512
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz
+https://github.com/containerbase/maven-prebuild/releases/latest/download/version
 https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz
 https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz.sha1
 https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar

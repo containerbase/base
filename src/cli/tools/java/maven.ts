@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
   EnvService,
@@ -106,5 +108,19 @@ export class InstallMavenService extends InstallToolBaseService {
   private async readChecksum(url: string): Promise<string | undefined> {
     const checksumFile = await this.http.download({ url });
     return (await fs.readFile(checksumFile, 'utf-8')).split(' ')[0]?.trim();
+  }
+}
+
+@injectable()
+export class MavenVersionResolver extends ToolVersionResolver {
+  readonly tool = 'maven';
+
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      return await this.http.get(
+        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
+      );
+    }
+    return version;
   }
 }
