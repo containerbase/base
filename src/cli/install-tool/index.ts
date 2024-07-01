@@ -17,7 +17,7 @@ import {
   GradleVersionResolver,
   InstallGradleService,
 } from '../tools/java/gradle';
-import { InstallMavenService } from '../tools/java/maven';
+import { InstallMavenService, MavenVersionResolver } from '../tools/java/maven';
 import {
   JavaJdkVersionResolver,
   JavaJreVersionResolver,
@@ -97,6 +97,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
 
