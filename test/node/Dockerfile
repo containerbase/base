@@ -66,17 +66,6 @@ RUN npm install -g re2@1.20.9
 #--------------------------------------
 FROM build AS testb
 
-ARG APT_HTTP_PROXY
-
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
-
-RUN set -ex; cd a; yarn; [[ -d node_modules/.bin ]] || exit 1
-
-
 SHELL [ "/bin/sh", "-c" ]
 
 USER root
@@ -90,6 +79,8 @@ RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
+RUN set -ex; cd a; yarn; test -d node_modules/.bin || exit 1
+
 RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
@@ -102,30 +93,21 @@ RUN install-tool yarn 4.3.1
 
 FROM build AS testc
 
-ARG APT_HTTP_PROXY
-
 # renovate: datasource=npm
 RUN install-tool pnpm 9.5.0
 
 RUN set -ex; \
   pnpm --version;
 
+SHELL [ "/bin/sh", "-c" ]
 
 RUN set -ex; cd a; pnpm i
-
-
-SHELL [ "/bin/sh", "-c" ]
-RUN set -ex; \
-  pnpm --version \
-  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # test: node 18
 #--------------------------------------
 
 FROM base AS testd
-
-ARG APT_HTTP_PROXY
 
 USER 1000
 
@@ -134,13 +116,13 @@ RUN install-tool node v18.20.4
 
 RUN npm install -g yarn
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
+  [ "$(command -v yarn)" = "" ] && echo "works" || exit 1; \
+  true;
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 
@@ -273,15 +255,6 @@ FROM build AS testj
 
 USER 1111:0
 
-ARG APT_HTTP_PROXY
-
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
-
-RUN set -ex; ls -lah /test/a; cd a; yarn
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -291,6 +264,8 @@ RUN install-tool yarn 1.22.22
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
+
+RUN set -ex; ls -lah /test/a; cd a; yarn
 
 RUN install-tool yarn 1.22.15
 

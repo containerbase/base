@@ -147,10 +147,6 @@ export class InstallNodeService extends InstallNodeBaseService {
     await this.pathSvc.resetToolEnv(this.name);
     await this.postInstall(version);
 
-    await this.pathSvc.exportToolPath(
-      this.name,
-      join(this.envSvc.userHome, '.npm-global', 'bin'),
-    );
     await this.pathSvc.exportToolEnv(this.name, {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
