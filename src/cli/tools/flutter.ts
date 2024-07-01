@@ -128,9 +128,6 @@ export class InstallFlutterService extends InstallToolBaseService {
   }
 
   private async getToolPath(): Promise<string> {
-    return (
-      (await this.pathSvc.findToolPath(this.name)) ??
-      (await this.pathSvc.createToolPath(this.name))
-    );
+    return await this.pathSvc.ensureToolPath(this.name);
   }
 }

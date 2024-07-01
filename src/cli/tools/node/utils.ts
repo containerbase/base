@@ -91,10 +91,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     );
     const env = this.prepareEnv(version, tmp);
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {

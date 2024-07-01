@@ -102,10 +102,7 @@ export class InstallNodeService extends InstallNodeBaseService {
       }
     }
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
     await this.compress.extract({ file, cwd: path, strip: 1 });

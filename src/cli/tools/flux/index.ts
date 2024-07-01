@@ -45,10 +45,7 @@ export class InstallFluxService extends InstallToolBaseService {
       expectedChecksum,
     });
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),

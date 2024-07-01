@@ -140,10 +140,7 @@ export class InstallJavaService extends InstallToolBaseService {
       fileName: pkg.name,
     });
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const cwd = await this.pathSvc.createVersionedToolPath(this.name, version);
     await this.compress.extract({

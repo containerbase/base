@@ -80,10 +80,7 @@ export class InstallMavenService extends InstallToolBaseService {
       });
     }
 
-    let path = await this.pathSvc.findToolPath(this.name);
-    if (!path) {
-      path = await this.pathSvc.createToolPath(this.name);
-    }
+    let path = await this.pathSvc.ensureToolPath(this.name);
 
     if (strip) {
       // from archive.apache.org

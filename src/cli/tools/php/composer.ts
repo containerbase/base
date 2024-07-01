@@ -75,10 +75,7 @@ export class ComposerInstallService extends InstallToolBaseService {
       });
     }
 
-    let path = await this.pathSvc.findToolPath(this.name);
-    if (!path) {
-      path = await this.pathSvc.createToolPath(this.name);
-    }
+    let path = await this.pathSvc.ensureToolPath(this.name);
 
     if (isOnGithub) {
       await this.compress.extract({ file, cwd: path });

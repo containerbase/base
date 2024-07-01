@@ -4,7 +4,7 @@ import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { fileRights } from '../utils';
+import { fileRights, pathExists } from '../utils';
 import { PathService, rootContainer } from '.';
 import { rootPath } from '~test/path';
 
@@ -156,6 +156,16 @@ describe('path.service', () => {
         PATH: `/some/path:${path}:/some/path`,
       });
     });
+  });
+
+  test('ensureToolPath', async () => {
+    await mkdir(rootPath('opt/containerbase/tools'), { recursive: true });
+    expect(await child.get(PathService).ensureToolPath('node')).toBe(
+      rootPath('opt/containerbase/tools/node'),
+    );
+    expect(
+      await pathExists(rootPath('opt/containerbase/tools/node'), true),
+    ).toBe(true);
   });
 
   test('fileExists', async () => {

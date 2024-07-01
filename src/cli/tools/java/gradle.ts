@@ -40,11 +40,9 @@ export class InstallGradleService extends InstallToolBaseService {
       expectedChecksum,
     });
 
-    let path = await this.pathSvc.findToolPath(this.name);
-    if (!path) {
-      path = await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
+    let path = await this.pathSvc.ensureToolPath(this.name);
     path = await this.pathSvc.createVersionedToolPath(this.name, version);
 
     await this.compress.extract({ file, cwd: path, strip: 1 });

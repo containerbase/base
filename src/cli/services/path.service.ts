@@ -60,6 +60,10 @@ export class PathService {
     return toolPath;
   }
 
+  async ensureToolPath(tool: string): Promise<string> {
+    return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));
+  }
+
   async createVersionedToolPath(
     tool: string,
     version: string,
@@ -73,14 +77,10 @@ export class PathService {
   async findToolPath(tool: string): Promise<string | null> {
     const toolPath = this.toolPath(tool);
 
-    if (
-      await stat(toolPath)
-        .then((s) => !s.isDirectory())
-        .catch(() => true)
-    ) {
-      return null;
+    if (await pathExists(toolPath, true)) {
+      return toolPath;
     }
-    return toolPath;
+    return null;
   }
 
   async findVersionedToolPath(
@@ -89,14 +89,10 @@ export class PathService {
   ): Promise<string | null> {
     const versionedToolPath = this.versionedToolPath(tool, version);
 
-    if (
-      await stat(versionedToolPath)
-        .then((s) => !s.isDirectory())
-        .catch(() => true)
-    ) {
-      return null;
+    if (await pathExists(versionedToolPath, true)) {
+      return versionedToolPath;
     }
-    return versionedToolPath;
+    return null;
   }
 
   async fileExists(filePath: string): Promise<boolean> {
