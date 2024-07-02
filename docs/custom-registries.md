@@ -532,6 +532,19 @@ https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.gz
 https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.gz
 ```
 
+## `rye`
+
+Rye releases are downloaded from:
+
+- `https://github.com/astral-sh/rye/releases`
+
+Samples:
+
+```txt
+https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz.sha256
+https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz
+```
+
 ## `swift`
 
 Swift releases are downloaded from:

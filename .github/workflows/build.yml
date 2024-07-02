@@ -217,6 +217,7 @@ jobs:
           - python
           - ruby
           - rust
+          - rye
           - swift
           - latest
 
