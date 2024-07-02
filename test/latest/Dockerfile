@@ -19,6 +19,8 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 
 RUN install-containerbase
 
+RUN set -ex; [[ -z "${XDG_CACHE_HOME}" ]] && echo "works" || exit 1;
+
 #--------------------------------------
 # build
 #--------------------------------------
@@ -125,7 +127,7 @@ SHELL ["/bin/bash" , "-c"]
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
-COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/sbin/ /usr/local/sbin/
 COPY --from=build /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -161,6 +163,8 @@ RUN install-tool git v2.45.2
 
 USER 1000
 
+RUN set -ex; [[ "${XDG_CACHE_HOME}" = "/opt/containerbase/cache" ]] && echo "works" || exit 1;
+
 RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
 ARG IGNORED_TOOLS=powershell,node
@@ -181,11 +185,13 @@ RUN install-tool node v20.15.0
 RUN install-tool docker v27.0.3
 
 #--------------------------------------
-# test: bin path has 775
+# test: bin path has 777
 #--------------------------------------
 FROM base as testd
 
-RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+ARG CONTAINERBASE_DEBUG
+
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
 RUN prepare-tool all
 
