@@ -54,7 +54,7 @@ export class EnvService {
   }
 
   get rootDir(): string {
-    return join('/', env.CONTAINERBASE_ROOT_DIR ?? '');
+    return env.CONTAINERBASE_ROOT_DIR ?? join('/', '');
   }
 
   get userHome(): string {
