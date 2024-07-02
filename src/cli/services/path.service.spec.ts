@@ -1,6 +1,7 @@
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
+import { deleteAsync } from 'del';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights } from '../utils';
@@ -11,10 +12,11 @@ describe('path.service', () => {
   const path = env.PATH;
   let child!: Container;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     child = rootContainer.createChild();
     env.PATH = path;
     delete env.NODE_VERSION;
+    await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
   });
 
   test('cachePath', () => {
