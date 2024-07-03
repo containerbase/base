@@ -12,21 +12,32 @@ import {
   PathService,
 } from '../services';
 import { logger } from '../utils';
+import { prepareDartHome, preparePubCache } from './dart/utils';
 
 @injectable()
 export class PrepareFlutterService extends PrepareToolBaseService {
   readonly name = 'flutter';
 
   override async execute(): Promise<void> {
-    const flutter = join(this.envSvc.userHome, '.flutter');
-    await fs.writeFile(flutter, '{ "firstRun": false, "enabled": false }');
-    await fs.chown(flutter, this.envSvc.userId, 0);
-    await fs.chmod(flutter, 0o664);
+    await prepareDartHome(this.envSvc, this.pathSvc);
 
+    // for root
     await fs.writeFile(
       join(this.envSvc.rootDir, '/root/.flutter'),
       '{ "firstRun": false, "enabled": false }',
     );
+
+    // for user
+    const flutter = join(this.envSvc.userHome, '.flutter');
+    await this.pathSvc.writeFile(flutter, '{ "firstRun": false, "enabled": false }\n');
+
+    const futterToolState = join(this.envSvc.userHome, '.flutter_tool_state');
+    await this.pathSvc.writeFile(
+      futterToolState,
+      '{ "is-bot": false, "redisplay-welcome-message": false }\n',
+    );
+
+    await preparePubCache(this.envSvc, this.pathSvc);
   }
 }
 
@@ -118,7 +129,7 @@ export class InstallFlutterService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src });
+    await this.shellwrapper({ srcDir: src, args: '--no-version-check' });
   }
 
   override async test(_version: string): Promise<void> {

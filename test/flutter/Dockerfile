@@ -52,6 +52,12 @@ RUN set -ex; \
     cd b; \
     flutter pub upgrade;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  cat $USER_HOME/.flutter_tool_state; \
+  cat $USER_HOME/.flutter; \
+  true
+
 #--------------------------------------
 # test: flutter 1.x (non-root)
 #--------------------------------------
@@ -115,6 +121,13 @@ RUN install-tool flutter 3.22.2
 RUN set -ex; \
     cd d; \
     flutter pub upgrade;
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  cat $USER_HOME/.flutter_tool_state; \
+  cat $USER_HOME/.flutter; \
+  cat $USER_HOME/.dart-tool/dart-flutter-telemetry.config; \
+  true
 
 #--------------------------------------
 # final

@@ -47,6 +47,9 @@ RUN set -ex; \
     cd a; \
     dart pub upgrade;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 
 #--------------------------------------
 # test: dart 2.x (root, openstack)
