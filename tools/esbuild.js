@@ -26,6 +26,7 @@ await build({
   outdir: './dist',
   define: {
     'globalThis.CONTAINERBASE_VERSION': `"${version}"`,
+    'globalThis.rootDir': 'null',
   },
   plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
 });

@@ -55,10 +55,10 @@ export class EnvService {
 
   /**
    * Root directory of the container.
-   * `CONTAINERBASE_ROOT_DIR` is set by test setup for testing, do not set on production.
+   * `globalThis.rootDir` is set by test setup only, it's replaced by `null` on production.
    */
   get rootDir(): string {
-    return env.CONTAINERBASE_ROOT_DIR ?? join('/', '');
+    return globalThis.rootDir ?? join('/', '');
   }
 
   /**
