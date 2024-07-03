@@ -173,4 +173,12 @@ describe('path.service', () => {
       await child.get(PathService).fileExists(rootPath('usr/local/etc/env123')),
     ).toBe(false);
   });
+
+  test('createDir', async () => {
+    const dir = rootPath('env123');
+    expect(await child.get(PathService).createDir(dir)).toBeUndefined();
+
+    const s = await stat(dir);
+    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o775);
+  });
 });

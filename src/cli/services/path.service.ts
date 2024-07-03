@@ -53,6 +53,11 @@ export class PathService {
 
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
+  async createDir(path: string, mode = 0o775): Promise<void> {
+    await mkdir(path);
+    await this.setOwner({ path, mode });
+  }
+
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
     await mkdir(toolPath);
