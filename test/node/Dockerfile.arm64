@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,7 +23,7 @@ RUN install-containerbase
 #--------------------------------------
 # Image: node
 #--------------------------------------
-FROM base as test-node
+FROM base AS test-node
 
 # renovate: datasource=node
 RUN install-tool node v20.15.0
@@ -32,7 +32,7 @@ RUN install-tool node v20.15.0
 #--------------------------------------
 # Image: pnpm
 #--------------------------------------
-FROM test-node as test-pnpm
+FROM test-node AS test-pnpm
 
 # renovate: datasource=npm
 RUN install-tool pnpm 9.4.0
@@ -40,7 +40,7 @@ RUN install-tool pnpm 9.4.0
 #--------------------------------------
 # Image: yarn
 #--------------------------------------
-FROM test-node as test-yarn
+FROM test-node AS test-yarn
 
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
@@ -48,7 +48,7 @@ RUN install-tool yarn 1.22.22
 #--------------------------------------
 # Image: renovate
 #--------------------------------------
-FROM test-node as test-renovate
+FROM test-node AS test-renovate
 
 # renovate: datasource=npm
 RUN install-tool renovate 37.421.3

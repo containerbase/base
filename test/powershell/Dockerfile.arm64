@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,7 +23,7 @@ RUN install-containerbase
 #--------------------------------------
 # Image: test
 #--------------------------------------
-FROM base as test-powershell
+FROM base AS test-powershell
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.4.3

@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,7 +23,7 @@ RUN install-containerbase
 #--------------------------------------
 # Image: flux
 #--------------------------------------
-FROM base as test-flux
+FROM base AS test-flux
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.3.0

@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -25,7 +25,7 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # TODO: move to prepare
 # renovate: datasource=github-tags packageName=git/git
@@ -37,7 +37,7 @@ RUN install-tool swift 5.10.1
 #--------------------------------------
 # testa: swift latest
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 USER 1000
 
@@ -62,7 +62,7 @@ RUN swift --version
 #--------------------------------------
 # testb: swift 5.2.5 (non-root)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 USER 1000
 

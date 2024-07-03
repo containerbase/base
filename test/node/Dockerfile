@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -26,7 +26,7 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # renovate: datasource=node
 RUN install-tool node v20.15.0
@@ -37,7 +37,7 @@ USER 1000
 #--------------------------------------
 # test: node
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 SHELL [ "/bin/sh", "-c" ]
 ENTRYPOINT [ ]
@@ -64,7 +64,7 @@ RUN npm install -g re2@1.20.9
 #--------------------------------------
 # test: yarn
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 ARG APT_HTTP_PROXY
 
@@ -100,7 +100,7 @@ RUN install-tool yarn 4.3.1
 # test: pnpm
 #--------------------------------------
 
-FROM build as testc
+FROM build AS testc
 
 ARG APT_HTTP_PROXY
 
@@ -123,7 +123,7 @@ RUN set -ex; \
 # test: node 18
 #--------------------------------------
 
-FROM base as testd
+FROM base AS testd
 
 ARG APT_HTTP_PROXY
 
@@ -159,7 +159,7 @@ RUN del -d test/a/**
 #--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------
-FROM build as teste
+FROM build AS teste
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -188,7 +188,7 @@ RUN npm --version | grep '7.24.2'
 #--------------------------------------
 # test: use npm from node to install
 #--------------------------------------
-FROM build as testf
+FROM build AS testf
 
 RUN install-tool node 10.24.0
 # intentionally fails
@@ -202,7 +202,7 @@ RUN yarn --version
 #--------------------------------------
 # test: npm (npm install -g npm)
 #--------------------------------------
-FROM build as testg
+FROM build AS testg
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -229,7 +229,7 @@ RUN set -ex; cd a; npm install
 #--------------------------------------
 # test: yarn-slim
 #--------------------------------------
-FROM build as testh
+FROM build AS testh
 
 # renovate: datasource=npm packageName=yarn
 RUN install-tool yarn-slim 1.22.22
@@ -240,7 +240,7 @@ RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
 #--------------------------------------
-FROM base as testi
+FROM base AS testi
 
 ARG CONTAINERBASE_DEBUG
 
@@ -269,7 +269,7 @@ RUN set -ex; cd a; npm install --ignore-scripts
 #--------------------------------------
 # test: openshift yarn
 #--------------------------------------
-FROM build as testj
+FROM build AS testj
 
 USER 1111:0
 
@@ -297,7 +297,7 @@ RUN install-tool yarn 1.22.15
 #--------------------------------------
 # test: openshift npm (install-tool npm)
 #--------------------------------------
-FROM build as testk
+FROM build AS testk
 
 ARG CONTAINERBASE_DEBUG
 # ENV NPM_CONFIG_LOGLEVEL=verbose
@@ -338,7 +338,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: corepack
 #--------------------------------------
-FROM build as testl
+FROM build AS testl
 
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
@@ -369,7 +369,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: yarn (corepack)
 #--------------------------------------
-FROM build as testm
+FROM build AS testm
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -387,7 +387,7 @@ RUN set -ex; cd a; \
 #--------------------------------------
 # test: yarn v3 (corepack)
 #--------------------------------------
-FROM build as testn
+FROM build AS testn
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -415,7 +415,7 @@ RUN set -ex; cd b; \
 #--------------------------------------
 # test: pnpm (corepack)
 #--------------------------------------
-FROM build as testo
+FROM build AS testo
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -440,7 +440,7 @@ RUN set -ex; cd a; \
 #--------------------------------------
 # test: pnpm / yarn (link / wrapper overrides)
 #--------------------------------------
-FROM build as testp
+FROM build AS testp
 
 ARG PNPM_VERSION=6.0.0
 ARG YARN_VERSION=1.22.0
@@ -476,7 +476,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: renovate
 #--------------------------------------
-FROM base as testq
+FROM base AS testq
 
 # install latest version
 RUN install-tool node

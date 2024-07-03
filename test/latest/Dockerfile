@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -22,7 +22,7 @@ RUN install-containerbase
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # install nginx for request testing
 RUN install-apt nginx
@@ -50,7 +50,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: custom root ca
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 # renovate: datasource=node
 RUN install-tool node v20.15.0
@@ -109,7 +109,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ubuntu:focal as testb-gitpod
+FROM ubuntu:focal AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
@@ -151,7 +151,7 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 # test: ignore tools
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 RUN prepare-tool docker
 
@@ -183,7 +183,7 @@ RUN install-tool docker v27.0.3
 #--------------------------------------
 # test: bin path has 775
 #--------------------------------------
-FROM base as testd
+FROM base AS testd
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
 
@@ -194,7 +194,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 #--------------------------------------
 # test: bazelisk, bun, vendir, helmfile, kustomize
 #--------------------------------------
-FROM base as teste
+FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
 RUN install-tool bazelisk v1.20.0

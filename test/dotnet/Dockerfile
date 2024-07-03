@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -25,7 +25,7 @@ WORKDIR /test
 #--------------------------------------
 # build: dotnet 6.0 base image (LTS)
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN install-tool dotnet 6.0.416
 RUN set -ex; dotnet --version | grep 6.0.
@@ -42,7 +42,7 @@ RUN dotnet --info
 #--------------------------------------
 # test: dotnet 6.0 (LTS)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -55,7 +55,7 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet 8.0 (LTS)
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # Do not change
 RUN install-tool dotnet 6.0.416
@@ -84,7 +84,7 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet 8.0 (non-root, LTS)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
@@ -102,7 +102,7 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet latest (non-root)
 #--------------------------------------
-FROM build as testd
+FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk

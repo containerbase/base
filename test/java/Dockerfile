@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -29,7 +29,7 @@ WORKDIR /test
 #--------------------------------------
 # build: Java LTS base
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool java
 
@@ -54,7 +54,7 @@ RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 #--------------------------------------
 # test: Java 11 LTS + Gradle 6
 #--------------------------------------
-FROM build as test-gradle-a
+FROM build AS test-gradle-a
 
 RUN install-tool java 11.0.23+9
 
@@ -89,7 +89,7 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 21 LTS + Gradle 8
 #--------------------------------------
-FROM base as test-gradle-b
+FROM base AS test-gradle-b
 
 # renovate: datasource=adoptium-java packageName=java-jre
 RUN install-tool java-jre 21.0.3+9.0.LTS
@@ -115,7 +115,7 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 8 LTS + Gradle 7
 #--------------------------------------
-FROM build as test-gradle-c
+FROM build AS test-gradle-c
 
 # need to stay old
 RUN install-tool java 8.0.342+7
@@ -131,7 +131,7 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 17 LTS (non-root)
 #--------------------------------------
-FROM base as test-gradle-d
+FROM base AS test-gradle-d
 
 RUN prepare-tool java gradle
 
@@ -153,7 +153,7 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 #--------------------------------------
 # test: maven
 #--------------------------------------
-FROM build as test-maven-a
+FROM build AS test-maven-a
 
 # test openshift userid missmatch
 USER 1001
@@ -174,7 +174,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: Scala / sbt
 #--------------------------------------
-FROM build as test-others
+FROM build AS test-others
 
 
 WORKDIR /
@@ -201,7 +201,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: Resolve latest versions
 #--------------------------------------
-FROM base as test-latest-version
+FROM base AS test-latest-version
 
 RUN install-tool java-jre
 RUN install-tool gradle

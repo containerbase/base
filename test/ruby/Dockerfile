@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -29,7 +29,7 @@ WORKDIR /test
 #--------------------------------------
 # build: ruby 3.x
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
 RUN install-tool ruby 3.3.3
@@ -37,7 +37,7 @@ RUN install-tool ruby 3.3.3
 #--------------------------------------
 # test: bundler (gem)
 #--------------------------------------
-FROM build as test-bundler-a
+FROM build AS test-bundler-a
 
 ENV PATH=/home/ubuntu/bin:$PATH
 
@@ -67,7 +67,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: global bundler
 #--------------------------------------
-FROM build as test-bundler-b
+FROM build AS test-bundler-b
 
 # renovate: datasource=rubygems depName=bundler
 RUN install-tool bundler 2.4.22
@@ -87,7 +87,7 @@ RUN ruby --version
 #--------------------------------------
 # test: bundler (install-tool)
 #--------------------------------------
-FROM build as test-bundler-c
+FROM build AS test-bundler-c
 
 
 USER 1000
@@ -111,7 +111,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: bundler install root - install rootless
 #--------------------------------------
-FROM build as test-bundler-d
+FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.5.14
@@ -132,7 +132,7 @@ RUN install-tool bundler
 #--------------------------------------
 # test: cocoapods (install-tool)
 #--------------------------------------
-FROM build as test-cocoapods-a
+FROM build AS test-cocoapods-a
 
 USER 1000
 
@@ -148,7 +148,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: install-gem
 #--------------------------------------
-FROM build as test-gem
+FROM build AS test-gem
 
 USER 1000
 

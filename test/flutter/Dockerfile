@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -29,14 +29,14 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool flutter
 
 #--------------------------------------
 # test: flutter 1.x (root)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 # EOL, use source, not prebuild
 RUN install-tool flutter 1.22.5
@@ -55,7 +55,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 1.x (non-root)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 USER 1000
 
@@ -74,7 +74,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 2.x (non-root)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 USER 1000
 
@@ -88,7 +88,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root)
 #--------------------------------------
-FROM build as testd
+FROM build AS testd
 
 USER 1000
 
@@ -102,7 +102,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root, openshift)
 #--------------------------------------
-FROM build as teste
+FROM build AS teste
 
 # fix test file perms for openstack
 RUN chown -R 1001 .

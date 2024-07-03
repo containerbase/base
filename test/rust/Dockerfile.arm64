@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,7 +23,7 @@ RUN install-containerbase
 #--------------------------------------
 # Image: rust
 #--------------------------------------
-FROM base as test-rust
+FROM base AS test-rust
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.79.0

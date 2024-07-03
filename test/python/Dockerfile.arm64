@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,7 +23,7 @@ RUN install-containerbase
 #--------------------------------------
 # Image: python
 #--------------------------------------
-FROM base as test-python
+FROM base AS test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.4
@@ -31,7 +31,7 @@ RUN install-tool python 3.12.4
 #--------------------------------------
 # Image: checkov
 #--------------------------------------
-FROM test-python as test-checkov
+FROM test-python AS test-checkov
 
 # renovate: datasource=pypi
 RUN install-tool checkov 3.2.159
@@ -39,7 +39,7 @@ RUN install-tool checkov 3.2.159
 #--------------------------------------
 # Image: hashin
 #--------------------------------------
-FROM test-python as test-hashin
+FROM test-python AS test-hashin
 
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.1
@@ -47,7 +47,7 @@ RUN install-tool hashin 1.0.1
 #--------------------------------------
 # Image: pipenv
 #--------------------------------------
-FROM test-python as test-pipenv
+FROM test-python AS test-pipenv
 
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.0.1
@@ -55,7 +55,7 @@ RUN install-tool pipenv 2024.0.1
 #--------------------------------------
 # Image: poetry
 #--------------------------------------
-FROM test-python as test-poetry
+FROM test-python AS test-poetry
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
@@ -63,7 +63,7 @@ RUN install-tool poetry 1.8.3
 #--------------------------------------
 # Image: conan
 #--------------------------------------
-FROM test-python as test-conan
+FROM test-python AS test-conan
 
 # renovate: datasource=pypi
 RUN install-tool conan 2.4.1

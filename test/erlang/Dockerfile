@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -26,14 +26,14 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool erlang
 
 #--------------------------------------
 # test: erlang (root)
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
@@ -53,7 +53,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: erlang (v24,user,openshift)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 USER 1001
 
@@ -74,7 +74,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: erlang (v22,user,openshift)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 USER 1001
 

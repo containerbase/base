@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ubuntu:focal AS base
 
 RUN touch /.dummy
 
@@ -25,7 +25,7 @@ WORKDIR /test
 #--------------------------------------
 # test: php 7.4
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # old php version, not for renovating
 RUN install-tool php 7.4.14
@@ -71,7 +71,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: php 5.6
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # old php version, not for renovating
 RUN install-tool php 5.6.40
@@ -102,7 +102,7 @@ RUN composer --version
 #--------------------------------------
 # test: php 8.0
 #--------------------------------------
-FROM base as testc
+FROM base AS testc
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
@@ -140,7 +140,7 @@ RUN composer --version
 #--------------------------------------
 # testd: php 8.0 (non-root)
 #--------------------------------------
-FROM base as testd
+FROM base AS testd
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
