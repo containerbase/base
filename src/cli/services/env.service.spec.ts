@@ -44,6 +44,10 @@ describe('env.service', () => {
     expect(child.get(EnvService).home).toBeUndefined();
   });
 
+  test('rootHome', () => {
+    expect(child.get(EnvService).rootHome).toBe(rootPath('root'));
+  });
+
   test('userHome', () => {
     expect(child.get(EnvService).userHome).toBe(rootPath('home/ubuntu'));
   });

@@ -53,12 +53,23 @@ export class EnvService {
     return this.uid === 0;
   }
 
+  /**
+   * Root directory of the container.
+   * `CONTAINERBASE_ROOT_DIR` is set by test setup for testing, do not set on production.
+   */
   get rootDir(): string {
     return env.CONTAINERBASE_ROOT_DIR ?? join('/', '');
   }
 
+  /**
+   * Home directory of root
+   */
+  get rootHome(): string {
+    return join(this.rootDir, 'root');
+  }
+
   get userHome(): string {
-    return env.USER_HOME ?? join(this.rootDir, `home/${this.userName}`);
+    return env.USER_HOME ?? join(this.rootDir, 'home', this.userName);
   }
 
   get userName(): string {
