@@ -181,4 +181,13 @@ describe('path.service', () => {
     const s = await stat(dir);
     expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o775);
   });
+
+  test('writeFile', async () => {
+    const file = rootPath('env123');
+    await child.get(PathService).writeFile(file, 'test');
+
+    const s = await stat(file);
+    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o664);
+    expect(await readFile(file, 'utf8')).toBe('test');
+  });
 });

@@ -1,4 +1,4 @@
-import { appendFile, chmod, chown, mkdir, rm, stat } from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env } from 'node:process';
 import { inject, injectable } from 'inversify';
@@ -54,14 +54,14 @@ export class PathService {
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createDir(path: string, mode = 0o775): Promise<void> {
-    await mkdir(path);
+    await fs.mkdir(path);
     await this.setOwner({ path, mode });
   }
 
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
-    await mkdir(toolPath);
-    await chmod(toolPath, 0o775);
+    await fs.mkdir(toolPath);
+    await fs.chmod(toolPath, 0o775);
     return toolPath;
   }
 
@@ -74,8 +74,8 @@ export class PathService {
     version: string,
   ): Promise<string> {
     const toolPath = this.versionedToolPath(tool, version);
-    await mkdir(toolPath);
-    await chmod(toolPath, this.envSvc.umask);
+    await fs.mkdir(toolPath);
+    await fs.chmod(toolPath, this.envSvc.umask);
     return toolPath;
   }
 
@@ -134,12 +134,12 @@ export class PathService {
       content += 'fi\n';
     }
 
-    await appendFile(this.envFile, content);
+    await fs.appendFile(this.envFile, content);
   }
 
   async exportPath(value: string): Promise<void> {
     env.PATH = `${value}:${env.PATH}`;
-    await appendFile(this.envFile, `export PATH=${value}:$PATH\n`);
+    await fs.appendFile(this.envFile, `export PATH=${value}:$PATH\n`);
   }
 
   async resetToolEnv(tool: string): Promise<Promise<void>> {
@@ -148,12 +148,12 @@ export class PathService {
       return;
     }
 
-    await rm(file, { force: true });
+    await fs.rm(file, { force: true });
   }
 
   async exportToolEnvContent(tool: string, content: string): Promise<void> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
-    await appendFile(file, `\n${content.trim()}\n`);
+    await fs.appendFile(file, `\n${content.trim()}\n`);
     await this.setOwner({ path: file, mode: 0o644 });
   }
 
@@ -181,7 +181,7 @@ export class PathService {
       content += 'fi\n';
     }
 
-    await appendFile(file, content);
+    await fs.appendFile(file, content);
     await this.setOwner({ path: file, mode: 0o644 });
   }
 
@@ -194,23 +194,34 @@ export class PathService {
 
     if (toEnd) {
       env.PATH = `${env.PATH}:${value}`;
-      await appendFile(file, `export PATH=$PATH:${value}\n`);
+      await fs.appendFile(file, `export PATH=$PATH:${value}\n`);
     } else {
       env.PATH = `${value}:${env.PATH}`;
-      await appendFile(file, `export PATH=${value}:$PATH\n`);
+      await fs.appendFile(file, `export PATH=${value}:$PATH\n`);
     }
 
     await this.setOwner({ path: file, mode: 0o644 });
   }
 
   async setOwner({ path, mode = 0o775 }: FileOwnerConfig): Promise<void> {
-    const s = await stat(path);
+    const s = await fs.stat(path);
     if ((s.mode & fileRights) !== mode) {
       logger.debug({ path, mode, s: s.mode & fileRights }, 'setting path mode');
-      await chmod(path, mode);
+      await fs.chmod(path, mode);
     }
     if (this.envSvc.isRoot && s.uid === 0) {
-      await chown(path, this.envSvc.userId, 0);
+      await fs.chown(path, this.envSvc.userId, 0);
     }
+  }
+
+  /**
+   * Write content to file and set permissions.
+   * @param file path to file
+   * @param content content to write
+   * @param mode fille access mode
+   */
+  async writeFile(file: string, content: string, mode = 0o664): Promise<void> {
+    await fs.writeFile(file, content);
+    await this.setOwner({ path: file, mode });
   }
 }
