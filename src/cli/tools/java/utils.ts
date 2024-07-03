@@ -3,7 +3,7 @@ import path from 'node:path';
 import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
 import type { HttpService } from '../../services';
-import { type Arch, fileExists, logger } from '../../utils';
+import { type Arch, logger, pathExists } from '../../utils';
 import {
   type AdoptiumPackage,
   AdoptiumReleaseVersions,
@@ -53,7 +53,7 @@ export async function createMavenSettings(
 ): Promise<void> {
   const dir = path.join(home, '.m2');
   const file = path.join(dir, 'settings.xml');
-  if (await fileExists(file)) {
+  if (await pathExists(file)) {
     logger.debug('Maven settings already found');
     return;
   }
@@ -84,7 +84,7 @@ export async function createGradleSettings(
 ): Promise<void> {
   const dir = path.join(home, '.gradle');
   const file = path.join(dir, 'gradle.properties');
-  if (await fileExists(file)) {
+  if (await pathExists(file)) {
     logger.debug('Gradle settings already found');
     return;
   }

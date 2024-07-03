@@ -7,7 +7,7 @@ import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { fileExists, logger, parse } from '../../utils';
+import { logger, parse, pathExists } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
@@ -261,7 +261,7 @@ export async function prepareUserConfig({
 }): Promise<void> {
   const npmrc = `${home}/.npmrc`;
   if (
-    (await fileExists(npmrc)) &&
+    (await pathExists(npmrc)) &&
     (await readFile(npmrc, { encoding: 'utf8' })).includes('prefix')
   ) {
     return;

@@ -2,7 +2,7 @@ import { appendFile, chmod, chown, mkdir, rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env } from 'node:process';
 import { inject, injectable } from 'inversify';
-import { fileExists, fileRights, logger } from '../utils';
+import { fileRights, logger, pathExists } from '../utils';
 import { EnvService } from './env.service';
 
 export interface FileOwnerConfig {
@@ -100,7 +100,7 @@ export class PathService {
   }
 
   async fileExists(filePath: string): Promise<boolean> {
-    return await fileExists(filePath);
+    return await pathExists(filePath);
   }
 
   toolPath(tool: string): string {
@@ -143,7 +143,7 @@ export class PathService {
 
   async resetToolEnv(tool: string): Promise<Promise<void>> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
-    if (!(await fileExists(file))) {
+    if (!(await pathExists(file))) {
       return;
     }
 
