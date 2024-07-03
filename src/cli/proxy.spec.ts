@@ -1,7 +1,7 @@
 import { env } from 'node:process';
 import { createGlobalProxyAgent } from 'global-agent';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { bootstrap, hasProxy } from './proxy';
+import { bootstrap } from './proxy';
 
 vi.mock('global-agent', () => ({ createGlobalProxyAgent: vi.fn() }));
 
@@ -22,7 +22,6 @@ describe('proxy', () => {
   test('respects HTTP_PROXY', () => {
     env.HTTP_PROXY = httpProxy;
     bootstrap();
-    expect(hasProxy()).toBe(true);
     expect(createGlobalProxyAgent).toHaveBeenCalledWith({
       environmentVariableNamespace: '',
     });
@@ -31,7 +30,6 @@ describe('proxy', () => {
   test('copies upper case HTTP_PROXY to http_proxy', () => {
     env.HTTP_PROXY = httpProxy;
     bootstrap();
-    expect(hasProxy()).toBe(true);
     expect(env.HTTP_PROXY).toBeDefined();
     expect(env.http_proxy).toBeDefined();
 
@@ -47,7 +45,6 @@ describe('proxy', () => {
   test('respects HTTPS_PROXY', () => {
     env.HTTPS_PROXY = httpsProxy;
     bootstrap();
-    expect(hasProxy()).toBe(true);
     expect(createGlobalProxyAgent).toHaveBeenCalledWith({
       environmentVariableNamespace: '',
     });
@@ -56,7 +53,6 @@ describe('proxy', () => {
   test('copies upper case HTTPS_PROXY to https_proxy', () => {
     env.HTTPS_PROXY = httpsProxy;
     bootstrap();
-    expect(hasProxy()).toBe(true);
     expect(env.HTTPS_PROXY).toBeDefined();
     expect(env.https_proxy).toBeDefined();
 
@@ -72,7 +68,6 @@ describe('proxy', () => {
   test('does nothing', () => {
     env.no_proxy = noProxy;
     bootstrap();
-    expect(hasProxy()).toBe(false);
     expect(createGlobalProxyAgent).not.toHaveBeenCalled();
   });
 });
