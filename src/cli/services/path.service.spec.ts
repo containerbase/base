@@ -72,7 +72,7 @@ describe('path.service', () => {
     const s = await stat(`${pathSvc.installDir}/env.d/node.sh`);
     expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o644);
     expect(await readFile(`${pathSvc.installDir}/env.d/node.sh`, 'utf8')).toBe(
-      'export NODE_VERSION=v14.17.0\n',
+      '\nexport NODE_VERSION=v14.17.0\n',
     );
   });
 

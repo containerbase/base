@@ -39,7 +39,7 @@ export class InstallBazeliskService extends InstallToolBaseService {
     const binarypath = join(path, 'bazelisk');
     await fs.copyFile(file, binarypath);
     await this.pathSvc.setOwner({
-      file: binarypath,
+      path: binarypath,
     });
   }
 

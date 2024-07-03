@@ -82,6 +82,6 @@ export abstract class InstallToolBaseService {
     content += ` "$@"\n`;
 
     await writeFile(tgt, content, { encoding: 'utf8' });
-    await this.pathSvc.setOwner({ file: tgt });
+    await this.pathSvc.setOwner({ path: tgt });
   }
 }

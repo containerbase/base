@@ -156,13 +156,13 @@ export class InstallDotnetService extends InstallToolBaseService {
     const nuget = join(this.envSvc.userHome, '.nuget', 'NuGet', 'NuGet.Config');
     if (await this.pathSvc.fileExists(nuget)) {
       await this.pathSvc.setOwner({
-        file: join(this.envSvc.userHome, '.nuget'),
+        path: join(this.envSvc.userHome, '.nuget'),
       });
       await this.pathSvc.setOwner({
-        file: join(this.envSvc.userHome, '.nuget', 'NuGet'),
+        path: join(this.envSvc.userHome, '.nuget', 'NuGet'),
       });
       await this.pathSvc.setOwner({
-        file: nuget,
+        path: nuget,
       });
     }
   }

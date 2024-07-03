@@ -6,7 +6,10 @@ import { fileExists, fileRights, logger } from '../utils';
 import { EnvService } from './env.service';
 
 export interface FileOwnerConfig {
-  file: string;
+  /**
+   * file or folder
+   */
+  path: string;
   mode?: number;
 }
 
@@ -149,8 +152,8 @@ export class PathService {
 
   async exportToolEnvContent(tool: string, content: string): Promise<void> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
-    await appendFile(file, content);
-    await this.setOwner({ file, mode: 0o644 });
+    await appendFile(file, `\n${content.trim()}\n`);
+    await this.setOwner({ path: file, mode: 0o644 });
   }
 
   async exportToolEnv(
@@ -178,7 +181,7 @@ export class PathService {
     }
 
     await appendFile(file, content);
-    await this.setOwner({ file, mode: 0o644 });
+    await this.setOwner({ path: file, mode: 0o644 });
   }
 
   async exportToolPath(
@@ -196,17 +199,17 @@ export class PathService {
       await appendFile(file, `export PATH=${value}:$PATH\n`);
     }
 
-    await this.setOwner({ file, mode: 0o644 });
+    await this.setOwner({ path: file, mode: 0o644 });
   }
 
-  async setOwner({ file, mode = 0o775 }: FileOwnerConfig): Promise<void> {
-    const s = await stat(file);
+  async setOwner({ path, mode = 0o775 }: FileOwnerConfig): Promise<void> {
+    const s = await stat(path);
     if ((s.mode & fileRights) !== mode) {
-      logger.debug({ file, mode, s: s.mode & fileRights }, 'setting file mode');
-      await chmod(file, mode);
+      logger.debug({ path, mode, s: s.mode & fileRights }, 'setting path mode');
+      await chmod(path, mode);
     }
     if (this.envSvc.isRoot && s.uid === 0) {
-      await chown(file, this.envSvc.userId, 0);
+      await chown(path, this.envSvc.userId, 0);
     }
   }
 }
