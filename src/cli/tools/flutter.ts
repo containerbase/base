@@ -29,7 +29,10 @@ export class PrepareFlutterService extends PrepareToolBaseService {
 
     // for user
     const flutter = join(this.envSvc.userHome, '.flutter');
-    await this.pathSvc.writeFile(flutter, '{ "firstRun": false, "enabled": false }\n');
+    await this.pathSvc.writeFile(
+      flutter,
+      '{ "firstRun": false, "enabled": false }\n',
+    );
 
     const futterToolState = join(this.envSvc.userHome, '.flutter_tool_state');
     await this.pathSvc.writeFile(
