@@ -18,9 +18,9 @@ export async function prepareDartHome(
   }
 
   // for user
-  const dart = join(envSvc.userHome, '.dart');
+  const dart = join(pathSvc.homePath, '.dart');
   if (await pathExists(dart, true)) {
-    const dartTool = join(envSvc.userHome, '.dart-tool');
+    const dartTool = join(pathSvc.homePath, '.dart-tool');
 
     await pathSvc.createDir(dart);
     await pathSvc.createDir(dartTool);
@@ -30,6 +30,9 @@ export async function prepareDartHome(
 
     const dartToolTelemetry = join(dartTool, 'dart-flutter-telemetry.config');
     await pathSvc.writeFile(dartToolTelemetry, 'reporting=0\n');
+
+    await fs.symlink(dart, join(envSvc.userHome, '.dart'));
+    await fs.symlink(dartTool, join(envSvc.userHome, '.dart-tool'));
   }
 }
 
@@ -37,8 +40,9 @@ export async function preparePubCache(
   envSvc: EnvService,
   pathSvc: PathService,
 ): Promise<void> {
-  const pubCache = join(envSvc.userHome, '.pub-cache');
+  const pubCache = join(pathSvc.homePath, '.pub-cache');
   if (!(await pathExists(pubCache, true))) {
     await pathSvc.createDir(pubCache);
+    await fs.symlink(pubCache, join(envSvc.userHome, '.pub-cache'));
   }
 }

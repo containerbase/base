@@ -23,21 +23,26 @@ export class PrepareFlutterService extends PrepareToolBaseService {
 
     // for root
     await fs.writeFile(
-      join(this.envSvc.rootDir, '/root/.flutter'),
+      join(this.envSvc.rootDir, 'root', '.flutter'),
       '{ "firstRun": false, "enabled": false }',
     );
 
     // for user
-    const flutter = join(this.envSvc.userHome, '.flutter');
+    const flutter = join(this.pathSvc.homePath, '.flutter');
     await this.pathSvc.writeFile(
       flutter,
       '{ "firstRun": false, "enabled": false }\n',
     );
+    await fs.symlink(flutter, join(this.envSvc.userHome, '.flutter'));
 
-    const futterToolState = join(this.envSvc.userHome, '.flutter_tool_state');
+    const futterToolState = join(this.pathSvc.homePath, '.flutter_tool_state');
     await this.pathSvc.writeFile(
       futterToolState,
       '{ "is-bot": false, "redisplay-welcome-message": false }\n',
+    );
+    await fs.symlink(
+      futterToolState,
+      join(this.envSvc.userHome, '.flutter_tool_state'),
     );
 
     await preparePubCache(this.envSvc, this.pathSvc);
