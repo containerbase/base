@@ -70,7 +70,7 @@ describe('path.service', () => {
       'export NODE_VERSION=v14.17.0\n',
     );
     const s = await stat(`${pathSvc.installDir}/env.d/node.sh`);
-    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o644);
+    expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o664);
     expect(await readFile(`${pathSvc.installDir}/env.d/node.sh`, 'utf8')).toBe(
       '\nexport NODE_VERSION=v14.17.0\n',
     );
@@ -132,7 +132,7 @@ describe('path.service', () => {
 
       const s = await stat(`${pathSvc.installDir}/env.d/node.sh`);
 
-      expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o644);
+      expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o664);
 
       await child.get(PathService).resetToolEnv('node');
       await expect(stat(`${pathSvc.installDir}/env.d/node.sh`)).rejects.toThrow(

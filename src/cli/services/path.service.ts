@@ -154,7 +154,7 @@ export class PathService {
   async exportToolEnvContent(tool: string, content: string): Promise<void> {
     const file = `${this.installDir}/env.d/${tool}.sh`;
     await fs.appendFile(file, `\n${content.trim()}\n`);
-    await this.setOwner({ path: file, mode: 0o644 });
+    await this.setOwner({ path: file, mode: 0o664 });
   }
 
   async exportToolEnv(
@@ -182,7 +182,7 @@ export class PathService {
     }
 
     await fs.appendFile(file, content);
-    await this.setOwner({ path: file, mode: 0o644 });
+    await this.setOwner({ path: file, mode: 0o664 });
   }
 
   async exportToolPath(
@@ -200,7 +200,7 @@ export class PathService {
       await fs.appendFile(file, `export PATH=${value}:$PATH\n`);
     }
 
-    await this.setOwner({ path: file, mode: 0o644 });
+    await this.setOwner({ path: file, mode: 0o664 });
   }
 
   async setOwner({ path, mode = 0o775 }: FileOwnerConfig): Promise<void> {
