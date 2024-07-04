@@ -35,36 +35,6 @@ FROM base AS build
 RUN install-tool ruby 3.3.4
 
 #--------------------------------------
-# test: bundler (gem)
-#--------------------------------------
-FROM build AS test-bundler-a
-
-ENV PATH=/home/ubuntu/bin:$PATH
-
-# fix perms
-RUN chown -R 1005:0 /test
-
-# openshift
-USER 1005
-
-RUN ruby --version
-RUN gem env
-
-# renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.16
-RUN gem install bundler -v $BUNDLER_VERSION
-
-RUN bundle env
-
-RUN set -ex; \
-  [ "$(command -v bundle)" = "/home/${USER_NAME}/bin/bundle" ] && echo "works" || exit 1; \
-  bundler env
-
-RUN set -ex; \
-  cd a; \
-  bundler lock
-
-#--------------------------------------
 # test: global bundler
 #--------------------------------------
 FROM build AS test-bundler-b
@@ -89,7 +59,6 @@ RUN ruby --version
 #--------------------------------------
 FROM build AS test-bundler-c
 
-
 USER 1000
 
 # renovate: datasource=rubygems depName=bundler
@@ -107,6 +76,11 @@ RUN bundler env
 RUN set -ex; \
   cd a; \
   bundler lock;
+
+RUN set -ex; \
+ls -la $USER_HOME; \
+ls -la $USER_HOME/.gem/; \
+true
 
 #--------------------------------------
 # test: bundler install root - install rootless
@@ -145,6 +119,13 @@ RUN set -ex; \
   cd b/Project; \
   pod install;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  ls -la $USER_HOME/.gem/; \
+  ls -la $USER_HOME/.cocoapods/; \
+  ls -la $USER_HOME/Library/; \
+  true
+
 #--------------------------------------
 # test: install-gem
 #--------------------------------------
@@ -163,7 +144,6 @@ RUN rake --help
 #--------------------------------------
 FROM base
 
-COPY --from=test-bundler-a /.dummy /.dummy
 COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-bundler-d /.dummy /.dummy

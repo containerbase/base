@@ -3,7 +3,7 @@
 function prepare_tool() {
   local version_codename
   local tool_path
-  local cp_home
+  local path
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
@@ -23,18 +23,35 @@ function prepare_tool() {
     ;
   tool_path=$(create_tool_path)
 
+  # Redirect gemrc
+  path="$(get_home_path)/.gemrc"
   {
-    printf -- "gem: --bindir %s/bin --no-document\n" "${USER_HOME}"
-  } > "${USER_HOME}"/.gemrc
-  chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
-  chmod -R g+w "${USER_HOME}"/.gemrc
+    printf -- "gem: --no-document\n"
+  } > "${path}"
+  chown "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.gemrc"
+
+  # Redirect gem home
+  path="$(get_home_path)/.gem"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.gem"
 
   # Redirect cocoapods home
-  cp_home="$(get_home_path)/.cocoapods"
-  create_folder "${cp_home}" 775
-  chown  "${USER_ID}" "${cp_home}"
-  chmod g+w "${cp_home}"
-  ln -sf "${cp_home}" "${USER_HOME}/.cocoapods"
+  path="$(get_home_path)/.cocoapods"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.cocoapods"
+
+  # Redirect Library home
+  path="$(get_home_path)/Library"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/Library"
 
   # Workaround for compatibillity for Ruby hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
@@ -94,7 +111,7 @@ function install_tool () {
   # System settings
   mkdir -p "$versioned_tool_path/etc"
   {
-    printf -- "gem: --bindir /usr/local/bin --no-document\n"
+    printf -- "gem: --no-document\n"
     printf -- ":benchmark: false\n"
     printf -- ":verbose: true\n"
     printf -- ":update_sources: true\n"
