@@ -74,7 +74,7 @@ function setup_directories () {
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${home_path}"
   # shellcheck disable=SC2174
-  mkdir -p -m 775 "${home_path}"/{.config,.local}
+  mkdir -p -m 775 "${home_path}"/{.cache,.config,.local}
 
   # symlink v2 tools bin and lib
   rm -rf "${BIN_DIR}" "${LIB_DIR}"

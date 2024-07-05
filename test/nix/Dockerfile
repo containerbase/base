@@ -77,6 +77,9 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     flake update
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 #--------------------------------------
 # final
 #--------------------------------------
