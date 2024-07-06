@@ -26,7 +26,7 @@ RUN install-containerbase
 FROM base AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.8
+RUN install-tool php 8.3.9
 #--------------------------------------
 # Image: composer
 #--------------------------------------
