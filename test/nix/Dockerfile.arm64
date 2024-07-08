@@ -26,7 +26,7 @@ RUN install-containerbase
 FROM base AS test-nix
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.23.2
+RUN install-tool nix 2.23.3
 
 #--------------------------------------
 # Image: final
