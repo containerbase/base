@@ -29,7 +29,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=node
-RUN install-tool node v20.15.0
+RUN install-tool node v20.15.1
 
 USER 1000
 

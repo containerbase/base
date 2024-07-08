@@ -26,7 +26,7 @@ RUN install-containerbase
 FROM base AS test-node
 
 # renovate: datasource=node
-RUN install-tool node v20.15.0
+RUN install-tool node v20.15.1
 
 
 #--------------------------------------
