@@ -95,7 +95,7 @@ FROM base AS test-gradle-b
 RUN install-tool java-jre 21.0.3+9.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.8
+RUN install-tool gradle 8.9
 
 USER 1000
 
