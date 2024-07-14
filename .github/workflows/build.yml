@@ -58,7 +58,7 @@ jobs:
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
-        uses: reviewdog/action-shellcheck@6af7780c4a230cc46c42e4e7245c1b8919f6e205 # v1.25.0
+        uses: reviewdog/action-shellcheck@d99499e855260c9c56f7a1d066933b57326e9e7c # v1.26.0
         with:
           fail_on_error: true
           reporter: github-check
