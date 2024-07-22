@@ -197,11 +197,21 @@ https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_
 
 Go releases are downloaded from:
 
+- `https://github.com/containerbase/golang-prebuild/releases`
 - `https://dl.google.com/go/`
+- `https://go.dev/dl/?mode=json&include=all`
+
+The second url is used as fallback for older versions.
+The third url is used to find the checksums.
 
 Samples:
 
 ```txt
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-x86_64.tar.xz.sha512
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-x86_64.tar.xz
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-aarch64.tar.xz.sha512
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-aarch64.tar.xz
+https://go.dev/dl/?mode=json&include=all
 https://dl.google.com/go/go1.21.6.linux-arm64.tar.gz
 https://dl.google.com/go/go1.17.5.linux-amd64.tar.gz
 ```
