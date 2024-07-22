@@ -78,7 +78,7 @@ export class InstallToolService {
 
       await this.versionSvc.update(tool, version);
     } catch (e) {
-      await deleteAsync(this.pathSvc.versionedToolPath(tool, version));
+      await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
       throw e;
     } finally {
       if (this.envSvc.isRoot) {
