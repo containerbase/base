@@ -26,7 +26,7 @@ RUN install-containerbase
 FROM base AS test-powershell
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.3
+RUN install-tool powershell v7.4.4
 
 #--------------------------------------
 # Image: final
