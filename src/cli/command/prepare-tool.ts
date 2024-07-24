@@ -25,15 +25,22 @@ export class PrepareToolCommand extends Command {
     try {
       return await prepareTools(this.tools, this.dryRun);
     } catch (err) {
-      logger.fatal(err);
       error = true;
+      logger.debug(err);
+      if (err instanceof Error) {
+        logger.fatal(err.message);
+      }
       return 1;
     } finally {
-      logger.info(
-        `Prepared tools ${this.tools.join(', ')} ${
-          error ? 'with errors ' : ''
-        } in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
+      if (error) {
+        logger.fatal(
+          `Prepare tools ${this.tools.join(', ')} failed in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      } else {
+        logger.info(
+          `Prepare tools ${this.tools.join(', ')} succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      }
     }
   }
 }
