@@ -9,6 +9,7 @@ import {
   PrepareJavaJreService,
   PrepareJavaService,
 } from '../tools/java';
+import { PrepareNodeService } from '../tools/node';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
 import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
@@ -30,6 +31,7 @@ function prepareContainer(): Container {
   container.bind(PREPARE_TOOL_TOKEN).to(PrepareJavaService);
   container.bind(PREPARE_TOOL_TOKEN).to(PrepareJavaJreService);
   container.bind(PREPARE_TOOL_TOKEN).to(PrepareJavaJdkService);
+  container.bind(PREPARE_TOOL_TOKEN).to(PrepareNodeService);
 
   logger.trace('preparing container done');
   return container;

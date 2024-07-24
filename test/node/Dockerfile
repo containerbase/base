@@ -109,6 +109,8 @@ RUN set -ex; cd a; pnpm i
 
 FROM base AS testd
 
+RUN prepare-tool node
+
 USER 1000
 
 # renovate: datasource=node
@@ -230,7 +232,7 @@ ARG CONTAINERBASE_DEBUG
 RUN install-tool node v14.18.1
 RUN install-tool node v14.18.2
 
-RUN cat $USER_HOME/.npmrc | grep "prefix = \"$USER_HOME/.npm-global\""
+RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.npmrc
 
 RUN touch /.dummy
 
@@ -452,6 +454,8 @@ RUN set -ex; \
 # test: renovate
 #--------------------------------------
 FROM base AS testq
+
+RUN prepare-tool node
 
 # install latest version
 RUN install-tool node

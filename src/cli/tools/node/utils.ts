@@ -276,3 +276,31 @@ async function readPackageJson(path: string): Promise<PackageJson> {
   const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
 }
+
+export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.homePath, '.npm');
+  if (!(await pathExists(path, true))) {
+    await pathSvc.createDir(path);
+  }
+}
+
+export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.homePath, '.npmrc');
+  if (!(await pathExists(path, false))) {
+    await fs.writeFile(path, '');
+  }
+}
+
+export async function prepareSymlinks(
+  envSvc: EnvService,
+  pathSvc: PathService,
+): Promise<void> {
+  await fs.symlink(
+    join(pathSvc.homePath, '.npm'),
+    join(envSvc.userHome, '.npm'),
+  );
+  await fs.symlink(
+    join(pathSvc.homePath, '.npmrc'),
+    join(envSvc.userHome, '.npmrc'),
+  );
+}
