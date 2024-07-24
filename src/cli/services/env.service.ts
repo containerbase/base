@@ -105,10 +105,10 @@ export class EnvService {
       .sort(compare)) {
       const to = from.replace(/_FROM$/, '_TO');
       if (env[from] && env[to]) {
-        replacements.push([env[from]!, env[to]!]);
+        replacements.push([env[from], env[to]]);
       } else {
         logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`,
+          `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
         );
       }
     }
