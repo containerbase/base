@@ -24,6 +24,8 @@ WORKDIR /test
 
 RUN prepare-tool rust
 
+RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.cargo
+
 #--------------------------------------
 # build
 #--------------------------------------

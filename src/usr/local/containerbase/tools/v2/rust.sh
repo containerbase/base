@@ -1,10 +1,15 @@
 #!/bin/bash
 
 function prepare_tool() {
+  local cargo_home
+
+  cargo_home=$(get_home_path)/.cargo
+
+  ln -sf "${cargo_home}" "${USER_HOME}/.cargo"
+  mkdir "${cargo_home}"
+  chown -R "${USER_ID}" "${cargo_home}"
+  chmod -R g+w "${cargo_home}"
   create_tool_path > /dev/null
-  export_env RUST_BACKTRACE 1
-  export_env CARGO_HOME "${USER_HOME}/.cargo"
-  export_path "\$CARGO_HOME/bin"
 }
 
 function install_tool () {
