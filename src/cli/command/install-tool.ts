@@ -71,15 +71,22 @@ export class InstallToolCommand extends Command {
     try {
       return await installTool(this.name, version, this.dryRun, type);
     } catch (err) {
-      logger.fatal(err);
       error = true;
+      logger.debug(err);
+      if (err instanceof Error) {
+        logger.error(err.message);
+      }
       return 1;
     } finally {
-      logger.info(
-        `Installed ${this.type ?? 'tool'} ${this.name} ${
-          error ? 'with errors ' : ''
-        }in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
+      if (error) {
+        logger.fatal(
+          `Install ${this.type ?? 'tool'} ${this.name} failed in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      } else {
+        logger.info(
+          `Install ${this.type ?? 'tool'} ${this.name} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      }
     }
   }
 }

@@ -47,18 +47,24 @@ export class DownloadFileCommand extends Command {
         }),
         createWriteStream(this.output),
       );
-
       return 0;
     } catch (err) {
-      logger.fatal(err);
       error = true;
+      logger.debug(err);
+      if (err instanceof Error) {
+        logger.error(err.message);
+      }
       return 1;
     } finally {
-      logger.info(
-        `Download completed ${
-          error ? 'with errors ' : ''
-        } in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
+      if (error) {
+        logger.fatal(
+          `Download failed in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      } else {
+        logger.info(
+          `Download succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      }
     }
   }
 }
