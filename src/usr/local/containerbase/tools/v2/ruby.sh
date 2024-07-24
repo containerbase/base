@@ -65,8 +65,13 @@ function install_tool () {
     version_codename="jammy"
   fi
 
-  checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
-  expected_checksum=$(cat "${checksum_file}")
+  # not all releases have checksums
+  checksum_exists=$(file_exists "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  if [[ "${checksum_exists}" == "200" ]]; then
+    checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
+  fi
 
   file=$(get_from_url \
     "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
