@@ -35,10 +35,14 @@ function prepare_tool() {
 }
 
 function install_tool () {
-  local tool_path
-  local file
-  local BASE_URL
   local arch
+  local base_url
+  local checksum_file
+  local expected_checksum
+  local file
+  local name=${TOOL_NAME}
+  local tool_path
+  local version=${TOOL_VERSION}
   local version_codename
   local versioned_tool_path
 
@@ -54,15 +58,24 @@ function install_tool () {
   fi
 
   arch=$(uname -p)
-  BASE_URL="https://github.com/containerbase/${TOOL_NAME}-prebuild/releases/download"
+  base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
   if [[ "${version_codename}" == "noble" ]]; then
     version_codename="jammy"
   fi
 
-  file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
-  tar -C "${tool_path}" -xf "${file}"
+  checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  expected_checksum=$(cat "${checksum_file}")
+
+  file=$(get_from_url \
+    "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${expected_checksum}" \
+    sha512sum
+    )
+
+  bsdtar -C "${tool_path}" -xf "${file}"
 
   versioned_tool_path=$(find_versioned_tool_path)
   # System settings
