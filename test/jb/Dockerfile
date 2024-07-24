@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal AS base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 

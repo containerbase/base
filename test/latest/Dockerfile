@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal AS base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -109,7 +109,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ubuntu:focal AS testb-gitpod
+FROM ghcr.io/containerbase/ubuntu:20.04 AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
