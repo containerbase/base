@@ -267,6 +267,16 @@ RUN set -ex; \
     cat conan.lock
 
 #--------------------------------------
+# test copier: copier
+#--------------------------------------
+FROM build as test-copier
+
+USER 1000
+
+# renovate: datasource=pypi
+RUN install-tool copier 9.2.0
+
+#--------------------------------------
 # test c: python2.7
 #--------------------------------------
 FROM build-rootless AS testc
@@ -299,6 +309,7 @@ RUN set -ex; \
 FROM base
 
 COPY --from=test-conan /.dummy /.dummy
+COPY --from=test-copier /.dummy /.dummy
 COPY --from=test-pip-tools-a /.dummy /.dummy
 COPY --from=test-pip-tools-b /.dummy /.dummy
 COPY --from=test-poetry-a /.dummy /.dummy

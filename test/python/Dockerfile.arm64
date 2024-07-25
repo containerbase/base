@@ -69,12 +69,21 @@ FROM test-python AS test-conan
 RUN install-tool conan 2.5.0
 
 #--------------------------------------
+# Image: copier
+#--------------------------------------
+FROM test-python as test-copier
+
+# renovate: datasource=pypi
+RUN install-tool copier 9.2.0
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
 
 COPY --from=test-checkov /.dummy /.dummy
 COPY --from=test-conan /.dummy /.dummy
+COPY --from=test-copier /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
