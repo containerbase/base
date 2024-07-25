@@ -401,7 +401,7 @@ RUN install-tool corepack 0.29.3
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 9.5.0
+RUN install-tool pnpm 9.6.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.29.3
