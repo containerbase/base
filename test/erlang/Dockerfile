@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -26,21 +26,21 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool erlang
 
 #--------------------------------------
 # test: erlang (root)
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.2.5.0
+RUN install-tool erlang 27.0.0.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.16.3
+RUN install-tool elixir 1.17.2
 
 
 USER 1001
@@ -53,16 +53,13 @@ RUN set -ex; \
 #--------------------------------------
 # test: erlang (v24,user,openshift)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 USER 1001
 
-# https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-# no major update, pin elixir if newer version doesn't support v24
-# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+# https://hexdocs.pm/elixir/1.16.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 RUN install-tool erlang 24.3.4.17
 
-# renovate: datasource=docker versioning=docker
 RUN install-tool elixir 1.16.3
 
 
@@ -74,13 +71,11 @@ RUN set -ex; \
 #--------------------------------------
 # test: erlang (v22,user,openshift)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 USER 1001
 
 # https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-# no major update, pin elixir if newer version doesn't support v22
-# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 22.3.4.27
 
 RUN install-tool elixir 1.13.4

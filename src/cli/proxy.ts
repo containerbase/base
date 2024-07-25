@@ -4,8 +4,6 @@ import { createGlobalProxyAgent } from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
-let agent = false;
-
 export function bootstrap(): void {
   for (const envVar of envVars) {
     const lKey = envVar.toLowerCase();
@@ -22,14 +20,5 @@ export function bootstrap(): void {
     createGlobalProxyAgent({
       environmentVariableNamespace: '',
     });
-    agent = true;
-  } else {
-    // for testing only, does not reset global agent
-    agent = false;
   }
-}
-
-// will be used by our http layer later
-export function hasProxy(): boolean {
-  return agent === true;
 }

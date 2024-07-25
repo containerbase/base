@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -29,45 +29,15 @@ WORKDIR /test
 #--------------------------------------
 # build: ruby 3.x
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
-RUN install-tool ruby 3.3.3
-
-#--------------------------------------
-# test: bundler (gem)
-#--------------------------------------
-FROM build as test-bundler-a
-
-ENV PATH=/home/ubuntu/bin:$PATH
-
-# fix perms
-RUN chown -R 1005:0 /test
-
-# openshift
-USER 1005
-
-RUN ruby --version
-RUN gem env
-
-# renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.14
-RUN gem install bundler -v $BUNDLER_VERSION
-
-RUN bundle env
-
-RUN set -ex; \
-  [ "$(command -v bundle)" = "/home/${USER_NAME}/bin/bundle" ] && echo "works" || exit 1; \
-  bundler env
-
-RUN set -ex; \
-  cd a; \
-  bundler lock
+RUN install-tool ruby 3.3.4
 
 #--------------------------------------
 # test: global bundler
 #--------------------------------------
-FROM build as test-bundler-b
+FROM build AS test-bundler-b
 
 # renovate: datasource=rubygems depName=bundler
 RUN install-tool bundler 2.4.22
@@ -87,13 +57,12 @@ RUN ruby --version
 #--------------------------------------
 # test: bundler (install-tool)
 #--------------------------------------
-FROM build as test-bundler-c
-
+FROM build AS test-bundler-c
 
 USER 1000
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.14
+ENV BUNDLER_VERSION=2.5.16
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -108,13 +77,18 @@ RUN set -ex; \
   cd a; \
   bundler lock;
 
+RUN set -ex; \
+ls -la $USER_HOME; \
+ls -la $USER_HOME/.gem/; \
+true
+
 #--------------------------------------
 # test: bundler install root - install rootless
 #--------------------------------------
-FROM build as test-bundler-d
+FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.14
+ENV BUNDLER_VERSION=2.5.16
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
@@ -125,14 +99,14 @@ USER 1000
 RUN install-tool ruby 3.1.0
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.14
+ENV BUNDLER_VERSION=2.5.16
 RUN install-tool bundler
 
 
 #--------------------------------------
 # test: cocoapods (install-tool)
 #--------------------------------------
-FROM build as test-cocoapods-a
+FROM build AS test-cocoapods-a
 
 USER 1000
 
@@ -145,10 +119,17 @@ RUN set -ex; \
   cd b/Project; \
   pod install;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  ls -la $USER_HOME/.gem/; \
+  ls -la $USER_HOME/.cocoapods/; \
+  ls -la $USER_HOME/Library/; \
+  true
+
 #--------------------------------------
 # test: install-gem
 #--------------------------------------
-FROM build as test-gem
+FROM build AS test-gem
 
 USER 1000
 
@@ -163,7 +144,6 @@ RUN rake --help
 #--------------------------------------
 FROM base
 
-COPY --from=test-bundler-a /.dummy /.dummy
 COPY --from=test-bundler-b /.dummy /.dummy
 COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-bundler-d /.dummy /.dummy

@@ -64,7 +64,7 @@ export class PrepareDotnetService extends PrepareToolBaseService {
         break;
     }
 
-    await this.pathSvc.exportEnv({
+    await this.pathSvc.exportToolEnv(this.name, {
       DOTNET_ROOT: this.pathSvc.toolPath(this.name),
       DOTNET_CLI_TELEMETRY_OPTOUT: '1',
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1',
@@ -156,13 +156,13 @@ export class InstallDotnetService extends InstallToolBaseService {
     const nuget = join(this.envSvc.userHome, '.nuget', 'NuGet', 'NuGet.Config');
     if (await this.pathSvc.fileExists(nuget)) {
       await this.pathSvc.setOwner({
-        file: join(this.envSvc.userHome, '.nuget'),
+        path: join(this.envSvc.userHome, '.nuget'),
       });
       await this.pathSvc.setOwner({
-        file: join(this.envSvc.userHome, '.nuget', 'NuGet'),
+        path: join(this.envSvc.userHome, '.nuget', 'NuGet'),
       });
       await this.pathSvc.setOwner({
-        file: nuget,
+        path: nuget,
       });
     }
   }

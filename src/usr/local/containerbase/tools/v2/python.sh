@@ -127,11 +127,6 @@ function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  reset_tool_env
-
-  # export python vars
-  export_tool_path "${versioned_tool_path}/bin"
-
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin"
   shell_wrapper "${TOOL_NAME}${MAJOR}.${MINOR}" "${versioned_tool_path}/bin"

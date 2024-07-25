@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,18 +23,18 @@ RUN install-containerbase
 #--------------------------------------
 # Image: erlang
 #--------------------------------------
-FROM base as test-erlang
+FROM base AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.2.5.0
+RUN install-tool erlang 27.0.0.0
 
 #--------------------------------------
 # Image: elixir
 #--------------------------------------
-FROM test-erlang as test-elixir
+FROM test-erlang AS test-elixir
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.16.3
+RUN install-tool elixir 1.17.2
 
 #--------------------------------------
 # Image: final

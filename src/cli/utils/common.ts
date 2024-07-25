@@ -71,10 +71,13 @@ async function readDistro(): Promise<Distro> {
 export const fileRights =
   fs.constants.S_IRWXU | fs.constants.S_IRWXG | fs.constants.S_IRWXO;
 
-export async function fileExists(filePath: string): Promise<boolean> {
+export async function pathExists(
+  filePath: string,
+  dir = false,
+): Promise<boolean> {
   try {
     const fstat = await stat(filePath);
-    return fstat.isFile();
+    return dir ? fstat.isDirectory() : fstat.isFile();
   } catch {
     return false;
   }

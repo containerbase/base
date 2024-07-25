@@ -7,7 +7,7 @@ import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { fileExists, logger, parse } from '../../utils';
+import { logger, parse, pathExists } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
@@ -91,10 +91,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     );
     const env = this.prepareEnv(version, tmp);
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {
@@ -183,7 +180,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
     }
 
     for (const name of Object.keys(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name });
+      await this.shellwrapper({ srcDir: src, name, extraToolEnvs: ['node'] });
     }
   }
 
@@ -261,7 +258,7 @@ export async function prepareUserConfig({
 }): Promise<void> {
   const npmrc = `${home}/.npmrc`;
   if (
-    (await fileExists(npmrc)) &&
+    (await pathExists(npmrc)) &&
     (await readFile(npmrc, { encoding: 'utf8' })).includes('prefix')
   ) {
     return;
@@ -278,4 +275,32 @@ export async function prepareUserConfig({
 async function readPackageJson(path: string): Promise<PackageJson> {
   const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
+}
+
+export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.homePath, '.npm');
+  if (!(await pathExists(path, true))) {
+    await pathSvc.createDir(path);
+  }
+}
+
+export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.homePath, '.npmrc');
+  if (!(await pathExists(path, false))) {
+    await fs.writeFile(path, '');
+  }
+}
+
+export async function prepareSymlinks(
+  envSvc: EnvService,
+  pathSvc: PathService,
+): Promise<void> {
+  await fs.symlink(
+    join(pathSvc.homePath, '.npm'),
+    join(envSvc.userHome, '.npm'),
+  );
+  await fs.symlink(
+    join(pathSvc.homePath, '.npmrc'),
+    join(envSvc.userHome, '.npmrc'),
+  );
 }

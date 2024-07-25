@@ -13,7 +13,6 @@ export const NoPrepareTools = [
   'gradle',
   'lerna',
   'maven',
-  'node',
   'npm',
   'pnpm',
   'renovate',

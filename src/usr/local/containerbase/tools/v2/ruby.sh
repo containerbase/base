@@ -3,6 +3,7 @@
 function prepare_tool() {
   local version_codename
   local tool_path
+  local path
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
@@ -22,11 +23,35 @@ function prepare_tool() {
     ;
   tool_path=$(create_tool_path)
 
+  # Redirect gemrc
+  path="$(get_home_path)/.gemrc"
   {
-    printf -- "gem: --bindir %s/bin --no-document\n" "${USER_HOME}"
-  } > "${USER_HOME}"/.gemrc
-  chown -R "${USER_ID}" "${USER_HOME}"/.gemrc
-  chmod -R g+w "${USER_HOME}"/.gemrc
+    printf -- "gem: --no-document\n"
+  } > "${path}"
+  chown "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.gemrc"
+
+  # Redirect gem home
+  path="$(get_home_path)/.gem"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.gem"
+
+  # Redirect cocoapods home
+  path="$(get_home_path)/.cocoapods"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/.cocoapods"
+
+  # Redirect Library home
+  path="$(get_home_path)/Library"
+  create_folder "${path}" 775
+  chown  "${USER_ID}" "${path}"
+  chmod g+w "${path}"
+  ln -sf "${path}" "${USER_HOME}/Library"
 
   # Workaround for compatibillity for Ruby hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
@@ -35,10 +60,14 @@ function prepare_tool() {
 }
 
 function install_tool () {
-  local tool_path
-  local file
-  local BASE_URL
   local arch
+  local base_url
+  local checksum_file
+  local expected_checksum
+  local file
+  local name=${TOOL_NAME}
+  local tool_path
+  local version=${TOOL_VERSION}
   local version_codename
   local versioned_tool_path
 
@@ -54,21 +83,35 @@ function install_tool () {
   fi
 
   arch=$(uname -p)
-  BASE_URL="https://github.com/containerbase/${TOOL_NAME}-prebuild/releases/download"
+  base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
   if [[ "${version_codename}" == "noble" ]]; then
     version_codename="jammy"
   fi
 
-  file=$(get_from_url "${BASE_URL}/${TOOL_VERSION}/${TOOL_NAME}-${TOOL_VERSION}-${version_codename}-${arch}.tar.xz")
-  tar -C "${tool_path}" -xf "${file}"
+  # not all releases have checksums
+  checksum_exists=$(file_exists "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+  if [[ "${checksum_exists}" == "200" ]]; then
+    checksum_file=$(get_from_url "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
+    # get checksum from file
+    expected_checksum=$(cat "${checksum_file}")
+  fi
+
+  file=$(get_from_url \
+    "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${name}-${version}-${version_codename}-${arch}.tar.xz" \
+    "${expected_checksum}" \
+    sha512sum
+    )
+
+  bsdtar -C "${tool_path}" -xf "${file}"
 
   versioned_tool_path=$(find_versioned_tool_path)
   # System settings
   mkdir -p "$versioned_tool_path/etc"
   {
-    printf -- "gem: --bindir /usr/local/bin --no-document\n"
+    printf -- "gem: --no-document\n"
     printf -- ":benchmark: false\n"
     printf -- ":verbose: true\n"
     printf -- ":update_sources: true\n"
@@ -78,21 +121,9 @@ function install_tool () {
 }
 
 function link_tool () {
-  local tool_path
   local versioned_tool_path
-  local ruby_minor_version
 
-  tool_path=$(find_tool_path)
   versioned_tool_path=$(find_versioned_tool_path)
-  ruby_minor_version="${MAJOR}.${MINOR}.0"
-
-  reset_tool_env
-  # export ruby varsreset_tool_env
-  {
-    printf -- "if [ \"\${EUID}\" != 0 ] && [ -z \"\$GEM_HOME\" ]; then\n"
-    printf -- "  export GEM_HOME=\"%s/.gem/ruby/%s\"\n" "${USER_HOME}" "${ruby_minor_version}"
-    printf -- "fi\n"
-  } >> "$(find_tool_env)"
 
   shell_wrapper ruby "${versioned_tool_path}/bin"
   shell_wrapper gem "${versioned_tool_path}/bin"

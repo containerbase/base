@@ -127,7 +127,7 @@
     },
     {
       "description": "Trigger fix release for ubuntu digest updates",
-      "matchPackageNames": ["ubuntu"],
+      "matchDepNames": ["ubuntu", "ghcr.io/containerbase/ubuntu"],
       "matchUpdateTypes": ["digest"],
       "semanticCommitType": "fix"
     },

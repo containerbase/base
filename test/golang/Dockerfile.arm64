@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -27,10 +27,10 @@ RUN install-tool git v2.45.2
 #--------------------------------------
 # Image: golang
 #--------------------------------------
-FROM base as test-golang
+FROM base AS test-golang
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.4
+RUN install-tool golang 1.22.5
 
 #--------------------------------------
 # Image: final

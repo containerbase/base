@@ -40,11 +40,9 @@ export class InstallGradleService extends InstallToolBaseService {
       expectedChecksum,
     });
 
-    let path = await this.pathSvc.findToolPath(this.name);
-    if (!path) {
-      path = await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
+    let path = await this.pathSvc.ensureToolPath(this.name);
     path = await this.pathSvc.createVersionedToolPath(this.name, version);
 
     await this.compress.extract({ file, cwd: path, strip: 1 });
@@ -52,10 +50,7 @@ export class InstallGradleService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({
-      srcDir: src,
-      exports: 'GRADLE_USER_HOME=$HOME/.gradle',
-    });
+    await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {

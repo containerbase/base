@@ -34,10 +34,7 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     const gem = await this.getRubyGem();
     const ruby = await this.getRubyVersion();
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {

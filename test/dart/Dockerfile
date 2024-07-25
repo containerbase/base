@@ -2,7 +2,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -26,14 +26,14 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool dart
 
 #--------------------------------------
 # test: dart 2.x (non-root)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 USER 1000
 
@@ -47,11 +47,14 @@ RUN set -ex; \
     cd a; \
     dart pub upgrade;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 
 #--------------------------------------
 # test: dart 2.x (root, openstack)
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6

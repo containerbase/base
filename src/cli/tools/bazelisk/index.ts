@@ -25,10 +25,7 @@ export class InstallBazeliskService extends InstallToolBaseService {
       url: `${baseurl}${filename}`,
     });
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),
@@ -39,7 +36,7 @@ export class InstallBazeliskService extends InstallToolBaseService {
     const binarypath = join(path, 'bazelisk');
     await fs.copyFile(file, binarypath);
     await this.pathSvc.setOwner({
-      file: binarypath,
+      path: binarypath,
     });
   }
 

@@ -44,7 +44,9 @@ function create_versioned_tool_path () {
 # Will set up the general folder structure for the whole containerbase installation
 function setup_directories () {
   local install_dir
+  local home_path
   install_dir=$(get_install_dir)
+  home_path=$(get_home_path)
 
   mkdir -p "${install_dir}"
   # contains the installed tools
@@ -58,7 +60,10 @@ function setup_directories () {
   mkdir -p -m 775 "$(get_version_path)"
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
-  mkdir -p -m 775 "$(get_bin_path)"
+  mkdir -p -m 775 "${install_dir}/bin"
+  # contains nodejs files and maybe others
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "${install_dir}/lib"
   # contains the certificates for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "$(get_ssl_path)"
@@ -67,13 +72,19 @@ function setup_directories () {
   mkdir -p -m 775 "$(get_cache_path)"
   # contains the home for the tools
   # shellcheck disable=SC2174
-  mkdir -p -m 775 "$(get_home_path)"
+  mkdir -p -m 775 "${home_path}"
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "${home_path}"/{.cache,.config,.local}
 
-  # if the bin path exists and does not have 775, force it
-  if [ "$(stat --format '%a' "$(get_bin_path)")" -ne 775 ]; then
-    echo "Forcing 775 on '$(get_bin_path)' ..."
-    chmod 775 "$(get_bin_path)"
-  fi
+  # symlink v2 tools bin and lib
+  rm -rf "${BIN_DIR}" "${LIB_DIR}"
+  ln -sf "${ROOT_DIR}/bin" "${BIN_DIR}"
+  ln -sf "${ROOT_DIR}/lib" "${LIB_DIR}"
+
+  # symlink known user folders
+  ln -sf "${home_path}/.config" "${USER_HOME}/.config"
+  ln -sf "${home_path}/.local" "${USER_HOME}/.local"
+  ln -sf "$(get_cache_path)" "${USER_HOME}/.cache"
 }
 
 # Creates the given folder path with root and user umask depending on the caller
@@ -101,7 +112,7 @@ function create_folder () {
 
 # Gets the path to the bin folder
 function get_bin_path () {
-  echo "${BIN_DIR}"
+  echo "${ROOT_DIR}/bin"
 }
 
 # Gets the path to the versions folder

@@ -12,6 +12,12 @@ export interface ShellWrapperConfig {
   exports?: string;
 
   args?: string;
+
+  /**
+   * Which extra tool envs to load.
+   * Eg. load php env before composer env.
+   */
+  extraToolEnvs?: string[];
 }
 
 @injectable()
@@ -60,15 +66,25 @@ export abstract class InstallToolBaseService {
     name,
     srcDir,
     exports,
+    extraToolEnvs,
   }: ShellWrapperConfig): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name ?? this.name);
 
+    const envs = [...(extraToolEnvs ?? []), this.name];
     let content = codeBlock`
       #!/bin/bash
 
       if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
         . ${this.pathSvc.envFile}
       fi
+
+      # load tool envs
+      for n in ${envs.join(' ')}; do
+        if [[ -f "${this.pathSvc.toolsPath}/\${n}/env.sh" ]]; then
+          . "${this.pathSvc.toolsPath}/\${n}/env.sh"
+        fi
+      done
+      unset n
       `;
 
     if (exports) {
@@ -82,6 +98,6 @@ export abstract class InstallToolBaseService {
     content += ` "$@"\n`;
 
     await writeFile(tgt, content, { encoding: 'utf8' });
-    await this.pathSvc.setOwner({ file: tgt });
+    await this.pathSvc.setOwner({ path: tgt });
   }
 }

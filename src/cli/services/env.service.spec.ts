@@ -1,7 +1,7 @@
 import { sep } from 'node:path';
 import { env } from 'node:process';
 import type { Container } from 'inversify';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { EnvService, rootContainer } from '.';
 import { rootPath } from '~test/path';
 
@@ -18,10 +18,15 @@ vi.mock('node:process', () => ({
 
 describe('env.service', () => {
   let child!: Container;
+  let rootDir: string | undefined;
+
+  beforeAll(() => {
+    rootDir = globalThis.rootDir;
+  });
 
   beforeEach(() => {
     child = rootContainer.createChild();
-    env.CONTAINERBASE_ROOT_DIR = globalThis.rootDir;
+    globalThis.rootDir = rootDir;
     mocks.arch.mockReturnValue('x64');
   });
 
@@ -42,6 +47,10 @@ describe('env.service', () => {
 
   test('home', () => {
     expect(child.get(EnvService).home).toBeUndefined();
+  });
+
+  test('rootHome', () => {
+    expect(child.get(EnvService).rootHome).toBe(rootPath('root'));
   });
 
   test('userHome', () => {
@@ -75,7 +84,7 @@ describe('env.service', () => {
     });
 
     test('uses default root', () => {
-      delete env.CONTAINERBASE_ROOT_DIR;
+      globalThis.rootDir = undefined;
       const e = child.get(EnvService);
       expect(e.rootDir).toBe(sep);
     });

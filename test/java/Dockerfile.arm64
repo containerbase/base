@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,23 +23,23 @@ RUN install-containerbase
 #--------------------------------------
 # Image: java
 #--------------------------------------
-FROM base as test-java
+FROM base AS test-java
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java 21.0.3+9.0.LTS
+RUN install-tool java 21.0.4+7.0.LTS
 
 #--------------------------------------
 # Image: java
 #--------------------------------------
-FROM test-java as test-gradle
+FROM test-java AS test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.8
+RUN install-tool gradle 8.9
 
 #--------------------------------------
 # Image: maven
 #--------------------------------------
-FROM test-java as test-maven
+FROM test-java AS test-maven
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
 RUN install-tool maven 3.9.8

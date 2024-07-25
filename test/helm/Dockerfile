@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -23,9 +23,9 @@ RUN install-containerbase
 ARG HELM_VERSION=3.8.0
 
 #------------------------------------------------------------------
-# testa: install helm as root, run as both
+# testa: install helm AS root, run AS both
 #------------------------------------------------------------------
-FROM base as testa
+FROM base AS testa
 
 RUN install-tool helm "v${HELM_VERSION}"
 
@@ -57,9 +57,9 @@ RUN helm version | grep "${HELM_VERSION}"
 
 
 #------------------------------------------------------------------
-# testb: install helm as user (openshift)
+# testb: install helm AS user (openshift)
 #------------------------------------------------------------------
-FROM base as testb
+FROM base AS testb
 
 USER 1111
 
@@ -81,9 +81,9 @@ RUN helm version | grep "${HELM_VERSION}"
 
 
 #------------------------------------------------------------------
-# testc: install as user when already installed as root (openshift)
+# testc: install AS user when already installed AS root (openshift)
 #------------------------------------------------------------------
-FROM base as testc
+FROM base AS testc
 
 
 RUN install-tool helm "v${HELM_VERSION}"

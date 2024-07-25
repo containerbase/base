@@ -75,6 +75,11 @@ export class InstallToolService {
         }
         await this.legacySvc.execute(tool, version);
       }
+
+      await this.versionSvc.update(tool, version);
+    } catch (e) {
+      await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
+      throw e;
     } finally {
       if (this.envSvc.isRoot) {
         logger.debug('cleaning apt caches');
@@ -121,8 +126,6 @@ export class InstallToolService {
       logger.debug({ tool: toolSvc.name }, 'link tool');
       await toolSvc.link(version);
     }
-
-    await this.versionSvc.update(toolSvc.name, version);
 
     logger.debug({ tool: toolSvc.name }, 'post-install tool');
     await toolSvc.postInstall(version);

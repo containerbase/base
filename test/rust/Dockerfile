@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -24,10 +24,12 @@ WORKDIR /test
 
 RUN prepare-tool rust
 
+RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.cargo
+
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.79.0
@@ -41,7 +43,7 @@ USER 1000
 #--------------------------------------
 # test a: root
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 RUN set -ex; \
     cd a; \
@@ -55,7 +57,7 @@ RUN cargo --version
 #--------------------------------------
 # test b: non-root
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 USER 1000
 

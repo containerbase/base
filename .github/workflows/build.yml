@@ -58,7 +58,7 @@ jobs:
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
-        uses: reviewdog/action-shellcheck@52f34f737a16c65b8caa8c51ae1b23036afe5685 # v1.23.0
+        uses: reviewdog/action-shellcheck@d99499e855260c9c56f7a1d066933b57326e9e7c # v1.26.0
         with:
           fail_on_error: true
           reporter: github-check
@@ -143,7 +143,7 @@ jobs:
         run: docker buildx bake
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
 
   distro:
     runs-on: ubuntu-latest
@@ -186,7 +186,7 @@ jobs:
         run: docker buildx bake test-distro
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
 
   lang:
     runs-on: ubuntu-latest
@@ -225,7 +225,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
+        uses: containerbase/internal-tools@bbe92263bdc6c66203234f0ab89695137157506c # v3.3.11
         with:
           command: docker-config
 
@@ -250,4 +250,4 @@ jobs:
         run: docker buildx bake test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}

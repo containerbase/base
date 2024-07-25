@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
+# use this if custom env is required, creates a shell wrapper to /opt/containerbase/bin
 function shell_wrapper () {
   local TARGET
   local SOURCE=$2
   local EXPORTS=$3
   local args=$4
+  local content=$5
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
@@ -28,12 +29,16 @@ EOM
     echo "export $EXPORTS" >> "$TARGET"
   fi
 
+  if [ -n "$content" ]; then
+    echo "$content" >> "$TARGET"
+  fi
+
   echo "${SOURCE} ${args} \"\$@\"" >> "$TARGET"
 
   set_file_owner "${TARGET}" 775
 }
 
-# use this for simple symlink to /usr/local/bin
+# use this for simple symlink to /opt/containerbase/bin
 function link_wrapper () {
   local TARGET
   local SOURCE=$2
