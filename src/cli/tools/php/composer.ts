@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import { sort } from 'semver';
+import { z } from 'zod';
 import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
@@ -12,11 +14,11 @@ import {
   PathService,
 } from '../../services';
 import type { HttpChecksumType } from '../../services/http.service';
-import { logger, parse } from '../../utils';
+import { logger } from '../../utils';
 
 @injectable()
-export class InstallMavenService extends InstallToolBaseService {
-  readonly name = 'maven';
+export class ComposerInstallService extends InstallToolBaseService {
+  readonly name = 'composer';
 
   constructor(
     @inject(EnvService) envSvc: EnvService,
@@ -34,7 +36,6 @@ export class InstallMavenService extends InstallToolBaseService {
     let checksumFileUrl = `${url}.sha512`;
     const isOnGithub = await this.http.exists(checksumFileUrl);
     let file: string;
-    let strip: number | undefined;
 
     if (isOnGithub) {
       logger.info(`using github`);
@@ -48,23 +49,17 @@ export class InstallMavenService extends InstallToolBaseService {
         expectedChecksum,
       });
     } else {
-      logger.info(`using archive.apache.org`);
-      strip = 1;
-      // fallback to archive.apache.org
-      const ver = parse(version);
-      filename = `apache-${name}-${version}-bin.tar.gz`;
-      url = `https://archive.apache.org/dist/${name}/${name}-${ver.major}/${ver.version}/binaries/${filename}`;
-      checksumFileUrl = `${url}.sha512`;
+      logger.info(`using getcomposer.org`);
+      // fallback to getcomposer.org
+      filename = `composer.phar`;
+      url = `https://getcomposer.org/download/${version}/composer.phar`;
+      checksumFileUrl = `${url}.sha256sum`;
       let expectedChecksum: string | undefined;
       let checksumType: HttpChecksumType | undefined;
       if (await this.http.exists(checksumFileUrl)) {
-        logger.debug(`using sha512 checksum for ${filename}`);
-        expectedChecksum = await this.readChecksum(`${url}.sha512`);
-        checksumType = 'sha512';
-      } else if (await this.http.exists(`${url}.sha1`)) {
-        logger.debug(`using sha1 checksum for ${filename}`);
-        expectedChecksum = await this.readChecksum(`${url}.sha1`);
-        checksumType = 'sha1';
+        logger.debug(`using sha256sum checksum for ${filename}`);
+        expectedChecksum = await this.readChecksum(`${url}.sha256sum`);
+        checksumType = 'sha256';
       } else {
         throw new Error(`checksum file not found for ${filename}`);
       }
@@ -82,26 +77,26 @@ export class InstallMavenService extends InstallToolBaseService {
 
     let path = await this.pathSvc.ensureToolPath(this.name);
 
-    if (strip) {
-      // from archive.apache.org
+    if (isOnGithub) {
+      await this.compress.extract({ file, cwd: path });
+    } else {
+      // from getcomposer.org
       path = await this.pathSvc.createVersionedToolPath(this.name, version);
+      path = join(path, 'bin');
+      await fs.mkdir(path);
+      path = join(path, filename);
+      await fs.cp(file, path);
+      await fs.chmod(path, 0o755);
     }
-
-    await this.compress.extract({ file, cwd: path, strip });
   }
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({
-      srcDir: src,
-      name: 'mvn',
-      extraToolEnvs: ['java'],
-    });
+    await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {
-    // pkg bug, using `node` causes module load error
-    await execa('mvn', ['--version'], {
+    await execa('composer', ['--version'], {
       stdio: ['inherit', 'inherit', 1],
     });
   }
@@ -113,15 +108,25 @@ export class InstallMavenService extends InstallToolBaseService {
 }
 
 @injectable()
-export class MavenVersionResolver extends ToolVersionResolver {
-  readonly tool = 'maven';
+export class ComposerVersionResolver extends ToolVersionResolver {
+  readonly tool = 'composer';
 
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.http.get(
-        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
+      const meta = ComposerVersionsSchema.parse(
+        await this.http.getJson('https://getcomposer.org/versions'),
       );
+      // we know that the latest version is the first entry, so search for first lts
+      return meta;
     }
     return version;
   }
 }
+
+const ComposerVersionsSchema = z
+  .object({
+    stable: z.array(z.object({ version: z.string() })),
+  })
+  .transform(({ stable }) => {
+    return sort(stable.map((v) => v.version)).pop();
+  });

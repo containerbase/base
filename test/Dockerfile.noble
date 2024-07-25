@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:noble as base
+FROM ghcr.io/containerbase/ubuntu:24.04 AS base
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_DEBUG
@@ -20,7 +20,7 @@ RUN install-tool git v2.45.2
 #--------------------------------------
 # Image: build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN uname -p | tee | grep x86_64
 
@@ -31,25 +31,25 @@ RUN prepare-tool all
 #--------------------------------------
 # Image: test
 #--------------------------------------
-FROM build as test
+FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
 RUN install-tool bazelisk v1.20.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.12
+RUN install-tool bun 1.1.20
 
 # renovate: datasource=docker
 RUN install-tool dart 2.19.6
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.4
+RUN install-tool docker v27.1.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.302
+RUN install-tool dotnet 8.0.303
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.22.2
+RUN install-tool flutter 3.22.3
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.3.0
@@ -58,28 +58,28 @@ RUN install-tool flux v2.3.0
 RUN install-tool git-lfs v3.5.1
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.2.1
+RUN install-tool gleam 1.3.2
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.4
+RUN install-tool golang 1.22.5
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v3.15.2
+RUN install-tool helm v3.15.3
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.165.0
+RUN install-tool helmfile v0.166.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.4.2
+RUN install-tool kustomize 5.4.3
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.22.1
+RUN install-tool nix 2.23.3
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.2
+RUN install-tool powershell v7.4.4
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.78.0
+RUN install-tool rust 1.79.0
 
 # renovate: datasource=github-releases packageName=astral-sh/rye
 RUN install-tool rye 0.34.0
@@ -88,83 +88,83 @@ RUN install-tool rye 0.34.0
 RUN install-tool swift 5.10.1
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.5
+RUN install-tool terraform 1.9.3
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.5.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.40.1
+RUN install-tool vendir v0.41.0
 
 #--------------------------------------
 # Image: test-erlang
 #--------------------------------------
-FROM build as test-erlang
+FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 26.2.5.0
+RUN install-tool erlang 27.0.0.0
 # renovate: datasource=docker versioning=docker
-RUN install-tool elixir 1.16.3
+RUN install-tool elixir 1.17.2
 
 #--------------------------------------
 # Image: test-java
 #--------------------------------------
-FROM build as test-java
+FROM build AS test-java
 
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java 21.0.3+9.0.LTS
+RUN install-tool java 21.0.4+7.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.8
+RUN install-tool gradle 8.9
 
 #--------------------------------------
 # Image: test-node
 #--------------------------------------
-FROM build as test-node
+FROM build AS test-node
 
 # renovate: datasource=node
-RUN install-tool node v20.14.0
+RUN install-tool node v20.16.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.2.0
+RUN install-tool pnpm 9.6.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.2.2
+RUN install-tool yarn 4.3.1
 
 #--------------------------------------
 # Image: test-php
 #--------------------------------------
-FROM build as test-php
+FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.7
+RUN install-tool php 8.3.9
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
 
 #--------------------------------------
 # Image: test-python
 #--------------------------------------
-FROM build as test-python
+FROM build AS test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.4
 # renovate: datasource=pypi
-RUN install-tool conan 2.4.1
+RUN install-tool conan 2.5.0
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.1
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.0.1
 # renovate: datasource=pypi
-RUN install-tool pdm 2.15.4
+RUN install-tool pdm 2.17.1
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
 
 #--------------------------------------
 # Image: test-ruby
 #--------------------------------------
-FROM build as test-ruby
+FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.3
+RUN install-tool ruby 3.3.4
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.12
+RUN install-tool bundler 2.5.16
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.15.2
 

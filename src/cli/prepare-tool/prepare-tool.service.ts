@@ -46,7 +46,7 @@ export class PrepareToolService {
           }
           logger.debug({ tool: tool.name }, 'preparing tool');
           await tool.execute();
-          await this.pathSvc.createToolPath(tool.name);
+          await this.pathSvc.ensureToolPath(tool.name);
         }
         await this.legacySvc.execute(tools);
       } else {
@@ -67,7 +67,7 @@ export class PrepareToolService {
             }
             logger.debug({ tool }, 'preparing tool');
             await toolSvc.execute();
-            await this.pathSvc.createToolPath(tool);
+            await this.pathSvc.ensureToolPath(tool);
           } else {
             await this.legacySvc.execute([tool]);
           }

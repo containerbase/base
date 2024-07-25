@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,10 +23,10 @@ RUN install-containerbase
 #--------------------------------------
 # Image: nix
 #--------------------------------------
-FROM base as test-nix
+FROM base AS test-nix
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.22.1
+RUN install-tool nix 2.23.3
 
 #--------------------------------------
 # Image: final

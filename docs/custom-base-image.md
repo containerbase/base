@@ -15,7 +15,7 @@ Use this template for using a custom base image with our default user named `ubu
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 # Allows custom apt proxy usage
 ARG APT_HTTP_PROXY
@@ -32,7 +32,7 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -58,7 +58,7 @@ You can also customize username or userid by using this template.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 # The containerbase supports custom user
 ARG USER_NAME=custom
@@ -78,7 +78,7 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -107,7 +107,7 @@ The group must already exist.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
@@ -122,7 +122,7 @@ ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 

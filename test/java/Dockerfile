@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -29,9 +29,15 @@ WORKDIR /test
 #--------------------------------------
 # build: Java LTS base
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool java
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 777 ]; \
+  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 777 ]; \
+  true
 
 RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 
@@ -41,7 +47,7 @@ RUN set -ex; \
   exit 0
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java 21.0.3+9.0.LTS
+RUN install-tool java 21.0.4+7.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -54,17 +60,11 @@ RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
 #--------------------------------------
 # test: Java 11 LTS + Gradle 6
 #--------------------------------------
-FROM build as test-gradle-a
+FROM build AS test-gradle-a
 
 RUN install-tool java 11.0.23+9
 
 RUN prepare-tool gradle
-
-RUN set -ex; \
-  ls -la $USER_HOME; \
-  [ $(stat --format '%a' "${USER_HOME}/.gradle") -eq 775 ]; \
-  [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 775 ]; \
-  exit 0
 
 USER 1000
 
@@ -89,13 +89,13 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 21 LTS + Gradle 8
 #--------------------------------------
-FROM base as test-gradle-b
+FROM base AS test-gradle-b
 
 # renovate: datasource=adoptium-java packageName=java-jre
-RUN install-tool java-jre 21.0.3+9.0.LTS
+RUN install-tool java-jre 21.0.4+7.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.8
+RUN install-tool gradle 8.9
 
 USER 1000
 
@@ -115,13 +115,20 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 8 LTS + Gradle 7
 #--------------------------------------
-FROM build as test-gradle-c
+FROM build AS test-gradle-c
 
 # need to stay old
 RUN install-tool java 8.0.342+7
 
 # disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.6.1
+
+RUN set -ex; \
+  ls -la /root/; \
+  ls -la /opt/containerbase/; \
+  ls -la /opt/containerbase/home/; \
+  ls -la /opt/containerbase/home/.gradle; \
+  true
 
 # test openshift userid missmatch
 USER 1001
@@ -131,7 +138,7 @@ RUN gradle --version
 #--------------------------------------
 # test: Java 17 LTS (non-root)
 #--------------------------------------
-FROM base as test-gradle-d
+FROM base AS test-gradle-d
 
 RUN prepare-tool java gradle
 
@@ -139,7 +146,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=java-version depName=java
-ARG JAVA_JDK_VERSION=21.0.3+9.0.LTS
+ARG JAVA_JDK_VERSION=21.0.4+7.0.LTS
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -153,7 +160,7 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 #--------------------------------------
 # test: maven
 #--------------------------------------
-FROM build as test-maven-a
+FROM build AS test-maven-a
 
 # test openshift userid missmatch
 USER 1001
@@ -164,7 +171,7 @@ RUN install-tool maven 3.1.0-alpha-1
 RUN install-tool maven 3.5.4
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.9.7
+RUN install-tool maven 3.9.8
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
@@ -174,7 +181,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: Scala / sbt
 #--------------------------------------
-FROM build as test-others
+FROM build AS test-others
 
 
 WORKDIR /
@@ -184,7 +191,7 @@ WORKDIR /
 RUN install-tool scala v2.13.14
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.10.0
+RUN install-tool sbt v1.10.1
 
 RUN install-tool gradle 8.8-rc-2
 
@@ -201,10 +208,11 @@ RUN set -ex; \
 #--------------------------------------
 # test: Resolve latest versions
 #--------------------------------------
-FROM base as test-latest-version
+FROM base AS test-latest-version
 
 RUN install-tool java-jre
 RUN install-tool gradle
+RUN install-tool maven
 
 
 #--------------------------------------

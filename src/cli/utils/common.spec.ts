@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   cleanAptFiles,
   cleanTmpFiles,
-  fileExists,
   getDistro,
   isDockerBuild,
   parseBinaryName,
+  pathExists,
   reset,
   validateSystem,
 } from '.';
@@ -84,10 +84,12 @@ UBUNTU_CODENAME=jammy`);
     });
   });
 
-  test('fileExists', async () => {
+  test('pathExists', async () => {
     fsMocks.stat.mockResolvedValueOnce({ isFile: () => true });
-    expect(await fileExists('/etc/os-release')).toBe(true);
-    expect(await fileExists('/etc/os-release')).toBe(false);
+    expect(await pathExists('/etc/os-release')).toBe(true);
+    expect(await pathExists('/etc/os-release')).toBe(false);
+    fsMocks.stat.mockResolvedValueOnce({ isDirectory: () => true });
+    expect(await pathExists('/etc/os-release', true)).toBe(true);
   });
 
   test('parseBinaryName', () => {

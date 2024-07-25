@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -27,7 +27,7 @@ USER 1000
 #--------------------------------------
 # install flux as root
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 RUN install-tool flux "${FLUX_VERSION}"
 
@@ -38,7 +38,7 @@ RUN flux -v | grep "${FLUX_VERSION#v}"
 #--------------------------------------
 # install flux as user
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 USER 1111
 
@@ -51,7 +51,7 @@ RUN flux -v | grep "${FLUX_VERSION#v}"
 #--------------------------------------
 # install flux as user when already installed
 #--------------------------------------
-FROM base as testc
+FROM base AS testc
 
 RUN install-tool flux "${FLUX_VERSION}"
 

@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -26,7 +26,7 @@ WORKDIR /test
 #--------------------------------------
 # test: nix 2.10
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # old nix version, not for renovating
 RUN install-tool nix 2.10.0
@@ -53,13 +53,13 @@ RUN set -ex; \
 #--------------------------------------
 # test: nix latest
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 
 USER 1000
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.22.1
+RUN install-tool nix 2.23.3
 
 RUN set -ex; \
   nix --version
@@ -77,6 +77,9 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     flake update
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 #--------------------------------------
 # final
 #--------------------------------------

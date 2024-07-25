@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -29,10 +29,10 @@ WORKDIR /test
 #--------------------------------------
 # test: golang
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.4
+RUN install-tool golang 1.22.5
 
 USER 1000
 
@@ -55,7 +55,7 @@ RUN set -ex; cd c; go get -d ./...; cat go.sum
 #--------------------------------------
 # test: check first patch version eg v1.11.0
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # do not update patch version
 RUN install-tool golang 1.11.0
@@ -73,14 +73,14 @@ RUN go env
 #--------------------------------------
 # test: golang (non-root)
 #--------------------------------------
-FROM base as testc
+FROM base AS testc
 
 RUN prepare-tool golang
 
 USER 1000
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.4
+RUN install-tool golang 1.22.5
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
@@ -91,6 +91,17 @@ RUN set -ex; \
   cd d; \
   go get -d ./...; \
   go mod tidy;
+
+# test go install
+RUN set -ex; \
+  go install github.com/marwan-at-work/mod/cmd/mod@latest; \
+  mod --help; \
+  command -v mod; \
+  ls -la ${USER_HOME}; \
+  true
+
+RUN set -ex; \
+  [ "$(command -v mod)" = "/usr/local/bin/mod" ] && echo "works" || exit 1;
 
 #--------------------------------------
 # final

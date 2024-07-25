@@ -30,7 +30,6 @@ function install_v2_tool () {
   else
     echo "linking tool ${TOOL_NAME} v${TOOL_VERSION}"
     link_tool
-    set_tool_version
   fi
 
   # Allow tools to do some additional stuff, like overwriting additional shell wrapper

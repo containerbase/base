@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -27,10 +27,10 @@ RUN install-tool git v2.45.2
 #--------------------------------------
 # Image: flutter
 #--------------------------------------
-FROM base as test-flutter
+FROM base AS test-flutter
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.22.2
+RUN install-tool flutter 3.22.3
 
 #--------------------------------------
 # Image: final

@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,10 +23,10 @@ RUN install-containerbase
 #--------------------------------------
 # Image: dotnet
 #--------------------------------------
-FROM base as test-dotnet
+FROM base AS test-dotnet
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.302
+RUN install-tool dotnet 8.0.303
 
 #--------------------------------------
 # Image: final

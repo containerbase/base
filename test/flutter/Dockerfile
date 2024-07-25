@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -29,14 +29,14 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool flutter
 
 #--------------------------------------
 # test: flutter 1.x (root)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 # EOL, use source, not prebuild
 RUN install-tool flutter 1.22.5
@@ -52,10 +52,16 @@ RUN set -ex; \
     cd b; \
     flutter pub upgrade;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  cat $USER_HOME/.flutter_tool_state; \
+  cat $USER_HOME/.flutter; \
+  true
+
 #--------------------------------------
 # test: flutter 1.x (non-root)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
 USER 1000
 
@@ -74,7 +80,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 2.x (non-root)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 USER 1000
 
@@ -88,12 +94,12 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root)
 #--------------------------------------
-FROM build as testd
+FROM build AS testd
 
 USER 1000
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.22.2
+RUN install-tool flutter 3.22.3
 
 RUN set -ex; \
     cd d; \
@@ -102,7 +108,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root, openshift)
 #--------------------------------------
-FROM build as teste
+FROM build AS teste
 
 # fix test file perms for openstack
 RUN chown -R 1001 .
@@ -110,11 +116,18 @@ RUN chown -R 1001 .
 USER 1001
 
 # renovate: datasource=flutter-version
-RUN install-tool flutter 3.22.2
+RUN install-tool flutter 3.22.3
 
 RUN set -ex; \
     cd d; \
     flutter pub upgrade;
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  cat $USER_HOME/.flutter_tool_state; \
+  cat $USER_HOME/.flutter; \
+  cat $USER_HOME/.dart-tool/dart-flutter-telemetry.config; \
+  true
 
 #--------------------------------------
 # final

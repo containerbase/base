@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -22,7 +22,7 @@ RUN install-containerbase
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # install nginx for request testing
 RUN install-apt nginx
@@ -50,17 +50,17 @@ RUN set -ex; \
 #--------------------------------------
 # test: custom root ca
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 # renovate: datasource=node
-RUN install-tool node v20.14.0
+RUN install-tool node v20.16.0
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool php 7.4.14
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.2
+RUN install-tool powershell v7.4.4
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.12.4
@@ -109,7 +109,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ubuntu:focal as testb-gitpod
+FROM ghcr.io/containerbase/ubuntu:20.04 AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
@@ -125,7 +125,7 @@ SHELL ["/bin/bash" , "-c"]
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
-COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/sbin/ /usr/local/sbin/
 COPY --from=build /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -143,7 +143,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.8.5
+RUN install-tool terraform 1.9.3
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -151,7 +151,7 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 # test: ignore tools
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 RUN prepare-tool docker
 
@@ -172,20 +172,20 @@ RUN install-tool flux v2.3.0
 RUN install-tool git-lfs v3.5.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.2
+RUN install-tool powershell v7.4.4
 
 # renovate: datasource=node
-RUN install-tool node v20.14.0
+RUN install-tool node v20.16.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v26.1.4
+RUN install-tool docker v27.1.1
 
 #--------------------------------------
-# test: bin path has 775
+# test: bin path has 777
 #--------------------------------------
-FROM base as testd
+FROM base AS testd
 
-RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
 RUN prepare-tool all
 
@@ -194,16 +194,16 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 #--------------------------------------
 # test: bazelisk, bun, vendir, helmfile, kustomize
 #--------------------------------------
-FROM base as teste
+FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
 RUN install-tool bazelisk v1.20.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.12
+RUN install-tool bun 1.1.20
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.2.1
+RUN install-tool gleam 1.3.2
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2

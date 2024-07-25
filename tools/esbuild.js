@@ -18,6 +18,7 @@ await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
 await build({
   entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
   bundle: true,
+  packages: 'bundle',
   platform: 'node',
   target: `node${nodeVersion}`,
   minify: false,
@@ -26,6 +27,7 @@ await build({
   outdir: './dist',
   define: {
     'globalThis.CONTAINERBASE_VERSION': `"${version}"`,
+    'globalThis.rootDir': 'null',
   },
   plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
 });

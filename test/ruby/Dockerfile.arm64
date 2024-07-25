@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN uname -p | tee | grep aarch64
 RUN touch /.dummy
@@ -23,23 +23,23 @@ RUN install-containerbase
 #--------------------------------------
 # Image: ruby
 #--------------------------------------
-FROM base as test-ruby
+FROM base AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.3
+RUN install-tool ruby 3.3.4
 
 #--------------------------------------
 # Image: bundler
 #--------------------------------------
-FROM test-ruby as test-bundler
+FROM test-ruby AS test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.12
+RUN install-tool bundler 2.5.16
 
 #--------------------------------------
 # Image: cocoapods
 #--------------------------------------
-FROM test-ruby as test-cocoapods
+FROM test-ruby AS test-cocoapods
 
 # cocoapods need git, but don't install yet
 # renovate: datasource=github-tags packageName=git/git

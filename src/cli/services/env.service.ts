@@ -53,12 +53,23 @@ export class EnvService {
     return this.uid === 0;
   }
 
+  /**
+   * Root directory of the container.
+   * `globalThis.rootDir` is set by test setup only, it's replaced by `null` on production.
+   */
   get rootDir(): string {
-    return join('/', env.CONTAINERBASE_ROOT_DIR ?? '');
+    return globalThis.rootDir ?? join('/', '');
+  }
+
+  /**
+   * Home directory of root
+   */
+  get rootHome(): string {
+    return join(this.rootDir, 'root');
   }
 
   get userHome(): string {
-    return env.USER_HOME ?? join(this.rootDir, `home/${this.userName}`);
+    return env.USER_HOME ?? join(this.rootDir, 'home', this.userName);
   }
 
   get userName(): string {
@@ -94,10 +105,10 @@ export class EnvService {
       .sort(compare)) {
       const to = from.replace(/_FROM$/, '_TO');
       if (env[from] && env[to]) {
-        replacements.push([env[from]!, env[to]!]);
+        replacements.push([env[from], env[to]]);
       } else {
         logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`,
+          `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
         );
       }
     }

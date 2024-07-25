@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -25,7 +25,7 @@ WORKDIR /test
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 USER 1000
 
@@ -37,7 +37,7 @@ RUN install-tool jb v0.5.1
 # test: jb install
 #--------------------------------------
 
-FROM build as testa
+FROM build AS testa
 
 RUN set -ex; \
     jb install; \

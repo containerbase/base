@@ -11,6 +11,7 @@ import {
   HttpService,
   PathService,
 } from '../../services';
+import { prepareDartHome, preparePubCache } from './utils';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip
@@ -24,24 +25,8 @@ export class PrepareDartService extends PrepareToolBaseService {
   readonly name = 'dart';
 
   async execute(): Promise<void> {
-    await fs.mkdir(`${this.envSvc.home}/.dart`);
-    await fs.writeFile(
-      `${this.envSvc.home}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }',
-    );
-    await fs.mkdir(`${this.envSvc.userHome}/.dart`);
-    await fs.writeFile(
-      `${this.envSvc.userHome}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }',
-    );
-
-    // fs isn't recursive, so we use system binaries
-    await execa('chown', [
-      '-R',
-      this.envSvc.userName,
-      `${this.envSvc.userHome}/.dart`,
-    ]);
-    await execa('chmod', ['-R', 'g+w', `${this.envSvc.userHome}/.dart`]);
+    await prepareDartHome(this.envSvc, this.pathSvc);
+    await preparePubCache(this.envSvc, this.pathSvc);
   }
 }
 

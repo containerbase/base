@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -25,7 +25,7 @@ WORKDIR /test
 #--------------------------------------
 # test: php 7.4
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # old php version, not for renovating
 RUN install-tool php 7.4.14
@@ -71,7 +71,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: php 5.6
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # old php version, not for renovating
 RUN install-tool php 5.6.40
@@ -102,18 +102,19 @@ RUN composer --version
 #--------------------------------------
 # test: php 8.0
 #--------------------------------------
-FROM base as testc
+FROM base AS testc
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.7
+RUN install-tool php 8.3.9
 
 
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
 
+# test with latest version
 RUN install-tool composer latest
 
 USER 1000
@@ -139,7 +140,7 @@ RUN composer --version
 #--------------------------------------
 # testd: php 8.0 (non-root)
 #--------------------------------------
-FROM base as testd
+FROM base AS testd
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
@@ -150,9 +151,10 @@ USER 1000
 
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.7
+RUN install-tool php 8.3.9
 
-RUN install-tool composer latest
+# test without version
+RUN install-tool composer
 
 # renovate: datasource=github-releases packageName=composer/composer
 RUN install-tool composer 2.7.7
@@ -175,6 +177,9 @@ RUN set -ex; \
 
 RUN php --version
 RUN composer --version
+
+# test from getcomposer.org
+RUN install-tool composer 2.0.0
 
 #--------------------------------------
 # final

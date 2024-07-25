@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:focal as base
+FROM ghcr.io/containerbase/ubuntu:20.04 AS base
 
 RUN touch /.dummy
 
@@ -22,7 +22,7 @@ RUN install-containerbase
 #--------------------------------------
 # test: powershell 7.2 (non-root)
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 RUN prepare-tool powershell
 
@@ -44,10 +44,10 @@ RUN pwsh --version
 #--------------------------------------
 # test: powershell 7.x
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.2
+RUN install-tool powershell v7.4.4
 
 USER 1000
 
