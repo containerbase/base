@@ -94,7 +94,7 @@ RUN install-tool yarn 4.3.1
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.5.0
+RUN install-tool pnpm 9.6.0
 
 RUN set -ex; \
   pnpm --version;
@@ -407,7 +407,7 @@ RUN install-tool pnpm 9.6.0
 RUN install-tool corepack 0.29.3
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=9.5.0
+ARG PNPM_VERSION=9.6.0
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
