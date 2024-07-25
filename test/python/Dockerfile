@@ -274,7 +274,7 @@ FROM build as test-copier
 USER 1000
 
 # renovate: datasource=pypi
-RUN install-tool copier 9.2.0
+RUN install-tool copier 9.3.1
 
 #--------------------------------------
 # test c: python2.7
