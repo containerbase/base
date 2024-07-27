@@ -29,7 +29,7 @@ RUN prepare-tool rye
 FROM base as build
 
 # renovate: datasource=github-releases packageName=astral-sh/rye
-RUN install-tool rye 0.34.0
+RUN install-tool rye 0.37.0
 
 USER 1000
 
@@ -57,7 +57,7 @@ FROM base as test-a2
 USER 1000
 
 # renovate: datasource=github-releases packageName=astral-sh/rye
-RUN install-tool rye 0.34.0
+RUN install-tool rye 0.37.0
 
 RUN set -ex; \
   cd a; \

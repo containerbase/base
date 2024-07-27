@@ -551,8 +551,8 @@ Rye releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz.sha256
-https://github.com/astral-sh/rye/releases/download/0.34.0/rye-x86_64-linux.gz
+https://github.com/astral-sh/rye/releases/download/0.37.0/rye-x86_64-linux.gz
+https://github.com/astral-sh/rye/releases/download/0.37.0/rye-aarch64-linux.gz
 ```
 
 ## `swift`
