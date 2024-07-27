@@ -287,7 +287,7 @@ export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
 export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
   const path = join(pathSvc.homePath, '.npmrc');
   if (!(await pathExists(path, false))) {
-    await fs.writeFile(path, '');
+    await pathSvc.writeFile(path, '');
   }
 }
 

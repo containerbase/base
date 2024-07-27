@@ -31,6 +31,9 @@ FROM base AS build
 # renovate: datasource=node
 RUN install-tool node v20.16.0
 
+# ensure npmrc is writable by user
+RUN set -ex; [ $(stat --format '%u' "/opt/containerbase/home/.npmrc") -eq ${USER_ID} ]
+
 USER 1000
 
 
