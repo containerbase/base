@@ -48,7 +48,7 @@
     "got": "14.4.2",
     "inversify": "6.0.2",
     "pino": "9.3.2",
-    "pino-pretty": "11.2.1",
+    "pino-pretty": "11.2.2",
     "pretty-ms": "9.1.0",
     "reflect-metadata": "0.2.2",
     "semver": "7.6.3",
