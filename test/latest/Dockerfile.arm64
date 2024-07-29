@@ -101,6 +101,14 @@ FROM base AS test-vendir
 RUN install-tool vendir v0.41.0
 
 #--------------------------------------
+# Image: others
+#--------------------------------------
+FROM base AS test-others
+
+# renovate: datasource=github-releases packageName=getsops/sops
+RUN install-tool sops v3.8.1
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
@@ -115,3 +123,5 @@ COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy
 COPY --from=test-terraform /.dummy /.dummy
 COPY --from=test-vendir /.dummy /.dummy
+
+COPY --from=test-others /.dummy /.dummy
