@@ -192,7 +192,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, vendir, helmfile, kustomize
+# test: bazelisk, bun, vendir, helmfile, kustomize, skopeo
 #--------------------------------------
 FROM base AS teste
 
@@ -204,6 +204,9 @@ RUN install-tool bun 1.1.20
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.3.2
+
+# renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
+RUN install-tool skopeo 1.16.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
