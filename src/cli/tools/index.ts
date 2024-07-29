@@ -11,6 +11,7 @@ export const NoPrepareTools = [
   'flux',
   'gleam',
   'gradle',
+  'kubectl',
   'lerna',
   'maven',
   'npm',

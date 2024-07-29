@@ -105,6 +105,9 @@ RUN install-tool vendir v0.41.0
 #--------------------------------------
 FROM base AS test-others
 
+# renovate: datasource=github-releases packageName=kubernetes/kubernetes
+RUN install-tool kubectl v1.30.3
+
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.8.1
 
