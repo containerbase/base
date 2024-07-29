@@ -106,7 +106,7 @@ RUN install-tool vendir v0.41.0
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.8.1
+RUN install-tool sops v3.9.0
 
 #--------------------------------------
 # Image: final

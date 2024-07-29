@@ -82,7 +82,7 @@ RUN install-tool powershell v7.4.4
 RUN install-tool rust 1.80.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.8.1
+RUN install-tool sops v3.9.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.10.1
