@@ -162,6 +162,11 @@
       "matchPackageNames": ["checkov", "renovate"],
       "extends": ["schedule:weekly"],
       "automerge": true
+    },
+    {
+      "description": "Disable eslint v9",
+      "matchDepNames": ["eslint"],
+      "allowedVersions": "<9"
     }
   ],
   "customManagers": [
