@@ -24,6 +24,7 @@ export const NoPrepareTools = [
   'pnpm',
   'poetry',
   'renovate',
+  'sops',
   'yarn',
   'yarn-slim',
 ];
