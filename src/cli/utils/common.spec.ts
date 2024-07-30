@@ -18,8 +18,8 @@ const osMocks = vi.hoisted(() => ({
 const fsMocks = vi.hoisted(() => ({ readFile: vi.fn(), stat: vi.fn() }));
 const procMocks = vi.hoisted(() => ({ exit: vi.fn(), env: {}, argv0: 'node' }));
 
-vi.mock('node:fs/promises', async () => {
-  const origFs = await vi.importActual<any>('node:fs/promises');
+vi.mock('node:fs/promises', async (importActual) => {
+  const origFs = await importActual<any>();
   return {
     ...fsMocks,
     default: { ...origFs, ...fsMocks },
