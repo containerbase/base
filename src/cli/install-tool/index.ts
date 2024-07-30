@@ -40,6 +40,8 @@ import {
   ComposerInstallService,
   ComposerVersionResolver,
 } from '../tools/php/composer';
+import { PipVersionResolver } from '../tools/python/pip';
+import { InstallPipBaseService } from '../tools/python/utils';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
 import { logger } from '../utils';
@@ -48,7 +50,7 @@ import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
 
-export type InstallToolType = 'gem' | 'npm';
+export type InstallToolType = 'gem' | 'npm' | 'pip';
 
 function prepareInstallContainer(): Container {
   logger.trace('preparing install container');
@@ -158,6 +160,27 @@ export function installTool(
         container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericNpmService);
         break;
       }
+      case 'pip': {
+        @injectable()
+        class InstallGenericNpmService extends InstallPipBaseService {
+          override readonly name: string = tool;
+
+          override needsPrepare(): boolean {
+            return false;
+          }
+
+          override async test(version: string): Promise<void> {
+            try {
+              // some pip packages may not have a `--version` flag
+              await super.test(version);
+            } catch (err) {
+              logger.debug(err);
+            }
+          }
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericNpmService);
+        break;
+      }
     }
   }
   return container.get(InstallToolService).execute(tool, version, dryRun);
@@ -199,6 +222,14 @@ export async function resolveVersion(
           override readonly tool: string = tool;
         }
         container.bind(TOOL_VERSION_RESOLVER).to(GenericNpmVersionResolver);
+        break;
+      }
+      case 'pip': {
+        @injectable()
+        class GenericPipVersionResolver extends PipVersionResolver {
+          override readonly tool: string = tool;
+        }
+        container.bind(TOOL_VERSION_RESOLVER).to(GenericPipVersionResolver);
         break;
       }
     }

@@ -16,6 +16,9 @@ export function cliMode(): CliMode | null {
   if (argv0.endsWith('/install-npm') || argv0 === 'install-npm') {
     return 'install-npm';
   }
+  if (argv0.endsWith('/install-pip') || argv0 === 'install-pip') {
+    return 'install-pip';
+  }
   if (argv0.endsWith('/install-tool') || argv0 === 'install-tool') {
     return 'install-tool';
   }
