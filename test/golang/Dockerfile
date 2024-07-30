@@ -104,6 +104,17 @@ RUN set -ex; \
   [ "$(command -v mod)" = "/usr/local/bin/mod" ] && echo "works" || exit 1;
 
 #--------------------------------------
+# test: golang (automatic patch version selection)
+#--------------------------------------
+FROM base AS testd
+
+# do not update
+RUN install-tool golang 1.20
+
+# go 1.20 is EOL so the latest patch version should stay at 1.20.14
+RUN go version | grep "go1.20.14"
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -111,3 +122,4 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy

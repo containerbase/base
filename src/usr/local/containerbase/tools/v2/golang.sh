@@ -1,5 +1,12 @@
 #!/bin/bash
 
+function check_tool_requirements () {
+  check_semver "${TOOL_VERSION}"
+  if [[ ! "${MAJOR}" || ! "${MINOR}" ]]; then # patch is optional and will default to latest available
+    echo Invalid version: "${TOOL_VERSION}"
+    exit 1
+  fi
+}
 
 function prepare_tool() {
   # go suggests: git svn bzr mercurial
@@ -57,10 +64,21 @@ function install_tool () {
     bsdtar -C "$(find_tool_path)" -xf "${file}"
   else
 
+    now=$(date +%Y%m%d%H) # cache for one hour
+    checksum_file=$(get_from_url "https://go.dev/dl/?mode=json&include=all&_=${now}" "go-versions.${now}.json")
+
     # fix version, only for go 1.20 and below
     fversion=${TOOL_VERSION}
     if [[ ($MAJOR -lt 1 || ($MAJOR -eq 1 && $MINOR -lt 21)) && "${PATCH}" == "0" ]]; then
       fversion="${MAJOR}.${MINOR}"
+    fi
+
+    if [[ ! "${PATCH}" ]]; then
+      fversion="$(jq -r --arg prefix "$TOOL_VERSION" 'first(.[].version[2:] | select(startswith($prefix)))' < "${checksum_file}")"
+      if [[ -z "$fversion" ]]; then
+        echo "Could not resolve version $TOOL_VERSION" >&2
+        exit 1;
+      fi
     fi
 
     if [[ "${arch}" = "aarch64" ]]; then
@@ -69,8 +87,6 @@ function install_tool () {
       arch=amd64
     fi
 
-    now=$(date +%Y%m%d%H) # cache for one hour
-    checksum_file=$(get_from_url "https://go.dev/dl/?mode=json&include=all&_=${now}" "go-versions.${now}.json")
     expected_checksum="$(jq -r ".[] | select(.version == \"go${fversion}\") | .files[] | select(.os == \"linux\" and .arch == \"${arch}\") | .sha256" < "${checksum_file}")"
 
     file=$(get_from_url \
