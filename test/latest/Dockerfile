@@ -212,7 +212,7 @@ RUN install-tool kubectl v1.30.3
 RUN install-tool skopeo 1.16.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.8.1
+RUN install-tool sops v3.9.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2

@@ -109,7 +109,7 @@ FROM base AS test-others
 RUN install-tool kubectl v1.30.3
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.8.1
+RUN install-tool sops v3.9.0
 
 #--------------------------------------
 # Image: final
