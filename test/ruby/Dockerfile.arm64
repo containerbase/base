@@ -43,7 +43,7 @@ FROM test-ruby AS test-cocoapods
 
 # cocoapods need git, but don't install yet
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.2
+RUN install-tool git v2.46.0
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.15.2

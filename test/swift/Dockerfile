@@ -29,7 +29,7 @@ FROM base AS build
 
 # TODO: move to prepare
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.45.2
+RUN install-tool git v2.46.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 5.10.1
