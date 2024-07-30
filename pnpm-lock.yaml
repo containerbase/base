@@ -26,8 +26,8 @@ importers:
   .:
     dependencies:
       '@sindresorhus/is':
-        specifier: 6.3.1
-        version: 6.3.1
+        specifier: 7.0.0
+        version: 7.0.0
       clipanion:
         specifier: 3.2.1
         version: 3.2.1(patch_hash=fhbb5gvkz3xnkjsqqxesufv7h4)(typanion@3.14.0)
@@ -690,10 +690,6 @@ packages:
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
-
-  '@sindresorhus/is@6.3.1':
-    resolution: {integrity: sha512-FX4MfcifwJyFOI2lPoX7PQxCqx8BG1HCho7WdiXwpEQx1Ycij0JxkfYtGK7yqNScrZGSlt6RE6sw8QYoH7eKnQ==}
-    engines: {node: '>=16'}
 
   '@sindresorhus/is@7.0.0':
     resolution: {integrity: sha512-WDTlVTyvFivSOuyvMeedzg2hdoBLZ3f1uNVuEida2Rl9BrfjrIRjWA/VZIrMRLvSwJYCAlCRA3usDt1THytxWQ==}
@@ -3973,8 +3969,6 @@ snapshots:
   '@sinclair/typebox@0.27.8': {}
 
   '@sindresorhus/is@4.6.0': {}
-
-  '@sindresorhus/is@6.3.1': {}
 
   '@sindresorhus/is@7.0.0': {}
 
