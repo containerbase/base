@@ -15,6 +15,7 @@ export const NoPrepareTools = [
   'gradle',
   'hashin',
   'helm',
+  'helmfile',
   'kubectl',
   'lerna',
   'maven',
