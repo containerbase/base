@@ -5,6 +5,11 @@ vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 
+vi.mock('node:process', async (importOriginal) => ({
+  ...(await importOriginal<any>()),
+  geteuid: () => 0,
+}));
+
 describe('index', () => {
   test('installTool', async () => {
     expect(await installTool('bun', '1.0.0')).toBeUndefined();
