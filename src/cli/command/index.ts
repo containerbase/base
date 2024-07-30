@@ -4,6 +4,7 @@ import { logger } from '../utils/logger';
 import { DownloadFileCommand } from './download-file';
 import { InstallGemCommand, InstallGemShortCommand } from './install-gem';
 import { InstallNpmCommand, InstallNpmShortCommand } from './install-npm';
+import { InstallPipCommand, InstallPipShortCommand } from './install-pip';
 import { InstallToolCommand, InstallToolShortCommand } from './install-tool';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 
@@ -28,11 +29,15 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
   } else if (mode === 'install-gem') {
     cli.register(InstallGemShortCommand);
     return;
+  } else if (mode === 'install-pip') {
+    cli.register(InstallPipShortCommand);
+    return;
   }
 
   cli.register(DownloadFileCommand);
   cli.register(InstallGemCommand);
   cli.register(InstallNpmCommand);
+  cli.register(InstallPipCommand);
   cli.register(InstallToolCommand);
   cli.register(PrepareToolCommand);
 }

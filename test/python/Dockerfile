@@ -22,15 +22,6 @@ RUN install-containerbase
 COPY --chown=1000:0 test/python/test test
 WORKDIR /test
 
-# RUN install-tool python 3.11.4
-# RUN install-tool checkov 2.4.7
-
-# RUN set -ex; \
-#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/bin; \
-#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info; \
-#   # cat /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info/RECORD; \
-#   cat /opt/containerbase/tools/checkov/2.4.7/3.11/bin/unidiff; \
-#   false
 
 #--------------------------------------
 # build
@@ -303,6 +294,20 @@ RUN set -ex; \
   poetry update --lock --no-interaction pytest; \
   true
 
+
+#--------------------------------------
+# test install-pip
+#--------------------------------------
+FROM build-rootless AS testd
+
+RUN install-pip checkov
+RUN install-pip copier
+RUN install-pip hashin
+RUN install-pip pdm
+RUN install-pip pip-tools
+RUN install-pip pipenv
+RUN install-pip poetry
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -323,3 +328,4 @@ COPY --from=test-pdm /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy

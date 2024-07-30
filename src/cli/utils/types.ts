@@ -8,6 +8,7 @@ export type CliMode =
   | 'containerbase-cli'
   | 'install-gem'
   | 'install-npm'
+  | 'install-pip'
   | 'install-tool'
   | 'prepare-tool';
 

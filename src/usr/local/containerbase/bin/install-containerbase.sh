@@ -96,6 +96,7 @@ function link_tools () {
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/containerbase-cli
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-gem
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-pip
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-tool
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/prepare-tool
 
