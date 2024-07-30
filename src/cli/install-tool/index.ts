@@ -44,6 +44,7 @@ import { PipVersionResolver } from '../tools/python/pip';
 import { InstallPipBaseService } from '../tools/python/utils';
 import { InstallCocoapodsService } from '../tools/ruby/gem';
 import { InstallRubyBaseService } from '../tools/ruby/utils';
+import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
 import { logger } from '../utils';
 import { InstallLegacyToolService } from './install-legacy-tool.service';
@@ -81,6 +82,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);
+  container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnSlimService);

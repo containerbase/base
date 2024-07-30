@@ -24,6 +24,7 @@ export const NoPrepareTools = [
   'pnpm',
   'poetry',
   'renovate',
+  'skopeo',
   'sops',
   'yarn',
   'yarn-slim',
