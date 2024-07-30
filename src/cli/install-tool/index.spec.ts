@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 import { installTool, resolveVersion } from '.';
 
+vi.mock('del');
 vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
