@@ -78,6 +78,7 @@
         "renovate",
         "rust",
         "sbt",
+        "sops",
         "swift",
         "vendir"
       ],
@@ -113,6 +114,7 @@
         "renovate",
         "rust",
         "sbt",
+        "sops",
         "swift",
         "vendir"
       ],
@@ -144,6 +146,7 @@
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/**"],
+      "matchPackageNames": ["!git"],
       "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },
@@ -151,6 +154,7 @@
       "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
       "matchPaths": ["test/**"],
       "matchUpdateTypes": ["major"],
+      "matchPackageNames": ["!git"],
       "additionalBranchPrefix": "test-major-"
     },
     {
