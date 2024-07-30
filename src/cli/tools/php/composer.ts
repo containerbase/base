@@ -86,7 +86,7 @@ export class ComposerInstallService extends InstallToolBaseService {
       await fs.mkdir(path);
       path = join(path, filename);
       await fs.cp(file, path);
-      await fs.chmod(path, 0o755);
+      await fs.chmod(path, this.envSvc.umask);
     }
   }
 

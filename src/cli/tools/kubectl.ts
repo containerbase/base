@@ -45,7 +45,7 @@ export class InstallKubectlService extends InstallToolBaseService {
     );
     await fs.mkdir(path);
     await fs.copyFile(file, join(path, filename));
-    await fs.chmod(join(path, filename), 0o777);
+    await fs.chmod(join(path, filename), this.envSvc.umask);
   }
 
   override async link(version: string): Promise<void> {
