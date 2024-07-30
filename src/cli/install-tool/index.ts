@@ -26,6 +26,7 @@ import {
   JavaVersionResolver,
 } from '../tools/java/resolver';
 import { InstallKubectlService } from '../tools/kubectl';
+import { KustomizeInstallService } from '../tools/kustomize';
 import { InstallNodeService } from '../tools/node';
 import {
   InstallRenovateService,
@@ -83,6 +84,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJdkService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallKubectlService);
+  container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
   container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);

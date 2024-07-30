@@ -214,13 +214,13 @@ RUN install-tool skopeo 1.16.0
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.9.0
 
-# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
+# renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.32.2
 
-# renovate: datasource=github-releases packageName=helmfile/helmfile
+# renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=0.150.0
 
-# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
+# renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.0.0
 
 RUN install-tool vendir "v${VENDIR_VERSION}"

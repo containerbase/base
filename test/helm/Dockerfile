@@ -19,7 +19,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 
 RUN install-containerbase
 
-# renovate: datasource=github-releases packageName=helm/helm
+# renovate: datasource=github-releases depName=helm packageName=helm/helm
 ARG HELM_VERSION=3.8.0
 
 #------------------------------------------------------------------
