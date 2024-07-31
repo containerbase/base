@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { resolveLatestJavaLtsVersion } from './utils';
@@ -8,7 +8,7 @@ export class JavaVersionResolver extends ToolVersionResolver {
   readonly tool: string = 'java';
 
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       // we know that the latest version is the first entry, so search for first lts
       return await resolveLatestJavaLtsVersion(
         this.http,

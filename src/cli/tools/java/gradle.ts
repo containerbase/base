@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import semver from 'semver';
@@ -74,7 +74,7 @@ export class GradleVersionResolver extends ToolVersionResolver {
   readonly tool = 'gradle';
 
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return GradleVersionData.parse(
         await this.http.getJson('https://services.gradle.org/versions/current'),
       )?.version;

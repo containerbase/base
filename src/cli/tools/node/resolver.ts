@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { logger } from '../../utils';
@@ -9,7 +9,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
   readonly tool = 'node';
 
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMetaList.parse(
         await this.http.getJson('https://nodejs.org/dist/index.json'),
       );
@@ -23,7 +23,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
 @injectable()
 export abstract class NpmVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMeta.parse(
         await this.http.getJson(`https://registry.npmjs.org/${this.tool}`, {
           headers: {
@@ -42,7 +42,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
 export class YarnVersionResolver extends ToolVersionResolver {
   readonly tool = 'yarn';
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMeta.parse(
         await this.http.getJson(
           `https://registry.npmjs.org/@yarnpkg/cli-dist`,

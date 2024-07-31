@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import * as t from 'typanion';
@@ -51,7 +51,7 @@ export class InstallToolCommand extends Command {
       type = ResolverMap[this.name] ?? this.type;
     }
 
-    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+    if (!isNonEmptyStringAndNotWhitespace(version)) {
       version = getVersion(this.name);
     }
 
@@ -60,7 +60,7 @@ export class InstallToolCommand extends Command {
     );
     version = await resolveVersion(this.name, version, type);
 
-    if (!is.nonEmptyStringAndNotWhitespace(version)) {
+    if (!isNonEmptyStringAndNotWhitespace(version)) {
       logger.error(`No version found for ${this.name}`);
       return MissingVersion;
     }

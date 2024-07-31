@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { type TransportTargetOptions, levels, pino, transport } from 'pino';
 
 const level: string =
@@ -14,7 +14,7 @@ const targets: TransportTargetOptions[] = [
   { target: 'pino-pretty', level, options: {} },
 ];
 
-if (is.nonEmptyStringAndNotWhitespace(env.CONTAINERBASE_LOG_FILE)) {
+if (isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_LOG_FILE)) {
   fileLevel = env.CONTAINERBASE_LOG_FILE_LEVEL ?? 'debug';
   targets.push({
     target: 'pino/file',
