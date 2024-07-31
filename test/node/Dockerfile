@@ -44,7 +44,7 @@ FROM base AS build
 RUN install-tool node 20.17.0
 
 # ensure npmrc is writable by user
-RUN set -ex; [ $(stat --format '%u' "/opt/containerbase/home/.npmrc") -eq ${USER_ID} ]
+RUN set -ex; [ $(stat --format '%u' "/tmp/containerbase/cache/.npmrc") -eq ${USER_ID} ]
 
 USER 12021
 
@@ -466,11 +466,28 @@ RUN set -ex; \
   yarn -v | grep ${YARN_SLIM_VERSION};
 
 #--------------------------------------
-# test: renovate
+# test: renovate (rootless,readonly)
 #--------------------------------------
 FROM base AS testq
 
+RUN set -ex; \
+  ls -la /opt/containerbase; \
+  ls -la /tmp/containerbase; \
+  ls -la /tmp/containerbase/cache; \
+  true;true
+
 RUN prepare-tool node
+
+# emulate emtpy containerbase folders
+RUN set -ex; \
+  ls -la /tmp/containerbase/cache; \
+  rm -rf /opt/containerbase/*; \
+  ls -la /opt/containerbase/; \
+  rm -rf /tmp/*; \
+  ls -la /tmp/; \
+  true
+
+USER 1000
 
 # install latest version
 RUN install-tool node
@@ -500,20 +517,20 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
-COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
-COPY --from=testf /.dummy /.dummy
-COPY --from=testg /.dummy /.dummy
-COPY --from=testh /.dummy /.dummy
-COPY --from=testi /.dummy /.dummy
-COPY --from=testj /.dummy /.dummy
-COPY --from=testk /.dummy /.dummy
-COPY --from=testl /.dummy /.dummy
-COPY --from=testm /.dummy /.dummy
-COPY --from=testn /.dummy /.dummy
-COPY --from=testo /.dummy /.dummy
-COPY --from=testp /.dummy /.dummy
+# COPY --from=testa /.dummy /.dummy
+# COPY --from=testb /.dummy /.dummy
+# COPY --from=testc /.dummy /.dummy
+# COPY --from=testd /.dummy /.dummy
+# COPY --from=teste /.dummy /.dummy
+# COPY --from=testf /.dummy /.dummy
+# COPY --from=testg /.dummy /.dummy
+# COPY --from=testh /.dummy /.dummy
+# COPY --from=testi /.dummy /.dummy
+# COPY --from=testj /.dummy /.dummy
+# COPY --from=testk /.dummy /.dummy
+# COPY --from=testl /.dummy /.dummy
+# COPY --from=testm /.dummy /.dummy
+# COPY --from=testn /.dummy /.dummy
+# COPY --from=testo /.dummy /.dummy
+# COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy

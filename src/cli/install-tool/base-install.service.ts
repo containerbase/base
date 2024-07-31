@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { injectable } from 'inversify';
 import type { EnvService, PathService } from '../services';
-import { NoPrepareTools } from '../tools';
-import { isValid } from '../utils';
+import { NoInitTools, NoPrepareTools } from '../tools';
+import { isValid, tool2path } from '../utils';
 
 export interface ShellWrapperConfig {
   name?: string;
@@ -35,11 +35,19 @@ export abstract class BaseInstallService {
     return !!(await this.pathSvc.findVersionedToolPath(this.name, version));
   }
 
+  async isInitialized(): Promise<boolean> {
+    return await this.pathSvc.isInitialized(this.name);
+  }
+
   async isPrepared(): Promise<boolean> {
-    return null !== (await this.pathSvc.findToolPath(this.name));
+    return await this.pathSvc.isPrepared(this.name);
   }
 
   abstract link(version: string): Promise<void>;
+
+  needsInitialize(): boolean {
+    return !NoInitTools.includes(this.name);
+  }
 
   needsPrepare(): boolean {
     return !NoPrepareTools.includes(this.name);
@@ -70,12 +78,17 @@ export abstract class BaseInstallService {
   }: ShellWrapperConfig): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name ?? this.name);
 
-    const envs = [...(extraToolEnvs ?? []), this.name];
+    const envs = [...(extraToolEnvs ?? []), this.name].map(tool2path);
     let content = codeBlock`
       #!/bin/bash
 
       if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
         . ${this.pathSvc.envFile}
+      fi
+
+      if [[ ! -f "${this.pathSvc.toolInitPath(this.name)}" ]]; then
+        # set logging to only warn and above to not interfere with tool output
+        CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${this.name}"
       fi
 
       # load tool envs

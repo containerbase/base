@@ -7,20 +7,31 @@ export async function prepareDartHome(
   envSvc: EnvService,
   pathSvc: PathService,
 ): Promise<void> {
+  const dart = join(envSvc.userHome, '.dart');
+  if (!(await pathExists(dart))) {
+    await fs.symlink(join(pathSvc.cachePath, '.dart'), dart);
+    await fs.symlink(
+      join(pathSvc.cachePath, '.dart-tool'),
+      join(envSvc.userHome, '.dart-tool'),
+    );
+  }
+
   // for root
   const rootDart = join(envSvc.rootDir, 'root', '.dart');
-  if (!(await pathExists(rootDart, true))) {
+  if (!(await pathExists(rootDart))) {
     await fs.mkdir(rootDart);
     await fs.writeFile(
       join(rootDart, 'dartdev.json'),
       '{ "firstRun": false, "enabled": false }',
     );
   }
+}
 
+export async function initDartHome(pathSvc: PathService): Promise<void> {
   // for user
-  const dart = join(pathSvc.homePath, '.dart');
-  if (await pathExists(dart, true)) {
-    const dartTool = join(pathSvc.homePath, '.dart-tool');
+  const dart = join(pathSvc.cachePath, '.dart');
+  if (!(await pathExists(dart))) {
+    const dartTool = join(pathSvc.cachePath, '.dart-tool');
 
     await pathSvc.createDir(dart);
     await pathSvc.createDir(dartTool);
@@ -30,9 +41,6 @@ export async function prepareDartHome(
 
     const dartToolTelemetry = join(dartTool, 'dart-flutter-telemetry.config');
     await pathSvc.writeFile(dartToolTelemetry, 'reporting=0\n');
-
-    await fs.symlink(dart, join(envSvc.userHome, '.dart'));
-    await fs.symlink(dartTool, join(envSvc.userHome, '.dart-tool'));
   }
 }
 
@@ -40,9 +48,12 @@ export async function preparePubCache(
   envSvc: EnvService,
   pathSvc: PathService,
 ): Promise<void> {
-  const pubCache = join(pathSvc.homePath, '.pub-cache');
-  if (!(await pathExists(pubCache, true))) {
-    await pathSvc.createDir(pubCache);
-    await fs.symlink(pubCache, join(envSvc.userHome, '.pub-cache'));
+  const pubCache = join(envSvc.userHome, '.pub-cache');
+  if (!(await pathExists(pubCache))) {
+    await fs.symlink(join(pathSvc.cachePath, '.pub-cache'), pubCache);
   }
+}
+
+export async function initPubCache(pathSvc: PathService): Promise<void> {
+  await pathSvc.createDir(join(pathSvc.cachePath, '.pub-cache'));
 }

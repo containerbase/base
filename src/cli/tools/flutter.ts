@@ -10,14 +10,19 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { prepareDartHome, preparePubCache } from './dart/utils';
+import { initDartHome, initPubCache ,
+  prepareDartHome,
+  preparePubCache,
+} from './dart/utils';
 
 @injectable()
 export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
-  override async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
+    await this.initialize();
     await prepareDartHome(this.envSvc, this.pathSvc);
+    await preparePubCache(this.envSvc, this.pathSvc);
 
     // for root
     await fs.writeFile(
@@ -26,24 +31,31 @@ export class FlutterPrepareService extends BasePrepareService {
     );
 
     // for user
-    const flutter = join(this.pathSvc.homePath, '.flutter');
-    await this.pathSvc.writeFile(
-      flutter,
-      '{ "firstRun": false, "enabled": false }\n',
-    );
-    await fs.symlink(flutter, join(this.envSvc.userHome, '.flutter'));
-
-    const futterToolState = join(this.pathSvc.homePath, '.flutter_tool_state');
-    await this.pathSvc.writeFile(
-      futterToolState,
-      '{ "is-bot": false, "redisplay-welcome-message": false }\n',
-    );
     await fs.symlink(
-      futterToolState,
+      join(this.pathSvc.cachePath, '.flutter'),
+      join(this.envSvc.userHome, '.flutter'),
+    );
+
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.flutter_tool_state'),
       join(this.envSvc.userHome, '.flutter_tool_state'),
     );
+  }
 
-    await preparePubCache(this.envSvc, this.pathSvc);
+  override async initialize(): Promise<void> {
+    await initDartHome(this.pathSvc);
+    await initPubCache(this.pathSvc);
+
+    // for user
+    await this.pathSvc.writeFile(
+      join(this.pathSvc.cachePath, '.flutter'),
+      '{ "firstRun": false, "enabled": false }\n',
+    );
+
+    await this.pathSvc.writeFile(
+      join(this.pathSvc.cachePath, '.flutter_tool_state'),
+      '{ "is-bot": false, "redisplay-welcome-message": false }\n',
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import {
   parseBinaryName,
   pathExists,
   reset,
+  tool2path,
   validateSystem,
 } from '.';
 import { rootPath } from '~test/path';
@@ -85,11 +86,17 @@ UBUNTU_CODENAME=jammy`);
   });
 
   test('pathExists', async () => {
-    fsMocks.stat.mockResolvedValueOnce({ isFile: () => true });
+    fsMocks.stat.mockResolvedValueOnce({});
     expect(await pathExists('/etc/os-release')).toBe(true);
     expect(await pathExists('/etc/os-release')).toBe(false);
+    fsMocks.stat.mockResolvedValueOnce({ isFile: () => true });
+    expect(await pathExists('/etc/os-release', 'file')).toBe(true);
+    expect(await pathExists('/etc/os-release', 'file')).toBe(false);
     fsMocks.stat.mockResolvedValueOnce({ isDirectory: () => true });
-    expect(await pathExists('/etc/os-release', true)).toBe(true);
+    expect(await pathExists('/etc/os-release', 'dir')).toBe(true);
+    fsMocks.stat.mockResolvedValueOnce({ isSymbolicLink: () => true });
+    expect(await pathExists('/etc/os-release', 'symlink')).toBe(true);
+    expect(await pathExists('/etc/os-release', 'symlink')).toBe(false);
   });
 
   test('parseBinaryName', () => {
@@ -132,5 +139,9 @@ UBUNTU_CODENAME=jammy`);
       fsMocks.readFile.mockRejectedValueOnce(new Error());
       expect(await isDockerBuild()).toBe(false);
     });
+  });
+
+  test('tool2path', () => {
+    expect(tool2path('@microsoft/rush//path')).toBe('@microsoft__rush____path');
   });
 });

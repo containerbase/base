@@ -34,6 +34,8 @@ export const NoPrepareTools = [
   'yarn-slim',
 ];
 
+export const NoInitTools = [...NoPrepareTools];
+
 /**
  * Tools in this map are implicit mapped from `install-tool` to `install-<type>`.
  * So no need for an extra install service.

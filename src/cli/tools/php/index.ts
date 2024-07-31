@@ -27,7 +27,7 @@ export class PhpPrepareService extends BasePrepareService {
     super(pathSvc, envSvc);
   }
 
-  override async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
