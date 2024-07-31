@@ -65,6 +65,8 @@ export class InstallToolCommand extends Command {
       return MissingVersion;
     }
 
+    version = version.replace(/^v/, ''); // trim optional 'v' prefix
+
     const start = Date.now();
     let error = false;
     logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
