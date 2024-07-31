@@ -23,7 +23,7 @@ export class InstallKubectlService extends InstallToolBaseService {
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}${filename}.sha256`,
-      fileName: `${filename}-${version}.sha256`,
+      fileName: `${filename}-v${version}-${this.envSvc.arch}.sha256`,
     });
     const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
       .split('\n')
@@ -32,7 +32,7 @@ export class InstallKubectlService extends InstallToolBaseService {
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
-      fileName: `${filename}-${version}`,
+      fileName: `${filename}-v${version}-${this.envSvc.arch}`,
       checksumType: 'sha256',
       expectedChecksum,
     });
