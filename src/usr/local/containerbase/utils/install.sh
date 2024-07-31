@@ -12,7 +12,18 @@ function install_v2_tool () {
   # shellcheck source=/dev/null
   . "${path}"
 
+  if [[ ! -f "$(get_tool_prep)" && "${NEEDS_PREPARE}" -eq 1 ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prep_tool
+  fi
+
   check_tool_requirements
+
+  # ensure the tool path exists
+  create_tool_path > /dev/null
 
   if ! check_tool_installed; then
     echo "installing v2 tool ${TOOL_NAME} v${TOOL_VERSION}"

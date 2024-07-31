@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
   local tool_path
@@ -21,7 +23,7 @@ function prepare_tool() {
     libyaml-0-2 \
     make \
     ;
-  tool_path=$(create_tool_path)
+  tool_path=$(find_tool_path)
 
   # Redirect gemrc
   path="$(get_home_path)/.gemrc"
@@ -72,15 +74,6 @@ function install_tool () {
   local versioned_tool_path
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   arch=$(uname -p)
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"

@@ -29,6 +29,8 @@ export TEMP_DIR=/tmp
 # used to source helper from tools
 export CONTAINERBASE_DIR=/usr/local/containerbase
 
+export TOOL_PREP_DIR=/var/lib/containerbase/tool.prep.d
+
 # Used to find matching tool downloads
 ARCHITECTURE=$(uname -p)
 export ARCHITECTURE

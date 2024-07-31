@@ -35,7 +35,7 @@ function link_tool () {
 
 # Installs needed packages to make the tool runtime installable
 function prepare_tool() {
-  echo "'prepare_tool' not defined for tool ${TOOL_NAME}"
+  true
 }
 
 # Called after install_tool and link_tool. It's always called.

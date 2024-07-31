@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 # sets the correct shebang for python
 fix_python_shebangs() {
   # https://github.com/koalaman/shellcheck/wiki/SC2044
@@ -40,7 +42,7 @@ function prepare_tool() {
     libpq-dev \
     ;
 
-  tool_path=$(create_tool_path)
+  tool_path=$(find_tool_path)
 
   # Workaround for compatibillity for Python hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/python" ]; then
@@ -64,15 +66,6 @@ function install_tool () {
   local checksum_exists
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${name} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)

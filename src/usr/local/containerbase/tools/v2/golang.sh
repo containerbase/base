@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
 
 function prepare_tool() {
   # go suggests: git svn bzr mercurial
@@ -13,7 +14,6 @@ function prepare_tool() {
 
   chown -R "${USER_ID}" "${go_path}"
   chmod -R g+w "${go_path}"
-  create_tool_path > /dev/null
 }
 
 function install_tool () {
@@ -26,14 +26,6 @@ function install_tool () {
   local name=${TOOL_NAME}
   local version=${TOOL_VERSION}
   local versioned_tool_path
-
-  if [[ ! -d "$(find_tool_path)" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-  fi
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
 

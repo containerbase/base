@@ -27,6 +27,14 @@ function prepare_tools () {
     exit 1
   fi
 
+  prep_tool
+}
+
+function prep_tool () {
+  # ensure tool path exists
+  create_tool_path > /dev/null
   # prepare tool
   prepare_tool
+  # set tool preped
+  set_tool_prep
 }

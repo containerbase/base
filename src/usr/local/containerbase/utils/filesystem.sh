@@ -76,6 +76,8 @@ function setup_directories () {
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${home_path}"/{.cache,.config,.local}
 
+  create_folder "$(get_tool_prep_path)" 755
+
   # symlink v2 tools bin and lib
   rm -rf "${BIN_DIR}" "${LIB_DIR}"
   ln -sf "${ROOT_DIR}/bin" "${BIN_DIR}"
@@ -170,6 +172,23 @@ function get_umask () {
 # Gets the path to the containerbase folder
 function get_containerbase_path () {
   echo "${CONTAINERBASE_DIR}"
+}
+
+# Gets the path to the cache folder
+function get_tool_prep_path () {
+  echo "${TOOL_PREP_DIR}"
+}
+
+function set_tool_prep () {
+  if [[ ! -f "$(get_tool_prep_path)/${TOOL_NAME}" ]]; then
+    touch "$(get_tool_prep_path)/${TOOL_NAME}"
+  fi
+}
+
+function get_tool_prep () {
+  if [[ -f "$(get_tool_prep_path)/${TOOL_NAME}" ]]; then
+    echo "$(get_tool_prep_path)/${TOOL_NAME}"
+  fi
 }
 
 # Own the file by default user and make it writable for root group

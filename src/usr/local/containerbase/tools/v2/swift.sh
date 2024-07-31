@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
   local tool_path
@@ -66,8 +68,6 @@ function prepare_tool() {
       exit 1
     ;;
   esac
-
-  create_tool_path > /dev/null
 }
 
 function install_tool () {
@@ -84,16 +84,6 @@ function install_tool () {
   local version=$TOOL_VERSION
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
-
 
   # shellcheck source=/dev/null
   VERSION_ID=$(. /etc/os-release && echo "${VERSION_ID}")
