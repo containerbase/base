@@ -51,7 +51,10 @@ export class HelmfileInstallService extends InstallToolBaseService {
       this.pathSvc.versionedToolPath(this.name, version),
       'bin',
     );
-    await this.shellwrapper({ srcDir: src });
+    await this.shellwrapper({
+      srcDir: src,
+      exports: 'HELMFILE_UPGRADE_NOTICE_DISABLED=1',
+    });
   }
 
   override async test(_version: string): Promise<void> {
