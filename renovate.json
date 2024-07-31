@@ -51,7 +51,7 @@
     {
       "description": "Don't separate minor and patch updates in tests",
       "matchPaths": ["test/**"],
-      "matchPackageNames": [
+      "matchDepNames": [
         "bazelisk",
         "bun",
         "bundler",
@@ -87,7 +87,7 @@
     {
       "description": "Automerge test selected minor updates in tests",
       "matchPaths": ["test/**"],
-      "matchPackageNames": [
+      "matchDepNames": [
         "bazelisk",
         "bun",
         "bundler",
@@ -123,7 +123,7 @@
     },
     {
       "description": "Trigger fix release for git updates",
-      "matchPackageNames": ["git"],
+      "matchDepNames": ["git"],
       "semanticCommitType": "fix",
       "stabilityDays": 5
     },
@@ -146,7 +146,7 @@
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
       "matchPaths": ["test/**"],
-      "matchPackageNames": ["!git"],
+      "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },
@@ -154,12 +154,12 @@
       "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
       "matchPaths": ["test/**"],
       "matchUpdateTypes": ["major"],
-      "matchPackageNames": ["!git"],
+      "matchDepeNames": ["!git"],
       "additionalBranchPrefix": "test-major-"
     },
     {
       "description": "Update some deps only weekly",
-      "matchPackageNames": ["checkov", "renovate"],
+      "matchDepNames": ["checkov", "renovate"],
       "extends": ["schedule:weekly"],
       "automerge": true
     },
