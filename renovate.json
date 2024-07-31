@@ -154,7 +154,7 @@
       "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
       "matchPaths": ["test/**"],
       "matchUpdateTypes": ["major"],
-      "matchDepeNames": ["!git"],
+      "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-major-"
     },
     {
