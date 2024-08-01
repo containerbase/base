@@ -174,9 +174,14 @@ function get_containerbase_path () {
   echo "${CONTAINERBASE_DIR}"
 }
 
+# Gets the path to the var folder to persist prepared tools state
+function get_containerbase_var_path () {
+  echo "${CONTAINERBASE_VAR_DIR}"
+}
+
 # Gets the path to the cache folder
 function get_tool_prep_path () {
-  echo "${TOOL_PREP_DIR}"
+  echo "$(get_containerbase_var_path)/tool.prep.d"
 }
 
 function set_tool_prep () {
