@@ -8,6 +8,7 @@ RUN touch /.dummy
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -21,7 +22,6 @@ RUN install-containerbase
 
 COPY --chown=1000:0 test/python/test test
 WORKDIR /test
-
 
 #--------------------------------------
 # build

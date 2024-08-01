@@ -28,6 +28,10 @@ variable "CONTAINERBASE_DEBUG" {
   default = ""
 }
 
+variable "CONTAINERBASE_LOG_LEVEL" {
+  default = ""
+}
+
 variable "GITHUB_TOKEN" {
   default = ""
 }
@@ -48,11 +52,12 @@ group "test-distro" {
 target "settings" {
   context = "."
   args = {
-    APT_HTTP_PROXY        = "${APT_HTTP_PROXY}"
-    CONTAINERBASE_CDN     = "${CONTAINERBASE_CDN}"
-    CONTAINERBASE_DEBUG   = "${CONTAINERBASE_DEBUG}"
-    CONTAINERBASE_VERSION = "${CONTAINERBASE_VERSION}"
-    GITHUB_TOKEN          = "${GITHUB_TOKEN}"
+    APT_HTTP_PROXY          = "${APT_HTTP_PROXY}"
+    CONTAINERBASE_CDN       = "${CONTAINERBASE_CDN}"
+    CONTAINERBASE_DEBUG     = "${CONTAINERBASE_DEBUG}"
+    CONTAINERBASE_LOG_LEVEL = "${CONTAINERBASE_LOG_LEVEL}"
+    CONTAINERBASE_VERSION   = "${CONTAINERBASE_VERSION}"
+    GITHUB_TOKEN            = "${GITHUB_TOKEN}"
   }
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
