@@ -106,7 +106,12 @@ export async function cleanTmpFiles(
   tmp: string,
   dryRun = false,
 ): Promise<void> {
-  await deleteAsync(`${tmp}/**`, { dot: true, dryRun, force: true });
+  await deleteAsync([`**`, `!containerbase`], {
+    dot: true,
+    dryRun,
+    force: true,
+    cwd: tmp,
+  });
 }
 
 const buildKitMounts = [
