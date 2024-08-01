@@ -7,7 +7,7 @@ function install_v2_tool () {
 
   # load overrides needed for v2 tools
   # shellcheck source=/dev/null
-  . "/${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
+  . "${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
 
   # shellcheck source=/dev/null
   . "${path}"
@@ -17,13 +17,13 @@ function install_v2_tool () {
       echo "${TOOL_NAME} not prepared"
       exit 1
     fi
-    prep_tool
+    prepare_tool_wrapper
   fi
 
-  check_tool_requirements
+  # init tool if required
+  init_tool_wrapper
 
-  # ensure the tool path exists
-  create_tool_path > /dev/null
+  check_tool_requirements
 
   if ! check_tool_installed; then
     echo "installing v2 tool ${TOOL_NAME} v${TOOL_VERSION}"

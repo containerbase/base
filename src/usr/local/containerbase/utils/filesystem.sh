@@ -76,6 +76,8 @@ function setup_directories () {
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${home_path}"/{.cache,.config,.local}
 
+  create_folder "$(get_tool_init_path)" 775
+
   create_folder "$(get_tool_prep_path)" 755
 
   # symlink v2 tools bin and lib
@@ -179,7 +181,7 @@ function get_containerbase_var_path () {
   echo "${CONTAINERBASE_VAR_DIR}"
 }
 
-# Gets the path to the cache folder
+# Gets the path to the tool prep state folder
 function get_tool_prep_path () {
   echo "$(get_containerbase_var_path)/tool.prep.d"
 }
@@ -188,6 +190,11 @@ function set_tool_prep () {
   if [[ ! -f "$(get_tool_prep_path)/${TOOL_NAME}" ]]; then
     touch "$(get_tool_prep_path)/${TOOL_NAME}"
   fi
+}
+
+# Gets the path to the tool init state folder
+function get_tool_init_path () {
+  echo "$(get_install_dir)/tool.init.d"
 }
 
 function get_tool_prep () {

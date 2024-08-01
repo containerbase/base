@@ -6,7 +6,6 @@ set -e
 # shellcheck source=/dev/null
 . /usr/local/containerbase/util.sh
 
-require_root
 
 TOOLS=( "$@" )
 TOOL_PATH="${CONTAINERBASE_DIR}/tools/v2"
@@ -24,5 +23,5 @@ do
   # TODO: find better way to reset env
   # shellcheck source=/dev/null
   . "${CONTAINERBASE_DIR}/util.sh"
-  prepare_tools "${tool}"
+  init_tools "${tool}"
 done

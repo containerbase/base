@@ -20,6 +20,8 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 # shellcheck source=/dev/null
 . "${DIR}/utils/install.sh"
 # shellcheck source=/dev/null
+. "${DIR}/utils/init.sh"
+# shellcheck source=/dev/null
 . "${DIR}/utils/prepare.sh"
 # shellcheck source=/dev/null
 . "${DIR}/utils/user.sh"

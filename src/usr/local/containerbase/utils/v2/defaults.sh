@@ -38,6 +38,11 @@ function prepare_tool() {
   true
 }
 
+# creates required files and folders for the tool
+function init_tool() {
+  true
+}
+
 # Called after install_tool and link_tool. It's always called.
 # Allow tools to do some additional stuff, like overwriting additional shell wrapper
 function post_install () {

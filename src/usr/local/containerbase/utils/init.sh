@@ -1,12 +1,10 @@
 #!/bin/bash
 
 # Will install the tool in the given path according to the v2 tool spec
-function prepare_tools () {
+function init_tools () {
   local TOOL_NAME
   TOOL_NAME=${1}
   check TOOL_NAME true
-
-  require_root
 
   if [[ $(ignore_tool) -eq 1 ]]; then
     echo "Tool ignored - skipping: ${TOOL_NAME}"
@@ -27,22 +25,27 @@ function prepare_tools () {
     exit 1
   fi
 
-  prepare_tool_wrapper
+  init_tool_wrapper
 }
 
-function prepare_tool_wrapper () {
-  # force root check
-  require_root
+function init_tool_wrapper () {
+  local init_path
+  init_path=$(get_tool_init_path)
+
+  if [[ -f "${init_path}/${TOOL_NAME}" ]]; then
+    # tool already initialized
+    return
+  fi
+
+  if [[ ! -d "${init_path}" ]]; then
+    create_folder "${init_path}" 775
+  fi
 
   # ensure tool path exists
   create_tool_path > /dev/null
 
-  # prepare tool
-  prepare_tool
-
-  # set tool preped
-  set_tool_prep
-
   # init tool
-  init_tool_wrapper
+  init_tool
+
+  touch "${init_path}/${TOOL_NAME}"
 }
