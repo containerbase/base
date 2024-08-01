@@ -30,6 +30,7 @@ export TEMP_DIR=/tmp
 export CONTAINERBASE_DIR=/usr/local/containerbase
 
 export CONTAINERBASE_VAR_DIR=/var/lib/containerbase
+export CONTAINERBASE_TMP_DIR=/tmp/containerbase
 
 # Used to find matching tool downloads
 ARCHITECTURE=$(uname -p)

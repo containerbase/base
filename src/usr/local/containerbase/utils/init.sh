@@ -29,16 +29,10 @@ function init_tools () {
 }
 
 function init_tool_wrapper () {
-  local init_path
-  init_path=$(get_tool_init_path)
 
-  if [[ -f "${init_path}/${TOOL_NAME}" ]]; then
+  if [[ -f "$(get_tool_init)" ]]; then
     # tool already initialized
     return
-  fi
-
-  if [[ ! -d "${init_path}" ]]; then
-    create_folder "${init_path}" 775
   fi
 
   # ensure tool path exists
@@ -47,5 +41,5 @@ function init_tool_wrapper () {
   # init tool
   init_tool
 
-  touch "${init_path}/${TOOL_NAME}"
+  set_tool_init
 }

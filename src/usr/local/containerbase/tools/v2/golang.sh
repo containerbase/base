@@ -6,7 +6,7 @@ function prepare_tool() {
   # go suggests: git svn bzr mercurial
   apt_install bzr mercurial
 
-  go_path=$(get_home_path)/go
+  go_path=$(get_cache_path)/go
 
   ln -sf "${go_path}" "${USER_HOME}/go"
 

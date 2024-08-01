@@ -39,23 +39,22 @@ RUN set -ex; \
   [ $(stat --format '%a' "${USER_HOME}/.m2") -eq 777 ]; \
   true
 
-RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
-
 RUN set -ex; \
   ls -la /tmp; \
-  find /tmp -type f; \
-  exit 0
+  find /tmp -mindepth 1 -maxdepth 1; \
+  true
+
+RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre
 RUN install-tool java 21.0.4+7.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
-  find /tmp -type f; \
-  exit 0
+  true
 
 
-RUN [ "$(find /tmp -type f | wc -l)" -eq 0 ]
+RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 #--------------------------------------
 # test: Java 11 LTS + Gradle 6

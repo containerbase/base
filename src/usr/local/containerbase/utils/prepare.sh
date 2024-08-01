@@ -34,6 +34,11 @@ function prepare_tool_wrapper () {
   # force root check
   require_root
 
+  if [[ -f "$(get_tool_prep)" ]]; then
+    # tool already prepared
+    return
+  fi
+
   # ensure tool path exists
   create_tool_path > /dev/null
 

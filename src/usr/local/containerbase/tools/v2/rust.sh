@@ -5,7 +5,7 @@ export NEEDS_PREPARE=1
 function prepare_tool() {
   local cargo_home
 
-  cargo_home=$(get_home_path)/.cargo
+  cargo_home=$(get_cache_path)/.cargo
 
   ln -sf "${cargo_home}" "${USER_HOME}/.cargo"
   mkdir "${cargo_home}"
