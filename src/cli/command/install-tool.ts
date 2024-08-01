@@ -10,7 +10,7 @@ import {
 import { DeprecatedTools, ResolverMap } from '../tools';
 import { logger, validateVersion } from '../utils';
 import { MissingVersion } from '../utils/codes';
-import { getVersion } from './utils';
+import { getVersion, isToolIgnored } from './utils';
 
 export class InstallToolCommand extends Command {
   static override paths = [['install', 'tool'], ['it']];
@@ -39,6 +39,13 @@ export class InstallToolCommand extends Command {
   protected type: InstallToolType | undefined;
 
   override async execute(): Promise<number | void> {
+    const start = Date.now();
+
+    if (isToolIgnored(this.name)) {
+      logger.info({ tool: this.name }, 'tool ignored');
+      return 0;
+    }
+
     let version = this.version;
 
     let type = DeprecatedTools[this.name];
@@ -67,7 +74,6 @@ export class InstallToolCommand extends Command {
 
     version = version.replace(/^v/, ''); // trim optional 'v' prefix
 
-    const start = Date.now();
     let error = false;
     logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
     try {
