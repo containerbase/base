@@ -2,11 +2,11 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import { EnvService, HttpService, PathService } from '../services';
 
 @injectable()
-export class SopsInstallService extends InstallToolBaseService {
+export class SopsInstallService extends BaseInstallService {
   readonly name = 'sops';
 
   constructor(

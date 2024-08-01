@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import semver from 'semver';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
@@ -21,7 +21,7 @@ import { prepareDartHome, preparePubCache } from './utils';
 // https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 
 @injectable()
-export class PrepareDartService extends PrepareToolBaseService {
+export class DartPrepareService extends BasePrepareService {
   readonly name = 'dart';
 
   async execute(): Promise<void> {
@@ -31,7 +31,7 @@ export class PrepareDartService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class InstallDartService extends InstallToolBaseService {
+export class DartInstallService extends BaseInstallService {
   readonly name = 'dart';
 
   private get arch(): string {

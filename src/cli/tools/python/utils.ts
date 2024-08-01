@@ -3,12 +3,12 @@ import path from 'node:path';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService, VersionService } from '../../services';
 import { logger, parse } from '../../utils';
 
 @injectable()
-export abstract class InstallPythonBaseService extends InstallToolBaseService {
+export abstract class PythonBaseInstallService extends BaseInstallService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -33,7 +33,7 @@ export abstract class InstallPythonBaseService extends InstallToolBaseService {
 }
 
 @injectable()
-export abstract class InstallPipBaseService extends InstallPythonBaseService {
+export abstract class PipBaseInstallService extends PythonBaseInstallService {
   protected tool(_version: string): string {
     return this.name;
   }

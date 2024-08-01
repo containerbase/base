@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../../install-tool/tool-version-resolver';
 import { EnvService, PathService } from '../../../services';
 
@@ -13,7 +13,7 @@ export class ComposerVersionResolver extends ToolVersionResolver {
 }
 
 @injectable()
-export class ComposerInstallService extends InstallToolBaseService {
+export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
 
   constructor(

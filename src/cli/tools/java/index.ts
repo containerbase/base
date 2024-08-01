@@ -3,8 +3,8 @@ import path from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import semver from 'semver';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
@@ -20,7 +20,7 @@ import {
 } from './utils';
 
 @injectable()
-export class PrepareJavaService extends PrepareToolBaseService {
+export class JavaPrepareService extends BasePrepareService {
   readonly name: string = 'java';
 
   constructor(
@@ -112,17 +112,17 @@ export class PrepareJavaService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class PrepareJavaJdkService extends PrepareJavaService {
+export class JavaJdkPrepareService extends JavaPrepareService {
   override readonly name = 'java-jdk';
 }
 
 @injectable()
-export class PrepareJavaJreService extends PrepareJavaService {
+export class JavaJrePrepareService extends JavaPrepareService {
   override readonly name = 'java-jre';
 }
 
 @injectable()
-export class InstallJavaService extends InstallToolBaseService {
+export class JavaInstallService extends BaseInstallService {
   override name: string = 'java';
 
   constructor(
@@ -198,11 +198,11 @@ export class InstallJavaService extends InstallToolBaseService {
 }
 
 @injectable()
-export class InstallJavaJreService extends InstallJavaService {
+export class JavaJreInstallService extends JavaInstallService {
   override readonly name = 'java-jre';
 }
 
 @injectable()
-export class InstallJavaJdkService extends InstallJavaService {
+export class JavaJdkInstallService extends JavaInstallService {
   override readonly name = 'java-jdk';
 }

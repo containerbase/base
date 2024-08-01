@@ -1,56 +1,56 @@
 import { Container, injectable } from 'inversify';
 import { rootContainer } from '../services';
-import { InstallBazeliskService } from '../tools/bazelisk';
-import { InstallBunService } from '../tools/bun';
-import { InstallDartService } from '../tools/dart';
-import { InstallDockerService } from '../tools/docker';
-import { InstallDotnetService } from '../tools/dotnet';
-import { InstallFlutterService } from '../tools/flutter';
-import { InstallFluxService } from '../tools/flux';
-import { InstallGleamService } from '../tools/gleam';
+import { BazeliskInstallService } from '../tools/bazelisk';
+import { BunInstallService } from '../tools/bun';
+import { DartInstallService } from '../tools/dart';
+import { DockerInstallService } from '../tools/docker';
+import { DotnetInstallService } from '../tools/dotnet';
+import { FlutterInstallService } from '../tools/flutter';
+import { FluxInstallService } from '../tools/flux';
+import { GleamInstallService } from '../tools/gleam';
 import { HelmInstallService } from '../tools/helm';
 import { HelmfileInstallService } from '../tools/helmfile';
 import {
-  InstallJavaJdkService,
-  InstallJavaJreService,
-  InstallJavaService,
+  JavaInstallService,
+  JavaJdkInstallService,
+  JavaJreInstallService,
 } from '../tools/java';
 import {
+  GradleInstallService,
   GradleVersionResolver,
-  InstallGradleService,
 } from '../tools/java/gradle';
-import { InstallMavenService, MavenVersionResolver } from '../tools/java/maven';
+import { MavenInstallService, MavenVersionResolver } from '../tools/java/maven';
 import {
   JavaJdkVersionResolver,
   JavaJreVersionResolver,
   JavaVersionResolver,
 } from '../tools/java/resolver';
-import { InstallKubectlService } from '../tools/kubectl';
+import { KubectlInstallService } from '../tools/kubectl';
 import { KustomizeInstallService } from '../tools/kustomize';
-import { InstallNodeService } from '../tools/node';
+import { NodeInstallService } from '../tools/node';
 import {
-  InstallRenovateService,
-  InstallYarnService,
-  InstallYarnSlimService,
+  RenovateInstallService,
+  YarnInstallService,
+  YarnSlimInstallService,
 } from '../tools/node/npm';
 import {
   NodeVersionResolver,
   NpmVersionResolver,
   YarnVersionResolver,
 } from '../tools/node/resolver';
-import { InstallNpmBaseService } from '../tools/node/utils';
+import { NpmBaseInstallService } from '../tools/node/utils';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
 } from '../tools/php/composer';
 import { PipVersionResolver } from '../tools/python/pip';
-import { InstallPipBaseService } from '../tools/python/utils';
-import { InstallCocoapodsService } from '../tools/ruby/gem';
-import { InstallRubyBaseService } from '../tools/ruby/utils';
+import { PipBaseInstallService } from '../tools/python/utils';
+import { CocoapodsInstallService } from '../tools/ruby/gem';
+import { RubyBaseInstallService } from '../tools/ruby/utils';
 import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
 import { logger } from '../utils';
-import { InstallLegacyToolService } from './install-legacy-tool.service';
+import { LegacyToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
@@ -64,34 +64,34 @@ function prepareInstallContainer(): Container {
 
   // core services
   container.bind(InstallToolService).toSelf();
-  container.bind(InstallLegacyToolService).toSelf();
+  container.bind(LegacyToolInstallService).toSelf();
 
   // tool services
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallBazeliskService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallBunService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallCocoapodsService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallDartService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallDockerService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallDotnetService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallFlutterService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallFluxService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallGleamService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallGradleService);
+  container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DartInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(FluxInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GleamInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GradleInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(HelmInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(HelmfileInstallService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJreService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallJavaJdkService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallKubectlService);
+  container.bind(INSTALL_TOOL_TOKEN).to(JavaInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(JavaJreInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(JavaJdkInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(KubectlInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallMavenService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallNodeService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallRenovateService);
+  container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(RenovateInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnService);
-  container.bind(INSTALL_TOOL_TOKEN).to(InstallYarnSlimService);
+  container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
 
   logger.trace('preparing install container done');
   return container;
@@ -130,7 +130,7 @@ export function installTool(
     switch (type) {
       case 'gem': {
         @injectable()
-        class InstallGenericGemService extends InstallRubyBaseService {
+        class InstallGenericGemService extends RubyBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -151,7 +151,7 @@ export function installTool(
       }
       case 'npm': {
         @injectable()
-        class InstallGenericNpmService extends InstallNpmBaseService {
+        class InstallGenericNpmService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -172,7 +172,7 @@ export function installTool(
       }
       case 'pip': {
         @injectable()
-        class InstallGenericNpmService extends InstallPipBaseService {
+        class InstallGenericNpmService extends PipBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {

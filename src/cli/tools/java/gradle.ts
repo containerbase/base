@@ -4,7 +4,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import semver from 'semver';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
@@ -15,7 +15,7 @@ import {
 import { GradleVersionData } from './schema';
 
 @injectable()
-export class InstallGradleService extends InstallToolBaseService {
+export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
 
   constructor(

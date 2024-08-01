@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService } from '../../services';
 
 @injectable()
-export class InstallBunService extends InstallToolBaseService {
+export class BunInstallService extends BaseInstallService {
   readonly name = 'bun';
 
   constructor(

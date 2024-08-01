@@ -5,14 +5,14 @@ import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService, VersionService } from '../../services';
 import { logger, parse, pathExists } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
-export abstract class InstallNodeBaseService extends InstallToolBaseService {
+export abstract class NodeBaseInstallService extends BaseInstallService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -78,7 +78,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 }
 
 @injectable()
-export abstract class InstallNpmBaseService extends InstallNodeBaseService {
+export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   protected tool(_version: string): string {
     return this.name;
   }

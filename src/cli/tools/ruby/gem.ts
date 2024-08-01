@@ -2,10 +2,10 @@ import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
 import { satisfies } from 'semver';
-import { InstallRubyBaseService } from './utils';
+import { RubyBaseInstallService } from './utils';
 
 @injectable()
-export class InstallCocoapodsService extends InstallRubyBaseService {
+export class CocoapodsInstallService extends RubyBaseInstallService {
   override readonly name: string = 'cocoapods';
 
   override async test(_version: string): Promise<void> {

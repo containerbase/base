@@ -3,19 +3,19 @@ import { inject, injectable, multiInject, optional } from 'inversify';
 import { prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { InstallLegacyToolService } from './install-legacy-tool.service';
-import type { InstallToolBaseService } from './install-tool-base.service';
+import type { BaseInstallService } from './base-install.service';
+import { LegacyToolInstallService } from './install-legacy-tool.service';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
 @injectable()
 export class InstallToolService {
   constructor(
-    @inject(InstallLegacyToolService)
-    private legacySvc: InstallLegacyToolService,
+    @inject(LegacyToolInstallService)
+    private legacySvc: LegacyToolInstallService,
     @multiInject(INSTALL_TOOL_TOKEN)
     @optional()
-    private toolSvcs: InstallToolBaseService[] = [],
+    private toolSvcs: BaseInstallService[] = [],
     @inject(EnvService) private envSvc: EnvService,
     @inject(PathService) private pathSvc: PathService,
     @inject(VersionService) private versionSvc: VersionService,
@@ -117,7 +117,7 @@ export class InstallToolService {
   }
 
   private async linkAndTest(
-    toolSvc: InstallToolBaseService,
+    toolSvc: BaseInstallService,
     version: string,
   ): Promise<void> {
     if (version === (await this.versionSvc.find(toolSvc.name))) {

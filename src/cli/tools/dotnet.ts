@@ -2,19 +2,19 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
+import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
   AptService,
   CompressionService,
   EnvService,
   HttpService,
   PathService,
-} from '../../services';
-import { getDistro, parse } from '../../utils';
+} from '../services';
+import { getDistro, parse } from '../utils';
 
 @injectable()
-export class PrepareDotnetService extends PrepareToolBaseService {
+export class DotnetPrepareService extends BasePrepareService {
   readonly name = 'dotnet';
 
   constructor(
@@ -79,7 +79,7 @@ export class PrepareDotnetService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class InstallDotnetService extends InstallToolBaseService {
+export class DotnetInstallService extends BaseInstallService {
   readonly name = 'dotnet';
 
   private get arch(): string {

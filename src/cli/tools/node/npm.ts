@@ -2,10 +2,10 @@ import { execa } from 'execa';
 import { injectable } from 'inversify';
 import { satisfies } from 'semver';
 import { logger, parse } from '../../utils';
-import { InstallNpmBaseService } from './utils';
+import { NpmBaseInstallService } from './utils';
 
 @injectable()
-export class InstallRenovateService extends InstallNpmBaseService {
+export class RenovateInstallService extends NpmBaseInstallService {
   override readonly name: string = 'renovate';
 
   override prepareEnv(version: string, tmp: string): NodeJS.ProcessEnv {
@@ -22,7 +22,7 @@ export class InstallRenovateService extends InstallNpmBaseService {
 }
 
 @injectable()
-export class InstallYarnService extends InstallNpmBaseService {
+export class YarnInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn';
 
   protected override tool(version: string): string {
@@ -40,7 +40,7 @@ export class InstallYarnService extends InstallNpmBaseService {
 }
 
 @injectable()
-export class InstallYarnSlimService extends InstallNpmBaseService {
+export class YarnSlimInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn-slim';
 
   protected override tool(): string {

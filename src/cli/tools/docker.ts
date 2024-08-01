@@ -2,17 +2,17 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
+import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
-} from '../../services';
+} from '../services';
 
 @injectable()
-export class PrepareDockerService extends PrepareToolBaseService {
+export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
   async execute(): Promise<void> {
@@ -22,7 +22,7 @@ export class PrepareDockerService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class InstallDockerService extends InstallToolBaseService {
+export class DockerInstallService extends BaseInstallService {
   readonly name = 'docker';
 
   private get arch(): string {

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
@@ -15,7 +15,7 @@ import type { HttpChecksumType } from '../../services/http.service';
 import { logger, parse } from '../../utils';
 
 @injectable()
-export class InstallMavenService extends InstallToolBaseService {
+export class MavenInstallService extends BaseInstallService {
   readonly name = 'maven';
 
   constructor(

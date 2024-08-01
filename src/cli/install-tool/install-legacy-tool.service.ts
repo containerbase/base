@@ -7,7 +7,7 @@ import { logger } from '../utils';
 const defaultPipRegistry = 'https://pypi.org/simple/';
 
 @injectable()
-export class InstallLegacyToolService {
+export class LegacyToolInstallService {
   constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
 
   async execute(tool: string, version: string): Promise<void> {

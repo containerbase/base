@@ -5,7 +5,7 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { sort } from 'semver';
 import { z } from 'zod';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
@@ -17,7 +17,7 @@ import type { HttpChecksumType } from '../../services/http.service';
 import { logger } from '../../utils';
 
 @injectable()
-export class ComposerInstallService extends InstallToolBaseService {
+export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
 
   constructor(

@@ -3,8 +3,8 @@ import { inject, injectable, multiInject, optional } from 'inversify';
 import { EnvService, PathService } from '../services';
 import { NoPrepareTools } from '../tools';
 import { cleanAptFiles, cleanTmpFiles, logger } from '../utils';
+import type { BasePrepareService } from './base-prepare.service';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
-import type { PrepareToolBaseService } from './prepare-tool-base.service';
 
 export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');
 
@@ -15,7 +15,7 @@ export class PrepareToolService {
     private legacySvc: PrepareLegacyToolsService,
     @multiInject(PREPARE_TOOL_TOKEN)
     @optional()
-    private toolSvcs: PrepareToolBaseService[] = [],
+    private toolSvcs: BasePrepareService[] = [],
     @inject(PathService) private pathSvc: PathService,
     @inject(EnvService) private envSvc: EnvService,
   ) {}

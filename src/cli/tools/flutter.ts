@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { CleanOptions, ResetMode, simpleGit } from 'simple-git';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
+import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
@@ -15,7 +15,7 @@ import { logger } from '../utils';
 import { prepareDartHome, preparePubCache } from './dart/utils';
 
 @injectable()
-export class PrepareFlutterService extends PrepareToolBaseService {
+export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
   override async execute(): Promise<void> {
@@ -50,7 +50,7 @@ export class PrepareFlutterService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class InstallFlutterService extends InstallToolBaseService {
+export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 
   private get ghArch(): string {

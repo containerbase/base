@@ -2,16 +2,16 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
-} from '../../services';
+} from '../services';
 
 @injectable()
-export class InstallFluxService extends InstallToolBaseService {
+export class FluxInstallService extends BaseInstallService {
   readonly name = 'flux';
 
   private get arch(): string {

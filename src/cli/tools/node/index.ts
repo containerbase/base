@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
@@ -13,14 +13,14 @@ import {
 } from '../../services';
 import { getDistro, parse } from '../../utils';
 import {
-  InstallNodeBaseService,
+  NodeBaseInstallService,
   prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
 } from './utils';
 
 @injectable()
-export class PrepareNodeService extends PrepareToolBaseService {
+export class NodePrepareService extends BasePrepareService {
   override name = 'node';
   override async execute(): Promise<void> {
     await prepareNpmCache(this.pathSvc);
@@ -36,7 +36,7 @@ export class PrepareNodeService extends PrepareToolBaseService {
 }
 
 @injectable()
-export class InstallNodeService extends InstallNodeBaseService {
+export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
 
   private get nodeArch(): string {

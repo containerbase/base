@@ -3,14 +3,14 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService, VersionService } from '../../services';
 import { logger } from '../../utils';
 
 const defaultRegistry = 'https://rubygems.org/';
 
 @injectable()
-export abstract class InstallRubyBaseService extends InstallToolBaseService {
+export abstract class RubyBaseInstallService extends BaseInstallService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,

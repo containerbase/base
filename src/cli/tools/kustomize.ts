@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
@@ -11,7 +11,7 @@ import {
 } from '../services';
 
 @injectable()
-export class KustomizeInstallService extends InstallToolBaseService {
+export class KustomizeInstallService extends BaseInstallService {
   readonly name = 'kustomize';
 
   constructor(

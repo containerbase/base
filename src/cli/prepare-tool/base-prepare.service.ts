@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { EnvService, PathService } from '../services';
 
 @injectable()
-export abstract class PrepareToolBaseService {
+export abstract class BasePrepareService {
   abstract readonly name: string;
 
   constructor(

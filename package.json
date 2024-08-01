@@ -19,6 +19,7 @@
     "lint:types": "run-p 'lint:types:*'",
     "lint:types:default": "tsc",
     "lint:types:dist": "tsc -p tsconfig.dist.json",
+    "lint-fix": "run-s prettier-fix eslint-fix",
     "prepare": "husky",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "prettier": "prettier --cache -c -u \"**/*.*\"",

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import semver from 'semver';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
@@ -12,7 +12,7 @@ import {
 } from '../services';
 
 @injectable()
-export class InstallGleamService extends InstallToolBaseService {
+export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 
   private get ghArch(): string {

@@ -21,7 +21,7 @@ export interface ShellWrapperConfig {
 }
 
 @injectable()
-export abstract class InstallToolBaseService {
+export abstract class BaseInstallService {
   abstract readonly name: string;
 
   constructor(
