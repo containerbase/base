@@ -53,21 +53,17 @@ export abstract class InstallPipBaseService extends InstallPythonBaseService {
 
     prefix = path.join(prefix, pythonVersion);
     await fs.mkdir(prefix);
-    let res = await execa(
-      'python',
-      ['-m', 'virtualenv', '--no-periodic-update', prefix],
-      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
-    );
+    await this.createVirtualenv(prefix, env);
+    await this.installPackage(version, pythonVersion, env, prefix);
+  }
 
-    if (res.failed) {
-      logger.warn(`Python virtualenv error:\n${res.all}`);
-      await fs.rm(prefix, { recursive: true, force: true });
-      throw new Error('python virtualenv command failed');
-    } else {
-      logger.trace(`python virtualenv:\n${res.all}`);
-    }
-
-    res = await execa(
+  private async installPackage(
+    version: string,
+    pythonVersion: string,
+    env: NodeJS.ProcessEnv,
+    prefix: string,
+  ): Promise<void> {
+    const res = await execa(
       this.getPython(version, pythonVersion),
       [
         '-W',
@@ -91,6 +87,25 @@ export abstract class InstallPipBaseService extends InstallPythonBaseService {
       throw new Error('pip install command failed');
     } else {
       logger.trace(`pip install:\n${res.all}`);
+    }
+  }
+
+  private async createVirtualenv(
+    prefix: string,
+    env: NodeJS.ProcessEnv,
+  ): Promise<void> {
+    const res = await execa(
+      'python',
+      ['-m', 'virtualenv', '--no-periodic-update', prefix],
+      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
+    );
+
+    if (res.failed) {
+      logger.warn(`Python virtualenv error:\n${res.all}`);
+      await fs.rm(prefix, { recursive: true, force: true });
+      throw new Error('python virtualenv command failed');
+    } else {
+      logger.trace(`python virtualenv:\n${res.all}`);
     }
   }
 
@@ -122,7 +137,7 @@ export abstract class InstallPipBaseService extends InstallPythonBaseService {
       const pkg = parseIni(entryPoints);
 
       if (pkg.console_scripts) {
-        for (const [name] of Object.entries(pkg.console_scripts)) {
+        for (const name of Object.keys(pkg.console_scripts)) {
           await this.shellwrapper({
             srcDir: src,
             name,
