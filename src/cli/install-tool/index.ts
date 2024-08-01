@@ -1,5 +1,6 @@
 import { Container, injectable } from 'inversify';
 import { rootContainer } from '../services';
+import { ResolverMap } from '../tools';
 import { BazeliskInstallService } from '../tools/bazelisk';
 import { BunInstallService } from '../tools/bun';
 import { DartInstallService } from '../tools/dart';
@@ -184,6 +185,10 @@ export function installTool(
               // some pip packages may not have a `--version` flag
               await super.test(version);
             } catch (err) {
+              if (ResolverMap[tool] === 'pip') {
+                // those tools are known and should work
+                throw err;
+              }
               logger.debug(err);
             }
           }

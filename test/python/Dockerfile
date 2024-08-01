@@ -51,6 +51,8 @@ FROM build AS pipenv
 
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.0.1
+# renovate: datasource=pypi
+RUN install-tool pipenv 2024.0.1
 
 USER 1000
 
@@ -59,6 +61,9 @@ USER 1000
 #--------------------------------------
 FROM build AS poetry
 
+
+# renovate: datasource=pypi
+RUN install-tool poetry 1.8.3
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
 
@@ -260,7 +265,7 @@ RUN set -ex; \
 #--------------------------------------
 # test copier: copier
 #--------------------------------------
-FROM build as test-copier
+FROM build AS test-copier
 
 USER 1000
 

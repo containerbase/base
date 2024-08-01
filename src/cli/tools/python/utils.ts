@@ -133,8 +133,11 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
       'entry_points.txt',
     );
 
+    logger.trace({ entryPoints }, 'entry_points');
+
     if (await this.pathSvc.fileExists(entryPoints)) {
-      const pkg = parseIni(entryPoints);
+      const pkg = parseIni(await fs.readFile(entryPoints, 'utf-8'));
+      logger.trace({ pkg }, 'entry_points');
 
       if (pkg.console_scripts) {
         for (const name of Object.keys(pkg.console_scripts)) {
@@ -144,14 +147,16 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
             extraToolEnvs: ['python'],
           });
         }
+        return;
       }
-    } else {
-      await this.shellwrapper({
-        srcDir: src,
-        name: this.name,
-        extraToolEnvs: ['python'],
-      });
     }
+
+    // fallback to the tool name
+    await this.shellwrapper({
+      srcDir: src,
+      name: this.name,
+      extraToolEnvs: ['python'],
+    });
   }
 
   override async test(_version: string): Promise<void> {
@@ -182,12 +187,12 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   protected async getPythonVersion(): Promise<string> {
-    const nodeVersion = await this.versionSvc.find('python');
+    const version = await this.versionSvc.find('python');
 
-    if (!nodeVersion) {
+    if (!version) {
       throw new Error('Python not installed');
     }
-    return nodeVersion;
+    return version;
   }
 
   protected getAdditionalArgs(
@@ -218,14 +223,14 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     pythonVersion: string,
     file = 'WHEEL',
   ): string {
-    const pVer = pythonVersion.replace(/\.\d+/g, '');
+    const pVer = parse(pythonVersion);
     return path.join(
       this.pathSvc.versionedToolPath(this.name, version),
       pythonVersion,
       'lib',
-      `python${pVer}`,
+      `python${pVer.major}.${pVer.minor}`,
       'site-packages',
-      `${this.tool(version)}-${version}.dist-info`,
+      `${this.tool(version).replaceAll(/[-_.]+/g, '_')}-${version}.dist-info`,
       file,
     );
   }
