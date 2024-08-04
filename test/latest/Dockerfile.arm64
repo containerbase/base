@@ -43,7 +43,7 @@ RUN install-tool bun 1.1.21
 FROM base AS test-gleam
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.4.0
+RUN install-tool gleam 1.4.1
 
 #--------------------------------------
 # Image: docker
