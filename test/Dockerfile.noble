@@ -59,7 +59,7 @@ RUN install-tool flux v2.3.0
 RUN install-tool git-lfs v3.5.1
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.4.0
+RUN install-tool gleam 1.4.1
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool golang 1.22.5
