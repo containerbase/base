@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from 'vitest';
-import { isValid, parse, validateSemver, validateVersion } from './versions';
+import { describe, expect, test } from 'vitest';
+import { isValid, parse } from './versions';
 
 describe('versions', () => {
   test('isValid', () => {
@@ -10,29 +10,5 @@ describe('versions', () => {
   test('parse', () => {
     expect(parse('1.0.0')).not.toBeNull();
     expect(() => parse('abc')).toThrow('Invalid version: abc');
-  });
-
-  test('validateSemver', () => {
-    expect(validateSemver()('1.0.0', {})).toBe(true);
-    expect(
-      validateSemver()('1.0.0', { coercion: vi.fn(), coercions: [] }),
-    ).toBe(true);
-
-    expect(validateSemver()('1.0.0', { coercions: [], errors: [] })).toBe(
-      false,
-    );
-    expect(validateSemver()('abc', { errors: [] })).toBe(false);
-  });
-
-  test('validateVersion', () => {
-    expect(validateVersion()('1.0.0', {})).toBe(true);
-    expect(
-      validateVersion()('v1.0.0', { coercion: vi.fn(), coercions: [] }),
-    ).toBe(true);
-
-    expect(validateVersion()('v1.0.0', { coercions: [], errors: [] })).toBe(
-      false,
-    );
-    // expect(validateVersion()('abc', { errors: [] })).toBe(false);
   });
 });

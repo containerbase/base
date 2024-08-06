@@ -1,14 +1,13 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import * as t from 'typanion';
 import {
   type InstallToolType,
   installTool,
   resolveVersion,
 } from '../install-tool';
 import { DeprecatedTools, ResolverMap } from '../tools';
-import { logger, validateVersion } from '../utils';
+import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
 import { getVersion, isToolIgnored } from './utils';
 
@@ -31,10 +30,7 @@ export class InstallToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
-  version = Option.String({
-    validator: t.cascade(t.isString(), validateVersion()),
-    required: false,
-  });
+  version = Option.String({ required: false });
 
   protected type: InstallToolType | undefined;
 
@@ -46,7 +42,7 @@ export class InstallToolCommand extends Command {
       return 0;
     }
 
-    let version = this.version;
+    let version = this.version?.replace(/^v/, ''); // trim optional 'v' prefix
 
     let type = DeprecatedTools[this.name];
 
@@ -59,7 +55,7 @@ export class InstallToolCommand extends Command {
     }
 
     if (!isNonEmptyStringAndNotWhitespace(version)) {
-      version = getVersion(this.name);
+      version = getVersion(this.name)?.replace(/^v/, ''); // trim optional 'v' prefix
     }
 
     logger.debug(
