@@ -40,6 +40,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
+import { PhpInstallService, PhpVersionResolver } from '../tools/php';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
@@ -99,6 +100,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(RenovateInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
@@ -127,6 +129,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
 
   logger.trace('preparing container done');

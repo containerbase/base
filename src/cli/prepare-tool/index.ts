@@ -10,6 +10,7 @@ import {
   JavaPrepareService,
 } from '../tools/java';
 import { NodePrepareService } from '../tools/node';
+import { PhpPrepareService } from '../tools/php';
 import { ConanPrepareService } from '../tools/python/conan';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
@@ -34,6 +35,7 @@ function prepareContainer(): Container {
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJdkPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(NodePrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(PhpPrepareService);
 
   logger.trace('preparing container done');
   return container;

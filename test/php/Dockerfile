@@ -73,9 +73,8 @@ RUN prepare-tool php
 
 USER 1000
 
-
-# renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.9
+# test without version
+RUN install-tool php
 
 # test without version
 RUN install-tool composer
