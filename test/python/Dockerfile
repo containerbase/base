@@ -90,9 +90,9 @@ RUN install-tool python 3.8.18
 RUN install-tool pip-tools 7.4.1
 
 #--------------------------------------
-# test poetry-a: build
+# test poetry-a: (rootless)
 #--------------------------------------
-FROM build AS test-poetry-a
+FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
@@ -101,20 +101,16 @@ RUN install-tool python 3.12.4
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
 
-USER 1000
 
 SHELL [ "/bin/sh", "-c" ]
 RUN python --version
 RUN poetry --version
 
-#--------------------------------------
-# test pipenv-a: pipenv
-#--------------------------------------
-FROM pipenv AS test-pipenv-a
-
-RUN set -ex; \
-  cd a; \
-  pipenv lock;
+RUN set -ex \
+  && cd c-poetry \
+  && poetry update --lock --no-interaction \
+  && poetry add h5py \
+  ;
 
 
 #--------------------------------------
@@ -181,22 +177,6 @@ RUN set -ex; \
 FROM build-rootless AS testb
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.0.1
-
-RUN set -ex; \
-  cd a; \
-  pipenv lock;
-
-# renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
-
-RUN set -ex \
-  && cd c-poetry \
-  && poetry update --lock --no-interaction \
-  && poetry add h5py \
-  ;
-
-# renovate: datasource=pypi
 RUN install-tool hashin 1.0.1
 
 RUN set -ex \
@@ -213,12 +193,20 @@ RUN install-tool checkov 3.2.217
 RUN install-tool python 3.7.17
 RUN install-tool checkov 2.3.298
 
-#--------------------------------------
-# test pipenv-b: pipenv (multiple python)
-#--------------------------------------
-FROM build AS test-pipenv-b
 
-USER 1000
+#--------------------------------------
+# test pipenv-a
+#--------------------------------------
+FROM pipenv AS test-pipenv-a
+
+RUN set -ex; \
+  cd a; \
+  pipenv lock;
+
+#--------------------------------------
+# test pipenv-b (rootless)
+#--------------------------------------
+FROM build-rootless AS test-pipenv-b
 
 # Do not update minor
 RUN install-tool python 3.8.13
@@ -235,11 +223,9 @@ RUN set -ex; \
   pipenv lock;
 
 #--------------------------------------
-# test pdm: pdm (multiple python)
+# test pdm
 #--------------------------------------
-FROM build AS test-pdm
-
-USER 1000
+FROM build-rootless AS test-pdm
 
 # renovate: datasource=pypi
 RUN install-tool pdm 2.17.3
@@ -263,47 +249,17 @@ RUN set -ex; \
     cat conan.lock
 
 #--------------------------------------
-# test copier: copier
+# test copier
 #--------------------------------------
-FROM build AS test-copier
-
-USER 1000
+FROM build-rootless AS test-copier
 
 # renovate: datasource=pypi
 RUN install-tool copier 9.3.1
 
 #--------------------------------------
-# test c: python2.7
-#--------------------------------------
-FROM build-rootless AS testc
-
-# test older python install
-RUN install-tool python 3.6.15
-
-# needs to be v2
-RUN install-tool python 2.7.18
-
-# don't change, never versions don't work on python 2.7
-RUN install-tool pipenv 2020.11.15
-RUN install-tool poetry 0.12.17
-RUN install-tool poetry 1.1.15
-RUN install-tool hashin 0.17.0
-RUN install-tool pip-tools 5.5.0
-
-# https://github.com/python-poetry/poetry/issues/3010
-RUN poetry config experimental.new-installer false
-
-RUN set -ex; \
-  poetry new poetry-demo; \
-  cd poetry-demo; \
-  poetry update --lock --no-interaction pytest; \
-  true
-
-
-#--------------------------------------
 # test install-pip
 #--------------------------------------
-FROM build-rootless AS testd
+FROM build-rootless AS test-other
 
 RUN install-pip checkov
 RUN install-pip copier
@@ -332,5 +288,4 @@ COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=test-pdm /.dummy /.dummy
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
+COPY --from=test-other /.dummy /.dummy
