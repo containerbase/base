@@ -21,7 +21,7 @@ export class PrepareToolService {
   ) {}
 
   async execute(tools: string[], dryRun = false): Promise<number | void> {
-    logger.debug(
+    logger.trace(
       { tools: this.toolSvcs.map((t) => t.name) },
       'supported tools',
     );
