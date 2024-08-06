@@ -59,7 +59,7 @@ export class PathService {
     }
     const parent = dirname(path);
     if (!(await pathExists(parent, true))) {
-      await this.createDir(parent, mode);
+      await this.createDir(parent, 0o775);
     }
     await fs.mkdir(path);
     await this.setOwner({ path, mode });
