@@ -37,7 +37,7 @@ RUN install-tool python 3.12.4
 #--------------------------------------
 FROM base AS build-rootless
 
-RUN prepare-tool python
+RUN prepare-tool python conan
 
 USER 1000
 
@@ -260,6 +260,8 @@ RUN install-tool copier 9.3.1
 # test install-pip
 #--------------------------------------
 FROM build-rootless AS test-other
+
+RUN install-tool conan
 
 RUN install-pip checkov
 RUN install-pip copier

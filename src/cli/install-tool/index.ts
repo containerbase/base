@@ -44,6 +44,10 @@ import {
   ComposerInstallService,
   ComposerVersionResolver,
 } from '../tools/php/composer';
+import {
+  ConanInstallService,
+  ConanVersionResolver,
+} from '../tools/python/conan';
 import { PipVersionResolver } from '../tools/python/pip';
 import { PipBaseInstallService } from '../tools/python/utils';
 import { CocoapodsInstallService } from '../tools/ruby/gem';
@@ -72,6 +76,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DartInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
@@ -107,6 +112,7 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
+  container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);

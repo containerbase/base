@@ -10,6 +10,7 @@ import {
   JavaPrepareService,
 } from '../tools/java';
 import { NodePrepareService } from '../tools/node';
+import { ConanPrepareService } from '../tools/python/conan';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
 import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
@@ -24,6 +25,7 @@ function prepareContainer(): Container {
   container.bind(PrepareLegacyToolsService).toSelf();
 
   // tool services
+  container.bind(PREPARE_TOOL_TOKEN).to(ConanPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DartPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DotnetPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DockerPrepareService);
