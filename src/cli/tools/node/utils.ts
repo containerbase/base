@@ -96,6 +96,8 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {
       prefix = await this.pathSvc.createVersionedToolPath(this.name, version);
+      // fix perms for later user installs
+      await this.pathSvc.setOwner({ path: prefix });
     }
 
     prefix = join(prefix, nodeVersion);

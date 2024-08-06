@@ -80,7 +80,7 @@ export class PathService {
     version: string,
   ): Promise<string> {
     const toolPath = this.versionedToolPath(tool, version);
-    await this.createDir(toolPath);
+    await this.createDir(toolPath, this.envSvc.umask);
     return toolPath;
   }
 
