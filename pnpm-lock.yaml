@@ -17,9 +17,6 @@ patchedDependencies:
   clipanion@3.2.1:
     hash: fhbb5gvkz3xnkjsqqxesufv7h4
     path: patches/clipanion@3.2.1.patch
-  esbuild-plugin-pino@2.1.1:
-    hash: ql5tvcjzmgrmlnnrpkanu5vzjy
-    path: patches/esbuild-plugin-pino@2.1.1.patch
 
 importers:
 
