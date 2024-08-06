@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { inject, injectable } from 'inversify';
 import { fileRights, logger, pathExists } from '../utils';
@@ -54,14 +54,20 @@ export class PathService {
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createDir(path: string, mode = 0o775): Promise<void> {
+    if (await pathExists(path, true)) {
+      return;
+    }
+    const parent = dirname(path);
+    if (!(await pathExists(parent, true))) {
+      await this.createDir(parent, mode);
+    }
     await fs.mkdir(path);
     await this.setOwner({ path, mode });
   }
 
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
-    await fs.mkdir(toolPath);
-    await fs.chmod(toolPath, 0o775);
+    await this.createDir(toolPath);
     return toolPath;
   }
 
@@ -74,8 +80,7 @@ export class PathService {
     version: string,
   ): Promise<string> {
     const toolPath = this.versionedToolPath(tool, version);
-    await fs.mkdir(toolPath);
-    await fs.chmod(toolPath, this.envSvc.umask);
+    await this.createDir(toolPath);
     return toolPath;
   }
 

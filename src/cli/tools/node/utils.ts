@@ -1,4 +1,4 @@
-import fs, { appendFile, chmod, mkdir, readFile } from 'node:fs/promises';
+import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
@@ -84,8 +84,8 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
-    const node = await this.getNodeVersion();
-    const npm = this.getNodeNpm(node);
+    const nodeVersion = await this.getNodeVersion();
+    const npm = this.getNodeNpm(nodeVersion);
     const tmp = await fs.mkdtemp(
       join(this.pathSvc.tmpDir, 'containerbase-npm-'),
     );
@@ -96,12 +96,10 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {
       prefix = await this.pathSvc.createVersionedToolPath(this.name, version);
-      // fix perms for later user installs
-      await chmod(prefix, 0o775);
     }
 
-    prefix = join(prefix, node);
-    await mkdir(prefix);
+    prefix = join(prefix, nodeVersion);
+    await this.pathSvc.createDir(prefix);
 
     const res = await execa(
       npm,
@@ -130,7 +128,9 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
     if (this.name === 'npm') {
-      const pkg = await readPackageJson(this.packageJsonPath(version, node));
+      const pkg = await readPackageJson(
+        this.packageJsonPath(version, nodeVersion),
+      );
       const ver = parse(pkg.version);
       if (ver.major < 7) {
         // update to latest node-gyp to fully support python3
