@@ -251,3 +251,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+
+  # Catch-all required check for test matrix
+  test-success:
+    needs:
+      - distro
+      - lang
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    if: always()
+    steps:
+      - name: Fail for failed or cancelled distro tests
+        if: |
+          needs.distro.result == 'failure' ||
+          needs.distro.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for failed or cancelled lang tests
+        if: |
+          needs.lang.result == 'failure' ||
+          needs.lang.result == 'skipped'
+        run: exit 1
