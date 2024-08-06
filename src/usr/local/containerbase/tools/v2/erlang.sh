@@ -2,6 +2,8 @@
 
 SEMVER_REGEX_ERLANG="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
+export NEEDS_PREPARE=1
+
 function check_semver_erlang () {
   if [[ ! "${1}" =~ ${SEMVER_REGEX_ERLANG} ]]; then
     echo Not a semver like version - aborting: "${1}"
@@ -35,7 +37,7 @@ function check_tool_requirements () {
 
 function prepare_tool() {
   local tool_path
-  tool_path=$(create_tool_path)
+  tool_path=$(find_tool_path)
   # Workaround for compatibillity for Erlang hardcoded paths, works for v22+
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/erlang" ]; then
     ln -sf "${tool_path}" /usr/local/erlang
@@ -55,15 +57,6 @@ function install_tool () {
   local checksum_exists
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${name} not prepared" >&2
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)

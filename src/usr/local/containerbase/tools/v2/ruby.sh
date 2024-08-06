@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
   local tool_path
@@ -21,10 +23,10 @@ function prepare_tool() {
     libyaml-0-2 \
     make \
     ;
-  tool_path=$(create_tool_path)
+  tool_path=$(find_tool_path)
 
   # Redirect gemrc
-  path="$(get_home_path)/.gemrc"
+  path="$(get_cache_path)/.gemrc"
   {
     printf -- "gem: --no-document\n"
   } > "${path}"
@@ -33,21 +35,21 @@ function prepare_tool() {
   ln -sf "${path}" "${USER_HOME}/.gemrc"
 
   # Redirect gem home
-  path="$(get_home_path)/.gem"
+  path="$(get_cache_path)/.gem"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
   chmod g+w "${path}"
   ln -sf "${path}" "${USER_HOME}/.gem"
 
   # Redirect cocoapods home
-  path="$(get_home_path)/.cocoapods"
+  path="$(get_cache_path)/.cocoapods"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
   chmod g+w "${path}"
   ln -sf "${path}" "${USER_HOME}/.cocoapods"
 
   # Redirect Library home
-  path="$(get_home_path)/Library"
+  path="$(get_cache_path)/Library"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
   chmod g+w "${path}"
@@ -72,15 +74,6 @@ function install_tool () {
   local versioned_tool_path
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   arch=$(uname -p)
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"

@@ -73,14 +73,6 @@ function install_java () {
 
   ssl_dir=$(get_ssl_path)
 
-  if [[ ! -f "${ssl_dir}/cacerts" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-  fi
-
   versioned_tool_path=$(create_versioned_tool_path)
   url=$(get_java_install_url "${TOOL_VERSION}" "${type}")
   file=$(get_from_url "${url}")

@@ -58,5 +58,4 @@ teardown() {
 
   run prepare_tool
   assert_success
-  assert_output --partial "not defined"
 }

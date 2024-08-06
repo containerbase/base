@@ -8,7 +8,7 @@ export NEEDS_PREPARE=1
 function get_architecture() {
   local architecture
   architecture="$(uname -p)"
-  
+
   case $architecture in
   "x86_64") echo "$architecture" ;;
   "aarch64") echo "$architecture" ;;
@@ -99,8 +99,6 @@ function prepare_tool () {
   set_conan_profile "${architecture}" "${distribution}"
 
   apt_install gcc g++ make cmake perl
-
-  create_tool_path > /dev/null
 }
 
 function link_tool () {

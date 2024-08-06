@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
   local tool_path
@@ -29,7 +31,6 @@ function prepare_tool() {
       exit 1
     ;;
   esac
-  tool_path=$(create_tool_path)
 }
 
 function install_tool () {
@@ -45,15 +46,6 @@ function install_tool () {
   local checksum_exists
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${name} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
