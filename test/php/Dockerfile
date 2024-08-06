@@ -26,7 +26,7 @@ WORKDIR /test
 #--------------------------------------
 # test: php 8.0
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
@@ -64,7 +64,7 @@ RUN composer --version
 #--------------------------------------
 # testd: php 8.0 (non-root)
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # no auto env for testing
 SHELL [ "/bin/sh", "-c" ]
@@ -103,7 +103,8 @@ RUN php --version
 RUN composer --version
 
 # test from getcomposer.org
-RUN install-tool composer 2.0.0
+# version 2.0.0 is broken
+#RUN install-tool composer 2.0.0
 
 #--------------------------------------
 # final

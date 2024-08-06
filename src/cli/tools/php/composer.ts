@@ -84,7 +84,7 @@ export class ComposerInstallService extends BaseInstallService {
       path = await this.pathSvc.createVersionedToolPath(this.name, version);
       path = join(path, 'bin');
       await fs.mkdir(path);
-      path = join(path, filename);
+      path = join(path, 'composer');
       await fs.cp(file, path);
       await fs.chmod(path, this.envSvc.umask);
     }
