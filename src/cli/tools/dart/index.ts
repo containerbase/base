@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
@@ -11,6 +10,7 @@ import {
   HttpService,
   PathService,
 } from '../../services';
+import { parse } from '../../utils';
 import { prepareDartHome, preparePubCache } from './utils';
 
 // Dart SDK sample urls
@@ -53,10 +53,8 @@ export class DartInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
-    const ver = semver.parse(version);
-    if (!ver) {
-      throw new Error(`Invalid version: ${version}`);
-    }
+    const ver = parse(version);
+
     if (ver.major < 2) {
       throw new Error(`Dart SDK version < v2 is not supported: ${version}`);
     }

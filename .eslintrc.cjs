@@ -88,9 +88,10 @@ module.exports = {
       {
         paths: [
           'nock',
+          'node:test',
           'parse-link-header',
           'path',
-          'node:test',
+          'semver',
           {
             name: 'vitest',
             importNames: ['it'],

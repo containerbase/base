@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { satisfies } from 'semver';
+import { semverSatisfies } from '../../utils';
 import { RubyBaseInstallService } from './utils';
 
 @injectable()
@@ -19,7 +19,7 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
     env: NodeJS.ProcessEnv,
   ): Promise<void> {
     // https://github.com/containerbase/base/issues/1547
-    if (!satisfies(version, '1.12.0 - 1.13.0')) {
+    if (!semverSatisfies(version, '1.12.0 - 1.13.0')) {
       return;
     }
 

@@ -1,7 +1,6 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { satisfies } from 'semver';
-import { logger, parse } from '../../utils';
+import { logger, parse, semverSatisfies } from '../../utils';
 import { NpmBaseInstallService } from './utils';
 
 @injectable()
@@ -11,7 +10,7 @@ export class RenovateInstallService extends NpmBaseInstallService {
   override prepareEnv(version: string, tmp: string): NodeJS.ProcessEnv {
     const env = super.prepareEnv(version, tmp);
 
-    if (satisfies(version, '<37.234.0')) {
+    if (semverSatisfies(version, '<37.234.0')) {
       env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
         'https://github.com/containerbase/node-re2-prebuild/releases/download',
       );

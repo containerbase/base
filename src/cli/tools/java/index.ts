@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
@@ -11,7 +10,7 @@ import {
   HttpService,
   PathService,
 } from '../../services';
-import { logger } from '../../utils';
+import { logger, parse } from '../../utils';
 import {
   createGradleSettings,
   createMavenSettings,
@@ -166,10 +165,10 @@ export class JavaInstallService extends BaseInstallService {
       strip: 1,
     });
 
-    const v = semver.parse(version);
+    const v = parse(version);
     // we've a different cacerts location in java 8 jdk
     const cacerts =
-      v?.major === 8 && this.name !== 'java-jre'
+      v.major === 8 && this.name !== 'java-jre'
         ? path.join(cwd, 'jre/lib/security/cacerts')
         : path.join(cwd, 'lib/security/cacerts');
     await fs.rm(cacerts);

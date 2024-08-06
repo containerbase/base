@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
@@ -10,6 +9,7 @@ import {
   HttpService,
   PathService,
 } from '../services';
+import { semverGte } from '../utils';
 
 @injectable()
 export class GleamInstallService extends BaseInstallService {
@@ -78,6 +78,6 @@ export class GleamInstallService extends BaseInstallService {
   }
 
   override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semver.gte(version, '0.19.0-rc1');
+    return (await super.validate(version)) && semverGte(version, '0.19.0-rc1');
   }
 }

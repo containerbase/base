@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { sort } from 'semver';
 import { z } from 'zod';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
@@ -14,7 +13,7 @@ import {
   PathService,
 } from '../../services';
 import type { HttpChecksumType } from '../../services/http.service';
-import { logger } from '../../utils';
+import { logger, semverSort } from '../../utils';
 
 @injectable()
 export class ComposerInstallService extends BaseInstallService {
@@ -128,5 +127,5 @@ const ComposerVersionsSchema = z
     stable: z.array(z.object({ version: z.string() })),
   })
   .transform(({ stable }) => {
-    return sort(stable.map((v) => v.version)).pop();
+    return semverSort(stable.map((v) => v.version)).pop();
   });

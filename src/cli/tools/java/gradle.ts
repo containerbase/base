@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
@@ -12,6 +11,7 @@ import {
   HttpService,
   PathService,
 } from '../../services';
+import { semverCoerce } from '../../utils';
 import { GradleVersionData } from './schema';
 
 @injectable()
@@ -60,7 +60,7 @@ export class GradleInstallService extends BaseInstallService {
   }
 
   override validate(version: string): Promise<boolean> {
-    return Promise.resolve(semver.coerce(version) !== null);
+    return Promise.resolve(semverCoerce(version) !== null);
   }
 
   private async readChecksum(url: string): Promise<string | undefined> {
