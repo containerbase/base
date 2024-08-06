@@ -98,12 +98,6 @@ export class FlutterInstallService extends BaseInstallService {
         version,
       );
       const git = simpleGit({ baseDir: path });
-      await git.clone('https://github.com/flutter/flutter.git', '.', {
-        '--filter': 'blob:none',
-        '--branch': 'stable',
-      });
-
-      await git.reset(ResetMode.HARD, [version]);
 
       await git.addConfig(
         'safe.directory',
@@ -111,6 +105,13 @@ export class FlutterInstallService extends BaseInstallService {
         true,
         this.envSvc.isRoot ? 'system' : 'global',
       );
+
+      await git.clone('https://github.com/flutter/flutter.git', '.', {
+        '--filter': 'blob:none',
+        '--branch': 'stable',
+      });
+
+      await git.reset(ResetMode.HARD, [version]);
 
       // init flutter
       await execa(`./bin/flutter`, ['--version'], { cwd: path });
