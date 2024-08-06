@@ -5,7 +5,7 @@ import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { logger, parse } from '../../utils';
+import { logger, parse, semverGte } from '../../utils';
 
 @injectable()
 export abstract class PythonBaseInstallService extends BaseInstallService {
@@ -196,7 +196,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   protected getAdditionalArgs(
-    _version: string,
+    version: string,
     pythonVersion: string,
   ): string[] {
     switch (this.name) {
@@ -213,6 +213,11 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
           return ['keyrings.envvars>=1.1.0'];
         }
         break;
+      }
+      case 'poetry': {
+        if (semverGte(version, '1.2.1')) {
+          return ['poetry-plugin-pypi-mirror'];
+        }
       }
     }
     return [];

@@ -1,5 +1,8 @@
 import semver, { type SemVer } from 'semver';
+import semverGte from 'semver/functions/gte';
 import { type StrictValidator, makeValidator } from 'typanion';
+
+export { semverGte };
 
 export function isValid(version: string): boolean {
   return semver.valid(version) !== null;
