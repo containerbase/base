@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectable } from 'inversify';
 import { semverSatisfies } from '../../utils';
-import { RubyBaseInstallService } from './utils';
+import { RubyBaseInstallService, RubyGemVersionResolver } from './utils';
 
 @injectable()
 export class CocoapodsInstallService extends RubyBaseInstallService {
@@ -53,4 +53,9 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
       { stdio: ['inherit', 'inherit', 1], env, cwd: this.pathSvc.installDir },
     );
   }
+}
+
+@injectable()
+export class CocoapodsVersionResolver extends RubyGemVersionResolver {
+  override readonly tool: string = 'cocoapods';
 }

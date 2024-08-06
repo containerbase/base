@@ -50,8 +50,14 @@ import {
 } from '../tools/python/conan';
 import { PipVersionResolver } from '../tools/python/pip';
 import { PipBaseInstallService } from '../tools/python/utils';
-import { CocoapodsInstallService } from '../tools/ruby/gem';
-import { RubyBaseInstallService } from '../tools/ruby/utils';
+import {
+  CocoapodsInstallService,
+  CocoapodsVersionResolver,
+} from '../tools/ruby/cocoapods';
+import {
+  RubyBaseInstallService,
+  RubyGemVersionResolver,
+} from '../tools/ruby/utils';
 import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
 import { logger } from '../utils';
@@ -112,6 +118,7 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
+  container.bind(TOOL_VERSION_RESOLVER).to(CocoapodsVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
@@ -216,27 +223,14 @@ export async function resolveVersion(
 
   if (type) {
     switch (type) {
-      // case 'gem': {
-      //   @injectable()
-      //   class InstallGenericGemService extends InstallRubyBaseService {
-      //     override readonly name: string = tool;
-
-      //     override needsPrepare(): boolean {
-      //       return false;
-      //     }
-
-      //     override async test(version: string): Promise<void> {
-      //       try {
-      //         // some npm packages may not have a `--version` flag
-      //         await super.test(version);
-      //       } catch (err) {
-      //         logger.debug(err);
-      //       }
-      //     }
-      //   }
-      //   container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericGemService);
-      //   break;
-      // }
+      case 'gem': {
+        @injectable()
+        class GenericRubyGemVersionResolver extends RubyGemVersionResolver {
+          override readonly tool: string = tool;
+        }
+        container.bind(TOOL_VERSION_RESOLVER).to(GenericRubyGemVersionResolver);
+        break;
+      }
       case 'npm': {
         @injectable()
         class GenericNpmVersionResolver extends NpmVersionResolver {

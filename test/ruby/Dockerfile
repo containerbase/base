@@ -128,16 +128,17 @@ RUN set -ex; \
   true
 
 #--------------------------------------
-# test: install-gem
+# test: install-gem, no version
 #--------------------------------------
 FROM build AS test-gem
 
 USER 1000
 
-# renovate: datasource=rubygems
-RUN install-gem rake 13.2.1
+RUN install-tool cocoapods
 
-RUN rake --help
+RUN install-gem rake
+
+RUN rake --version
 
 
 #--------------------------------------

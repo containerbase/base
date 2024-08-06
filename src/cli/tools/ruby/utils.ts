@@ -4,8 +4,10 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { EnvService, PathService, VersionService } from '../../services';
 import { logger } from '../../utils';
+import { RubyGemJson } from './schema';
 
 const defaultRegistry = 'https://rubygems.org/';
 
@@ -148,5 +150,20 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
       'specifications',
       `${this.name}-${version}.gemspec`,
     );
+  }
+}
+
+@injectable()
+export abstract class RubyGemVersionResolver extends ToolVersionResolver {
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (version === undefined || version === 'latest') {
+      const meta = RubyGemJson.parse(
+        await this.http.getJson(
+          `https://rubygems.org/api/v1/gems/${this.tool}.json`,
+        ),
+      );
+      return meta.version;
+    }
+    return version;
   }
 }
