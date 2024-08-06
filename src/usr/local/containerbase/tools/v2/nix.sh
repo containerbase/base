@@ -15,8 +15,12 @@ function install_tool() {
   #   exit 1
   # fi
 
+  if [[ (${MAJOR} -eq 2 && ${MINOR} -gt 23) || ${MAJOR} -gt 2 ]]; then
+    suffix=".nix"
+  fi
+
   arch=$(uname -m)
-  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic.${arch}-linux/latest/download-by-type/file/binary-dist")
+  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic${suffix}.${arch}-linux/latest/download-by-type/file/binary-dist")
 
   versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
