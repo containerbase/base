@@ -32,7 +32,7 @@ FROM base AS testa
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.9
+RUN install-tool php 8.3.10
 
 
 # renovate: datasource=github-releases packageName=composer/composer
