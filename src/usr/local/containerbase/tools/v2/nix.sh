@@ -18,7 +18,7 @@ function install_tool() {
 
   arch=$(uname -m)
 
-  if [[ ${MAJOR} -eq 2 && ${MINOR} -lt 24 ]]; then
+  if [[ ${MAJOR} -lt 2 || (${MAJOR} -eq 2 && ${MINOR} -lt 24) ]]; then
     build_path="buildStatic.${arch}-linux"
   else
     build_path="buildStatic.nix.${arch}-linux"
