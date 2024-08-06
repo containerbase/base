@@ -478,6 +478,12 @@ RUN set -ex; \
   node -e "new require('re2')('.*').exec('test'); console.log('re2 usable')"; \
   true
 
+
+RUN set -ex; \
+  install-npm @microsoft/rush; \
+  rush -h; \
+  true
+
 #--------------------------------------
 # final
 #--------------------------------------
