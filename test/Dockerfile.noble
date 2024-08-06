@@ -118,7 +118,7 @@ RUN install-tool elixir 1.17.2
 #--------------------------------------
 FROM build AS test-java
 
-# renovate: datasource=adoptium-java packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre
 RUN install-tool java 21.0.4+7.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 8.9
