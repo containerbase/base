@@ -35,53 +35,9 @@ FROM base AS build
 RUN prepare-tool flutter
 
 #--------------------------------------
-# test: flutter 1.x (root)
-#--------------------------------------
-FROM build AS testa
-
-# EOL, use source, not prebuild
-RUN install-tool flutter 1.22.5
-
-USER 1000
-
-RUN set -ex; \
-    ls -la /opt/containerbase/tools/flutter/1.22.5 $USER_HOME; \
-    cd a; \
-    flutter pub upgrade;
-
-RUN set -ex; \
-    cd b; \
-    flutter pub upgrade;
-
-RUN set -ex; \
-  ls -la $USER_HOME; \
-  cat $USER_HOME/.flutter_tool_state; \
-  cat $USER_HOME/.flutter; \
-  true
-
-#--------------------------------------
-# test: flutter 1.x (non-root)
-#--------------------------------------
-FROM build AS testb
-
-USER 1000
-
-# EOL
-RUN install-tool flutter 1.22.6
-
-RUN set -ex; \
-    ls -la /opt/containerbase/tools/flutter/1.22.6; \
-    cd a; \
-    flutter pub upgrade;
-
-RUN set -ex; \
-    cd b; \
-    flutter pub upgrade;
-
-#--------------------------------------
 # test: flutter 2.x (non-root)
 #--------------------------------------
-FROM build AS testc
+FROM build AS testa
 
 USER 1000
 
@@ -95,7 +51,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root)
 #--------------------------------------
-FROM build AS testd
+FROM build AS testb
 
 USER 1000
 
@@ -109,7 +65,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: flutter 3.x (non-root, openshift)
 #--------------------------------------
-FROM build AS teste
+FROM build AS testc
 
 # fix test file perms for openstack
 RUN chown -R 1001 .
@@ -138,5 +94,3 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
