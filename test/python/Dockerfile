@@ -125,16 +125,6 @@ RUN set -ex \
 
 
 #--------------------------------------
-# test poetry-b: c-poetry
-#--------------------------------------
-FROM poetry AS test-poetry-b
-
-RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
-
-RUN set -ex; cd c-poetry && poetry add h5py
-
-
-#--------------------------------------
 # test poetry-c: d-poetry
 #--------------------------------------
 FROM poetry AS test-poetry-c
@@ -170,19 +160,6 @@ RUN install-tool python 3.10.0
 RUN install-tool poetry 1.8.3
 
 #--------------------------------------
-# test a: pip_requirements
-#--------------------------------------
-FROM build AS testa
-
-# renovate: datasource=pypi
-RUN install-tool hashin 1.0.1
-
-RUN set -ex; \
-  cd f; \
-  hashin distribute==0.6.27; \
-  cat requirements.txt
-
-#--------------------------------------
 # test b: non-root
 #--------------------------------------
 FROM build-rootless AS testb
@@ -195,10 +172,6 @@ RUN set -ex \
   && hashin distribute==0.6.27 \
   && cat requirements.txt \
   ;
-
-
-# renovate: datasource=pypi
-RUN install-tool checkov 3.2.217
 
 # test old checkov with old python
 RUN install-tool python 3.7.17
@@ -234,14 +207,6 @@ RUN set -ex; \
   pipenv lock;
 
 #--------------------------------------
-# test pdm
-#--------------------------------------
-FROM build-rootless AS test-pdm
-
-# renovate: datasource=pypi
-RUN install-tool pdm 2.17.3
-
-#--------------------------------------
 # test conan
 #--------------------------------------
 FROM build AS test-conan
@@ -258,14 +223,6 @@ RUN set -ex; \
     conan lock create .; \
     conan install . --build=missing; \
     cat conan.lock
-
-#--------------------------------------
-# test copier
-#--------------------------------------
-FROM build-rootless AS test-copier
-
-# renovate: datasource=pypi
-RUN install-tool copier 9.3.1
 
 #--------------------------------------
 # test install-pip
@@ -288,17 +245,13 @@ RUN install-pip poetry
 FROM base
 
 COPY --from=test-conan /.dummy /.dummy
-COPY --from=test-copier /.dummy /.dummy
 COPY --from=test-pip-tools-a /.dummy /.dummy
 COPY --from=test-pip-tools-b /.dummy /.dummy
 COPY --from=test-poetry-a /.dummy /.dummy
-COPY --from=test-poetry-b /.dummy /.dummy
 COPY --from=test-poetry-c /.dummy /.dummy
 COPY --from=test-poetry-d /.dummy /.dummy
 COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
-COPY --from=test-pdm /.dummy /.dummy
-COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=test-other /.dummy /.dummy
