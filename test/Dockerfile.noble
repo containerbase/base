@@ -1,9 +1,7 @@
-ARG BASE_IMAGE=containerbase
-
 #--------------------------------------
-# Image: containerbase
+# Image: base
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS base
 
 ARG TARGETARCH
 COPY dist/docker/ /
@@ -18,16 +16,6 @@ RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.46.0
-
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ${BASE_IMAGE} AS base
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_CDN
-ARG CONTAINERBASE_DEBUG
-ARG CONTAINERBASE_LOG_LEVEL
 
 #--------------------------------------
 # Image: build

@@ -74,9 +74,6 @@ target "test-settings" {
   args = {
     BASE_IMAGE = "${BASE_IMAGE}"
   }
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
-  ]
 }
 
 target "build" {
@@ -112,7 +109,7 @@ target "build-docker" {
 }
 
 target "build-distro" {
-  inherits   = ["test-settings"]
+  inherits   = ["settings"]
   dockerfile = "./test/Dockerfile.${TAG}"
 }
 
