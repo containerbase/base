@@ -1,15 +1,9 @@
-#--------------------------------------
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_CDN
-ARG CONTAINERBASE_DEBUG
-ARG CONTAINERBASE_LOG_LEVEL
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -19,7 +13,25 @@ ARG TARGETARCH
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
+
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 COPY --chown=1000:0 test/dart/test test
 WORKDIR /test

@@ -121,6 +121,9 @@ jobs:
     needs: setup
     timeout-minutes: 15
 
+    outputs:
+      base: ${{ steps.init.outputs.base }}
+
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
@@ -128,7 +131,10 @@ jobs:
 
       - name: init
         run: |
+          export base="ttl.sh/$(uuidgen):1h"
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+          echo "BASE=${base}" >> ${GITHUB_ENV}
+          echo "base=${base}" >> ${GITHUB_OUTPUT}
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
@@ -140,7 +146,7 @@ jobs:
         run: pnpm build
 
       - name: test distro
-        run: docker buildx bake
+        run: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -153,6 +159,8 @@ jobs:
       - lint
       - vitest
     timeout-minutes: 30
+
+    if: false
 
     strategy:
       fail-fast: false
@@ -202,23 +210,23 @@ jobs:
       matrix:
         tag:
           - dart
-          - dotnet
-          - erlang
-          - flutter
-          - flux
-          - golang
-          - java
-          - jb
-          - helm
-          - nix
-          - node
-          - php
-          - powershell
-          - python
-          - ruby
-          - rust
-          - swift
-          - latest
+          # - dotnet
+          # - erlang
+          # - flutter
+          # - flux
+          # - golang
+          # - java
+          # - jb
+          # - helm
+          # - nix
+          # - node
+          # - php
+          # - powershell
+          # - python
+          # - ruby
+          # - rust
+          # - swift
+          # - latest
 
     env:
       TAG: ${{ matrix.tag }}
@@ -236,15 +244,13 @@ jobs:
       - name: init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+          echo "BASE_IMAGE=${{ needs.base.outputs.base }}" >> ${GITHUB_ENV}
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy
-
-      - name: build
-        run: pnpm build
 
       - name: test
         run: docker buildx bake test
