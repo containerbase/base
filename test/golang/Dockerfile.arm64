@@ -31,7 +31,7 @@ RUN install-tool git v2.46.0
 FROM base AS test-golang
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.5
+RUN install-tool golang 1.22.6
 
 #--------------------------------------
 # Image: final
