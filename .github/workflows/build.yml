@@ -171,6 +171,7 @@ jobs:
         distro:
           - focal
           - jammy
+          - noble
 
     env:
       TAG: ${{ matrix.distro }}
