@@ -110,7 +110,10 @@ target "build-docker" {
 
 target "build-distro" {
   inherits   = ["settings"]
-  dockerfile = "./test/Dockerfile.${TAG}"
+  args = {
+    BASE_IMAGE = "${TAG}"
+  }
+  dockerfile = "./test/Dockerfile.distro"
 }
 
 target "build-test" {

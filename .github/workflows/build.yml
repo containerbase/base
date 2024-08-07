@@ -169,6 +169,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
+          - focal
           - jammy
           - noble
 
