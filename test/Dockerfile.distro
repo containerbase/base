@@ -7,7 +7,8 @@ ARG BASE_IMAGE=latest
 FROM ghcr.io/containerbase/ubuntu:20.04 AS focal
 FROM ghcr.io/containerbase/ubuntu:22.04 AS jammy
 FROM ghcr.io/containerbase/ubuntu:24.04 AS noble
-FROM ghcr.io/containerbase/ubuntu:24.04 AS latest
+
+FROM ghcr.io/containerbase/ubuntu:20.04 AS latest
 #--------------------------------------
 # Image: base
 #--------------------------------------
