@@ -357,9 +357,12 @@ Nix releases are downloaded from:
 
 The second url will be used soon (#2066).
 
+Starting with `2.24`, the Hydra job name is `buildStatic.nix.${arch}`, instead of `buildStatic.${arch}`.
+
 Samples:
 
 ```txt
+https://hydra.nixos.org/job/nix/maintenance-2.24/buildStatic.nix.x86_64-linux/latest/download-by-type/file/binary-dist
 https://hydra.nixos.org/job/nix/maintenance-2.4/buildStatic.x86_64-linux/latest/download-by-type/file/binary-dist
 https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2
 https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2.sha256
