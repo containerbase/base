@@ -135,6 +135,7 @@ jobs:
           show-progress: false
 
       - name: init
+        id: init
         run: |
           export base="ttl.sh/$(uuidgen):1h"
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
