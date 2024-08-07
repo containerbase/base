@@ -9,9 +9,17 @@ function install_tool() {
   local versioned_tool_path
   local file
   local arch
+  local build_path
 
   arch=$(uname -m)
-  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/buildStatic.${arch}-linux/latest/download-by-type/file/binary-dist")
+
+  if [[ ${MAJOR} -lt 2 || (${MAJOR} -eq 2 && ${MINOR} -lt 24) ]]; then
+    build_path="buildStatic.${arch}-linux"
+  else
+    build_path="buildStatic.nix.${arch}-linux"
+  fi
+
+  file=$(get_from_url "https://hydra.nixos.org/job/nix/maintenance-${TOOL_VERSION}/${build_path}/latest/download-by-type/file/binary-dist")
 
   versioned_tool_path=$(create_versioned_tool_path)
   create_folder "${versioned_tool_path}/bin"
