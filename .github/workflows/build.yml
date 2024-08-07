@@ -125,6 +125,11 @@ jobs:
       base: ${{ steps.init.outputs.base }}
 
     steps:
+      - name: docker-config
+        uses: containerbase/internal-tools@cf9251e0d7d116c60bf6b6c231d49267358e1df7 # v3.3.15
+        with:
+          command: docker-config
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           show-progress: false
