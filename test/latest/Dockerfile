@@ -67,7 +67,7 @@ FROM build AS testa
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v20.16.0
 
-# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 7.4.14
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
@@ -80,7 +80,7 @@ RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
 # Do not renovate ruby 2.x
-RUN install-tool ruby 2.6.4
+RUN install-tool ruby 2.7.7
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 
 RUN set -ex; \

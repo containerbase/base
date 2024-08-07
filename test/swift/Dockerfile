@@ -72,15 +72,15 @@ RUN swift --version
 
 
 #--------------------------------------
-# testb: swift 5.2.5 (non-root)
+# testb: swift 5.7.3 (non-root)
 #--------------------------------------
 FROM build AS testb
 
 USER 1000
 
-RUN install-tool swift 5.2.5
+RUN install-tool swift 5.7.3
 
-RUN set -ex; swift --version | grep 5.2.5
+RUN set -ex; swift --version | grep 5.7.3
 
 RUN set -ex; \
   cd c; \

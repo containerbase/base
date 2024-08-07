@@ -47,15 +47,15 @@ RUN prepare-tool erlang
 #--------------------------------------
 FROM base AS testa
 
-# https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+# https://hexdocs.pm/elixir/1.17.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 27.0.0.0
 
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.2
 
-
-USER 1001
+RUN chown -R 1000:0 /test
+USER 1000
 
 RUN set -ex; \
     cd a; \
@@ -81,16 +81,16 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: erlang (v22,user,openshift)
+# test: erlang (v26,user,openshift)
 #--------------------------------------
 FROM build AS testc
 
 USER 1001
 
-# https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-RUN install-tool erlang 22.3.4.27
+# https://hexdocs.pm/elixir/1.15.0/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+RUN install-tool erlang 26.2.5.0
 
-RUN install-tool elixir 1.13.4
+RUN install-tool elixir 1.15.7
 
 RUN set -ex; \
     cd a; \
