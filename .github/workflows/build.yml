@@ -216,20 +216,20 @@ jobs:
           - dotnet
           - erlang
           - flutter
-          # - flux
-          # - golang
-          # - java
-          # - jb
-          # - helm
-          # - nix
-          # - node
-          # - php
-          # - powershell
-          # - python
-          # - ruby
-          # - rust
-          # - swift
-          # - latest
+          - flux
+          - golang
+          - java
+          - jb
+          - helm
+          - nix
+          - node
+          - php
+          - powershell
+          - python
+          - ruby
+          - rust
+          - swift
+          - latest
 
     env:
       TAG: ${{ matrix.tag }}
