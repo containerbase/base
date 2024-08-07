@@ -46,7 +46,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN install-tool php 8.3.10
 
 
-# renovate: datasource=github-releases packageName=composer/composer
+# renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.7.7
 
 # test with latest version
@@ -90,7 +90,7 @@ RUN install-tool php
 # test without version
 RUN install-tool composer
 
-# renovate: datasource=github-releases packageName=composer/composer
+# renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.7.7
 
 

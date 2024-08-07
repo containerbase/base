@@ -37,7 +37,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 #--------------------------------------
 FROM base AS test-node
 
-# renovate: datasource=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v20.16.0
 
 

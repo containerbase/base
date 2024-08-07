@@ -43,7 +43,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS testa
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.22.6
 
 USER 1000
@@ -91,7 +91,7 @@ RUN prepare-tool golang
 
 USER 1000
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.22.6
 
 

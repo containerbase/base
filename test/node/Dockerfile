@@ -40,7 +40,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-# renovate: datasource=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v20.16.0
 
 # ensure npmrc is writable by user
@@ -128,7 +128,7 @@ RUN prepare-tool node
 
 USER 1000
 
-# renovate: datasource=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v18.20.4
 
 RUN npm install -g yarn

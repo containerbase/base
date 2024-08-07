@@ -64,7 +64,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build AS testa
 
-# renovate: datasource=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v20.16.0
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
@@ -187,7 +187,7 @@ RUN install-tool git-lfs v3.5.1
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.4.4
 
-# renovate: datasource=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v20.16.0
 
 # renovate: datasource=github-releases packageName=moby/moby

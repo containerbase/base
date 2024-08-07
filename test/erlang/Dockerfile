@@ -51,7 +51,7 @@ FROM base AS testa
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 27.0.0.0
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.2
 
 

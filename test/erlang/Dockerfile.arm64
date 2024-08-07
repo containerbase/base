@@ -45,7 +45,7 @@ RUN install-tool erlang 27.0.0.0
 #--------------------------------------
 FROM test-erlang AS test-elixir
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.2
 
 #--------------------------------------

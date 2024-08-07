@@ -100,7 +100,7 @@ ARG IGNORED_TOOLS=powershell,node
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.1.3
 
-# renovate: datasource=docker versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 
 # renovate: datasource=github-releases packageName=moby/moby

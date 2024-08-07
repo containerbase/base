@@ -41,7 +41,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 #--------------------------------------
 FROM base AS test-flutter
 
-# renovate: datasource=flutter-version
+# renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
 RUN install-tool flutter 3.24.0
 
 #--------------------------------------
