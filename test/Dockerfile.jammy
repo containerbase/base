@@ -62,7 +62,7 @@ RUN install-tool git-lfs v3.5.1
 RUN install-tool gleam 1.4.1
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.22.5
+RUN install-tool golang 1.22.6
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.15.3
