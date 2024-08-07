@@ -8,6 +8,10 @@ variable "TAG" {
   default = "latest"
 }
 
+variable "BASE_IMAGE" {
+  default = null
+}
+
 variable "CONTAINERBASE_CDN" {
   default = ""
 }
@@ -64,6 +68,14 @@ target "settings" {
   ]
 }
 
+
+target "test-settings" {
+  inherits = ["settings"]
+  args = {
+    BASE_IMAGE = "${BASE_IMAGE}"
+  }
+}
+
 target "build" {
   inherits = ["settings"]
   tags = [
@@ -72,6 +84,16 @@ target "build" {
     "${OWNER}/${FILE}:${TAG}",
     "${OWNER}/${FILE}"
   ]
+}
+
+target "build-ttl" {
+  inherits = ["settings"]
+  output   = ["type=registry"]
+  platforms = [
+    "linux/amd64",
+    "linux/arm64",
+  ]
+  tags = [ ]
 }
 
 target "build-docker" {
@@ -92,12 +114,12 @@ target "build-distro" {
 }
 
 target "build-test" {
-  inherits = ["settings"]
+  inherits = ["test-settings"]
   dockerfile = "./test/${TAG}/Dockerfile"
 }
 
 target "build-arm64" {
-  inherits   = ["settings"]
+  inherits   = ["test-settings"]
   platforms  = ["linux/arm64"]
   dockerfile = "./test/${TAG}/Dockerfile.arm64"
 }

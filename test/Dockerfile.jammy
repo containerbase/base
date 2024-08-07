@@ -3,15 +3,14 @@
 #--------------------------------------
 FROM ghcr.io/containerbase/ubuntu:22.04 AS base
 
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
-ARG CONTAINERBASE_CDN
-ARG CONTAINERBASE_LOG_LEVEL
-
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 RUN install-containerbase
 
