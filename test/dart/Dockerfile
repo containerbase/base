@@ -9,10 +9,8 @@ ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
-
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN

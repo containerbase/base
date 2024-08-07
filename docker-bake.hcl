@@ -112,7 +112,7 @@ target "build-docker" {
 }
 
 target "build-distro" {
-  inherits   = ["settings"]
+  inherits   = ["test-settings"]
   dockerfile = "./test/Dockerfile.${TAG}"
 }
 
