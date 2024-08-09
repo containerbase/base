@@ -352,20 +352,21 @@ https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.
 
 Nix releases are downloaded from:
 
+- `https://github.com/containerbase/nix-prebuild/releases`
 - `https://hydra.nixos.org/job/nix`
-- `https://releases.nixos.org`
 
-The second url will be used soon (#2066).
-
+The second url is used as fallback for older versions.
 Starting with `2.24`, the Hydra job name is `buildStatic.nix.${arch}`, instead of `buildStatic.${arch}`.
 
 Samples:
 
 ```txt
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
 https://hydra.nixos.org/job/nix/maintenance-2.24/buildStatic.nix.x86_64-linux/latest/download-by-type/file/binary-dist
 https://hydra.nixos.org/job/nix/maintenance-2.4/buildStatic.x86_64-linux/latest/download-by-type/file/binary-dist
-https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2
-https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2.sha256
 ```
 
 ## `node`
