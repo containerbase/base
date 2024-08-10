@@ -47,7 +47,7 @@ RUN install-tool node v20.16.0
 FROM test-node AS test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.6.0
+RUN install-tool pnpm 9.7.0
 
 #--------------------------------------
 # Image: yarn
