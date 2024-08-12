@@ -36,10 +36,6 @@ variable "CONTAINERBASE_LOG_LEVEL" {
   default = ""
 }
 
-variable "GITHUB_TOKEN" {
-  default = ""
-}
-
 group "default" {
   targets = ["build-docker"]
 }
@@ -61,7 +57,6 @@ target "settings" {
     CONTAINERBASE_DEBUG     = "${CONTAINERBASE_DEBUG}"
     CONTAINERBASE_LOG_LEVEL = "${CONTAINERBASE_LOG_LEVEL}"
     CONTAINERBASE_VERSION   = "${CONTAINERBASE_VERSION}"
-    GITHUB_TOKEN            = "${GITHUB_TOKEN}"
   }
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}",
@@ -109,7 +104,7 @@ target "build-docker" {
 }
 
 target "build-distro" {
-  inherits   = ["settings"]
+  inherits   = ["test-settings"]
   args = {
     BASE_IMAGE = "${TAG}"
   }

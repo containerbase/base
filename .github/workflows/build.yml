@@ -195,7 +195,7 @@ jobs:
         run: pnpm build
 
       - name: test distro
-        run: docker buildx bake test-distro
+        run: docker buildx bake test-distro --set settings.secret=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -257,7 +257,7 @@ jobs:
         uses: ./.github/actions/prepare-proxy
 
       - name: test
-        run: docker buildx bake test
+        run: docker buildx bake test --set settings.secret=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
