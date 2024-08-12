@@ -9,10 +9,10 @@ function install_tool() {
   local tool_path
   local version=${TOOL_VERSION}
 
-  # if [[ ${MAJOR} -lt 2 || (${MAJOR} -eq 2 && ${MINOR} -lt 14) ]]; then
-  #   echo "Nix version ${TOOL_VERSION} is not supported! Use v2.14 or higher." >&2
-  #   exit 1
-  # fi
+  if [[ ${MAJOR} -lt 2 || (${MAJOR} -eq 2 && ${MINOR} -lt 10) || (${MAJOR} -eq 2 && ${MINOR} -eq 10 && ${PATCH} -lt 3) ]]; then
+    echo "Nix version ${TOOL_VERSION} is not supported! Use v2.10.3 or higher." >&2
+    exit 1
+  fi
 
   arch=$(uname -m)
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"

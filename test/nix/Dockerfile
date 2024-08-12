@@ -30,6 +30,7 @@ ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
+ARG GITHUB_TOKEN
 
 COPY --chown=1000:0 test/nix/test test
 WORKDIR /test
@@ -40,7 +41,7 @@ WORKDIR /test
 FROM base AS testa
 
 # old nix version, not for renovating
-RUN install-tool nix 2.10.0
+RUN install-tool nix 2.10.3
 
 USER 1000
 
