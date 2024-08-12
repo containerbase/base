@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-nix
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.24.1
+RUN install-tool nix 2.24.2
 
 #--------------------------------------
 # Image: final
