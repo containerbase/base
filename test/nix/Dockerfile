@@ -54,7 +54,7 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
-RUN --mount=type=secret,id=GITHUB_TOKEN \
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=1000 \
   set -ex; \
   [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
@@ -83,7 +83,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 
-RUN --mount=type=secret,id=GITHUB_TOKEN \
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=1000 \
   set -ex; \
   [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
