@@ -177,6 +177,11 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
+      - name: docker-config
+        uses: containerbase/internal-tools@ea879db0cfe20e24636d8010ea1d1b2e9683e167 # v3.4.0
+        with:
+          command: docker-config
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           show-progress: false
@@ -195,7 +200,7 @@ jobs:
         run: pnpm build
 
       - name: test distro
-        run: docker buildx bake test-distro --set settings.secret=type=env,id=GITHUB_TOKEN
+        run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -257,7 +262,7 @@ jobs:
         uses: ./.github/actions/prepare-proxy
 
       - name: test
-        run: docker buildx bake test --set settings.secret=type=env,id=GITHUB_TOKEN
+        run: docker buildx bake test --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
