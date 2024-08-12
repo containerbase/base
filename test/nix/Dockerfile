@@ -56,7 +56,7 @@ RUN set -ex; \
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
   set -ex; \
-  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="extra-access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
+  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
@@ -85,7 +85,7 @@ RUN set -ex; \
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
   set -ex; \
-  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="extra-access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
+  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
