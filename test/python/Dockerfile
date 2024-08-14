@@ -238,6 +238,7 @@ RUN install-pip pdm
 RUN install-pip pip-tools
 RUN install-pip pipenv
 RUN install-pip poetry
+RUN install-pip uv
 
 #--------------------------------------
 # final

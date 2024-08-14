@@ -177,6 +177,8 @@ RUN install-tool pipenv 2024.0.1
 RUN install-tool pdm 2.18.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
+# renovate: datasource=pypi
+RUN install-tool uv 0.2.36
 
 #--------------------------------------
 # Image: test-ruby
