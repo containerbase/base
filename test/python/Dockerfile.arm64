@@ -83,10 +83,19 @@ RUN install-tool conan 2.6.0
 #--------------------------------------
 # Image: copier
 #--------------------------------------
-FROM test-python as test-copier
+FROM test-python AS test-copier
 
 # renovate: datasource=pypi
 RUN install-tool copier 9.3.1
+
+
+#--------------------------------------
+# Image: uv
+#--------------------------------------
+FROM test-python AS test-uv
+
+# renovate: datasource=pypi
+RUN install-tool uv 0.2.36
 
 #--------------------------------------
 # Image: final
@@ -99,3 +108,4 @@ COPY --from=test-copier /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
+COPY --from=test-uv /.dummy /.dummy

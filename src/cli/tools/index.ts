@@ -29,6 +29,7 @@ export const NoPrepareTools = [
   'renovate',
   'skopeo',
   'sops',
+  'uv',
   'yarn',
   'yarn-slim',
 ];
@@ -49,6 +50,7 @@ export const ResolverMap: Record<string, InstallToolType | undefined> = {
   'pip-tools': 'pip',
   pipenv: 'pip',
   poetry: 'pip',
+  uv: 'pip',
 };
 
 /**
