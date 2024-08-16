@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-dotnet
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.400
+RUN install-tool dotnet 8.0.401
 
 #--------------------------------------
 # Image: final
