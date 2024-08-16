@@ -90,7 +90,7 @@
     "eslint-plugin-typescript-enum": "2.1.0",
     "eslint-plugin-vitest": "0.5.4",
     "husky": "9.1.4",
-    "lint-staged": "15.2.8",
+    "lint-staged": "15.2.9",
     "nock": "13.5.4",
     "npm-run-all2": "6.2.2",
     "prettier": "3.3.3",
