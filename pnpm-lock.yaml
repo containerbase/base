@@ -11,7 +11,7 @@ overrides:
   vite: 5.4.0
 
 patchedDependencies:
-  '@yao-pkg/pkg@5.12.0':
+  '@yao-pkg/pkg@5.12.1':
     hash: fb6cn5vkrnldric4eq2yxxfize
     path: patches/@yao-pkg__pkg@5.11.1.patch
   clipanion@3.2.1:
@@ -114,8 +114,8 @@ importers:
         specifier: 2.0.5
         version: 2.0.5(vitest@2.0.5)
       '@yao-pkg/pkg':
-        specifier: 5.12.0
-        version: 5.12.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+        specifier: 5.12.1
+        version: 5.12.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
       bats:
         specifier: 1.11.0
         version: 1.11.0
@@ -870,8 +870,8 @@ packages:
     resolution: {integrity: sha512-usMwwqFCd2B7k+V87u6kiTesyDSlw+3LpiuYBWe+UgryvSOk/NXjx3XVCub8hQoi0bCREbdQ6NDBqminyHJJrg==}
     hasBin: true
 
-  '@yao-pkg/pkg@5.12.0':
-    resolution: {integrity: sha512-KZVpiDKRi2gtrVtKwhz/ZUKBOicVNggxaYQzPBjULuOLJ/UypTmAz5a2g+utLMn+WogbLE3vLfmC+TWp8v3+aQ==}
+  '@yao-pkg/pkg@5.12.1':
+    resolution: {integrity: sha512-vqp8Z9o39LDKTpjfeDjJsLf4mi0zS4jkbTTZbptfc/K1KKDU2hosex64TaattPO9NLkibc6EJldmSjVmc63ooA==}
     hasBin: true
 
   abort-controller@3.0.0:
@@ -1826,10 +1826,6 @@ packages:
     resolution: {integrity: sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==}
     engines: {node: '>= 0.4'}
 
-  has@1.0.4:
-    resolution: {integrity: sha512-qdSAmqLF6209RFj4VVItywPMbm3vWylknmB3nvNiUIs72xAimcM8nVYxYr7ncvZq5qzk9MKIZR8ijqD/1QuYjQ==}
-    engines: {node: '>= 0.4.0'}
-
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
@@ -1975,9 +1971,6 @@ packages:
   is-core-module@2.15.0:
     resolution: {integrity: sha512-Dd+Lb2/zvk9SKy1TGCt1wFJFo/MWBPMX5x7KcvLajWTGuomczdQX61PvY5yK6SVACwpoexWo81IfFyoKY2QnTA==}
     engines: {node: '>= 0.4'}
-
-  is-core-module@2.9.0:
-    resolution: {integrity: sha512-+5FPy5PnwmO3lvfMb0AsoPaBG+5KHUI0wYFXOtYPnVVVspTFUuMZNfNaNVRt3FZadstu2c8x23vykRW/NBoU6A==}
 
   is-data-view@1.0.1:
     resolution: {integrity: sha512-AHkaJrsUVW6wq6JS8y3JnM/GJF/9cf+k20+iDzlSaJrinEo5+7vRiteOSwBhHRiAyQATN1AmY4hwzxJKPmYf+w==}
@@ -3532,7 +3525,7 @@ snapshots:
 
   '@babel/generator@7.23.0':
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.25.2
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
       jsesc: 2.5.2
@@ -3550,7 +3543,7 @@ snapshots:
 
   '@babel/parser@7.23.0':
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.25.2
 
   '@babel/parser@7.25.3':
     dependencies:
@@ -4198,7 +4191,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@5.12.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
+  '@yao-pkg/pkg@5.12.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
     dependencies:
       '@babel/generator': 7.23.0
       '@babel/parser': 7.23.0
@@ -4208,7 +4201,6 @@ snapshots:
       fs-extra: 9.1.0
       globby: 11.1.0
       into-stream: 6.0.0
-      is-core-module: 2.9.0
       minimatch: 9.0.4
       minimist: 1.2.8
       multistream: 4.1.0
@@ -5346,8 +5338,6 @@ snapshots:
     dependencies:
       has-symbols: 1.0.3
 
-  has@1.0.4: {}
-
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
@@ -5478,10 +5468,6 @@ snapshots:
   is-core-module@2.15.0:
     dependencies:
       hasown: 2.0.2
-
-  is-core-module@2.9.0:
-    dependencies:
-      has: 1.0.4
 
   is-data-view@1.0.1:
     dependencies:
