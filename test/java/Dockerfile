@@ -183,7 +183,7 @@ RUN install-tool maven 3.1.0-alpha-1
 RUN install-tool maven 3.5.4
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.9.8
+RUN install-tool maven 3.9.9
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
