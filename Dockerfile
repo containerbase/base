@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04@sha256:6b74c1a5996659717ade273c4dae317b58790479b46ce8c7d4e635e7262e8cac
+FROM ghcr.io/containerbase/ubuntu:20.04@sha256:d10b9095125a8f4ae2d245df5f191aa53d1f5cf53042d3b0e9dc35da9f45a5bf
 
 ARG APT_HTTP_PROXY
 
