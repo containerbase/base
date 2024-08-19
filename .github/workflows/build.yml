@@ -126,7 +126,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@6dfb2e082aca4b8d03e064cd054f9b3746e027a3 # v3.4.4
+        uses: containerbase/internal-tools@c7fd9c98b79b3ae16e46dd33610327507e33275c # v3.4.6
         with:
           command: docker-config
 
@@ -178,7 +178,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@6dfb2e082aca4b8d03e064cd054f9b3746e027a3 # v3.4.4
+        uses: containerbase/internal-tools@c7fd9c98b79b3ae16e46dd33610327507e33275c # v3.4.6
         with:
           command: docker-config
 
@@ -242,7 +242,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@6dfb2e082aca4b8d03e064cd054f9b3746e027a3 # v3.4.4
+        uses: containerbase/internal-tools@c7fd9c98b79b3ae16e46dd33610327507e33275c # v3.4.6
         with:
           command: docker-config
 
