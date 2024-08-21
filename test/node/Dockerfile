@@ -41,7 +41,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node v20.16.0
+RUN install-tool node 20.17.0
 
 # ensure npmrc is writable by user
 RUN set -ex; [ $(stat --format '%u' "/opt/containerbase/home/.npmrc") -eq ${USER_ID} ]
