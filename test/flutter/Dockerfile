@@ -67,7 +67,7 @@ FROM build AS testb
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.0
+RUN install-tool flutter 3.24.1
 
 RUN set -ex; \
     cd d; \
@@ -84,7 +84,7 @@ RUN chown -R 1001 .
 USER 1001
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.0
+RUN install-tool flutter 3.24.1
 
 RUN set -ex; \
     cd d; \
