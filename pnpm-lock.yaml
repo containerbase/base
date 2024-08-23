@@ -165,8 +165,8 @@ importers:
         specifier: 0.5.4
         version: 0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.16.1)(@vitest/ui@2.0.5))
       husky:
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 9.1.5
+        version: 9.1.5
       lint-staged:
         specifier: 15.2.9
         version: 15.2.9
@@ -1878,8 +1878,8 @@ packages:
     resolution: {integrity: sha512-/1/GPCpDUCCYwlERiYjxoczfP0zfvZMU/OWgQPMya9AbAE24vseigFdhAMObpc8Q4lc/kjutPfUddDYyAmejnA==}
     engines: {node: '>=18.18.0'}
 
-  husky@9.1.4:
-    resolution: {integrity: sha512-bho94YyReb4JV7LYWRWxZ/xr6TtOTt8cMfmQ39MQYJ7f/YE268s3GdghGwi+y4zAeqewE5zYLvuhV0M0ijsDEA==}
+  husky@9.1.5:
+    resolution: {integrity: sha512-rowAVRUBfI0b4+niA4SJMhfQwc107VLkBUgEYYAOQAbqDCnra1nYh83hF/MDmhYs9t9n1E3DuKOrs2LYNC+0Ag==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5388,7 +5388,7 @@ snapshots:
 
   human-signals@8.0.0: {}
 
-  husky@9.1.4: {}
+  husky@9.1.5: {}
 
   ieee754@1.2.1: {}
 
