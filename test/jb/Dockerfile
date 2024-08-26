@@ -42,7 +42,7 @@ FROM base AS build
 USER 1000
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
-RUN install-tool jb v0.5.1
+RUN install-tool jb v0.6.0
 
 
 #--------------------------------------
