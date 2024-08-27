@@ -94,7 +94,7 @@
     "nock": "13.5.5",
     "npm-run-all2": "6.2.2",
     "prettier": "3.3.3",
-    "prettier-plugin-packagejson": "2.5.1",
+    "prettier-plugin-packagejson": "2.5.2",
     "semantic-release": "24.1.0",
     "shelljs": "0.8.5",
     "tsx": "4.17.0",
