@@ -80,6 +80,7 @@
         "sbt",
         "sops",
         "swift",
+        "uv",
         "vendir"
       ],
       "separateMinorPatch": false
@@ -116,6 +117,7 @@
         "sbt",
         "sops",
         "swift",
+        "uv",
         "vendir"
       ],
       "matchUpdateTypes": ["minor", "patch"],
