@@ -4,6 +4,7 @@ import { ResolverMap } from '../tools';
 import { BazeliskInstallService } from '../tools/bazelisk';
 import { BunInstallService } from '../tools/bun';
 import { DartInstallService } from '../tools/dart';
+import { DevboxInstallService } from '../tools/devbox';
 import { DockerInstallService } from '../tools/docker';
 import { DotnetInstallService } from '../tools/dotnet';
 import { FlutterInstallService } from '../tools/flutter';
@@ -85,6 +86,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DartInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DevboxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
