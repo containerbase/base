@@ -2,13 +2,13 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
 } from '../services';
-import { BaseInstallService } from '../install-tool/base-install.service';
 
 @injectable()
 export class DevboxInstallService extends BaseInstallService {
