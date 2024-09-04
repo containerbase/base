@@ -10,6 +10,7 @@ export const NoPrepareTools = [
   'composer',
   'copier',
   'corepack',
+  'devbox',
   'flux',
   'gleam',
   'gradle',

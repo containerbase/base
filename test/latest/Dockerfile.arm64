@@ -49,6 +49,14 @@ FROM base AS test-bun
 RUN install-tool bun 1.1.29
 
 #--------------------------------------
+# Image: devbox
+#--------------------------------------
+FROM base AS test-devbox
+
+# renovate: datasource=github-releases packageName=jetify-com/devbox
+RUN install-tool devbox 0.12.0
+
+#--------------------------------------
 # Image: gleam
 #--------------------------------------
 FROM base AS test-gleam
@@ -133,6 +141,7 @@ FROM base
 
 COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
+COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
 COPY --from=test-git-lfs /.dummy /.dummy
