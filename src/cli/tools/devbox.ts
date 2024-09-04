@@ -58,6 +58,6 @@ export class DevboxInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
+    await execa(this.name, ['version'], { stdio: ['inherit', 'inherit', 1] });
   }
 }
