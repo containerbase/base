@@ -119,7 +119,9 @@
         "sbt",
         "sops",
         "swift",
-        "vendir"
+        "uv",
+        "vendir",
+        "devbox"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
