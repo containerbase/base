@@ -58,6 +58,7 @@
         "bundler",
         "conan",
         "corepack",
+        "devbox",
         "docker",
         "dotnet",
         "git",
@@ -82,8 +83,7 @@
         "sops",
         "swift",
         "uv",
-        "vendir",
-        "devbox"
+        "vendir"
       ],
       "separateMinorPatch": false
     },
@@ -96,6 +96,7 @@
         "bundler",
         "corepack",
         "conan",
+        "devbox",
         "docker",
         "dotnet",
         "git",
@@ -120,8 +121,7 @@
         "sops",
         "swift",
         "uv",
-        "vendir",
-        "devbox"
+        "vendir"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
