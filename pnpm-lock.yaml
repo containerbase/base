@@ -141,8 +141,8 @@ importers:
         specifier: 9.1.0
         version: 9.1.0(eslint@8.57.0)
       eslint-formatter-gha:
-        specifier: 1.5.0
-        version: 1.5.0
+        specifier: 1.5.1
+        version: 1.5.1
       eslint-import-resolver-typescript:
         specifier: 3.6.3
         version: 3.6.3(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0)
@@ -150,8 +150,8 @@ importers:
         specifier: 2.29.1
         version: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.0)
       eslint-plugin-jest:
-        specifier: 28.8.1
-        version: 28.8.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
+        specifier: 28.8.2
+        version: 28.8.2(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
       eslint-plugin-jest-formatting:
         specifier: 3.1.0
         version: 3.1.0(eslint@8.57.0)
@@ -1437,8 +1437,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-formatter-gha@1.5.0:
-    resolution: {integrity: sha512-mpZ8g/rfxn/igeAapQpbUrnvaP3zPpru3Y2I1yfDdRazzcNvYJmrAb9NLbNce0TQYbLBmg38X/drUOv0QhLyaw==}
+  eslint-formatter-gha@1.5.1:
+    resolution: {integrity: sha512-OSMS0XdM2Z5DhTMfRJx/1NiOH+zMYvrq6VXoARgR7mikwkQ5lG8uKBE2GIbM6sxcX13gI4M8x0vyhLNp3RIG7A==}
 
   eslint-formatter-json@8.40.0:
     resolution: {integrity: sha512-0bXo4At1EoEU23gFfN7wcDeqRXDHLJnvDOuQKD3Q6FkBlk7L2oVNPYg/sciIWdYrUnCBcKuMit3IWXkdSfzChg==}
@@ -1501,8 +1501,8 @@ packages:
     peerDependencies:
       eslint: '>=0.8.0'
 
-  eslint-plugin-jest@28.8.1:
-    resolution: {integrity: sha512-G46XMyYu6PtSNJUkQ0hsPjzXYpzq/O4vpCciMizTKRJG8kNsRreGoMRDG6H9FIB/xVgfFuclVnuX4XRvFUzrZQ==}
+  eslint-plugin-jest@28.8.2:
+    resolution: {integrity: sha512-mC3OyklHmS5i7wYU1rGId9EnxRI8TVlnFG56AE+8U9iRy6zwaNygZR+DsdZuCL0gRG0wVeyzq+uWcPt6yJrrMA==}
     engines: {node: ^16.10.0 || ^18.12.0 || >=20.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -4891,7 +4891,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-formatter-gha@1.5.0:
+  eslint-formatter-gha@1.5.1:
     dependencies:
       eslint-formatter-json: 8.40.0
       eslint-formatter-stylish: 8.40.0
@@ -4973,7 +4973,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@28.8.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4):
+  eslint-plugin-jest@28.8.2(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4):
     dependencies:
       '@typescript-eslint/utils': 8.3.0(eslint@8.57.0)(typescript@5.5.4)
       eslint: 8.57.0
