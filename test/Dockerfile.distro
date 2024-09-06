@@ -93,7 +93,7 @@ RUN install-tool nix 2.24.5
 RUN install-tool powershell v7.4.5
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.80.1
+RUN install-tool rust 1.81.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.16.1
