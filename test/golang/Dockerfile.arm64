@@ -42,7 +42,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-golang
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.0
+RUN install-tool golang 1.23.1
 
 #--------------------------------------
 # Image: final

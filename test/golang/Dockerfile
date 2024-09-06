@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.0
+RUN install-tool golang 1.23.1
 
 USER 1000
 
@@ -92,7 +92,7 @@ RUN prepare-tool golang
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.0
+RUN install-tool golang 1.23.1
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
