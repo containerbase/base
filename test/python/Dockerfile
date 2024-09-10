@@ -41,7 +41,7 @@ FROM base AS build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.5
+RUN install-tool python 3.12.6
 
 #--------------------------------------
 # build-rootless
@@ -53,7 +53,7 @@ RUN prepare-tool python conan
 USER 1000
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.5
+RUN install-tool python 3.12.6
 
 #--------------------------------------
 # build: pipenv
@@ -107,7 +107,7 @@ FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.5
+RUN install-tool python 3.12.6
 
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
@@ -197,7 +197,7 @@ RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.5
+RUN install-tool python 3.12.6
 
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.0.1
