@@ -111,7 +111,7 @@ RUN install-tool terraform 1.9.5
 RUN install-tool jb v0.6.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.41.1
+RUN install-tool vendir v0.42.0
 
 #--------------------------------------
 # Image: test-erlang
