@@ -228,7 +228,7 @@ RUN install-tool skopeo 1.16.1
 RUN install-tool sops v3.9.0
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=0.41.1
+ARG VENDIR_VERSION=0.42.0
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=0.167.1
