@@ -219,7 +219,7 @@ RUN install-tool bun 1.1.27
 RUN install-tool gleam 1.4.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.31.0
+RUN install-tool kubectl v1.31.1
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.16.1
