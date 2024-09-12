@@ -60,7 +60,7 @@ RUN install-tool docker v27.2.1
 RUN install-tool dotnet 8.0.401
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.2
+RUN install-tool flutter 3.24.3
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.3.0
