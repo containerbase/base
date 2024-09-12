@@ -231,7 +231,7 @@ RUN install-tool sops v3.9.0
 ARG VENDIR_VERSION=0.42.0
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=0.167.1
+ARG HELMFILE_VERSION=0.168.0
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.4.3
