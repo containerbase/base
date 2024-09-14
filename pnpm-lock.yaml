@@ -8,7 +8,7 @@ overrides:
   bats-support: 0.3.0
   esbuild: 0.23.1
   tsconfig-paths: 4.2.0
-  vite: 5.4.4
+  vite: 5.4.5
 
 patchedDependencies:
   '@yao-pkg/pkg@5.14.0':
@@ -198,11 +198,11 @@ importers:
         specifier: 5.6.2
         version: 5.6.2
       vite:
-        specifier: 5.4.4
-        version: 5.4.4(@types/node@20.16.5)
+        specifier: 5.4.5
+        version: 5.4.5(@types/node@20.16.5)
       vite-tsconfig-paths:
         specifier: 5.0.1
-        version: 5.0.1(typescript@5.6.2)(vite@5.4.4(@types/node@20.16.5))
+        version: 5.0.1(typescript@5.6.2)(vite@5.4.5(@types/node@20.16.5))
       vitest:
         specifier: 2.0.5
         version: 2.0.5(@types/node@20.16.5)(@vitest/ui@2.0.5)
@@ -3417,13 +3417,13 @@ packages:
   vite-tsconfig-paths@5.0.1:
     resolution: {integrity: sha512-yqwv+LstU7NwPeNqajZzLEBVpUFU6Dugtb2P84FXuvaoYA+/70l9MHE+GYfYAycVyPSDYZ7mjOFuYBRqlEpTig==}
     peerDependencies:
-      vite: 5.4.4
+      vite: 5.4.5
     peerDependenciesMeta:
       vite:
         optional: true
 
-  vite@5.4.4:
-    resolution: {integrity: sha512-RHFCkULitycHVTtelJ6jQLd+KSAAzOgEYorV32R2q++M6COBjKJR6BxqClwp5sf0XaBDjVMuJ9wnNfyAJwjMkA==}
+  vite@5.4.5:
+    resolution: {integrity: sha512-pXqR0qtb2bTwLkev4SE3r4abCNioP3GkjvIDLlzziPpXtHgiJIjuKl+1GN6ESOT3wMjG3JTeARopj2SwYaHTOA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -6914,7 +6914,7 @@ snapshots:
       debug: 4.3.6
       pathe: 1.1.2
       tinyrainbow: 1.2.0
-      vite: 5.4.4(@types/node@20.16.5)
+      vite: 5.4.5(@types/node@20.16.5)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -6926,18 +6926,18 @@ snapshots:
       - supports-color
       - terser
 
-  vite-tsconfig-paths@5.0.1(typescript@5.6.2)(vite@5.4.4(@types/node@20.16.5)):
+  vite-tsconfig-paths@5.0.1(typescript@5.6.2)(vite@5.4.5(@types/node@20.16.5)):
     dependencies:
       debug: 4.3.6
       globrex: 0.1.2
       tsconfck: 3.1.3(typescript@5.6.2)
     optionalDependencies:
-      vite: 5.4.4(@types/node@20.16.5)
+      vite: 5.4.5(@types/node@20.16.5)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@5.4.4(@types/node@20.16.5):
+  vite@5.4.5(@types/node@20.16.5):
     dependencies:
       esbuild: 0.23.1
       postcss: 8.4.43
@@ -6969,7 +6969,7 @@ snapshots:
       tinybench: 2.9.0
       tinypool: 1.0.1
       tinyrainbow: 1.2.0
-      vite: 5.4.4(@types/node@20.16.5)
+      vite: 5.4.5(@types/node@20.16.5)
       vite-node: 2.0.5(@types/node@20.16.5)
       why-is-node-running: 2.3.0
     optionalDependencies:
