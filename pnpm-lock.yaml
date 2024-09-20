@@ -11,7 +11,7 @@ overrides:
   vite: 5.4.6
 
 patchedDependencies:
-  '@yao-pkg/pkg@5.14.0':
+  '@yao-pkg/pkg@5.14.1':
     hash: fb6cn5vkrnldric4eq2yxxfize
     path: patches/@yao-pkg__pkg@5.11.1.patch
   clipanion@3.2.1:
@@ -114,8 +114,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(vitest@2.1.1)
       '@yao-pkg/pkg':
-        specifier: 5.14.0
-        version: 5.14.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+        specifier: 5.14.1
+        version: 5.14.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
       bats:
         specifier: 1.11.0
         version: 1.11.0
@@ -916,12 +916,12 @@ packages:
   '@vitest/utils@2.1.1':
     resolution: {integrity: sha512-Y6Q9TsI+qJ2CC0ZKj6VBb+T8UPz593N113nnUykqwANqhgf3QkZeHFlusgKLTqrnVHbj/XDKZcDHol+dxVT+rQ==}
 
-  '@yao-pkg/pkg-fetch@3.5.11':
-    resolution: {integrity: sha512-2tQ/1n7BLTptW6lL0pfTCnVMIxls8Jiw0/ClK1J2Fja9z2S2j4uzNL5dwGRqtvPJPn/q9i8X+Y+c4dwnMb+NOA==}
+  '@yao-pkg/pkg-fetch@3.5.12':
+    resolution: {integrity: sha512-1owgBz/dLPoHfRju0xLd8tOzJniSTRxysOv24z8t0Axw4Oe3+0CDlHOmP/VoxJvMujUY7Qm8U9qUaEsqvaCxCw==}
     hasBin: true
 
-  '@yao-pkg/pkg@5.14.0':
-    resolution: {integrity: sha512-34oflUyAOI64a4cc4AF3ckvS8Qqnk/ISvZ1bDBa1/JAYaaFtzAO+RlhPaU+wCHzhk6VXvZwEywJpb+SlVDTgdA==}
+  '@yao-pkg/pkg@5.14.1':
+    resolution: {integrity: sha512-nKQZfhL/yTKfLIxArD6QjsRvSOQ5XV6/zOoi4k0+g/3xkmIgL+mq6AUzv371uNLDaPmBQELpCDyAO4uXzrKu/A==}
     hasBin: true
 
   abort-controller@3.0.0:
@@ -3612,7 +3612,7 @@ snapshots:
 
   '@babel/generator@7.23.0':
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.25.6
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
       jsesc: 2.5.2
@@ -3630,7 +3630,7 @@ snapshots:
 
   '@babel/parser@7.23.0':
     dependencies:
-      '@babel/types': 7.23.0
+      '@babel/types': 7.25.6
 
   '@babel/parser@7.25.6':
     dependencies:
@@ -4313,7 +4313,7 @@ snapshots:
       loupe: 3.1.1
       tinyrainbow: 1.2.0
 
-  '@yao-pkg/pkg-fetch@3.5.11':
+  '@yao-pkg/pkg-fetch@3.5.12':
     dependencies:
       chalk: 4.1.2
       fs-extra: 9.1.0
@@ -4327,12 +4327,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@5.14.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
+  '@yao-pkg/pkg@5.14.1(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
     dependencies:
       '@babel/generator': 7.23.0
       '@babel/parser': 7.23.0
       '@babel/types': 7.23.0
-      '@yao-pkg/pkg-fetch': 3.5.11
+      '@yao-pkg/pkg-fetch': 3.5.12
       chalk: 4.1.2
       fs-extra: 9.1.0
       globby: 11.1.0
