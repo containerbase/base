@@ -54,7 +54,7 @@
     "pretty-ms": "9.1.0",
     "reflect-metadata": "0.2.2",
     "semver": "7.6.3",
-    "simple-git": "3.26.0",
+    "simple-git": "3.27.0",
     "zod": "3.23.8"
   },
   "devDependencies": {
