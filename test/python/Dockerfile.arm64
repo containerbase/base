@@ -62,7 +62,7 @@ RUN install-tool hashin 1.0.1
 FROM test-python AS test-pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.0.2
+RUN install-tool pipenv 2024.0.3
 
 #--------------------------------------
 # Image: poetry
