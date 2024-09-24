@@ -131,7 +131,7 @@ FROM build AS test-java
 # renovate: datasource=java-version packageName=java-jre
 RUN install-tool java 21.0.4+7.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.10.1
+RUN install-tool gradle 8.10.2
 
 #--------------------------------------
 # Image: test-node
