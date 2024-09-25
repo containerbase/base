@@ -439,7 +439,7 @@ https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86
 
 Composer releases are downloaded from:
 
-- `https://github.com/containerbase/maven-prebuild/releases`
+- `https://github.com/containerbase/composer-prebuild/releases`
 - `https://getcomposer.org/download`
 - `https://getcomposer.org/versions`
 
