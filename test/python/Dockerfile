@@ -165,7 +165,7 @@ RUN install-tool poetry 1.8.3
 FROM build-rootless AS testb
 
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.1
+RUN install-tool hashin 1.0.2
 
 RUN set -ex \
   && cd f \
