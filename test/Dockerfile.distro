@@ -170,7 +170,7 @@ RUN install-tool conan 2.7.1
 # renovate: datasource=pypi
 RUN install-tool copier 9.3.1
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.1
+RUN install-tool hashin 1.0.2
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.0.3
 # renovate: datasource=pypi
