@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['typescript-enum', 'vitest'], // , 'jest-formatting'
+  plugins: ['typescript-enum', '@vitest'], // , 'jest-formatting'
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,7 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
-    'plugin:vitest/legacy-recommended',
+    'plugin:@vitest/legacy-recommended',
     // 'plugin:jest-formatting/recommended',
     'prettier',
   ],
