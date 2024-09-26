@@ -61,7 +61,7 @@ jobs:
         uses: reviewdog/action-shellcheck@ccaafec556ffa154f112bfcb7b9c9574190b7091 # v1.27.0
         with:
           fail_on_error: true
-          reporter: github-check
+          reporter: github-pr-annotations
           filter_mode: nofilter
           path: |
             src
@@ -112,6 +112,7 @@ jobs:
         run: pnpm test:vitest
 
       - name: Codecov
+        if: github.event_name != 'merge_group'
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
