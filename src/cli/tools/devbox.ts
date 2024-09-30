@@ -47,8 +47,7 @@ export class DevboxInstallService extends BaseInstallService {
 
     await this.compress.extract({
       file,
-      cwd: path,
-      strip: 0,
+      cwd: `${path}/bin`,
     });
   }
 
