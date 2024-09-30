@@ -21,7 +21,7 @@ teardown() {
 }
 
 @test "overwrite: gets the default install dir" {
-    TEST_ROOT_USER=1000 \
+    TEST_ROOT_USER=12021 \
     run get_install_dir
     assert_output "${TEST_ROOT_DIR}/root"
 

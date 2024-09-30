@@ -12,7 +12,7 @@ export USER_HOME="${TEST_ROOT_DIR}/user"
 export ENV_FILE="${TEST_ROOT_DIR}/env"
 
 # set default test user
-export TEST_ROOT_USER=1000
+export TEST_ROOT_USER=12021
 
 # Overwrite is_root function to check a test root user
 # instead of the effective caller

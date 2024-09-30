@@ -35,7 +35,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/ruby/test test
+COPY --chown=12021:0 test/ruby/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -54,7 +54,7 @@ FROM build AS test-bundler-b
 # renovate: datasource=rubygems depName=bundler
 RUN install-tool bundler 2.4.22
 
-USER 1000
+USER 12021
 
 RUN ruby --version
 RUN bundler env
@@ -71,7 +71,7 @@ RUN ruby --version
 #--------------------------------------
 FROM build AS test-bundler-c
 
-USER 1000
+USER 12021
 
 # renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.5.20
@@ -103,9 +103,9 @@ FROM build AS test-bundler-d
 ENV BUNDLER_VERSION=2.5.20
 RUN install-tool bundler
 
-RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 1000 ]
+RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 12021 ]
 
-USER 1000
+USER 12021
 
 # install old version
 RUN install-tool ruby 3.1.0
@@ -120,7 +120,7 @@ RUN install-tool bundler
 #--------------------------------------
 FROM build AS test-cocoapods-a
 
-USER 1000
+USER 12021
 
 # renovate: datasource=rubygems
 RUN install-tool cocoapods 1.15.2
@@ -143,7 +143,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build AS test-gem
 
-USER 1000
+USER 12021
 
 RUN install-tool cocoapods
 

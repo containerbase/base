@@ -58,13 +58,13 @@ describe('env.service', () => {
   });
 
   test('userId', () => {
-    expect(child.get(EnvService).userId).toBe(1000);
+    expect(child.get(EnvService).userId).toBe(12021);
   });
 
   test('umask', () => {
     const e = child.get(EnvService);
     expect(e.umask).toBe(0o755);
-    Object.assign(e, { uid: 1000 });
+    Object.assign(e, { uid: 12021 });
     expect(e.umask).toBe(0o775);
   });
 

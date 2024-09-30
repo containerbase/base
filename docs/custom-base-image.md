@@ -9,7 +9,7 @@ You should always use a specific version which can be found at [docker hub](http
 
 ## Default user name and id
 
-Use this template for using a custom base image with our default user named `ubuntu` and userid `1000`.
+Use this template for using a custom base image with our default user named `ubuntu` and userid `12021`.
 
 ```dockerfile
 # This containerbase is used for tool intallation and user/directory setup
@@ -47,7 +47,7 @@ RUN install-tool yarn 1.22.10
 WORKDIR /usr/src/app
 
 # must be numeric if this should work with openshift
-USER 1000
+USER 12021
 ```
 
 ## Custom user name and id

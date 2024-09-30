@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/rust/test test
+COPY --chown=12021:0 test/rust/test test
 WORKDIR /test
 
 RUN prepare-tool rust
@@ -50,7 +50,7 @@ RUN install-tool rust 1.81.0
 RUN install-tool rust 1.81.0
 
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # test a: root
@@ -71,7 +71,7 @@ RUN cargo --version
 #--------------------------------------
 FROM base AS testb
 
-USER 1000
+USER 12021
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.81.0

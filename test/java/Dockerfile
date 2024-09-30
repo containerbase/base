@@ -35,7 +35,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/java/test test
+COPY --chown=12021:0 test/java/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -78,7 +78,7 @@ RUN install-tool java 11.0.23+9
 
 RUN prepare-tool gradle
 
-USER 1000
+USER 12021
 
 # stay on v6
 RUN install-tool gradle 6.9
@@ -109,7 +109,7 @@ RUN install-tool java-jre 21.0.4+7.0.LTS
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 8.10.2
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   gradle --version;
@@ -208,7 +208,7 @@ RUN install-tool sbt v1.10.2
 RUN install-tool gradle 8.8-rc-2
 
 # doesn't work for arbitrary users
-USER 1000
+USER 12021
 
 WORKDIR /test
 RUN set -ex; \

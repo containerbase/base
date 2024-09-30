@@ -35,7 +35,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/swift/test test
+COPY --chown=12021:0 test/swift/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -51,7 +51,7 @@ RUN install-tool swift 6.0.1
 #--------------------------------------
 FROM build AS testa
 
-USER 1000
+USER 12021
 
 RUN swift --version
 
@@ -76,7 +76,7 @@ RUN swift --version
 #--------------------------------------
 FROM build AS testb
 
-USER 1000
+USER 12021
 
 RUN install-tool swift 5.7.3
 
