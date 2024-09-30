@@ -152,7 +152,7 @@ module.exports = {
     ],
 
     '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
-    '@typescript-eslint/ban-types': 2,
+    '@typescript-eslint/no-empty-object-type': 2,
     // '@renovate/jest-root-describe': 2,
 
     'typescript-enum/no-const-enum': 2,
