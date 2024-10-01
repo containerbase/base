@@ -43,16 +43,19 @@ export class DevboxInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
+    const path = join(
+      await this.pathSvc.createVersionedToolPath(this.name, version),
+      'bin',
+    );
 
     await this.compress.extract({
       file,
-      cwd: `${path}/bin`,
+      cwd: path,
     });
   }
 
   override async link(version: string): Promise<void> {
-    const src = join(this.pathSvc.versionedToolPath(this.name, version));
+    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
