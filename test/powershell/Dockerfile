@@ -38,7 +38,7 @@ FROM base AS testa
 
 RUN prepare-tool powershell
 
-USER 1000
+USER 12021
 
 # Don't update
 RUN install-tool powershell v7.2.8
@@ -61,7 +61,7 @@ FROM base AS testb
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.4.5
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   pwsh -Version

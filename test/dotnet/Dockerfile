@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/dotnet/test test
+COPY --chown=12021:0 test/dotnet/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -44,7 +44,7 @@ RUN set -ex; dotnet --version | grep 6.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
 
-USER 1000
+USER 12021
 
 RUN dotnet --info
 
@@ -80,7 +80,7 @@ RUN install-tool dotnet 8.0.402
 RUN install-tool dotnet 8.0.402
 RUN set -ex; dotnet --version | grep 8.0.
 
-USER 1000
+USER 12021
 
 RUN dotnet --info
 

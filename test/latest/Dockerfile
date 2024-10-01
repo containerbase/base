@@ -172,7 +172,7 @@ RUN prepare-tool docker
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.46.2
 
-USER 1000
+USER 12021
 
 RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
@@ -256,7 +256,7 @@ RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
-USER 1000
+USER 12021
 
 RUN bazel --version
 

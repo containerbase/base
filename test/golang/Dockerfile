@@ -35,7 +35,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/golang/test test
+COPY --chown=12021:0 test/golang/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -46,7 +46,7 @@ FROM base AS testa
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.23.1
 
-USER 1000
+USER 12021
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
 
@@ -60,7 +60,7 @@ RUN set -ex; \
 USER root
 RUN echo export "GOPATH=/home/${USER_NAME}/.go" | tee -a $BASH_ENV
 
-USER 1000
+USER 12021
 RUN go env
 RUN set -ex; cd c; go get -d ./...; cat go.sum
 
@@ -77,7 +77,7 @@ RUN set -ex; \
   go get -d ./...; \
   go mod tidy;
 
-USER 1000
+USER 12021
 
 SHELL [ "/bin/sh", "-c" ]
 RUN go env
@@ -89,7 +89,7 @@ FROM base AS testc
 
 RUN prepare-tool golang
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.23.1

@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/nix/test test
+COPY --chown=12021:0 test/nix/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -42,7 +42,7 @@ FROM base AS testa
 # old nix version, not for renovating
 RUN install-tool nix 2.10.3
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   nix --version
@@ -54,7 +54,7 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
-RUN --mount=type=secret,id=GITHUB_TOKEN,uid=1000 \
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
   set -ex; \
   [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
@@ -68,7 +68,7 @@ RUN --mount=type=secret,id=GITHUB_TOKEN,uid=1000 \
 FROM base AS testb
 
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-tags packageName=NixOS/nix
 RUN install-tool nix 2.24.9
@@ -83,7 +83,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 
-RUN --mount=type=secret,id=GITHUB_TOKEN,uid=1000 \
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
   set -ex; \
   [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \

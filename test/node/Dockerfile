@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/node/test test
+COPY --chown=12021:0 test/node/test test
 RUN chmod -R 775 /test
 WORKDIR /test
 
@@ -46,7 +46,7 @@ RUN install-tool node 20.17.0
 # ensure npmrc is writable by user
 RUN set -ex; [ $(stat --format '%u' "/opt/containerbase/home/.npmrc") -eq ${USER_ID} ]
 
-USER 1000
+USER 12021
 
 
 #--------------------------------------
@@ -88,7 +88,7 @@ USER root
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
@@ -126,7 +126,7 @@ FROM base AS testd
 
 RUN prepare-tool node
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node v18.20.4
@@ -143,7 +143,7 @@ RUN set -ex; \
   yarn --version;
 
 
-COPY --chown=1000:0 test/node/test test
+COPY --chown=12021:0 test/node/test test
 
 RUN set -ex; \
   npm --version; \
@@ -169,7 +169,7 @@ RUN install-tool npm 8.0.0
 RUN npm --version
 RUN npm --version | grep '8.0.0'
 
-USER 1000
+USER 12021
 
 # don't update!! Should overwrite npm
 RUN install-tool node 18.13.0
@@ -212,7 +212,7 @@ RUN set -ex; npm install -gf npm@8.0.0
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
 
-USER 1000
+USER 12021
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
 RUN chmod -R g+w .
@@ -251,9 +251,9 @@ RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.npmrc
 
 RUN touch /.dummy
 
-USER 1000
+USER 12021
 
-COPY --chown=1000:0 test/node/test test
+COPY --chown=12021:0 test/node/test test
 WORKDIR /test
 
 # don't update!!
@@ -344,7 +344,7 @@ RUN install-tool corepack 0.9.0
 
 RUN corepack --version | tee | grep '0.9.0'
 
-USER 1000
+USER 12021
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.29.4

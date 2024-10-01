@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/python/test test
+COPY --chown=12021:0 test/python/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -50,7 +50,7 @@ FROM base AS build-rootless
 
 RUN prepare-tool python conan
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.12.6
@@ -65,7 +65,7 @@ RUN install-tool pipenv 2024.1.0
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.1.0
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # build: poetry
@@ -78,7 +78,7 @@ RUN install-tool poetry 1.8.3
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.3
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # test pip-tools-a: pip-tools
@@ -213,7 +213,7 @@ FROM build AS test-conan
 
 RUN prepare-tool conan
 
-USER 1000
+USER 12021
 
 # renovate: datasource=pypi
 RUN install-tool conan 2.8.0
