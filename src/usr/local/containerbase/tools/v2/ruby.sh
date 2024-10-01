@@ -1,8 +1,9 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
-  local tool_path
   local path
 
   version_codename="$(get_distro)"
@@ -21,42 +22,61 @@ function prepare_tool() {
     libyaml-0-2 \
     make \
     ;
-  tool_path=$(create_tool_path)
+
+  init_tool
 
   # Redirect gemrc
-  path="$(get_home_path)/.gemrc"
+  path="$(get_cache_path)/.gemrc"
+  ln -sf "${path}" "${USER_HOME}/.gemrc"
+
+  # Redirect gem home
+  path="$(get_cache_path)/.gem"
+  ln -sf "${path}" "${USER_HOME}/.gem"
+
+  # Redirect cocoapods home
+  path="$(get_cache_path)/.cocoapods"
+  ln -sf "${path}" "${USER_HOME}/.cocoapods"
+
+  # Redirect Library home
+  path="$(get_cache_path)/Library"
+  ln -sf "${path}" "${USER_HOME}/Library"
+
+  # Workaround for compatibillity for Ruby hardcoded paths
+  path=$(find_tool_path)
+  if [ "${path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
+    ln -sf "${path}" /usr/local/ruby
+  fi
+}
+
+function init_tool () {
+  local path
+  path="$(get_cache_path)/.gemrc"
+
+  if [ -f "${path}" ]; then
+    return
+  fi
+
+  # Init gemrc
   {
     printf -- "gem: --no-document\n"
   } > "${path}"
   chown "${USER_ID}" "${path}"
   chmod g+w "${path}"
-  ln -sf "${path}" "${USER_HOME}/.gemrc"
 
-  # Redirect gem home
-  path="$(get_home_path)/.gem"
+  # Init gem home
+  path="$(get_cache_path)/.gem"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
-  chmod g+w "${path}"
-  ln -sf "${path}" "${USER_HOME}/.gem"
 
-  # Redirect cocoapods home
-  path="$(get_home_path)/.cocoapods"
+  # Init cocoapods home
+  path="$(get_cache_path)/.cocoapods"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
-  chmod g+w "${path}"
-  ln -sf "${path}" "${USER_HOME}/.cocoapods"
 
-  # Redirect Library home
-  path="$(get_home_path)/Library"
+  # Init Library home
+  path="$(get_cache_path)/Library"
   create_folder "${path}" 775
   chown  "${USER_ID}" "${path}"
-  chmod g+w "${path}"
-  ln -sf "${path}" "${USER_HOME}/Library"
-
-  # Workaround for compatibillity for Ruby hardcoded paths
-  if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/ruby" ]; then
-    ln -sf "${tool_path}" /usr/local/ruby
-  fi
 }
 
 function install_tool () {
@@ -72,15 +92,6 @@ function install_tool () {
   local versioned_tool_path
 
   tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   arch=$(uname -p)
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"

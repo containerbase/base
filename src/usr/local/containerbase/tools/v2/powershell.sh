@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local version_codename
 
@@ -13,22 +15,12 @@ function prepare_tool() {
       exit 1
     ;;
   esac
-
-  create_tool_path > /dev/null
 }
 
 function install_tool () {
   local file
   local versioned_tool_path
   local arch=linux-x64
-
-  if [[ ! -d "$(find_tool_path)" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-  fi
 
   if [[ "$(uname -p)" = "aarch64" ]]; then
     arch=linux-arm64

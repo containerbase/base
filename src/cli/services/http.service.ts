@@ -57,7 +57,7 @@ export class HttpService {
 
     const urlChecksum = hash(url, 'sha256');
 
-    const cacheDir = this.envSvc.cacheDir ?? this.pathSvc.tmpDir;
+    const cacheDir = this.envSvc.cacheDir ?? this.envSvc.tmpDir;
     const cachePath = join(cacheDir, urlChecksum);
     // TODO: validate name
     const file = fileName ?? new URL(url).pathname.split('/').pop()!;

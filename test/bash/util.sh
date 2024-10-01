@@ -10,6 +10,8 @@ export BIN_DIR="${TEST_ROOT_DIR}/bin"
 export LIB_DIR="${TEST_ROOT_DIR}/lib"
 export USER_HOME="${TEST_ROOT_DIR}/user"
 export ENV_FILE="${TEST_ROOT_DIR}/env"
+export CONTAINERBASE_VAR_DIR="${TEST_ROOT_DIR}/var"
+export CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/tmp"
 
 # set default test user
 export TEST_ROOT_USER=12021

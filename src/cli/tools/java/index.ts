@@ -32,32 +32,24 @@ export class JavaPrepareService extends BasePrepareService {
     super(pathSvc, envSvc);
   }
 
-  override async execute(): Promise<void> {
-    const ssl = this.pathSvc.sslPath;
+  override async prepare(): Promise<void> {
+    await this.initialize();
 
-    if (await this.isPrepared()) {
+    const cacerts = path.join(this.pathSvc.sslPath, 'cacerts');
+
+    if (await this.pathSvc.fileExists(cacerts)) {
       // cert store already there
       return;
     }
 
-    await createMavenSettings(this.pathSvc);
-    await createGradleSettings(this.pathSvc);
-
     // compatibility with gradle and maven
     await fs.symlink(
-      path.join(this.pathSvc.homePath, '.m2'),
+      path.join(this.pathSvc.cachePath, '.m2'),
       path.join(this.envSvc.userHome, '.m2'),
     );
     await fs.symlink(
-      path.join(this.pathSvc.homePath, '.gradle'),
+      path.join(this.pathSvc.cachePath, '.gradle'),
       path.join(this.envSvc.userHome, '.gradle'),
-    );
-
-    // fix: Failed to load native library 'libnative-platform.so' for Linux amd64.
-    await this.pathSvc.exportToolEnv(
-      'gradle',
-      { GRADLE_USER_HOME: path.join(this.pathSvc.homePath, '.gradle') },
-      true,
     );
 
     const version = await resolveLatestJavaLtsVersion(
@@ -89,24 +81,33 @@ export class JavaPrepareService extends BasePrepareService {
       fileName: pkg.name,
     });
 
-    const tmp = path.join(this.pathSvc.tmpDir, 'java');
+    const tmp = path.join(this.envSvc.tmpDir, 'java');
 
     await fs.mkdir(tmp, { recursive: true });
 
     await this.compressionSvc.extract({ file: jre, cwd: tmp, strip: 1 });
 
-    await fs.cp(
-      path.join(tmp, 'lib/security/cacerts'),
-      path.join(ssl, 'cacerts'),
-    );
+    const varCerts = path.join(this.pathSvc.varPath, 'cacerts');
+
+    await fs.cp(path.join(tmp, 'lib/security/cacerts'), varCerts);
+
+    await fs.symlink(varCerts, cacerts);
 
     // cleanup will be done by caller
   }
 
-  override async isPrepared(): Promise<boolean> {
-    return await this.pathSvc.fileExists(
-      path.join(this.pathSvc.sslPath, 'cacerts'),
-    );
+  override async initialize(): Promise<void> {
+    await createMavenSettings(this.pathSvc);
+    await createGradleSettings(this.pathSvc);
+
+    if (!(await this.pathSvc.toolEnvExists(this.name))) {
+      // fix: Failed to load native library 'libnative-platform.so' for Linux amd64.
+      await this.pathSvc.exportToolEnv(
+        'gradle',
+        { GRADLE_USER_HOME: path.join(this.pathSvc.cachePath, '.gradle') },
+        true,
+      );
+    }
   }
 }
 

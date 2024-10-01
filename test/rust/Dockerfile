@@ -85,6 +85,11 @@ SHELL [ "/bin/sh", "-c" ]
 RUN rustc --version
 RUN cargo --version
 
+RUN set -ex; \
+  ls -la /tmp/containerbase; \
+  ls -la /tmp/containerbase/cache; \
+  true
+
 #--------------------------------------
 # final
 #--------------------------------------

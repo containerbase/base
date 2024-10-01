@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { inject, injectable } from 'inversify';
-import { fileRights, logger, pathExists } from '../utils';
+import { fileRights, logger, pathExists, tool2path } from '../utils';
 import { EnvService } from './env.service';
 
 export interface FileOwnerConfig {
@@ -15,38 +15,82 @@ export interface FileOwnerConfig {
 
 @injectable()
 export class PathService {
+  /**
+   * Path to `/tmp/containerbase/tool.init.d`.
+   */
+  private get _toolInitPath(): string {
+    return join(this.tmpDir, 'tool.init.d');
+  }
+  /**
+   * Path to `/var/lib/containerbase/tool.prep.d`.
+   */
+  private get _toolPrepPath(): string {
+    return join(this.varPath, 'tool.prep.d');
+  }
+
+  /**
+   * Path to `/opt/containerbase/bin`.
+   */
   get binDir(): string {
     return join(this.installDir, 'bin');
   }
 
+  /**
+   * Path to `/tmp/containerbase/cache`.
+   */
   get cachePath(): string {
-    return join(this.installDir, 'cache');
+    return join(this.tmpDir, 'cache');
   }
 
   get envFile(): string {
     return join(this.envSvc.rootDir, 'usr/local/etc/env');
   }
 
-  get homePath(): string {
-    return join(this.installDir, 'home');
-  }
-
+  /**
+   * Path to `/opt/containerbase`.
+   */
   get installDir(): string {
     return join(this.envSvc.rootDir, 'opt/containerbase');
   }
 
+  /**
+   * Path to `/opt/containerbase/ssl`.
+   */
   get sslPath(): string {
     return join(this.installDir, 'ssl');
   }
 
+  /**
+   * Path to `/tmp/containerbase`.
+   */
   get tmpDir(): string {
-    return join(this.envSvc.rootDir, 'tmp');
+    return join(this.envSvc.tmpDir, 'containerbase');
   }
 
+  /**
+   * Path to `/opt/containerbase/tools`.
+   */
   get toolsPath(): string {
     return join(this.installDir, 'tools');
   }
 
+  /**
+   * Path to `/usr/local/containerbase`.
+   */
+  get usrPath(): string {
+    return join(this.envSvc.rootDir, 'usr/local/containerbase');
+  }
+
+  /**
+   * Path to `/var/lib/containerbase`.
+   */
+  get varPath(): string {
+    return join(this.envSvc.rootDir, 'var/lib/containerbase');
+  }
+
+  /**
+   * Path to `/opt/containerbase/versions`.
+   */
   get versionPath(): string {
     return join(this.installDir, 'versions');
   }
@@ -54,25 +98,21 @@ export class PathService {
   constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createDir(path: string, mode = 0o775): Promise<void> {
-    if (await pathExists(path, true)) {
+    if (await pathExists(path)) {
       return;
     }
     const parent = dirname(path);
-    if (!(await pathExists(parent, true))) {
+    if (!(await pathExists(parent))) {
       await this.createDir(parent, 0o775);
     }
+    logger.debug({ path }, 'creating dir');
     await fs.mkdir(path);
     await this.setOwner({ path, mode });
   }
-
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
     await this.createDir(toolPath);
     return toolPath;
-  }
-
-  async ensureToolPath(tool: string): Promise<string> {
-    return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));
   }
 
   async createVersionedToolPath(
@@ -84,10 +124,26 @@ export class PathService {
     return toolPath;
   }
 
+  async ensureBasePaths(): Promise<void> {
+    if (!(await pathExists(this.varPath, 'dir'))) {
+      throw new Error('System not initialized for containerbase');
+    }
+    await this.createDir(this._toolPrepPath);
+    await this.createDir(this.toolsPath);
+    await this.createDir(this.versionPath);
+    await this.createDir(this.binDir);
+    await this.createDir(this.sslPath);
+    await this.createDir(this._toolInitPath);
+  }
+
+  async ensureToolPath(tool: string): Promise<string> {
+    return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));
+  }
+
   async findToolPath(tool: string): Promise<string | null> {
     const toolPath = this.toolPath(tool);
 
-    if (await pathExists(toolPath, true)) {
+    if (await pathExists(toolPath, 'dir')) {
       return toolPath;
     }
     return null;
@@ -99,18 +155,57 @@ export class PathService {
   ): Promise<string | null> {
     const versionedToolPath = this.versionedToolPath(tool, version);
 
-    if (await pathExists(versionedToolPath, true)) {
+    if (await pathExists(versionedToolPath, 'dir')) {
       return versionedToolPath;
     }
     return null;
   }
 
+  async findLegacyTools(): Promise<string[]> {
+    const tools = await fs.readdir(join(this.usrPath, 'tools/v2'));
+    return tools
+      .filter((t) => t.endsWith('.sh'))
+      .map((t) => t.substring(0, t.length - 3));
+  }
+
   async fileExists(filePath: string): Promise<boolean> {
-    return await pathExists(filePath);
+    return await pathExists(filePath, 'file');
+  }
+
+  async isInitialized(tool: string): Promise<boolean> {
+    return await this.fileExists(this.toolInitPath(tool));
+  }
+
+  async isPrepared(tool: string): Promise<boolean> {
+    return await this.fileExists(this.toolPreparePath(tool));
+  }
+
+  async isLegacyTool(tool: string, v1 = false): Promise<boolean> {
+    let exists = await pathExists(join(this.usrPath, 'tools/v2', `${tool}.sh`));
+    if (!exists && v1) {
+      exists = await pathExists(join(this.usrPath, 'tools', `${tool}.sh`));
+    }
+    return exists;
+  }
+
+  async setInitialized(tool: string): Promise<void> {
+    await fs.writeFile(this.toolInitPath(tool), '');
+  }
+
+  async setPrepared(tool: string): Promise<void> {
+    await fs.writeFile(this.toolPreparePath(tool), '');
+  }
+
+  toolInitPath(tool: string): string {
+    return join(this._toolInitPath, tool2path(tool));
   }
 
   toolPath(tool: string): string {
-    return join(this.toolsPath, tool);
+    return join(this.toolsPath, tool2path(tool));
+  }
+
+  toolPreparePath(tool: string): string {
+    return join(this._toolPrepPath, tool2path(tool));
   }
 
   versionedToolPath(tool: string, version: string): string {
@@ -191,8 +286,7 @@ export class PathService {
       content += 'fi\n';
     }
 
-    await fs.appendFile(file, content);
-    await this.setOwner({ path: file, mode: 0o664 });
+    await this.writeFile(file, content);
   }
 
   async exportToolPath(

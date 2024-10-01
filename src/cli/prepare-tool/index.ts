@@ -46,5 +46,13 @@ export function prepareTools(
   dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
-  return container.get(PrepareToolService).execute(tools, dryRun);
+  return container.get(PrepareToolService).prepare(tools, dryRun);
+}
+
+export function initializeTools(
+  tools: string[],
+  dryRun = false,
+): Promise<number | void> {
+  const container = prepareContainer();
+  return container.get(PrepareToolService).initialize(tools, dryRun);
 }

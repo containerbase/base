@@ -7,10 +7,21 @@ function install_v2_tool () {
 
   # load overrides needed for v2 tools
   # shellcheck source=/dev/null
-  . "/${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
+  . "${CONTAINERBASE_DIR}/utils/v2/overrides.sh"
 
   # shellcheck source=/dev/null
   . "${path}"
+
+  if [[ ! -f "$(get_tool_prep)" && "${NEEDS_PREPARE}" -eq 1 ]]; then
+    if [[ $(is_root) -ne 0 ]]; then
+      echo "${TOOL_NAME} not prepared"
+      exit 1
+    fi
+    prepare_tool_wrapper
+  fi
+
+  # init tool if required
+  init_v2_tool
 
   check_tool_requirements
 

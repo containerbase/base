@@ -115,6 +115,8 @@ teardown() {
 @test "setup directories with correct permissions" {
   local TEST_ROOT_USER=0 # root
   local install_dir=$(get_install_dir)
+  local tmp_dir=$(get_containerbase_tmp_path)
+  local var_dir=$(get_containerbase_var_path)
 
   run setup_directories
   assert_success
@@ -130,10 +132,10 @@ teardown() {
   assert [ "$(stat --format '%a' "${BIN_DIR}")" -eq 777 ]
   assert [ -d "${install_dir}/env.d" ]
   assert [ "$(stat --format '%a' "${install_dir}/env.d")" -eq 775 ]
-  assert [ -d "${install_dir}/cache" ]
-  assert [ "$(stat --format '%a' "${install_dir}/cache")" -eq 775 ]
-  assert [ -d "${install_dir}/home" ]
-  assert [ "$(stat --format '%a' "${install_dir}/home")" -eq 775 ]
+  assert [ -d "${tmp_dir}/cache" ]
+  assert [ "$(stat --format '%a' "${tmp_dir}/cache")" -eq 775 ]
+  assert [ -d "${var_dir}/tool.prep.d" ]
+  assert [ "$(stat --format '%a' "${var_dir}/tool.prep.d")" -eq 755 ]
 }
 
 @test "creates a folder with correct permissions" {
