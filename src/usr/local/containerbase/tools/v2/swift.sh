@@ -4,7 +4,7 @@ export NEEDS_PREPARE=1
 
 function prepare_tool() {
   local version_codename
-  local tool_path
+  local path
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
@@ -68,6 +68,25 @@ function prepare_tool() {
       exit 1
     ;;
   esac
+
+
+  # Redirect swift home
+  path="$(get_cache_path)/.swiftpm"
+  ln -sf "${path}" "${USER_HOME}/.swiftpm"
+}
+
+
+function init_tool () {
+  local path
+  path="$(get_cache_path)/.swiftpm"
+
+  if [ -d "${path}" ]; then
+    return
+  fi
+
+  # Init swift home
+  create_folder "${path}" 775
+  chown -R "${USER_ID}" "${path}"
 }
 
 function install_tool () {
