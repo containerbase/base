@@ -1,5 +1,6 @@
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { EnvService } from './env.service';
 
 export interface ExtractConfig {
   file: string;
@@ -7,17 +8,34 @@ export interface ExtractConfig {
   strip?: number | undefined;
 
   files?: string[];
+
+  /**
+   * Additional options to pass to the `bsdtar` command.
+   */
+  options?: string[];
 }
 
 @injectable()
 export class CompressionService {
-  async extract({ file, cwd, strip, files }: ExtractConfig): Promise<void> {
+  constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
+  async extract({
+    file,
+    cwd,
+    strip,
+    files,
+    options,
+  }: ExtractConfig): Promise<void> {
     await execa('bsdtar', [
       '-xf',
       file,
       '-C',
       cwd,
       ...(strip ? ['--strip', `${strip}`] : []),
+      '--uid',
+      `${this.envSvc.userId}`,
+      '--gid',
+      '0',
+      ...(options ?? []),
       ...(files ?? []),
     ]);
   }

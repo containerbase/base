@@ -98,6 +98,10 @@ RUN set -ex;  \
 #--------------------------------------
 FROM build AS testc
 
+RUN set -ex; \
+  ls -la /opt/containerbase/tools/dotnet; \
+  true
+
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.402
