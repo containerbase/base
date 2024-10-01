@@ -116,7 +116,6 @@ export class DotnetInstallService extends BaseInstallService {
       file,
       cwd: toolPath,
       strip: 1,
-      options: ['--uid', `${this.envSvc.userId}`, '--gid', '0'],
     });
 
     const dotnet = join(toolPath, 'dotnet');
