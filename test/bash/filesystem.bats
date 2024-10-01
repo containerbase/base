@@ -18,7 +18,7 @@ teardown() {
 }
 
 @test "gets the default install dir" {
-    TEST_ROOT_USER=1000 \
+    TEST_ROOT_USER=12021 \
     run get_install_dir
     assert_output "${TEST_ROOT_DIR}/user"
 
@@ -142,7 +142,7 @@ teardown() {
   run create_folder
   assert_failure
 
-  TEST_ROOT_USER=1000
+  TEST_ROOT_USER=12021
   run create_folder "${install_dir}/foo"
   assert_success
 
@@ -172,7 +172,7 @@ teardown() {
 @test "creates deep folder with correct permissions" {
   local install_dir=$(get_install_dir)
 
-  TEST_ROOT_USER=1000
+  TEST_ROOT_USER=12021
   run create_folder "${install_dir}/test/foo/bar/baz"
 
   assert [ -d "${install_dir}/test" ]

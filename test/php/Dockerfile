@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/php/test test
+COPY --chown=12021:0 test/php/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -52,7 +52,7 @@ RUN install-tool composer 2.7.9
 # test with latest version
 RUN install-tool composer latest
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   [ ! -z "$(command -v php)" ] && echo "php installed" || exit 1;
@@ -82,7 +82,7 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN prepare-tool php
 
-USER 1000
+USER 12021
 
 # test without version
 RUN install-tool php

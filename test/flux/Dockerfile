@@ -34,7 +34,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
 ARG FLUX_VERSION=v2.4.0
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # install flux as root
