@@ -7,17 +7,29 @@ export interface ExtractConfig {
   strip?: number | undefined;
 
   files?: string[];
+
+  /**
+   * Additional options to pass to the `bsdtar` command.
+   */
+  options?: string[];
 }
 
 @injectable()
 export class CompressionService {
-  async extract({ file, cwd, strip, files }: ExtractConfig): Promise<void> {
+  async extract({
+    file,
+    cwd,
+    strip,
+    files,
+    options,
+  }: ExtractConfig): Promise<void> {
     await execa('bsdtar', [
       '-xf',
       file,
       '-C',
       cwd,
       ...(strip ? ['--strip', `${strip}`] : []),
+      ...(options ?? []),
       ...(files ?? []),
     ]);
   }
