@@ -119,21 +119,6 @@ export class DotnetInstallService extends BaseInstallService {
       options: ['--uid', `${this.envSvc.userId}`, '--gid', '0'],
     });
 
-    // we need write access to some sub dirs for non root
-    // if (this.envSvc.isRoot) {
-    //   //  find "$tool_path" -type d -exec chmod g+w {} \;
-    //   await execa('find', [
-    //     toolPath,
-    //     '-type',
-    //     'd',
-    //     '-exec',
-    //     'chmod',
-    //     'g+w',
-    //     '{}',
-    //     ';',
-    //   ]);
-    // }
-
     const dotnet = join(toolPath, 'dotnet');
     await execa(dotnet, ['new']);
     if (this.envSvc.isRoot) {
