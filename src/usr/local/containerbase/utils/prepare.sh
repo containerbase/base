@@ -27,6 +27,27 @@ function prepare_tools () {
     exit 1
   fi
 
+  prepare_tool_wrapper
+}
+
+function prepare_tool_wrapper () {
+  # force root check
+  require_root
+
+  if [[ -f "$(get_tool_prep)" ]]; then
+    # tool already prepared
+    return
+  fi
+
+  # ensure tool path exists
+  create_tool_path > /dev/null
+
   # prepare tool
   prepare_tool
+
+  # set tool preped
+  set_tool_prep
+
+  # init tool
+  init_v2_tool
 }

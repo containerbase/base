@@ -1,15 +1,28 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 function prepare_tool() {
   local cargo_home
 
-  cargo_home=$(get_home_path)/.cargo
+  init_tool
 
+  cargo_home=$(get_cache_path)/.cargo
   ln -sf "${cargo_home}" "${USER_HOME}/.cargo"
-  mkdir "${cargo_home}"
+}
+
+function init_tool () {
+   local cargo_home
+
+  cargo_home=$(get_cache_path)/.cargo
+
+  if [ -d "${cargo_home}" ]; then
+    # already initialized
+    return
+  fi
+
+  create_folder "${cargo_home}" 775
   chown -R "${USER_ID}" "${cargo_home}"
-  chmod -R g+w "${cargo_home}"
-  create_tool_path > /dev/null
 }
 
 function install_tool () {
@@ -21,18 +34,6 @@ function install_tool () {
   local expected_checksum
   local ext=gz
   local file_name
-  local tool_path
-
-  tool_path=$(find_tool_path)
-
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
 
   arch=$(uname -p)
   file_name="rust-${TOOL_VERSION}-${arch}-unknown-linux-gnu.tar"

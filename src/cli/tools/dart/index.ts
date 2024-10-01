@@ -11,7 +11,12 @@ import {
   PathService,
 } from '../../services';
 import { parse } from '../../utils';
-import { prepareDartHome, preparePubCache } from './utils';
+import {
+  initDartHome,
+  initPubCache,
+  prepareDartHome,
+  preparePubCache,
+} from './utils';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip
@@ -24,9 +29,15 @@ import { prepareDartHome, preparePubCache } from './utils';
 export class DartPrepareService extends BasePrepareService {
   readonly name = 'dart';
 
-  async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
+    await this.initialize();
     await prepareDartHome(this.envSvc, this.pathSvc);
     await preparePubCache(this.envSvc, this.pathSvc);
+  }
+
+  override async initialize(): Promise<void> {
+    await initDartHome(this.pathSvc);
+    await initPubCache(this.pathSvc);
   }
 }
 

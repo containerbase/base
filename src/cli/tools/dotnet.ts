@@ -11,7 +11,7 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { getDistro, parse } from '../utils';
+import { getDistro, parse, pathExists } from '../utils';
 
 @injectable()
 export class DotnetPrepareService extends BasePrepareService {
@@ -25,7 +25,7 @@ export class DotnetPrepareService extends BasePrepareService {
     super(pathSvc, envSvc);
   }
 
-  async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
@@ -64,17 +64,26 @@ export class DotnetPrepareService extends BasePrepareService {
         break;
     }
 
-    await this.pathSvc.exportToolEnv(this.name, {
-      DOTNET_ROOT: this.pathSvc.toolPath(this.name),
-      DOTNET_CLI_TELEMETRY_OPTOUT: '1',
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1',
-    });
+    await this.initialize();
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.nuget'),
+      join(this.envSvc.userHome, '.nuget'),
+    );
+  }
 
-    const nuget = join(this.envSvc.userHome, '.nuget');
-    await fs.mkdir(join(nuget, 'NuGet'), { recursive: true });
-    // fs isn't recursive, so we use system binaries
-    await execa('chown', ['-R', this.envSvc.userName, nuget]);
-    await execa('chmod', ['-R', 'g+w', nuget]);
+  override async initialize(): Promise<void> {
+    if (!(await this.pathSvc.toolEnvExists(this.name))) {
+      await this.pathSvc.exportToolEnv(this.name, {
+        DOTNET_ROOT: this.pathSvc.toolPath(this.name),
+        DOTNET_CLI_TELEMETRY_OPTOUT: '1',
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1',
+      });
+    }
+
+    const nuget = join(this.pathSvc.cachePath, '.nuget');
+    if (!(await pathExists(nuget))) {
+      await this.pathSvc.createDir(join(nuget, 'NuGet'));
+    }
   }
 }
 

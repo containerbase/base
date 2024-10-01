@@ -15,7 +15,7 @@ import {
 export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
-  async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
     await execa('groupadd', ['-g', '999', 'docker']);
     await execa('usermod', ['-aG', 'docker', this.envSvc.userName]);
   }

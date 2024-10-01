@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { inject, injectable } from 'inversify';
@@ -19,7 +20,18 @@ export class ConanPrepareService extends BasePrepareService {
     super(pathSvc, envSvc);
   }
 
-  override async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
+    await this.aptSvc.install('cmake', 'gcc', 'g++', 'make', 'perl');
+
+    await this.initialize();
+
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.conan2'),
+      join(this.envSvc.userHome, '.conan2'),
+    );
+  }
+
+  override async initialize(): Promise<void> {
     const distro = await getDistro();
     const profile = codeBlock`
     [settings]
@@ -32,10 +44,9 @@ export class ConanPrepareService extends BasePrepareService {
     os=Linux
     `;
 
-    const profilesPath = join(this.envSvc.userHome, '.conan2', 'profiles');
+    const profilesPath = join(this.pathSvc.cachePath, '.conan2', 'profiles');
     await this.pathSvc.createDir(profilesPath);
     await this.pathSvc.writeFile(join(profilesPath, 'default'), profile);
-    await this.aptSvc.install('cmake', 'gcc', 'g++', 'make', 'perl');
   }
 }
 
