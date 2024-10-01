@@ -87,7 +87,7 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     const nodeVersion = await this.getNodeVersion();
     const npm = this.getNodeNpm(nodeVersion);
     const tmp = await fs.mkdtemp(
-      join(this.pathSvc.tmpDir, 'containerbase-npm-'),
+      join(this.envSvc.tmpDir, 'containerbase-npm-'),
     );
     const env = this.prepareEnv(version, tmp);
 
@@ -187,7 +187,12 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   }
 
   override async test(version: string): Promise<void> {
-    await execa(this.tool(version), ['--version'], { stdio: 'inherit' });
+    let name = this.tool(version);
+    const idx = name.lastIndexOf('/');
+    if (idx > 0) {
+      name = name.slice(idx + 1);
+    }
+    await execa(name, ['--version'], { stdio: 'inherit' });
   }
 
   override async validate(version: string): Promise<boolean> {
@@ -280,15 +285,13 @@ async function readPackageJson(path: string): Promise<PackageJson> {
 }
 
 export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
-  const path = join(pathSvc.homePath, '.npm');
-  if (!(await pathExists(path, true))) {
-    await pathSvc.createDir(path);
-  }
+  const path = join(pathSvc.cachePath, '.npm');
+  await pathSvc.createDir(path);
 }
 
 export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
-  const path = join(pathSvc.homePath, '.npmrc');
-  if (!(await pathExists(path, false))) {
+  const path = join(pathSvc.cachePath, '.npmrc');
+  if (!(await pathExists(path))) {
     await pathSvc.writeFile(path, '');
   }
 }
@@ -298,11 +301,11 @@ export async function prepareSymlinks(
   pathSvc: PathService,
 ): Promise<void> {
   await fs.symlink(
-    join(pathSvc.homePath, '.npm'),
+    join(pathSvc.cachePath, '.npm'),
     join(envSvc.userHome, '.npm'),
   );
   await fs.symlink(
-    join(pathSvc.homePath, '.npmrc'),
+    join(pathSvc.cachePath, '.npmrc'),
     join(envSvc.userHome, '.npmrc'),
   );
 }

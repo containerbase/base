@@ -22,16 +22,22 @@ import {
 @injectable()
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
-  override async execute(): Promise<void> {
+  override async prepare(): Promise<void> {
+    await this.initialize();
+    await prepareSymlinks(this.envSvc, this.pathSvc);
+  }
+
+  override async initialize(): Promise<void> {
     await prepareNpmCache(this.pathSvc);
     await prepareNpmrc(this.pathSvc);
-    await prepareSymlinks(this.envSvc, this.pathSvc);
 
-    await this.pathSvc.exportToolEnv(this.name, {
-      NO_UPDATE_NOTIFIER: '1',
-      npm_config_update_notifier: 'false',
-      npm_config_fund: 'false',
-    });
+    if (!(await this.pathSvc.toolEnvExists(this.name))) {
+      await this.pathSvc.exportToolEnv(this.name, {
+        NO_UPDATE_NOTIFIER: '1',
+        npm_config_update_notifier: 'false',
+        npm_config_fund: 'false',
+      });
+    }
   }
 }
 
@@ -121,7 +127,7 @@ export class NodeInstallService extends NodeBaseInstallService {
     const ver = parse(version);
     if (ver.major < 15) {
       const tmp = await fs.mkdtemp(
-        join(this.pathSvc.tmpDir, 'containerbase-npm-'),
+        join(this.envSvc.tmpDir, 'containerbase-npm-'),
       );
       const env = this.prepareEnv(version, tmp);
       env.PATH = `${path}/bin:${penv.PATH}`;

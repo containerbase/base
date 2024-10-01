@@ -1,6 +1,6 @@
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { prepareTools } from '../prepare-tool';
+import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
 import type { BaseInstallService } from './base-install.service';
@@ -31,6 +31,8 @@ export class InstallToolService {
       'supported tools',
     );
 
+    await this.pathSvc.ensureBasePaths();
+
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       if (toolSvc) {
@@ -43,6 +45,14 @@ export class InstallToolService {
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {
           logger.debug({ tool }, 'tool not prepared');
           const res = await prepareTools([tool], dryRun);
+          if (res) {
+            return res;
+          }
+        }
+
+        if (toolSvc.needsInitialize() && !(await toolSvc.isInitialized())) {
+          logger.debug({ tool }, 'tool not initialized');
+          const res = await initializeTools([tool], dryRun);
           if (res) {
             return res;
           }
@@ -83,7 +93,7 @@ export class InstallToolService {
 
       if (await isDockerBuild()) {
         logger.debug('cleaning tmp files');
-        await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
+        await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
 
         if (this.envSvc.isRoot) {
           logger.debug('cleaning root caches');
@@ -96,9 +106,8 @@ export class InstallToolService {
           logger.debug('cleaning user caches');
           await deleteAsync(
             [
-              `${this.envSvc.userHome}/.cache`,
-              `${this.envSvc.userHome}/.local/share/virtualenv`,
-              `${this.pathSvc.cachePath}/**`,
+              `${this.pathSvc.cachePath}/.cache/**`,
+              `${this.pathSvc.cachePath}/.local/share/virtualenv/**`,
             ],
             {
               force: true,

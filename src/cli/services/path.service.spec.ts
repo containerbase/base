@@ -17,11 +17,17 @@ describe('path.service', () => {
     env.PATH = path;
     delete env.NODE_VERSION;
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
+    await mkdir(rootPath('var/lib/containerbase/tool.prep.d'), {
+      recursive: true,
+    });
+    await mkdir(rootPath('tmp/containerbase/tool.init.d'), {
+      recursive: true,
+    });
   });
 
   test('cachePath', () => {
     expect(child.get(PathService).cachePath).toBe(
-      rootPath('opt/containerbase/cache'),
+      rootPath('tmp/containerbase/cache'),
     );
   });
 
@@ -30,13 +36,7 @@ describe('path.service', () => {
   });
 
   test('tmpDir', () => {
-    expect(child.get(PathService).tmpDir).toBe(rootPath('tmp'));
-  });
-
-  test('homePath', () => {
-    expect(child.get(PathService).homePath).toBe(
-      rootPath('opt/containerbase/home'),
-    );
+    expect(child.get(PathService).tmpDir).toBe(rootPath('tmp/containerbase'));
   });
 
   test('sslPath', () => {
@@ -63,6 +63,15 @@ describe('path.service', () => {
 
   test('toolEnvExists', async () => {
     expect(await child.get(PathService).toolEnvExists('node')).toBe(false);
+  });
+
+  test('ensureBasePaths', async () => {
+    await child.get(PathService).ensureBasePaths();
+    expect(await pathExists(rootPath('opt/containerbase'), 'dir')).toBe(true);
+    expect(await pathExists(rootPath('var/lib/containerbase'), 'dir')).toBe(
+      true,
+    );
+    expect(await pathExists(rootPath('tmp/containerbase'), 'dir')).toBe(true);
   });
 
   test('exportToolEnvContent', async () => {
@@ -169,7 +178,7 @@ describe('path.service', () => {
       rootPath('opt/containerbase/tools/node'),
     );
     expect(
-      await pathExists(rootPath('opt/containerbase/tools/node'), true),
+      await pathExists(rootPath('opt/containerbase/tools/node'), 'dir'),
     ).toBe(true);
   });
 
@@ -180,11 +189,32 @@ describe('path.service', () => {
   });
 
   test('createDir', async () => {
-    const dir = rootPath('env123');
+    const dir = rootPath('env123/sub');
     expect(await child.get(PathService).createDir(dir)).toBeUndefined();
 
     const s = await stat(dir);
     expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o775);
+    expect(await child.get(PathService).createDir(dir)).toBeUndefined();
+  });
+
+  test('toolInit', async () => {
+    const pathSvc = child.get(PathService);
+    expect(pathSvc.toolInitPath('node')).toBe(
+      rootPath('tmp/containerbase/tool.init.d/node'),
+    );
+    expect(await pathSvc.isInitialized('node')).toBe(false);
+    await pathSvc.setInitialized('node');
+    expect(await pathSvc.isInitialized('node')).toBe(true);
+  });
+
+  test('toolPrepare', async () => {
+    const pathSvc = child.get(PathService);
+    expect(pathSvc.toolPreparePath('node')).toBe(
+      rootPath('var/lib/containerbase/tool.prep.d/node'),
+    );
+    expect(await pathSvc.isPrepared('node')).toBe(false);
+    await pathSvc.setPrepared('node');
+    expect(await pathSvc.isPrepared('node')).toBe(true);
   });
 
   test('writeFile', async () => {

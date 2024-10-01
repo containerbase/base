@@ -7,6 +7,7 @@ function shell_wrapper () {
   local EXPORTS=$3
   local args=$4
   local content=$5
+  local tool_init
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
@@ -17,11 +18,17 @@ function shell_wrapper () {
   check SOURCE true
   check_command "$SOURCE"
 
+  tool_init=$(get_tool_init "${TOOL_NAME//\//__}")
+
   cat > "$TARGET" <<- EOM
 #!/bin/bash
 
 if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
   . $ENV_FILE
+fi
+if [[ ! -f "${tool_init}" ]]; then
+  # set logging to only warn and above to not interfere with tool output
+  CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${TOOL_NAME}"
 fi
 EOM
 

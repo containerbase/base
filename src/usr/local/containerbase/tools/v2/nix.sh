@@ -35,6 +35,6 @@ function link_tool() {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
 
-  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "NIX_STORE_DIR=$(get_home_path)/nix/store NIX_DATA_DIR=$(get_home_path)/nix/data NIX_LOG_DIR=$(get_cache_path)/nix/log NIX_STATE_DIR=$(get_home_path)/nix/state NIX_CONF_DIR=$(get_home_path)/nix/conf"
+  shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin" "NIX_STORE_DIR=$(get_cache_path)/nix/store NIX_DATA_DIR=$(get_cache_path)/nix/data NIX_LOG_DIR=$(get_cache_path)/nix/log NIX_STATE_DIR=$(get_cache_path)/nix/state NIX_CONF_DIR=$(get_cache_path)/nix/conf"
   [[ -n $SKIP_VERSION ]] || nix --version
 }

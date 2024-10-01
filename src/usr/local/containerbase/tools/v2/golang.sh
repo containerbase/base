@@ -1,19 +1,32 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
 
 function prepare_tool() {
+  local go_path
   # go suggests: git svn bzr mercurial
   apt_install bzr mercurial
 
-  go_path=$(get_home_path)/go
+  init_tool
+
+  go_path=$(get_cache_path)/go
 
   ln -sf "${go_path}" "${USER_HOME}/go"
+}
 
-  mkdir -p "${go_path}/src" "${go_path}/bin" "${go_path}/pkg"
+function init_tool() {
+  local go_path
 
+  go_path=$(get_cache_path)/go
+
+  if [ -d "${go_path}" ]; then
+    return
+  fi
+
+  create_folder "${go_path}/src" 775
+  create_folder "${go_path}/bin" 775
+  create_folder "${go_path}/pkg" 775
   chown -R "${USER_ID}" "${go_path}"
-  chmod -R g+w "${go_path}"
-  create_tool_path > /dev/null
 }
 
 function install_tool () {
@@ -26,14 +39,6 @@ function install_tool () {
   local name=${TOOL_NAME}
   local version=${TOOL_VERSION}
   local versioned_tool_path
-
-  if [[ ! -d "$(find_tool_path)" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${TOOL_NAME} not prepared"
-      exit 1
-    fi
-    prepare_tool
-  fi
 
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
 

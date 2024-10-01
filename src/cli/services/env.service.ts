@@ -68,6 +68,10 @@ export class EnvService {
     return join(this.rootDir, 'root');
   }
 
+  get tmpDir(): string {
+    return join(this.rootDir, 'tmp');
+  }
+
   get userHome(): string {
     return env.USER_HOME ?? join(this.rootDir, 'home', this.userName);
   }

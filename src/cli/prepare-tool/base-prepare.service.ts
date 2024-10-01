@@ -10,10 +10,11 @@ export abstract class BasePrepareService {
     @inject(EnvService) protected readonly envSvc: EnvService,
   ) {}
 
-  abstract execute(): Promise<void> | void;
-
-  async isPrepared(): Promise<boolean> {
-    return null !== (await this.pathSvc.findToolPath(this.name));
+  prepare(): Promise<void> | void {
+    // noting to do;
+  }
+  initialize(): Promise<void> | void {
+    // noting to do;
   }
 
   toString(): string {

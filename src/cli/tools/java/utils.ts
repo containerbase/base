@@ -46,16 +46,16 @@ export async function resolveJavaDownloadUrl(
 }
 
 export async function createMavenSettings(pathSvc: PathService): Promise<void> {
-  const dir = path.join(pathSvc.homePath, '.m2');
+  const dir = path.join(pathSvc.cachePath, '.m2');
+  await pathSvc.createDir(dir);
+
   const file = path.join(dir, 'settings.xml');
   if (await pathExists(file)) {
     logger.debug('Maven settings already found');
     return;
   }
+
   logger.debug('Creating Maven settings');
-
-  await pathSvc.createDir(dir);
-
   await pathSvc.writeFile(
     file,
     codeBlock`
@@ -72,16 +72,16 @@ export async function createMavenSettings(pathSvc: PathService): Promise<void> {
 export async function createGradleSettings(
   pathSvc: PathService,
 ): Promise<void> {
-  const dir = path.join(pathSvc.homePath, '.gradle');
+  const dir = path.join(pathSvc.cachePath, '.gradle');
+  await pathSvc.createDir(dir);
+
   const file = path.join(dir, 'gradle.properties');
   if (await pathExists(file)) {
     logger.debug('Gradle settings already found');
     return;
   }
+
   logger.debug('Creating Gradle settings');
-
-  await pathSvc.createDir(dir);
-
   await pathSvc.writeFile(
     file,
     codeBlock`
