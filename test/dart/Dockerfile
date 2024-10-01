@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/dart/test test
+COPY --chown=12021:0 test/dart/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -46,7 +46,7 @@ RUN prepare-tool dart
 #--------------------------------------
 FROM build AS testa
 
-USER 1000
+USER 12021
 
 RUN install-tool dart 2.0.0
 

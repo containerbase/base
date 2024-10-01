@@ -10,7 +10,7 @@ if [[ -z "${USER_NAME}" ]]; then
 fi
 
 if [[ -z "${USER_ID}" ]]; then
-  export USER_ID=1000
+  export USER_ID=12021
   echo "No USER_ID defined - using: ${USER_ID}"
 fi
 

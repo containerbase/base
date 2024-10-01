@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/jb/test test
+COPY --chown=12021:0 test/jb/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -39,7 +39,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0

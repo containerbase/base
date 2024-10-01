@@ -31,7 +31,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-# test openshift compatibility 1000<>1001
+# test openshift compatibility 12021<>1001
 COPY --chown=1001:0 test/erlang/test test
 WORKDIR /test
 
@@ -54,8 +54,8 @@ RUN install-tool erlang 27.0.1.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.3
 
-RUN chown -R 1000:0 /test
-USER 1000
+RUN chown -R 12021:0 /test
+USER 12021
 
 RUN set -ex; \
     cd a; \

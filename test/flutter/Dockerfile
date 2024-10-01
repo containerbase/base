@@ -35,7 +35,7 @@ ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
-COPY --chown=1000:0 test/flutter/test test
+COPY --chown=12021:0 test/flutter/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -50,7 +50,7 @@ RUN prepare-tool flutter
 #--------------------------------------
 FROM build AS testa
 
-USER 1000
+USER 12021
 
 # EOL
 RUN install-tool flutter 2.10.5
@@ -64,7 +64,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM build AS testb
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
 RUN install-tool flutter 3.24.3
