@@ -131,9 +131,6 @@ https://github.com/elixir-lang/elixir/releases/v1.13.0/Precompiled.zip
 Flutter releases are downloaded from:
 
 - `https://github.com/containerbase/flutter-prebuild/releases`
-- `https://github.com/flutter/flutter.git`
-
-The first url is preferred and the second is used as fallback for older versions.
 
 Samples:
 
@@ -142,7 +139,6 @@ https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-x86_64.tar.xz.sha512
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz.sha512
-https://github.com/flutter/flutter.git
 ```
 
 ## `flux`

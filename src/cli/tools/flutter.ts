@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { CleanOptions, ResetMode, simpleGit } from 'simple-git';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
@@ -11,7 +10,6 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { logger } from '../utils';
 import { prepareDartHome, preparePubCache } from './dart/utils';
 
 @injectable()
@@ -75,65 +73,15 @@ export class FlutterInstallService extends BaseInstallService {
     const name = this.name;
     const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
-    const checksumFileUrl = `${url}.sha512`;
-    const isOnGithub = await this.http.exists(checksumFileUrl);
 
-    if (isOnGithub) {
-      logger.info(`using github prebuild`);
-      const checksumFile = await this.http.download({ url: checksumFileUrl });
-      const expectedChecksum = (
-        await fs.readFile(checksumFile, 'utf-8')
-      ).trim();
-      const file = await this.http.download({
-        url,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-      await this.compress.extract({ file, cwd: await this.getToolPath() });
-    } else {
-      logger.info(`using github source repo`);
-      await this.getToolPath();
-      const path = await this.pathSvc.createVersionedToolPath(
-        this.name,
-        version,
-      );
-      const git = simpleGit({ baseDir: path });
-
-      await git.addConfig(
-        'safe.directory',
-        path,
-        true,
-        this.envSvc.isRoot ? 'system' : 'global',
-      );
-
-      await git.clone('https://github.com/flutter/flutter.git', '.', {
-        '--filter': 'blob:none',
-        '--branch': 'stable',
-      });
-
-      await git.reset(ResetMode.HARD, [version]);
-
-      // init flutter
-      await execa(`./bin/flutter`, ['--version'], { cwd: path });
-      await execa(`./bin/flutter`, ['pub', 'get', '--help'], { cwd: path });
-
-      // cleanup
-      await git.clean(CleanOptions.FORCE + CleanOptions.IGNORED_INCLUDED, [
-        '--',
-        '**/.packages',
-      ]);
-      await git.clean(CleanOptions.FORCE + CleanOptions.IGNORED_INCLUDED, [
-        '--',
-        '**/.dart_tool/',
-      ]);
-      await fs.rm(join(path, '.pub-cache/git'), {
-        recursive: true,
-        force: true,
-      });
-
-      // fix permrmissions
-      await execa('chmod', ['-R', 'g+w', path]);
-    }
+    const checksumFile = await this.http.download({ url: `${url}.sha512` });
+    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
+    await this.compress.extract({ file, cwd: await this.getToolPath() });
   }
 
   override async link(version: string): Promise<void> {
