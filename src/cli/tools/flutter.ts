@@ -10,7 +10,9 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { initDartHome, initPubCache ,
+import {
+  initDartHome,
+  initPubCache,
   prepareDartHome,
   preparePubCache,
 } from './dart/utils';
