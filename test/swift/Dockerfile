@@ -67,6 +67,10 @@ RUN set -ex; \
   cd c; \
   swift package resolve
 
+RUN set -ex; \
+  ls -la $USER_HOME/; \
+  true
+
 SHELL [ "/bin/sh", "-c" ]
 RUN swift --version
 

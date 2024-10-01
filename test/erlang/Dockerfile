@@ -40,7 +40,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-RUN prepare-tool erlang
+RUN prepare-tool erlang elixir
 
 #--------------------------------------
 # test: erlang (root)
@@ -61,6 +61,9 @@ RUN set -ex; \
     cd a; \
     mix deps.update --all;
 
+RUN set -ex; \
+    ls -la $USER_HOME/; \
+    true
 
 #--------------------------------------
 # test: erlang (v24,user,openshift)

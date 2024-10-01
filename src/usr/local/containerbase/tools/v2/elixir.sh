@@ -1,4 +1,36 @@
 #!/bin/bash
+export NEEDS_PREPARE=1
+
+function prepare_tool() {
+  local path
+  init_tool
+
+  # Redirect mix home
+  path="$(get_cache_path)/.hex"
+  ln -sf "${path}" "${USER_HOME}/.hex"
+
+  # Redirect mix home
+  path="$(get_cache_path)/.mix"
+  ln -sf "${path}" "${USER_HOME}/.mix"
+}
+
+function init_tool () {
+  local path
+  path="$(get_cache_path)/.mix"
+
+  if [ -d "${path}" ]; then
+    return
+  fi
+
+  # Init mix home
+  create_folder "${path}" 775
+  chown -R "${USER_ID}" "${path}"
+
+  # Init hex home
+  path="$(get_cache_path)/.hex"
+  create_folder "${path}" 775
+  chown -R "${USER_ID}" "${path}"
+}
 
 function install_tool () {
   local versioned_tool_path
@@ -41,4 +73,6 @@ function link_tool () {
     mix local.hex --force
     mix local.rebar --force
   fi
+
+  # TODO: check rights of files and folder in ~/.mix and ~/.hex
 }
