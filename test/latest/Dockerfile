@@ -179,7 +179,7 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.3.0
+RUN install-tool flux v2.4.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.5.1
