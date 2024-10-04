@@ -153,7 +153,7 @@ FROM build AS test-php
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.3.12
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.7.9
+RUN install-tool composer 2.8.1
 
 #--------------------------------------
 # Image: test-python
