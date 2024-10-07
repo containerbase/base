@@ -42,17 +42,14 @@ FROM base AS build
 RUN prepare-tool dart
 
 #--------------------------------------
-# test: dart 2.x (non-root)
+# test: dart 3.x (non-root)
 #--------------------------------------
 FROM build AS testa
 
 USER 12021
 
-RUN install-tool dart 2.0.0
-
 # renovate: datasource=docker
 RUN install-tool dart 3.5.2
-
 
 RUN set -ex; \
     cd a; \
@@ -63,7 +60,7 @@ RUN set -ex; \
   true
 
 #--------------------------------------
-# test: dart 2.x (root, openstack)
+# test: dart 3.x (root, openstack)
 #--------------------------------------
 FROM base AS testb
 
@@ -79,6 +76,23 @@ RUN set -ex; \
     cd a; \
     dart pub upgrade;
 
+#--------------------------------------
+# test: dart 2.x (non-root)
+#--------------------------------------
+FROM build AS testc
+
+USER 12021
+
+# renovate: datasource=docker
+RUN install-tool dart 2.19.6
+
+RUN set -ex; \
+    cd a; \
+    dart pub upgrade;
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 
 #--------------------------------------
 # final
@@ -87,3 +101,4 @@ FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
