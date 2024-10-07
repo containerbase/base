@@ -8,6 +8,7 @@
   "enabledManagers": ["dockerfile", "github-actions", "nodenv", "npm", "regex"],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
+  "baseBranches": ["$default", "/^maint/.+/"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
@@ -169,6 +170,19 @@
       "description": "Disable eslint v9",
       "matchDepNames": ["eslint"],
       "allowedVersions": "<9"
+    },
+    {
+      "description": "Use branch merge for maintenace branches",
+      "matchBaseBranches": ["/^maint/.+/"],
+      "automergeType": "branch",
+      "prCreation": "not-pending",
+      "rebaseWhen": "auto"
+    },
+    {
+      "description": "Require approval for maintenace branches test deps",
+      "matchBaseBranches": ["/^maint/.+/"],
+      "matchFileNames": ["test/**"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [
