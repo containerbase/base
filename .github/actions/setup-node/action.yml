@@ -18,7 +18,7 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: ♻️ Restore `node_modules`
-      uses: actions/cache/restore@2cdf405574d6ef1f33a1d12acccd3ae82f47b3f2 # v4.1.0
+      uses: actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
       id: node-modules-restore
       with:
         path: node_modules
@@ -53,7 +53,7 @@ runs:
 
     - name: ♻️ Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@2cdf405574d6ef1f33a1d12acccd3ae82f47b3f2 # v4.1.0
+      uses: actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
