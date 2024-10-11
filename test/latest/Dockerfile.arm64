@@ -46,7 +46,7 @@ RUN install-tool bazelisk v1.22.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.29
+RUN install-tool bun 1.1.30
 
 #--------------------------------------
 # Image: gleam
