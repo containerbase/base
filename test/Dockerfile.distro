@@ -114,7 +114,7 @@ RUN install-tool jb v0.6.0
 RUN install-tool vendir v0.42.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.12.0
+RUN install-tool devbox 0.13.4
 
 #--------------------------------------
 # Image: test-erlang
