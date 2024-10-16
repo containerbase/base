@@ -103,7 +103,7 @@ RUN gradle --version
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java-jre 21.0.4+7.0.LTS
+RUN install-tool java-jre 21.0.5+11.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 8.10.2
