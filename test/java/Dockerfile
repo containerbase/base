@@ -59,7 +59,7 @@ RUN set -ex; \
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java 21.0.4+7.0.LTS
+RUN install-tool java 21.0.5+11.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -157,7 +157,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=java-version depName=java
-ARG JAVA_JDK_VERSION=21.0.4+7.0.LTS
+ARG JAVA_JDK_VERSION=21.0.5+11.0.LTS
 RUN install-tool java-jdk
 
 # test latest gradle
