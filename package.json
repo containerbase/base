@@ -36,7 +36,7 @@
     "bats-support": "0.3.0",
     "esbuild": "0.24.0",
     "tsconfig-paths": "4.2.0",
-    "vite": "5.4.8"
+    "vite": "5.4.9"
   },
   "dependencies": {
     "@sindresorhus/is": "7.0.1",
@@ -100,7 +100,7 @@
     "tsx": "4.19.1",
     "type-fest": "4.26.1",
     "typescript": "5.6.3",
-    "vite": "5.4.8",
+    "vite": "5.4.9",
     "vite-tsconfig-paths": "5.0.1",
     "vitest": "2.1.2",
     "vitest-github-actions-reporter": "0.11.1"
