@@ -44,10 +44,10 @@ RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.cargo
 FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.82.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.82.0
 
 
 USER 12021
@@ -74,7 +74,7 @@ FROM base AS testb
 USER 12021
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.82.0
 
 RUN set -ex; \
     cd a; \
