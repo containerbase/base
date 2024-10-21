@@ -213,7 +213,7 @@ FROM base AS teste
 RUN install-tool bazelisk v1.22.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.30
+RUN install-tool bun 1.1.31
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.5.1
