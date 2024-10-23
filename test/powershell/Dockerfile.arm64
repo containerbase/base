@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-powershell
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.5
+RUN install-tool powershell v7.4.6
 
 #--------------------------------------
 # Image: final
