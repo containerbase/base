@@ -68,7 +68,7 @@ FROM build AS testa
 RUN install-tool node 20.18.0
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.12
+RUN install-tool php 8.3.13
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
