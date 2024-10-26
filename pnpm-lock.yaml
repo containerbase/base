@@ -8,7 +8,7 @@ overrides:
   bats-support: 0.3.0
   esbuild: 0.24.0
   tsconfig-paths: 4.2.0
-  vite: 5.4.9
+  vite: 5.4.10
 
 patchedDependencies:
   '@yao-pkg/pkg@5.16.1':
@@ -198,11 +198,11 @@ importers:
         specifier: 5.6.3
         version: 5.6.3
       vite:
-        specifier: 5.4.9
-        version: 5.4.9(@types/node@20.16.15)
+        specifier: 5.4.10
+        version: 5.4.10(@types/node@20.16.15)
       vite-tsconfig-paths:
         specifier: 5.0.1
-        version: 5.0.1(typescript@5.6.3)(vite@5.4.9(@types/node@20.16.15))
+        version: 5.0.1(typescript@5.6.3)(vite@5.4.10(@types/node@20.16.15))
       vitest:
         specifier: 2.1.3
         version: 2.1.3(@types/node@20.16.15)(@vitest/ui@2.1.3)
@@ -898,7 +898,7 @@ packages:
     peerDependencies:
       '@vitest/spy': 2.1.3
       msw: ^2.3.5
-      vite: 5.4.9
+      vite: 5.4.10
     peerDependenciesMeta:
       msw:
         optional: true
@@ -3415,13 +3415,13 @@ packages:
   vite-tsconfig-paths@5.0.1:
     resolution: {integrity: sha512-yqwv+LstU7NwPeNqajZzLEBVpUFU6Dugtb2P84FXuvaoYA+/70l9MHE+GYfYAycVyPSDYZ7mjOFuYBRqlEpTig==}
     peerDependencies:
-      vite: 5.4.9
+      vite: 5.4.10
     peerDependenciesMeta:
       vite:
         optional: true
 
-  vite@5.4.9:
-    resolution: {integrity: sha512-20OVpJHh0PAM0oSOELa5GaZNWeDjcAvQjGXy2Uyr+Tp+/D2/Hdz6NLgpJLsarPTA2QJ6v8mX2P1ZfbsSKvdMkg==}
+  vite@5.4.10:
+    resolution: {integrity: sha512-1hvaPshuPUtxeQ0hsVH3Mud0ZanOLwVTneA1EgbAM5LhaZEqyPWGRQ7BtaMvUrTDeEaC8pxtj6a6jku3x4z6SQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -4257,13 +4257,13 @@ snapshots:
       chai: 5.1.1
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.3(@vitest/spy@2.1.3)(vite@5.4.9(@types/node@20.16.15))':
+  '@vitest/mocker@2.1.3(@vitest/spy@2.1.3)(vite@5.4.10(@types/node@20.16.15))':
     dependencies:
       '@vitest/spy': 2.1.3
       estree-walker: 3.0.3
       magic-string: 0.30.12
     optionalDependencies:
-      vite: 5.4.9(@types/node@20.16.15)
+      vite: 5.4.10(@types/node@20.16.15)
 
   '@vitest/pretty-format@2.1.3':
     dependencies:
@@ -6904,7 +6904,7 @@ snapshots:
       cac: 6.7.14
       debug: 4.3.7
       pathe: 1.1.2
-      vite: 5.4.9(@types/node@20.16.15)
+      vite: 5.4.10(@types/node@20.16.15)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -6916,18 +6916,18 @@ snapshots:
       - supports-color
       - terser
 
-  vite-tsconfig-paths@5.0.1(typescript@5.6.3)(vite@5.4.9(@types/node@20.16.15)):
+  vite-tsconfig-paths@5.0.1(typescript@5.6.3)(vite@5.4.10(@types/node@20.16.15)):
     dependencies:
       debug: 4.3.7
       globrex: 0.1.2
       tsconfck: 3.1.4(typescript@5.6.3)
     optionalDependencies:
-      vite: 5.4.9(@types/node@20.16.15)
+      vite: 5.4.10(@types/node@20.16.15)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@5.4.9(@types/node@20.16.15):
+  vite@5.4.10(@types/node@20.16.15):
     dependencies:
       esbuild: 0.24.0
       postcss: 8.4.47
@@ -6944,7 +6944,7 @@ snapshots:
   vitest@2.1.3(@types/node@20.16.15)(@vitest/ui@2.1.3):
     dependencies:
       '@vitest/expect': 2.1.3
-      '@vitest/mocker': 2.1.3(@vitest/spy@2.1.3)(vite@5.4.9(@types/node@20.16.15))
+      '@vitest/mocker': 2.1.3(@vitest/spy@2.1.3)(vite@5.4.10(@types/node@20.16.15))
       '@vitest/pretty-format': 2.1.3
       '@vitest/runner': 2.1.3
       '@vitest/snapshot': 2.1.3
@@ -6959,7 +6959,7 @@ snapshots:
       tinyexec: 0.3.1
       tinypool: 1.0.1
       tinyrainbow: 1.2.0
-      vite: 5.4.9(@types/node@20.16.15)
+      vite: 5.4.10(@types/node@20.16.15)
       vite-node: 2.1.3(@types/node@20.16.15)
       why-is-node-running: 2.3.0
     optionalDependencies:
