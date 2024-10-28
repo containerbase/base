@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-swift
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 6.0.1
+RUN install-tool swift 6.0.2
 
 #--------------------------------------
 # Image: final
