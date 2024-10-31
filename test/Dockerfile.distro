@@ -141,7 +141,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.18.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.12.2
+RUN install-tool pnpm 9.12.3
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.5.1
 
