@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
-RUN install-tool ruby 3.3.5
+RUN install-tool ruby 3.3.6
 
 #--------------------------------------
 # test: global bundler
