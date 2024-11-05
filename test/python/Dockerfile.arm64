@@ -95,7 +95,7 @@ RUN install-tool copier 9.4.1
 FROM test-python AS test-uv
 
 # renovate: datasource=pypi
-RUN install-tool uv 0.4.29
+RUN install-tool uv 0.4.30
 
 #--------------------------------------
 # Image: final
