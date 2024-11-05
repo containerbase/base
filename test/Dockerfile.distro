@@ -119,7 +119,7 @@ RUN install-tool vendir v0.42.0
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 27.1.1.0
+RUN install-tool erlang 27.1.2.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.3
 
