@@ -176,8 +176,8 @@ FROM build AS test-maven-a
 # test openshift userid missmatch
 USER 1001
 
-# test archive.apache.org
-RUN install-tool maven 3.1.0-alpha-1
+# test archive.apache.org, failing too often
+# RUN install-tool maven 3.1.0-alpha-1
 
 RUN install-tool maven 3.5.4
 
