@@ -5,10 +5,10 @@ import { afterAll, afterEach, beforeAll } from 'vitest';
 type BasePath = string | RegExp | Url;
 let missingLog: string[] = [];
 
-type TestRequest = {
+interface TestRequest {
   method: string;
   href: string;
-};
+}
 
 function onMissing(req: TestRequest, opts?: TestRequest): void {
   if (opts) {

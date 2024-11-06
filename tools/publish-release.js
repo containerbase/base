@@ -40,7 +40,7 @@ class ReleaseCommand extends Command {
     }
 
     const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
-    const digest = meta?.['push']?.['containerimage.digest'];
+    const digest = meta?.push?.['containerimage.digest'];
 
     if (!digest) {
       shell.echo('Error: missing digest\n' + JSON.stringify(meta, null, 2));

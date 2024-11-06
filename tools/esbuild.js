@@ -6,7 +6,7 @@ import shell from 'shelljs';
 
 shell.config.fatal = true;
 
-const nodeVersion = 20;
+const nodeVersion = 22;
 const version = process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
 
 shell.rm('-rf', 'dist/docker');
