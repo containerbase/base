@@ -8,7 +8,7 @@ import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
     ignores: [
       'dist/',
@@ -265,4 +265,4 @@ export default [
       'import/extensions': 0,
     },
   },
-];
+);
