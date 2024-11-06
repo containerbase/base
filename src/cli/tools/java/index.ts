@@ -123,7 +123,7 @@ export class JavaJrePrepareService extends JavaPrepareService {
 
 @injectable()
 export class JavaInstallService extends BaseInstallService {
-  override name: string = 'java';
+  override name = 'java';
 
   constructor(
     @inject(EnvService) envSvc: EnvService,
