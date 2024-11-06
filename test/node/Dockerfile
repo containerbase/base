@@ -119,7 +119,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; cd a; pnpm i
 
 #--------------------------------------
-# test: node 18
+# test: node 20
 #--------------------------------------
 
 FROM base AS testd
@@ -129,7 +129,7 @@ RUN prepare-tool node
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.11.0
+RUN install-tool node 20.18.0
 
 RUN npm install -g yarn
 RUN set -ex; \
