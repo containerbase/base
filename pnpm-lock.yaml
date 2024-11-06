@@ -92,6 +92,9 @@ importers:
       '@types/common-tags':
         specifier: 1.8.4
         version: 1.8.4
+      '@types/eslint-config-prettier':
+        specifier: 6.11.3
+        version: 6.11.3
       '@types/global-agent':
         specifier: 2.1.3
         version: 2.1.3
@@ -751,6 +754,9 @@ packages:
 
   '@types/common-tags@1.8.4':
     resolution: {integrity: sha512-S+1hLDJPjWNDhcGxsxEbepzaxWqURP/o+3cP4aa2w7yBXgdcmKGQtZzP8JbyfOd0m+33nh+8+kvxYE2UJtBDkg==}
+
+  '@types/eslint-config-prettier@6.11.3':
+    resolution: {integrity: sha512-3wXCiM8croUnhg9LdtZUJQwNcQYGWxxdOWDjPe1ykCqJFPVpzAKfs/2dgSoCtAvdPeaponcWPI7mPcGGp9dkKQ==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -4052,6 +4058,8 @@ snapshots:
   '@tsconfig/strictest@2.0.5': {}
 
   '@types/common-tags@1.8.4': {}
+
+  '@types/eslint-config-prettier@6.11.3': {}
 
   '@types/estree@1.0.6': {}
 
