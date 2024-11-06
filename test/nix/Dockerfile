@@ -71,7 +71,7 @@ FROM base AS testb
 USER 12021
 
 # renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.24.9
+RUN install-tool nix 2.24.10
 
 RUN set -ex; \
   nix --version
