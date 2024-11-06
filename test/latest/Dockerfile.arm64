@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-bazelisk
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.22.1
+RUN install-tool bazelisk v1.23.0
 
 #--------------------------------------
 # Image: bun
@@ -46,7 +46,7 @@ RUN install-tool bazelisk v1.22.1
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.33
+RUN install-tool bun 1.1.34
 
 #--------------------------------------
 # Image: gleam

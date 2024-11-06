@@ -210,10 +210,10 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.22.1
+RUN install-tool bazelisk v1.23.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.33
+RUN install-tool bun 1.1.34
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.5.1

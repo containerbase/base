@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['typescript-enum', '@vitest'], // , 'jest-formatting'
+  plugins: ['@vitest'], // , 'jest-formatting'
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -155,8 +155,6 @@ module.exports = {
     '@typescript-eslint/no-empty-object-type': 2,
     // '@renovate/jest-root-describe': 2,
 
-    'typescript-enum/no-const-enum': 2,
-    'typescript-enum/no-enum': 2,
     'object-shorthand': [
       'error',
       'always',

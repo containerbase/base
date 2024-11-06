@@ -61,9 +61,9 @@ RUN install-tool python 3.12.7
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.2.0
+RUN install-tool pipenv 2024.4.0
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.2.0
+RUN install-tool pipenv 2024.4.0
 
 USER 12021
 
@@ -165,7 +165,7 @@ RUN install-tool poetry 1.8.4
 FROM build-rootless AS testb
 
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.2
+RUN install-tool hashin 1.0.3
 
 RUN set -ex \
   && cd f \
@@ -200,7 +200,7 @@ RUN install-tool python 3.8.13
 RUN install-tool python 3.12.7
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.2.0
+RUN install-tool pipenv 2024.4.0
 
 RUN set -ex; \
   cd h-pipenv; \
@@ -216,7 +216,7 @@ RUN prepare-tool conan
 USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.9.0
+RUN install-tool conan 2.9.1
 
 RUN set -ex; \
     cd b-conan; \

@@ -54,7 +54,7 @@ RUN install-tool checkov 3.2.269
 FROM test-python AS test-hashin
 
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.2
+RUN install-tool hashin 1.0.3
 
 #--------------------------------------
 # Image: pipenv
@@ -62,7 +62,7 @@ RUN install-tool hashin 1.0.2
 FROM test-python AS test-pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.2.0
+RUN install-tool pipenv 2024.4.0
 
 #--------------------------------------
 # Image: poetry
@@ -78,7 +78,7 @@ RUN install-tool poetry 1.8.4
 FROM test-python AS test-conan
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.9.0
+RUN install-tool conan 2.9.1
 
 #--------------------------------------
 # Image: copier
@@ -95,7 +95,7 @@ RUN install-tool copier 9.4.1
 FROM test-python AS test-uv
 
 # renovate: datasource=pypi
-RUN install-tool uv 0.4.28
+RUN install-tool uv 0.4.30
 
 #--------------------------------------
 # Image: final

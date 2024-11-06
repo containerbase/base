@@ -176,8 +176,8 @@ FROM build AS test-maven-a
 # test openshift userid missmatch
 USER 1001
 
-# test archive.apache.org
-RUN install-tool maven 3.1.0-alpha-1
+# test archive.apache.org, failing too often
+# RUN install-tool maven 3.1.0-alpha-1
 
 RUN install-tool maven 3.5.4
 
@@ -202,7 +202,7 @@ WORKDIR /
 RUN install-tool scala v2.13.15
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.10.4
+RUN install-tool sbt v1.10.5
 
 RUN install-tool gradle 8.8-rc-2
 

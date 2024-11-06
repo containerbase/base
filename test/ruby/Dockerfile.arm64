@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.5
+RUN install-tool ruby 3.3.6
 
 #--------------------------------------
 # Image: bundler
@@ -46,7 +46,7 @@ RUN install-tool ruby 3.3.5
 FROM test-ruby AS test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.22
+RUN install-tool bundler 2.5.23
 
 #--------------------------------------
 # Image: cocoapods

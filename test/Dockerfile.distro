@@ -45,10 +45,10 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.22.1
+RUN install-tool bazelisk v1.23.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.33
+RUN install-tool bun 1.1.34
 
 # renovate: datasource=docker
 RUN install-tool dart 3.5.4
@@ -119,7 +119,7 @@ RUN install-tool vendir v0.42.0
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 27.1.1.0
+RUN install-tool erlang 27.1.2.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.17.3
 
@@ -141,7 +141,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.11.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.12.2
+RUN install-tool pnpm 9.12.3
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.5.1
 
@@ -153,7 +153,7 @@ FROM build AS test-php
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.3.13
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.8.1
+RUN install-tool composer 2.8.2
 
 #--------------------------------------
 # Image: test-python
@@ -166,19 +166,19 @@ RUN install-tool python 3.12.7
 # renovate: datasource=pypi
 RUN install-tool checkov 3.2.269
 # renovate: datasource=pypi
-RUN install-tool conan 2.9.0
+RUN install-tool conan 2.9.1
 # renovate: datasource=pypi
 RUN install-tool copier 9.4.1
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.2
+RUN install-tool hashin 1.0.3
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.2.0
+RUN install-tool pipenv 2024.4.0
 # renovate: datasource=pypi
-RUN install-tool pdm 2.19.3
+RUN install-tool pdm 2.20.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.4
 # renovate: datasource=pypi
-RUN install-tool uv 0.4.28
+RUN install-tool uv 0.4.30
 
 #--------------------------------------
 # Image: test-ruby
@@ -186,9 +186,9 @@ RUN install-tool uv 0.4.28
 FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.5
+RUN install-tool ruby 3.3.6
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.22
+RUN install-tool bundler 2.5.23
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.15.2
 
