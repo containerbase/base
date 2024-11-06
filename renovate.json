@@ -169,11 +169,6 @@
       "automerge": true
     },
     {
-      "description": "Disable eslint v9",
-      "matchDepNames": ["eslint"],
-      "allowedVersions": "<9"
-    },
-    {
       "description": "Use branch merge for maintenace branches",
       "matchBaseBranches": ["/^maint/.+/"],
       "automergeType": "branch",
