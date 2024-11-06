@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { env } from 'node:process';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectable } from 'inversify';
 import { fileRights, logger, pathExists, tool2path } from '../utils';
 import { EnvService } from './env.service';
@@ -168,6 +169,18 @@ export class PathService {
       .map((t) => t.substring(0, t.length - 3));
   }
 
+  async findPreparedTools(): Promise<string[]> {
+    const file = join(this.varPath, 'tool.prep');
+
+    if (!(await this.fileExists(file))) {
+      return [];
+    }
+
+    return (await fs.readFile(file, 'utf-8'))
+      .split('\n')
+      .filter(isNonEmptyStringAndNotWhitespace);
+  }
+
   async fileExists(filePath: string): Promise<boolean> {
     return await pathExists(filePath, 'file');
   }
@@ -194,6 +207,7 @@ export class PathService {
 
   async setPrepared(tool: string): Promise<void> {
     await fs.writeFile(this.toolPreparePath(tool), '');
+    await fs.appendFile(join(this.varPath, 'tool.prep'), `${tool}\n`);
   }
 
   toolInitPath(tool: string): string {

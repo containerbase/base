@@ -11,7 +11,7 @@ export class InitToolCommand extends Command {
       'Initialize a tool into the container. This creates missing files and directories.',
     examples: [
       ['Initialize node', '$0 init tool node'],
-      ['Initialize all tools', '$0 init tool all'],
+      ['Initialize all prepared tools', '$0 init tool all'],
     ],
   });
 

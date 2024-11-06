@@ -485,9 +485,16 @@ RUN set -ex; \
   ls -la /opt/containerbase/; \
   rm -rf /tmp/*; \
   ls -la /tmp/; \
+  ls -la /var/lib/containerbase/; \
+  cat /var/lib/containerbase/tool.prep; \
   true
 
 USER 1000
+
+RUN [[ ! -d /tmp/containerbase ]] || (echo "/tmp/containerbase should not exist"; exit 1 )
+RUN containerbase-cli init tool all
+RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit 1)
+RUN rm -rf /tmp/*;
 
 # install latest version
 RUN install-tool node
@@ -517,20 +524,20 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-# COPY --from=testa /.dummy /.dummy
-# COPY --from=testb /.dummy /.dummy
-# COPY --from=testc /.dummy /.dummy
-# COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
-# COPY --from=testg /.dummy /.dummy
-# COPY --from=testh /.dummy /.dummy
-# COPY --from=testi /.dummy /.dummy
-# COPY --from=testj /.dummy /.dummy
-# COPY --from=testk /.dummy /.dummy
-# COPY --from=testl /.dummy /.dummy
-# COPY --from=testm /.dummy /.dummy
-# COPY --from=testn /.dummy /.dummy
-# COPY --from=testo /.dummy /.dummy
-# COPY --from=testp /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
+COPY --from=testj /.dummy /.dummy
+COPY --from=testk /.dummy /.dummy
+COPY --from=testl /.dummy /.dummy
+COPY --from=testm /.dummy /.dummy
+COPY --from=testn /.dummy /.dummy
+COPY --from=testo /.dummy /.dummy
+COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy

@@ -77,7 +77,7 @@ export class PrepareToolService {
     await this.pathSvc.ensureBasePaths();
 
     if (tools.length === 1 && tools[0] === 'all') {
-      for (const tool of supportedTools) {
+      for (const tool of await this.pathSvc.findPreparedTools()) {
         const res = await this._initTool(tool, dryRun);
         if (res) {
           return res;
