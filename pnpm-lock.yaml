@@ -11,7 +11,7 @@ overrides:
   vite: 5.4.10
 
 patchedDependencies:
-  '@yao-pkg/pkg@6.0.0':
+  '@yao-pkg/pkg@6.1.0':
     hash: fb6cn5vkrnldric4eq2yxxfize
     path: patches/@yao-pkg__pkg@5.11.1.patch
   clipanion@3.2.1:
@@ -120,8 +120,8 @@ importers:
         specifier: 2.1.4
         version: 2.1.4(vitest@2.1.4)
       '@yao-pkg/pkg':
-        specifier: 6.0.0
-        version: 6.0.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+        specifier: 6.1.0
+        version: 6.1.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
       bats:
         specifier: 1.11.0
         version: 1.11.0
@@ -902,12 +902,12 @@ packages:
   '@vitest/utils@2.1.4':
     resolution: {integrity: sha512-MXDnZn0Awl2S86PSNIim5PWXgIAx8CIkzu35mBdSApUip6RFOGXBCf3YFyeEu8n1IHk4bWD46DeYFu9mQlFIRg==}
 
-  '@yao-pkg/pkg-fetch@3.5.16':
-    resolution: {integrity: sha512-mCnZvZz0/Ylpk4TGyt34pqWJyBGYJM8c3dPoMRV8Knodv2QhcYS4iXb5kB/JNWkrRtCKukGZIKkMLXZ3TQlzPg==}
+  '@yao-pkg/pkg-fetch@3.5.17':
+    resolution: {integrity: sha512-2gD2K8JUwHwvFFZbwVXwmm90P0U3s8Kqiym4w7t2enTajH28LMhpXaqh/x+SzKeNwvPGoaRUhV0h2nPtWTDoDA==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.0.0':
-    resolution: {integrity: sha512-2XlkWA4Y/QhW0Lhvo8f2sE/dBZGIyp9uMX3wxaq8WvWgCaXcFpeSprxQoKF2BFyUqVAr/TmDsQ6+1RukK9XZag==}
+  '@yao-pkg/pkg@6.1.0':
+    resolution: {integrity: sha512-77wFdRj3fWlWdCsF+vCYYzTHClvSEZvFJ+yZ98/Jr3D0VTsrd1tIpxJRnhS6xvbV9UEPM+IXPSC1qXVD6mOH+w==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4228,7 +4228,7 @@ snapshots:
       loupe: 3.1.2
       tinyrainbow: 1.2.0
 
-  '@yao-pkg/pkg-fetch@3.5.16':
+  '@yao-pkg/pkg-fetch@3.5.17':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
@@ -4241,12 +4241,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.0.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
+  '@yao-pkg/pkg@6.1.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
     dependencies:
       '@babel/generator': 7.26.0
       '@babel/parser': 7.26.1
       '@babel/types': 7.26.0
-      '@yao-pkg/pkg-fetch': 3.5.16
+      '@yao-pkg/pkg-fetch': 3.5.17
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
