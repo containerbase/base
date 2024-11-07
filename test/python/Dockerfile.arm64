@@ -78,7 +78,7 @@ RUN install-tool poetry 1.8.4
 FROM test-python AS test-conan
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.9.1
+RUN install-tool conan 2.9.2
 
 #--------------------------------------
 # Image: copier
