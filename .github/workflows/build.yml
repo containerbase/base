@@ -138,7 +138,7 @@ jobs:
       - name: init
         id: init
         run: |
-          export base="ttl.sh/$(uuidgen):1h"
+          export base="ttl.sh/$(uuidgen):1d"
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE=${base}" >> ${GITHUB_ENV}
           echo "base=${base}" >> ${GITHUB_OUTPUT}
