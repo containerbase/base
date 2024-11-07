@@ -69,13 +69,6 @@ RUN node --version
 RUN npm --version
 
 
-## Test for #136
-USER 0
-
-ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
-# renovate: datasource=npm
-RUN npm install -g re2@1.20.9
-
 #--------------------------------------
 # test: yarn
 #--------------------------------------
@@ -524,7 +517,7 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-# COPY --from=testa /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
