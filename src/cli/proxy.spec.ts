@@ -5,7 +5,7 @@ import { bootstrap } from './proxy';
 
 vi.mock('global-agent', () => ({ createGlobalProxyAgent: vi.fn() }));
 
-describe('proxy', () => {
+describe('cli/proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';
   const httpsProxy = 'http://example.org/https-proxy';
   const noProxy = 'http://example.org/no-proxy';

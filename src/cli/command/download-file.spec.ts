@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('index', () => {
+describe('cli/command/download-file', () => {
   beforeEach(() => {
     for (const key of Object.keys(env)) {
       if (key.startsWith('URL_REPLACE_')) {

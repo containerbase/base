@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // TODO: can't do full coverage because of some vitest mock issues.
 
-describe('logger', () => {
+describe('cli/utils/logger', () => {
   beforeEach(() => {
     vi.resetModules();
     delete env.CONTAINERBASE_LOG_LEVEL;

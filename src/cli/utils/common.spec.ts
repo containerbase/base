@@ -30,7 +30,7 @@ vi.mock('node:os', () => ({ ...osMocks, default: osMocks }));
 vi.mock('node:process', () => ({ ...procMocks, default: procMocks }));
 vi.mock('del');
 
-describe('common', () => {
+describe('cli/utils/common', () => {
   beforeEach(() => {
     reset();
     fsMocks.readFile.mockResolvedValueOnce(`PRETTY_NAME="Ubuntu 22.04.2 LTS"

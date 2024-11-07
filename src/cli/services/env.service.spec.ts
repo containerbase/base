@@ -16,7 +16,7 @@ vi.mock('node:process', () => ({
   geteuid: undefined,
 }));
 
-describe('env.service', () => {
+describe('cli/services/env.service', () => {
   let child!: Container;
   let rootDir: string | undefined;
 

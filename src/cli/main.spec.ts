@@ -16,7 +16,7 @@ vi.mock('./utils/common', async (importActual) => ({
   validateSystem: vi.fn(),
 }));
 
-describe('index', () => {
+describe('cli/main', () => {
   test('works', async () => {
     expect(await main()).toBeUndefined();
   });

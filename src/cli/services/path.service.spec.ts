@@ -8,7 +8,7 @@ import { fileRights, pathExists } from '../utils';
 import { PathService, rootContainer } from '.';
 import { rootPath } from '~test/path';
 
-describe('path.service', () => {
+describe('cli/services/path.service', () => {
   const path = env.PATH;
   let child!: Container;
 

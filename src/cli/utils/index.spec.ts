@@ -4,7 +4,7 @@ import { cliMode } from '.';
 const procMocks = vi.hoisted(() => ({ argv0: '', env: {} }));
 vi.mock('node:process', () => procMocks);
 
-describe('index', () => {
+describe('cli/utils/index', () => {
   test('cliMode', async () => {
     expect(cliMode()).toBeNull();
     procMocks.argv0 = 'containerbase-cli';

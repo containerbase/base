@@ -15,7 +15,7 @@ vi.mock('node:fs/promises', async (importActual) => ({
   ...mocks,
 }));
 
-describe('apt.service', () => {
+describe('cli/services/apt.service', () => {
   let child!: Container;
 
   beforeEach(() => {

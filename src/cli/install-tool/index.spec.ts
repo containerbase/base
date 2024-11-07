@@ -8,7 +8,7 @@ vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 
-describe('index', () => {
+describe('cli/install-tool/index', () => {
   beforeAll(async () => {
     for (const p of [
       'var/lib/containerbase/tool.prep.d',

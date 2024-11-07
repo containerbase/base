@@ -14,7 +14,7 @@ vi.mock('node:process', async (importOriginal) => ({
   geteuid: () => 0,
 }));
 
-describe('index', () => {
+describe('cli/prepare-tool/index', () => {
   beforeAll(async () => {
     for (const p of [
       'var/lib/containerbase/tool.prep.d',

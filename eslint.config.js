@@ -1,9 +1,8 @@
+import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
 import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
-// @ts-expect-error no types available
 import eslintPluginImport from 'eslint-plugin-import';
-// @ts-expect-error no types available
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -29,11 +28,8 @@ export default tseslint.config(
   eslintPluginImport.flatConfigs.typescript,
   vitest.configs.recommended,
   eslintPluginPromise.configs['flat/recommended'],
+  eslintContainerbase.configs.all,
   {
-    plugins: {
-      '@vitest': vitest,
-    },
-
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },

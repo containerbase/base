@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('install-pip', () => {
+describe('cli/command/install-pip', () => {
   beforeEach(() => {
     delete env.POETRY_VERSION;
   });

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('./main', () => mocks);
 
-describe('index', () => {
+describe('cli/index', () => {
   test('works', async () => {
     await import('./index');
     expect(mocks.main).toHaveBeenCalledTimes(1);
