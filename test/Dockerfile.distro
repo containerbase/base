@@ -72,7 +72,7 @@ RUN install-tool git-lfs v3.5.1
 RUN install-tool gleam 1.5.1
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.2
+RUN install-tool golang 1.23.3
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v3.16.2
