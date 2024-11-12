@@ -89,7 +89,23 @@ FROM base AS testc
 
 RUN prepare-tool golang
 
+# emulate emtpy containerbase folders
+RUN set -ex; \
+  ls -la /tmp/containerbase/cache; \
+  rm -rf /opt/containerbase/*; \
+  ls -la /opt/containerbase/; \
+  rm -rf /tmp/*; \
+  ls -la /tmp/; \
+  ls -la /var/lib/containerbase/; \
+  cat /var/lib/containerbase/tool.prep; \
+  true
+
 USER 12021
+
+RUN [[ ! -d /tmp/containerbase ]] || (echo "/tmp/containerbase should not exist"; exit 1 )
+RUN containerbase-cli init tool golang
+RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit 1)
+RUN rm -rf /tmp/*;
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.23.3

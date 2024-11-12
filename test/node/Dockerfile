@@ -467,7 +467,7 @@ RUN set -ex; \
   ls -la /opt/containerbase; \
   ls -la /tmp/containerbase; \
   ls -la /tmp/containerbase/cache; \
-  true;true
+  true
 
 RUN prepare-tool node
 
