@@ -86,7 +86,7 @@ RUN install-tool kubectl v1.31.1
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.4.3
 
-# renovate: datasource=github-tags packageName=NixOS/nix
+# renovate: datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.9
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell

@@ -70,7 +70,7 @@ FROM base AS testb
 
 USER 1000
 
-# renovate: datasource=github-tags packageName=NixOS/nix
+# renovate: datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.9
 
 RUN set -ex; \
