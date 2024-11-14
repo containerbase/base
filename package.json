@@ -36,7 +36,7 @@
     "bats-support": "0.3.0",
     "esbuild": "0.24.0",
     "tsconfig-paths": "4.2.0",
-    "vite": "5.4.10"
+    "vite": "5.4.11"
   },
   "dependencies": {
     "@renovatebot/pep440": "3.0.20",
@@ -102,7 +102,7 @@
     "type-fest": "4.26.1",
     "typescript": "5.6.3",
     "typescript-eslint": "8.13.0",
-    "vite": "5.4.10",
+    "vite": "5.4.11",
     "vite-tsconfig-paths": "5.1.2",
     "vitest": "2.1.4",
     "vitest-github-actions-reporter": "0.11.1"
