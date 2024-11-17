@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "2.1.4",
     "@vitest/eslint-plugin": "1.1.8",
     "@vitest/ui": "2.1.4",
-    "@yao-pkg/pkg": "6.1.0",
+    "@yao-pkg/pkg": "6.1.1",
     "bats": "1.11.0",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
@@ -124,7 +124,7 @@
       ]
     },
     "patchedDependencies": {
-      "@yao-pkg/pkg@6.1.0": "patches/@yao-pkg__pkg@5.11.1.patch",
+      "@yao-pkg/pkg@6.1.1": "patches/@yao-pkg__pkg@5.11.1.patch",
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
     }
   }
