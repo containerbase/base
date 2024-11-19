@@ -39,7 +39,7 @@
     "vite": "5.4.11"
   },
   "dependencies": {
-    "@renovatebot/pep440": "3.0.20",
+    "@renovatebot/pep440": "3.1.0",
     "@sindresorhus/is": "7.0.1",
     "clipanion": "3.2.1",
     "common-tags": "1.8.2",
