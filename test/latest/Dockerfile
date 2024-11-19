@@ -216,7 +216,7 @@ RUN install-tool bazelisk v1.23.0
 RUN install-tool bun 1.1.34
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.6.0
+RUN install-tool gleam 1.6.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.31.2
