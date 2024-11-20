@@ -45,7 +45,7 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.23.0
+RUN install-tool bazelisk v1.24.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.1.34
