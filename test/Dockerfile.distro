@@ -48,7 +48,7 @@ FROM build AS test
 RUN install-tool bazelisk v1.24.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.34
+RUN install-tool bun 1.1.36
 
 # renovate: datasource=docker
 RUN install-tool dart 3.5.4
