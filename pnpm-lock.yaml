@@ -79,7 +79,7 @@ importers:
     devDependencies:
       '@containerbase/eslint-plugin':
         specifier: 1.1.2
-        version: 1.1.2(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.1.0(eslint@9.15.0))(eslint@9.15.0)
+        version: 1.1.2(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.0(eslint@9.15.0))(eslint@9.15.0)
       '@eslint/js':
         specifier: 9.15.0
         version: 9.15.0
@@ -162,8 +162,8 @@ importers:
         specifier: 28.9.0
         version: 28.9.0(@typescript-eslint/eslint-plugin@8.15.0(@typescript-eslint/parser@8.15.0(eslint@9.15.0)(typescript@5.7.2))(eslint@9.15.0)(typescript@5.7.2))(eslint@9.15.0)(typescript@5.7.2)
       eslint-plugin-promise:
-        specifier: 7.1.0
-        version: 7.1.0(eslint@9.15.0)
+        specifier: 7.2.0
+        version: 7.2.0(eslint@9.15.0)
       globals:
         specifier: 15.12.0
         version: 15.12.0
@@ -1561,8 +1561,8 @@ packages:
       jest:
         optional: true
 
-  eslint-plugin-promise@7.1.0:
-    resolution: {integrity: sha512-8trNmPxdAy3W620WKDpaS65NlM5yAumod6XeC4LOb+jxlkG4IVcp68c6dXY2ev+uT4U1PtG57YDV6EGAXN0GbQ==}
+  eslint-plugin-promise@7.2.0:
+    resolution: {integrity: sha512-O2QBfKGRP0AHxXhZ3Lk2sFGGGw8TlMW84c+QfPX0gMnDrKJEN5SGJOICt/nR6spLvzuYO3d3nV4R3AIzdbaW7Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -3649,11 +3649,11 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@containerbase/eslint-plugin@1.1.2(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.1.0(eslint@9.15.0))(eslint@9.15.0)':
+  '@containerbase/eslint-plugin@1.1.2(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.0(eslint@9.15.0))(eslint@9.15.0)':
     dependencies:
       eslint: 9.15.0
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.15.0(eslint@9.15.0)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@9.15.0)
-      eslint-plugin-promise: 7.1.0(eslint@9.15.0)
+      eslint-plugin-promise: 7.2.0(eslint@9.15.0)
 
   '@esbuild/aix-ppc64@0.24.0':
     optional: true
@@ -5028,8 +5028,9 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-promise@7.1.0(eslint@9.15.0):
+  eslint-plugin-promise@7.2.0(eslint@9.15.0):
     dependencies:
+      '@eslint-community/eslint-utils': 4.4.1(eslint@9.15.0)
       eslint: 9.15.0
 
   eslint-scope@8.2.0:
