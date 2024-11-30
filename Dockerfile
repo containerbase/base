@@ -29,7 +29,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.47.0
+RUN install-tool git v2.47.1
 
 
 LABEL org.opencontainers.image.version="${CONTAINERBASE_VERSION}"

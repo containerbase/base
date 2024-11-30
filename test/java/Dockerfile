@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.47.0
+RUN install-tool git v2.47.1
 
 #--------------------------------------
 # Image: base
