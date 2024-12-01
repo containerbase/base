@@ -84,7 +84,7 @@
     "esbuild-plugin-pino": "2.2.1",
     "eslint": "9.15.0",
     "eslint-config-prettier": "9.1.0",
-    "eslint-formatter-gha": "1.5.1",
+    "eslint-formatter-gha": "1.5.2",
     "eslint-import-resolver-typescript": "3.6.3",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.9.0",
