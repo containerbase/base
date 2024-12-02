@@ -75,7 +75,7 @@
     "@vitest/eslint-plugin": "1.1.12",
     "@vitest/ui": "2.1.6",
     "@yao-pkg/pkg": "6.1.1",
-    "bats": "1.11.0",
+    "bats": "1.11.1",
     "bats-assert": "2.0.0",
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
