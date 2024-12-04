@@ -222,7 +222,7 @@ RUN install-tool gleam 1.6.3
 RUN install-tool kubectl v1.31.3
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.16.1
+RUN install-tool skopeo 1.17.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.9.2
