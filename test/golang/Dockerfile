@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.3
+RUN install-tool golang 1.23.4
 
 USER 12021
 
@@ -108,7 +108,7 @@ RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit
 RUN rm -rf /tmp/*;
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.3
+RUN install-tool golang 1.23.4
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum
