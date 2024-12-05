@@ -190,7 +190,7 @@ RUN install-tool ruby 3.3.6
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.5.23
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.15.2
+RUN install-tool cocoapods 1.16.2
 
 #--------------------------------------
 # Image: final
