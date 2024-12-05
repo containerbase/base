@@ -78,6 +78,7 @@ apt_install \
   jq \
   libarchive-tools \
   openssh-client \
+  rsync \
   unzip \
   xz-utils \
   zstd \
