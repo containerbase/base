@@ -178,7 +178,8 @@ FROM build AS test-maven-a
 USER 1001
 
 # test archive.apache.org
-RUN install-tool maven 3.1.0-alpha-1
+# to unreliable
+#RUN install-tool maven 3.1.0-alpha-1
 
 RUN install-tool maven 3.5.4
 
