@@ -5,53 +5,59 @@
     "github>containerbase/.github//merge-queue.json"
   ],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
-  "enabledManagers": ["dockerfile", "github-actions", "nodenv", "npm", "regex"],
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions",
+    "nodenv",
+    "npm",
+    "custom.regex"
+  ],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
   "baseBranches": ["$default", "/^maint/.+/"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
-      "matchPackagePatterns": ["*"],
-      "dependencyDashboardApproval": false
+      "dependencyDashboardApproval": false,
+      "matchPackageNames": ["*"]
     },
     {
       "description": "Hold back npm major updates in root package.json",
       "matchUpdateTypes": ["major"],
-      "matchFiles": ["package.json"],
+      "matchFileNames": ["package.json"],
       "dependencyDashboardApproval": true
     },
     {
       "description": "Disable all managers in test/ by default",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "enabled": false
     },
     {
       "description": "Enable the regex manager only for test/",
-      "matchPaths": ["test/**"],
-      "matchManagers": ["regex"],
+      "matchFileNames": ["test/**"],
+      "matchManagers": ["custom.regex"],
       "enabled": true
     },
     {
       "description": "Disable pin digest for test/",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["pinDigest"],
       "enabled": false
     },
     {
       "description": "Separate patch updates in test/ so that we can automerge them",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "separateMinorPatch": true
     },
     {
       "description": "Don't automerge test minor/major because we might want to retain old versions in tests too",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["minor", "major"],
       "automerge": false
     },
     {
       "description": "Don't separate minor and patch updates in tests",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchDepNames": [
         "bazelisk",
         "bun",
@@ -89,7 +95,7 @@
     },
     {
       "description": "Automerge test selected minor updates in tests",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchDepNames": [
         "bazelisk",
         "bun",
@@ -130,7 +136,7 @@
       "description": "Trigger fix release for git updates",
       "matchDepNames": ["git"],
       "semanticCommitType": "fix",
-      "stabilityDays": 5
+      "minimumReleaseAge": "5 days"
     },
     {
       "description": "Trigger fix release for ubuntu digest updates",
@@ -150,14 +156,14 @@
     },
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },
     {
       "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["major"],
       "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-major-"
