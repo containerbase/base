@@ -53,8 +53,8 @@ importers:
         specifier: 4.1.3
         version: 4.1.3
       inversify:
-        specifier: 6.1.5
-        version: 6.1.5(reflect-metadata@0.2.2)
+        specifier: 6.1.6
+        version: 6.1.6(reflect-metadata@0.2.2)
       pino:
         specifier: 9.5.0
         version: 9.5.0
@@ -2053,8 +2053,8 @@ packages:
     resolution: {integrity: sha512-2dYz766i9HprMBasCMvHMuazJ7u4WzhJwo5kb3iPSiW/iRYV6uPari3zHoqZlnuaR7V1bEiNMxikhp37rdBXbw==}
     engines: {node: '>=12'}
 
-  inversify@6.1.5:
-    resolution: {integrity: sha512-+287m3dGkSDZjgi6y6KzAjIsD199ffnwUQ0yURAoSg7hx/6vCj7+qWMNF7hEoWXwMJ+F48bnsW8gcxMohazS8g==}
+  inversify@6.1.6:
+    resolution: {integrity: sha512-qQLOINPTMoe0U4lGUuCkNr/MQ9+8xVlht1MBKm67wPzD5N9mwjgCgBXtJlSwibTnwc3OkTlLx/MpIR6pP6djUA==}
     peerDependencies:
       reflect-metadata: ~0.2.2
 
@@ -5666,7 +5666,7 @@ snapshots:
       from2: 2.3.0
       p-is-promise: 3.0.0
 
-  inversify@6.1.5(reflect-metadata@0.2.2):
+  inversify@6.1.6(reflect-metadata@0.2.2):
     dependencies:
       '@inversifyjs/common': 1.4.0
       '@inversifyjs/core': 1.3.5(reflect-metadata@0.2.2)
