@@ -53,6 +53,9 @@ RUN install-tool bun 1.1.29
 # renovate: datasource=docker
 RUN install-tool dart 3.5.2
 
+# renovate: datasource=github-releases packageName=jetify-com/devbox
+RUN install-tool devbox 0.13.4
+
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v27.3.1
 
@@ -112,9 +115,6 @@ RUN install-tool jb v0.6.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 RUN install-tool vendir v0.42.0
-
-# renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.13.4
 
 #--------------------------------------
 # Image: test-erlang
