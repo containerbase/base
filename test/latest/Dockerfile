@@ -205,7 +205,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, vendir, helmfile, kustomize, skopeo
+# test: bazelisk, bun, devbox, vendir, helmfile, kustomize, skopeo
 #--------------------------------------
 FROM base AS teste
 
@@ -214,6 +214,9 @@ RUN install-tool bazelisk v1.24.1
 
 # renovate: datasource=npm
 RUN install-tool bun 1.1.38
+
+# renovate: datasource=github-releases packageName=jetify-com/devbox
+RUN install-tool devbox 0.13.4
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.6.3

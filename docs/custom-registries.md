@@ -73,6 +73,20 @@ https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/d
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 ```
 
+## `devbox`
+
+Devbox releases are downloaded from:
+
+- `https://github.com/jetify-com/devbox/releases`
+
+Samples:
+
+```txt
+https://github.com/jetify-com/devbox/releases/download/0.12.0/devbox_0.12.0_linux_amd64.tar.gz
+https://github.com/jetify-com/devbox/releases/download/0.12.0/devbox_0.12.0_linux_arm64.tar.gz
+https://github.com/jetify-com/devbox/releases/download/0.12.0/checksums.txt
+```
+
 ## `docker`
 
 Docker releases are downloaded from:
