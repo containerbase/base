@@ -54,7 +54,7 @@ RUN install-tool bun 1.1.38
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.13.6
+RUN install-tool devbox 0.13.7
 
 #--------------------------------------
 # Image: gleam
