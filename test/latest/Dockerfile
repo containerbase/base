@@ -216,7 +216,7 @@ RUN install-tool bazelisk v1.24.1
 RUN install-tool bun 1.1.38
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.13.4
+RUN install-tool devbox 0.13.6
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.6.3
