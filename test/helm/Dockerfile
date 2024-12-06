@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -32,7 +32,7 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 # renovate: datasource=github-releases depName=helm packageName=helm/helm
-ARG HELM_VERSION=3.16.1
+ARG HELM_VERSION=3.16.3
 
 #------------------------------------------------------------------
 # testa: install helm AS root, run AS both

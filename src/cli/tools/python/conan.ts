@@ -57,7 +57,7 @@ export class ConanInstallService extends PipBaseInstallService {
 
 @injectable()
 export class ConanVersionResolver extends PipVersionResolver {
-  override tool: string = 'conan';
+  override tool = 'conan';
 }
 
 function getArchitecture(arch: string): string {

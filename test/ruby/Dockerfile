@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 #--------------------------------------
 # Image: base
@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
-RUN install-tool ruby 3.3.5
+RUN install-tool ruby 3.3.6
 
 #--------------------------------------
 # test: global bundler
@@ -74,7 +74,7 @@ FROM build AS test-bundler-c
 USER 12021
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.21
+ENV BUNDLER_VERSION=2.5.23
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -100,7 +100,7 @@ true
 FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.21
+ENV BUNDLER_VERSION=2.5.23
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 12021 ]
@@ -111,7 +111,7 @@ USER 12021
 RUN install-tool ruby 3.1.0
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.5.21
+ENV BUNDLER_VERSION=2.5.23
 RUN install-tool bundler
 
 
@@ -123,7 +123,7 @@ FROM build AS test-cocoapods-a
 USER 12021
 
 # renovate: datasource=rubygems
-RUN install-tool cocoapods 1.15.2
+RUN install-tool cocoapods 1.16.2
 
 RUN pod env
 

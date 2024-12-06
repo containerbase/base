@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-dart
 
 # renovate: datasource=docker
-RUN install-tool dart 3.5.2
+RUN install-tool dart 3.5.4
 
 #--------------------------------------
 # Image: final

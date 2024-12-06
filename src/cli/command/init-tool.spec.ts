@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('index', () => {
+describe('cli/command/init-tool', () => {
   test('init-tool', async () => {
     const cli = new Cli({ binaryName: 'cli' });
     prepareCommands(cli, null);

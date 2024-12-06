@@ -126,7 +126,9 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     _version: string,
     _prefix: string,
     _env: NodeJS.ProcessEnv,
-  ): Promise<void> | void {}
+  ): Promise<void> | void {
+    // no-op
+  }
 
   private async getRubyGem(): Promise<string> {
     const rubyVersion = await this.getRubyVersion();

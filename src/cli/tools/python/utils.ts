@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { valid as validPep440 } from '@renovatebot/pep440';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
@@ -170,7 +171,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   override async validate(version: string): Promise<boolean> {
-    if (!(await super.validate(version))) {
+    if (!validPep440(version)) {
       return false;
     }
 

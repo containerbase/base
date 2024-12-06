@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('install-npm', () => {
+describe('cli/command/install-npm', () => {
   beforeEach(() => {
     delete env.DEL_CLI_VERSION;
   });

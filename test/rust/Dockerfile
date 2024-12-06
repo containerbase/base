@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -44,10 +44,10 @@ RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.cargo
 FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.83.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.83.0
 
 
 USER 12021
@@ -74,7 +74,7 @@ FROM base AS testb
 USER 12021
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.81.0
+RUN install-tool rust 1.83.0
 
 RUN set -ex; \
     cd a; \

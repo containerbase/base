@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { getVersion, isToolIgnored } from './utils';
 
-describe('utils', () => {
+describe('cli/command/utils', () => {
   beforeEach(() => {
     delete env.NODE_VERSION;
     delete env.DEL_CLI_VERSION;

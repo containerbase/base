@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # TODO: move to prepare
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 #--------------------------------------
 # Image: base
@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.2
+RUN install-tool golang 1.23.4
 
 USER 12021
 
@@ -89,10 +89,26 @@ FROM base AS testc
 
 RUN prepare-tool golang
 
+# emulate emtpy containerbase folders
+RUN set -ex; \
+  ls -la /tmp/containerbase/cache; \
+  rm -rf /opt/containerbase/*; \
+  ls -la /opt/containerbase/; \
+  rm -rf /tmp/*; \
+  ls -la /tmp/; \
+  ls -la /var/lib/containerbase/; \
+  cat /var/lib/containerbase/tool.prep; \
+  true
+
 USER 12021
 
+RUN [[ ! -d /tmp/containerbase ]] || (echo "/tmp/containerbase should not exist"; exit 1 )
+RUN containerbase-cli init tool golang
+RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit 1)
+RUN rm -rf /tmp/*;
+
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.23.2
+RUN install-tool golang 1.23.4
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum

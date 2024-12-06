@@ -7,7 +7,7 @@ import { scope } from '~test/http-mock';
 import { cachePath } from '~test/path';
 
 const baseUrl = 'https://example.com';
-describe('http.service', () => {
+describe('cli/services/http.service', () => {
   let child!: Container;
 
   beforeEach(() => {

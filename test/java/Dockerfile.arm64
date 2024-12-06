@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-java
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java 21.0.4+7.0.LTS
+RUN install-tool java 21.0.5+11.0.LTS
 
 #--------------------------------------
 # Image: java
@@ -46,7 +46,7 @@ RUN install-tool java 21.0.4+7.0.LTS
 FROM test-java AS test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.10.2
+RUN install-tool gradle 8.11.1
 
 #--------------------------------------
 # Image: maven

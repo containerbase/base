@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -41,7 +41,7 @@ FROM base AS build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.7
+RUN install-tool python 3.12.8
 
 #--------------------------------------
 # build-rootless
@@ -53,7 +53,7 @@ RUN prepare-tool python conan
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.7
+RUN install-tool python 3.12.8
 
 #--------------------------------------
 # build: pipenv
@@ -61,9 +61,9 @@ RUN install-tool python 3.12.7
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.1.0
+RUN install-tool pipenv 2024.4.0
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.1.0
+RUN install-tool pipenv 2024.4.0
 
 USER 12021
 
@@ -74,9 +74,9 @@ FROM build AS poetry
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
+RUN install-tool poetry 1.8.4
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
+RUN install-tool poetry 1.8.4
 
 USER 12021
 
@@ -107,10 +107,10 @@ FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.7
+RUN install-tool python 3.12.8
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
+RUN install-tool poetry 1.8.4
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -149,7 +149,7 @@ RUN install-tool poetry 1.1.15
 FROM build AS test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
+RUN install-tool poetry 1.8.4
 
 USER 1001
 
@@ -157,7 +157,7 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.8.3
+RUN install-tool poetry 1.8.4
 
 #--------------------------------------
 # test b: non-root
@@ -165,7 +165,7 @@ RUN install-tool poetry 1.8.3
 FROM build-rootless AS testb
 
 # renovate: datasource=pypi
-RUN install-tool hashin 1.0.2
+RUN install-tool hashin 1.0.3
 
 RUN set -ex \
   && cd f \
@@ -197,10 +197,10 @@ RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.7
+RUN install-tool python 3.12.8
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.1.0
+RUN install-tool pipenv 2024.4.0
 
 RUN set -ex; \
   cd h-pipenv; \
@@ -216,7 +216,7 @@ RUN prepare-tool conan
 USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.8.0
+RUN install-tool conan 2.10.1
 
 RUN set -ex; \
     cd b-conan; \

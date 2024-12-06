@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -65,17 +65,17 @@ RUN set -ex; \
 FROM build AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.18.0
+RUN install-tool node 22.12.0
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.3.12
+RUN install-tool php 8.4.1
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.5
+RUN install-tool powershell v7.4.6
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.12.7
+ARG PYTHON_VERSION=3.12.8
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -121,7 +121,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS testb-gitpod
+FROM ghcr.io/containerbase/ubuntu:24.04 AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
@@ -156,7 +156,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.9.7
+RUN install-tool terraform 1.10.1
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -170,7 +170,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 USER 12021
 
@@ -182,13 +182,13 @@ ARG IGNORED_TOOLS=powershell,node
 RUN install-tool flux v2.4.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.5.1
+RUN install-tool git-lfs v3.6.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.5
+RUN install-tool powershell v7.4.6
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.18.0
+RUN install-tool node 22.12.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v27.3.1
@@ -210,34 +210,34 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.22.0
+RUN install-tool bazelisk v1.24.1
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.29
+RUN install-tool bun 1.1.38
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.13.4
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.5.1
+RUN install-tool gleam 1.6.3
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.31.1
+RUN install-tool kubectl v1.31.3
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.16.1
+RUN install-tool skopeo 1.17.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.9.1
+RUN install-tool sops v3.9.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.42.0
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=0.168.0
+ARG HELMFILE_VERSION=0.169.2
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.4.3
+ARG KUSTOMIZE_VERSION=5.5.0
 
 RUN install-tool vendir "v${VENDIR_VERSION}"
 

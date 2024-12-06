@@ -4,7 +4,7 @@ import { CompressionService, rootContainer } from '.';
 
 vi.mock('execa');
 
-describe('compression.service', () => {
+describe('cli/services/compression.service', () => {
   let child!: Container;
 
   beforeEach(() => {

@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 #--------------------------------------
 # Image: base
@@ -59,7 +59,7 @@ RUN set -ex; \
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java 21.0.4+7.0.LTS
+RUN install-tool java 21.0.5+11.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -103,10 +103,10 @@ RUN gradle --version
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre
-RUN install-tool java-jre 21.0.4+7.0.LTS
+RUN install-tool java-jre 21.0.5+11.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.10.2
+RUN install-tool gradle 8.11.1
 
 USER 12021
 
@@ -157,7 +157,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=java-version depName=java
-ARG JAVA_JDK_VERSION=21.0.4+7.0.LTS
+ARG JAVA_JDK_VERSION=21.0.5+11.0.LTS
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -176,8 +176,8 @@ FROM build AS test-maven-a
 # test openshift userid missmatch
 USER 1001
 
-# test archive.apache.org
-RUN install-tool maven 3.1.0-alpha-1
+# test archive.apache.org, failing too often
+# RUN install-tool maven 3.1.0-alpha-1
 
 RUN install-tool maven 3.5.4
 
@@ -202,7 +202,7 @@ WORKDIR /
 RUN install-tool scala v2.13.15
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.10.2
+RUN install-tool sbt v1.10.6
 
 RUN install-tool gradle 8.8-rc-2
 

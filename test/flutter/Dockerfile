@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # TODO: move to prepare
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 #--------------------------------------
 # Image: base
@@ -67,7 +67,7 @@ FROM build AS testb
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.3
+RUN install-tool flutter 3.24.5
 
 RUN set -ex; \
     cd d; \
@@ -84,7 +84,7 @@ RUN chown -R 1001 .
 USER 1001
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.3
+RUN install-tool flutter 3.24.5
 
 RUN set -ex; \
     cd d; \

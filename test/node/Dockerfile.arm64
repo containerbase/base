@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.18.0
+RUN install-tool node 22.12.0
 
 
 #--------------------------------------
@@ -47,7 +47,7 @@ RUN install-tool node 20.18.0
 FROM test-node AS test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.12.0
+RUN install-tool pnpm 9.14.4
 
 #--------------------------------------
 # Image: yarn
@@ -63,7 +63,7 @@ RUN install-tool yarn 1.22.22
 FROM test-node AS test-renovate
 
 # renovate: datasource=npm
-RUN install-tool renovate 38.110.2
+RUN install-tool renovate 39.42.4
 
 # ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # # renovate: datasource=npm

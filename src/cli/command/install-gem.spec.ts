@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../install-tool', () => mocks);
 vi.mock('../prepare-tool', () => mocks);
 
-describe('install-gem', () => {
+describe('cli/command/install-gem', () => {
   beforeEach(() => {
     delete env.RAKE_VERSION;
   });

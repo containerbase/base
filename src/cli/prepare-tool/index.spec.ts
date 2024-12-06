@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { rootPath } from '../../../test/path';
+import { PathService, rootContainer } from '../services';
 import { initializeTools, prepareTools } from '.';
 
 vi.mock('del');
@@ -13,7 +14,7 @@ vi.mock('node:process', async (importOriginal) => ({
   geteuid: () => 0,
 }));
 
-describe('index', () => {
+describe('cli/prepare-tool/index', () => {
   beforeAll(async () => {
     for (const p of [
       'var/lib/containerbase/tool.prep.d',
@@ -30,6 +31,10 @@ describe('index', () => {
       rootPath('usr/local/containerbase/tools/v2/dummy.sh'),
       '',
     );
+
+    const child = rootContainer.createChild();
+    const pathSvc = child.get(PathService);
+    await pathSvc.setPrepared('bun');
   });
 
   test('prepareTools', async () => {
@@ -40,5 +45,6 @@ describe('index', () => {
   test('initializeTools', async () => {
     expect(await initializeTools(['bun', 'dummy'])).toBeUndefined();
     expect(await initializeTools(['not-exist'])).toBeUndefined();
+    expect(await initializeTools(['all'])).toBeUndefined();
   });
 });

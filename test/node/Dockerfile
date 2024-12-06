@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -41,7 +41,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.18.0
+RUN install-tool node 22.12.0
 
 # ensure npmrc is writable by user
 RUN set -ex; [ $(stat --format '%u' "/tmp/containerbase/cache/.npmrc") -eq ${USER_ID} ]
@@ -69,13 +69,6 @@ RUN node --version
 RUN npm --version
 
 
-## Test for #136
-USER 0
-
-ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
-# renovate: datasource=npm
-RUN npm install -g re2@1.20.9
-
 #--------------------------------------
 # test: yarn
 #--------------------------------------
@@ -100,7 +93,7 @@ RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.5.0
+RUN install-tool yarn 4.5.3
 
 #--------------------------------------
 # test: pnpm
@@ -109,7 +102,7 @@ RUN install-tool yarn 4.5.0
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.12.0
+RUN install-tool pnpm 9.14.4
 
 RUN set -ex; \
   pnpm --version;
@@ -119,7 +112,7 @@ SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; cd a; pnpm i
 
 #--------------------------------------
-# test: node 18
+# test: node 20
 #--------------------------------------
 
 FROM base AS testd
@@ -129,7 +122,7 @@ RUN prepare-tool node
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node v18.20.4
+RUN install-tool node 20.18.1
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -152,7 +145,7 @@ RUN set -ex; \
 RUN set -ex; cd test/a; npm i
 
 # renovate: datasource=npm
-RUN install-npm del-cli 5.1.0
+RUN install-npm del-cli 6.0.0
 RUN del -d test/a/**
 
 #--------------------------------------
@@ -347,7 +340,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 12021
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -366,7 +359,7 @@ FROM build AS testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 # renovate: datasource=npm depName=yarn
 ARG YARN_VERSION=1.22.22
@@ -384,14 +377,14 @@ FROM build AS testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 
 # renovate: datasource=npm depName=yarn
@@ -412,17 +405,17 @@ FROM build AS testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 9.12.0
+RUN install-tool pnpm 9.14.4
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=9.12.0
+ARG PNPM_VERSION=9.14.4
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -446,7 +439,7 @@ RUN install-tool yarn
 RUN install-tool yarn-slim
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.29.4
+RUN install-tool corepack 0.30.0
 
 RUN install-tool pnpm
 RUN install-tool yarn
@@ -474,7 +467,7 @@ RUN set -ex; \
   ls -la /opt/containerbase; \
   ls -la /tmp/containerbase; \
   ls -la /tmp/containerbase/cache; \
-  true;true
+  true
 
 RUN prepare-tool node
 
@@ -485,9 +478,16 @@ RUN set -ex; \
   ls -la /opt/containerbase/; \
   rm -rf /tmp/*; \
   ls -la /tmp/; \
+  ls -la /var/lib/containerbase/; \
+  cat /var/lib/containerbase/tool.prep; \
   true
 
 USER 1000
+
+RUN [[ ! -d /tmp/containerbase ]] || (echo "/tmp/containerbase should not exist"; exit 1 )
+RUN containerbase-cli init tool all
+RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit 1)
+RUN rm -rf /tmp/*;
 
 # install latest version
 RUN install-tool node
@@ -495,7 +495,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=38.110.2
+ARG RENOVATE_VERSION=39.42.4
 RUN install-tool renovate
 
 RUN set -ex; \
@@ -517,20 +517,20 @@ RUN set -ex; \
 #--------------------------------------
 FROM base
 
-# COPY --from=testa /.dummy /.dummy
-# COPY --from=testb /.dummy /.dummy
-# COPY --from=testc /.dummy /.dummy
-# COPY --from=testd /.dummy /.dummy
-# COPY --from=teste /.dummy /.dummy
-# COPY --from=testf /.dummy /.dummy
-# COPY --from=testg /.dummy /.dummy
-# COPY --from=testh /.dummy /.dummy
-# COPY --from=testi /.dummy /.dummy
-# COPY --from=testj /.dummy /.dummy
-# COPY --from=testk /.dummy /.dummy
-# COPY --from=testl /.dummy /.dummy
-# COPY --from=testm /.dummy /.dummy
-# COPY --from=testn /.dummy /.dummy
-# COPY --from=testo /.dummy /.dummy
-# COPY --from=testp /.dummy /.dummy
+COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy
+COPY --from=testf /.dummy /.dummy
+COPY --from=testg /.dummy /.dummy
+COPY --from=testh /.dummy /.dummy
+COPY --from=testi /.dummy /.dummy
+COPY --from=testj /.dummy /.dummy
+COPY --from=testk /.dummy /.dummy
+COPY --from=testl /.dummy /.dummy
+COPY --from=testm /.dummy /.dummy
+COPY --from=testn /.dummy /.dummy
+COPY --from=testo /.dummy /.dummy
+COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy

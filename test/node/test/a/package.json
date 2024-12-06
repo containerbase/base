@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "re2": "1.20.9",
+    "re2": "1.21.4",
     "semver": "7.3.2"
   }
 }

@@ -3,7 +3,7 @@ ARG BASE_IMAGE=containerbase
 #--------------------------------------
 # Image: containerbase
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:20.04 AS containerbase
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.5
+RUN install-tool ruby 3.3.6
 
 #--------------------------------------
 # Image: bundler
@@ -46,7 +46,7 @@ RUN install-tool ruby 3.3.5
 FROM test-ruby AS test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.5.21
+RUN install-tool bundler 2.5.23
 
 #--------------------------------------
 # Image: cocoapods
@@ -55,10 +55,10 @@ FROM test-ruby AS test-cocoapods
 
 # cocoapods need git, but don't install yet
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.46.2
+RUN install-tool git v2.47.1
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool cocoapods 1.15.2
+RUN install-tool cocoapods 1.16.2
 
 #--------------------------------------
 # Image: final
