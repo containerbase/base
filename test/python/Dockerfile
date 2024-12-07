@@ -1,139 +1,133 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/python/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/python/test test
 WORKDIR /test
-
-# RUN install-tool python 3.11.4
-# RUN install-tool checkov 2.4.7
-
-# RUN set -ex; \
-#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/bin; \
-#   ls -la /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info; \
-#   # cat /opt/containerbase/tools/checkov/2.4.7/3.11/lib/python3.11/site-packages/checkov-2.4.7.dist-info/RECORD; \
-#   cat /opt/containerbase/tools/checkov/2.4.7/3.11/bin/unidiff; \
-#   false
 
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.8
 
 #--------------------------------------
 # build-rootless
 #--------------------------------------
-FROM base as build-rootless
+FROM base AS build-rootless
 
-RUN prepare-tool python
+RUN prepare-tool python conan
 
-USER 1000
+USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.8
 
 #--------------------------------------
 # build: pipenv
 #--------------------------------------
-FROM build as pipenv
+FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.4.0
+# renovate: datasource=pypi
+RUN install-tool pipenv 2024.4.0
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # build: poetry
 #--------------------------------------
-FROM build as poetry
+FROM build AS poetry
+
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.7.1
+RUN install-tool poetry 1.8.5
+# renovate: datasource=pypi
+RUN install-tool poetry 1.8.5
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # test pip-tools-a: pip-tools
 #--------------------------------------
-FROM build as test-pip-tools-a
+FROM build AS test-pip-tools-a
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.4.0
+RUN install-tool pip-tools 7.4.1
 
 #--------------------------------------
 # test pip-tools-b: pip-tools (older python)
 #--------------------------------------
-FROM base as test-pip-tools-b
+FROM base AS test-pip-tools-b
 
 # python < 3.9 is not supported by the keyrings.envvars library that is installed along with pip-tools,
 # so make sure we can still install on an older version
 RUN install-tool python 3.8.18
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.4.0
+RUN install-tool pip-tools 7.4.1
 
 #--------------------------------------
-# test poetry-a: build
+# test poetry-a: (rootless)
 #--------------------------------------
-FROM build as test-poetry-a
+FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.8
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.7.1
+RUN install-tool poetry 1.8.5
 
-USER 1000
 
 SHELL [ "/bin/sh", "-c" ]
 RUN python --version
 RUN poetry --version
 
-#--------------------------------------
-# test pipenv-a: pipenv
-#--------------------------------------
-FROM pipenv as test-pipenv-a
-
-RUN set -ex; \
-  cd a; \
-  pipenv lock;
-
-
-#--------------------------------------
-# test poetry-b: c-poetry
-#--------------------------------------
-FROM poetry as test-poetry-b
-
-RUN set -ex; cd c-poetry && poetry update --lock --no-interaction
-
-RUN set -ex; cd c-poetry && poetry add h5py
+RUN set -ex \
+  && cd c-poetry \
+  && poetry update --lock --no-interaction \
+  && poetry add h5py \
+  ;
 
 
 #--------------------------------------
 # test poetry-c: d-poetry
 #--------------------------------------
-FROM poetry as test-poetry-c
+FROM poetry AS test-poetry-c
 
 RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 
@@ -141,7 +135,7 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 # test poetry-d: poetry (old versions)
 #--------------------------------------
-FROM base as test-poetry-d
+FROM base AS test-poetry-d
 
 # python 3.12+ not supported
 RUN install-tool python 3.11.6
@@ -152,10 +146,10 @@ RUN install-tool poetry 1.1.15
 #--------------------------------------
 # poetry test e: root install - non root install
 #--------------------------------------
-FROM build as test-poetry-e
+FROM build AS test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.7.1
+RUN install-tool poetry 1.8.5
 
 USER 1001
 
@@ -163,44 +157,15 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 1.7.1
-
-#--------------------------------------
-# test a: pip_requirements
-#--------------------------------------
-FROM build as testa
-
-# renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
-
-RUN set -ex; \
-  cd f; \
-  hashin distribute==0.6.27; \
-  cat requirements.txt
+RUN install-tool poetry 1.8.5
 
 #--------------------------------------
 # test b: non-root
 #--------------------------------------
-FROM build-rootless as testb
+FROM build-rootless AS testb
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
-
-RUN set -ex; \
-  cd a; \
-  pipenv lock;
-
-# renovate: datasource=pypi
-RUN install-tool poetry 1.7.1
-
-RUN set -ex \
-  && cd c-poetry \
-  && poetry update --lock --no-interaction \
-  && poetry add h5py \
-  ;
-
-# renovate: datasource=pypi
-RUN install-tool hashin 0.17.0
+RUN install-tool hashin 1.0.3
 
 RUN set -ex \
   && cd f \
@@ -208,83 +173,86 @@ RUN set -ex \
   && cat requirements.txt \
   ;
 
+# test old checkov with old python
+RUN install-tool python 3.7.17
+RUN install-tool checkov 2.3.298
 
-# renovate: datasource=pypi
-RUN install-tool checkov 3.2.22
 
 #--------------------------------------
-# test pipenv-b: pipenv (multiple python)
+# test pipenv-a
 #--------------------------------------
-FROM build as test-pipenv-b
+FROM pipenv AS test-pipenv-a
 
-USER 1000
+RUN set -ex; \
+  cd a; \
+  pipenv lock;
+
+#--------------------------------------
+# test pipenv-b (rootless)
+#--------------------------------------
+FROM build-rootless AS test-pipenv-b
 
 # Do not update minor
 RUN install-tool python 3.8.13
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.12.2
+RUN install-tool python 3.12.8
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2023.12.1
+RUN install-tool pipenv 2024.4.0
 
 RUN set -ex; \
   cd h-pipenv; \
   pipenv lock;
 
 #--------------------------------------
-# test pdm: pdm (multiple python)
+# test conan
 #--------------------------------------
-FROM build as test-pdm
+FROM build AS test-conan
 
-USER 1000
+RUN prepare-tool conan
+
+USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool pdm 2.12.3
-
-#--------------------------------------
-# test c: python2.7
-#--------------------------------------
-FROM build-rootless as testc
-
-# test older python install
-RUN install-tool python 3.6.15
-
-# needs to be v2
-RUN install-tool python 2.7.18
-
-# don't change, never versions don't work on python 2.7
-RUN install-tool pipenv 2020.11.15
-RUN install-tool poetry 0.12.17
-RUN install-tool poetry 1.1.15
-RUN install-tool hashin 0.17.0
-RUN install-tool pip-tools 5.5.0
-
-# https://github.com/python-poetry/poetry/issues/3010
-RUN poetry config experimental.new-installer false
+RUN install-tool conan 2.10.1
 
 RUN set -ex; \
-  poetry new poetry-demo; \
-  cd poetry-demo; \
-  poetry update --lock --no-interaction pytest; \
-  true
+    cd b-conan; \
+    conan lock create .; \
+    conan install . --build=missing; \
+    cat conan.lock
+
+#--------------------------------------
+# test install-pip
+#--------------------------------------
+FROM build-rootless AS test-other
+
+RUN install-tool conan
+
+RUN install-pip checkov
+RUN install-pip copier
+RUN install-pip hashin
+RUN install-pip pdm
+RUN install-pip pip-tools
+RUN install-pip pipenv
+RUN install-pip poetry
+RUN install-pip uv
 
 #--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
+COPY --from=test-conan /.dummy /.dummy
 COPY --from=test-pip-tools-a /.dummy /.dummy
 COPY --from=test-pip-tools-b /.dummy /.dummy
 COPY --from=test-poetry-a /.dummy /.dummy
-COPY --from=test-poetry-b /.dummy /.dummy
 COPY --from=test-poetry-c /.dummy /.dummy
 COPY --from=test-poetry-d /.dummy /.dummy
 COPY --from=test-poetry-e /.dummy /.dummy
 COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
-COPY --from=test-pdm /.dummy /.dummy
-COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
+COPY --from=test-other /.dummy /.dummy

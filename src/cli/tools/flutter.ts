@@ -2,36 +2,67 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { CleanOptions, ResetMode, simpleGit } from 'simple-git';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
+import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
 } from '../services';
-import { logger } from '../utils';
+import {
+  initDartHome,
+  initPubCache,
+  prepareDartHome,
+  preparePubCache,
+} from './dart/utils';
 
 @injectable()
-export class PrepareFlutterService extends PrepareToolBaseService {
+export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
-  override async execute(): Promise<void> {
-    const flutter = join(this.envSvc.userHome, '.flutter');
-    await fs.writeFile(flutter, '{ "firstRun": false, "enabled": false }');
-    await fs.chown(flutter, this.envSvc.userId, 0);
-    await fs.chmod(flutter, 0o664);
+  override async prepare(): Promise<void> {
+    await this.initialize();
+    await prepareDartHome(this.envSvc, this.pathSvc);
+    await preparePubCache(this.envSvc, this.pathSvc);
 
+    // for root
     await fs.writeFile(
-      join(this.envSvc.rootDir, '/root/.flutter'),
+      join(this.envSvc.rootDir, 'root', '.flutter'),
       '{ "firstRun": false, "enabled": false }',
+    );
+
+    // for user
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.flutter'),
+      join(this.envSvc.userHome, '.flutter'),
+    );
+
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.flutter_tool_state'),
+      join(this.envSvc.userHome, '.flutter_tool_state'),
+    );
+  }
+
+  override async initialize(): Promise<void> {
+    await initDartHome(this.pathSvc);
+    await initPubCache(this.pathSvc);
+
+    // for user
+    await this.pathSvc.writeFile(
+      join(this.pathSvc.cachePath, '.flutter'),
+      '{ "firstRun": false, "enabled": false }\n',
+    );
+
+    await this.pathSvc.writeFile(
+      join(this.pathSvc.cachePath, '.flutter_tool_state'),
+      '{ "is-bot": false, "redisplay-welcome-message": false }\n',
     );
   }
 }
 
 @injectable()
-export class InstallFlutterService extends InstallToolBaseService {
+export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 
   private get ghArch(): string {
@@ -56,69 +87,20 @@ export class InstallFlutterService extends InstallToolBaseService {
     const name = this.name;
     const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
-    const checksumFileUrl = `${url}.sha512`;
-    const isOnGithub = await this.http.exists(checksumFileUrl);
 
-    if (isOnGithub) {
-      logger.info(`using github prebuild`);
-      const checksumFile = await this.http.download({ url: checksumFileUrl });
-      const expectedChecksum = (
-        await fs.readFile(checksumFile, 'utf-8')
-      ).trim();
-      const file = await this.http.download({
-        url,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-      await this.compress.extract({ file, cwd: await this.getToolPath() });
-    } else {
-      logger.info(`using github source repo`);
-      await this.getToolPath();
-      const path = await this.pathSvc.createVersionedToolPath(
-        this.name,
-        version,
-      );
-      const git = simpleGit({ baseDir: path });
-      await git.clone('https://github.com/flutter/flutter.git', '.', {
-        '--filter': 'blob:none',
-        '--branch': 'stable',
-      });
-
-      await git.reset(ResetMode.HARD, [version]);
-
-      await git.addConfig(
-        'safe.directory',
-        path,
-        true,
-        this.envSvc.isRoot ? 'system' : 'global',
-      );
-
-      // init flutter
-      await execa(`./bin/flutter`, ['--version'], { cwd: path });
-      await execa(`./bin/flutter`, ['pub', 'get', '--help'], { cwd: path });
-
-      // cleanup
-      await git.clean(CleanOptions.FORCE + CleanOptions.IGNORED_INCLUDED, [
-        '--',
-        '**/.packages',
-      ]);
-      await git.clean(CleanOptions.FORCE + CleanOptions.IGNORED_INCLUDED, [
-        '--',
-        '**/.dart_tool/',
-      ]);
-      await fs.rm(join(path, '.pub-cache/git'), {
-        recursive: true,
-        force: true,
-      });
-
-      // fix permrmissions
-      await execa('chmod', ['-R', 'g+w', path]);
-    }
+    const checksumFile = await this.http.download({ url: `${url}.sha512` });
+    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
+    await this.compress.extract({ file, cwd: await this.getToolPath() });
   }
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src });
+    await this.shellwrapper({ srcDir: src, args: '--no-version-check' });
   }
 
   override async test(_version: string): Promise<void> {
@@ -128,9 +110,6 @@ export class InstallFlutterService extends InstallToolBaseService {
   }
 
   private async getToolPath(): Promise<string> {
-    return (
-      (await this.pathSvc.findToolPath(this.name)) ??
-      (await this.pathSvc.createToolPath(this.name))
-    );
+    return await this.pathSvc.ensureToolPath(this.name);
   }
 }

@@ -12,6 +12,8 @@ setup() {
     # load test overwrites
     load "$TEST_DIR/util.sh"
 
+    mkdir "${ROOT_DIR}/bin"
+
     setup_directories
 }
 

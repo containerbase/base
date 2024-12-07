@@ -1,44 +1,57 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/swift/test test
+# TODO: move to prepare
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.47.1
+
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/swift/test test
 WORKDIR /test
 
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
-
-# TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.2
+FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.9.2
+RUN install-tool swift 6.0.2
 
 #--------------------------------------
 # testa: swift latest
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
-USER 1000
+USER 12021
 
 RUN swift --version
 
@@ -54,20 +67,24 @@ RUN set -ex; \
   cd c; \
   swift package resolve
 
+RUN set -ex; \
+  ls -la $USER_HOME/; \
+  true
+
 SHELL [ "/bin/sh", "-c" ]
 RUN swift --version
 
 
 #--------------------------------------
-# testb: swift 5.2.5 (non-root)
+# testb: swift 5.7.3 (non-root)
 #--------------------------------------
-FROM build as testb
+FROM build AS testb
 
-USER 1000
+USER 12021
 
-RUN install-tool swift 5.2.5
+RUN install-tool swift 5.7.3
 
-RUN set -ex; swift --version | grep 5.2.5
+RUN set -ex; swift --version | grep 5.7.3
 
 RUN set -ex; \
   cd c; \

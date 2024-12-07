@@ -2,11 +2,12 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   cleanAptFiles,
   cleanTmpFiles,
-  fileExists,
   getDistro,
   isDockerBuild,
   parseBinaryName,
+  pathExists,
   reset,
+  tool2path,
   validateSystem,
 } from '.';
 import { rootPath } from '~test/path';
@@ -18,8 +19,8 @@ const osMocks = vi.hoisted(() => ({
 const fsMocks = vi.hoisted(() => ({ readFile: vi.fn(), stat: vi.fn() }));
 const procMocks = vi.hoisted(() => ({ exit: vi.fn(), env: {}, argv0: 'node' }));
 
-vi.mock('node:fs/promises', async () => {
-  const origFs = await vi.importActual<any>('node:fs/promises');
+vi.mock('node:fs/promises', async (importActual) => {
+  const origFs = await importActual<any>();
   return {
     ...fsMocks,
     default: { ...origFs, ...fsMocks },
@@ -29,7 +30,7 @@ vi.mock('node:os', () => ({ ...osMocks, default: osMocks }));
 vi.mock('node:process', () => ({ ...procMocks, default: procMocks }));
 vi.mock('del');
 
-describe('common', () => {
+describe('cli/utils/common', () => {
   beforeEach(() => {
     reset();
     fsMocks.readFile.mockResolvedValueOnce(`PRETTY_NAME="Ubuntu 22.04.2 LTS"
@@ -84,10 +85,18 @@ UBUNTU_CODENAME=jammy`);
     });
   });
 
-  test('fileExists', async () => {
+  test('pathExists', async () => {
+    fsMocks.stat.mockResolvedValueOnce({});
+    expect(await pathExists('/etc/os-release')).toBe(true);
+    expect(await pathExists('/etc/os-release')).toBe(false);
     fsMocks.stat.mockResolvedValueOnce({ isFile: () => true });
-    expect(await fileExists('/etc/os-release')).toBe(true);
-    expect(await fileExists('/etc/os-release')).toBe(false);
+    expect(await pathExists('/etc/os-release', 'file')).toBe(true);
+    expect(await pathExists('/etc/os-release', 'file')).toBe(false);
+    fsMocks.stat.mockResolvedValueOnce({ isDirectory: () => true });
+    expect(await pathExists('/etc/os-release', 'dir')).toBe(true);
+    fsMocks.stat.mockResolvedValueOnce({ isSymbolicLink: () => true });
+    expect(await pathExists('/etc/os-release', 'symlink')).toBe(true);
+    expect(await pathExists('/etc/os-release', 'symlink')).toBe(false);
   });
 
   test('parseBinaryName', () => {
@@ -130,5 +139,9 @@ UBUNTU_CODENAME=jammy`);
       fsMocks.readFile.mockRejectedValueOnce(new Error());
       expect(await isDockerBuild()).toBe(false);
     });
+  });
+
+  test('tool2path', () => {
+    expect(tool2path('@microsoft/rush//path')).toBe('@microsoft__rush____path');
   });
 });

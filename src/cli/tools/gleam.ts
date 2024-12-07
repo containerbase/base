@@ -2,17 +2,17 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
 } from '../services';
+import { semverGte } from '../utils';
 
 @injectable()
-export class InstallGleamService extends InstallToolBaseService {
+export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 
   private get ghArch(): string {
@@ -57,9 +57,7 @@ export class InstallGleamService extends InstallToolBaseService {
       expectedChecksum,
     });
 
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
 
@@ -80,6 +78,6 @@ export class InstallGleamService extends InstallToolBaseService {
   }
 
   override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semver.gte(version, '0.19.0-rc1');
+    return (await super.validate(version)) && semverGte(version, '0.19.0-rc1');
   }
 }

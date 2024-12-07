@@ -1,29 +1,18 @@
-import is from '@sindresorhus/is';
-import { inject, injectable } from 'inversify';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import { injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { EnvService, HttpService } from '../../services';
-import type { NodeVersionMeta, NpmPackageMeta } from './types';
+import { logger } from '../../utils';
+import { NpmPackageMeta, NpmPackageMetaList } from './schema';
 
 @injectable()
 export class NodeVersionResolver extends ToolVersionResolver {
   readonly tool = 'node';
 
-  constructor(
-    @inject(HttpService) http: HttpService,
-    @inject(EnvService) env: EnvService,
-  ) {
-    super(http, env);
-  }
-
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const url = this.env.replaceUrl('https://nodejs.org/dist/index.json');
-      const meta = await this.http.getJson<NodeVersionMeta[]>(url, {
-        headers: {
-          accept:
-            'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
-        },
-      });
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      const meta = NpmPackageMetaList.parse(
+        await this.http.getJson('https://nodejs.org/dist/index.json'),
+      );
       // we know that the latest version is the first entry, so search for first lts
       return meta.find((v) => v.lts)?.version.replace(/^v/, '');
     }
@@ -33,24 +22,39 @@ export class NodeVersionResolver extends ToolVersionResolver {
 
 @injectable()
 export abstract class NpmVersionResolver extends ToolVersionResolver {
-  constructor(
-    @inject(HttpService) http: HttpService,
-    @inject(EnvService) env: EnvService,
-  ) {
-    super(http, env);
-  }
-
   async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!is.nonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const meta = await this.http.getJson<NpmPackageMeta>(
-        `https://registry.npmjs.org/${this.tool}`,
-        {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      const meta = NpmPackageMeta.parse(
+        await this.http.getJson(`https://registry.npmjs.org/${this.tool}`, {
           headers: {
             accept:
               'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
           },
-        },
+        }),
       );
+      return meta['dist-tags'].latest;
+    }
+    return version;
+  }
+}
+
+@injectable()
+export class YarnVersionResolver extends ToolVersionResolver {
+  readonly tool = 'yarn';
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      const meta = NpmPackageMeta.parse(
+        await this.http.getJson(
+          `https://registry.npmjs.org/@yarnpkg/cli-dist`,
+          {
+            headers: {
+              accept:
+                'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',
+            },
+          },
+        ),
+      );
+      logger.debug({ meta }, 'NpmPackageMeta');
       return meta['dist-tags'].latest;
     }
     return version;

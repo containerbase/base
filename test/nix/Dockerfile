@@ -1,36 +1,48 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
-ARG GITHUB_TOKEN
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/nix/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/nix/test test
 WORKDIR /test
 
 #--------------------------------------
 # test: nix 2.10
 #--------------------------------------
-FROM base as testa
+FROM base AS testa
 
 # old nix version, not for renovating
-RUN install-tool nix 2.10.0
+RUN install-tool nix 2.10.3
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   nix --version
@@ -42,8 +54,9 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
-RUN set -ex; \
-  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
+  set -ex; \
+  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
@@ -52,13 +65,13 @@ RUN set -ex; \
 #--------------------------------------
 # test: nix latest
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 
-USER 1000
+USER 12021
 
-# renovate: datasource=github-tags packageName=NixOS/nix
-RUN install-tool nix 2.20.3
+# renovate: datasource=github-releases packageName=containerbase/nix-prebuild
+RUN install-tool nix 2.25.3
 
 RUN set -ex; \
   nix --version
@@ -69,13 +82,18 @@ RUN set -ex; \
     --extra-experimental-features flakes \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
-RUN set -ex; \
-  [ -n "$GITHUB_TOKEN" ] && export NIX_CONFIG="extra-access-tokens = github.com=${GITHUB_TOKEN}"; \
+
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
+  set -ex; \
+  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
   nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
     flake update
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 #--------------------------------------
 # final
 #--------------------------------------

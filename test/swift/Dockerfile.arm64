@@ -1,34 +1,44 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN uname -p | tee | grep aarch64
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-# renovate: datasource=github-tags packageName=git/git
-# RUN install-tool git v2.40.0
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN uname -p | tee | grep aarch64
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 #--------------------------------------
 # Image: swift
 #--------------------------------------
-FROM base as test-swift
+FROM base AS test-swift
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 5.9.2
+RUN install-tool swift 6.0.2
 
 #--------------------------------------
 # Image: final

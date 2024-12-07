@@ -9,13 +9,13 @@ You should always use a specific version which can be found at [docker hub](http
 
 ## Default user name and id
 
-Use this template for using a custom base image with our default user named `ubuntu` and userid `1000`.
+Use this template for using a custom base image with our default user named `ubuntu` and userid `12021`.
 
 ```dockerfile
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 # Allows custom apt proxy usage
 ARG APT_HTTP_PROXY
@@ -32,14 +32,14 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
-# renovate: datasource=node versioning=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
@@ -47,7 +47,7 @@ RUN install-tool yarn 1.22.10
 WORKDIR /usr/src/app
 
 # must be numeric if this should work with openshift
-USER 1000
+USER 12021
 ```
 
 ## Custom user name and id
@@ -58,7 +58,7 @@ You can also customize username or userid by using this template.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 # The containerbase supports custom user
 ARG USER_NAME=custom
@@ -78,14 +78,14 @@ CMD [ "bash" ]
 COPY my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
 RUN install-tool git v2.30.0
-# renovate: datasource=node versioning=node
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
 RUN install-tool yarn 1.22.10
@@ -107,7 +107,7 @@ The group must already exist.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy as base
+FROM amd64/ubuntu:jammy AS base
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
@@ -122,7 +122,7 @@ ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "bash" ]
 
 # Set up containerbase
-COPY --from=containerbase /usr/local/bin/ /usr/local/bin/
+COPY --from=containerbase /usr/local/sbin/ /usr/local/sbin/
 COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 

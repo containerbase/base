@@ -10,7 +10,7 @@ if [[ -z "${USER_NAME}" ]]; then
 fi
 
 if [[ -z "${USER_ID}" ]]; then
-  export USER_ID=1000
+  export USER_ID=12021
   echo "No USER_ID defined - using: ${USER_ID}"
 fi
 
@@ -42,6 +42,12 @@ setup_env_files
 echo "APT::Install-Recommends \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 echo "APT::Get::Install-Suggests \"false\";" | tee -a /etc/apt/apt.conf.d/containerbase.conf
 
+# happens on ubuntu noble
+if grep 'ubuntu:x:1000:' /etc/passwd > /dev/null; then
+  echo "User already exists, deleting" >&2
+  userdel -r ubuntu
+fi
+
 # Set up user and home directory
 createUser
 
@@ -72,6 +78,7 @@ apt_install \
   jq \
   libarchive-tools \
   openssh-client \
+  rsync \
   unzip \
   xz-utils \
   zstd \
@@ -85,13 +92,14 @@ if [[ "$(find /usr/local/share/ca-certificates/ -name "*.crt" -type f -printf '.
 fi
 
 function link_tools () {
-  ln -sf /usr/local/containerbase/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-  ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/bin/install-apt
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/containerbase-cli
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-gem
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-npm
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/install-tool
-  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/bin/prepare-tool
+  ln -sf /usr/local/containerbase/bin/docker-entrypoint.sh /usr/local/sbin/docker-entrypoint.sh
+  ln -sf /usr/local/containerbase/bin/install-apt.sh /usr/local/sbin/install-apt
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/containerbase-cli
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-gem
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-pip
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/prepare-tool
 
   containerbase-cli --version
 }
@@ -105,6 +113,9 @@ function prepare_v2_tools () {
   . /usr/local/containerbase/utils/v2/overrides.sh
 
   setup_directories
+
+  # compability with current custom images
+  ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
 }
 prepare_v2_tools
 

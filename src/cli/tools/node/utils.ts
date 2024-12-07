@@ -1,18 +1,18 @@
-import fs, { appendFile, chmod, mkdir, readFile } from 'node:fs/promises';
+import fs, { appendFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 import { EnvService, PathService, VersionService } from '../../services';
-import { fileExists, logger, parse } from '../../utils';
+import { logger, parse, pathExists } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
-export abstract class InstallNodeBaseService extends InstallToolBaseService {
+export abstract class NodeBaseInstallService extends BaseInstallService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -21,7 +21,7 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
     super(pathSvc, envSvc);
   }
 
-  protected prepareEnv(tmp: string): NodeJS.ProcessEnv {
+  protected prepareEnv(_version: string, tmp: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
@@ -32,7 +32,10 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
       env.npm_config_cache = tmp;
     }
 
-    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    const registry = this.envSvc.replaceUrl(
+      defaultRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_NPM),
+    );
     if (registry !== defaultRegistry) {
       env.npm_config_registry = registry;
     }
@@ -75,39 +78,36 @@ export abstract class InstallNodeBaseService extends InstallToolBaseService {
 }
 
 @injectable()
-export abstract class InstallNpmBaseService extends InstallNodeBaseService {
-  protected get tool(): string {
+export abstract class NpmBaseInstallService extends NodeBaseInstallService {
+  protected tool(_version: string): string {
     return this.name;
   }
 
   override async install(version: string): Promise<void> {
-    const node = await this.getNodeVersion();
-    const npm = this.getNodeNpm(node);
+    const nodeVersion = await this.getNodeVersion();
+    const npm = this.getNodeNpm(nodeVersion);
     const tmp = await fs.mkdtemp(
-      join(this.pathSvc.tmpDir, 'containerbase-npm-'),
+      join(this.envSvc.tmpDir, 'containerbase-npm-'),
     );
-    const env = this.prepareEnv(tmp);
+    const env = this.prepareEnv(version, tmp);
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {
       prefix = await this.pathSvc.createVersionedToolPath(this.name, version);
       // fix perms for later user installs
-      await chmod(prefix, 0o775);
+      await this.pathSvc.setOwner({ path: prefix });
     }
 
-    prefix = join(prefix, node);
-    await mkdir(prefix);
+    prefix = join(prefix, nodeVersion);
+    await this.pathSvc.createDir(prefix);
 
     const res = await execa(
       npm,
       [
         'install',
-        `${this.tool}@${version}`,
+        `${this.tool(version)}@${version}`,
         '--save-exact',
         '--no-audit',
         '--prefix',
@@ -115,6 +115,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
         '--cache',
         tmp,
         ...this.getAdditionalArgs(),
+        '-d',
       ],
       { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
@@ -123,11 +124,15 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       logger.warn(`Npm error:\n${res.all}`);
       await fs.rm(prefix, { recursive: true, force: true });
       throw new Error('npm install command failed');
+    } else {
+      logger.trace(`npm install:\n${res.all}`);
     }
 
     await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
     if (this.name === 'npm') {
-      const pkg = await readPackageJson(this.packageJsonPath(version, node));
+      const pkg = await readPackageJson(
+        this.packageJsonPath(version, nodeVersion),
+      );
       const ver = parse(pkg.version);
       if (ver.major < 7) {
         // update to latest node-gyp to fully support python3
@@ -168,18 +173,26 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       return;
     }
 
-    if (is.string(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name: pkg.name ?? this.tool });
+    if (isString(pkg.bin)) {
+      await this.shellwrapper({
+        srcDir: src,
+        name: pkg.name ?? this.tool(version),
+      });
       return;
     }
 
     for (const name of Object.keys(pkg.bin)) {
-      await this.shellwrapper({ srcDir: src, name });
+      await this.shellwrapper({ srcDir: src, name, extraToolEnvs: ['node'] });
     }
   }
 
-  override async test(_version: string): Promise<void> {
-    await execa(this.tool, ['--version'], { stdio: 'inherit' });
+  override async test(version: string): Promise<void> {
+    let name = this.tool(version);
+    const idx = name.lastIndexOf('/');
+    if (idx > 0) {
+      name = name.slice(idx + 1);
+    }
+    await execa(name, ['--version'], { stdio: 'inherit' });
   }
 
   override async validate(version: string): Promise<boolean> {
@@ -212,7 +225,7 @@ export abstract class InstallNpmBaseService extends InstallNodeBaseService {
       this.pathSvc.versionedToolPath(this.name, version),
       node,
       'node_modules',
-      this.tool,
+      this.tool(version),
       'package.json',
     );
   }
@@ -252,7 +265,7 @@ export async function prepareUserConfig({
 }): Promise<void> {
   const npmrc = `${home}/.npmrc`;
   if (
-    (await fileExists(npmrc)) &&
+    (await pathExists(npmrc)) &&
     (await readFile(npmrc, { encoding: 'utf8' })).includes('prefix')
   ) {
     return;
@@ -269,4 +282,30 @@ export async function prepareUserConfig({
 async function readPackageJson(path: string): Promise<PackageJson> {
   const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
+}
+
+export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.cachePath, '.npm');
+  await pathSvc.createDir(path);
+}
+
+export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
+  const path = join(pathSvc.cachePath, '.npmrc');
+  if (!(await pathExists(path))) {
+    await pathSvc.writeFile(path, '');
+  }
+}
+
+export async function prepareSymlinks(
+  envSvc: EnvService,
+  pathSvc: PathService,
+): Promise<void> {
+  await fs.symlink(
+    join(pathSvc.cachePath, '.npm'),
+    join(envSvc.userHome, '.npm'),
+  );
+  await fs.symlink(
+    join(pathSvc.cachePath, '.npmrc'),
+    join(envSvc.userHome, '.npmrc'),
+  );
 }

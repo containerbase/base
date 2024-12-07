@@ -1,0 +1,7 @@
+[requires]
+lest/1.35.1
+[generators]
+CMakeDeps
+CMakeToolchain
+[layout]
+cmake_layout

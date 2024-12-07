@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { VersionService, rootContainer } from '.';
 import { rootPath } from '~test/path';
 
-describe('version.service', () => {
+describe('cli/services/version.service', () => {
   let child!: Container;
 
   beforeEach(() => {

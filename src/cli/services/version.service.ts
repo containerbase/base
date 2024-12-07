@@ -1,7 +1,7 @@
 import { chmod, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
-import { fileRights, logger } from '../utils';
+import { fileRights, logger, tool2path } from '../utils';
 import { PathService } from './path.service';
 
 @injectable()
@@ -9,7 +9,7 @@ export class VersionService {
   constructor(@inject(PathService) private pathSvc: PathService) {}
 
   async find(tool: string): Promise<string | null> {
-    const path = join(this.pathSvc.versionPath, tool);
+    const path = join(this.pathSvc.versionPath, tool2path(tool));
     try {
       return (await readFile(path, { encoding: 'utf8' })).trim() || null;
     } catch (err) {
@@ -24,7 +24,7 @@ export class VersionService {
   }
 
   async update(tool: string, version: string): Promise<void> {
-    const path = join(this.pathSvc.versionPath, tool);
+    const path = join(this.pathSvc.versionPath, tool2path(tool));
     try {
       await writeFile(path, version, { encoding: 'utf8' });
       const s = await stat(path);

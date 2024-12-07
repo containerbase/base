@@ -23,11 +23,12 @@ export async function validateSystem(): Promise<void> {
   switch (d.versionCode) {
     case 'focal':
     case 'jammy':
+    case 'noble':
       break;
     default:
       logger.fatal(
         { distro: d },
-        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal' or 'jammy'.`,
+        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal', 'jammy' or 'noble'.`,
       );
       exit(1);
   }
@@ -70,10 +71,23 @@ async function readDistro(): Promise<Distro> {
 export const fileRights =
   fs.constants.S_IRWXU | fs.constants.S_IRWXG | fs.constants.S_IRWXO;
 
-export async function fileExists(filePath: string): Promise<boolean> {
+export type PathType = 'file' | 'dir' | 'symlink';
+
+export async function pathExists(
+  filePath: string,
+  type?: PathType,
+): Promise<boolean> {
   try {
     const fstat = await stat(filePath);
-    return fstat.isFile();
+    switch (type) {
+      case 'file':
+        return fstat.isFile();
+      case 'dir':
+        return fstat.isDirectory();
+      case 'symlink':
+        return fstat.isSymbolicLink();
+    }
+    return !!fstat;
   } catch {
     return false;
   }
@@ -102,7 +116,12 @@ export async function cleanTmpFiles(
   tmp: string,
   dryRun = false,
 ): Promise<void> {
-  await deleteAsync(`${tmp}/**`, { dot: true, dryRun, force: true });
+  await deleteAsync([`**`, `!containerbase/**`], {
+    dot: true,
+    dryRun,
+    force: true,
+    cwd: tmp,
+  });
 }
 
 const buildKitMounts = [
@@ -124,4 +143,8 @@ async function checkDocker(): Promise<boolean> {
 
 export function isDockerBuild(): Promise<boolean> {
   return (isDocker ??= checkDocker());
+}
+
+export function tool2path(tool: string): string {
+  return tool.replace(/\//g, '__');
 }

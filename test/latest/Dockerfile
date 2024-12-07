@@ -1,27 +1,40 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 RUN install-containerbase
 
 #--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+#--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # install nginx for request testing
 RUN install-apt nginx
@@ -49,25 +62,25 @@ RUN set -ex; \
 #--------------------------------------
 # test: custom root ca
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
-# renovate: datasource=node
-RUN install-tool node v20.11.1
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.12.0
 
-# renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool php 7.4.14
+# renovate: datasource=github-releases packageName=containerbase/php-prebuild
+RUN install-tool php 8.4.1
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.1
+RUN install-tool powershell v7.4.6
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12.8
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
 # Do not renovate ruby 2.x
-RUN install-tool ruby 2.6.4
+RUN install-tool ruby 2.7.7
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 
 RUN set -ex; \
@@ -108,13 +121,15 @@ RUN set -ex; \
 #--------------------------------------
 # test: gitpod
 #--------------------------------------
-FROM ubuntu:focal as testb-gitpod
+FROM ghcr.io/containerbase/ubuntu:24.04 AS testb-gitpod
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
 ARG PRIMARY_GROUP_ID=${USER_ID}
 ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
 
 # Set env and shell
 ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
@@ -123,7 +138,7 @@ SHELL ["/bin/bash" , "-c"]
 COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
-COPY --from=build /usr/local/bin/ /usr/local/bin/
+COPY --from=build /usr/local/sbin/ /usr/local/sbin/
 COPY --from=build /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
@@ -141,7 +156,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.7.4
+RUN install-tool terraform 1.10.1
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -149,68 +164,80 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 # test: ignore tools
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
 
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.2
+RUN install-tool git v2.47.1
 
-USER 1000
+USER 12021
 
 RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.2.3
+RUN install-tool flux v2.4.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.4.1
+RUN install-tool git-lfs v3.6.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.1
+RUN install-tool powershell v7.4.6
 
-# renovate: datasource=node
-RUN install-tool node v20.11.1
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.12.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v25.0.3
+RUN install-tool docker v27.3.1
 
 #--------------------------------------
-# test: bin path has 775
+# test: bin path has 777
 #--------------------------------------
-FROM base as testd
+FROM base AS testd
 
-RUN [ $(stat --format '%a' "/usr/local/bin") -eq 775 ]
+RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
 RUN prepare-tool all
 
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, vendir, helmfile, kustomize, wally
+# test: bazelisk, bun, devbox, vendir, helmfile, kustomize, skopeo, wally
 #--------------------------------------
-FROM base as teste
+FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.19.0
+RUN install-tool bazelisk v1.24.1
 
 # renovate: datasource=npm
-RUN install-tool bun 1.0.28
+RUN install-tool bun 1.1.38
+
+# renovate: datasource=github-releases packageName=jetify-com/devbox
+RUN install-tool devbox 0.13.7
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 0.34.1
+RUN install-tool gleam 1.6.3
 
-# renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=0.32.2
+# renovate: datasource=github-releases packageName=kubernetes/kubernetes
+RUN install-tool kubectl v1.31.3
 
-# renovate: datasource=github-releases packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=0.150.0
+# renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
+RUN install-tool skopeo 1.17.0
 
-# renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.0.0
+# renovate: datasource=github-releases packageName=getsops/sops
+RUN install-tool sops v3.9.2
+
+# renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
+ARG VENDIR_VERSION=0.42.0
+
+# renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
+ARG HELMFILE_VERSION=0.169.2
+
+# renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
+ARG KUSTOMIZE_VERSION=5.5.0
 
 # renovate: datasource=github-releases packageName=UpliftGames/wally
 ARG WALLY_VERSION=0.3.2
@@ -241,7 +268,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
 RUN wally --version | grep "${WALLY_VERSION}"
 
-USER 1000
+USER 12021
 
 RUN bazel --version
 

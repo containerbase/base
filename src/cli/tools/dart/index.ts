@@ -2,15 +2,21 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
-import { PrepareToolBaseService } from '../../prepare-tool/prepare-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
 } from '../../services';
+import { parse } from '../../utils';
+import {
+  initDartHome,
+  initPubCache,
+  prepareDartHome,
+  preparePubCache,
+} from './utils';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip
@@ -20,33 +26,23 @@ import {
 // https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 
 @injectable()
-export class PrepareDartService extends PrepareToolBaseService {
+export class DartPrepareService extends BasePrepareService {
   readonly name = 'dart';
 
-  async execute(): Promise<void> {
-    await fs.mkdir(`${this.envSvc.home}/.dart`);
-    await fs.writeFile(
-      `${this.envSvc.home}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }',
-    );
-    await fs.mkdir(`${this.envSvc.userHome}/.dart`);
-    await fs.writeFile(
-      `${this.envSvc.userHome}/.dart/dartdev.json`,
-      '{ "firstRun": false, "enabled": false }',
-    );
+  override async prepare(): Promise<void> {
+    await this.initialize();
+    await prepareDartHome(this.envSvc, this.pathSvc);
+    await preparePubCache(this.envSvc, this.pathSvc);
+  }
 
-    // fs isn't recursive, so we use system binaries
-    await execa('chown', [
-      '-R',
-      this.envSvc.userName,
-      `${this.envSvc.userHome}/.dart`,
-    ]);
-    await execa('chmod', ['-R', 'g+w', `${this.envSvc.userHome}/.dart`]);
+  override async initialize(): Promise<void> {
+    await initDartHome(this.pathSvc);
+    await initPubCache(this.pathSvc);
   }
 }
 
 @injectable()
-export class InstallDartService extends InstallToolBaseService {
+export class DartInstallService extends BaseInstallService {
   readonly name = 'dart';
 
   private get arch(): string {
@@ -68,10 +64,8 @@ export class InstallDartService extends InstallToolBaseService {
   }
 
   override async install(version: string): Promise<void> {
-    const ver = semver.parse(version);
-    if (!ver) {
-      throw new Error(`Invalid version: ${version}`);
-    }
+    const ver = parse(version);
+
     if (ver.major < 2) {
       throw new Error(`Dart SDK version < v2 is not supported: ${version}`);
     }

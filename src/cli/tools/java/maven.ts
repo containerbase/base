@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
   CompressionService,
   EnvService,
@@ -13,7 +15,7 @@ import type { HttpChecksumType } from '../../services/http.service';
 import { logger, parse } from '../../utils';
 
 @injectable()
-export class InstallMavenService extends InstallToolBaseService {
+export class MavenInstallService extends BaseInstallService {
   readonly name = 'maven';
 
   constructor(
@@ -78,10 +80,7 @@ export class InstallMavenService extends InstallToolBaseService {
       });
     }
 
-    let path = await this.pathSvc.findToolPath(this.name);
-    if (!path) {
-      path = await this.pathSvc.createToolPath(this.name);
-    }
+    let path = await this.pathSvc.ensureToolPath(this.name);
 
     if (strip) {
       // from archive.apache.org
@@ -93,7 +92,11 @@ export class InstallMavenService extends InstallToolBaseService {
 
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src, name: 'mvn' });
+    await this.shellwrapper({
+      srcDir: src,
+      name: 'mvn',
+      extraToolEnvs: ['java'],
+    });
   }
 
   override async test(_version: string): Promise<void> {
@@ -106,5 +109,19 @@ export class InstallMavenService extends InstallToolBaseService {
   private async readChecksum(url: string): Promise<string | undefined> {
     const checksumFile = await this.http.download({ url });
     return (await fs.readFile(checksumFile, 'utf-8')).split(' ')[0]?.trim();
+  }
+}
+
+@injectable()
+export class MavenVersionResolver extends ToolVersionResolver {
+  readonly tool = 'maven';
+
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
+      return await this.http.get(
+        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
+      );
+    }
+    return version;
   }
 }

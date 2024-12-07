@@ -5,20 +5,38 @@ export const NoPrepareTools = [
   'bower',
   'bun',
   'bundler',
+  'checkov',
   'cocoapods',
+  'composer',
+  'copier',
   'corepack',
+  'devbox',
   'flux',
   'gleam',
+  'gradle',
+  'hashin',
+  'helm',
+  'helmfile',
+  'kubectl',
+  'kustomize',
   'lerna',
   'maven',
-  'node',
   'npm',
+  'pdm',
+  'pip-tools',
+  'pipenv',
   'pnpm',
+  'poetry',
   'renovate',
+  'skopeo',
+  'sops',
+  'uv',
   'wally',
   'yarn',
   'yarn-slim',
 ];
+
+export const NoInitTools = [...NoPrepareTools];
 
 /**
  * Tools in this map are implicit mapped from `install-tool` to `install-<type>`.
@@ -26,10 +44,17 @@ export const NoPrepareTools = [
  */
 export const ResolverMap: Record<string, InstallToolType | undefined> = {
   bundler: 'gem',
+  checkov: 'pip',
+  copier: 'pip',
   corepack: 'npm',
+  hashin: 'pip',
   npm: 'npm',
   pnpm: 'npm',
-  yarn: 'npm',
+  pdm: 'pip',
+  'pip-tools': 'pip',
+  pipenv: 'pip',
+  poetry: 'pip',
+  uv: 'pip',
 };
 
 /**

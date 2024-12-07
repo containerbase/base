@@ -34,6 +34,6 @@ dev_dependencies:
   stream_channel: ^2.1.0
   string_scanner: ^1.1.0
   term_glyph: ^1.2.0
-  test_api: ^0.6.1
+  test_api: '>=0.6.1'
   xml: ^6.1.0
 # PUBSPEC CHECKSUM: f789

@@ -1,15 +1,13 @@
 import { env } from 'node:process';
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isUndefined } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
-let agent = false;
-
 export function bootstrap(): void {
   for (const envVar of envVars) {
     const lKey = envVar.toLowerCase();
-    if (is.undefined(env[envVar]) && is.nonEmptyString(env[lKey])) {
+    if (isUndefined(env[envVar]) && isNonEmptyString(env[lKey])) {
       env[envVar] = env[lKey];
     }
 
@@ -18,18 +16,9 @@ export function bootstrap(): void {
     }
   }
 
-  if (is.nonEmptyString(env.HTTP_PROXY) || is.nonEmptyString(env.HTTPS_PROXY)) {
+  if (isNonEmptyString(env.HTTP_PROXY) || isNonEmptyString(env.HTTPS_PROXY)) {
     createGlobalProxyAgent({
       environmentVariableNamespace: '',
     });
-    agent = true;
-  } else {
-    // for testing only, does not reset global agent
-    agent = false;
   }
-}
-
-// will be used by our http layer later
-export function hasProxy(): boolean {
-  return agent === true;
 }

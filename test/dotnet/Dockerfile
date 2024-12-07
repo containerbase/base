@@ -1,37 +1,50 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/dotnet/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/dotnet/test test
 WORKDIR /test
 
 #--------------------------------------
 # build: dotnet 6.0 base image (LTS)
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN install-tool dotnet 6.0.416
 RUN set -ex; dotnet --version | grep 6.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
 
-USER 1000
+USER 12021
 
 RUN dotnet --info
 
@@ -41,7 +54,7 @@ RUN dotnet --info
 #--------------------------------------
 # test: dotnet 6.0 (LTS)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -54,20 +67,20 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet 8.0 (LTS)
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # Do not change
 RUN install-tool dotnet 6.0.416
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.201
+RUN install-tool dotnet 8.0.404
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.201
+RUN install-tool dotnet 8.0.404
 RUN set -ex; dotnet --version | grep 8.0.
 
-USER 1000
+USER 12021
 
 RUN dotnet --info
 
@@ -83,11 +96,15 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet 8.0 (non-root, LTS)
 #--------------------------------------
-FROM build as testc
+FROM build AS testc
+
+RUN set -ex; \
+  ls -la /opt/containerbase/tools/dotnet; \
+  true
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.201
+RUN install-tool dotnet 8.0.404
 RUN set -ex; dotnet --version | grep 8.0.
 
 RUN set -ex; \
@@ -101,11 +118,11 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet latest (non-root)
 #--------------------------------------
-FROM build as testd
+FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.201
+RUN install-tool dotnet 8.0.404
 RUN set -ex; dotnet --version | grep 8.0.
 
 RUN set -ex; \

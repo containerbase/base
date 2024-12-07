@@ -5,72 +5,91 @@
     "github>containerbase/.github//merge-queue.json"
   ],
   "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
-  "enabledManagers": ["dockerfile", "github-actions", "nodenv", "npm", "regex"],
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions",
+    "nodenv",
+    "npm",
+    "custom.regex"
+  ],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
+  "baseBranches": ["$default", "/^maint/.+/"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
-      "matchPackagePatterns": ["*"],
-      "dependencyDashboardApproval": false
+      "dependencyDashboardApproval": false,
+      "matchPackageNames": ["*"]
     },
     {
       "description": "Hold back npm major updates in root package.json",
       "matchUpdateTypes": ["major"],
-      "matchFiles": ["package.json"],
+      "matchFileNames": ["package.json"],
       "dependencyDashboardApproval": true
     },
     {
       "description": "Disable all managers in test/ by default",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "enabled": false
     },
     {
       "description": "Enable the regex manager only for test/",
-      "matchPaths": ["test/**"],
-      "matchManagers": ["regex"],
+      "matchFileNames": ["test/**"],
+      "matchManagers": ["custom.regex"],
       "enabled": true
     },
     {
       "description": "Disable pin digest for test/",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["pinDigest"],
       "enabled": false
     },
     {
       "description": "Separate patch updates in test/ so that we can automerge them",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "separateMinorPatch": true
     },
     {
       "description": "Don't automerge test minor/major because we might want to retain old versions in tests too",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["minor", "major"],
       "automerge": false
     },
     {
       "description": "Don't separate minor and patch updates in tests",
-      "matchPaths": ["test/**"],
-      "matchPackageNames": [
+      "matchFileNames": ["test/**"],
+      "matchDepNames": [
         "bazelisk",
+        "bun",
         "bundler",
+        "conan",
+        "copier",
         "corepack",
+        "devbox",
         "docker",
         "dotnet",
         "git",
+        "git-lfs",
+        "gleam",
         "gradle",
         "kustomize",
+        "hashin",
         "helm",
         "helmfile",
+        "nix",
         "node",
         "npm",
         "pdm",
         "pipenv",
         "poetry",
         "pnpm",
+        "rake",
         "renovate",
         "rust",
+        "sbt",
+        "sops",
         "swift",
+        "uv",
         "vendir",
         "wally"
       ],
@@ -78,27 +97,39 @@
     },
     {
       "description": "Automerge test selected minor updates in tests",
-      "matchPaths": ["test/**"],
-      "matchPackageNames": [
+      "matchFileNames": ["test/**"],
+      "matchDepNames": [
         "bazelisk",
+        "bun",
         "bundler",
+        "conan",
+        "copier",
         "corepack",
+        "devbox",
         "docker",
         "dotnet",
         "git",
+        "git-lfs",
+        "gleam",
         "gradle",
         "kustomize",
+        "hashin",
         "helm",
         "helmfile",
+        "nix",
         "node",
         "npm",
         "pdm",
         "pipenv",
         "poetry",
         "pnpm",
+        "rake",
         "renovate",
         "rust",
+        "sbt",
+        "sops",
         "swift",
+        "uv",
         "vendir",
         "wally"
       ],
@@ -107,13 +138,13 @@
     },
     {
       "description": "Trigger fix release for git updates",
-      "matchPackageNames": ["git"],
+      "matchDepNames": ["git"],
       "semanticCommitType": "fix",
-      "stabilityDays": 5
+      "minimumReleaseAge": "5 days"
     },
     {
       "description": "Trigger fix release for ubuntu digest updates",
-      "matchPackageNames": ["ubuntu"],
+      "matchDepNames": ["ubuntu", "ghcr.io/containerbase/ubuntu"],
       "matchUpdateTypes": ["digest"],
       "semanticCommitType": "fix"
     },
@@ -129,21 +160,36 @@
     },
     {
       "description": "Use `test` semantic commit scope and additionalBranchPrefix for test/",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
+      "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-",
       "semanticCommitType": "test"
     },
     {
       "description": "Use `test-major-` additionalBranchPrefix for test/ major updates",
-      "matchPaths": ["test/**"],
+      "matchFileNames": ["test/**"],
       "matchUpdateTypes": ["major"],
+      "matchDepNames": ["!git"],
       "additionalBranchPrefix": "test-major-"
     },
     {
       "description": "Update some deps only weekly",
-      "matchPackageNames": ["checkov", "renovate"],
+      "matchDepNames": ["checkov", "renovate"],
       "extends": ["schedule:weekly"],
       "automerge": true
+    },
+    {
+      "description": "Use branch merge for maintenace branches",
+      "matchBaseBranches": ["/^maint/.+/"],
+      "automergeType": "branch",
+      "prCreation": "not-pending",
+      "rebaseWhen": "auto"
+    },
+    {
+      "description": "Require approval for maintenace branches test deps",
+      "matchBaseBranches": ["/^maint/.+/"],
+      "matchFileNames": ["test/**"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [

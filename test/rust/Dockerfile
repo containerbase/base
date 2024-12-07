@@ -1,46 +1,61 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/rust/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/rust/test test
 WORKDIR /test
 
 RUN prepare-tool rust
 
+RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.cargo
+
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.83.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.83.0
 
 
-USER 1000
+USER 12021
 
 #--------------------------------------
 # test a: root
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 RUN set -ex; \
     cd a; \
@@ -54,12 +69,12 @@ RUN cargo --version
 #--------------------------------------
 # test b: non-root
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
-USER 1000
+USER 12021
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.76.0
+RUN install-tool rust 1.83.0
 
 RUN set -ex; \
     cd a; \
@@ -69,6 +84,11 @@ RUN set -ex; \
 SHELL [ "/bin/sh", "-c" ]
 RUN rustc --version
 RUN cargo --version
+
+RUN set -ex; \
+  ls -la /tmp/containerbase; \
+  ls -la /tmp/containerbase/cache; \
+  true
 
 #--------------------------------------
 # final

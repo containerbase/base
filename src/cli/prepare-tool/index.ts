@@ -1,9 +1,17 @@
 import { Container } from 'inversify';
 import { rootContainer } from '../services';
-import { PrepareDartService } from '../tools/dart';
-import { PrepareDockerService } from '../tools/docker';
-import { PrepareDotnetService } from '../tools/dotnet';
-import { PrepareFlutterService } from '../tools/flutter';
+import { DartPrepareService } from '../tools/dart';
+import { DockerPrepareService } from '../tools/docker';
+import { DotnetPrepareService } from '../tools/dotnet';
+import { FlutterPrepareService } from '../tools/flutter';
+import {
+  JavaJdkPrepareService,
+  JavaJrePrepareService,
+  JavaPrepareService,
+} from '../tools/java';
+import { NodePrepareService } from '../tools/node';
+import { PhpPrepareService } from '../tools/php';
+import { ConanPrepareService } from '../tools/python/conan';
 import { logger } from '../utils';
 import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
 import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
@@ -18,10 +26,16 @@ function prepareContainer(): Container {
   container.bind(PrepareLegacyToolsService).toSelf();
 
   // tool services
-  container.bind(PREPARE_TOOL_TOKEN).to(PrepareDartService);
-  container.bind(PREPARE_TOOL_TOKEN).to(PrepareDotnetService);
-  container.bind(PREPARE_TOOL_TOKEN).to(PrepareDockerService);
-  container.bind(PREPARE_TOOL_TOKEN).to(PrepareFlutterService);
+  container.bind(PREPARE_TOOL_TOKEN).to(ConanPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(DartPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(DotnetPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(DockerPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(FlutterPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(JavaPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(JavaJdkPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(NodePrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(PhpPrepareService);
 
   logger.trace('preparing container done');
   return container;
@@ -32,5 +46,13 @@ export function prepareTools(
   dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
-  return container.get(PrepareToolService).execute(tools, dryRun);
+  return container.get(PrepareToolService).prepare(tools, dryRun);
+}
+
+export function initializeTools(
+  tools: string[],
+  dryRun = false,
+): Promise<number | void> {
+  const container = prepareContainer();
+  return container.get(PrepareToolService).initialize(tools, dryRun);
 }

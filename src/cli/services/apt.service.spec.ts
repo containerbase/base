@@ -10,12 +10,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('execa', () => mocks);
-vi.mock('node:fs/promises', async () => ({
-  default: { ...(await vi.importActual<any>('node:fs/promises')), ...mocks },
+vi.mock('node:fs/promises', async (importActual) => ({
+  default: { ...(await importActual<any>()), ...mocks },
   ...mocks,
 }));
 
-describe('apt.service', () => {
+describe('cli/services/apt.service', () => {
   let child!: Container;
 
   beforeEach(() => {

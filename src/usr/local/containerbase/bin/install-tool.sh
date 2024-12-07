@@ -10,10 +10,6 @@ require_distro
 require_user
 require_tool "$@"
 
-if [[ $(ignore_tool) -eq 1 ]]; then
-  echo "Tool ignored - skipping: ${TOOL_NAME}"
-  exit 0;
-fi
 
 TOOL="${CONTAINERBASE_DIR}/tools/${TOOL_NAME}.sh"
 V2_TOOL="${CONTAINERBASE_DIR}/tools/v2/${TOOL_NAME}.sh"

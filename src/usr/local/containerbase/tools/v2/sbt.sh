@@ -1,9 +1,32 @@
 #!/bin/bash
+export NEEDS_PREPARE=1
 
 function check_tool_requirements () {
   check_command java
   check_semver "$TOOL_VERSION" "all"
 }
+
+function prepare_tool() {
+  init_tool
+
+  # Redirect mix home
+  path="$(get_cache_path)/.sbt"
+  ln -sf "${path}" "${USER_HOME}/.sbt"
+}
+
+function init_tool () {
+  local path
+  path="$(get_cache_path)/.sbt"
+
+  if [ -d "${path}" ]; then
+    return
+  fi
+
+  # Init mix home
+  create_folder "${path}" 775
+  chown -R "${USER_ID}" "${path}"
+}
+
 
 function install_tool () {
   local versioned_tool_path
@@ -32,5 +55,5 @@ function link_tool () {
   popd || exit 1
 
   # fix, cleanup sbt temp data
-  rm -rf /tmp/.sbt ~/.sbt "$temp_dir"
+  rm -rf /tmp/.sbt ~/.sbt/* "$temp_dir"
 }

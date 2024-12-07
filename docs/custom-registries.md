@@ -73,6 +73,20 @@ https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/d
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 ```
 
+## `devbox`
+
+Devbox releases are downloaded from:
+
+- `https://github.com/jetify-com/devbox/releases`
+
+Samples:
+
+```txt
+https://github.com/jetify-com/devbox/releases/download/0.12.0/devbox_0.12.0_linux_amd64.tar.gz
+https://github.com/jetify-com/devbox/releases/download/0.12.0/devbox_0.12.0_linux_arm64.tar.gz
+https://github.com/jetify-com/devbox/releases/download/0.12.0/checksums.txt
+```
+
 ## `docker`
 
 Docker releases are downloaded from:
@@ -131,9 +145,6 @@ https://github.com/elixir-lang/elixir/releases/v1.13.0/Precompiled.zip
 Flutter releases are downloaded from:
 
 - `https://github.com/containerbase/flutter-prebuild/releases`
-- `https://github.com/flutter/flutter.git`
-
-The first url is preferred and the second is used as fallback for older versions.
 
 Samples:
 
@@ -142,7 +153,6 @@ https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-x86_64.tar.xz.sha512
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz
 https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz.sha512
-https://github.com/flutter/flutter.git
 ```
 
 ## `flux`
@@ -197,11 +207,21 @@ https://github.com/gleam-lang/gleam/releases/download/v0.34.1/gleam-v0.34.1-x86_
 
 Go releases are downloaded from:
 
+- `https://github.com/containerbase/golang-prebuild/releases`
 - `https://dl.google.com/go/`
+- `https://go.dev/dl/?mode=json&include=all`
+
+The second url is used as fallback for older versions.
+The third url is used to find the checksums.
 
 Samples:
 
 ```txt
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-x86_64.tar.xz.sha512
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-x86_64.tar.xz
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-aarch64.tar.xz.sha512
+https://github.com/containerbase/golang-prebuild/releases/download/1.22.5/golang-1.22.5-aarch64.tar.xz
+https://go.dev/dl/?mode=json&include=all
 https://dl.google.com/go/go1.21.6.linux-arm64.tar.gz
 https://dl.google.com/go/go1.17.5.linux-amd64.tar.gz
 ```
@@ -278,8 +298,9 @@ The first url is preferred and the second is used as fallback for older versions
 Samples:
 
 ```txt
-https://github.com/containerbase/maven-prebuild/releases/3.0.4/maven-3.0.4.tar.xz.sha512
-https://github.com/containerbase/maven-prebuild/releases/3.0.4/maven-3.0.4.tar.xz
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz.sha512
+https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz
+https://github.com/containerbase/maven-prebuild/releases/latest/download/version
 https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz
 https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz.sha1
 https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar
@@ -341,17 +362,15 @@ https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.
 
 Nix releases are downloaded from:
 
-- `https://hydra.nixos.org/job/nix`
-- `https://releases.nixos.org`
-
-The second url will be used soon (#2066).
+- `https://github.com/containerbase/nix-prebuild/releases`
 
 Samples:
 
 ```txt
-https://hydra.nixos.org/job/nix/maintenance-2.4/buildStatic.x86_64-linux/latest/download-by-type/file/binary-dist
-https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2
-https://releases.nixos.org/nix/nix-2.2/nix-2.2-aarch64-linux.tar.bz2.sha256
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
 ```
 
 ## `node`
@@ -424,17 +443,19 @@ https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86
 
 Composer releases are downloaded from:
 
-- `https://getcomposer.org/download`
-- `https://api.github.com/repos/composer/composer/releases/latest`
+- `https://github.com/containerbase/composer-prebuild/releases`
+- `https://getcomposer.org/versions`
 
-The second url is only used when `latest` is passed as version.
-Then we try to find the latest version from GitHub.
+The first url is used for downloads.
+The last url is only used when `latest` or nothing is passed as version.
+Then we try to find the latest version from getcomposer.org.
 
 Samples:
 
 ```txt
-https://getcomposer.org/download/2.6.6/composer.phar.sha256sum
-https://getcomposer.org/download/2.6.6/composer.phar
+https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz.sha512
+https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz
+https://getcomposer.org/versions
 ```
 
 ## `powershell`
@@ -478,6 +499,7 @@ Those tools are installed via `pip` package manager.
 Known tools:
 
 - `checkov`
+- `conan`
 - `hashin`
 - `pdm`
 - `pip-tools`

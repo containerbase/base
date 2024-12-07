@@ -1,42 +1,58 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/node/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/node/test test
 RUN chmod -R 775 /test
 WORKDIR /test
 
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
-# renovate: datasource=node
-RUN install-tool node v20.11.1
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.12.0
 
-USER 1000
+# ensure npmrc is writable by user
+RUN set -ex; [ $(stat --format '%u' "/tmp/containerbase/cache/.npmrc") -eq ${USER_ID} ]
+
+USER 12021
 
 
 #--------------------------------------
 # test: node
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
 SHELL [ "/bin/sh", "-c" ]
 ENTRYPOINT [ ]
@@ -53,92 +69,74 @@ RUN node --version
 RUN npm --version
 
 
-## Test for #136
-USER 0
-
-ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
-# renovate: datasource=npm
-RUN npm install -g re2@1.20.9
-
 #--------------------------------------
 # test: yarn
 #--------------------------------------
-FROM build as testb
-
-ARG APT_HTTP_PROXY
-
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
-
-RUN set -ex; cd a; yarn; [[ -d node_modules/.bin ]] || exit 1
-
+FROM build AS testb
 
 SHELL [ "/bin/sh", "-c" ]
 
 USER root
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
 
+RUN set -ex; cd a; yarn; test -d node_modules/.bin || exit 1
+
+RUN install-tool yarn 2.4.2
+RUN install-tool yarn 3.8.1
+
+# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+RUN install-tool yarn 4.5.3
 
 #--------------------------------------
 # test: pnpm
 #--------------------------------------
 
-FROM build as testc
-
-ARG APT_HTTP_PROXY
+FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.3
+RUN install-tool pnpm 9.14.4
 
 RUN set -ex; \
   pnpm --version;
 
+SHELL [ "/bin/sh", "-c" ]
 
 RUN set -ex; cd a; pnpm i
 
-
-SHELL [ "/bin/sh", "-c" ]
-RUN set -ex; \
-  pnpm --version \
-  [ "$(command -v pnpm)" = "/home/${USER_NAME}/bin/pnpm" ] && echo "works" || exit 1;
-
 #--------------------------------------
-# test: node 18
+# test: node 20
 #--------------------------------------
 
-FROM base as testd
+FROM base AS testd
 
-ARG APT_HTTP_PROXY
+RUN prepare-tool node
 
-USER 1000
+USER 12021
 
-# renovate: datasource=node
-RUN install-tool node v18.19.1
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 20.18.1
 
 RUN npm install -g yarn
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
+  [ "$(command -v yarn)" = "" ] && echo "works" || exit 1; \
+  true;
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
+  [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version;
 
 
-COPY --chown=1000:0 test/node/test test
+COPY --chown=12021:0 test/node/test test
 
 RUN set -ex; \
   npm --version; \
@@ -147,13 +145,13 @@ RUN set -ex; \
 RUN set -ex; cd test/a; npm i
 
 # renovate: datasource=npm
-RUN install-npm del-cli 5.1.0
+RUN install-npm del-cli 6.0.0
 RUN del -d test/a/**
 
 #--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------
-FROM build as teste
+FROM build AS teste
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -164,7 +162,7 @@ RUN install-tool npm 8.0.0
 RUN npm --version
 RUN npm --version | grep '8.0.0'
 
-USER 1000
+USER 12021
 
 # don't update!! Should overwrite npm
 RUN install-tool node 18.13.0
@@ -182,7 +180,7 @@ RUN npm --version | grep '7.24.2'
 #--------------------------------------
 # test: use npm from node to install
 #--------------------------------------
-FROM build as testf
+FROM build AS testf
 
 RUN install-tool node 10.24.0
 # intentionally fails
@@ -196,7 +194,7 @@ RUN yarn --version
 #--------------------------------------
 # test: npm (npm install -g npm)
 #--------------------------------------
-FROM build as testg
+FROM build AS testg
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -207,7 +205,7 @@ RUN set -ex; npm install -gf npm@8.0.0
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
 
-USER 1000
+USER 12021
 RUN set -ex; command -v npm; npm --version
 RUN set -ex; npm --version | grep '8.0.0'
 RUN chmod -R g+w .
@@ -223,10 +221,10 @@ RUN set -ex; cd a; npm install
 #--------------------------------------
 # test: yarn-slim
 #--------------------------------------
-FROM build as testh
+FROM build AS testh
 
 # renovate: datasource=npm packageName=yarn
-RUN install-tool yarn-slim 1.22.21
+RUN install-tool yarn-slim 1.22.22
 
 RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
@@ -234,7 +232,7 @@ RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
 #--------------------------------------
 # test: npm (install-tool npm, node v14)
 #--------------------------------------
-FROM base as testi
+FROM base AS testi
 
 ARG CONTAINERBASE_DEBUG
 
@@ -242,13 +240,13 @@ ARG CONTAINERBASE_DEBUG
 RUN install-tool node v14.18.1
 RUN install-tool node v14.18.2
 
-RUN cat $USER_HOME/.npmrc | grep "prefix = \"$USER_HOME/.npm-global\""
+RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.npmrc
 
 RUN touch /.dummy
 
-USER 1000
+USER 12021
 
-COPY --chown=1000:0 test/node/test test
+COPY --chown=12021:0 test/node/test test
 WORKDIR /test
 
 # don't update!!
@@ -263,35 +261,28 @@ RUN set -ex; cd a; npm install --ignore-scripts
 #--------------------------------------
 # test: openshift yarn
 #--------------------------------------
-FROM build as testj
+FROM build AS testj
 
 USER 1111:0
 
-ARG APT_HTTP_PROXY
-
-RUN npm install -g yarn
-
-RUN set -ex; \
-  [ "$(command -v yarn)" = "/home/${USER_NAME}/.npm-global/bin/yarn" ] && echo "works" || exit 1; \
-  yarn --version;
-
-RUN set -ex; ls -lah /test/a; cd a; yarn
 
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
 RUN set -ex; \
   [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
   yarn --version
+
+RUN set -ex; ls -lah /test/a; cd a; yarn
 
 RUN install-tool yarn 1.22.15
 
 #--------------------------------------
 # test: openshift npm (install-tool npm)
 #--------------------------------------
-FROM build as testk
+FROM build AS testk
 
 ARG CONTAINERBASE_DEBUG
 # ENV NPM_CONFIG_LOGLEVEL=verbose
@@ -332,7 +323,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: corepack
 #--------------------------------------
-FROM build as testl
+FROM build AS testl
 
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
@@ -346,10 +337,10 @@ RUN install-tool corepack 0.9.0
 
 RUN corepack --version | tee | grep '0.9.0'
 
-USER 1000
+USER 12021
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -363,15 +354,15 @@ RUN set -ex; \
 #--------------------------------------
 # test: yarn (corepack)
 #--------------------------------------
-FROM build as testm
+FROM build AS testm
 
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 # renovate: datasource=npm depName=yarn
-ARG YARN_VERSION=1.22.21
+ARG YARN_VERSION=1.22.22
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=yarn@${YARN_VERSION}; \
@@ -381,19 +372,19 @@ RUN set -ex; cd a; \
 #--------------------------------------
 # test: yarn v3 (corepack)
 #--------------------------------------
-FROM build as testn
+FROM build AS testn
 
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.21
+RUN install-tool yarn 1.22.22
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 
 # renovate: datasource=npm depName=yarn
@@ -409,22 +400,22 @@ RUN set -ex; cd b; \
 #--------------------------------------
 # test: pnpm (corepack)
 #--------------------------------------
-FROM build as testo
+FROM build AS testo
 
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 8.15.3
+RUN install-tool pnpm 9.14.4
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=8.15.3
+ARG PNPM_VERSION=9.14.4
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -434,7 +425,7 @@ RUN set -ex; cd a; \
 #--------------------------------------
 # test: pnpm / yarn (link / wrapper overrides)
 #--------------------------------------
-FROM build as testp
+FROM build AS testp
 
 ARG PNPM_VERSION=6.0.0
 ARG YARN_VERSION=1.22.0
@@ -448,7 +439,7 @@ RUN install-tool yarn
 RUN install-tool yarn-slim
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.24.1
+RUN install-tool corepack 0.30.0
 
 RUN install-tool pnpm
 RUN install-tool yarn
@@ -468,9 +459,35 @@ RUN set -ex; \
   yarn -v | grep ${YARN_SLIM_VERSION};
 
 #--------------------------------------
-# test: renovate
+# test: renovate (rootless,readonly)
 #--------------------------------------
-FROM base as testq
+FROM base AS testq
+
+RUN set -ex; \
+  ls -la /opt/containerbase; \
+  ls -la /tmp/containerbase; \
+  ls -la /tmp/containerbase/cache; \
+  true
+
+RUN prepare-tool node
+
+# emulate emtpy containerbase folders
+RUN set -ex; \
+  ls -la /tmp/containerbase/cache; \
+  rm -rf /opt/containerbase/*; \
+  ls -la /opt/containerbase/; \
+  rm -rf /tmp/*; \
+  ls -la /tmp/; \
+  ls -la /var/lib/containerbase/; \
+  cat /var/lib/containerbase/tool.prep; \
+  true
+
+USER 1000
+
+RUN [[ ! -d /tmp/containerbase ]] || (echo "/tmp/containerbase should not exist"; exit 1 )
+RUN containerbase-cli init tool all
+RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit 1)
+RUN rm -rf /tmp/*;
 
 # install latest version
 RUN install-tool node
@@ -478,7 +495,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=37.183.0
+ARG RENOVATE_VERSION=39.42.4
 RUN install-tool renovate
 
 RUN set -ex; \
@@ -487,6 +504,12 @@ RUN set -ex; \
   export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
   ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/${NODE_VERSION}/node_modules ./node_modules; \
   node -e "new require('re2')('.*').exec('test'); console.log('re2 usable')"; \
+  true
+
+
+RUN set -ex; \
+  install-npm @microsoft/rush; \
+  rush -h; \
   true
 
 #--------------------------------------

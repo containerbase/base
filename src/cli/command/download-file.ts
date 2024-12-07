@@ -1,6 +1,7 @@
 import { createWriteStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
 import { got } from 'got';
@@ -36,19 +37,34 @@ export class DownloadFileCommand extends Command {
       await mkdir(path, { recursive: true });
 
       const nUrl = env.replaceUrl(this.url);
-      await pipeline(got.stream(nUrl), createWriteStream(this.output));
-
+      await pipeline(
+        got.stream(nUrl, {
+          headers: {
+            'user-agent': `containerbase/${
+              env.version
+            } node/${version.replace(/^v/, '')} (https://github.com/containerbase)`,
+          },
+        }),
+        createWriteStream(this.output),
+      );
       return 0;
     } catch (err) {
-      logger.fatal(err);
       error = true;
+      logger.debug(err);
+      if (err instanceof Error) {
+        logger.error(err.message);
+      }
       return 1;
     } finally {
-      logger.info(
-        `Download completed ${
-          error ? 'with errors ' : ''
-        } in ${prettyMilliseconds(Date.now() - start)}.`,
-      );
+      if (error) {
+        logger.fatal(
+          `Download failed in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      } else {
+        logger.info(
+          `Download succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+        );
+      }
     }
   }
 }

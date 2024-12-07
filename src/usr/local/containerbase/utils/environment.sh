@@ -8,8 +8,20 @@ function refreshenv () {
 }
 
 function export_env () {
-  export "${1}=${2}"
+  local non_root_only=${3-false}
+
+  if [[ "${non_root_only}" != 'false' ]]; then
+    # shellcheck disable=SC2016
+    echo 'if [ "${EUID}" != 0 ]; then' >> "$ENV_FILE"
+  else
+    export "${1}=${2}"
+  fi
+
   echo export "${1}=\${${1}-${2}}" >> "$ENV_FILE"
+
+  if [[ "${non_root_only}" != 'false' ]]; then
+    echo 'fi' >> "$ENV_FILE"
+  fi
 }
 
 function export_path () {
@@ -43,13 +55,27 @@ function find_tool_env () {
 
 function export_tool_env () {
   local install_dir
+  local non_root_only=${3-false}
   install_dir=$(get_install_dir)
+
   if [[ -z "${TOOL_NAME}" ]]; then
     echo "No TOOL_NAME defined - skipping: ${TOOL_NAME}" >&2
     exit 1;
   fi
-  export "${1}=${2}"
+
+  if [[ "${non_root_only}" != 'false' ]]; then
+    # shellcheck disable=SC2016
+    echo 'if [ "${EUID}" != 0 ]; then' >> "${install_dir}/env.d/${TOOL_NAME}.sh"
+  else
+    export "${1}=${2}"
+  fi
+
   echo export "${1}=\${${1}-${2}}" >> "${install_dir}/env.d/${TOOL_NAME}.sh"
+
+  if [[ "${non_root_only}" != 'false' ]]; then
+    echo 'fi' >> "${install_dir}/env.d/${TOOL_NAME}.sh"
+  fi
+
   set_file_owner "${install_dir}/env.d/${TOOL_NAME}.sh" 664
 }
 

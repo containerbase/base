@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
@@ -11,7 +11,7 @@ import {
 } from '../services';
 
 @injectable()
-export class InstallBunService extends InstallToolBaseService {
+export class BunInstallService extends BaseInstallService {
   readonly name = 'bun';
 
   private get ghArch(): string {
@@ -50,10 +50,7 @@ export class InstallBunService extends InstallToolBaseService {
       expectedChecksum,
     });
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     const path = join(
       await this.pathSvc.createVersionedToolPath(this.name, version),

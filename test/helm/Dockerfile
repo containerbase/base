@@ -1,30 +1,43 @@
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-# renovate: datasource=github-releases packageName=helm/helm
-ARG HELM_VERSION=3.8.0
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+# renovate: datasource=github-releases depName=helm packageName=helm/helm
+ARG HELM_VERSION=3.16.3
 
 #------------------------------------------------------------------
-# testa: install helm as root, run as both
+# testa: install helm AS root, run AS both
 #------------------------------------------------------------------
-FROM base as testa
+FROM base AS testa
 
 RUN install-tool helm "v${HELM_VERSION}"
 
@@ -38,7 +51,7 @@ SHELL [ "/bin/sh", "-c" ]
 
 RUN helm version | grep "${HELM_VERSION}"
 
-USER 1000
+USER 12021
 
 RUN set -ex; \
   helm repo add stable https://charts.helm.sh/stable; \
@@ -47,7 +60,7 @@ RUN set -ex; \
 RUN helm version | grep "${HELM_VERSION}"
 
 # even more restricted
-USER 1000:1000
+USER 12021:12021
 
 RUN set -ex; \
   helm repo update
@@ -56,9 +69,9 @@ RUN helm version | grep "${HELM_VERSION}"
 
 
 #------------------------------------------------------------------
-# testb: install helm as user (openshift)
+# testb: install helm AS user (openshift)
 #------------------------------------------------------------------
-FROM base as testb
+FROM base AS testb
 
 USER 1111
 
@@ -80,9 +93,9 @@ RUN helm version | grep "${HELM_VERSION}"
 
 
 #------------------------------------------------------------------
-# testc: install as user when already installed as root (openshift)
+# testc: install AS user when already installed AS root (openshift)
 #------------------------------------------------------------------
-FROM base as testc
+FROM base AS testc
 
 
 RUN install-tool helm "v${HELM_VERSION}"

@@ -1,3 +1,4 @@
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { EnvService } from '../services';
@@ -6,14 +7,17 @@ import { logger } from '../utils';
 const defaultPipRegistry = 'https://pypi.org/simple/';
 
 @injectable()
-export class InstallLegacyToolService {
+export class LegacyToolInstallService {
   constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
 
   async execute(tool: string, version: string): Promise<void> {
     logger.debug(`Installing legacy tool ${tool} v${version} ...`);
     const env: NodeJS.ProcessEnv = {};
 
-    const pipIndex = this.envSvc.replaceUrl(defaultPipRegistry);
+    const pipIndex = this.envSvc.replaceUrl(
+      defaultPipRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_PIP),
+    );
     if (pipIndex !== defaultPipRegistry) {
       env.PIP_INDEX_URL = pipIndex;
     }

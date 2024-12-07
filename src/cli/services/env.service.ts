@@ -53,12 +53,27 @@ export class EnvService {
     return this.uid === 0;
   }
 
+  /**
+   * Root directory of the container.
+   * `globalThis.rootDir` is set by test setup only, it's replaced by `null` on production.
+   */
   get rootDir(): string {
-    return join('/', env.CONTAINERBASE_ROOT_DIR ?? '');
+    return globalThis.rootDir ?? join('/', '');
+  }
+
+  /**
+   * Home directory of root
+   */
+  get rootHome(): string {
+    return join(this.rootDir, 'root');
+  }
+
+  get tmpDir(): string {
+    return join(this.rootDir, 'tmp');
   }
 
   get userHome(): string {
-    return env.USER_HOME ?? join(this.rootDir, `home/${this.userName}`);
+    return env.USER_HOME ?? join(this.rootDir, 'home', this.userName);
   }
 
   get userName(): string {
@@ -66,7 +81,7 @@ export class EnvService {
   }
 
   get userId(): number {
-    return parseInt(env.USER_ID ?? '1000', 10);
+    return parseInt(env.USER_ID ?? '12021', 10);
   }
 
   get umask(): number {
@@ -94,10 +109,10 @@ export class EnvService {
       .sort(compare)) {
       const to = from.replace(/_FROM$/, '_TO');
       if (env[from] && env[to]) {
-        replacements.push([env[from]!, env[to]!]);
+        replacements.push([env[from], env[to]]);
       } else {
         logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]!} ${to}=${env[to]!}`,
+          `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
         );
       }
     }
@@ -115,8 +130,19 @@ export class EnvService {
     return this.ignoredTools.has(tool.toUpperCase());
   }
 
-  public replaceUrl(src: string): string {
+  /**
+   * Replace the source url with the optional cdn and replacement urls
+   * @param src the source url
+   * @param cdn should the cdn url be used
+   * @returns the replaced url
+   */
+  public replaceUrl(src: string, cdn = true): string {
     let tgt = src;
+
+    if (env.CONTAINERBASE_CDN && cdn) {
+      tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
+    }
+
     const replacements = this.urlReplacements;
 
     for (const [from, to] of replacements) {

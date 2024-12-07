@@ -1,20 +1,21 @@
+import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { prepareTools } from '../prepare-tool';
+import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { InstallLegacyToolService } from './install-legacy-tool.service';
-import type { InstallToolBaseService } from './install-tool-base.service';
+import type { BaseInstallService } from './base-install.service';
+import { LegacyToolInstallService } from './install-legacy-tool.service';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
 @injectable()
 export class InstallToolService {
   constructor(
-    @inject(InstallLegacyToolService)
-    private legacySvc: InstallLegacyToolService,
+    @inject(LegacyToolInstallService)
+    private legacySvc: LegacyToolInstallService,
     @multiInject(INSTALL_TOOL_TOKEN)
     @optional()
-    private toolSvcs: InstallToolBaseService[] = [],
+    private toolSvcs: BaseInstallService[] = [],
     @inject(EnvService) private envSvc: EnvService,
     @inject(PathService) private pathSvc: PathService,
     @inject(VersionService) private versionSvc: VersionService,
@@ -25,15 +26,12 @@ export class InstallToolService {
     version: string,
     dryRun = false,
   ): Promise<number | void> {
-    logger.debug(
+    logger.trace(
       { tools: this.toolSvcs.map((t) => t.name) },
       'supported tools',
     );
 
-    if (this.envSvc.isToolIgnored(tool)) {
-      logger.info({ tool }, 'tool ignored');
-      return 0;
-    }
+    await this.pathSvc.ensureBasePaths();
 
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
@@ -44,12 +42,17 @@ export class InstallToolService {
           return;
         }
 
-        if (
-          toolSvc.needsPrepare() &&
-          !(await this.pathSvc.findToolPath(tool))
-        ) {
+        if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {
           logger.debug({ tool }, 'tool not prepared');
           const res = await prepareTools([tool], dryRun);
+          if (res) {
+            return res;
+          }
+        }
+
+        if (toolSvc.needsInitialize() && !(await toolSvc.isInitialized())) {
+          logger.debug({ tool }, 'tool not initialized');
+          const res = await initializeTools([tool], dryRun);
           if (res) {
             return res;
           }
@@ -77,21 +80,48 @@ export class InstallToolService {
         }
         await this.legacySvc.execute(tool, version);
       }
+
+      await this.versionSvc.update(tool, version);
+    } catch (e) {
+      await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
+      throw e;
     } finally {
       if (this.envSvc.isRoot) {
-        logger.debug('cleaning apt files');
+        logger.debug('cleaning apt caches');
         await cleanAptFiles(dryRun);
       }
 
       if (await isDockerBuild()) {
         logger.debug('cleaning tmp files');
-        await cleanTmpFiles(this.pathSvc.tmpDir, dryRun);
+        await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
+
+        if (this.envSvc.isRoot) {
+          logger.debug('cleaning root caches');
+          await deleteAsync(['/root/.cache', '/root/.local/share/virtualenv'], {
+            force: true,
+            dryRun,
+            dot: true,
+          });
+        } else {
+          logger.debug('cleaning user caches');
+          await deleteAsync(
+            [
+              `${this.pathSvc.cachePath}/.cache/**`,
+              `${this.pathSvc.cachePath}/.local/share/virtualenv/**`,
+            ],
+            {
+              force: true,
+              dryRun,
+              dot: true,
+            },
+          );
+        }
       }
     }
   }
 
   private async linkAndTest(
-    toolSvc: InstallToolBaseService,
+    toolSvc: BaseInstallService,
     version: string,
   ): Promise<void> {
     if (version === (await this.versionSvc.find(toolSvc.name))) {
@@ -100,8 +130,6 @@ export class InstallToolService {
       logger.debug({ tool: toolSvc.name }, 'link tool');
       await toolSvc.link(version);
     }
-
-    await this.versionSvc.update(toolSvc.name, version);
 
     logger.debug({ tool: toolSvc.name }, 'post-install tool');
     await toolSvc.postInstall(version);

@@ -1,13 +1,14 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ubuntu:20.04@sha256:bb1c41682308d7040f74d103022816d41c50d7b0c89e9d706a74b4e548636e54
+FROM ghcr.io/containerbase/ubuntu:24.04@sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab
 
 ARG APT_HTTP_PROXY
 
 # Weekly cache buster
 ARG CACHE_WEEK
 
+ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_VERSION
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
@@ -28,7 +29,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.43.2
+RUN install-tool git v2.47.1
 
 
 LABEL org.opencontainers.image.version="${CONTAINERBASE_VERSION}"

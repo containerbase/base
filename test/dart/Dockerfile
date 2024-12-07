@@ -1,59 +1,71 @@
-#--------------------------------------
-#--------------------------------------
-# Image: base
-#--------------------------------------
-FROM ubuntu:focal as base
+ARG BASE_IMAGE=containerbase
 
-RUN touch /.dummy
-
-ARG APT_HTTP_PROXY
-ARG CONTAINERBASE_DEBUG
+#--------------------------------------
+# Image: containerbase
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:24.04 AS containerbase
 
 ENV BASH_ENV=/usr/local/etc/env
 SHELL ["/bin/bash" , "-c"]
 
 ARG TARGETARCH
-
 COPY dist/docker/ /
 COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
 
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
 RUN install-containerbase
 
-COPY --chown=1000:0 test/dart/test test
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE} AS base
+
+RUN touch /.dummy
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+COPY --chown=12021:0 test/dart/test test
 WORKDIR /test
 
 #--------------------------------------
 # build
 #--------------------------------------
-FROM base as build
+FROM base AS build
 
 RUN prepare-tool dart
 
 #--------------------------------------
-# test: dart 2.x (non-root)
+# test: dart 3.x (non-root)
 #--------------------------------------
-FROM build as testa
+FROM build AS testa
 
-USER 1000
-
-RUN install-tool dart 2.0.0
+USER 12021
 
 # renovate: datasource=docker
-RUN install-tool dart 2.19.6
-
+RUN install-tool dart 3.5.4
 
 RUN set -ex; \
     cd a; \
     dart pub upgrade;
 
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 
 #--------------------------------------
-# test: dart 2.x (root, openstack)
+# test: dart 3.x (root, openstack)
 #--------------------------------------
-FROM base as testb
+FROM base AS testb
 
 # renovate: datasource=docker
-RUN install-tool dart 2.19.6
+RUN install-tool dart 3.5.4
 
 # fix test file perms for openstack
 RUN chown -R 1001 .
@@ -64,6 +76,23 @@ RUN set -ex; \
     cd a; \
     dart pub upgrade;
 
+#--------------------------------------
+# test: dart 2.x (non-root)
+#--------------------------------------
+FROM build AS testc
+
+USER 12021
+
+# renovate: datasource=docker
+RUN install-tool dart 2.19.6
+
+RUN set -ex; \
+    cd a; \
+    dart pub upgrade;
+
+RUN set -ex; \
+  ls -la $USER_HOME; \
+  true
 
 #--------------------------------------
 # final
@@ -72,3 +101,4 @@ FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy

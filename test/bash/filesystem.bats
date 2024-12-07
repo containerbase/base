@@ -18,7 +18,7 @@ teardown() {
 }
 
 @test "gets the default install dir" {
-    TEST_ROOT_USER=1000 \
+    TEST_ROOT_USER=12021 \
     run get_install_dir
     assert_output "${TEST_ROOT_DIR}/user"
 
@@ -113,7 +113,10 @@ teardown() {
 }
 
 @test "setup directories with correct permissions" {
+  local TEST_ROOT_USER=0 # root
   local install_dir=$(get_install_dir)
+  local tmp_dir=$(get_containerbase_tmp_path)
+  local var_dir=$(get_containerbase_var_path)
 
   run setup_directories
   assert_success
@@ -122,10 +125,17 @@ teardown() {
   assert [ "$(stat --format '%a' "${install_dir}/tools")" -eq 775 ]
   assert [ -d "${install_dir}/versions" ]
   assert [ "$(stat --format '%a' "${install_dir}/versions")" -eq 775 ]
+  assert [ -d "${install_dir}/bin" ]
+  assert [ "$(stat --format '%a' "${install_dir}/bin")" -eq 775 ]
   assert [ -d "${BIN_DIR}" ]
-  assert [ "$(stat --format '%a' "${BIN_DIR}")" -eq 775 ]
+  assert [ -L "${BIN_DIR}" ]
+  assert [ "$(stat --format '%a' "${BIN_DIR}")" -eq 777 ]
   assert [ -d "${install_dir}/env.d" ]
   assert [ "$(stat --format '%a' "${install_dir}/env.d")" -eq 775 ]
+  assert [ -d "${tmp_dir}/cache" ]
+  assert [ "$(stat --format '%a' "${tmp_dir}/cache")" -eq 775 ]
+  assert [ -d "${var_dir}/tool.prep.d" ]
+  assert [ "$(stat --format '%a' "${var_dir}/tool.prep.d")" -eq 755 ]
 }
 
 @test "creates a folder with correct permissions" {
@@ -134,7 +144,7 @@ teardown() {
   run create_folder
   assert_failure
 
-  TEST_ROOT_USER=1000
+  TEST_ROOT_USER=12021
   run create_folder "${install_dir}/foo"
   assert_success
 
@@ -164,7 +174,7 @@ teardown() {
 @test "creates deep folder with correct permissions" {
   local install_dir=$(get_install_dir)
 
-  TEST_ROOT_USER=1000
+  TEST_ROOT_USER=12021
   run create_folder "${install_dir}/test/foo/bar/baz"
 
   assert [ -d "${install_dir}/test" ]

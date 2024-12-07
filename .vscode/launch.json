@@ -18,8 +18,13 @@
       "name": "Debug Current Test File",
       "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "runtimeExecutable": "pnpm",
-      "args": ["vitest", "run", "${relativeFile}"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--pool=forks",
+        "--poolOptions.forks.singleFork",
+        "${relativeFile}"
+      ],
       "smartStep": true,
       "console": "integratedTerminal"
     }

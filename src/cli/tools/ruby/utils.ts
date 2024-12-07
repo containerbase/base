@@ -1,15 +1,18 @@
 import { chmod, mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { InstallToolBaseService } from '../../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { EnvService, PathService, VersionService } from '../../services';
 import { logger } from '../../utils';
+import { RubyGemJson } from './schema';
 
 const defaultRegistry = 'https://rubygems.org/';
 
 @injectable()
-export abstract class InstallRubyBaseService extends InstallToolBaseService {
+export abstract class RubyBaseInstallService extends BaseInstallService {
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -20,19 +23,20 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
 
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
+    const args: string[] = [];
 
-    const registry = this.envSvc.replaceUrl(defaultRegistry);
+    const registry = this.envSvc.replaceUrl(
+      defaultRegistry,
+      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_GEM),
+    );
     if (registry !== defaultRegistry) {
-      env.RUBYGEMS_HOST = registry;
+      args.push('--clear-sources', '--source', registry);
     }
 
     const gem = await this.getRubyGem();
     const ruby = await this.getRubyVersion();
 
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
+    await this.pathSvc.ensureToolPath(this.name);
 
     let prefix = await this.pathSvc.findVersionedToolPath(this.name, version);
     if (!prefix) {
@@ -55,6 +59,8 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
         join(prefix, 'bin'),
         '--version',
         version,
+        '--verbose',
+        ...args,
       ],
       { reject: false, env, cwd: this.pathSvc.installDir, all: true },
     );
@@ -63,6 +69,8 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
       logger.warn(`Gem error:\n${res.all}`);
       await rm(prefix, { recursive: true, force: true });
       throw new Error('gem install command failed');
+    } else {
+      logger.trace(`gem install\n${res.all}`);
     }
 
     await this._postInstall(gem, version, prefix, env);
@@ -118,7 +126,9 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
     _version: string,
     _prefix: string,
     _env: NodeJS.ProcessEnv,
-  ): Promise<void> | void {}
+  ): Promise<void> | void {
+    // no-op
+  }
 
   private async getRubyGem(): Promise<string> {
     const rubyVersion = await this.getRubyVersion();
@@ -142,5 +152,20 @@ export abstract class InstallRubyBaseService extends InstallToolBaseService {
       'specifications',
       `${this.name}-${version}.gemspec`,
     );
+  }
+}
+
+@injectable()
+export abstract class RubyGemVersionResolver extends ToolVersionResolver {
+  async resolve(version: string | undefined): Promise<string | undefined> {
+    if (version === undefined || version === 'latest') {
+      const meta = RubyGemJson.parse(
+        await this.http.getJson(
+          `https://rubygems.org/api/v1/gems/${this.tool}.json`,
+        ),
+      );
+      return meta.version;
+    }
+    return version;
   }
 }

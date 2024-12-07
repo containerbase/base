@@ -1,11 +1,13 @@
 #!/bin/bash
 
-# use this if custom env is required, creates a shell wrapper to /usr/local/bin
+# use this if custom env is required, creates a shell wrapper to /opt/containerbase/bin
 function shell_wrapper () {
   local TARGET
   local SOURCE=$2
   local EXPORTS=$3
   local args=$4
+  local content=$5
+  local tool_init
   TARGET="$(get_bin_path)/${1}"
   if [[ -z "$SOURCE" ]]; then
     SOURCE=$(command -v "${1}")
@@ -16,11 +18,17 @@ function shell_wrapper () {
   check SOURCE true
   check_command "$SOURCE"
 
+  tool_init=$(get_tool_init "${TOOL_NAME//\//__}")
+
   cat > "$TARGET" <<- EOM
 #!/bin/bash
 
 if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
   . $ENV_FILE
+fi
+if [[ ! -f "${tool_init}" ]]; then
+  # set logging to only warn and above to not interfere with tool output
+  CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${TOOL_NAME}"
 fi
 EOM
 
@@ -28,12 +36,16 @@ EOM
     echo "export $EXPORTS" >> "$TARGET"
   fi
 
+  if [ -n "$content" ]; then
+    echo "$content" >> "$TARGET"
+  fi
+
   echo "${SOURCE} ${args} \"\$@\"" >> "$TARGET"
 
   set_file_owner "${TARGET}" 775
 }
 
-# use this for simple symlink to /usr/local/bin
+# use this for simple symlink to /opt/containerbase/bin
 function link_wrapper () {
   local TARGET
   local SOURCE=$2

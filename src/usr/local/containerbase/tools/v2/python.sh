@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NEEDS_PREPARE=1
+
 # sets the correct shebang for python
 fix_python_shebangs() {
   # https://github.com/koalaman/shellcheck/wiki/SC2044
@@ -27,6 +29,7 @@ function prepare_tool() {
   case "${version_codename}" in
     "focal");;
     "jammy");;
+    "noble");;
     *)
       echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
       exit 1
@@ -39,7 +42,7 @@ function prepare_tool() {
     libpq-dev \
     ;
 
-  tool_path=$(create_tool_path)
+  tool_path=$(find_tool_path)
 
   # Workaround for compatibillity for Python hardcoded paths
   if [ "${tool_path}" != "${ROOT_DIR_LEGACY}/python" ]; then
@@ -64,17 +67,12 @@ function install_tool () {
 
   tool_path=$(find_tool_path)
 
-  if [[ ! -d "${tool_path}" ]]; then
-    if [[ $(is_root) -ne 0 ]]; then
-      echo "${name} not prepared"
-      exit 1
-    fi
-    prepare_tool
-    tool_path=$(find_tool_path)
-  fi
-
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
+
+  if [[ "${version_codename}" == "noble" ]]; then
+    version_codename="jammy"
+  fi
 
   # not all releases have checksums
   checksum_exists=$(file_exists "${base_url}/${version}/${name}-${version}-${version_codename}-${arch}.tar.xz.sha512")
@@ -121,11 +119,6 @@ function install_tool () {
 function link_tool () {
   local versioned_tool_path
   versioned_tool_path=$(find_versioned_tool_path)
-
-  reset_tool_env
-
-  # export python vars
-  export_tool_path "${versioned_tool_path}/bin"
 
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper "${TOOL_NAME}${MAJOR}" "${versioned_tool_path}/bin"

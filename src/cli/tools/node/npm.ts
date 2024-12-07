@@ -1,30 +1,48 @@
 import { execa } from 'execa';
 import { injectable } from 'inversify';
-import { InstallNpmBaseService } from './utils';
+import { logger, parse, semverSatisfies } from '../../utils';
+import { NpmBaseInstallService } from './utils';
 
 @injectable()
-export class InstallRenovateService extends InstallNpmBaseService {
+export class RenovateInstallService extends NpmBaseInstallService {
   override readonly name: string = 'renovate';
 
-  protected override getAdditionalArgs(): string[] {
-    return ['--no-optional', 're2'];
-  }
+  override prepareEnv(version: string, tmp: string): NodeJS.ProcessEnv {
+    const env = super.prepareEnv(version, tmp);
 
-  override prepareEnv(tmp: string): NodeJS.ProcessEnv {
-    const env = super.prepareEnv(tmp);
-    env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
-      'https://github.com/containerbase/node-re2-prebuild/releases/download',
-    );
-    env.RE2_DOWNLOAD_SKIP_PATH = '1';
+    if (semverSatisfies(version, '<37.234.0')) {
+      env.RE2_DOWNLOAD_MIRROR = this.envSvc.replaceUrl(
+        'https://github.com/containerbase/node-re2-prebuild/releases/download',
+      );
+      env.RE2_DOWNLOAD_SKIP_PATH = '1';
+    }
     return env;
   }
 }
 
 @injectable()
-export class InstallYarnSlimService extends InstallNpmBaseService {
+export class YarnInstallService extends NpmBaseInstallService {
+  override readonly name: string = 'yarn';
+
+  protected override tool(version: string): string {
+    const ver = parse(version);
+    if (ver.major >= 2) {
+      logger.debug({ version }, 'Using yarnpkg/cli-dist');
+      return '@yarnpkg/cli-dist';
+    }
+    return this.name;
+  }
+
+  override async test(): Promise<void> {
+    await execa(this.name, ['--version'], { stdio: 'inherit' });
+  }
+}
+
+@injectable()
+export class YarnSlimInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn-slim';
 
-  protected override get tool(): string {
+  protected override tool(): string {
     return 'yarn';
   }
 
