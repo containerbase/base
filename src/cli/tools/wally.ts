@@ -2,18 +2,17 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import semver from 'semver';
-import { InstallToolBaseService } from '../install-tool/install-tool-base.service';
+import { BaseInstallService } from '../install-tool/base-install.service';
 import {
   CompressionService,
   EnvService,
   HttpService,
   PathService,
 } from '../services';
-import { getDistro } from '../utils';
+import { getDistro, parse } from '../utils';
 
 @injectable()
-export class InstallWallyService extends InstallToolBaseService {
+export class WallyInstallService extends BaseInstallService {
   readonly name = 'wally';
 
   constructor(
@@ -36,7 +35,7 @@ export class InstallWallyService extends InstallToolBaseService {
     const baseUrl = `https://github.com/UpliftGames/wally/releases/download/v${version}/`;
     let filename = `wally-v${version}-linux.zip`;
 
-    const ver = semver.parse(version);
+    const ver = parse(version);
     if (!ver) {
       throw new Error(`Invalid version: ${version}`);
     }
