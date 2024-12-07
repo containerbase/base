@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { join } from 'node:path';
+import path from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
@@ -26,7 +26,6 @@ export class WallyInstallService extends BaseInstallService {
 
   override async install(version: string): Promise<void> {
     const distro = await getDistro();
-
     // wally requires libssl3 which is not easily installable on focal
     if (distro.versionCode === 'focal') {
       throw new Error(`Unsupported distro: ${distro.versionCode}`);
@@ -36,9 +35,6 @@ export class WallyInstallService extends BaseInstallService {
     let filename = `wally-v${version}-linux.zip`;
 
     const ver = parse(version);
-    if (!ver) {
-      throw new Error(`Invalid version: ${version}`);
-    }
     // asset names of v0.3.1 and lower are not prefixed with v
     if (
       ver.major === 0 &&
@@ -51,30 +47,26 @@ export class WallyInstallService extends BaseInstallService {
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
     });
-
-    // TODO: create recursive
-    if (!(await this.pathSvc.findToolPath(this.name))) {
-      await this.pathSvc.createToolPath(this.name);
-    }
-
-    const path = join(
+    await this.pathSvc.ensureToolPath(this.name);
+    const cwd = path.join(
       await this.pathSvc.createVersionedToolPath(this.name, version),
       'bin',
     );
-    await fs.mkdir(path);
-    await this.compress.extract({
-      file,
-      cwd: path,
-    });
+    await fs.mkdir(cwd);
+    await this.compress.extract({ file, cwd });
   }
 
   override async link(version: string): Promise<void> {
-    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-
+    const src = path.join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      'bin',
+    );
     await this.shellwrapper({ srcDir: src });
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
+    await execa(this.name, ['--version'], {
+      stdio: ['inherit', 'inherit', 1],
+    });
   }
 }
