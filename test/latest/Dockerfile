@@ -239,7 +239,7 @@ ARG HELMFILE_VERSION=0.169.2
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.5.0
 
-# renovate: datasource=github-releases packageName=UpliftGames/wally
+# renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 ARG WALLY_VERSION=0.3.2
 
 RUN install-tool vendir "v${VENDIR_VERSION}"

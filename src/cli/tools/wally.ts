@@ -9,11 +9,19 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { getDistro, parse } from '../utils';
 
 @injectable()
 export class WallyInstallService extends BaseInstallService {
   readonly name = 'wally';
+
+  private get ghArch(): string {
+    switch (this.envSvc.arch) {
+      case 'arm64':
+        return 'aarch64';
+      case 'amd64':
+        return 'x86_64';
+    }
+  }
 
   constructor(
     @inject(EnvService) envSvc: EnvService,
@@ -25,34 +33,22 @@ export class WallyInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
-    const distro = await getDistro();
-    // wally requires libssl3 which is not easily installable on focal
-    if (distro.versionCode === 'focal') {
-      throw new Error(`Unsupported distro: ${distro.versionCode}`);
-    }
+    const name = this.name;
+    const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
+    const checksumFileUrl = `${url}.sha512`;
 
-    const baseUrl = `https://github.com/UpliftGames/wally/releases/download/v${version}/`;
-    let filename = `wally-v${version}-linux.zip`;
-
-    const ver = parse(version);
-    // asset names of v0.3.1 and lower are not prefixed with v
-    if (
-      ver.major === 0 &&
-      ver.minor <= 3 &&
-      (ver.minor < 3 || ver.patch <= 1)
-    ) {
-      filename = `wally-${version}-linux.zip`;
-    }
+    const checksumFile = await this.http.download({ url: checksumFileUrl });
+    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
 
     const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
     });
-    await this.pathSvc.ensureToolPath(this.name);
-    const cwd = path.join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
-      'bin',
-    );
-    await fs.mkdir(cwd);
+
+    const cwd = await this.pathSvc.ensureToolPath(this.name);
+
     await this.compress.extract({ file, cwd });
   }
 

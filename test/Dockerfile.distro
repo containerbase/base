@@ -116,8 +116,8 @@ RUN install-tool jb v0.6.0
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 RUN install-tool vendir v0.42.0
 
-# renovate: datasource=github-releases packageName=UpliftGames/wally
-RUN install-tool wally v0.3.2
+# renovate: datasource=github-releases packageName=containerbase/wally-prebuild
+RUN install-tool wally 0.3.2
 
 #--------------------------------------
 # Image: test-erlang

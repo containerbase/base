@@ -588,12 +588,11 @@ https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.22.0/vendir-l
 
 Wally releases are downloaded from:
 
-- `https://github.com/UpliftGames/wally/releases`
+- `https://github.com/containerbase/wally-prebuild/releases`
 
 Samples:
 
 ```txt
-https://github.com/UpliftGames/wally/releases/download/v0.3.2/wally-v0.3.2-linux.zip
-https://github.com/UpliftGames/wally/releases/download/v0.3.1/wally-0.3.1-linux.zip
-https://github.com/UpliftGames/wally/releases/download/v0.3.0/wally-0.3.0-linux.zip
+https://github.com/containerbase/wally-prebuild/releases/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/wally-prebuild/releases/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz
 ```
