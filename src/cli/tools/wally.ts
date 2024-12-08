@@ -47,7 +47,7 @@ export class WallyInstallService extends BaseInstallService {
       expectedChecksum,
     });
 
-    const cwd = await this.pathSvc.ensureToolPath(this.name);
+    const cwd = await this.pathSvc.ensureToolPath(name);
 
     await this.compress.extract({ file, cwd });
   }
