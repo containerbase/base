@@ -31,6 +31,7 @@ export const NoPrepareTools = [
   'skopeo',
   'sops',
   'uv',
+  'wally',
   'yarn',
   'yarn-slim',
 ];
