@@ -9,6 +9,7 @@ import {
   HttpService,
   PathService,
 } from '../services';
+import { getDistro } from '../utils';
 
 @injectable()
 export class WallyInstallService extends BaseInstallService {
@@ -34,7 +35,8 @@ export class WallyInstallService extends BaseInstallService {
 
   override async install(version: string): Promise<void> {
     const name = this.name;
-    const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
+    const distro = await getDistro();
+    const filename = `${name}-${version}-${distro.versionCode}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
     const checksumFileUrl = `${url}.sha512`;
 
