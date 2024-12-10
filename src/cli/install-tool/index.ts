@@ -62,6 +62,7 @@ import {
 } from '../tools/ruby/utils';
 import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
+import { WallyInstallService } from '../tools/wally';
 import { logger } from '../utils';
 import { LegacyToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
@@ -106,6 +107,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(RenovateInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
 
