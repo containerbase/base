@@ -7,6 +7,9 @@ describe('cli/utils/logger', () => {
   beforeEach(() => {
     vi.resetModules();
     delete env.CONTAINERBASE_LOG_LEVEL;
+    delete env.CONTAINERBASE_LOG_FORMAT;
+    delete env.LOG_LEVEL;
+    delete env.LOG_FORMAT;
     delete env.CONTAINERBASE_LOG_FILE;
     delete env.CONTAINERBASE_LOG_FILE_LEVEL;
     delete env.CONTAINERBASE_DEBUG;
