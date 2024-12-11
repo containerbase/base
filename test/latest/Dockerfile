@@ -205,7 +205,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, devbox, vendir, helmfile, kustomize, skopeo, wally
+# test: bazelisk, bun, devbox, vendir, helmfile, kustomize, skopeo
 #--------------------------------------
 FROM base AS teste
 
@@ -239,24 +239,17 @@ ARG HELMFILE_VERSION=0.169.2
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.5.0
 
-# renovate: datasource=github-releases packageName=containerbase/wally-prebuild
-ARG WALLY_VERSION=0.3.2
-
 RUN install-tool vendir "v${VENDIR_VERSION}"
 
 RUN install-tool helmfile "v${HELMFILE_VERSION}"
 
 RUN install-tool kustomize "${KUSTOMIZE_VERSION}"
 
-RUN install-tool wally "v${WALLY_VERSION}"
-
 RUN set -ex; vendir --version
 
 RUN set -ex; helmfile version
 
 RUN set -ex; kustomize version
-
-RUN set -ex; wally --version
 
 SHELL [ "/bin/sh", "-c" ]
 
@@ -265,8 +258,6 @@ RUN vendir --version | grep "${VENDIR_VERSION}"
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
-
-RUN wally --version | grep "${WALLY_VERSION}"
 
 USER 12021
 
@@ -277,8 +268,6 @@ RUN vendir --version | grep "${VENDIR_VERSION}"
 RUN helmfile version | grep "${HELMFILE_VERSION}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
-
-RUN wally --version | grep "${WALLY_VERSION}"
 
 #--------------------------------------
 # final
