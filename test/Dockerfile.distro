@@ -57,7 +57,7 @@ RUN install-tool dart 3.5.4
 RUN install-tool devbox 0.13.7
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v27.3.1
+RUN install-tool docker v27.4.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.404
@@ -114,7 +114,7 @@ RUN install-tool terraform 1.10.1
 RUN install-tool jb v0.6.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.42.0
+RUN install-tool vendir v0.43.0
 
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
@@ -147,7 +147,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.12.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.14.4
+RUN install-tool pnpm 9.15.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.5.3
 
@@ -170,7 +170,7 @@ FROM build AS test-python
 RUN install-tool python 3.12.8
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.324
+RUN install-tool checkov 3.2.334
 # renovate: datasource=pypi
 RUN install-tool conan 2.10.1
 # renovate: datasource=pypi
@@ -180,7 +180,7 @@ RUN install-tool hashin 1.0.3
 # renovate: datasource=pypi
 RUN install-tool pipenv 2024.4.0
 # renovate: datasource=pypi
-RUN install-tool pdm 2.21.0
+RUN install-tool pdm 2.22.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.5
 # renovate: datasource=pypi

@@ -70,7 +70,7 @@ RUN install-tool gleam 1.6.3
 FROM base AS test-docker
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v27.3.1
+RUN install-tool docker v27.4.0
 
 #--------------------------------------
 # Image: git
@@ -118,7 +118,7 @@ RUN install-tool terraform 1.10.1
 FROM base AS test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.42.0
+RUN install-tool vendir v0.43.0
 
 #--------------------------------------
 # Image: others

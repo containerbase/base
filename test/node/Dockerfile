@@ -102,7 +102,7 @@ RUN install-tool yarn 4.5.3
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 9.14.4
+RUN install-tool pnpm 9.15.0
 
 RUN set -ex; \
   pnpm --version;
@@ -409,13 +409,13 @@ RUN install-tool corepack 0.30.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 9.14.4
+RUN install-tool pnpm 9.15.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.30.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=9.14.4
+ARG PNPM_VERSION=9.15.0
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -495,7 +495,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=39.42.4
+ARG RENOVATE_VERSION=39.57.4
 RUN install-tool renovate
 
 RUN set -ex; \
