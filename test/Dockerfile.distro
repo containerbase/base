@@ -45,7 +45,7 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.24.1
+RUN install-tool bazelisk v1.25.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.1.38
@@ -84,7 +84,7 @@ RUN install-tool helm v3.16.3
 RUN install-tool helmfile v0.169.2
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.31.3
+RUN install-tool kubectl v1.31.4
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.5.0
