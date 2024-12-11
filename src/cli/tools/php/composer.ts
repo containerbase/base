@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { z } from 'zod';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import {
@@ -12,7 +11,6 @@ import {
   HttpService,
   PathService,
 } from '../../services';
-import { semverSort } from '../../utils';
 
 @injectable()
 export class ComposerInstallService extends BaseInstallService {
@@ -62,20 +60,10 @@ export class ComposerVersionResolver extends ToolVersionResolver {
 
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      const meta = ComposerVersionsSchema.parse(
-        await this.http.getJson('https://getcomposer.org/versions'),
+      return await this.http.get(
+        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
       );
-      // we know that the latest version is the first entry, so search for first lts
-      return meta;
     }
     return version;
   }
 }
-
-const ComposerVersionsSchema = z
-  .object({
-    stable: z.array(z.object({ version: z.string() })),
-  })
-  .transform(({ stable }) => {
-    return semverSort(stable.map((v) => v.version)).pop();
-  });
