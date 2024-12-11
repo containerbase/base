@@ -32,4 +32,39 @@ describe('cli/utils/logger', () => {
       },
     );
   });
+
+  test('works - stdout with json', async () => {
+    env.CONTAINERBASE_LOG_FORMAT = 'json';
+    const { pino } = await import('pino');
+    const mod = await import('./logger');
+    expect(mod.logger).toBeDefined();
+    expect(pino).toHaveBeenCalledWith(
+      { level: 'info' },
+      {
+        targets: [{ target: 'pino/file', level: 'info', options: {} }],
+      },
+    );
+  });
+
+  test('works - debug stdout with json with file', async () => {
+    env.LOG_FORMAT = 'json';
+    env.CONTAINERBASE_LOG_LEVEL = 'warn';
+    env.CONTAINERBASE_LOG_FILE = 'test.ndjson';
+    const { pino } = await import('pino');
+    const mod = await import('./logger');
+    expect(mod.logger).toBeDefined();
+    expect(pino).toHaveBeenCalledWith(
+      { level: 'debug' },
+      {
+        targets: [
+          { target: 'pino/file', level: 'warn', options: {} },
+          {
+            target: 'pino/file',
+            level: 'debug',
+            options: { destination: 'test.ndjson' },
+          },
+        ],
+      },
+    );
+  });
 });
