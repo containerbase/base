@@ -91,9 +91,37 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test c: beta
+#--------------------------------------
+FROM base AS testc
+
+USER 12021
+
+RUN install-tool rust beta
+
+SHELL [ "/bin/sh", "-c" ]
+RUN rustc --version
+RUN cargo --version
+
+#--------------------------------------
+# test d: nightly
+#--------------------------------------
+FROM base AS testd
+
+USER 12021
+
+RUN install-tool rust nightly
+
+SHELL [ "/bin/sh", "-c" ]
+RUN rustc --version
+RUN cargo --version
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy

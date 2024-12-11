@@ -25,6 +25,15 @@ function init_tool () {
   chown -R "${USER_ID}" "${cargo_home}"
 }
 
+function check_tool_requirements () {
+  if [[ "${TOOL_VERSION}" == "nightly" || "${TOOL_VERSION}" == "beta" ]]; then
+    # allow beta and nightly versions
+    return
+  fi
+  # Sensitive default that can be overwritten by tools if needed
+  check_semver "$TOOL_VERSION" "all"
+}
+
 function install_tool () {
   local versioned_tool_path
   local file
@@ -55,7 +64,7 @@ function install_tool () {
   mkdir -p "${TEMP_DIR}/rust"
   bsdtar --strip 1 -C "${TEMP_DIR}/rust" -xf "${file}"
   versioned_tool_path=$(create_versioned_tool_path)
-  "${TEMP_DIR}/rust/install.sh" --prefix="$versioned_tool_path" --components=cargo,rust-std-"${arch}"-unknown-linux-gnu,rustc
+  "${TEMP_DIR}/rust/install.sh" --prefix="$versioned_tool_path" --components="cargo,rust-std-${arch}-unknown-linux-gnu,rustc"
   rm -rf "${TEMP_DIR}/rust"
 }
 
