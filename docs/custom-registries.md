@@ -593,6 +593,6 @@ Wally releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/wally-prebuild/releases/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/wally-prebuild/releases/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz
+https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz
 ```
