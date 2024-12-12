@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# simple wrapper to install containerbase
-/usr/local/containerbase/bin/install-containerbase.sh "$@"

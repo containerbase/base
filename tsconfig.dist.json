@@ -1,4 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "files": ["./src/cli/index.ts", "./src/cli/types.d.ts"]
-}

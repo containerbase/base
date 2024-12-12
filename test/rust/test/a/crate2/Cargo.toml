@@ -1,7 +1,0 @@
-[package]
-name = "crate2"
-version = "0.1.0"
-authors = []
-
-[dependencies]
-env_logger = "0.3.0"

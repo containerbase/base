@@ -1,7 +1,0 @@
-[package]
-name = "crate3"
-version = "0.1.0"
-authors = []
-
-[dependencies]
-libc = "0.1.0"
