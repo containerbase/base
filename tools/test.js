@@ -33,7 +33,7 @@ class TestCommand extends Command {
     if (this.debug) {
       shell.echo('Debug mode enabled');
       env.CONTAINERBASE_DEBUG = '1';
-      env.BUILDKIT_PROGRESS = '1';
+      env.BUILDKIT_PROGRESS = 'plain';
     }
 
     if (this.logLevel) {

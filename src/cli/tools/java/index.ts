@@ -100,7 +100,7 @@ export class JavaPrepareService extends BasePrepareService {
     await createMavenSettings(this.pathSvc);
     await createGradleSettings(this.pathSvc);
 
-    if (!(await this.pathSvc.toolEnvExists(this.name))) {
+    if (!(await this.pathSvc.toolEnvExists('gradle'))) {
       // fix: Failed to load native library 'libnative-platform.so' for Linux amd64.
       await this.pathSvc.exportToolEnv(
         'gradle',

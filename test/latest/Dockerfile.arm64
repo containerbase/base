@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-bazelisk
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.24.1
+RUN install-tool bazelisk v1.25.0
 
 #--------------------------------------
 # Image: bun
@@ -110,7 +110,7 @@ RUN install-tool kustomize 5.5.0
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.10.1
+RUN install-tool terraform 1.10.2
 
 #--------------------------------------
 # Image: vendir
@@ -126,7 +126,7 @@ RUN install-tool vendir v0.43.0
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.31.3
+RUN install-tool kubectl v1.32.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.17.0

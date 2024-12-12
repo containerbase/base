@@ -78,7 +78,7 @@ RUN install-tool poetry 1.8.5
 FROM test-python AS test-conan
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.10.1
+RUN install-tool conan 2.10.2
 
 #--------------------------------------
 # Image: copier
@@ -95,7 +95,7 @@ RUN install-tool copier 9.4.1
 FROM test-python AS test-uv
 
 # renovate: datasource=pypi
-RUN install-tool uv 0.5.7
+RUN install-tool uv 0.5.8
 
 #--------------------------------------
 # Image: final

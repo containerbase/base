@@ -28,7 +28,7 @@ RUN install-tool dart 2.18.0
 
 ## GitHub (github.com)
 
-GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/<version>/<file>` to `https://objects.githubusercontent.com/<some-url>` which seems to be an Amazon S3 bucket.
+GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/download/<version>/<file>` to `https://objects.githubusercontent.com/<some-url>` which seems to be an Amazon S3 bucket.
 
 ## `bazelisk`
 
@@ -39,8 +39,8 @@ Bazelisk releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/bazelbuild/bazelisk/releases/v1.19.0/bazelisk-linux-amd64
-https://github.com/bazelbuild/bazelisk/releases/v1.19.0/bazelisk-linux-arm64
+https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64
+https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64
 ```
 
 ## `bun`
@@ -52,9 +52,9 @@ Bun releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/oven-sh/bun/releases/bun-v1.0.0/bun-linux-x64.zip
-https://github.com/oven-sh/bun/releases/bun-v1.0.0/bun-linux-aarch64.zip
-https://github.com/oven-sh/bun/releases/bun-v1.0.0/SHASUMS256.txt
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-x64.zip
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-aarch64.zip
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/SHASUMS256.txt
 ```
 
 ## `dart`
@@ -122,8 +122,8 @@ Erlang releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/erlang-prebuild/releases/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/erlang-prebuild/releases/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz
 ```
 
 ### `elixir`
@@ -135,9 +135,9 @@ Elixir releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/elixir-lang/elixir/releases/v1.16.0/elixir-otp-24.zip
-https://github.com/elixir-lang/elixir/releases/v1.14.0/elixir-otp-23.zip
-https://github.com/elixir-lang/elixir/releases/v1.13.0/Precompiled.zip
+https://github.com/elixir-lang/elixir/releases/download/v1.16.0/elixir-otp-24.zip
+https://github.com/elixir-lang/elixir/releases/download/v1.14.0/elixir-otp-23.zip
+https://github.com/elixir-lang/elixir/releases/download/v1.13.0/Precompiled.zip
 ```
 
 ## `flutter`
@@ -149,10 +149,10 @@ Flutter releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-x86_64.tar.xz
-https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-x86_64.tar.xz.sha512
-https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz
-https://github.com/containerbase/flutter-prebuild/releases/3.13.7/flutter-3.13.7-aarch64.tar.xz.sha512
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-x86_64.tar.xz
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-x86_64.tar.xz.sha512
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-aarch64.tar.xz
+https://github.com/containerbase/flutter-prebuild/releases/download/3.13.7/flutter-3.13.7-aarch64.tar.xz.sha512
 ```
 
 ## `flux`
@@ -164,8 +164,8 @@ Flux releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/fluxcd/flux2/releases/v0.19.0/flux_0.19.0_linux_amd64.tar.gz
-https://github.com/fluxcd/flux2/releases/v2.1.0/flux_2.1.0_linux_arm64.tar.gz
+https://github.com/fluxcd/flux2/releases/download/v0.19.0/flux_0.19.0_linux_amd64.tar.gz
+https://github.com/fluxcd/flux2/releases/download/v2.1.0/flux_2.1.0_linux_arm64.tar.gz
 ```
 
 ## `git`
@@ -185,14 +185,14 @@ Git LFS releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/git-lfs/git-lfs/releases/v3.4.1/git-lfs-linux-amd64-v3.4.1.tar.gz
+https://github.com/git-lfs/git-lfs/releases/download/v3.4.1/git-lfs-linux-amd64-v3.4.1.tar.gz
 ```
 
 ## gleam
 
 Gleam releases are downloaded from:
 
-- `https://github.com/gleam-lang/gleam/releases/download`
+- `https://github.com/gleam-lang/gleam/releases`
 
 Samples:
 
@@ -264,8 +264,8 @@ Samples:
 ```txt
 https://api.adoptium.net/v3/assets/version/21.0.1+12.0.LTS?architecture=x86_64&image_type=jre&heap_size=normal&os=linux&page=0&page_size=1&project=jdk&semver=true
 https://api.adoptium.net/v3/assets/version/11.0.22+7?architecture=x86_64&image_type=jdk&heap_size=normal&os=linux&page=0&page_size=1&project=jdk&semver=true
-https://github.com/adoptium/temurin21-binaries/releases/jdk-21.0.1%2B12/OpenJDK21U-jre_x64_linux_hotspot_21.0.1_12.tar.gz
-https://github.com/adoptium/temurin11-binaries/releases/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz
+https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jre_x64_linux_hotspot_21.0.1_12.tar.gz
+https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz
 ```
 
 ### `gradle`
@@ -367,10 +367,10 @@ Nix releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
-https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
-https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
-https://github.com/containerbase/nix-prebuild/releases/2.24.2/node-2.24.2-aarch64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-aarch64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-aarch64.tar.xz
 ```
 
 ## `node`
@@ -385,10 +385,10 @@ The first url is preferred and the second is used as fallback for older versions
 Samples:
 
 ```txt
-https://github.com/containerbase/node-prebuild/releases/18.12.0/node-18.12.0-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/node-prebuild/releases/18.12.0/node-18.12.0-jammy-aarch64.tar.xz
-https://github.com/containerbase/node-prebuild/releases/18.12.0/node-18.12.0-focal-x86_x64.tar.xz.sha512
-https://github.com/containerbase/node-prebuild/releases/18.12.0/node-18.12.0-focal-aarch64.tar.xz
+https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-jammy-aarch64.tar.xz
+https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-focal-x86_x64.tar.xz.sha512
+https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-focal-aarch64.tar.xz
 https://nodejs.org/dist/v20.0.0/SHASUMS256.txt
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-x64.tar.xz
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-arm64.tar.xz
@@ -422,8 +422,8 @@ The `install-npm` command uses those urls too.
 Renovate additionally uses the following urls for downloading `re2` binaries.
 
 ```txt
-https://github.com/containerbase/node-re2-prebuild/releases/1.20.9/linux-arm64-115.br
-https://github.com/containerbase/node-re2-prebuild/releases/1.20.9/linux-x64-108.br
+https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-arm64-115.br
+https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-x64-108.br
 ```
 
 ## `php`
@@ -435,8 +435,8 @@ PHP releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz
+https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz
 ```
 
 ### `composer`
@@ -444,18 +444,13 @@ https://github.com/containerbase/php-prebuild/releases/8.3.2/php-8.3.2-jammy-x86
 Composer releases are downloaded from:
 
 - `https://github.com/containerbase/composer-prebuild/releases`
-- `https://getcomposer.org/versions`
-
-The first url is used for downloads.
-The last url is only used when `latest` or nothing is passed as version.
-Then we try to find the latest version from getcomposer.org.
 
 Samples:
 
 ```txt
-https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz.sha512
-https://github.com/containerbase/composer-prebuild/releases/2.7.7/composer-2.7.7.tar.xz
-https://getcomposer.org/versions
+https://github.com/containerbase/composer-prebuild/releases/download/2.7.7/composer-2.7.7.tar.xz.sha512
+https://github.com/containerbase/composer-prebuild/releases/download/2.7.7/composer-2.7.7.tar.xz
+https://github.com/containerbase/composer-prebuild/releases/latest/download/version
 ```
 
 ## `powershell`
@@ -484,8 +479,8 @@ The second url is used to install and update global `pip` and `virtualenv` packa
 Samples:
 
 ```txt
-https://github.com/containerbase/python-prebuild/releases/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/python-prebuild/releases/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz
 ```
 
 ## `pip` tools
@@ -515,8 +510,8 @@ Ruby releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/ruby-prebuild/releases/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/ruby-prebuild/releases/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz
+https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz
 ```
 
 ### `gem` tools

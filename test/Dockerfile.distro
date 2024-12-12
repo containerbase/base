@@ -45,13 +45,13 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.24.1
+RUN install-tool bazelisk v1.25.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.1.38
 
 # renovate: datasource=docker
-RUN install-tool dart 3.5.4
+RUN install-tool dart 3.6.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.13.7
@@ -63,7 +63,7 @@ RUN install-tool docker v27.4.0
 RUN install-tool dotnet 8.0.404
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.24.5
+RUN install-tool flutter 3.27.0
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.4.0
@@ -84,7 +84,7 @@ RUN install-tool helm v3.16.3
 RUN install-tool helmfile v0.169.2
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.31.3
+RUN install-tool kubectl v1.32.0
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.5.0
@@ -108,7 +108,7 @@ RUN install-tool sops v3.9.2
 RUN install-tool swift 6.0.2
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.10.1
+RUN install-tool terraform 1.10.2
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -159,7 +159,7 @@ FROM build AS test-php
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.4.1
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.8.3
+RUN install-tool composer 2.8.4
 
 #--------------------------------------
 # Image: test-python
@@ -172,7 +172,7 @@ RUN install-tool python 3.12.8
 # renovate: datasource=pypi
 RUN install-tool checkov 3.2.334
 # renovate: datasource=pypi
-RUN install-tool conan 2.10.1
+RUN install-tool conan 2.10.2
 # renovate: datasource=pypi
 RUN install-tool copier 9.4.1
 # renovate: datasource=pypi
@@ -184,7 +184,7 @@ RUN install-tool pdm 2.22.0
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.5
 # renovate: datasource=pypi
-RUN install-tool uv 0.5.7
+RUN install-tool uv 0.5.8
 
 #--------------------------------------
 # Image: test-ruby
