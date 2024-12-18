@@ -57,7 +57,7 @@ RUN install-tool dart 3.6.0
 RUN install-tool devbox 0.13.7
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v27.4.0
+RUN install-tool docker v27.4.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.404
