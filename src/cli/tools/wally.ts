@@ -9,7 +9,7 @@ import {
   HttpService,
   PathService,
 } from '../services';
-import { getDistro } from '../utils';
+import { getDistro, logger } from '../utils';
 
 @injectable()
 export class WallyInstallService extends BaseInstallService {
@@ -36,6 +36,12 @@ export class WallyInstallService extends BaseInstallService {
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
+    let code = distro.versionCode;
+
+    if (code === 'noble') {
+      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
+      code = 'jammy';
+    }
     const filename = `${name}-${version}-${distro.versionCode}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
     const checksumFileUrl = `${url}.sha512`;
