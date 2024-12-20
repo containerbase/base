@@ -42,7 +42,7 @@ export class WallyInstallService extends BaseInstallService {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }
-    const filename = `${name}-${version}-${distro.versionCode}-${this.ghArch}.tar.xz`;
+    const filename = `${name}-${version}-${code}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
     const checksumFileUrl = `${url}.sha512`;
 
