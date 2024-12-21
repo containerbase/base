@@ -90,7 +90,8 @@
         "sops",
         "swift",
         "uv",
-        "vendir"
+        "vendir",
+        "wally"
       ],
       "separateMinorPatch": false
     },
@@ -129,7 +130,8 @@
         "sops",
         "swift",
         "uv",
-        "vendir"
+        "vendir",
+        "wally"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true

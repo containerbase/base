@@ -578,3 +578,16 @@ Samples:
 ```txt
 https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.22.0/vendir-linux-amd64
 ```
+
+## `wally`
+
+Wally releases are downloaded from:
+
+- `https://github.com/containerbase/wally-prebuild/releases`
+
+Samples:
+
+```txt
+https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz
+```
