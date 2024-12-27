@@ -192,7 +192,7 @@ RUN install-tool uv 0.5.13
 FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.6
+RUN install-tool ruby 3.4.1
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.6.2
 # renovate: datasource=rubygems versioning=ruby
