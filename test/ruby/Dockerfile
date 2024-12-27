@@ -43,7 +43,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild
+# renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.3.6
 
 #--------------------------------------
