@@ -69,9 +69,6 @@ RUN set -ex;  \
 #--------------------------------------
 FROM base AS testb
 
-# Do not change
-RUN install-tool dotnet 6.0.416
-
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.404
 
@@ -122,8 +119,8 @@ FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.404
-RUN set -ex; dotnet --version | grep 8.0.
+RUN install-tool dotnet 9.0.101
+RUN set -ex; dotnet --version | grep 9.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -140,5 +137,4 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
-# TODO: enable for net 9.0
-# COPY --from=testd /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
