@@ -104,13 +104,13 @@ https://download.docker.com/linux/static/stable/aarch64/docker-24.0.5.tgz
 
 Dotnet releases are downloaded from:
 
-- `https://dotnetcli.azureedge.net/dotnet/Sdk`
+- `https://builds.dotnet.microsoft.com/dotnet/Sdk`
 
 Samples:
 
 ```txt
-https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
-https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-arm64.tar.gz
+https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
+https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-arm64.tar.gz
 ```
 
 ## `erlang`

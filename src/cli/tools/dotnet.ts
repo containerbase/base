@@ -117,8 +117,9 @@ export class DotnetInstallService extends BaseInstallService {
   override async install(version: string): Promise<void> {
     const toolPath = this.pathSvc.toolPath(this.name);
 
-    //  https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
-    const url = `https://dotnetcli.azureedge.net/dotnet/Sdk/${version}/dotnet-sdk-${version}-linux-${this.arch}.tar.gz`;
+    // https://github.com/dotnet/core/issues/9671
+    // https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
+    const url = `https://builds.dotnet.microsoft.com/dotnet/Sdk/${version}/dotnet-sdk-${version}-linux-${this.arch}.tar.gz`;
     const file = await this.http.download({ url });
 
     await this.compress.extract({
