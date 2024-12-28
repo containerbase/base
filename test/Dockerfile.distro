@@ -127,7 +127,7 @@ FROM build AS test-erlang
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 27.1.2.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
-RUN install-tool elixir 1.18.0
+RUN install-tool elixir 1.18.1
 
 #--------------------------------------
 # Image: test-java
@@ -147,7 +147,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.12.0
 # renovate: datasource=npm
-RUN install-tool pnpm 9.15.0
+RUN install-tool pnpm 9.15.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.5.3
 
@@ -192,7 +192,7 @@ RUN install-tool uv 0.5.13
 FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 3.3.6
+RUN install-tool ruby 3.4.1
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 2.6.2
 # renovate: datasource=rubygems versioning=ruby
