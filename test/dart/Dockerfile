@@ -49,7 +49,7 @@ FROM build AS testa
 USER 12021
 
 # renovate: datasource=docker
-RUN install-tool dart 3.6.0
+RUN install-tool dart 3.6.1
 
 RUN set -ex; \
     cd a; \
@@ -65,7 +65,7 @@ RUN set -ex; \
 FROM base AS testb
 
 # renovate: datasource=docker
-RUN install-tool dart 3.6.0
+RUN install-tool dart 3.6.1
 
 # fix test file perms for openstack
 RUN chown -R 1001 .
