@@ -125,7 +125,7 @@ RUN install-tool wally 0.3.2
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 27.1.2.0
+RUN install-tool erlang 27.2.0.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.18.1
 
