@@ -237,7 +237,7 @@ ARG VENDIR_VERSION=0.43.0
 ARG HELMFILE_VERSION=0.169.2
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.5.0
+ARG KUSTOMIZE_VERSION=5.6.0
 
 RUN install-tool vendir "v${VENDIR_VERSION}"
 
