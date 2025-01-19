@@ -8,6 +8,7 @@ import {
   HttpService,
   PathService,
 } from '../services';
+import { semverCoerce } from '../utils';
 
 @injectable()
 export class ProtocInstallService extends BaseInstallService {
@@ -57,5 +58,9 @@ export class ProtocInstallService extends BaseInstallService {
     await execa(this.name, ['--version'], {
       stdio: ['inherit', 'inherit', 1],
     });
+  }
+
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(semverCoerce(version) !== null);
   }
 }
