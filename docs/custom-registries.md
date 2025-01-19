@@ -591,3 +591,15 @@ Samples:
 https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz.sha512
 https://github.com/containerbase/wally-prebuild/releases/download/0.3.2/wally-0.3.2-jammy-x86_x64.tar.xz
 ```
+
+## `protoc`
+
+Protoc releases are downloaded from:
+
+- `https://github.com/protocolbuffers/protobuf/releases`
+
+Samples:
+
+```txt
+https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-x86_64.zip
+```

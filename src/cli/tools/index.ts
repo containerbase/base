@@ -27,6 +27,7 @@ export const NoPrepareTools = [
   'pipenv',
   'pnpm',
   'poetry',
+  'protoc',
   'renovate',
   'skopeo',
   'sops',
