@@ -120,7 +120,7 @@ RUN install-tool vendir v0.43.0
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf
-RUN install-tool protoc 29.2.0
+RUN install-tool protoc 29.2
 
 #--------------------------------------
 # Image: test-erlang

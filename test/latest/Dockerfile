@@ -231,7 +231,7 @@ RUN install-tool skopeo 1.17.0
 RUN install-tool sops v3.9.3
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf
-RUN install-tool protoc 29.2.0
+RUN install-tool protoc 29.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=0.43.0

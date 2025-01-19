@@ -84,6 +84,7 @@
         "poetry",
         "pnpm",
         "protobuf",
+        "protoc",
         "rake",
         "renovate",
         "rust",
