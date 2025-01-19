@@ -22,6 +22,12 @@ export class ProtocInstallService extends BaseInstallService {
     }
   }
 
+  private version(version: string): string {
+    // Remove patch version from version string
+    // since the download URL does not include it
+    return version.split('.').slice(0, 2).join('.');
+  }
+
   constructor(
     @inject(EnvService) envSvc: EnvService,
     @inject(PathService) pathSvc: PathService,
@@ -31,23 +37,25 @@ export class ProtocInstallService extends BaseInstallService {
     super(pathSvc, envSvc);
   }
 
-  override async install(version: string): Promise<void> {
+  override async install(_version: string): Promise<void> {
     const name = this.name;
+    const version = this.version(_version);
 
-    const url = `https://github.com/protocolbuffers/protobuf/releases/download/v${version}/protoc-${version}-linux-${this.ghArch}.zip`;
+    const url = `https://github.com/protocolbuffers/protobuf/releases/download/v${version}/${name}-${version}-linux-${this.ghArch}.zip`;
 
     const file = await this.http.download({
       url,
     });
 
-    const cwd = await this.pathSvc.ensureToolPath(name);
+    const cwd = await this.pathSvc.createVersionedToolPath(name, version);
 
     await this.compress.extract({ file, cwd });
   }
 
-  override async link(version: string): Promise<void> {
+  override async link(_version: string): Promise<void> {
+    const version = this.version(_version);
     const src = path.join(
-      this.pathSvc.versionedToolPath(this.name, version),
+      await this.pathSvc.createVersionedToolPath(this.name, version),
       'bin',
     );
     await this.shellwrapper({ srcDir: src });
