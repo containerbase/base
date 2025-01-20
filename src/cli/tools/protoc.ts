@@ -48,7 +48,7 @@ export class ProtocInstallService extends BaseInstallService {
 
   override async link(version: string): Promise<void> {
     const src = path.join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+      await this.pathSvc.versionedToolPath(this.name, version),
       'bin',
     );
     await this.shellwrapper({ srcDir: src });
