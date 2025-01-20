@@ -83,7 +83,6 @@
         "pipenv",
         "poetry",
         "pnpm",
-        "protobuf",
         "protoc",
         "rake",
         "renovate",
