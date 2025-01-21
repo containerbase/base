@@ -213,7 +213,7 @@ FROM base AS teste
 RUN install-tool bazelisk v1.25.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.1.44
+RUN install-tool bun 1.1.45
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.13.7
