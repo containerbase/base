@@ -137,6 +137,9 @@ RUN install-tool sops v3.9.3
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
 
+# renovate: datasource=github-releases packageName=protocolbuffers/protobuf
+RUN install-tool protoc 29.2
+
 #--------------------------------------
 # Image: final
 #--------------------------------------
