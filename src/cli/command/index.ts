@@ -1,6 +1,7 @@
 import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
+import { CleanupPathCommand } from './cleanup-path';
 import { DownloadFileCommand } from './download-file';
 import { InitToolCommand } from './init-tool';
 import { InstallGemCommand, InstallGemShortCommand } from './install-gem';
@@ -42,4 +43,5 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
   cli.register(InstallToolCommand);
   cli.register(PrepareToolCommand);
   cli.register(InitToolCommand);
+  cli.register(CleanupPathCommand);
 }
