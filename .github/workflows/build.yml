@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -32,7 +32,7 @@ jobs:
           save-cache: true
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -69,7 +69,7 @@ jobs:
           check_all_files_with_shebangs: 'true'
 
   bats:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 15
 
@@ -93,7 +93,7 @@ jobs:
         run: pnpm test:bats
 
   vitest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 15
 
@@ -115,7 +115,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   base:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 15
 
@@ -156,7 +156,7 @@ jobs:
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
 
   distro:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - bats
       - lint
@@ -175,10 +175,9 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@4453842226e67bc5d507c41b21184cc9220f4974 # v3.5.19
-        with:
-          command: docker-config
+      - name: check docker
+        run: |
+          systemctl status docker
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -204,8 +203,8 @@ jobs:
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
 
   lang:
-    runs-on: ${{ matrix.os }}
-    name: ${{ matrix.tag }} (${{ matrix.os == 'ubuntu-latest' && 'amd64' || 'arm64' }})
+    runs-on: ${{ matrix.arch.os }}
+    name: ${{ matrix.tag }} (${{ matrix.arch.name }})
     needs:
       - base
       - bats
@@ -235,18 +234,19 @@ jobs:
           - rust
           - swift
           - latest
-        os:
-          - ubuntu-latest
-          - ubuntu-24.04-arm # https://github.blog/changelog/2024-06-24-github-actions-ubuntu-24-04-image-now-available-for-arm64-runners/
+        arch:
+          - name: x86_64
+            os: ubuntu-22.04
+          - name: aarch64
+            os: ubuntu-22.04-arm
 
     env:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@4453842226e67bc5d507c41b21184cc9220f4974 # v3.5.19
-        with:
-          command: docker-config
+      - name: check docker
+        run: |
+          systemctl status docker
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -264,7 +264,7 @@ jobs:
         uses: ./.github/actions/prepare-proxy
 
       - name: test
-        run: docker buildx bake test-${{ runner.arch }} --set settings.secrets=type=env,id=GITHUB_TOKEN
+        run: docker buildx bake test-${{ matrix.arch.name }} --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -274,7 +274,7 @@ jobs:
     needs:
       - distro
       - lang
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 1
     if: always()
     steps:
