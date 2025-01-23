@@ -93,7 +93,7 @@ RUN install-tool kustomize 5.6.0
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.4.6
+RUN install-tool powershell v7.4.7
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.84.0
