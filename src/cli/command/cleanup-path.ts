@@ -9,7 +9,10 @@ export class CleanupPathCommand extends Command {
   static override usage = Command.Usage({
     description: 'Cleanup passed paths.',
     examples: [
-      ['Cleanup multiple paths', '$0 cleanup path "/tmp/**:/var/tmp" "/some/paths/**"'],
+      [
+        'Cleanup multiple paths',
+        '$0 cleanup path "/tmp/**:/var/tmp" "/some/paths/**"',
+      ],
     ],
   });
 
