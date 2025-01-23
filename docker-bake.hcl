@@ -48,11 +48,11 @@ group "test-distro" {
   targets = ["build-distro"]
 }
 
-group "test-X64" {
+group "test-x86_64" {
   targets = ["build-test"]
 }
 
-group "test-ARM64" {
+group "test-aarch64" {
   targets = ["build-arm64"]
 }
 
