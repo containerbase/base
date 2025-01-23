@@ -94,7 +94,7 @@ RUN install-tool git-lfs v3.6.1
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v0.170.0
+RUN install-tool helmfile v0.170.1
 
 #--------------------------------------
 # Image: kustomize
