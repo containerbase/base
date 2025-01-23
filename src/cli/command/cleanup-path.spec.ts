@@ -18,6 +18,9 @@ describe('cli/command/cleanup-path', () => {
     ).toBe(0);
 
     expect(mocks.deleteAsync).toHaveBeenCalledOnce();
-    expect(mocks.deleteAsync).toHaveBeenCalledWith('/tmp/**', '/var/tmp', '/some/path/**', { dot: true });
+    expect(mocks.deleteAsync).toHaveBeenCalledWith(
+      ['/tmp/**', '/var/tmp', '/some/path/**'],
+      { dot: true },
+    );
   });
 });
