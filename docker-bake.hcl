@@ -92,10 +92,6 @@ target "build" {
 target "build-ttl" {
   inherits = ["settings"]
   output   = ["type=registry"]
-  platforms = [
-    "linux/amd64",
-    "linux/arm64",
-  ]
   tags = [ ]
 }
 

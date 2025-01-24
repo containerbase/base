@@ -21,6 +21,10 @@ permissions:
 jobs:
   setup:
     runs-on: ubuntu-22.04
+
+    outputs:
+      uid: ${{ steps.init.outputs.uid }}
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -30,6 +34,10 @@ jobs:
         uses: ./.github/actions/setup-node
         with:
           save-cache: true
+
+      - name: ⚙️ Init
+        id: init
+        run: echo "uid=$(uuidgen)" >> ${GITHUB_OUTPUT}
 
   lint:
     runs-on: ubuntu-22.04
@@ -115,30 +123,34 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   base:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.arch.os }}
+    name: base (${{ matrix.arch.name }})
     needs: setup
     timeout-minutes: 15
 
-    outputs:
-      base: ${{ steps.init.outputs.base }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - name: x86_64
+            os: ubuntu-22.04
+            tag: amd64
+          - name: aarch64
+            os: ubuntu-22.04-arm
+            tag: arm64
 
     steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@4453842226e67bc5d507c41b21184cc9220f4974 # v3.5.19
-        with:
-          command: docker-config
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
-      - name: init
-        id: init
+      - name: Check docker
+        uses: ./.github/actions/check-docker
+
+      - name: ⚙️ Init
         run: |
-          export base="ttl.sh/$(uuidgen):1d"
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE=${base}" >> ${GITHUB_ENV}
-          echo "base=${base}" >> ${GITHUB_OUTPUT}
+          echo "BASE=${ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d}" >> ${GITHUB_ENV}
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
@@ -175,15 +187,14 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - name: check docker
-        run: |
-          systemctl status docker
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
-      - name: init
+      - name: Check docker
+        uses: ./.github/actions/check-docker
+
+      - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
@@ -206,6 +217,7 @@ jobs:
     runs-on: ${{ matrix.arch.os }}
     name: ${{ matrix.tag }} (${{ matrix.arch.name }})
     needs:
+      - setup
       - base
       - bats
       - lint
@@ -237,25 +249,26 @@ jobs:
         arch:
           - name: x86_64
             os: ubuntu-22.04
+            tag: amd64
           - name: aarch64
             os: ubuntu-22.04-arm
+            tag: arm64
 
     env:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - name: check docker
-        run: |
-          systemctl status docker
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
-      - name: init
+      - name: Check docker
+        uses: ./.github/actions/check-docker
+
+      - name: ⚙️ Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE_IMAGE=${{ needs.base.outputs.base }}" >> ${GITHUB_ENV}
+          echo "BASE_IMAGE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
