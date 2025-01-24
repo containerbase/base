@@ -188,10 +188,12 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: dist
+          path: dist
 
       - name: debug
         run: |
           set -ex;
+          ls -la .
           ls -la dist/
           ls -la dist/cli/
 
@@ -243,6 +245,7 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: dist
+          path: dist
 
       - name: test distro
         run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
