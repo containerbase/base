@@ -116,7 +116,8 @@
     "allowNonAppliedPatches": true,
     "supportedArchitectures": {
       "cpu": [
-        "x64"
+        "x64",
+        "arm64"
       ],
       "os": [
         "linux",
@@ -124,8 +125,9 @@
       ]
     },
     "patchedDependencies": {
-      "@yao-pkg/pkg@6.2.0": "patches/@yao-pkg__pkg@5.11.1.patch",
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch"
+      "@yao-pkg/pkg": "patches/@yao-pkg__pkg.patch",
+      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
+      "global-agent": "patches/global-agent.patch"
     }
   }
 }
