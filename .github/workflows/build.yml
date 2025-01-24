@@ -199,7 +199,7 @@ jobs:
         run: |
           chmod +x dist/cli/*
           chmod +x dist/docker/usr/local/containerbase/bin/*
-          chmod +x dist/docker/usr/local/containerbase/sbin/*
+          chmod +x dist/docker/usr/local/sbin/*
 
       - name: debug
         run: |
@@ -262,7 +262,7 @@ jobs:
         run: |
           chmod +x dist/cli/*
           chmod +x dist/docker/usr/local/containerbase/bin/*
-          chmod +x dist/docker/usr/local/containerbase/sbin/*
+          chmod +x dist/docker/usr/local/sbin/*
 
       - name: test distro
         run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
