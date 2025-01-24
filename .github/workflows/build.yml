@@ -150,7 +150,7 @@ jobs:
       - name: ⚙️ Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE=${ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d}" >> ${GITHUB_ENV}
+          echo "BASE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
 
       - name: 📥 Setup Node.js
         uses: ./.github/actions/setup-node
