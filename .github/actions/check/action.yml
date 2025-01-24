@@ -1,0 +1,15 @@
+name: 'Check system'
+description: 'checks system status'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ⚙️ Check docker service
+      shell: bash
+      run: |
+        systemctl status docker
+    - name: ⚙️ Check docker info
+      shell: bash
+      run: |
+        docker info
