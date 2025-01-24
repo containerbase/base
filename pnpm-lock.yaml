@@ -11,9 +11,9 @@ overrides:
   vite: 5.4.14
 
 patchedDependencies:
-  '@yao-pkg/pkg@6.2.0':
+  '@yao-pkg/pkg':
     hash: fb6cn5vkrnldric4eq2yxxfize
-    path: patches/@yao-pkg__pkg@5.11.1.patch
+    path: patches/@yao-pkg__pkg.patch
   clipanion@3.2.1:
     hash: fhbb5gvkz3xnkjsqqxesufv7h4
     path: patches/clipanion@3.2.1.patch
