@@ -1,5 +1,5 @@
-name: 'Check docker'
-description: 'checks docker status'
+name: 'Check system'
+description: 'checks system status'
 
 runs:
   using: 'composite'

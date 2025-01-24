@@ -170,8 +170,8 @@ jobs:
         with:
           show-progress: false
 
-      - name: Check docker
-        uses: ./.github/actions/check-docker
+      - name: Check system
+        uses: ./.github/actions/check
 
       - name: ⚙️ Init
         run: |
@@ -190,23 +190,11 @@ jobs:
           name: dist
           path: dist
 
-      - name: debug
-        run: |
-          set -ex;
-          find dist -type f
-
       - name: fix executable
         run: |
           chmod +x dist/cli/*
           chmod +x dist/docker/usr/local/containerbase/bin/*
           chmod +x dist/docker/usr/local/sbin/*
-
-      - name: debug
-        run: |
-          set -ex;
-          ls -la .
-          ls -la dist/
-          ls -la dist/cli/
 
       - name: test distro
         run: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
@@ -239,8 +227,8 @@ jobs:
         with:
           show-progress: false
 
-      - name: Check docker
-        uses: ./.github/actions/check-docker
+      - name: Check system
+        uses: ./.github/actions/check
 
       - name: ⚙️  Init
         run: |
@@ -320,8 +308,8 @@ jobs:
         with:
           show-progress: false
 
-      - name: Check docker
-        uses: ./.github/actions/check-docker
+      - name: Check system
+        uses: ./.github/actions/check
 
       - name: ⚙️ Init
         run: |
