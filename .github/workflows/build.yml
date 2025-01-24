@@ -190,6 +190,11 @@ jobs:
           name: dist
           path: dist
 
+      - name: debug
+        run: |
+          set -ex;
+          find dist -type f
+
       - name: fix executable
         run: |
           chmod +x dist/cli/*
