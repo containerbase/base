@@ -1,0 +1,31 @@
+diff --git a/dist/factories/createGlobalProxyAgent.js b/dist/factories/createGlobalProxyAgent.js
+index c87b9ed04f1cf8314374d9e169383e3b81904c22..a17fcde1b68706694ecdce5ae97e650065d5da87 100644
+--- a/dist/factories/createGlobalProxyAgent.js
++++ b/dist/factories/createGlobalProxyAgent.js
+@@ -11,7 +11,7 @@ var _https = _interopRequireDefault(require("https"));
+ 
+ var _boolean = require("boolean");
+ 
+-var _semver = _interopRequireDefault(require("semver"));
++var _semverGte = require("semver/functions/gte");
+ 
+ var _Logger = _interopRequireDefault(require("../Logger"));
+ 
+@@ -138,7 +138,7 @@ const createGlobalProxyAgent = (configurationInput = defaultConfigurationInput)
+   const httpsAgent = new BoundHttpsProxyAgent(); // Overriding globalAgent was added in v11.7.
+   // @see https://nodejs.org/uk/blog/release/v11.7.0/
+ 
+-  if (_semver.default.gte(process.version, 'v11.7.0')) {
++  if (_semverGte(process.version, 'v11.7.0')) {
+     // @see https://github.com/facebook/flow/issues/7670
+     // $FlowFixMe
+     _http.default.globalAgent = httpAgent; // $FlowFixMe
+@@ -154,7 +154,7 @@ const createGlobalProxyAgent = (configurationInput = defaultConfigurationInput)
+   // in `bindHttpMethod`.
+ 
+ 
+-  if (_semver.default.gte(process.version, 'v10.0.0')) {
++  if (_semverGte(process.version, 'v10.0.0')) {
+     // $FlowFixMe
+     _http.default.get = (0, _utilities.bindHttpMethod)(httpGet, httpAgent, configuration.forceGlobalAgent); // $FlowFixMe
+ 
