@@ -21,6 +21,7 @@ permissions:
 jobs:
   setup:
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
 
     outputs:
       uid: ${{ steps.init.outputs.uid }}
@@ -122,10 +123,35 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  build:
+    runs-on: ubuntu-22.04
+    needs: setup
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: false
+
+      - name: 📥 Setup Node.js
+        uses: ./.github/actions/setup-node
+
+      - name: build
+        run: pnpm build
+
+      - name: upload dist
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: dist
+          path: |
+            dist/
+
   base:
     runs-on: ${{ matrix.arch.os }}
     name: base (${{ matrix.arch.name }})
-    needs: setup
+    needs:
+      - setup
+      - build
     timeout-minutes: 15
 
     strategy:
@@ -158,8 +184,10 @@ jobs:
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy
 
-      - name: build
-        run: pnpm build
+      - name: fetch dist
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: dist
 
       - name: test distro
         run: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
@@ -173,6 +201,7 @@ jobs:
       - bats
       - lint
       - vitest
+      - build
     timeout-minutes: 30
 
     strategy:
@@ -204,8 +233,10 @@ jobs:
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy
 
-      - name: build
-        run: pnpm build
+      - name: fetch dist
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: dist
 
       - name: test distro
         run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
@@ -222,7 +253,7 @@ jobs:
       - bats
       - lint
       - vitest
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     strategy:
       fail-fast: false
