@@ -213,6 +213,7 @@ jobs:
     timeout-minutes: 30
 
     strategy:
+      max-parallel: 10
       fail-fast: false
       matrix:
         tag:
