@@ -189,6 +189,12 @@ jobs:
         with:
           name: dist
 
+      - name: debug
+        run: |
+          set -ex;
+          ls -la dist/
+          ls -la dist/cli/
+
       - name: test distro
         run: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
         env:
