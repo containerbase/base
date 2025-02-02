@@ -126,8 +126,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4(vitest@3.0.4)
       '@yao-pkg/pkg':
-        specifier: 6.2.0
-        version: 6.2.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+        specifier: 6.3.0
+        version: 6.3.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
       bats:
         specifier: 1.11.1
         version: 1.11.1
@@ -956,12 +956,12 @@ packages:
   '@vitest/utils@3.0.4':
     resolution: {integrity: sha512-8BqC1ksYsHtbWH+DfpOAKrFw3jl3Uf9J7yeFh85Pz52IWuh1hBBtyfEbRNNZNjl8H8A5yMLH9/t+k7HIKzQcZQ==}
 
-  '@yao-pkg/pkg-fetch@3.5.18':
-    resolution: {integrity: sha512-tdUT7zS2lyXeJwkA8lDI4aVxHwauAc5lKj6Xui3/BtDe6vDsQ8KP+f66u07AI28DuTzKxjRJKNNXVdyGv2Ndsg==}
+  '@yao-pkg/pkg-fetch@3.5.19':
+    resolution: {integrity: sha512-EEURrS1Q5sSSAwaQ4zD0wZsquDiG8CroY3SCi7jYBoM0NG3eRA239mW6YMUYPNWUK4zCMhuK3bzFT5aIZP/rDg==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.2.0':
-    resolution: {integrity: sha512-kq1aDs9aa+fEtKQQ2AsxcL4Z82LsYw9ZQIwD3Q/wDq8ZPN69wCf2+OQp271lnqMybYInXwwBJ3swIb/nvaXS/g==}
+  '@yao-pkg/pkg@6.3.0':
+    resolution: {integrity: sha512-adD3EkqXk+WxZvfMMIJ756EBYKBYr0/6BOBzYb/NrKPKRozwXwe8SKyqr9ntyuPRD+jDX04huDRM52ptee3UsQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4398,7 +4398,7 @@ snapshots:
       loupe: 3.1.2
       tinyrainbow: 2.0.0
 
-  '@yao-pkg/pkg-fetch@3.5.18':
+  '@yao-pkg/pkg-fetch@3.5.19':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
@@ -4411,12 +4411,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.2.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
+  '@yao-pkg/pkg@6.3.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
     dependencies:
       '@babel/generator': 7.26.5
       '@babel/parser': 7.26.7
       '@babel/types': 7.26.7
-      '@yao-pkg/pkg-fetch': 3.5.18
+      '@yao-pkg/pkg-fetch': 3.5.19
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
