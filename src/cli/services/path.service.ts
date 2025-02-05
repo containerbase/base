@@ -137,7 +137,7 @@ export class PathService {
     await this.createDir(this._toolInitPath);
     await this.createDir(join(this.tmpDir, 'cache', '.cache'));
     await this.createDir(join(this.tmpDir, 'cache', '.config'));
-    await this.createDir(join(this.tmpDir, 'cache', '.local'));
+    await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
   }
 
   async ensureToolPath(tool: string): Promise<string> {

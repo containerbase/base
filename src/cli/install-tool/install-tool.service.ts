@@ -107,7 +107,7 @@ export class InstallToolService {
           await deleteAsync(
             [
               `${this.pathSvc.cachePath}/.cache/**`,
-              `${this.pathSvc.cachePath}/.local/share/virtualenv/**`,
+              `${this.pathSvc.cachePath}/.local/share/virtualenv`,
             ],
             {
               force: true,

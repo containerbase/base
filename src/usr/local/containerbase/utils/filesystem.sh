@@ -153,7 +153,7 @@ function get_cache_path () {
     create_folder "${cache_path}" 775
     create_folder "${cache_path}/.cache" 775
     create_folder "${cache_path}/.config" 775
-    create_folder "${cache_path}/.local" 775
+    create_folder "${cache_path}/.local/share" 775
   fi
   echo "${cache_path}"
 }
