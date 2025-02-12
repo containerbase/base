@@ -60,7 +60,7 @@ RUN install-tool devbox 0.13.7
 RUN install-tool docker v27.5.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.405
+RUN install-tool dotnet 8.0.406
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
 RUN install-tool flutter 3.27.4
