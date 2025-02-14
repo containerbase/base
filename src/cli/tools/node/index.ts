@@ -36,6 +36,7 @@ export class NodePrepareService extends BasePrepareService {
         NO_UPDATE_NOTIFIER: '1',
         npm_config_update_notifier: 'false',
         npm_config_fund: 'false',
+        NODE_OPTIONS: '--use-openssl-ca',
       });
     }
   }
@@ -131,7 +132,6 @@ export class NodeInstallService extends NodeBaseInstallService {
       );
       const env = this.prepareEnv(version, tmp);
       env.PATH = `${path}/bin:${penv.PATH}`;
-      env.NODE_OPTIONS = '--use-openssl-ca';
       // update to latest node-gyp to fully support python3
       await this.updateNodeGyp(path, tmp, env, true);
       await fs.rm(tmp, { recursive: true, force: true });
@@ -150,10 +150,7 @@ export class NodeInstallService extends NodeBaseInstallService {
   override async postInstall(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
-    await this.shellwrapper({
-      srcDir: src,
-      args: '--use-openssl-ca',
-    });
+    await this.shellwrapper({ srcDir: src });
     await this.shellwrapper({ srcDir: src, name: 'npm' });
     await this.shellwrapper({ srcDir: src, name: 'npx' });
 
