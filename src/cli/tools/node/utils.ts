@@ -26,6 +26,7 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
       npm_config_fund: 'false',
+      NODE_OPTIONS: penv.NODE_OPTIONS ?? '--use-openssl-ca',
     };
 
     if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
@@ -34,7 +35,7 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
 
     const registry = this.envSvc.replaceUrl(
       defaultRegistry,
-      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_NPM),
+      isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_NPM),
     );
     if (registry !== defaultRegistry) {
       env.npm_config_registry = registry;
