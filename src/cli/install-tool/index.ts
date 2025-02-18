@@ -153,7 +153,7 @@ export function installTool(
     switch (type) {
       case 'gem': {
         @injectable()
-        class InstallGenericGemService extends RubyBaseInstallService {
+        class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -169,12 +169,12 @@ export function installTool(
             }
           }
         }
-        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericGemService);
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;
       }
       case 'npm': {
         @injectable()
-        class InstallGenericNpmService extends NpmBaseInstallService {
+        class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -190,12 +190,12 @@ export function installTool(
             }
           }
         }
-        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericNpmService);
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;
       }
       case 'pip': {
         @injectable()
-        class InstallGenericNpmService extends PipBaseInstallService {
+        class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
 
           override needsPrepare(): boolean {
@@ -215,7 +215,7 @@ export function installTool(
             }
           }
         }
-        container.bind(INSTALL_TOOL_TOKEN).to(InstallGenericNpmService);
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;
       }
     }
@@ -234,26 +234,26 @@ export async function resolveVersion(
     switch (type) {
       case 'gem': {
         @injectable()
-        class GenericRubyGemVersionResolver extends RubyGemVersionResolver {
+        class GenericVersionResolver extends RubyGemVersionResolver {
           override readonly tool: string = tool;
         }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericRubyGemVersionResolver);
+        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
         break;
       }
       case 'npm': {
         @injectable()
-        class GenericNpmVersionResolver extends NpmVersionResolver {
+        class GenericVersionResolver extends NpmVersionResolver {
           override readonly tool: string = tool;
         }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericNpmVersionResolver);
+        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
         break;
       }
       case 'pip': {
         @injectable()
-        class GenericPipVersionResolver extends PipVersionResolver {
+        class GenericVersionResolver extends PipVersionResolver {
           override readonly tool: string = tool;
         }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericPipVersionResolver);
+        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
         break;
       }
     }
