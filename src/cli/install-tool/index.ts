@@ -52,6 +52,7 @@ import {
   ConanVersionResolver,
 } from '../tools/python/conan';
 import { PipVersionResolver } from '../tools/python/pip';
+import { PoetryVersionResolver } from '../tools/python/poetry';
 import { PipBaseInstallService } from '../tools/python/utils';
 import {
   CocoapodsInstallService,
@@ -136,6 +137,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(PoetryVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
 
   logger.trace('preparing container done');
