@@ -26,8 +26,8 @@ importers:
   .:
     dependencies:
       '@renovatebot/pep440':
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.1.0
+        version: 4.1.0
       '@sindresorhus/is':
         specifier: 7.0.1
         version: 7.0.1
@@ -624,8 +624,8 @@ packages:
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
 
-  '@renovatebot/pep440@4.0.1':
-    resolution: {integrity: sha512-jKodfnFIIGjK9PcoB7+2JkDQ+prjv3LHFMUS21F3+IEaiGomrvpiH27+gjyQRRwtSkkRnrxkqjEPdkj2IxC2qA==}
+  '@renovatebot/pep440@4.1.0':
+    resolution: {integrity: sha512-mo2RxnOSp78Njt1HmgMwjl6FapP4OyIS8HypJlymCvN7AIV2Xf5PmZfl/E3O1WWZ6IjKrfsEAaPWFMi8tnkq3g==}
     engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
 
   '@rollup/rollup-android-arm-eabi@4.34.6':
@@ -4021,7 +4021,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.28': {}
 
-  '@renovatebot/pep440@4.0.1': {}
+  '@renovatebot/pep440@4.1.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.34.6':
     optional: true
