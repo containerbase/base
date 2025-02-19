@@ -12,13 +12,13 @@ overrides:
 
 patchedDependencies:
   '@yao-pkg/pkg':
-    hash: fb6cn5vkrnldric4eq2yxxfize
+    hash: 962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32
     path: patches/@yao-pkg__pkg.patch
   clipanion@3.2.1:
-    hash: fhbb5gvkz3xnkjsqqxesufv7h4
+    hash: ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299
     path: patches/clipanion@3.2.1.patch
   global-agent:
-    hash: 5id5eiueolbawrqzaogiikprky
+    hash: c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13
     path: patches/global-agent.patch
 
 importers:
@@ -33,7 +33,7 @@ importers:
         version: 7.0.1
       clipanion:
         specifier: 3.2.1
-        version: 3.2.1(patch_hash=fhbb5gvkz3xnkjsqqxesufv7h4)(typanion@3.14.0)
+        version: 3.2.1(patch_hash=ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299)(typanion@3.14.0)
       common-tags:
         specifier: 1.8.2
         version: 1.8.2
@@ -48,7 +48,7 @@ importers:
         version: 9.5.2
       global-agent:
         specifier: 3.0.0
-        version: 3.0.0(patch_hash=5id5eiueolbawrqzaogiikprky)
+        version: 3.0.0(patch_hash=c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13)
       got:
         specifier: 14.4.6
         version: 14.4.6
@@ -127,7 +127,7 @@ importers:
         version: 3.0.5(vitest@3.0.5)
       '@yao-pkg/pkg':
         specifier: 6.3.0
-        version: 6.3.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)
+        version: 6.3.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.11.1
         version: 1.11.1
@@ -4423,7 +4423,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.3.0(patch_hash=fb6cn5vkrnldric4eq2yxxfize)':
+  '@yao-pkg/pkg@6.3.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.26.8
       '@babel/parser': 7.26.8
@@ -4696,7 +4696,7 @@ snapshots:
       slice-ansi: 5.0.0
       string-width: 7.2.0
 
-  clipanion@3.2.1(patch_hash=fhbb5gvkz3xnkjsqqxesufv7h4)(typanion@3.14.0):
+  clipanion@3.2.1(patch_hash=ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299)(typanion@3.14.0):
     dependencies:
       typanion: 3.14.0
 
@@ -5433,7 +5433,7 @@ snapshots:
       once: 1.4.0
       path-is-absolute: 1.0.1
 
-  global-agent@3.0.0(patch_hash=5id5eiueolbawrqzaogiikprky):
+  global-agent@3.0.0(patch_hash=c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13):
     dependencies:
       boolean: 3.2.0
       es6-error: 4.1.1
