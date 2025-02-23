@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
@@ -32,8 +33,6 @@ export class PixiInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
-    const name = this.name;
-
     const url = `https://github.com/prefix-dev/pixi/releases/download/v${version}/${this.name}-${this.ghArch}-unknown-linux-musl.tar.gz`;
     const checksumFileUrl = `${url}.sha256`;
 
@@ -48,13 +47,23 @@ export class PixiInstallService extends BaseInstallService {
       expectedChecksum,
     });
 
-    const cwd = await this.pathSvc.ensureToolPath(name);
+    await this.pathSvc.ensureToolPath(this.name);
 
-    await this.compress.extract({ file, cwd });
+    const path = join(
+      await this.pathSvc.createVersionedToolPath(this.name, version),
+      'bin',
+    );
+    await fs.mkdir(path);
+    await this.compress.extract({
+      file,
+      cwd: path,
+      strip: 1,
+    });
   }
 
   override async link(version: string): Promise<void> {
-    const src = this.pathSvc.versionedToolPath(this.name, version);
+    const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
+
     await this.shellwrapper({ srcDir: src });
   }
 
