@@ -99,7 +99,7 @@
     "semantic-release": "24.2.3",
     "shelljs": "0.8.5",
     "tsx": "4.19.3",
-    "type-fest": "4.34.1",
+    "type-fest": "4.35.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.24.1",
     "vite": "5.4.14",
