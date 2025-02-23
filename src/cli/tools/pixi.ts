@@ -35,7 +35,7 @@ export class PixiInstallService extends BaseInstallService {
     const name = this.name;
 
     const url = `https://github.com/prefix-dev/pixi/releases/download/v${version}/${this.name}-${this.ghArch}-unknown-linux-musl.tar.gz`;
-    const checksumFileUrl = `${url}.sha25612`;
+    const checksumFileUrl = `${url}.sha256`;
 
     const checksumFile = await this.http.download({ url: checksumFileUrl });
     const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
