@@ -126,8 +126,8 @@ importers:
         specifier: 3.0.5
         version: 3.0.5(vitest@3.0.5)
       '@yao-pkg/pkg':
-        specifier: 6.3.0
-        version: 6.3.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.3.1
+        version: 6.3.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.11.1
         version: 1.11.1
@@ -973,8 +973,8 @@ packages:
     resolution: {integrity: sha512-EEURrS1Q5sSSAwaQ4zD0wZsquDiG8CroY3SCi7jYBoM0NG3eRA239mW6YMUYPNWUK4zCMhuK3bzFT5aIZP/rDg==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.3.0':
-    resolution: {integrity: sha512-adD3EkqXk+WxZvfMMIJ756EBYKBYr0/6BOBzYb/NrKPKRozwXwe8SKyqr9ntyuPRD+jDX04huDRM52ptee3UsQ==}
+  '@yao-pkg/pkg@6.3.1':
+    resolution: {integrity: sha512-CIzNOWeq/IMd9FtG+RZOEj6Nbx3aeQYp7KiVjStATV6rkQWbUiOIID4Nrvc/zrjpau5i38xFzzTX0ZYDkedQTA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -3314,6 +3314,10 @@ packages:
     resolution: {integrity: sha512-Zc+8eJlFMvgatPZTl6A9L/yht8QqdmUNtURHaKZLmKBE12hNPSrqNkUp2cs3M/UKmNVVAMFQYSjYIVHDjW5zew==}
     engines: {node: '>=12.0.0'}
 
+  tinyglobby@0.2.12:
+    resolution: {integrity: sha512-qkf4trmKSIiMTs/E63cxH+ojC2unam7rJ0WrauAzpT3ECNTxGRMlaXxVbfxMUC/w0LaYk6jQ4y/nGR9uBO3tww==}
+    engines: {node: '>=12.0.0'}
+
   tinypool@1.0.2:
     resolution: {integrity: sha512-al6n+QEANGFOMf/dmUMsuS5/r9B06uwlyNjZZql/zv8J7ybHCgoihBNORZCY2mzUuAnomQa2JdhyHKzZxPCrFA==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -4423,7 +4427,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.3.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.3.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.26.8
       '@babel/parser': 7.26.8
@@ -4438,7 +4442,7 @@ snapshots:
       resolve: 1.22.10
       stream-meter: 1.0.4
       tar: 7.4.3
-      tinyglobby: 0.2.10
+      tinyglobby: 0.2.12
       unzipper: 0.12.3
     transitivePeerDependencies:
       - encoding
@@ -6908,6 +6912,11 @@ snapshots:
   tinyexec@0.3.2: {}
 
   tinyglobby@0.2.10:
+    dependencies:
+      fdir: 6.4.3(picomatch@4.0.2)
+      picomatch: 4.0.2
+
+  tinyglobby@0.2.12:
     dependencies:
       fdir: 6.4.3(picomatch@4.0.2)
       picomatch: 4.0.2
