@@ -26,6 +26,7 @@ export const NoPrepareTools = [
   'pip-tools',
   'pipenv',
   'pnpm',
+  'pixi',
   'poetry',
   'protoc',
   'renovate',

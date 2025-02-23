@@ -46,6 +46,7 @@ import {
   ComposerInstallService,
   ComposerVersionResolver,
 } from '../tools/php/composer';
+import { PixiInstallService } from '../tools/pixi';
 import { ProtocInstallService } from '../tools/protoc';
 import {
   ConanInstallService,
@@ -106,6 +107,7 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(PixiInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ProtocInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(RenovateInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
