@@ -140,6 +140,9 @@ RUN install-tool wally 0.3.2
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf
 RUN install-tool protoc 29.2
 
+# renovate: datasource=github-releases packageName=prefix-dev/pixi
+RUN install-tool pixi v0.41.4
+
 #--------------------------------------
 # Image: final
 #--------------------------------------
