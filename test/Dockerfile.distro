@@ -92,6 +92,9 @@ RUN install-tool kustomize 5.6.0
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
+# renovate: datasource=github-releases packageName=prefix-dev/pixi
+RUN install-tool pixi v0.41.4
+
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.5.0
 
