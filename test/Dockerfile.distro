@@ -173,7 +173,7 @@ FROM build AS test-python
 RUN install-tool python 3.12.9
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.368
+RUN install-tool checkov 3.2.372
 # renovate: datasource=pypi
 RUN install-tool conan 2.12.2
 # renovate: datasource=pypi
