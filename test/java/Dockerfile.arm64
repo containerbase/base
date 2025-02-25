@@ -46,7 +46,7 @@ RUN install-tool java 21.0.6+7.0.LTS
 FROM test-java AS test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 8.12.1
+RUN install-tool gradle 8.13
 
 #--------------------------------------
 # Image: maven
