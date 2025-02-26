@@ -15,7 +15,7 @@ export class VersionService {
     } catch (err) {
       if (err instanceof Error && err.code === 'ENOENT') {
         logger.debug({ tool }, 'tool version not found');
-        /* c8 ignore next 3 */
+        /* v8 ignore next 3 */
       } else {
         logger.error({ tool, err }, 'tool version not found');
       }

@@ -43,11 +43,12 @@ export async function getDistro(): Promise<Distro> {
  * @private
  * @internal
  */
-/* c8 ignore next 3 */
+/* v8 ignore start */
 export function reset(): void {
   distro = undefined;
   isDocker = undefined;
 }
+/* v8 ignore stop */
 
 async function readDistro(): Promise<Distro> {
   const data = await readFile('/etc/os-release', { encoding: 'utf-8' });
@@ -87,10 +88,10 @@ export async function pathExists(
       case 'symlink':
         return fstat.isSymbolicLink();
     }
-    return !!fstat;
   } catch {
-    return false;
+    // ignore
   }
+  return false;
 }
 
 export function parseBinaryName(
