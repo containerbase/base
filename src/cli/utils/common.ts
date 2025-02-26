@@ -88,10 +88,10 @@ export async function pathExists(
       case 'symlink':
         return fstat.isSymbolicLink();
     }
+    return !!fstat;
   } catch {
-    // ignore
+    return false;
   }
-  return false;
 }
 
 export function parseBinaryName(
