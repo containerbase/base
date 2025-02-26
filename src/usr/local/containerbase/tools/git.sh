@@ -17,4 +17,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git.asc
 
 apt_install git
 
+# flutter workaround
+git config --system safe.directory "/opt/containerbase/tools/flutter/*"
+
 [[ -n $SKIP_VERSION ]] || git --version
