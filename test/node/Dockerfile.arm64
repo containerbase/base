@@ -47,7 +47,7 @@ RUN install-tool node 22.14.0
 FROM test-node AS test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 10.4.1
+RUN install-tool pnpm 10.5.0
 
 #--------------------------------------
 # Image: yarn
