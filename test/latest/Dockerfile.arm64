@@ -110,7 +110,7 @@ RUN install-tool kustomize 5.6.0
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.11.0
+RUN install-tool terraform 1.11.1
 
 #--------------------------------------
 # Image: vendir
