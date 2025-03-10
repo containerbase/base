@@ -219,7 +219,7 @@ RUN install-tool bun 1.2.4
 RUN install-tool devbox 0.14.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.8.1
+RUN install-tool gleam 1.9.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.32.2
