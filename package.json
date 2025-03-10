@@ -83,7 +83,7 @@
     "esbuild": "0.25.0",
     "esbuild-plugin-pino": "2.2.2",
     "eslint": "9.21.0",
-    "eslint-config-prettier": "10.0.2",
+    "eslint-config-prettier": "10.1.1",
     "eslint-formatter-gha": "1.5.2",
     "eslint-import-resolver-typescript": "3.8.3",
     "eslint-plugin-import": "2.31.0",
@@ -101,7 +101,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.37.0",
     "typescript": "5.8.2",
-    "typescript-eslint": "8.25.0",
+    "typescript-eslint": "8.26.0",
     "vite": "5.4.14",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.0.8"
