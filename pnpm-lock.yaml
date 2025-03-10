@@ -126,8 +126,8 @@ importers:
         specifier: 3.0.7
         version: 3.0.7(vitest@3.0.7)
       '@yao-pkg/pkg':
-        specifier: 6.3.1
-        version: 6.3.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.3.2
+        version: 6.3.2(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.11.1
         version: 1.11.1
@@ -925,8 +925,8 @@ packages:
     resolution: {integrity: sha512-EEURrS1Q5sSSAwaQ4zD0wZsquDiG8CroY3SCi7jYBoM0NG3eRA239mW6YMUYPNWUK4zCMhuK3bzFT5aIZP/rDg==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.3.1':
-    resolution: {integrity: sha512-CIzNOWeq/IMd9FtG+RZOEj6Nbx3aeQYp7KiVjStATV6rkQWbUiOIID4Nrvc/zrjpau5i38xFzzTX0ZYDkedQTA==}
+  '@yao-pkg/pkg@6.3.2':
+    resolution: {integrity: sha512-gd4fh8dVC5qnKQD8HTwQrVLvT8TyQqwE59ky3LHtnke+6fBcTTrWavtbsVOwdL09IWqY+eSB+2AGCrSUnZ4wwg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4303,7 +4303,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.3.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.3.2(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.26.9
       '@babel/parser': 7.26.9
