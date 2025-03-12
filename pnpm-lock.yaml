@@ -192,8 +192,8 @@ importers:
         specifier: 24.2.3
         version: 24.2.3(typescript@5.8.2)
       shelljs:
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       tsx:
         specifier: 4.19.3
         version: 4.19.3
@@ -3059,8 +3059,8 @@ packages:
     resolution: {integrity: sha512-AzqKpGKjrj7EM6rKVQEPpB288oCfnrEIuyoT9cyF4nmGa7V8Zk6f7RRqYisX8X9m+Q7bd632aZW4ky7EhbQztA==}
     engines: {node: '>= 0.4'}
 
-  shelljs@0.9.0:
-    resolution: {integrity: sha512-uwlECU3w0BCxLXEZW88et6rHF8Wt3xdVgoiVzDzVBmEqjzJG7t4rPmWF/9L40aCk3/bD5Z44/CoU8V6wIeUmxQ==}
+  shelljs@0.9.1:
+    resolution: {integrity: sha512-ngPynK9u9OmsL2DttaTOhEPahyAjVbjIwCK3R+2V9YDq0/equpq7hVz3XrnfIjAk1thN5ET5mEIzAmocmV6i+Q==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -6621,7 +6621,7 @@ snapshots:
 
   shell-quote@1.8.2: {}
 
-  shelljs@0.9.0:
+  shelljs@0.9.1:
     dependencies:
       execa: 1.0.0
       fast-glob: 3.3.3
