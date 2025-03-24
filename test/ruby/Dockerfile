@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.48.1
+RUN install-tool git v2.49.0
 
 #--------------------------------------
 # Image: base
