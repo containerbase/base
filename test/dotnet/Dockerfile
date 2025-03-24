@@ -119,7 +119,7 @@ FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 9.0.201
+RUN install-tool dotnet 9.0.202
 RUN set -ex; dotnet --version | grep 9.0.
 
 RUN set -ex; \
