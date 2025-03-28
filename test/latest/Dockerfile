@@ -234,7 +234,7 @@ RUN install-tool sops v3.9.4
 RUN install-tool protoc 29.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=0.43.0
+ARG VENDIR_VERSION=0.43.1
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=0.171.0
