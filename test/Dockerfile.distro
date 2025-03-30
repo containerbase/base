@@ -105,7 +105,7 @@ RUN install-tool rust 1.85.1
 RUN install-tool skopeo 1.18.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.9.4
+RUN install-tool sops v3.10.0
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool swift 6.0.3

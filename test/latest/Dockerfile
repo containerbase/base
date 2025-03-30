@@ -228,7 +228,7 @@ RUN install-tool kubectl v1.32.3
 RUN install-tool skopeo 1.18.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.9.4
+RUN install-tool sops v3.10.0
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf
 RUN install-tool protoc 29.2
