@@ -132,7 +132,7 @@ RUN install-tool kubectl v1.32.3
 RUN install-tool skopeo 1.18.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.10.0
+RUN install-tool sops v3.10.1
 
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
