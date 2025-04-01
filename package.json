@@ -85,7 +85,7 @@
     "eslint": "9.23.0",
     "eslint-config-prettier": "10.1.1",
     "eslint-formatter-gha": "1.5.2",
-    "eslint-import-resolver-typescript": "4.2.2",
+    "eslint-import-resolver-typescript": "4.2.7",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-promise": "7.2.1",
@@ -101,7 +101,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.38.0",
     "typescript": "5.8.2",
-    "typescript-eslint": "8.27.0",
+    "typescript-eslint": "8.28.0",
     "vite": "6.2.4",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.0.9"
