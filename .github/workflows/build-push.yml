@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@5b65bcc6c57327ea0b13ce6008716f7887fcbc10 # v3.10.14
+        uses: containerbase/internal-tools@6ace88c90ae392ff482dbfc7bbecf1bd53b306fc # v3.10.20
         with:
           command: docker-config
 
