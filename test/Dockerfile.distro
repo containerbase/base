@@ -153,7 +153,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.14.0
 # renovate: datasource=npm
-RUN install-tool pnpm 10.7.0
+RUN install-tool pnpm 10.7.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.8.0
 
