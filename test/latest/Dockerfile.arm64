@@ -62,7 +62,7 @@ RUN install-tool devbox 0.14.1
 FROM base AS test-gleam
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.9.1
+RUN install-tool gleam 1.10.0
 
 #--------------------------------------
 # Image: docker
