@@ -72,7 +72,7 @@ RUN install-tool flux v2.5.1
 RUN install-tool git-lfs v3.6.1
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.9.1
+RUN install-tool gleam 1.10.0
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.24.2
