@@ -222,7 +222,7 @@ RUN install-tool devbox 0.14.2
 RUN install-tool gleam 1.10.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.32.4
+RUN install-tool kubectl v1.33.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.18.0
