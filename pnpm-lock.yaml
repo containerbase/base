@@ -177,8 +177,8 @@ importers:
         specifier: 15.5.1
         version: 15.5.1
       nock:
-        specifier: 14.0.3
-        version: 14.0.3
+        specifier: 14.0.4
+        version: 14.0.4
       npm-run-all2:
         specifier: 7.0.2
         version: 7.0.2
@@ -2623,8 +2623,8 @@ packages:
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
 
-  nock@14.0.3:
-    resolution: {integrity: sha512-sJ9RNmCuYBqXDmGZZHgZ1D1441MqFOU4T5aeLGVGEB4OWI/2LM0mZlkfBQzQKdOfJypL+2nPPBugXKjixBn4kQ==}
+  nock@14.0.4:
+    resolution: {integrity: sha512-86fh+gIKH8H02+y0/HKAOZZXn6OwgzXvl6JYwfjvKkoKxUWz54wIIDU/+w24xzMvk/R8pNVXOrvTubyl+Ml6cg==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.74.0:
@@ -6422,7 +6422,7 @@ snapshots:
 
   nice-try@1.0.5: {}
 
-  nock@14.0.3:
+  nock@14.0.4:
     dependencies:
       '@mswjs/interceptors': 0.38.5
       json-stringify-safe: 5.0.1
