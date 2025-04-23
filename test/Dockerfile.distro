@@ -84,7 +84,7 @@ RUN install-tool helm v3.17.3
 RUN install-tool helmfile v0.171.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.32.3
+RUN install-tool kubectl v1.32.4
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.6.0
