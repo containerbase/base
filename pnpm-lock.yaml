@@ -126,8 +126,8 @@ importers:
         specifier: 3.1.2
         version: 3.1.2(vitest@3.1.2)
       '@yao-pkg/pkg':
-        specifier: 6.3.2
-        version: 6.3.2(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.4.0
+        version: 6.4.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.11.1
         version: 1.11.1
@@ -1082,12 +1082,12 @@ packages:
   '@vitest/utils@3.1.2':
     resolution: {integrity: sha512-5GGd0ytZ7BH3H6JTj9Kw7Prn1Nbg0wZVrIvou+UWxm54d+WoXXgAgjFJ8wn3LdagWLFSEfpPeyYrByZaGEZHLg==}
 
-  '@yao-pkg/pkg-fetch@3.5.19':
-    resolution: {integrity: sha512-EEURrS1Q5sSSAwaQ4zD0wZsquDiG8CroY3SCi7jYBoM0NG3eRA239mW6YMUYPNWUK4zCMhuK3bzFT5aIZP/rDg==}
+  '@yao-pkg/pkg-fetch@3.5.21':
+    resolution: {integrity: sha512-nlJ+rXersw70CQVSph7OfIN8lN6nCStjU7koXzh0WXiPvztZGqkoQTScHQCe1K8/tuKpeL0bEOYW0rP4QqMJ9A==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.3.2':
-    resolution: {integrity: sha512-gd4fh8dVC5qnKQD8HTwQrVLvT8TyQqwE59ky3LHtnke+6fBcTTrWavtbsVOwdL09IWqY+eSB+2AGCrSUnZ4wwg==}
+  '@yao-pkg/pkg@6.4.0':
+    resolution: {integrity: sha512-UxH+FoqEtf+g+cw4VWtaj1bsQpP1RGxZruAKI/7a34eZ+aVew1hIcpn0YZ+T9QP1130MkZ+2JHLp5AFVnJeqHA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4758,7 +4758,7 @@ snapshots:
       loupe: 3.1.3
       tinyrainbow: 2.0.0
 
-  '@yao-pkg/pkg-fetch@3.5.19':
+  '@yao-pkg/pkg-fetch@3.5.21':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
@@ -4771,12 +4771,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@yao-pkg/pkg@6.3.2(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.4.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.27.0
       '@babel/parser': 7.27.0
       '@babel/types': 7.27.0
-      '@yao-pkg/pkg-fetch': 3.5.19
+      '@yao-pkg/pkg-fetch': 3.5.21
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
