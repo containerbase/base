@@ -121,11 +121,9 @@ export class EnvService {
   }
 
   public isToolIgnored(tool: string): boolean {
-    if (!this.ignoredTools) {
-      this.ignoredTools = new Set(
-        (env.IGNORED_TOOLS ?? '').toUpperCase().split(','),
-      );
-    }
+    this.ignoredTools ??= new Set(
+      (env.IGNORED_TOOLS ?? '').toUpperCase().split(','),
+    );
 
     return this.ignoredTools.has(tool.toUpperCase());
   }
