@@ -237,7 +237,7 @@ RUN install-tool protoc 29.2
 ARG VENDIR_VERSION=v0.43.2
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=v0.171.0
+ARG HELMFILE_VERSION=v1.0.0
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=v5.6.0
