@@ -266,9 +266,9 @@ USER 12021
 
 RUN bazel --version
 
-RUN vendir --version | grep "${VENDIR_VERSION}"
+RUN vendir --version | grep "${VENDIR_VERSION#v}"
 
-RUN helmfile version | grep "${HELMFILE_VERSION}"
+RUN helmfile version | grep "${HELMFILE_VERSION#v}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
