@@ -193,7 +193,7 @@ RUN set -ex; \
 FROM build-rootless AS test-pipenv-b
 
 # Do not update minor
-RUN install-tool python 3.8.13
+RUN install-tool python 3.10.17
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
@@ -203,7 +203,7 @@ RUN install-tool python 3.12.10
 RUN install-tool pipenv 2024.4.1
 
 RUN set -ex; \
-  cd h-pipenv; \
+  cd pipenv-b; \
   pipenv lock;
 
 #--------------------------------------
