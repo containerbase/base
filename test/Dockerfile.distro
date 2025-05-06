@@ -184,7 +184,7 @@ RUN install-tool copier 9.7.1
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.3
 # renovate: datasource=pypi
-RUN install-tool pipenv 2024.4.1
+RUN install-tool pipenv 2025.0.2
 # renovate: datasource=pypi
 RUN install-tool pdm 2.24.1
 # renovate: datasource=pypi
