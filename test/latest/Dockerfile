@@ -234,17 +234,17 @@ RUN install-tool sops v3.10.2
 RUN install-tool protoc 29.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=0.43.2
+ARG VENDIR_VERSION=v0.43.2
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=0.171.0
+ARG HELMFILE_VERSION=v0.171.0
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.6.0
+ARG KUSTOMIZE_VERSION=v5.6.0
 
-RUN install-tool vendir "v${VENDIR_VERSION}"
+RUN install-tool vendir "${VENDIR_VERSION}"
 
-RUN install-tool helmfile "v${HELMFILE_VERSION}"
+RUN install-tool helmfile "${HELMFILE_VERSION}"
 
 RUN install-tool kustomize "${KUSTOMIZE_VERSION}"
 
@@ -256,9 +256,9 @@ RUN set -ex; kustomize version
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN vendir --version | grep "${VENDIR_VERSION}"
+RUN vendir --version | grep "${VENDIR_VERSION#v}"
 
-RUN helmfile version | grep "${HELMFILE_VERSION}"
+RUN helmfile version | grep "${HELMFILE_VERSION#v}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
