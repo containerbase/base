@@ -215,9 +215,16 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
         break;
       }
       case 'poetry': {
+        const args = [];
         if (satisfies(version, '>=1.2.1')) {
-          return ['poetry-plugin-pypi-mirror'];
+          args.push('poetry-plugin-pypi-mirror');
         }
+        if (!satisfies(version, '>=2.0.0')) {
+          // virtualenv version 20.31.0 and above is not compatible with poetry < 2.0.0
+          // https://github.com/python-poetry/poetry/issues/10378
+          args.push('virtualenv<20.31.0');
+        }
+        return args;
       }
     }
     return [];
