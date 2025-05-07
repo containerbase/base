@@ -198,7 +198,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^package\\.json$"],
+      "managerFilePatterns": ["/^package\\.json$/"],
       "matchStrings": [
         "\"(?<depName>@yao-pkg/pkg|clipanion)@(?<currentValue>\\d+\\.\\d+\\.\\d+)\":"
       ],
