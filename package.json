@@ -89,7 +89,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-promise": "7.2.1",
-    "globals": "16.0.0",
+    "globals": "16.1.0",
     "husky": "9.1.7",
     "lint-staged": "15.5.2",
     "nock": "14.0.4",
