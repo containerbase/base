@@ -87,8 +87,8 @@ importers:
         specifier: 9.26.0
         version: 9.26.0
       '@semantic-release/exec':
-        specifier: 7.0.3
-        version: 7.0.3(semantic-release@24.2.3(typescript@5.8.3))
+        specifier: 7.1.0
+        version: 7.1.0(semantic-release@24.2.3(typescript@5.8.3))
       '@tsconfig/node20':
         specifier: 20.1.5
         version: 20.1.5
@@ -750,8 +750,8 @@ packages:
     resolution: {integrity: sha512-mgdxrHTLOjOddRVYIYDo0fR3/v61GNN1YGkfbrjuIKg/uMgCd+Qzo3UAXJ+woLQQpos4pl5Esuw5A7AoNlzjUQ==}
     engines: {node: '>=18'}
 
-  '@semantic-release/exec@7.0.3':
-    resolution: {integrity: sha512-uNWwPNtWi3WTcTm3fWfFQEuj8otOvwoS5m9yo2jSVHuvqdZNsOWmuL0/FqcVyZnCI32fxyYV0G7PPb/TzCH6jw==}
+  '@semantic-release/exec@7.1.0':
+    resolution: {integrity: sha512-4ycZ2atgEUutspPZ2hxO6z8JoQt4+y/kkHvfZ1cZxgl9WKJId1xPj+UadwInj+gMn2Gsv+fLnbrZ4s+6tK2TFQ==}
     engines: {node: '>=20.8.1'}
     peerDependencies:
       semantic-release: '>=24.1.0'
@@ -4403,7 +4403,7 @@ snapshots:
 
   '@semantic-release/error@4.0.0': {}
 
-  '@semantic-release/exec@7.0.3(semantic-release@24.2.3(typescript@5.8.3))':
+  '@semantic-release/exec@7.1.0(semantic-release@24.2.3(typescript@5.8.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 3.1.0
