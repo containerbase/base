@@ -47,7 +47,7 @@ RUN install-tool php 8.4.7
 
 
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.8.8
+RUN install-tool composer 2.8.9
 
 # test with latest version
 RUN install-tool composer latest
@@ -91,7 +91,7 @@ RUN install-tool php
 RUN install-tool composer
 
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.8.8
+RUN install-tool composer 2.8.9
 
 
 RUN set -ex; \
