@@ -65,7 +65,7 @@ RUN set -ex; \
 FROM build AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.15.0
+RUN install-tool node 22.15.1
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.4.7
@@ -188,7 +188,7 @@ RUN install-tool git-lfs v3.6.1
 RUN install-tool powershell v7.5.1
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.15.0
+RUN install-tool node 22.15.1
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v28.1.1
