@@ -54,7 +54,7 @@
     "pino-pretty": "13.0.0",
     "pretty-ms": "9.2.0",
     "reflect-metadata": "0.2.2",
-    "semver": "7.7.1",
+    "semver": "7.7.2",
     "simple-git": "3.27.0",
     "zod": "3.24.4"
   },
