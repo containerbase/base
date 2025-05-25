@@ -77,8 +77,8 @@ importers:
         specifier: 3.27.0
         version: 3.27.0
       zod:
-        specifier: 3.25.20
-        version: 3.25.20
+        specifier: 3.25.21
+        version: 3.25.21
     devDependencies:
       '@containerbase/eslint-plugin':
         specifier: 1.1.4
@@ -3736,8 +3736,8 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
-  zod@3.25.20:
-    resolution: {integrity: sha512-z03fqpTMDF1G02VLKUMt6vyACE7rNWkh3gpXVHgPTw28NPtDFRGvcpTtPwn2kMKtQ0idtYJUTxchytmnqYswcw==}
+  zod@3.25.21:
+    resolution: {integrity: sha512-k3MXcS5jrVo00Irs53CngVH4gHL1LgcCfOd9fOmZ7Pq/BP8eBop0P5RJDX5SsKchuxTMewJI0/AuK7MdD6ePXw==}
 
 snapshots:
 
@@ -7423,4 +7423,4 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zod@3.25.20: {}
+  zod@3.25.21: {}
