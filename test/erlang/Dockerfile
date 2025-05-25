@@ -52,7 +52,7 @@ FROM base AS testa
 RUN install-tool erlang 27.3.3.0
 
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
-RUN install-tool elixir 1.18.3
+RUN install-tool elixir 1.18.4
 
 RUN chown -R 12021:0 /test
 USER 12021
