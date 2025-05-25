@@ -190,7 +190,7 @@ RUN install-tool pdm 2.24.1
 # renovate: datasource=pypi
 RUN install-tool poetry 1.8.5
 # renovate: datasource=pypi
-RUN install-tool uv 0.7.6
+RUN install-tool uv 0.7.8
 
 #--------------------------------------
 # Image: test-ruby
