@@ -46,7 +46,7 @@ RUN install-tool bazelisk v1.26.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.2.13
+RUN install-tool bun 1.2.14
 
 #--------------------------------------
 # Image: devbox
