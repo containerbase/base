@@ -129,14 +129,14 @@ importers:
         specifier: 6.5.1
         version: 6.5.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
-        specifier: 1.11.1
-        version: 1.11.1
+        specifier: 1.12.0
+        version: 1.12.0
       bats-assert:
         specifier: 2.0.0
-        version: 2.0.0(bats-support@0.3.0(bats@1.11.1))
+        version: 2.0.0(bats-support@0.3.0(bats@1.12.0))
       bats-support:
         specifier: 0.3.0
-        version: 0.3.0(bats@1.11.1)
+        version: 0.3.0(bats@1.12.0)
       conventional-changelog-conventionalcommits:
         specifier: 8.0.0
         version: 8.0.0
@@ -1180,8 +1180,8 @@ packages:
     peerDependencies:
       bats: 0.4 || ^1
 
-  bats@1.11.1:
-    resolution: {integrity: sha512-Dh26FsiLog+wwQeTkboYo2xYj9rUaPEbibUobnYb3G3M9hva/Kby00wrAN9VB9qqGVhl/pYjjt/LVBWwjXlD2A==}
+  bats@1.12.0:
+    resolution: {integrity: sha512-1HTv2n+fjn3bmY9SNDgmzS6bjoKtVlSK2pIHON5aSA2xaqGkZFoCCWP46/G6jm9zZ7MCi84mD+3Byw4t3KGwBg==}
     hasBin: true
 
   before-after-hook@3.0.2:
@@ -4703,15 +4703,15 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  bats-assert@2.0.0(bats-support@0.3.0(bats@1.11.1)):
+  bats-assert@2.0.0(bats-support@0.3.0(bats@1.12.0)):
     dependencies:
-      bats-support: 0.3.0(bats@1.11.1)
+      bats-support: 0.3.0(bats@1.12.0)
 
-  bats-support@0.3.0(bats@1.11.1):
+  bats-support@0.3.0(bats@1.12.0):
     dependencies:
-      bats: 1.11.1
+      bats: 1.12.0
 
-  bats@1.11.1: {}
+  bats@1.12.0: {}
 
   before-after-hook@3.0.2: {}
 
