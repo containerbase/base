@@ -176,7 +176,7 @@ FROM build AS test-python
 RUN install-tool python 3.12.10
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.416
+RUN install-tool checkov 3.2.432
 # renovate: datasource=pypi
 RUN install-tool conan 2.16.1
 # renovate: datasource=pypi
