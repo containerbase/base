@@ -59,7 +59,7 @@
     "zod": "3.25.30"
   },
   "devDependencies": {
-    "@containerbase/eslint-plugin": "1.1.4",
+    "@containerbase/eslint-plugin": "1.1.6",
     "@eslint/js": "9.27.0",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node20": "20.1.5",
