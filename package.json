@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@renovatebot/pep440": "4.1.0",
-    "@sindresorhus/is": "7.0.1",
+    "@sindresorhus/is": "7.0.2",
     "clipanion": "3.2.1",
     "common-tags": "1.8.2",
     "deepmerge": "4.3.1",
