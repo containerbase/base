@@ -44,8 +44,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       execa:
-        specifier: 9.5.3
-        version: 9.5.3
+        specifier: 9.6.0
+        version: 9.6.0
       global-agent:
         specifier: 3.0.0
         version: 3.0.0(patch_hash=c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13)
@@ -1780,8 +1780,8 @@ packages:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
 
-  execa@9.5.3:
-    resolution: {integrity: sha512-QFNnTvU3UjgWFy8Ef9iDHvIdcgZ344ebkwYx4/KLbR+CKQA4xBaHzv+iRpp86QfMHP8faFQLh8iOc57215y4Rg==}
+  execa@9.6.0:
+    resolution: {integrity: sha512-jpWzZ1ZhwUmeWRhS7Qv3mhpOhLfwI+uAX4e5fOcXqwMR7EcJ0pj2kV1CVzHVMX/LphnKWD3LObjZCoJ71lKpHw==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
   expand-template@2.0.3:
@@ -4269,7 +4269,7 @@ snapshots:
       '@semantic-release/error': 4.0.0
       aggregate-error: 3.1.0
       debug: 4.4.1
-      execa: 9.5.3
+      execa: 9.6.0
       lodash-es: 4.17.21
       parse-json: 8.3.0
       semantic-release: 24.2.5(typescript@5.8.3)
@@ -4302,7 +4302,7 @@ snapshots:
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
-      execa: 9.5.3
+      execa: 9.6.0
       fs-extra: 11.3.0
       lodash-es: 4.17.21
       nerf-dart: 1.0.0
@@ -5509,7 +5509,7 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
-  execa@9.5.3:
+  execa@9.6.0:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       cross-spawn: 7.0.6
@@ -6818,7 +6818,7 @@ snapshots:
       cosmiconfig: 9.0.0(typescript@5.8.3)
       debug: 4.4.1
       env-ci: 11.1.1
-      execa: 9.5.3
+      execa: 9.6.0
       figures: 6.1.0
       find-versions: 6.0.0
       get-stream: 6.0.1
