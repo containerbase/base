@@ -120,7 +120,8 @@
       ],
       "os": [
         "linux",
-        "win32"
+        "win32",
+        "darwin"
       ]
     },
     "patchedDependencies": {
