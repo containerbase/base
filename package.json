@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.6",
-    "@eslint/js": "9.30.1",
+    "@eslint/js": "9.31.0",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node20": "20.1.6",
     "@tsconfig/strictest": "2.0.5",
@@ -101,7 +101,7 @@
     "tsx": "4.20.3",
     "type-fest": "4.41.0",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.35.1",
+    "typescript-eslint": "8.36.0",
     "vite": "6.3.5",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4"
