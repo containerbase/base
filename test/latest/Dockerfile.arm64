@@ -126,7 +126,7 @@ RUN install-tool vendir v0.44.0
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.33.2
+RUN install-tool kubectl v1.33.3
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.19.0
