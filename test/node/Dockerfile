@@ -122,7 +122,7 @@ RUN prepare-tool node
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.19.3
+RUN install-tool node 20.19.4
 
 RUN npm install -g yarn
 RUN set -ex; \
