@@ -177,8 +177,8 @@ importers:
         specifier: 16.1.2
         version: 16.1.2
       nock:
-        specifier: 14.0.5
-        version: 14.0.5
+        specifier: 14.0.7
+        version: 14.0.7
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
@@ -536,8 +536,8 @@ packages:
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
 
-  '@mswjs/interceptors@0.38.7':
-    resolution: {integrity: sha512-Jkb27iSn7JPdkqlTqKfhncFfnEZsIJVYxsFbUSWEkxdIPdsyngrhoDBk0/BGD2FQcRH99vlRrkHpNTyKqI+0/w==}
+  '@mswjs/interceptors@0.39.5':
+    resolution: {integrity: sha512-B9nHSJYtsv79uo7QdkZ/b/WoKm20IkVSmTc/WCKarmDtFwM0dRx2ouEniqwNkzCSLn3fydzKmnMzjtfdOWt3VQ==}
     engines: {node: '>=18'}
 
   '@napi-rs/wasm-runtime@0.2.11':
@@ -2633,8 +2633,8 @@ packages:
   nerf-dart@1.0.0:
     resolution: {integrity: sha512-EZSPZB70jiVsivaBLYDCyntd5eH8NTSMOn3rB+HxwdmKThGELLdYv8qVIMWvZEFy9w8ZZpW9h9OB32l1rGtj7g==}
 
-  nock@14.0.5:
-    resolution: {integrity: sha512-R49fALR9caB6vxuSWUIaK2eBYeTloZQUFBZ4rHO+TbhMGQHtwnhdqKLYki+o+8qMgLvoBYWrp/2KzGPhxL4S6w==}
+  nock@14.0.7:
+    resolution: {integrity: sha512-ubwvvhSzNPqc7Nm3a/iYolwqb7lo1zfllDKO1ODsYu3KnarmQEya5yV70ZUwhVxYIl1ePuX3W+lHw2un+pUfpQ==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.75.0:
@@ -4087,7 +4087,7 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@mswjs/interceptors@0.38.7':
+  '@mswjs/interceptors@0.39.5':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
       '@open-draft/logger': 0.3.0
@@ -6343,9 +6343,9 @@ snapshots:
 
   nerf-dart@1.0.0: {}
 
-  nock@14.0.5:
+  nock@14.0.7:
     dependencies:
-      '@mswjs/interceptors': 0.38.7
+      '@mswjs/interceptors': 0.39.5
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
 
