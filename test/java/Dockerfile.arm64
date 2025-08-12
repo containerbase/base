@@ -37,7 +37,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 #--------------------------------------
 FROM base AS test-java
 
-# renovate: datasource=java-version packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre?os=linux&architecture=aarch64
 RUN install-tool java 21.0.8+9.0.LTS
 
 #--------------------------------------
