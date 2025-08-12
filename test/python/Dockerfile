@@ -137,11 +137,18 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 #--------------------------------------
 FROM base AS test-poetry-d
 
-# python 3.12+ not supported
+# python 3.12+ not supported for poetry <1.7
 RUN install-tool python 3.11.6
 
 RUN install-tool poetry 0.12.17
 RUN install-tool poetry 1.1.15
+
+# python 3.14+ not supported for poetry <2
+RUN install-tool python 3.13.6
+
+RUN install-tool poetry 1.8.5
+
+RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 
 #--------------------------------------
 # poetry test e: root install - non root install
