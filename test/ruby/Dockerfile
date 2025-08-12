@@ -108,7 +108,7 @@ RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bund
 USER 12021
 
 # install old version
-RUN install-tool ruby 3.1.0
+RUN install-tool ruby 3.4.0
 
 # renovate: datasource=rubygems depName=bundler
 ENV BUNDLER_VERSION=2.7.1
