@@ -74,7 +74,7 @@ FROM build AS test-bundler-c
 USER 12021
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.6.9
+ENV BUNDLER_VERSION=2.7.1
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -100,7 +100,7 @@ true
 FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.6.9
+ENV BUNDLER_VERSION=2.7.1
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 12021 ]
@@ -108,10 +108,10 @@ RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bund
 USER 12021
 
 # install old version
-RUN install-tool ruby 3.1.0
+RUN install-tool ruby 3.4.0
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=2.6.9
+ENV BUNDLER_VERSION=2.7.1
 RUN install-tool bundler
 
 
