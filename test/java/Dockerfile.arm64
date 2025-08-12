@@ -54,7 +54,7 @@ RUN install-tool gradle 9.0.0
 FROM test-java AS test-maven
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.9.10
+RUN install-tool maven 3.9.11
 
 #--------------------------------------
 # Image: final

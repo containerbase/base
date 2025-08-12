@@ -208,7 +208,7 @@ USER 1001
 RUN install-tool maven 3.5.4
 
 # renovate: datasource=maven packageName=org.apache.maven:maven
-RUN install-tool maven 3.9.10
+RUN install-tool maven 3.9.11
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
@@ -228,7 +228,7 @@ WORKDIR /
 RUN install-tool scala v2.13.16
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.11.3
+RUN install-tool sbt v1.11.4
 
 RUN install-tool gradle 8.8-rc-2
 
