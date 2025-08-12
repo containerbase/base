@@ -58,7 +58,7 @@ RUN set -ex; \
 
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
-# renovate: datasource=java-version packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java 21.0.8+9.0.LTS
 
 RUN set -ex; \
@@ -98,15 +98,15 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: Java 21 LTS + Gradle 8
+# test: Java 21 LTS + Gradle 9
 #--------------------------------------
 FROM base AS test-gradle-b
 
-# renovate: datasource=java-version packageName=java-jre
+# renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java-jre 21.0.8+9.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 8.14.3
+RUN install-tool gradle 9.0.0
 
 USER 12021
 
@@ -156,7 +156,7 @@ RUN prepare-tool java gradle
 # test openshift userid missmatch
 USER 1001
 
-# renovate: datasource=java-version depName=java
+# renovate: datasource=java-version depName=java?os=linux&architecture=x64
 ARG JAVA_JDK_VERSION=21.0.8+9.0.LTS
 RUN install-tool java-jdk
 
@@ -167,6 +167,32 @@ RUN gradle --version
 
 # fail if java version mismatch
 RUN gradle --version | grep "${JAVA_VERSION}"
+
+#--------------------------------------
+# test: Java 21 LTS + Gradle 8
+#--------------------------------------
+FROM base AS test-gradle-e
+
+# renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
+RUN install-tool java-jre 21.0.8+9.0.LTS
+
+# renovate: datasource=gradle-version versioning=gradle
+RUN install-tool gradle 8.14.3
+
+USER 12021
+
+RUN set -ex; \
+  gradle --version;
+
+RUN set -ex; \
+  git init .; \
+  touch settings.gradle; \
+  gradle wrapper; \
+  git diff; \
+  ./gradlew --version
+
+SHELL [ "/bin/sh", "-c" ]
+RUN gradle --version
 
 #--------------------------------------
 # test: maven
@@ -254,6 +280,7 @@ COPY --from=test-gradle-a /.dummy /.dummy
 COPY --from=test-gradle-b /.dummy /.dummy
 COPY --from=test-gradle-c /.dummy /.dummy
 COPY --from=test-gradle-d /.dummy /.dummy
+COPY --from=test-gradle-e /.dummy /.dummy
 COPY --from=test-maven-a /.dummy /.dummy
 COPY --from=test-others /.dummy /.dummy
 COPY --from=test-latest-version /.dummy /.dummy
