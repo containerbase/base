@@ -6,9 +6,8 @@ If you are using a custom base image, checkout [Custom base image](./custom-base
 
 ## Notes
 
-1. `Bun` doesn't support custom root ca certificates[^1].
-
-[^1]: <https://github.com/oven-sh/bun/issues/271>
+1. Ensure your custom certs are RFC 5280[^1] compliant.
+   Especially Python v3.13.0 will reject non-compliant certs.
 
 ## Buildtime install
 
@@ -38,6 +37,7 @@ RUN install-tool java <version>
 ## Runtime install
 
 Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environment for additional custom root ca files.
+If you're using Bun, then you need to set `NODE_EXTRA_CA_CERTS` environment variable[^2].
 
 ```bash
 docker run --rm -it \
@@ -57,3 +57,7 @@ docker run --rm -it \
   -e SSL_CERT_FILE=/my-root-ca.crt \
   containerbase/base bash
 ```
+
+[^1]: <https://datatracker.ietf.org/doc/html/rfc5280>
+
+[^2]: <https://github.com/oven-sh/bun/issues/271>
