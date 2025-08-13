@@ -156,7 +156,7 @@ RUN prepare-tool java gradle
 # test openshift userid missmatch
 USER 1001
 
-# renovate: datasource=java-version depName=java?os=linux&architecture=x64
+# renovate: datasource=java-version depName=java packageName=java?os=linux&architecture=x64
 ARG JAVA_JDK_VERSION=21.0.8+9.0.LTS
 RUN install-tool java-jdk
 
