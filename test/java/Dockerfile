@@ -157,7 +157,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=java-version depName=java?os=linux&architecture=x64
-ARG JAVA_JDK_VERSION=21.0.8+9.0.LTS
+ARG JAVA_JDK_VERSION=24.0.2+12
 RUN install-tool java-jdk
 
 # test latest gradle
