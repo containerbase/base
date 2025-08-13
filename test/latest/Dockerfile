@@ -36,9 +36,6 @@ ARG CONTAINERBASE_LOG_LEVEL
 #--------------------------------------
 FROM base AS build
 
-# install nginx for request testing
-RUN install-apt nginx
-
 COPY test/latest/src/ /
 
 WORKDIR /test
@@ -62,7 +59,10 @@ RUN set -ex; \
 #--------------------------------------
 # test: custom root ca
 #--------------------------------------
-FROM build AS testa
+FROM base AS testa
+
+# install nginx for request testing
+RUN install-apt nginx
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.18.0
@@ -83,9 +83,15 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 RUN install-tool ruby 2.7.7
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/ruby") -eq ${USER_ID} ]
 
+COPY --link --from=build /test /test
+COPY --link --from=build /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
+
+WORKDIR /test
+
 RUN set -ex; \
   openssl x509 -noout -text -in ca.pem; \
-  openssl x509 -noout -text -in renovate.pem;
+  openssl x509 -noout -text -in renovate.pem; \
+  true
 
 RUN set -ex; \
   nginx; \
@@ -135,15 +141,15 @@ ARG CONTAINERBASE_LOG_LEVEL
 ENV BASH_ENV=/usr/local/etc/env PATH=/home/$USER_NAME/bin:$PATH
 SHELL ["/bin/bash" , "-c"]
 
-COPY --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
+COPY --link --from=build /test/ca.pem /usr/local/share/ca-certificates/renovate-ca.crt
 
 # Set up containerbase
-COPY --from=build /usr/local/sbin/ /usr/local/sbin/
-COPY --from=build /usr/local/containerbase/ /usr/local/containerbase/
+COPY --link --from=build /usr/local/sbin/ /usr/local/sbin/
+COPY --link --from=build /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 # validate custom cert
-COPY --from=build /test/renovate.pem /renovate.pem
+COPY --link --from=build /test/renovate.pem /renovate.pem
 RUN openssl verify /renovate.pem
 
 # Test start
@@ -164,7 +170,7 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 # test: ignore tools
 #--------------------------------------
-FROM build AS testc
+FROM base AS testc
 
 RUN prepare-tool docker
 
@@ -277,8 +283,8 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 #--------------------------------------
 FROM base
 
-COPY --from=testa /.dummy /.dummy
-COPY --from=testb-gitpod /.dummy /.dummy
-COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
-COPY --from=teste /.dummy /.dummy
+COPY --link --from=testa /.dummy /.dummy
+COPY --link --from=testb-gitpod /.dummy /.dummy
+COPY --link --from=testc /.dummy /.dummy
+COPY --link --from=testd /.dummy /.dummy
+COPY --link --from=teste /.dummy /.dummy
