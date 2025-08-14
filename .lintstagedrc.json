@@ -2,8 +2,9 @@
   "*.sh": "shellcheck",
   "*.bats": "shellcheck",
   ".husky/*": "shellcheck",
+  "*.md": ["markdownlint-cli2 --fix", "prettier --write"],
   "src/usr/local/bin/*": "shellcheck",
   "src/usr/local/containerbase/bin/*": "shellcheck",
   "*.{js,ts,cjs,mjs}": ["eslint --fix", "prettier --write"],
-  "!*.{js,ts,cjs,mjs}": "prettier --ignore-unknown --write"
+  "!*.{cjs,js,mjs,md,ts}": "prettier --ignore-unknown --write"
 }

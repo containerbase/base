@@ -15,11 +15,13 @@
     "build:cli": "node tools/esbuild.js",
     "eslint": "eslint --cache .",
     "eslint-fix": "eslint --cache --fix .",
-    "lint": "run-s prettier eslint lint:types",
+    "lint": "run-s prettier eslint lint:types lint:markdown",
+    "lint:markdown": "markdownlint-cli2 '**/*.md'",
     "lint:types": "run-p 'lint:types:*'",
     "lint:types:default": "tsc",
     "lint:types:dist": "tsc -p tsconfig.dist.json",
-    "lint-fix": "run-s prettier-fix eslint-fix",
+    "lint-fix": "run-s prettier-fix eslint-fix 'lint-fix:*'",
+    "lint-fix:markdown": "markdownlint-cli2 --fix '**/*.md'",
     "prepare": "husky",
     "prepare:proxy": "node tools/prepare-proxy.js",
     "prettier": "prettier --cache -c -u \"**/*.*\"",
@@ -91,6 +93,7 @@
     "globals": "16.3.0",
     "husky": "9.1.7",
     "lint-staged": "16.1.5",
+    "markdownlint-cli2": "0.18.1",
     "nock": "14.0.9",
     "npm-run-all2": "8.0.4",
     "prettier": "3.6.2",
@@ -106,6 +109,7 @@
     "vitest": "3.2.4"
   },
   "peerDependencies": {
+    "markdownlint": "*",
     "vite": "*"
   },
   "packageManager": "pnpm@10.14.0",
