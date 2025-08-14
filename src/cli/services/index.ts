@@ -25,5 +25,5 @@ rootContainer.bind(PathService).toSelf();
 rootContainer.bind(VersionService).toSelf();
 
 export function createContainer(parent = rootContainer): Container {
-  return new Container({ parent });
+  return parent.createChild();
 }
