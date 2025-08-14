@@ -1,7 +1,18 @@
 import 'reflect-metadata';
 import { afterAll, beforeAll, vi } from 'vitest';
 
-vi.mock('pino');
+vi.mock('pino', () => ({
+  default: vi.fn(() => ({
+    debug: vi.fn(),
+    error: vi.fn(),
+    fatal: vi.fn(),
+    info: vi.fn(),
+    trace: vi.fn(),
+    warn: vi.fn(),
+  })),
+  transport: vi.fn(),
+  levels: { values: {} },
+}));
 
 let rootDir!: string;
 let cacheDir!: string;
@@ -31,6 +42,6 @@ afterAll(async () => {
     await vi.importActual<typeof import('node:fs/promises')>(
       'node:fs/promises',
     );
-  await fs.rm(cacheDir, { recursive: true });
-  await fs.rm(rootDir, { recursive: true });
+  await fs.rm(cacheDir, { recursive: true, force: true });
+  await fs.rm(rootDir, { recursive: true, force: true });
 });

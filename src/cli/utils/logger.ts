@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { type TransportTargetOptions, levels, pino, transport } from 'pino';
+import pino, { type TransportTargetOptions, levels, transport } from 'pino';
 
 const level =
   [
