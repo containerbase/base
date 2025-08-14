@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
-import { inject, injectable } from 'inversify';
+import { inject, injectFromBase, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { AptService } from '../../services';
 import { type Distro, getDistro } from '../../utils';
@@ -9,6 +9,7 @@ import { PipVersionResolver } from './pip';
 import { PipBaseInstallService } from './utils';
 
 @injectable()
+@injectFromBase()
 export class ConanPrepareService extends BasePrepareService {
   @inject(AptService)
   private readonly aptSvc!: AptService;
@@ -46,11 +47,13 @@ export class ConanPrepareService extends BasePrepareService {
 }
 
 @injectable()
+@injectFromBase()
 export class ConanInstallService extends PipBaseInstallService {
   override readonly name: string = 'conan';
 }
 
 @injectable()
+@injectFromBase()
 export class ConanVersionResolver extends PipVersionResolver {
   override tool = 'conan';
 }

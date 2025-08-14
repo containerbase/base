@@ -1,9 +1,10 @@
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { logger, parse, semverSatisfies } from '../../utils';
 import { NpmBaseInstallService } from './utils';
 
 @injectable()
+@injectFromBase()
 export class RenovateInstallService extends NpmBaseInstallService {
   override readonly name: string = 'renovate';
 
@@ -21,6 +22,7 @@ export class RenovateInstallService extends NpmBaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export class YarnInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn';
 
@@ -39,6 +41,7 @@ export class YarnInstallService extends NpmBaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export class YarnSlimInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn-slim';
 

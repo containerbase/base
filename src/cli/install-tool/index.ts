@@ -1,4 +1,4 @@
-import { Container, injectable } from 'inversify';
+import { Container, injectFromBase, injectable } from 'inversify';
 import { createContainer } from '../services';
 import { ResolverMap } from '../tools';
 import { BazeliskInstallService } from '../tools/bazelisk';
@@ -155,6 +155,7 @@ export function installTool(
     switch (type) {
       case 'gem': {
         @injectable()
+        @injectFromBase()
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
 
@@ -176,6 +177,7 @@ export function installTool(
       }
       case 'npm': {
         @injectable()
+        @injectFromBase()
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
@@ -197,6 +199,7 @@ export function installTool(
       }
       case 'pip': {
         @injectable()
+        @injectFromBase()
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
 
@@ -236,6 +239,7 @@ export async function resolveVersion(
     switch (type) {
       case 'gem': {
         @injectable()
+        @injectFromBase()
         class GenericVersionResolver extends RubyGemVersionResolver {
           override readonly tool: string = tool;
         }
@@ -244,6 +248,7 @@ export async function resolveVersion(
       }
       case 'npm': {
         @injectable()
+        @injectFromBase()
         class GenericVersionResolver extends NpmVersionResolver {
           override readonly tool: string = tool;
         }
@@ -252,6 +257,7 @@ export async function resolveVersion(
       }
       case 'pip': {
         @injectable()
+        @injectFromBase()
         class GenericVersionResolver extends PipVersionResolver {
           override readonly tool: string = tool;
         }

@@ -1,11 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { getDistro, logger } from '../utils';
 
 @injectable()
+@injectFromBase()
 export class WallyInstallService extends BaseInstallService {
   readonly name = 'wally';
 

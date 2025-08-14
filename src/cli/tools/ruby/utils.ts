@@ -2,7 +2,7 @@ import { chmod, mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { inject, injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { VersionService } from '../../services';
@@ -12,6 +12,7 @@ import { RubyGemJson } from './schema';
 const defaultRegistry = 'https://rubygems.org/';
 
 @injectable()
+@injectFromBase()
 export abstract class RubyBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
@@ -151,6 +152,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export abstract class RubyGemVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (version === undefined || version === 'latest') {

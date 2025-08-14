@@ -2,11 +2,12 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 
 @injectable()
+@injectFromBase()
 export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
 
@@ -40,6 +41,7 @@ export class ComposerInstallService extends BaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export class ComposerVersionResolver extends ToolVersionResolver {
   readonly tool = 'composer';
 

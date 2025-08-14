@@ -3,12 +3,13 @@ import path from 'node:path';
 import { major, minor, satisfies, valid } from '@renovatebot/pep440';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
-import { inject, injectable } from 'inversify';
+import { inject, injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { VersionService } from '../../services';
 import { logger } from '../../utils';
 
 @injectable()
+@injectFromBase()
 export abstract class PythonBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
@@ -29,6 +30,7 @@ export abstract class PythonBaseInstallService extends BaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export abstract class PipBaseInstallService extends PythonBaseInstallService {
   protected tool(_version: string): string {
     return this.name;
