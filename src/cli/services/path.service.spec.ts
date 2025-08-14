@@ -5,7 +5,7 @@ import { deleteAsync } from 'del';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights, pathExists } from '../utils';
-import { PathService, rootContainer } from '.';
+import { PathService, createContainer } from '.';
 import { rootPath } from '~test/path';
 
 describe('cli/services/path.service', () => {
@@ -13,7 +13,7 @@ describe('cli/services/path.service', () => {
   let child!: Container;
 
   beforeEach(async () => {
-    child = rootContainer.createChild();
+    child = createContainer();
     env.PATH = path;
     delete env.NODE_VERSION;
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });

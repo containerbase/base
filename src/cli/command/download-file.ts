@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
 import { got } from 'got';
 import prettyMilliseconds from 'pretty-ms';
-import { EnvService, rootContainer } from '../services';
+import { EnvService, createContainer } from '../services';
 import { logger } from '../utils';
 
 export class DownloadFileCommand extends Command {
@@ -29,7 +29,7 @@ export class DownloadFileCommand extends Command {
     let error = false;
     logger.info({ url: this.url, output: this.output }, `Downloading file ...`);
     try {
-      const container = rootContainer.createChild();
+      const container = createContainer();
 
       const env = container.get(EnvService);
       const path = dirname(this.output);

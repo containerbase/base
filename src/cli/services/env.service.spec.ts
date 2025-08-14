@@ -2,7 +2,7 @@ import { sep } from 'node:path';
 import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { EnvService, rootContainer } from '.';
+import { EnvService, createContainer } from '.';
 import { rootPath } from '~test/path';
 
 const mocks = vi.hoisted(() => ({ arch: vi.fn() }));
@@ -25,7 +25,7 @@ describe('cli/services/env.service', () => {
   });
 
   beforeEach(() => {
-    child = rootContainer.createChild();
+    child = createContainer();
     globalThis.rootDir = rootDir;
     mocks.arch.mockReturnValue('x64');
   });

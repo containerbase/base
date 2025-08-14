@@ -1,5 +1,5 @@
 import { Container, injectable } from 'inversify';
-import { rootContainer } from '../services';
+import { createContainer } from '../services';
 import { ResolverMap } from '../tools';
 import { BazeliskInstallService } from '../tools/bazelisk';
 import { BunInstallService } from '../tools/bun';
@@ -76,8 +76,7 @@ export type InstallToolType = 'gem' | 'npm' | 'pip';
 
 function prepareInstallContainer(): Container {
   logger.trace('preparing install container');
-  const container = new Container();
-  container.parent = rootContainer;
+  const container = createContainer();
 
   // core services
   container.bind(InstallToolService).toSelf();
@@ -122,8 +121,7 @@ function prepareInstallContainer(): Container {
 
 function prepareResolveContainer(): Container {
   logger.trace('preparing resolve container');
-  const container = new Container();
-  container.parent = rootContainer;
+  const container = createContainer();
 
   // core services
   container.bind(ToolVersionResolverService).toSelf();

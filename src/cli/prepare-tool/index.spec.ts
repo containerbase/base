@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { rootPath } from '../../../test/path';
-import { PathService, rootContainer } from '../services';
+import { PathService, createContainer } from '../services';
 import { initializeTools, prepareTools } from '.';
+import { rootPath } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');
@@ -32,7 +32,7 @@ describe('cli/prepare-tool/index', () => {
       '',
     );
 
-    const child = rootContainer.createChild();
+    const child = createContainer();
     const pathSvc = child.get(PathService);
     await pathSvc.setPrepared('bun');
   });

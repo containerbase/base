@@ -1,6 +1,6 @@
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { CompressionService, rootContainer } from '.';
+import { CompressionService, createContainer } from '.';
 
 vi.mock('execa');
 
@@ -8,7 +8,7 @@ describe('cli/services/compression.service', () => {
   let child!: Container;
 
   beforeEach(() => {
-    child = rootContainer.createChild();
+    child = createContainer();
   });
 
   test('extracts with bstar', async () => {

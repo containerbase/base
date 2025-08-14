@@ -1,7 +1,7 @@
 import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { AptService, rootContainer } from '.';
+import { AptService, createContainer } from '.';
 
 const mocks = vi.hoisted(() => ({
   execa: vi.fn(),
@@ -19,7 +19,7 @@ describe('cli/services/apt.service', () => {
   let child!: Container;
 
   beforeEach(() => {
-    child = rootContainer.createChild();
+    child = createContainer();
     delete env.APT_HTTP_PROXY;
   });
 

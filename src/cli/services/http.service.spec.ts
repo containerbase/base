@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { logger } from '../utils';
-import { HttpService, rootContainer } from '.';
+import { HttpService, createContainer } from '.';
 import { scope } from '~test/http-mock';
 import { cachePath } from '~test/path';
 
@@ -11,7 +11,7 @@ describe('cli/services/http.service', () => {
   let child!: Container;
 
   beforeEach(() => {
-    child = rootContainer.createChild();
+    child = createContainer();
 
     for (const key of Object.keys(env)) {
       if (key.startsWith('URL_REPLACE_')) {

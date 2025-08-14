@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { rootContainer } from '../services';
+import { createContainer } from '../services';
 import { DartPrepareService } from '../tools/dart';
 import { DockerPrepareService } from '../tools/docker';
 import { DotnetPrepareService } from '../tools/dotnet';
@@ -18,8 +18,7 @@ import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
 
 function prepareContainer(): Container {
   logger.trace('preparing container');
-  const container = new Container();
-  container.parent = rootContainer;
+  const container = createContainer();
 
   // core services
   container.bind(PrepareToolService).toSelf();

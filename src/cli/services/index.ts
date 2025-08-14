@@ -23,3 +23,7 @@ rootContainer.bind(EnvService).toSelf();
 rootContainer.bind(HttpService).toSelf();
 rootContainer.bind(PathService).toSelf();
 rootContainer.bind(VersionService).toSelf();
+
+export function createContainer(parent = rootContainer): Container {
+  return new Container({ parent });
+}
