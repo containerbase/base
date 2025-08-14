@@ -10,16 +10,17 @@ export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
 @injectable()
 export class InstallToolService {
-  constructor(
-    @inject(LegacyToolInstallService)
-    private legacySvc: LegacyToolInstallService,
-    @multiInject(INSTALL_TOOL_TOKEN)
-    @optional()
-    private toolSvcs: BaseInstallService[] = [],
-    @inject(EnvService) private envSvc: EnvService,
-    @inject(PathService) private pathSvc: PathService,
-    @inject(VersionService) private versionSvc: VersionService,
-  ) {}
+  @inject(LegacyToolInstallService)
+  private readonly legacySvc!: LegacyToolInstallService;
+  @multiInject(INSTALL_TOOL_TOKEN)
+  @optional()
+  private readonly toolSvcs: BaseInstallService[] = [];
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
+  @inject(PathService)
+  private readonly pathSvc!: PathService;
+  @inject(VersionService)
+  private readonly versionSvc!: VersionService;
 
   async execute(
     tool: string,

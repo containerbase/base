@@ -3,12 +3,12 @@ import { EnvService, PathService } from '../services';
 
 @injectable()
 export abstract class BasePrepareService {
-  abstract readonly name: string;
+  @inject(PathService)
+  protected readonly pathSvc!: PathService;
+  @inject(EnvService)
+  protected readonly envSvc!: EnvService;
 
-  constructor(
-    @inject(PathService) protected readonly pathSvc: PathService,
-    @inject(EnvService) protected readonly envSvc: EnvService,
-  ) {}
+  abstract readonly name: string;
 
   prepare(): Promise<void> | void {
     // noting to do;

@@ -6,20 +6,19 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { BaseInstallService } from '../../install-tool/base-install.service';
-import { EnvService, PathService, VersionService } from '../../services';
+import {
+  type EnvService,
+  type PathService,
+  VersionService,
+} from '../../services';
 import { logger, parse, pathExists } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
 export abstract class NodeBaseInstallService extends BaseInstallService {
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(VersionService) protected versionSvc: VersionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  @inject(VersionService)
+  protected readonly versionSvc!: VersionService;
 
   protected prepareEnv(_version: string, tmp: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {

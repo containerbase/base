@@ -2,30 +2,15 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import {
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-} from '../../services';
 import { semverCoerce } from '../../utils';
 import { GradleVersionData } from './schema';
 
 @injectable()
 export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
 
   override async install(version: string): Promise<void> {
     const name = this.name;

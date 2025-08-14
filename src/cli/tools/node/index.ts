@@ -2,15 +2,8 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import {
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-  VersionService,
-} from '../../services';
 import { getDistro, parse } from '../../utils';
 import {
   NodeBaseInstallService,
@@ -62,16 +55,6 @@ export class NodeInstallService extends NodeBaseInstallService {
       case 'amd64':
         return 'x86_64';
     }
-  }
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-    @inject(VersionService) versionSvc: VersionService,
-  ) {
-    super(envSvc, pathSvc, versionSvc);
   }
 
   override async install(version: string): Promise<void> {

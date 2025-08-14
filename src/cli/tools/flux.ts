@@ -1,14 +1,8 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
-import {
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-} from '../services';
 
 @injectable()
 export class FluxInstallService extends BaseInstallService {
@@ -16,15 +10,6 @@ export class FluxInstallService extends BaseInstallService {
 
   private get arch(): string {
     return this.envSvc.arch;
-  }
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
   }
 
   override async install(version: string): Promise<void> {

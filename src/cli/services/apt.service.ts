@@ -7,7 +7,8 @@ import { EnvService } from './env.service';
 
 @injectable()
 export class AptService {
-  constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
 
   async install(...packages: string[]): Promise<void> {
     const todo: string[] = [];

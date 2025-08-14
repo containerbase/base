@@ -16,6 +16,9 @@ export interface FileOwnerConfig {
 
 @injectable()
 export class PathService {
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
+
   /**
    * Path to `/tmp/containerbase/tool.init.d`.
    */
@@ -95,8 +98,6 @@ export class PathService {
   get versionPath(): string {
     return join(this.installDir, 'versions');
   }
-
-  constructor(@inject(EnvService) private envSvc: EnvService) {}
 
   async createDir(path: string, mode = 0o775): Promise<void> {
     if (await pathExists(path)) {

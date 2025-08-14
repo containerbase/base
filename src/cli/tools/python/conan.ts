@@ -3,22 +3,17 @@ import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { inject, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { AptService, EnvService, PathService } from '../../services';
+import { AptService } from '../../services';
 import { type Distro, getDistro } from '../../utils';
 import { PipVersionResolver } from './pip';
 import { PipBaseInstallService } from './utils';
 
 @injectable()
 export class ConanPrepareService extends BasePrepareService {
-  override readonly name: string = 'conan';
+  @inject(AptService)
+  private readonly aptSvc!: AptService;
 
-  constructor(
-    @inject(PathService) pathSvc: PathService,
-    @inject(EnvService) envSvc: EnvService,
-    @inject(AptService) private readonly aptSvc: AptService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  override readonly name: string = 'conan';
 
   override async prepare(): Promise<void> {
     await this.aptSvc.install('cmake', 'gcc', 'g++', 'make', 'perl');

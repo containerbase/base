@@ -8,7 +8,8 @@ const defaultPipRegistry = 'https://pypi.org/simple/';
 
 @injectable()
 export class LegacyToolInstallService {
-  constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
 
   async execute(tool: string, version: string): Promise<void> {
     logger.debug(`Installing legacy tool ${tool} v${version} ...`);

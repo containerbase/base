@@ -5,7 +5,7 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { EnvService, PathService, VersionService } from '../../services';
+import { VersionService } from '../../services';
 import { logger } from '../../utils';
 import { RubyGemJson } from './schema';
 
@@ -13,13 +13,8 @@ const defaultRegistry = 'https://rubygems.org/';
 
 @injectable()
 export abstract class RubyBaseInstallService extends BaseInstallService {
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(VersionService) protected versionSvc: VersionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  @inject(VersionService)
+  protected readonly versionSvc!: VersionService;
 
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};

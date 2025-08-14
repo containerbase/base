@@ -6,26 +6,15 @@ import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import {
-  AptService,
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-} from '../../services';
+import { AptService } from '../../services';
 import { getDistro, logger } from '../../utils';
 
 @injectable()
 export class PhpPrepareService extends BasePrepareService {
-  override readonly name = 'php';
+  @inject(AptService)
+  private readonly aptSvc!: AptService;
 
-  constructor(
-    @inject(PathService) pathSvc: PathService,
-    @inject(EnvService) envSvc: EnvService,
-    @inject(AptService) private readonly aptSvc: AptService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  override readonly name = 'php';
 
   override async prepare(): Promise<void> {
     const distro = await getDistro();
@@ -74,15 +63,6 @@ export class PhpInstallService extends BaseInstallService {
       case 'amd64':
         return 'x86_64';
     }
-  }
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
   }
 
   override async install(version: string): Promise<void> {

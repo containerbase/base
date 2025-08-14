@@ -4,26 +4,15 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
-import {
-  AptService,
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-} from '../services';
+import { AptService } from '../services';
 import { getDistro, parse, pathExists } from '../utils';
 
 @injectable()
 export class DotnetPrepareService extends BasePrepareService {
-  readonly name = 'dotnet';
+  @inject(AptService)
+  private readonly aptSvc!: AptService;
 
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(AptService) private readonly aptSvc: AptService,
-    @inject(PathService) pathSvc: PathService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  readonly name = 'dotnet';
 
   override async prepare(): Promise<void> {
     const distro = await getDistro();
@@ -98,15 +87,6 @@ export class DotnetInstallService extends BaseInstallService {
       case 'amd64':
         return 'x64';
     }
-  }
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
   }
 
   override isInstalled(version: string): Promise<boolean> {

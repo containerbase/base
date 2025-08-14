@@ -5,18 +5,13 @@ import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
-import { EnvService, PathService, VersionService } from '../../services';
+import { VersionService } from '../../services';
 import { logger } from '../../utils';
 
 @injectable()
 export abstract class PythonBaseInstallService extends BaseInstallService {
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(VersionService) protected versionSvc: VersionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  @inject(VersionService)
+  protected readonly versionSvc!: VersionService;
 
   protected prepareEnv(_version: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {};

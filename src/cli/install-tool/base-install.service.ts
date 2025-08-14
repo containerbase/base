@@ -1,8 +1,13 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
-import { injectable } from 'inversify';
-import type { EnvService, PathService } from '../services';
+import { inject, injectable } from 'inversify';
+import {
+  CompressionService,
+  EnvService,
+  HttpService,
+  PathService,
+} from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
 import { isValid, tool2path } from '../utils';
 
@@ -22,12 +27,16 @@ export interface ShellWrapperConfig {
 
 @injectable()
 export abstract class BaseInstallService {
-  abstract readonly name: string;
+  @inject(PathService)
+  protected readonly pathSvc!: PathService;
+  @inject(EnvService)
+  protected readonly envSvc!: EnvService;
+  @inject(HttpService)
+  protected readonly http!: HttpService;
+  @inject(CompressionService)
+  protected readonly compress!: CompressionService;
 
-  constructor(
-    protected readonly pathSvc: PathService,
-    protected readonly envSvc: EnvService,
-  ) {}
+  abstract readonly name: string;
 
   abstract install(version: string): Promise<void>;
 

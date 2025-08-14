@@ -17,7 +17,9 @@ export interface ExtractConfig {
 
 @injectable()
 export class CompressionService {
-  constructor(@inject(EnvService) private readonly envSvc: EnvService) {}
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
+
   async extract({
     file,
     cwd,

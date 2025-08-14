@@ -6,7 +6,8 @@ import { PathService } from './path.service';
 
 @injectable()
 export class VersionService {
-  constructor(@inject(PathService) private pathSvc: PathService) {}
+  @inject(PathService)
+  private readonly pathSvc!: PathService;
 
   async find(tool: string): Promise<string | null> {
     const path = join(this.pathSvc.versionPath, tool2path(tool));

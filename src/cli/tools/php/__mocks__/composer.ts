@@ -1,7 +1,6 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { BaseInstallService } from '../../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../../install-tool/tool-version-resolver';
-import { EnvService, PathService } from '../../../services';
 
 @injectable()
 export class ComposerVersionResolver extends ToolVersionResolver {
@@ -15,13 +14,6 @@ export class ComposerVersionResolver extends ToolVersionResolver {
 @injectable()
 export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
-
-  constructor(
-    @inject(PathService) pathSvc: PathService,
-    @inject(EnvService) envSvc: EnvService,
-  ) {
-    super(pathSvc, envSvc);
-  }
 
   override isInstalled(_version: string): Promise<boolean> {
     return Promise.resolve(false);

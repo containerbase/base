@@ -1,21 +1,12 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
-import { EnvService, HttpService, PathService } from '../services';
 
 @injectable()
 export class BazeliskInstallService extends BaseInstallService {
   readonly name = 'bazelisk';
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-  ) {
-    super(pathSvc, envSvc);
-  }
 
   override async install(version: string): Promise<void> {
     const baseurl = `https://github.com/bazelbuild/bazelisk/releases/download/v${version}/`;

@@ -11,7 +11,7 @@ import {
   type OptionsOfTextResponseBody,
   got,
 } from 'got';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, postConstruct } from 'inversify';
 import { logger } from '../utils';
 import { hash, hashFile } from '../utils/hash';
 import { EnvService } from './env.service';
@@ -33,18 +33,23 @@ export interface HttpDownloadConfig {
 
 @injectable()
 export class HttpService {
-  private _opts: Pick<OptionsInit, 'headers'>;
-  constructor(
-    @inject(EnvService) private envSvc: EnvService,
-    @inject(PathService) private pathSvc: PathService,
-  ) {
-    this._opts = {
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
+
+  @inject(PathService)
+  private readonly pathSvc!: PathService;
+
+  private readonly _opts: Pick<OptionsInit, 'headers'> = {};
+
+  @postConstruct()
+  protected init(): void {
+    Object.assign(this._opts, {
       headers: {
         'user-agent': `containerbase/${
           this.envSvc.version
         } node/${version.replace(/^v/, '')} (https://github.com/containerbase)`,
       },
-    };
+    });
   }
 
   async download({

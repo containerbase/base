@@ -10,15 +10,15 @@ export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');
 
 @injectable()
 export class PrepareToolService {
-  constructor(
-    @inject(PrepareLegacyToolsService)
-    private legacySvc: PrepareLegacyToolsService,
-    @multiInject(PREPARE_TOOL_TOKEN)
-    @optional()
-    private toolSvcs: BasePrepareService[] = [],
-    @inject(PathService) private pathSvc: PathService,
-    @inject(EnvService) private envSvc: EnvService,
-  ) {}
+  @inject(PrepareLegacyToolsService)
+  private readonly legacySvc!: PrepareLegacyToolsService;
+  @multiInject(PREPARE_TOOL_TOKEN)
+  @optional()
+  private readonly toolSvcs!: BasePrepareService[];
+  @inject(PathService)
+  private readonly pathSvc!: PathService;
+  @inject(EnvService)
+  private readonly envSvc!: EnvService;
 
   async prepare(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = [

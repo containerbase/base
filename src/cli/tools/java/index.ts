@@ -4,12 +4,7 @@ import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import {
-  CompressionService,
-  EnvService,
-  HttpService,
-  PathService,
-} from '../../services';
+import { CompressionService, HttpService } from '../../services';
 import { logger, parse } from '../../utils';
 import {
   createGradleSettings,
@@ -20,17 +15,12 @@ import {
 
 @injectable()
 export class JavaPrepareService extends BasePrepareService {
-  readonly name: string = 'java';
+  @inject(HttpService)
+  private readonly httpSvc!: HttpService;
+  @inject(CompressionService)
+  private readonly compressionSvc!: CompressionService;
 
-  constructor(
-    @inject(PathService) pathSvc: PathService,
-    @inject(EnvService) envSvc: EnvService,
-    @inject(HttpService) private readonly httpSvc: HttpService,
-    @inject(CompressionService)
-    private readonly compressionSvc: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
+  readonly name: string = 'java';
 
   override async prepare(): Promise<void> {
     await this.initialize();
@@ -124,15 +114,6 @@ export class JavaJrePrepareService extends JavaPrepareService {
 @injectable()
 export class JavaInstallService extends BaseInstallService {
   override name = 'java';
-
-  constructor(
-    @inject(EnvService) envSvc: EnvService,
-    @inject(PathService) pathSvc: PathService,
-    @inject(HttpService) private http: HttpService,
-    @inject(CompressionService) private compress: CompressionService,
-  ) {
-    super(pathSvc, envSvc);
-  }
 
   override async install(version: string): Promise<void> {
     const type = this.name === 'java-jre' ? 'jre' : 'jdk';
