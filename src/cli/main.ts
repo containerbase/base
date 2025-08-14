@@ -6,7 +6,6 @@ import { cliMode, logger, parseBinaryName, validateSystem } from './utils';
 
 declare global {
   // needs to be this to make eslint happy
-  // eslint-disable-next-line no-var
   var CONTAINERBASE_VERSION: string | undefined;
 }
 
