@@ -88,7 +88,6 @@
     "eslint-formatter-gha": "1.6.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-jest": "28.14.0",
     "eslint-plugin-promise": "7.2.1",
     "globals": "16.3.0",
     "husky": "9.1.7",
