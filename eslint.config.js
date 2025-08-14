@@ -89,6 +89,7 @@ export default tseslint.config(
       'no-negated-condition': 'error',
       'no-param-reassign': 'error',
       'no-template-curly-in-string': 'error',
+      radix: ['error', 'as-needed'],
 
       'sort-imports': [
         'error',
@@ -212,7 +213,7 @@ export default tseslint.config(
     files: ['**/*.spec.ts', 'test/**'],
     languageOptions: {
       globals: {
-        ...globals.jest,
+        ...globals.node,
       },
     },
     rules: {

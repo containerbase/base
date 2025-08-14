@@ -81,7 +81,7 @@ export class EnvService {
   }
 
   get userId(): number {
-    return parseInt(env.USER_ID ?? '12021', 10);
+    return parseInt(env.USER_ID ?? '12021');
   }
 
   get umask(): number {
