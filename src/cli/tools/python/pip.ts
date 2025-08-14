@@ -1,8 +1,9 @@
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { PypiJson } from './schema';
 
 @injectable()
+@injectFromBase()
 export abstract class PipVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (version === undefined || version === 'latest') {

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { inject, injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { CompressionService, HttpService } from '../../services';
@@ -14,6 +14,7 @@ import {
 } from './utils';
 
 @injectable()
+@injectFromBase()
 export class JavaPrepareService extends BasePrepareService {
   @inject(HttpService)
   private readonly httpSvc!: HttpService;
@@ -102,16 +103,19 @@ export class JavaPrepareService extends BasePrepareService {
 }
 
 @injectable()
+@injectFromBase()
 export class JavaJdkPrepareService extends JavaPrepareService {
   override readonly name = 'java-jdk';
 }
 
 @injectable()
+@injectFromBase()
 export class JavaJrePrepareService extends JavaPrepareService {
   override readonly name = 'java-jre';
 }
 
 @injectable()
+@injectFromBase()
 export class JavaInstallService extends BaseInstallService {
   override name = 'java';
 
@@ -179,11 +183,13 @@ export class JavaInstallService extends BaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export class JavaJreInstallService extends JavaInstallService {
   override readonly name = 'java-jre';
 }
 
 @injectable()
+@injectFromBase()
 export class JavaJdkInstallService extends JavaInstallService {
   override readonly name = 'java-jdk';
 }

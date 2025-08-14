@@ -1,10 +1,11 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { logger } from '../../utils';
 import { NpmPackageMeta, NpmPackageMetaList } from './schema';
 
 @injectable()
+@injectFromBase()
 export class NodeVersionResolver extends ToolVersionResolver {
   readonly tool = 'node';
 
@@ -21,6 +22,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
 }
 
 @injectable()
+@injectFromBase()
 export abstract class NpmVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
@@ -39,6 +41,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
 }
 
 @injectable()
+@injectFromBase()
 export class YarnVersionResolver extends ToolVersionResolver {
   readonly tool = 'yarn';
   async resolve(version: string | undefined): Promise<string | undefined> {

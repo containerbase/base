@@ -2,13 +2,14 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import type { HttpChecksumType } from '../../services/http.service';
 import { logger, parse } from '../../utils';
 
 @injectable()
+@injectFromBase()
 export class MavenInstallService extends BaseInstallService {
   readonly name = 'maven';
 
@@ -98,6 +99,7 @@ export class MavenInstallService extends BaseInstallService {
 }
 
 @injectable()
+@injectFromBase()
 export class MavenVersionResolver extends ToolVersionResolver {
   readonly tool = 'maven';
 

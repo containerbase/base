@@ -1,11 +1,12 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { semverGte } from '../utils';
 
 @injectable()
+@injectFromBase()
 export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 

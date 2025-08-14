@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { injectFromBase, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 
 @injectable()
+@injectFromBase()
 export class KubectlInstallService extends BaseInstallService {
   readonly name = 'kubectl';
 
