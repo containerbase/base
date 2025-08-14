@@ -186,7 +186,7 @@ RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
 RUN install-tool pipenv 2025.0.4
 # renovate: datasource=pypi
-RUN install-tool pdm 2.25.5
+RUN install-tool pdm 2.25.6
 # renovate: datasource=pypi
 RUN install-tool poetry 2.1.4
 # renovate: datasource=pypi
