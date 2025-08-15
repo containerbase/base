@@ -9,8 +9,8 @@ import prettyMilliseconds from 'pretty-ms';
 import { EnvService, createContainer } from '../services';
 import { logger } from '../utils';
 
-export class DownloadFileCommand extends Command {
-  static override paths = [['download', 'file'], ['df']];
+export class FileDownloadCommand extends Command {
+  static override paths = [['file', 'download'], ['fd']];
 
   static override usage = Command.Usage({
     description: 'Downloads a file and optionally validates the checksum.',
@@ -66,5 +66,21 @@ export class DownloadFileCommand extends Command {
         );
       }
     }
+  }
+}
+
+export class DownloadFileCommand extends FileDownloadCommand {
+  static override paths = [['download', 'file'], ['df']];
+
+  static override usage = Command.Usage({
+    description: 'Deprecated. Use `file download` command instead.',
+  });
+
+  // Override the execute method to maintain compatibility with existing code
+  override execute(): Promise<number | void> {
+    logger.debug(
+      'DownloadFileCommand is deprecated. Use FileDownloadCommand instead.',
+    );
+    return super.execute();
   }
 }

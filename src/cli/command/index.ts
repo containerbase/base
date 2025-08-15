@@ -2,7 +2,7 @@ import type { Cli } from 'clipanion';
 import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
 import { CleanupPathCommand } from './cleanup-path';
-import { DownloadFileCommand } from './download-file';
+import { DownloadFileCommand, FileDownloadCommand } from './file-download';
 import { InitToolCommand } from './init-tool';
 import { InstallGemCommand, InstallGemShortCommand } from './install-gem';
 import { InstallNpmCommand, InstallNpmShortCommand } from './install-npm';
@@ -36,6 +36,7 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
     return;
   }
 
+  cli.register(FileDownloadCommand);
   cli.register(DownloadFileCommand);
   cli.register(InstallGemCommand);
   cli.register(InstallNpmCommand);
