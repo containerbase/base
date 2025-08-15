@@ -13,7 +13,7 @@ export class FileDownloadCommand extends Command {
   static override paths = [['file', 'download'], ['fd']];
 
   static override usage = Command.Usage({
-    description: 'Downloads a file and optionally validates the checksum.',
+    description: 'Downloads a file.',
   });
 
   url = Option.String();
