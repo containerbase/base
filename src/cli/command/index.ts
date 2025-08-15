@@ -3,6 +3,7 @@ import type { CliMode } from '../utils';
 import { logger } from '../utils/logger';
 import { CleanupPathCommand } from './cleanup-path';
 import { DownloadFileCommand, FileDownloadCommand } from './file-download';
+import { FileExistsCommand } from './file-exists';
 import { InitToolCommand } from './init-tool';
 import { InstallGemCommand, InstallGemShortCommand } from './install-gem';
 import { InstallNpmCommand, InstallNpmShortCommand } from './install-npm';
@@ -38,6 +39,7 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
 
   cli.register(FileDownloadCommand);
   cli.register(DownloadFileCommand);
+  cli.register(FileExistsCommand);
   cli.register(InstallGemCommand);
   cli.register(InstallNpmCommand);
   cli.register(InstallPipCommand);

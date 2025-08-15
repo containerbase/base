@@ -58,7 +58,7 @@ teardown() {
   assert test "[[ ""$real_fill_level"" =~ ^[0-9]+$ ]]"
 
   # overwrite function to verify deletion
-  # shellcheck disable=SC2317
+  # shellcheck disable=SC2317,SC2329
   function get_cache_fill_level () {
     echo "$TEST_FILL_LEVEL"
   }
@@ -354,4 +354,27 @@ teardown() {
   # delete cache entry
   rm -rf "${CONTAINERBASE_CACHE_DIR:?}/${key_checksum}"
   rm -rf "${CONTAINERBASE_CACHE_DIR:?}/${path_checksum}"
+}
+
+@test "file_exists" {
+  bats_require_minimum_version 1.5.0
+  # create cache dir
+  CONTAINERBASE_CACHE_DIR="${TEST_ROOT_DIR}/cache"
+  mkdir -p "${CONTAINERBASE_CACHE_DIR}"
+
+  local file="https://github.com/containerbase/base/releases/download/7.10.0/containerbase.tar.xz"
+
+  run --separate-stderr file_exists "${file}"
+  assert_success
+  assert_output "200"
+
+  run --separate-stderr file_exists "${file}.xx"
+  assert_success
+  assert_output "404"
+
+  export CONTAINERBASE_LOG_LEVEL="silent"
+
+  run --separate-stderr file_exists "${file}.xx"
+  assert_success
+  assert_output "0"
 }
