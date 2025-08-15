@@ -183,8 +183,8 @@ importers:
         specifier: 0.18.1
         version: 0.18.1
       nock:
-        specifier: 14.0.9
-        version: 14.0.9
+        specifier: 14.0.10
+        version: 14.0.10
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
@@ -2806,8 +2806,8 @@ packages:
   nerf-dart@1.0.0:
     resolution: {integrity: sha512-EZSPZB70jiVsivaBLYDCyntd5eH8NTSMOn3rB+HxwdmKThGELLdYv8qVIMWvZEFy9w8ZZpW9h9OB32l1rGtj7g==}
 
-  nock@14.0.9:
-    resolution: {integrity: sha512-aVIPgW9WVyb3XPCqfrwETc+hazxzgt8/QvARHAhC6BYHtTsZONUjlXoIB8EGmwqUBkKvOew4yqkGRBmwctdCrw==}
+  nock@14.0.10:
+    resolution: {integrity: sha512-Q7HjkpyPeLa0ZVZC5qpxBt5EyLczFJ91MEewQiIi9taWuA0KB/MDJlUWtON+7dGouVdADTQsf9RA7TZk6D8VMw==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.75.0:
@@ -6809,7 +6809,7 @@ snapshots:
 
   nerf-dart@1.0.0: {}
 
-  nock@14.0.9:
+  nock@14.0.10:
     dependencies:
       '@mswjs/interceptors': 0.39.5
       json-stringify-safe: 5.0.1
