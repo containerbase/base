@@ -48,14 +48,14 @@ class ReleaseCommand extends Command {
     }
 
     r = shell.exec(
-      `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}:@${digest}`,
+      `cosign sign --yes ${process.env.OWNER}/${process.env.FILE}@${digest}`,
     );
     if (r.code) {
       return 1;
     }
 
     r = shell.exec(
-      `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}:@${digest}`,
+      `cosign sign --yes ghcr.io/${process.env.OWNER}/${process.env.FILE}@${digest}`,
     );
     if (r.code) {
       return 1;
