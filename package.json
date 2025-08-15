@@ -127,6 +127,9 @@
         "darwin"
       ]
     },
+    "overrides": {
+      "verbose": "-"
+    },
     "patchedDependencies": {
       "@yao-pkg/pkg": "patches/@yao-pkg__pkg.patch",
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",

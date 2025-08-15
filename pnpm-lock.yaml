@@ -8,6 +8,7 @@ overrides:
   bats-support: 0.3.0
   esbuild: 0.25.8
   tsconfig-paths: 4.2.0
+  verbose: '-'
 
 patchedDependencies:
   '@yao-pkg/pkg':
