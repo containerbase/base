@@ -54,7 +54,7 @@ RUN install-tool bun 1.2.20
 RUN install-tool dart 3.9.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.15.1
+RUN install-tool devbox 0.16.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v28.3.3
