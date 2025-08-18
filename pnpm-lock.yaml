@@ -138,8 +138,8 @@ importers:
         specifier: 1.12.0
         version: 1.12.0
       bats-assert:
-        specifier: 2.1.0
-        version: 2.1.0(bats-support@0.3.0(bats@1.12.0))(bats@1.12.0)
+        specifier: 2.2.0
+        version: 2.2.0(bats-support@0.3.0(bats@1.12.0))(bats@1.12.0)
       bats-support:
         specifier: 0.3.0
         version: 0.3.0(bats@1.12.0)
@@ -1205,8 +1205,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  bats-assert@2.1.0:
-    resolution: {integrity: sha512-eHEFUytbDhe8js0W4c+H+oYGIqClEH0nV46pQ5HWJy6Yoj0DbeDvDF4kq6YtrR4TlzVfsJIJ8Cvtqg/iqCc4dQ==}
+  bats-assert@2.2.0:
+    resolution: {integrity: sha512-UwS5N8JItn8gCiFl5LegBgVzSAy4Wpj241FebQXpiF+17yzeuMGLF/n9mUze4fmRUXryF/8nb3aAh+C7sTfQ2g==}
     peerDependencies:
       bats: 0.4 || ^1
       bats-support: 0.3.0
@@ -4962,7 +4962,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  bats-assert@2.1.0(bats-support@0.3.0(bats@1.12.0))(bats@1.12.0):
+  bats-assert@2.2.0(bats-support@0.3.0(bats@1.12.0))(bats@1.12.0):
     dependencies:
       bats: 1.12.0
       bats-support: 0.3.0(bats@1.12.0)
