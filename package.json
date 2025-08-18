@@ -131,6 +131,7 @@
       "verbose": "-"
     },
     "patchedDependencies": {
+      "@semantic-release/github": "patches/@semantic-release__github.patch",
       "@yao-pkg/pkg": "patches/@yao-pkg__pkg.patch",
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
       "global-agent": "patches/global-agent.patch"
