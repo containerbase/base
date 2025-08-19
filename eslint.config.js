@@ -2,10 +2,13 @@ import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
 import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import eslintPluginImport from 'eslint-plugin-import';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import * as importX from 'eslint-plugin-import-x';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+
+const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
 export default tseslint.config(
   {
@@ -19,20 +22,20 @@ export default tseslint.config(
       '.pnpm-store',
     ],
   },
-  js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  eslintPluginImport.flatConfigs.errors,
-  eslintPluginImport.flatConfigs.warnings,
-  eslintPluginImport.flatConfigs.recommended,
-  eslintPluginImport.flatConfigs.typescript,
-  vitest.configs.recommended,
-  eslintPluginPromise.configs['flat/recommended'],
-  eslintContainerbase.configs.all,
   {
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
     },
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+  vitest.configs.recommended,
+  eslintPluginPromise.configs['flat/recommended'],
+  eslintContainerbase.configs.all,
+  {
+    ...jsFiles,
+    extends: [importX.flatConfigs.recommended, importX.flatConfigs.typescript],
 
     languageOptions: {
       globals: {
@@ -50,24 +53,21 @@ export default tseslint.config(
     },
 
     settings: {
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.lint.json',
-        },
-      },
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({ project: 'tsconfig.lint.json' }),
+      ],
     },
   },
   eslintConfigPrettier,
   {
-    files: ['**/*.{ts,js,cjs,mjs}'],
+    ...jsFiles,
     rules: {
-      'import/default': 2,
-      'import/named': 2,
-      'import/namespace': 2,
-      'import/no-named-as-default-member': 0,
+      'import-x/default': 2,
+      'import-x/named': 2,
+      'import-x/namespace': 2,
+      'import-x/no-named-as-default-member': 0,
 
-      'import/no-extraneous-dependencies': [
+      'import-x/no-extraneous-dependencies': [
         'error',
         {
           devDependencies: [
@@ -81,8 +81,8 @@ export default tseslint.config(
         },
       ],
 
-      'import/prefer-default-export': 0,
-      'import/no-cycle': 2,
+      'import-x/prefer-default-export': 0,
+      'import-x/no-cycle': 2,
       'consistent-return': 0,
       eqeqeq: 'error',
       'no-console': 'error',
@@ -101,14 +101,14 @@ export default tseslint.config(
         },
       ],
 
-      'import/no-unresolved': [
+      'import-x/no-unresolved': [
         'error',
         {
           ignore: ['^mdast$'],
         },
       ],
 
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           alphabetize: {
@@ -211,16 +211,11 @@ export default tseslint.config(
   },
   {
     files: ['**/*.spec.ts', 'test/**'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
     rules: {
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
-      'import/no-dynamic-require': 0,
+      'import-x/no-dynamic-require': 0,
       'global-require': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
@@ -241,11 +236,6 @@ export default tseslint.config(
   },
   {
     files: ['tools/**/*.{ts,js,mjs,cjs}', '__mocks__/*.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
     rules: {
       'no-console': 'off',
     },
@@ -259,7 +249,7 @@ export default tseslint.config(
   {
     files: ['**/*.mjs', '**/*.js'],
     rules: {
-      'import/extensions': 0,
+      'import-x/extensions': 0,
     },
   },
 );

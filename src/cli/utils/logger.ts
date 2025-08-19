@@ -1,5 +1,6 @@
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+// eslint-disable-next-line import-x/no-named-as-default
 import pino, { type TransportTargetOptions, levels, transport } from 'pino';
 
 const level =
