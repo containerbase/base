@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { inject, injectFromBase, injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import {
@@ -16,7 +16,6 @@ import { logger, parse, pathExists } from '../../utils';
 const defaultRegistry = 'https://registry.npmjs.org/';
 
 @injectable()
-@injectFromBase()
 export abstract class NodeBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
@@ -79,7 +78,6 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
 }
 
 @injectable()
-@injectFromBase()
 export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   protected tool(_version: string): string {
     return this.name;

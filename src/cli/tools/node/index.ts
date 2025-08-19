@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { getDistro, parse } from '../../utils';
 import {
@@ -13,7 +13,7 @@ import {
 } from './utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
   override async prepare(): Promise<void> {
@@ -37,7 +37,7 @@ export class NodePrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
 

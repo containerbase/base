@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { inject, injectFromBase, injectable } from 'inversify';
+import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
@@ -10,7 +10,7 @@ import { AptService } from '../../services';
 import { getDistro, logger } from '../../utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class PhpPrepareService extends BasePrepareService {
   @inject(AptService)
   private readonly aptSvc!: AptService;
@@ -54,7 +54,7 @@ export class PhpPrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class PhpInstallService extends BaseInstallService {
   readonly name = 'php';
 
@@ -123,7 +123,7 @@ export class PhpInstallService extends BaseInstallService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class PhpVersionResolver extends ToolVersionResolver {
   readonly tool = 'php';
 

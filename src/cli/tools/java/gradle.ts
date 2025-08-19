@@ -2,14 +2,14 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { semverCoerce } from '../../utils';
 import { GradleVersionData } from './schema';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
 
@@ -56,7 +56,7 @@ export class GradleInstallService extends BaseInstallService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class GradleVersionResolver extends ToolVersionResolver {
   readonly tool = 'gradle';
 

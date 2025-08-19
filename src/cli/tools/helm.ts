@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class HelmInstallService extends BaseInstallService {
   readonly name = 'helm';
 

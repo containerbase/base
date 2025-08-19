@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { inject, injectFromBase, injectable } from 'inversify';
+import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import { AptService } from '../services';
 import { getDistro, parse, pathExists } from '../utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DotnetPrepareService extends BasePrepareService {
   @inject(AptService)
   private readonly aptSvc!: AptService;
@@ -78,7 +78,7 @@ export class DotnetPrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DotnetInstallService extends BaseInstallService {
   readonly name = 'dotnet';
 
