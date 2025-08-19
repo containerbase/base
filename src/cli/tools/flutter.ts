@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 import {
@@ -12,7 +12,7 @@ import {
 } from './dart/utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
@@ -57,7 +57,7 @@ export class FlutterPrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 

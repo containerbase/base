@@ -1,11 +1,11 @@
 import path from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { semverCoerce } from '../utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class ProtocInstallService extends BaseInstallService {
   readonly name = 'protoc';
 

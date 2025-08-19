@@ -1,10 +1,10 @@
 import { maxSatisfying } from '@renovatebot/pep440';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { logger } from '../../utils';
 import { PipVersionResolver } from './pip';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class PoetryVersionResolver extends PipVersionResolver {
   override tool = 'poetry';
 

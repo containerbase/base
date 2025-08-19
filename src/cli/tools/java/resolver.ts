@@ -1,10 +1,10 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 import { resolveLatestJavaLtsVersion } from './utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class JavaVersionResolver extends ToolVersionResolver {
   readonly tool: string = 'java';
 
@@ -22,13 +22,13 @@ export class JavaVersionResolver extends ToolVersionResolver {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class JavaJreVersionResolver extends JavaVersionResolver {
   override readonly tool = 'java-jre';
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class JavaJdkVersionResolver extends JavaVersionResolver {
   override readonly tool = 'java-jdk';
 }

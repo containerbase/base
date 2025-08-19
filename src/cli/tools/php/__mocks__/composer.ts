@@ -1,9 +1,9 @@
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../../install-tool/tool-version-resolver';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class ComposerVersionResolver extends ToolVersionResolver {
   readonly tool = 'composer';
 
@@ -13,7 +13,7 @@ export class ComposerVersionResolver extends ToolVersionResolver {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
 

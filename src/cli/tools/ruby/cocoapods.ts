@@ -1,11 +1,11 @@
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { semverSatisfies } from '../../utils';
 import { RubyBaseInstallService, RubyGemVersionResolver } from './utils';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class CocoapodsInstallService extends RubyBaseInstallService {
   override readonly name: string = 'cocoapods';
 
@@ -57,7 +57,7 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class CocoapodsVersionResolver extends RubyGemVersionResolver {
   override readonly tool: string = 'cocoapods';
 }

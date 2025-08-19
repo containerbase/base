@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
@@ -17,7 +17,7 @@ export class DockerPrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DockerInstallService extends BaseInstallService {
   readonly name = 'docker';
 

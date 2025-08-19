@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
-import { injectFromBase, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { parse } from '../../utils';
@@ -20,7 +20,7 @@ import {
 // https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DartPrepareService extends BasePrepareService {
   readonly name = 'dart';
 
@@ -37,7 +37,7 @@ export class DartPrepareService extends BasePrepareService {
 }
 
 @injectable()
-@injectFromBase()
+@injectFromHierarchy()
 export class DartInstallService extends BaseInstallService {
   readonly name = 'dart';
 
