@@ -6,7 +6,7 @@ index b91c39d1fd1f3c251eb3b1b29200921086437f90..abcc5716de218426494123c2d33c03c4
      name: template(releaseNameTemplate)(context),
      body: template(releaseBodyTemplate)(context),
      prerelease: isPrerelease(branch),
-+    make_latest: branch.type === "release" && branch.main && !branch.prerelease,
++    make_latest: branch.type === "release" && branch.main && branch.prerelease ? "false" : "true",
    };
  
    debug("release object: %O", release);
