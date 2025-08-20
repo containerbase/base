@@ -40,6 +40,7 @@ export class InstallToolService {
         if (await toolSvc.isInstalled(version)) {
           logger.info({ tool }, 'tool already installed');
           await this.linkAndTest(toolSvc, version);
+          await this.versionSvc.update(tool, version);
           return;
         }
 
