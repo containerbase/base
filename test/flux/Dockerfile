@@ -74,7 +74,13 @@ RUN install-tool flux 0.27.2
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN flux -v | grep "0.27.2"
+RUN set -ex; flux -v | grep "0.27.2"
+
+RUN install-tool flux "${FLUX_VERSION}"
+RUN set -ex; flux -v | grep "${FLUX_VERSION#v}"
+# do not update
+RUN install-tool flux 0.27.2
+RUN set -ex; flux -v | grep "0.27.2"
 
 #--------------------------------------
 # final
