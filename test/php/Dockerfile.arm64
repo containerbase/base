@@ -45,7 +45,7 @@ RUN install-tool php 8.4.11
 FROM test-php AS test-composer
 
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
-RUN install-tool composer 2.8.10
+RUN install-tool composer 2.8.11
 
 #--------------------------------------
 # Image: final
