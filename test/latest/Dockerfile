@@ -308,6 +308,15 @@ RUN set -ex; \
   install-tool protoc; \
   true
 
+RUN set -ex; \
+  # install older version; \
+  install-tool protoc v25.7; \
+  # install latest version; \
+  install-tool protoc; \
+  # uninstall older version; \
+  uninstall-tool protoc v25.7; \
+  protoc --version; \
+  true
 
 #--------------------------------------
 # final

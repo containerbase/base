@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
+import { ensurePaths, rootPath } from '../../../test/path';
 import { VersionService, createContainer } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
@@ -11,8 +12,7 @@ import {
 } from '../tools/ruby/utils';
 import { isDockerBuild, logger } from '../utils';
 import { MissingParent } from '../utils/codes';
-import { installTool, linkTool, resolveVersion } from '.';
-import { ensurePaths, rootPath } from '~test/path';
+import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
 vi.mock('del');
 vi.mock('nano-spawn');
@@ -26,6 +26,7 @@ vi.mock('../utils', async (importActual) => ({
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
     await ensurePaths([
+      'opt/containerbase/bin',
       'opt/containerbase/data',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
@@ -127,5 +128,32 @@ describe('cli/install-tool/index', () => {
     const spy = vi.spyOn(fs, 'writeFile');
     expect(await linkTool('node', { srcDir: '/bin/bash' })).toBeUndefined();
     expect(spy).toHaveBeenCalledOnce();
+  });
+
+  describe('uninstallTool', () => {
+    test('works', async () => {
+      // not installed
+      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+      // legacy not supported
+      expect(await uninstallTool('leg', '1.0.0')).toBe(2);
+      // linked tool uninstall not supported
+      expect(await installTool('bun', '2.0.0')).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0')).toBe(1);
+
+      // can uninstall old version
+      expect(await installTool('bun', '2.0.1')).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0', true)).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+    });
+
+    test.each([
+      { type: 'gem' as const },
+      { type: 'npm' as const },
+      { type: 'pip' as const },
+    ])('works: $type', async ({ type }) => {
+      expect(
+        await uninstallTool(`dummy-${type}`, '2.0.0', false, type),
+      ).toBeUndefined();
+    });
   });
 });
