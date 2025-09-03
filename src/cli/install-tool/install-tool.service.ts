@@ -22,7 +22,7 @@ export class InstallToolService {
   @inject(VersionService)
   private readonly versionSvc!: VersionService;
 
-  async execute(
+  async install(
     tool: string,
     version: string,
     dryRun = false,

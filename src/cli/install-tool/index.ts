@@ -225,7 +225,7 @@ export function installTool(
       }
     }
   }
-  return container.get(InstallToolService).execute(tool, version, dryRun);
+  return container.get(InstallToolService).install(tool, version, dryRun);
 }
 
 export async function resolveVersion(

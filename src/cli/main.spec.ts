@@ -18,6 +18,7 @@ vi.mock('./utils/common', async (importActual) => ({
 
 describe('cli/main', () => {
   test('works', async () => {
+    vi.spyOn(process.stdout, 'write').mockReturnValue(true);
     expect(await main()).toBeUndefined();
   });
 });
