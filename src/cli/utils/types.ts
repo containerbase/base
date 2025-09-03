@@ -11,6 +11,10 @@ export const cliModes = [
   'install-pip',
   'install-tool',
   'prepare-tool',
+  'uninstall-gem',
+  'uninstall-npm',
+  'uninstall-pip',
+  'uninstall-tool',
 ] as const;
 
 export type CliMode = (typeof cliModes)[number];
