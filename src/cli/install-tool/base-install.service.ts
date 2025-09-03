@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
 import {
   CompressionService,
@@ -83,6 +84,13 @@ export abstract class BaseInstallService {
 
   toString(): string {
     return this.name;
+  }
+
+  async uninstall(version: string): Promise<void> {
+    await fs.rm(this.pathSvc.versionedToolPath(this.name, version), {
+      recursive: true,
+      force: true,
+    });
   }
 
   validate(version: string): Promise<boolean> {

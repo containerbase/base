@@ -333,3 +333,45 @@ export async function resolveVersion(
   const svc = await container.getAsync(ToolVersionResolverService);
   return svc.resolve(tool, version);
 }
+
+export async function uninstallTool(
+  tool: string,
+  version: string,
+  dryRun = false,
+  type?: InstallToolType,
+): Promise<number | void> {
+  const container = await prepareInstallContainer();
+  if (type) {
+    switch (type) {
+      case 'gem': {
+        @injectable()
+        @injectFromHierarchy()
+        class GenericInstallService extends RubyBaseInstallService {
+          override readonly name: string = tool;
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
+        break;
+      }
+      case 'npm': {
+        @injectable()
+        @injectFromHierarchy()
+        class GenericInstallService extends NpmBaseInstallService {
+          override readonly name: string = tool;
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
+        break;
+      }
+      case 'pip': {
+        @injectable()
+        @injectFromHierarchy()
+        class GenericInstallService extends PipBaseInstallService {
+          override readonly name: string = tool;
+        }
+        container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
+        break;
+      }
+    }
+  }
+  const svc = await container.getAsync(InstallToolService);
+  return svc.uninstall(tool, version, dryRun);
+}

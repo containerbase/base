@@ -166,6 +166,60 @@ export class InstallToolService {
     }
   }
 
+  async uninstall(
+    tool: string,
+    version: string,
+    dryRun = false,
+  ): Promise<number | void> {
+    logger.trace(
+      { tools: this.toolSvcs.map((t) => t.name) },
+      'supported tools',
+    );
+
+    await this.pathSvc.ensureBasePaths();
+
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+    if (toolSvc) {
+      if (
+        !(await this.versionSvc.isInstalled({
+          name: tool,
+          version,
+        }))
+      ) {
+        logger.info({ tool }, 'tool not installed');
+        return;
+      }
+
+      logger.debug({ tool }, 'validate tool');
+      if (
+        await this.versionSvc.isCurrent({
+          name: tool,
+          tool: { name: tool, version },
+        })
+      ) {
+        logger.fatal(
+          { tool, version },
+          'tool version is currently linked and cannot be uninstalled',
+        );
+        return 1;
+      }
+
+      // TODO: validate child tools
+
+      if (dryRun) {
+        logger.info(`Dry run: uninstall tool ${tool} ...`);
+        return;
+      } else {
+        logger.debug({ tool }, 'uninstall tool');
+        await toolSvc.uninstall(version);
+        await this.versionSvc.removeInstalled({ name: tool, version });
+      }
+    } else {
+      logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');
+      return 2;
+    }
+  }
+
   private async linkAndTest(
     toolSvc: BaseInstallService,
     version: string,

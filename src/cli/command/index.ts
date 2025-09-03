@@ -8,4 +8,8 @@ import './install-pip';
 import './install-tool';
 import './link-tool';
 import './prepare-tool';
+import './uninstall-gem';
+import './uninstall-npm';
+import './uninstall-pip';
+import './uninstall-tool';
 export { registerCommands } from './utils';
