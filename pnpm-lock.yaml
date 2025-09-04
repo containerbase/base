@@ -53,8 +53,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(patch_hash=c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13)
       got:
-        specifier: 14.4.7
-        version: 14.4.7
+        specifier: 14.4.8
+        version: 14.4.8
       ini:
         specifier: 5.0.0
         version: 5.0.0
@@ -2029,8 +2029,8 @@ packages:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
 
-  got@14.4.7:
-    resolution: {integrity: sha512-DI8zV1231tqiGzOiOzQWDhsBmncFW7oQDH6Zgy6pDPrqJuVZMtoSgPLLsBZQj8Jg4JFfwoOsDA8NGtLQLnIx2g==}
+  got@14.4.8:
+    resolution: {integrity: sha512-vxwU4HuR0BIl+zcT1LYrgBjM+IJjNElOjCzs0aPgHorQyr/V6H6Y73Sn3r3FOlUffvWD+Q5jtRuGWaXkU8Jbhg==}
     engines: {node: '>=20'}
 
   graceful-fs@4.2.10:
@@ -5936,7 +5936,7 @@ snapshots:
 
   gopd@1.2.0: {}
 
-  got@14.4.7:
+  got@14.4.8:
     dependencies:
       '@sindresorhus/is': 7.0.2
       '@szmarczak/http-timer': 5.0.1
