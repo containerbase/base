@@ -21,7 +21,7 @@ export class FileExistsCommand extends Command {
     try {
       const container = createContainer();
 
-      const env = container.get(EnvService);
+      const env = await container.getAsync(EnvService);
       const nUrl = env.replaceUrl(this.url);
       const res = await got.head(nUrl, {
         throwHttpErrors: false,

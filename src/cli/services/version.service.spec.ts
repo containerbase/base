@@ -6,14 +6,14 @@ import { rootPath } from '~test/path';
 
 describe('cli/services/version.service', () => {
   let child!: Container;
+  let svc!: VersionService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     child = createContainer();
+    svc = await child.getAsync(VersionService);
   });
 
   test('works', async () => {
-    const svc = child.get(VersionService);
-
     // doesn't fail
     await svc.update('node', '14.17.0');
 

@@ -12,7 +12,7 @@ describe('cli/services/compression.service', () => {
   });
 
   test('extracts with bstar', async () => {
-    const svc = child.get(CompressionService);
+    const svc = await child.getAsync(CompressionService);
 
     await expect(
       svc.extract({ file: 'some.txz', cwd: globalThis.cacheDir }),

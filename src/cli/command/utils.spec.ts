@@ -17,10 +17,10 @@ describe('cli/command/utils', () => {
     expect(getVersion('del-cli')).toBe('1.0.1');
   });
 
-  test('isToolIgnored', () => {
-    expect(isToolIgnored('node')).toBe(false);
+  test('isToolIgnored', async () => {
+    expect(await isToolIgnored('node')).toBe(false);
     env.IGNORED_TOOLS = 'node,pnpm';
-    expect(isToolIgnored('node')).toBe(true);
-    expect(isToolIgnored('php')).toBe(false);
+    expect(await isToolIgnored('node')).toBe(true);
+    expect(await isToolIgnored('php')).toBe(false);
   });
 });

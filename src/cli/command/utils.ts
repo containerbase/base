@@ -5,7 +5,7 @@ export function getVersion(tool: string): string | undefined {
   return env[tool.replace('-', '_').toUpperCase() + '_VERSION'];
 }
 
-export function isToolIgnored(tool: string): boolean {
+export async function isToolIgnored(tool: string): Promise<boolean> {
   const container = createContainer();
-  return container.get(EnvService).isToolIgnored(tool);
+  return (await container.getAsync(EnvService)).isToolIgnored(tool);
 }
