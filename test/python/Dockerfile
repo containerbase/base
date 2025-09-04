@@ -223,7 +223,7 @@ RUN prepare-tool conan
 USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.20.0
+RUN install-tool conan 2.20.1
 
 RUN set -ex; \
     cd b-conan; \
