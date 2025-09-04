@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('del', () => mocks);
 
 describe('cli/command/cleanup-path', () => {
-  test('download-file', async () => {
+  test('works', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
     prepareCommands(cli, null);
 
@@ -22,5 +22,10 @@ describe('cli/command/cleanup-path', () => {
       ['/tmp/**', '/var/tmp', '/some/path/**'],
       { dot: true },
     );
+
+    mocks.deleteAsync.mockRejectedValueOnce(new Error('test'));
+    expect(
+      await cli.run(['cleanup', 'path', '/tmp/**:/var/tmp', '/some/path/**']),
+    ).toBe(1);
   });
 });

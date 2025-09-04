@@ -18,7 +18,7 @@ describe('cli/command/install-npm', () => {
     delete env.DEL_CLI_VERSION;
   });
 
-  test('works', async () => {
+  test('install-npm', async () => {
     const cli = new Cli({ binaryName: 'install-npm' });
     prepareCommands(cli, 'install-npm');
 
@@ -46,5 +46,35 @@ describe('cli/command/install-npm', () => {
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['del-cli'])).toBe(1);
+  });
+
+  test('containerbase-cli install npm', async () => {
+    const cli = new Cli({ binaryName: 'containerbase-cli' });
+    prepareCommands(cli, null);
+
+    expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(MissingVersion);
+
+    mocks.resolveVersion.mockResolvedValueOnce('4.0.0');
+    expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(0);
+
+    env.DEL_CLI_VERSION = '5.0.0';
+    expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(0);
+    expect(mocks.installTool).toHaveBeenCalledTimes(2);
+    expect(mocks.installTool).toHaveBeenCalledWith(
+      'del-cli',
+      '4.0.0',
+      false,
+      'npm',
+    );
+    expect(mocks.installTool).toHaveBeenCalledWith(
+      'del-cli',
+      '5.0.0',
+      false,
+      'npm',
+    );
+    expect(await cli.run(['install', 'npm', 'del-cli', '-d'])).toBe(0);
+
+    mocks.installTool.mockRejectedValueOnce(new Error('test'));
+    expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(1);
   });
 });

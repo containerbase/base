@@ -32,6 +32,7 @@ export class InitToolCommand extends Command {
         logger.fatal(err.message);
       }
       return 1;
+      /* v8 ignore next -- coverage bug */
     } finally {
       if (error) {
         logger.fatal(

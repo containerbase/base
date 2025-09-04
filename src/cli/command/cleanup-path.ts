@@ -34,6 +34,7 @@ export class CleanupPathCommand extends Command {
         logger.error(err.message);
       }
       return 1;
+      /* v8 ignore next -- coverage bug */
     } finally {
       if (error) {
         logger.fatal(

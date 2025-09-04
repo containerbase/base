@@ -13,6 +13,8 @@ describe('cli/utils/index', () => {
     expect((await import('.')).cliMode()).toBe('install-gem');
     procMocks.argv0 = 'install-npm';
     expect((await import('.')).cliMode()).toBe('install-npm');
+    procMocks.argv0 = 'install-pip';
+    expect((await import('.')).cliMode()).toBe('install-pip');
     procMocks.argv0 = 'install-tool';
     expect((await import('.')).cliMode()).toBe('install-tool');
     procMocks.argv0 = 'prepare-tool';

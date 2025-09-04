@@ -2,6 +2,7 @@ import { Command } from 'clipanion';
 import { InstallToolCommand } from './install-tool';
 
 export class InstallGemCommand extends InstallToolCommand {
+  static override paths = [['install', 'gem']];
   static override usage = Command.Usage({
     description: 'Installs a gem package into the container.',
     examples: [
