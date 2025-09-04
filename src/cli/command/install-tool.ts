@@ -37,7 +37,7 @@ export class InstallToolCommand extends Command {
   override async execute(): Promise<number | void> {
     const start = Date.now();
 
-    if (isToolIgnored(this.name)) {
+    if (await isToolIgnored(this.name)) {
       logger.info({ tool: this.name }, 'tool ignored');
       return 0;
     }

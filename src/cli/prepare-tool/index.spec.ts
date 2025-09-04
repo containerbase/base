@@ -33,7 +33,7 @@ describe('cli/prepare-tool/index', () => {
     );
 
     const child = createContainer();
-    const pathSvc = child.get(PathService);
+    const pathSvc = await child.getAsync(PathService);
     await pathSvc.setPrepared('bun');
   });
 

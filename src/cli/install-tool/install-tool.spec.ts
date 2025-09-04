@@ -33,14 +33,14 @@ describe('cli/install-tool/install-tool', () => {
     }
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     child = createContainer(parent);
-    install = child.get(InstallToolService);
+    install = await child.getAsync(InstallToolService);
   });
 
   test('writes version if tool is not installed', async () => {
-    const ver = child.get(VersionService);
-    const bun = child.get<BunInstallService>(INSTALL_TOOL_TOKEN);
+    const ver = await child.getAsync(VersionService);
+    const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
     vi.mocked(bun).needsInitialize.mockResolvedValueOnce(true);
     vi.mocked(bun).needsPrepare.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.0')).toBeUndefined();
@@ -48,8 +48,8 @@ describe('cli/install-tool/install-tool', () => {
   });
 
   test('writes version even if tool is installed', async () => {
-    const ver = child.get(VersionService);
-    const bun = child.get<BunInstallService>(INSTALL_TOOL_TOKEN);
+    const ver = await child.getAsync(VersionService);
+    const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
     vi.mocked(bun).isInstalled.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.1')).toBeUndefined();
     expect(await ver.find('bun')).toBe('1.0.1');

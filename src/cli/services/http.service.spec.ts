@@ -9,9 +9,11 @@ import { cachePath } from '~test/path';
 const baseUrl = 'https://example.com';
 describe('cli/services/http.service', () => {
   let child!: Container;
+  let http!: HttpService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     child = createContainer();
+    http = await child.getAsync(HttpService);
 
     for (const key of Object.keys(env)) {
       if (key.startsWith('URL_REPLACE_')) {
@@ -22,8 +24,6 @@ describe('cli/services/http.service', () => {
 
   test('throws', async () => {
     scope(baseUrl).get('/fail.txt').times(6).reply(404);
-
-    const http = child.get(HttpService);
 
     await expect(
       http.download({ url: `${baseUrl}/fail.txt` }),
@@ -36,7 +36,6 @@ describe('cli/services/http.service', () => {
   test('throws with checksum', async () => {
     scope(baseUrl).get('/checksum.txt').thrice().reply(200, 'ok');
 
-    const http = child.get(HttpService);
     const expectedChecksum = 'invalid';
     const checksumType = 'sha256';
 
@@ -52,7 +51,6 @@ describe('cli/services/http.service', () => {
   test('download', async () => {
     scope(baseUrl).get('/test.txt').reply(200, 'ok');
 
-    const http = child.get(HttpService);
     const expected = cachePath(
       `d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020/test.txt`,
     );
@@ -65,7 +63,6 @@ describe('cli/services/http.service', () => {
   test('download with checksum', async () => {
     scope(baseUrl).get('/test.txt').reply(200, 'https://example.com/test.txt');
 
-    const http = child.get(HttpService);
     const expectedChecksum =
       'd1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020';
     const expected = cachePath(
@@ -98,7 +95,6 @@ describe('cli/services/http.service', () => {
       .head('/test.txt')
       .reply(501);
 
-    const http = child.get(HttpService);
     expect(await http.exists(`${baseUrl}/test.txt`)).toBe(true);
     expect(await http.exists(`${baseUrl}/test.txt`)).toBe(false);
     await expect(http.exists(`${baseUrl}/test.txt`)).rejects.toThrow();
@@ -114,7 +110,6 @@ describe('cli/services/http.service', () => {
         .times(3)
         .reply(501);
 
-      const http = child.get(HttpService);
       expect(
         await http.get(`${baseUrl}/test.txt`, {
           headers: { 'x-test': 'test' },
@@ -135,7 +130,6 @@ describe('cli/services/http.service', () => {
       .times(3)
       .reply(501);
 
-    const http = child.get(HttpService);
     expect(
       await http.getJson(`${baseUrl}/test.json`, {
         headers: { 'x-test': 'test' },
@@ -165,7 +159,6 @@ describe('cli/services/http.service', () => {
     // coverage
     env.URL_REPLACE_1_FROM = 'https://example.test';
 
-    const http = child.get(HttpService);
     const expected = cachePath(
       `f4eba41457a330d0fa5289e49836326c6a0208bbc639862e70bb378c88c62642/replace.txt`,
     );

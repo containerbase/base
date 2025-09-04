@@ -31,7 +31,7 @@ export class FileDownloadCommand extends Command {
     try {
       const container = createContainer();
 
-      const env = container.get(EnvService);
+      const env = await container.getAsync(EnvService);
       const path = dirname(this.output);
 
       await mkdir(path, { recursive: true });

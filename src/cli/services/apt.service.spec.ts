@@ -24,7 +24,7 @@ describe('cli/services/apt.service', () => {
   });
 
   test('skips install', async () => {
-    const svc = child.get(AptService);
+    const svc = await child.getAsync(AptService);
 
     mocks.execa.mockResolvedValueOnce({
       stdout: 'Status: install ok installed',
@@ -34,7 +34,7 @@ describe('cli/services/apt.service', () => {
   });
 
   test('works', async () => {
-    const svc = child.get(AptService);
+    const svc = await child.getAsync(AptService);
 
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg');
@@ -45,7 +45,7 @@ describe('cli/services/apt.service', () => {
 
   test('uses proxy', async () => {
     env.APT_HTTP_PROXY = 'http://proxy';
-    const svc = child.get(AptService);
+    const svc = await child.getAsync(AptService);
 
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg', 'other-pkg');

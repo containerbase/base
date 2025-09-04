@@ -144,7 +144,7 @@ function prepareResolveContainer(): Container {
   return container;
 }
 
-export function installTool(
+export async function installTool(
   tool: string,
   version: string,
   dryRun = false,
@@ -225,7 +225,11 @@ export function installTool(
       }
     }
   }
-  return container.get(InstallToolService).install(tool, version, dryRun);
+  return (await container.getAsync(InstallToolService)).install(
+    tool,
+    version,
+    dryRun,
+  );
 }
 
 export async function resolveVersion(
@@ -266,5 +270,8 @@ export async function resolveVersion(
       }
     }
   }
-  return await container.get(ToolVersionResolverService).resolve(tool, version);
+  return (await container.getAsync(ToolVersionResolverService)).resolve(
+    tool,
+    version,
+  );
 }

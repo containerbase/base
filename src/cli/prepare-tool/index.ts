@@ -40,18 +40,21 @@ function prepareContainer(): Container {
   return container;
 }
 
-export function prepareTools(
+export async function prepareTools(
   tools: string[],
   dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
-  return container.get(PrepareToolService).prepare(tools, dryRun);
+  return (await container.getAsync(PrepareToolService)).prepare(tools, dryRun);
 }
 
-export function initializeTools(
+export async function initializeTools(
   tools: string[],
   dryRun = false,
 ): Promise<number | void> {
   const container = prepareContainer();
-  return container.get(PrepareToolService).initialize(tools, dryRun);
+  return (await container.getAsync(PrepareToolService)).initialize(
+    tools,
+    dryRun,
+  );
 }
