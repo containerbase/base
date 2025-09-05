@@ -12,6 +12,7 @@ import { GradleVersionData } from './schema';
 @injectFromHierarchy()
 export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
+  override readonly parent = 'java';
 
   override async install(version: string): Promise<void> {
     const name = this.name;

@@ -1,7 +1,6 @@
-import fs from 'node:fs/promises';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { rootPath } from '../../../test/path';
+import { ensurePaths } from '../../../test/path';
 import { VersionService, createContainer } from '../services';
 import { BunInstallService } from '../tools/bun';
 import { LegacyToolInstallService } from './install-legacy-tool.service';
@@ -22,15 +21,11 @@ describe('cli/install-tool/install-tool', () => {
   let child: Container;
   let install: InstallToolService;
   beforeAll(async () => {
-    for (const p of [
+    await ensurePaths([
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
-    ]) {
-      const prepDir = rootPath(p);
-      await fs.mkdir(prepDir, {
-        recursive: true,
-      });
-    }
+      'opt/containerbase/data',
+    ]);
   });
 
   beforeEach(async () => {
@@ -44,7 +39,10 @@ describe('cli/install-tool/install-tool', () => {
     vi.mocked(bun).needsInitialize.mockResolvedValueOnce(true);
     vi.mocked(bun).needsPrepare.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.0')).toBeUndefined();
-    expect(await ver.find('bun')).toBe('1.0.0');
+    expect(await ver.getCurrent('bun')).toMatchObject({
+      name: 'bun',
+      tool: { name: 'bun', version: '1.0.0' },
+    });
   });
 
   test('writes version even if tool is installed', async () => {
@@ -52,6 +50,9 @@ describe('cli/install-tool/install-tool', () => {
     const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
     vi.mocked(bun).isInstalled.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.1')).toBeUndefined();
-    expect(await ver.find('bun')).toBe('1.0.1');
+    expect(await ver.getCurrent('bun')).toMatchObject({
+      name: 'bun',
+      tool: { name: 'bun', version: '1.0.1' },
+    });
   });
 });

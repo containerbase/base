@@ -6,7 +6,7 @@ import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights, pathExists } from '../utils';
 import { PathService, createContainer } from '.';
-import { rootPath } from '~test/path';
+import { ensurePaths, rootPath } from '~test/path';
 
 describe('cli/services/path.service', () => {
   const path = env.PATH;
@@ -19,16 +19,20 @@ describe('cli/services/path.service', () => {
     delete env.NODE_VERSION;
     pathSvc = await child.getAsync(PathService);
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
-    await mkdir(rootPath('var/lib/containerbase/tool.prep.d'), {
-      recursive: true,
-    });
-    await mkdir(rootPath('tmp/containerbase/tool.init.d'), {
-      recursive: true,
-    });
+    await ensurePaths([
+      'var/lib/containerbase/tool.prep.d',
+      'tmp/containerbase/tool.init.d',
+    ]);
   });
 
   test('cachePath', () => {
     expect(pathSvc.cachePath).toBe(rootPath('tmp/containerbase/cache'));
+  });
+
+  test('dataPath', () => {
+    expect(child.get(PathService).dataPath).toBe(
+      rootPath('opt/containerbase/data'),
+    );
   });
 
   test('envFile', () => {

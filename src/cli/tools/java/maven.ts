@@ -13,6 +13,8 @@ import { logger, parse } from '../../utils';
 export class MavenInstallService extends BaseInstallService {
   readonly name = 'maven';
 
+  override readonly parent = 'java';
+
   override async install(version: string): Promise<void> {
     const name = this.name;
     let filename = `${name}-${version}.tar.xz`;

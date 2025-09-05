@@ -186,10 +186,18 @@ export class JavaInstallService extends BaseInstallService {
 @injectFromHierarchy()
 export class JavaJreInstallService extends JavaInstallService {
   override readonly name = 'java-jre';
+
+  override get alias(): string {
+    return 'java';
+  }
 }
 
 @injectable()
 @injectFromHierarchy()
 export class JavaJdkInstallService extends JavaInstallService {
   override readonly name = 'java-jdk';
+
+  override get alias(): string {
+    return 'java';
+  }
 }
