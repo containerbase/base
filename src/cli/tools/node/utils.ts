@@ -79,6 +79,8 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
 
 @injectable()
 export abstract class NpmBaseInstallService extends NodeBaseInstallService {
+  override readonly parent = 'node';
+
   protected tool(_version: string): string {
     return this.name;
   }
@@ -195,25 +197,17 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     await execa(name, ['--version'], { stdio: 'inherit' });
   }
 
-  override async validate(version: string): Promise<boolean> {
-    if (!(await super.validate(version))) {
-      return false;
-    }
-
-    return (await this.versionSvc.find('node')) !== null;
-  }
-
   private getNodeNpm(nodeVersion: string): string {
     return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
   }
 
   protected async getNodeVersion(): Promise<string> {
-    const nodeVersion = await this.versionSvc.find('node');
+    const nodeVersion = await this.versionSvc.getCurrent('node');
 
     if (!nodeVersion) {
       throw new Error('Node not installed');
     }
-    return nodeVersion;
+    return nodeVersion.tool.version;
   }
 
   protected getAdditionalArgs(): string[] {

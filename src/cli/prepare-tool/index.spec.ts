@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { PathService, createContainer } from '../services';
 import { initializeTools, prepareTools } from '.';
-import { rootPath } from '~test/path';
+import { ensurePaths, rootPath } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');
@@ -16,16 +16,11 @@ vi.mock('node:process', async (importOriginal) => ({
 
 describe('cli/prepare-tool/index', () => {
   beforeAll(async () => {
-    for (const p of [
+    await ensurePaths([
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
-    ]) {
-      const prepDir = rootPath(p);
-      await fs.mkdir(prepDir, {
-        recursive: true,
-      });
-    }
+    ]);
 
     await fs.writeFile(
       rootPath('usr/local/containerbase/tools/v2/dummy.sh'),

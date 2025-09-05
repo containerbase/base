@@ -1,7 +1,5 @@
-import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { rootPath } from '../../../test/path';
-import { VersionService } from '../services';
+import { VersionService, createContainer } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
 import { PipVersionResolver } from '../tools/python/pip';
@@ -11,6 +9,7 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { installTool, resolveVersion } from '.';
+import { ensurePaths } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');
@@ -19,15 +18,26 @@ vi.mock('../tools/php/composer');
 
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
-    for (const p of [
+    await ensurePaths([
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
-    ]) {
-      const prepDir = rootPath(p);
-      await fs.mkdir(prepDir, {
-        recursive: true,
-      });
-    }
+      'opt/containerbase/data',
+    ]);
+
+    const verSvc = await createContainer().getAsync(VersionService);
+
+    await verSvc.setCurrent({
+      name: 'node',
+      tool: { name: 'node', version: '1.0.0' },
+    });
+    await verSvc.setCurrent({
+      name: 'python',
+      tool: { name: 'python', version: '1.0.0' },
+    });
+    await verSvc.setCurrent({
+      name: 'ruby',
+      tool: { name: 'ruby', version: '1.0.0' },
+    });
   });
 
   describe('installTool', () => {
@@ -52,12 +62,12 @@ describe('cli/install-tool/index', () => {
     ])('works: $type', async ({ type, svc }) => {
       vi.spyOn(svc.prototype, 'install').mockResolvedValue();
       vi.spyOn(svc.prototype, 'needsInitialize').mockReturnValue(false);
-      vi.spyOn(svc.prototype, 'isInstalled').mockResolvedValue(false);
       vi.spyOn(svc.prototype, 'validate').mockResolvedValue(true);
-      vi.spyOn(svc.prototype, 'postInstall').mockResolvedValue();
+      vi.spyOn(svc.prototype, 'link').mockResolvedValue();
       vi.spyOn(svc.prototype, 'test').mockRejectedValue(new Error('test'));
-      vi.spyOn(VersionService.prototype, 'find').mockResolvedValue(null);
-      expect(await installTool('dummy', '1.0.0', false, type)).toBeUndefined();
+      expect(
+        await installTool(`dummy-${type}`, '1.0.0', false, type),
+      ).toBeUndefined();
     });
   });
 

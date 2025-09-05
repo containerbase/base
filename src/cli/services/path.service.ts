@@ -46,6 +46,13 @@ export class PathService {
     return join(this.tmpDir, 'cache');
   }
 
+  /**
+   * Path to `/opt/containerbase/data`.
+   */
+  get dataPath(): string {
+    return join(this.installDir, 'data');
+  }
+
   get envFile(): string {
     return join(this.envSvc.rootDir, 'usr/local/etc/env');
   }
@@ -131,6 +138,7 @@ export class PathService {
       throw new Error('System not initialized for containerbase');
     }
     await this.createDir(this._toolPrepPath);
+    await this.createDir(this.dataPath);
     await this.createDir(this.toolsPath);
     await this.createDir(this.versionPath);
     await this.createDir(this.binDir);

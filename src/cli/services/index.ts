@@ -1,6 +1,7 @@
 import { Container } from 'inversify';
 import { AptService } from './apt.service';
 import { CompressionService } from './compression.service';
+import { DataService } from './data.service';
 import { EnvService } from './env.service';
 import { HttpService } from './http.service';
 import { PathService } from './path.service';
@@ -17,6 +18,7 @@ export {
 
 export const rootContainer = new Container();
 
+rootContainer.bind(DataService).toSelf();
 rootContainer.bind(AptService).toSelf();
 rootContainer.bind(CompressionService).toSelf();
 rootContainer.bind(EnvService).toSelf();
