@@ -1,10 +1,10 @@
 import { join } from 'node:path';
-import Datastore from '@seald-io/nedb';
 import { inject, injectable, postConstruct } from 'inversify';
-import { DataService } from './data.service';
+import { DataService, type Database } from './data.service';
 import { PathService } from './path.service';
 
 export type Doc<T> = T & {
+  _id?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -27,7 +27,7 @@ export interface ToolLink {
   tool: Tool;
 }
 
-export interface ToolCurrent {
+export interface ToolState {
   name: string;
   tool: Tool;
   parent?: Tool;
@@ -40,9 +40,9 @@ export class VersionService {
   @inject(PathService)
   private readonly pathSvc!: PathService;
 
-  private _links!: Datastore<Doc<ToolLink>>;
-  private _tools!: Datastore<Doc<ToolCurrent>>;
-  private _versions!: Datastore<Doc<ToolVersion>>;
+  private _links!: Database<Doc<ToolLink>>;
+  private _state!: Database<Doc<ToolState>>;
+  private _versions!: Database<Doc<ToolVersion>>;
 
   async isInstalled(tool: ToolVersion): Promise<boolean> {
     return (await this._versions.findOneAsync(tool)) !== null;
@@ -64,29 +64,28 @@ export class VersionService {
     await this._links.updateAsync({ name: tool.name }, tool, { upsert: true });
   }
 
-  async isCurrent(tool: ToolCurrent): Promise<boolean> {
-    return (await this._tools.findOneAsync(tool)) !== null;
+  async isCurrent(tool: ToolState): Promise<boolean> {
+    return (await this._state.findOneAsync(tool)) !== null;
   }
 
-  async setCurrent(tool: ToolCurrent): Promise<void> {
-    await this._tools.updateAsync({ name: tool.name }, tool, { upsert: true });
+  async setCurrent(tool: ToolState): Promise<void> {
+    await this._state.updateAsync({ name: tool.name }, tool, { upsert: true });
   }
 
-  async getCurrent(name: string): Promise<ToolCurrent | null> {
-    return await this._tools.findOneAsync({ name });
+  async getCurrent(name: string): Promise<ToolState | null> {
+    return await this._state.findOneAsync({ name });
   }
 
   @postConstruct()
   protected async [Symbol('construct')](): Promise<void> {
-    const [links, tools, versions] = await Promise.all([
+    const [links, state, versions] = await Promise.all([
       this.dataSvc.load(join(this.pathSvc.dataPath, 'links.nedb')),
-      this.dataSvc.load(join(this.pathSvc.dataPath, 'tools.nedb')),
+      this.dataSvc.load(join(this.pathSvc.dataPath, 'state.nedb')),
       this.dataSvc.load(join(this.pathSvc.dataPath, 'versions.nedb')),
-    ])
+    ]);
     this._links = links;
-    this._tools = tools;
+    this._state = state;
     this._versions = versions;
-
 
     await links.ensureIndexAsync({ fieldName: 'name', unique: true });
     await links.ensureIndexAsync({
@@ -94,7 +93,7 @@ export class VersionService {
       sparse: true,
     });
 
-    await tools.ensureIndexAsync({ fieldName: 'name', unique: true });
+    await state.ensureIndexAsync({ fieldName: 'name', unique: true });
 
     await versions.ensureIndexAsync({ fieldName: 'name' });
     await versions.ensureIndexAsync({ fieldName: ['name', 'version'] });

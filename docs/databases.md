@@ -6,30 +6,30 @@ It's planned to eventually switch to [`node:sqlite`](https://nodejs.org/api/sqli
 
 ## List of created databases
 
-- `tools.db`: Stores information about all installed tools with current linked version.
-- `versions.db`: Stores information about installed tool versions.
-- `links.db`: Stores information about linked tool versions.
+- `state`: Stores information about all the current linked version of installed tools.
+- `versions`: Stores information about installed tool versions.
+- `links`: Stores information about linked tool versions.
 
-## `tools.db`
+## `state`
 
-Stores information about all installed tools with current linked version.
+Stores information about all the current linked version of installed tools.
 
-Meta:
+**Meta:**
 
 - `name`: tool name or alias
 - `tool`: the tool and version
   - `name`: tool name
   - `version`: tool version
 
-Index:
+**Index:**
 
 - `name` (`unique`): only one can exist
 
-## `versions.db`
+## `versions`
 
 Stores the installed tool versions with an optional parent.
 
-Meta:
+**Meta:**
 
 - `name`: tool name
 - `version`: tool version
@@ -37,25 +37,27 @@ Meta:
   - `name`: tool name
   - `version`: tool version
 
-Index:
+**Index:**
 
 - `name`: search all installed versions
 - `name` and `version`: is a version installed
 - `tool.name` and `tool.version` (`sparse`): find links by current tool version
 
-## `links.db`
+## `links`
 
 Stores information about linked tool versions.
 It stores which tool and version a shell wrapper was created from.
 
-Meta:
+⚠️ `links` database is currently unused. ⚠️
+
+**Meta:**
 
 - `name`: file name
 - `tool`: the tool the file is linked to
   - `name`: tool name
   - `version`: tool version
 
-Index:
+**Index:**
 
 - `name` (`unique`): only one can exist
 - `tool.name` and `tool.version`: find links by current tool version

@@ -2,7 +2,7 @@ import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
-import type { ToolCurrent } from '../services/version.service';
+import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
 import { MissingParent } from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
@@ -39,7 +39,7 @@ export class InstallToolService {
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       if (toolSvc) {
-        let parent: ToolCurrent | null = null;
+        let parent: ToolState | null = null;
 
         if (toolSvc.parent) {
           parent = await this.versionSvc.getCurrent(toolSvc.parent);
@@ -153,9 +153,9 @@ export class InstallToolService {
   private async linkAndTest(
     toolSvc: BaseInstallService,
     version: string,
-    parent: ToolCurrent | null,
+    parent: ToolState | null,
   ): Promise<void> {
-    const current: ToolCurrent = {
+    const current: ToolState = {
       name: toolSvc.alias,
       tool: { name: toolSvc.name, version },
       ...(parent && { parent: parent.tool }),
