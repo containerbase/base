@@ -16,6 +16,8 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
 
+  override readonly parent = 'ruby';
+
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
     const args: string[] = [];
@@ -108,14 +110,6 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     await execa(this.name, ['--version'], { stdio: 'inherit' });
   }
 
-  override async validate(version: string): Promise<boolean> {
-    if (!(await super.validate(version))) {
-      return false;
-    }
-
-    return (await this.versionSvc.find('ruby')) !== null;
-  }
-
   protected _postInstall(
     _gem: string,
     _version: string,
@@ -132,12 +126,12 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
   }
 
   private async getRubyVersion(): Promise<string> {
-    const rubyVersion = await this.versionSvc.find('ruby');
+    const rubyVersion = await this.versionSvc.getCurrent('ruby');
 
     if (!rubyVersion) {
       throw new Error('Ruby not installed');
     }
-    return rubyVersion;
+    return rubyVersion.tool.version;
   }
 
   private getGemSpec(version: string, ruby: string): string {

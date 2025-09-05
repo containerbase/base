@@ -281,6 +281,30 @@ RUN helmfile version | grep "${HELMFILE_VERSION#v}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
+
+#--------------------------------------
+# test: db permissions
+#--------------------------------------
+FROM base AS testf
+
+# renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf
+ARG PROTOC_VERSION=29.2
+
+RUN set -ex; \
+  ls -lah /opt/containerbase/; \
+  ls -lah /opt/containerbase/data/; \
+  install-tool protoc; \
+  true
+
+USER 12021
+
+RUN set -ex; \
+  ls -lah /opt/containerbase/; \
+  ls -lah /opt/containerbase/data/; \
+  install-tool protoc; \
+  true
+
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -291,3 +315,4 @@ COPY --link --from=testb-gitpod /.dummy /.dummy
 COPY --link --from=testc /.dummy /.dummy
 COPY --link --from=testd /.dummy /.dummy
 COPY --link --from=teste /.dummy /.dummy
+COPY --link --from=testf /.dummy /.dummy

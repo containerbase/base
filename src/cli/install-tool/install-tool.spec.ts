@@ -39,7 +39,10 @@ describe('cli/install-tool/install-tool', () => {
     vi.mocked(bun).needsInitialize.mockResolvedValueOnce(true);
     vi.mocked(bun).needsPrepare.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.0')).toBeUndefined();
-    expect(await ver.find('bun')).toBe('1.0.0');
+    expect(await ver.getCurrent('bun')).toMatchObject({
+      name: 'bun',
+      tool: { name: 'bun', version: '1.0.0' },
+    });
   });
 
   test('writes version even if tool is installed', async () => {
@@ -47,6 +50,9 @@ describe('cli/install-tool/install-tool', () => {
     const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
     vi.mocked(bun).isInstalled.mockResolvedValueOnce(true);
     expect(await install.install('bun', '1.0.1')).toBeUndefined();
-    expect(await ver.find('bun')).toBe('1.0.1');
+    expect(await ver.getCurrent('bun')).toMatchObject({
+      name: 'bun',
+      tool: { name: 'bun', version: '1.0.1' },
+    });
   });
 });
