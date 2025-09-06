@@ -10,6 +10,7 @@ export const NoPrepareTools = [
   'composer',
   'copier',
   'corepack',
+  'deno',
   'devbox',
   'flux',
   'gleam',

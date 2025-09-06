@@ -49,6 +49,14 @@ FROM base AS test-bun
 RUN install-tool bun 1.2.21
 
 #--------------------------------------
+# Image: deno
+#--------------------------------------
+FROM base AS test-deno
+
+# renovate: datasource=github-releases packageName=denoland/deno
+RUN install-tool deno 2.4.5
+
+#--------------------------------------
 # Image: devbox
 #--------------------------------------
 FROM base AS test-devbox
@@ -150,6 +158,7 @@ FROM base
 
 COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
+COPY --from=test-deno /.dummy /.dummy
 COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
