@@ -97,5 +97,5 @@ function link_tool () {
   # only works for v24+
   #export_tool_env ERL_ROOTDIR "${versioned_tool_path}"
   shell_wrapper erl "${versioned_tool_path}/bin"
-  erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
+  [[ -n $SKIP_VERSION ]] || erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 }

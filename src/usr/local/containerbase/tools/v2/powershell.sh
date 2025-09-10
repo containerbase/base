@@ -38,5 +38,5 @@ function install_tool () {
 
 function link_tool () {
   shell_wrapper pwsh "$(find_versioned_tool_path)"
-  pwsh -version
+  [[ -n $SKIP_VERSION ]] || pwsh -version
 }

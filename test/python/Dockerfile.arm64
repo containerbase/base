@@ -46,7 +46,7 @@ RUN install-tool python 3.13.7
 FROM test-python AS test-checkov
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.468
+RUN install-tool checkov 3.2.469
 
 #--------------------------------------
 # Image: hashin
@@ -86,7 +86,7 @@ RUN install-tool conan 2.20.1
 FROM test-python AS test-copier
 
 # renovate: datasource=pypi
-RUN install-tool copier 9.10.1
+RUN install-tool copier 9.10.2
 
 
 #--------------------------------------
@@ -95,7 +95,7 @@ RUN install-tool copier 9.10.1
 FROM test-python AS test-uv
 
 # renovate: datasource=pypi
-RUN install-tool uv 0.8.15
+RUN install-tool uv 0.8.16
 
 #--------------------------------------
 # Image: final
