@@ -36,7 +36,23 @@ export abstract class BaseInstallService {
   @inject(CompressionService)
   protected readonly compress!: CompressionService;
 
+  /**
+   * Optional tool alias used to refer to this tool as parent.
+   */
+  get alias(): string {
+    return this.name;
+  }
+
+  /**
+   * Tool name
+   */
   abstract readonly name: string;
+
+  /**
+   * A tool can depend on another tool to work.
+   * Eg. composer depends on php.
+   */
+  readonly parent?: string;
 
   abstract install(version: string): Promise<void>;
 
@@ -62,6 +78,11 @@ export abstract class BaseInstallService {
     return !NoPrepareTools.includes(this.name);
   }
 
+  /**
+   * Post-installation steps
+   * @param _version Version that was installed
+   * @deprecated Link check is now smart enough to not need this
+   */
   postInstall(_version: string): Promise<void> {
     return Promise.resolve();
   }

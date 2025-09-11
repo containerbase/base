@@ -65,6 +65,9 @@ function setup_directories () {
   # contains the wrapper and symlinks for the tools
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${install_dir}/bin"
+  # contains databases and other data
+  # shellcheck disable=SC2174
+  mkdir -p -m 775 "${install_dir}/data"
   # contains nodejs files and maybe others
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${install_dir}/lib"

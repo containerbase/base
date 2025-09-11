@@ -30,6 +30,12 @@ describe('cli/services/path.service', () => {
     expect(pathSvc.cachePath).toBe(rootPath('tmp/containerbase/cache'));
   });
 
+  test('dataPath', () => {
+    expect(child.get(PathService).dataPath).toBe(
+      rootPath('opt/containerbase/data'),
+    );
+  });
+
   test('envFile', () => {
     expect(pathSvc.envFile).toBe(rootPath('usr/local/etc/env'));
   });

@@ -34,6 +34,8 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     return this.name;
   }
 
+  override readonly parent = 'python';
+
   override async install(version: string): Promise<void> {
     const pythonVersion = await this.getPythonVersion();
     const env = this.prepareEnv(version);
@@ -165,12 +167,8 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     await execa(name, ['--version'], { stdio: 'inherit' });
   }
 
-  override async validate(version: string): Promise<boolean> {
-    if (!valid(version)) {
-      return false;
-    }
-
-    return (await this.versionSvc.find('python')) !== null;
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(!!valid(version));
   }
 
   private getPython(version: string, pythonVersion: string): string {
@@ -183,12 +181,12 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   protected async getPythonVersion(): Promise<string> {
-    const version = await this.versionSvc.find('python');
+    const version = await this.versionSvc.getCurrent('python');
 
     if (!version) {
       throw new Error('Python not installed');
     }
-    return version;
+    return version.tool.version;
   }
 
   protected getAdditionalArgs(
