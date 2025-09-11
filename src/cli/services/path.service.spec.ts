@@ -6,7 +6,8 @@ import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights, pathExists } from '../utils';
 import { PathService } from '.';
-import { rootPath, testContainer } from '~test/path';
+import { testContainer } from '~test/di';
+import { rootPath } from '~test/path';
 
 describe('cli/services/path.service', () => {
   const path = env.PATH;

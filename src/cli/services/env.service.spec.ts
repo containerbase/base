@@ -3,7 +3,8 @@ import { env } from 'node:process';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { EnvService } from '.';
-import { rootPath, testContainer } from '~test/path';
+import { testContainer } from '~test/di';
+import { rootPath } from '~test/path';
 
 const mocks = vi.hoisted(() => ({ arch: vi.fn() }));
 

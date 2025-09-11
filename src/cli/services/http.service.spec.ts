@@ -3,8 +3,9 @@ import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { logger } from '../utils';
 import { HttpService } from '.';
+import { testContainer } from '~test/di';
 import { scope } from '~test/http-mock';
-import { cachePath, testContainer } from '~test/path';
+import { cachePath } from '~test/path';
 
 const baseUrl = 'https://example.com';
 describe('cli/services/http.service', () => {

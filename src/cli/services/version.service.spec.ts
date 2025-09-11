@@ -2,7 +2,8 @@ import { mkdir } from 'fs/promises';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { VersionService } from '.';
-import { rootPath, testContainer } from '~test/path';
+import { testContainer } from '~test/di';
+import { rootPath } from '~test/path';
 
 describe('cli/services/version.service', () => {
   let child!: Container;
