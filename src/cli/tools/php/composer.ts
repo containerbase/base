@@ -10,7 +10,7 @@ import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 @injectFromHierarchy()
 export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
-  override readonly parent = 'ruby';
+  override readonly parent = 'php';
 
   override async install(version: string): Promise<void> {
     const name = this.name;
