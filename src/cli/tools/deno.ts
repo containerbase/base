@@ -48,6 +48,7 @@ export class DenoInstallService extends BaseInstallService {
       await this.pathSvc.createVersionedToolPath(this.name, version),
       'bin',
     );
+    await fs.mkdir(path);
 
     await this.compress.extract({
       file,
