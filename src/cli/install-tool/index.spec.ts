@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { VersionService } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
@@ -10,7 +9,7 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { installTool, resolveVersion } from '.';
-import { rootPath } from '~test/path';
+import { ensurePaths } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');
@@ -19,15 +18,11 @@ vi.mock('../tools/php/composer');
 
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
-    for (const p of [
+    await ensurePaths([
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
-    ]) {
-      const prepDir = rootPath(p);
-      await fs.mkdir(prepDir, {
-        recursive: true,
-      });
-    }
+      'opt/containerbase/data',
+    ]);
   });
 
   describe('installTool', () => {

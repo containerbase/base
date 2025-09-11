@@ -1,11 +1,10 @@
-import fs from 'node:fs/promises';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { VersionService, createContainer } from '../services';
 import { BunInstallService } from '../tools/bun';
 import { LegacyToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
-import { rootPath } from '~test/path';
+import { ensurePaths } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');
@@ -22,15 +21,11 @@ describe('cli/install-tool/install-tool', () => {
   let child: Container;
   let install: InstallToolService;
   beforeAll(async () => {
-    for (const p of [
+    await ensurePaths([
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
-    ]) {
-      const prepDir = rootPath(p);
-      await fs.mkdir(prepDir, {
-        recursive: true,
-      });
-    }
+      'opt/containerbase/data',
+    ]);
   });
 
   beforeEach(async () => {
