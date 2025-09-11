@@ -1,7 +1,7 @@
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { env, geteuid } from 'node:process';
-import { injectable } from 'inversify';
+import { bindingScopeValues, injectable } from 'inversify';
 import { type Arch, logger } from '../utils';
 
 export type Replacements = [string, string][];
@@ -14,7 +14,7 @@ const compare = (() => {
   return (a: string, b: string) => collator.compare(a, b);
 })();
 
-@injectable()
+@injectable(bindingScopeValues.Singleton)
 export class EnvService {
   readonly arch: Arch;
   private uid: number;

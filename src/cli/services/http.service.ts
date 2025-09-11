@@ -42,7 +42,7 @@ export class HttpService {
   private readonly _opts: Pick<OptionsInit, 'headers'> = {};
 
   @postConstruct()
-  protected init(): void {
+  protected [Symbol('construct')](): void {
     Object.assign(this._opts, {
       headers: {
         'user-agent': `containerbase/${

@@ -1,4 +1,4 @@
-import { Container } from 'inversify';
+import { type Bind, Container, ContainerModule } from 'inversify';
 import { AptService } from './apt.service';
 import { CompressionService } from './compression.service';
 import { EnvService } from './env.service';
@@ -15,14 +15,19 @@ export {
   VersionService,
 };
 
-export const rootContainer = new Container();
+function init<T extends { bind: Bind }>(options: T): void {
+  options.bind(AptService).toSelf();
+  options.bind(CompressionService).toSelf();
+  options.bind(EnvService).toSelf();
+  options.bind(HttpService).toSelf();
+  options.bind(PathService).toSelf();
+  options.bind(VersionService).toSelf();
+}
 
-rootContainer.bind(AptService).toSelf();
-rootContainer.bind(CompressionService).toSelf();
-rootContainer.bind(EnvService).toSelf();
-rootContainer.bind(HttpService).toSelf();
-rootContainer.bind(PathService).toSelf();
-rootContainer.bind(VersionService).toSelf();
+export const rootContainerModule = new ContainerModule(init);
+
+const rootContainer = new Container();
+init(rootContainer);
 
 export function createContainer(parent = rootContainer): Container {
   return new Container({ parent });

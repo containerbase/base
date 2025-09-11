@@ -1,9 +1,9 @@
 import { sep } from 'node:path';
 import { env } from 'node:process';
-import type { Container } from 'inversify';
+import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { EnvService, createContainer } from '.';
-import { rootPath } from '~test/path';
+import { EnvService } from '.';
+import { rootPath, testContainer } from '~test/path';
 
 const mocks = vi.hoisted(() => ({ arch: vi.fn() }));
 
@@ -21,27 +21,30 @@ describe('cli/services/env.service', () => {
   let rootDir: string | undefined;
   let svc!: EnvService;
 
+  async function init() {
+    child = await testContainer();
+    svc = await child.getAsync(EnvService);
+  }
+
   beforeAll(() => {
     rootDir = globalThis.rootDir;
   });
 
   beforeEach(async () => {
-    child = createContainer();
     globalThis.rootDir = rootDir;
     mocks.arch.mockReturnValue('x64');
-    svc = await child.getAsync(EnvService);
+    await init();
   });
 
   test('arch', async () => {
     expect(svc.arch).toBe('amd64');
 
     mocks.arch.mockReturnValue('arm64');
-    expect((await child.getAsync(EnvService)).arch).toBe('arm64');
+    await init();
+    expect(svc.arch).toBe('arm64');
 
     mocks.arch.mockReturnValue('invalid');
-    await expect(
-      async () => (await child.getAsync(EnvService)).arch,
-    ).rejects.toThrow();
+    await expect(init()).rejects.toThrow();
   });
 
   test('isRoot', () => {
@@ -95,9 +98,9 @@ describe('cli/services/env.service', () => {
     expect(svc.isToolIgnored('node')).toBe(false);
 
     env.IGNORED_TOOLS = 'npm,yarn';
-    const e = await child.getAsync(EnvService);
-    expect(e.isToolIgnored('npm')).toBe(true);
-    expect(e.isToolIgnored('node')).toBe(false);
+    await init();
+    expect(svc.isToolIgnored('npm')).toBe(true);
+    expect(svc.isToolIgnored('node')).toBe(false);
   });
 
   test('replaceUrl', () => {

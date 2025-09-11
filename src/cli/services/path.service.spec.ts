@@ -2,11 +2,11 @@ import { mkdir, readFile, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
-import type { Container } from 'inversify';
+import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { fileRights, pathExists } from '../utils';
-import { PathService, createContainer } from '.';
-import { rootPath } from '~test/path';
+import { PathService } from '.';
+import { rootPath, testContainer } from '~test/path';
 
 describe('cli/services/path.service', () => {
   const path = env.PATH;
@@ -14,7 +14,7 @@ describe('cli/services/path.service', () => {
   let pathSvc!: PathService;
 
   beforeEach(async () => {
-    child = createContainer();
+    child = await testContainer();
     env.PATH = path;
     delete env.NODE_VERSION;
     pathSvc = await child.getAsync(PathService);

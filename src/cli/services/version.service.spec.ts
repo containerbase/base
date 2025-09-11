@@ -1,15 +1,15 @@
 import { mkdir } from 'fs/promises';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { VersionService, createContainer } from '.';
-import { rootPath } from '~test/path';
+import { VersionService } from '.';
+import { rootPath, testContainer } from '~test/path';
 
 describe('cli/services/version.service', () => {
   let child!: Container;
   let svc!: VersionService;
 
   beforeEach(async () => {
-    child = createContainer();
+    child = await testContainer();
     svc = await child.getAsync(VersionService);
   });
 
