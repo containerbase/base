@@ -172,8 +172,9 @@ export class InstallToolService {
       await this.versionSvc.setCurrent(current);
     }
 
-    // logger.debug({ tool: toolSvc.name }, 'post-install tool');
-    // await toolSvc.postInstall(version);
+    // needed until https://github.com/containerbase/base/issues/4998 is fixed
+    logger.debug({ tool: toolSvc.name }, 'post-install tool');
+    await toolSvc.postInstall(version);
 
     logger.debug({ tool: toolSvc.name }, 'test tool');
     if (!this.envSvc.skipTests) {

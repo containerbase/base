@@ -63,7 +63,7 @@ describe('cli/install-tool/index', () => {
       vi.spyOn(svc.prototype, 'install').mockResolvedValue();
       vi.spyOn(svc.prototype, 'needsInitialize').mockReturnValue(false);
       vi.spyOn(svc.prototype, 'validate').mockResolvedValue(true);
-      vi.spyOn(svc.prototype, 'link').mockResolvedValue();
+      vi.spyOn(svc.prototype, 'postInstall').mockResolvedValue();
       vi.spyOn(svc.prototype, 'test').mockRejectedValue(new Error('test'));
       expect(
         await installTool(`dummy-${type}`, '1.0.0', false, type),
