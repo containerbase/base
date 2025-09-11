@@ -1,6 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
-import { spyable } from '~test/util';
+import { spyable } from '~test/mock';
 
 @injectable()
 @injectFromHierarchy()
