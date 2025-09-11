@@ -103,7 +103,7 @@
     "tsx": "4.20.5",
     "type-fest": "4.41.0",
     "typescript": "5.9.2",
-    "typescript-eslint": "8.42.0",
+    "typescript-eslint": "8.43.0",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4"
   },
