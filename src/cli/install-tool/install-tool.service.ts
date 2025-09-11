@@ -60,6 +60,7 @@ export class InstallToolService {
         ) {
           logger.info({ tool }, 'tool already installed');
           await this.linkAndTest(toolSvc, version, parent);
+          await this.versionSvc.update(tool, version);
           return;
         }
 
@@ -110,6 +111,7 @@ export class InstallToolService {
           tool: { name: tool, version },
         });
       }
+      await this.versionSvc.update(tool, version);
     } catch (e) {
       await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
       await this.versionSvc.removeInstalled({ name: tool, version });

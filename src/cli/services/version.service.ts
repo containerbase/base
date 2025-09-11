@@ -1,5 +1,9 @@
+import { chmod, stat, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { inject, injectable, postConstruct } from 'inversify';
+import { fileRights, logger, tool2path } from '../utils';
 import { DataService, type Database } from './data.service';
+import { PathService } from './path.service';
 
 export type Doc<T> = T & {
   _id?: string;
@@ -36,6 +40,9 @@ export class VersionService {
   @inject(DataService)
   private readonly dataSvc!: DataService;
 
+  @inject(PathService)
+  private readonly pathSvc!: PathService;
+
   private _links!: Database<Doc<ToolLink>>;
   private _state!: Database<Doc<ToolState>>;
   private _versions!: Database<Doc<ToolVersion>>;
@@ -70,6 +77,25 @@ export class VersionService {
 
   async getCurrent(name: string): Promise<ToolState | null> {
     return await this._state.findOneAsync({ name });
+  }
+
+  /**
+   * Required for v2 tool to find parent tool version
+   * @param tool
+   * @param version
+   * @deprecated legacy v2 tools compability
+   */
+  async update(tool: string, version: string): Promise<void> {
+    const path = join(this.pathSvc.versionPath, tool2path(tool));
+    try {
+      await writeFile(path, version, { encoding: 'utf8' });
+      const s = await stat(path);
+      if ((s.mode & fileRights) !== 0o664) {
+        await chmod(path, 0o664);
+      }
+    } catch (err) {
+      logger.error({ tool, err }, 'tool version not found');
+    }
   }
 
   @postConstruct()

@@ -1,15 +1,17 @@
+import fs from 'node:fs/promises';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { logger } from '../utils';
 import { VersionService } from '.';
 import { testContainer } from '~test/di';
-import { ensurePaths } from '~test/path';
+import { ensurePaths, rootPath } from '~test/path';
 
 describe('cli/services/version.service', () => {
   let child!: Container;
   let svc!: VersionService;
 
   beforeAll(async () => {
-    await ensurePaths('opt/containerbase/data');
+    await ensurePaths(['opt/containerbase/data', 'opt/containerbase/versions']);
   });
 
   beforeEach(async () => {
@@ -69,6 +71,15 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.2' },
       }),
     ).toBe(false);
+
+    await svc.removeInstalled({ name: 'pnpm' });
+    expect(
+      await svc.isInstalled({
+        name: 'pnpm',
+        version: '10.0.1',
+        tool: { name: 'node', version: '14.17.1' },
+      }),
+    ).toBe(false);
   });
 
   test('linked', async () => {
@@ -108,5 +119,19 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.0' },
       }),
     ).toBe(false);
+  });
+
+  test('legacy', async () => {
+    await expect(svc.update('node', '14.17.0')).resolves.toBeUndefined();
+
+    await fs.rm(rootPath('opt/containerbase/versions'), {
+      force: true,
+      recursive: true,
+    });
+    await expect(svc.update('node', '14.17.0')).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+      { tool: 'node', err: expect.any(Error) },
+      'tool version not found',
+    );
   });
 });
