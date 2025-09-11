@@ -105,7 +105,9 @@ export class InstallToolService {
           return;
         }
         await this.legacySvc.execute(tool, version);
-        await this.versionSvc.addInstalled({ name: tool, version });
+        if (!(await this.versionSvc.isInstalled({ name: tool, version }))) {
+          await this.versionSvc.addInstalled({ name: tool, version });
+        }
         await this.versionSvc.setCurrent({
           name: tool,
           tool: { name: tool, version },
