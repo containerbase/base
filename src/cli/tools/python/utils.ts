@@ -34,7 +34,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     return this.name;
   }
 
-  override readonly parent = 'ruby';
+  override readonly parent = 'python';
 
   override async install(version: string): Promise<void> {
     const pythonVersion = await this.getPythonVersion();
