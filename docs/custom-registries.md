@@ -73,6 +73,21 @@ https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/d
 https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.4/sdk/dartsdk-linux-arm64-release.zip.sha256sum
 ```
 
+## `deno`
+
+Deno releases are downloaded from:
+
+- `https://github.com/denoland/deno/releases`
+
+Samples:
+
+```txt
+https://github.com/denoland/deno/releases/download/v2.4.5/deno-aarch64-unknown-linux-gnu.zip
+https://github.com/denoland/deno/releases/download/v2.4.5/deno-aarch64-unknown-linux-gnu.zip.sha256sum
+https://github.com/denoland/deno/releases/download/v2.4.5/deno-x86_64-unknown-linux-gnu.zip
+https://github.com/denoland/deno/releases/download/v2.4.5/deno-x86_64-unknown-linux-gnu.zip.sha256sum
+```
+
 ## `devbox`
 
 Devbox releases are downloaded from:
