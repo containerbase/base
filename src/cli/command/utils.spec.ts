@@ -6,7 +6,7 @@ describe('cli/command/utils', () => {
   beforeEach(() => {
     delete env.NODE_VERSION;
     delete env.DEL_CLI_VERSION;
-    delete env.IGNORED_TOOLS;
+    env.IGNORED_TOOLS = 'php,pnpm';
   });
 
   test('getVersion', () => {
@@ -19,8 +19,7 @@ describe('cli/command/utils', () => {
 
   test('isToolIgnored', async () => {
     expect(await isToolIgnored('node')).toBe(false);
-    env.IGNORED_TOOLS = 'node,pnpm';
-    expect(await isToolIgnored('node')).toBe(true);
-    expect(await isToolIgnored('php')).toBe(false);
+    expect(await isToolIgnored('pnpm')).toBe(true);
+    expect(await isToolIgnored('php')).toBe(true);
   });
 });

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { inject, injectable } from 'inversify';
+import { bindingScopeValues, inject, injectable } from 'inversify';
 import { fileRights, logger, pathExists, tool2path } from '../utils';
 import { EnvService } from './env.service';
 
@@ -14,7 +14,7 @@ export interface FileOwnerConfig {
   mode?: number;
 }
 
-@injectable()
+@injectable(bindingScopeValues.Singleton)
 export class PathService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;

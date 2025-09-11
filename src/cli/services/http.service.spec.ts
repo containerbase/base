@@ -2,9 +2,9 @@ import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { logger } from '../utils';
-import { HttpService, createContainer } from '.';
+import { HttpService } from '.';
 import { scope } from '~test/http-mock';
-import { cachePath } from '~test/path';
+import { cachePath, testContainer } from '~test/path';
 
 const baseUrl = 'https://example.com';
 describe('cli/services/http.service', () => {
@@ -12,7 +12,7 @@ describe('cli/services/http.service', () => {
   let http!: HttpService;
 
   beforeEach(async () => {
-    child = createContainer();
+    child = await testContainer();
     http = await child.getAsync(HttpService);
 
     for (const key of Object.keys(env)) {

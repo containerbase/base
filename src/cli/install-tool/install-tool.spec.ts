@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { rootPath } from '../../../test/path';
 import { VersionService, createContainer } from '../services';
 import { BunInstallService } from '../tools/bun';
 import { LegacyToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
+import { rootPath } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');

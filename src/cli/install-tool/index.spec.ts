@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { rootPath } from '../../../test/path';
 import { VersionService } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
@@ -11,6 +10,7 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { installTool, resolveVersion } from '.';
+import { rootPath } from '~test/path';
 
 vi.mock('del');
 vi.mock('execa');

@@ -17,7 +17,7 @@ vi.mock('../prepare-tool', () => mocks);
 describe('cli/command/install-tool', () => {
   beforeEach(() => {
     delete env.NODE_VERSION;
-    delete env.IGNORED_TOOLS;
+    env.IGNORED_TOOLS = 'pnpm,php';
   });
 
   test('install-tool', async () => {
@@ -42,9 +42,8 @@ describe('cli/command/install-tool', () => {
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['node'])).toBe(1);
 
-    env.IGNORED_TOOLS = 'node';
-    expect(await cli.run(['node'])).toBe(0);
-    expect(logger.info).toHaveBeenCalledWith({ tool: 'node' }, 'tool ignored');
+    expect(await cli.run(['php'])).toBe(0);
+    expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });
 
   test('containerbase-cli install tool', async () => {
@@ -69,8 +68,7 @@ describe('cli/command/install-tool', () => {
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['install', 'tool', 'node'])).toBe(1);
 
-    env.IGNORED_TOOLS = 'node';
-    expect(await cli.run(['install', 'tool', 'node'])).toBe(0);
-    expect(logger.info).toHaveBeenCalledWith({ tool: 'node' }, 'tool ignored');
+    expect(await cli.run(['install', 'tool', 'php'])).toBe(0);
+    expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });
 });
