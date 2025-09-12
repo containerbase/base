@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { inject, injectable } from 'inversify';
@@ -86,7 +86,7 @@ export class LinkToolService {
     }
     content += ` "$@"\n`;
 
-    await writeFile(tgt, content, { encoding: 'utf8' });
+    await fs.writeFile(tgt, content, { encoding: 'utf8' });
     await this.pathSvc.setOwner({ path: tgt });
   }
 }
