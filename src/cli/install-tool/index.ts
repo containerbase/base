@@ -73,6 +73,7 @@ import {
   V2ToolInstallService,
 } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
+import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
 
@@ -85,6 +86,7 @@ async function prepareInstallContainer(): Promise<Container> {
   // core services
   container.bind(InstallToolService).toSelf();
   container.bind(V1ToolInstallService).toSelf();
+  container.bind(LinkToolService).toSelf();
 
   // modern tool services
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
@@ -244,6 +246,16 @@ export async function installTool(
 
   const svc = await container.getAsync(InstallToolService);
   return svc.install(tool, version, dryRun);
+}
+
+export async function linkTool(
+  tool: string,
+  options: ShellWrapperConfig,
+): Promise<number | void> {
+  const container = await prepareInstallContainer();
+
+  const svc = await container.getAsync(LinkToolService);
+  return svc.shellwrapper(tool, options);
 }
 
 export async function resolveVersion(

@@ -9,6 +9,7 @@ import { InstallGemCommand, InstallGemShortCommand } from './install-gem';
 import { InstallNpmCommand, InstallNpmShortCommand } from './install-npm';
 import { InstallPipCommand, InstallPipShortCommand } from './install-pip';
 import { InstallToolCommand, InstallToolShortCommand } from './install-tool';
+import { LinkToolCommand } from './link-tool';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 
 export function prepareCommands(cli: Cli, mode: CliMode | null): void {
@@ -44,6 +45,7 @@ export function prepareCommands(cli: Cli, mode: CliMode | null): void {
   cli.register(InstallNpmCommand);
   cli.register(InstallPipCommand);
   cli.register(InstallToolCommand);
+  cli.register(LinkToolCommand);
   cli.register(PrepareToolCommand);
   cli.register(InitToolCommand);
   cli.register(CleanupPathCommand);
