@@ -47,7 +47,7 @@ export class PrepareToolCommand extends Command {
 }
 
 export class PrepareToolShortCommand extends PrepareToolCommand {
-  static override paths = [];
+  static override paths = [Command.Default];
 
   static override usage = Command.Usage({
     description: 'Prepares a tool into the container.',
