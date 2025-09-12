@@ -214,7 +214,9 @@ export class PathService {
   }
 
   async setInitialized(tool: string): Promise<void> {
-    await fs.writeFile(this.toolInitPath(tool), '');
+    const path = this.toolInitPath(tool);
+    await fs.writeFile(path, '');
+    await this.setOwner({ path });
   }
 
   async setPrepared(tool: string): Promise<void> {
