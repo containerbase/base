@@ -1,6 +1,3 @@
-import { writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { codeBlock } from 'common-tags';
 import { inject, injectable } from 'inversify';
 import {
   CompressionService,
@@ -9,21 +6,8 @@ import {
   PathService,
 } from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
-import { isValid, tool2path } from '../utils';
-
-export interface ShellWrapperConfig {
-  name?: string;
-  srcDir: string;
-  exports?: string;
-
-  args?: string;
-
-  /**
-   * Which extra tool envs to load.
-   * Eg. load php env before composer env.
-   */
-  extraToolEnvs?: string[];
-}
+import { isValid } from '../utils';
+import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 
 @injectable()
 export abstract class BaseInstallService {
@@ -35,6 +19,9 @@ export abstract class BaseInstallService {
   protected readonly http!: HttpService;
   @inject(CompressionService)
   protected readonly compress!: CompressionService;
+
+  @inject(LinkToolService)
+  private readonly _link!: LinkToolService;
 
   /**
    * Optional tool alias used to refer to this tool as parent.
@@ -99,48 +86,7 @@ export abstract class BaseInstallService {
     return Promise.resolve(isValid(version));
   }
 
-  protected async shellwrapper({
-    args,
-    name,
-    srcDir,
-    exports,
-    extraToolEnvs,
-  }: ShellWrapperConfig): Promise<void> {
-    const tgt = join(this.pathSvc.binDir, name ?? this.name);
-
-    const envs = [...(extraToolEnvs ?? []), this.name].map(tool2path);
-    let content = codeBlock`
-      #!/bin/bash
-
-      if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
-        . ${this.pathSvc.envFile}
-      fi
-
-      if [[ ! -f "${this.pathSvc.toolInitPath(this.name)}" ]]; then
-        # set logging to only warn and above to not interfere with tool output
-        CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${this.name}"
-      fi
-
-      # load tool envs
-      for n in ${envs.join(' ')}; do
-        if [[ -f "${this.pathSvc.toolsPath}/\${n}/env.sh" ]]; then
-          . "${this.pathSvc.toolsPath}/\${n}/env.sh"
-        fi
-      done
-      unset n
-      `;
-
-    if (exports) {
-      content += `\nexport ${exports}`;
-    }
-
-    content += `\n${srcDir}/${name ?? this.name}`;
-    if (args) {
-      content += ` ${args}`;
-    }
-    content += ` "$@"\n`;
-
-    await writeFile(tgt, content, { encoding: 'utf8' });
-    await this.pathSvc.setOwner({ path: tgt });
+  protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
+    return this._link.shellwrapper(this.name, options);
   }
 }

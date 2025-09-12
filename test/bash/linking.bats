@@ -68,13 +68,4 @@ teardown() {
   assert_failure
   assert_output --partial "param SOURCE is set but empty"
 
-  run shell_wrapper ls
-  assert_success
-  assert [ -f "${BIN_DIR}/ls" ]
-  assert [ "$(stat --format '%a' "${BIN_DIR}/ls")" -eq 775 ]
-
-  PATH="${USER_HOME}/bin":$PATH run shell_wrapper foobar
-  assert_success
-  assert [ -f "${BIN_DIR}/foobar" ]
-  assert [ "$(stat --format '%a' "${BIN_DIR}/ls")" -eq 775 ]
 }

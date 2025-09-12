@@ -31,6 +31,8 @@ describe('cli/install-tool/index', () => {
       '',
     );
 
+    await fs.writeFile(rootPath('usr/local/containerbase/tools/leg.sh'), '');
+
     const verSvc = await createContainer().getAsync(VersionService);
 
     await verSvc.setCurrent({
@@ -51,6 +53,10 @@ describe('cli/install-tool/index', () => {
     test('works', async () => {
       expect(await installTool('bun', '1.0.0')).toBeUndefined();
       expect(await installTool('dummy', '1.0.0')).toBeUndefined();
+      expect(await installTool('dummy', '1.0.0')).toBeUndefined();
+      expect(await installTool('leg', '1.0.0', true)).toBeUndefined();
+      expect(await installTool('leg', '1.0.0')).toBeUndefined();
+      expect(await installTool('a', '1.0.0')).toBe(1);
     });
 
     test.each([
