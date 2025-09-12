@@ -1,0 +1,25 @@
+diff --git a/source/spawn.js b/source/spawn.js
+index 0018a555bed498c5ff530139598158801683cb0b..389f0bc893beb2c40627e2b80ba2a653678bedcf 100644
+--- a/source/spawn.js
++++ b/source/spawn.js
+@@ -1,20 +1,10 @@
+ import {spawn} from 'node:child_process';
+ import {once} from 'node:events';
+-import process from 'node:process';
+ import {applyForceShell} from './windows.js';
+ import {getResultError} from './result.js';
+ 
+ export const spawnSubprocess = async (file, commandArguments, options, context) => {
+ 	try {
+-		// When running `node`, keep the current Node version and CLI flags.
+-		// Not applied with file paths to `.../node` since those indicate a clear intent to use a specific Node version.
+-		// This also provides a way to opting out, e.g. using `process.execPath` instead of `node` to discard current CLI flags.
+-		// Does not work with shebangs, but those don't work cross-platform anyway.
+-		if (['node', 'node.exe'].includes(file.toLowerCase())) {
+-			file = process.execPath;
+-			commandArguments = [...process.execArgv.filter(flag => !flag.startsWith('--inspect')), ...commandArguments];
+-		}
+-
+ 		[file, commandArguments, options] = await applyForceShell(file, commandArguments, options);
+ 		[file, commandArguments, options] = concatenateShell(file, commandArguments, options);
+ 		const instance = spawn(file, commandArguments, options);

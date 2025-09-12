@@ -1,20 +1,41 @@
-import { execa } from 'execa';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import spawn from 'nano-spawn';
+import { V2ToolService } from '../services';
 import { logger } from '../utils';
+import { BasePrepareService } from './base-prepare.service';
 
 @injectable()
-export class PrepareLegacyToolsService {
-  async prepare(tool: string): Promise<void> {
-    logger.debug(`Preparing legacy tool ${tool} ...`);
-    await execa('/usr/local/containerbase/bin/prepare-tool.sh', [tool], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+export abstract class V2ToolPrepareService extends BasePrepareService {
+  @inject(V2ToolService)
+  private readonly _svc!: V2ToolService;
+
+  override needsInitialize(): boolean {
+    return this._svc.needsInitialize(this.name);
   }
 
-  async initialize(tool: string): Promise<void> {
-    logger.debug(`Initializing legacy tool ${tool} ...`);
-    await execa('/usr/local/containerbase/bin/init-tool.sh', [tool], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+  override needsPrepare(): boolean {
+    return this._svc.needsPrepare(this.name);
+  }
+
+  override async initialize(): Promise<void> {
+    logger.debug(`Initializing v2 tool ${this.name} ...`);
+    await spawn(
+      'bash',
+      ['/usr/local/containerbase/bin/v2-install-tool.sh', 'init', this.name],
+      {
+        stdio: ['inherit', 'inherit', 1],
+      },
+    );
+  }
+
+  override async prepare(): Promise<void> {
+    logger.debug(`Preparing v2 tool ${this.name} ...`);
+    await spawn(
+      'bash',
+      ['/usr/local/containerbase/bin/v2-install-tool.sh', 'prepare', this.name],
+      {
+        stdio: ['inherit', 'inherit', 1],
+      },
+    );
   }
 }

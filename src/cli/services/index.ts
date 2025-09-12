@@ -5,6 +5,7 @@ import { DataService } from './data.service';
 import { EnvService } from './env.service';
 import { HttpService } from './http.service';
 import { PathService } from './path.service';
+import { V2ToolService } from './v2-tool.service';
 import { VersionService } from './version.service';
 
 export {
@@ -13,6 +14,7 @@ export {
   EnvService,
   HttpService,
   PathService,
+  V2ToolService,
   VersionService,
 };
 
@@ -23,6 +25,7 @@ function init<T extends { bind: Bind }>(options: T): void {
   options.bind(EnvService).toSelf();
   options.bind(HttpService).toSelf();
   options.bind(PathService).toSelf();
+  options.bind(V2ToolService).toSelf();
   options.bind(VersionService).toSelf();
 }
 

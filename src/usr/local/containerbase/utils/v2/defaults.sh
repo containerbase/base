@@ -44,3 +44,9 @@ function init_tool() {
 function post_install () {
   true
 }
+
+# Called after install_tool and link_tool. It's always called.
+# Allow tools to do some testing
+function test_tool () {
+  true
+}
