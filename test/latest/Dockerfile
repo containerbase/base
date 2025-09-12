@@ -206,6 +206,7 @@ FROM base AS testd
 
 RUN [ $(stat --format '%a' "/usr/local/bin") -eq 777 ]
 
+ENV CONTAINERBASE_LOG_LEVEL=trace
 RUN prepare-tool all
 
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;

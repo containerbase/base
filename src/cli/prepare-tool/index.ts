@@ -1,5 +1,5 @@
-import { Container } from 'inversify';
-import { createContainer } from '../services';
+import { Container, injectFromHierarchy, injectable } from 'inversify';
+import { PathService, createContainer } from '../services';
 import { DartPrepareService } from '../tools/dart';
 import { DockerPrepareService } from '../tools/docker';
 import { DotnetPrepareService } from '../tools/dotnet';
@@ -13,18 +13,28 @@ import { NodePrepareService } from '../tools/node';
 import { PhpPrepareService } from '../tools/php';
 import { ConanPrepareService } from '../tools/python/conan';
 import { logger } from '../utils';
-import { PrepareLegacyToolsService } from './prepare-legacy-tools.service';
+import { V2ToolPrepareService } from './prepare-legacy-tools.service';
 import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
 
-function prepareContainer(): Container {
+async function prepareContainer(): Promise<Container> {
   logger.trace('preparing container');
   const container = createContainer();
 
   // core services
   container.bind(PrepareToolService).toSelf();
-  container.bind(PrepareLegacyToolsService).toSelf();
 
-  // tool services
+  // v2 tool services
+  const pathSvc = await container.getAsync(PathService);
+  for (const tool of await pathSvc.findLegacyTools()) {
+    @injectable()
+    @injectFromHierarchy()
+    class GenericV2ToolPrepareService extends V2ToolPrepareService {
+      override readonly name: string = tool;
+    }
+    container.bind(PREPARE_TOOL_TOKEN).to(GenericV2ToolPrepareService);
+  }
+
+  // modern tool services
   container.bind(PREPARE_TOOL_TOKEN).to(ConanPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DartPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DotnetPrepareService);
@@ -44,17 +54,16 @@ export async function prepareTools(
   tools: string[],
   dryRun = false,
 ): Promise<number | void> {
-  const container = prepareContainer();
-  return (await container.getAsync(PrepareToolService)).prepare(tools, dryRun);
+  const container = await prepareContainer();
+  const svc = await container.getAsync(PrepareToolService);
+  return svc.prepare(tools, dryRun);
 }
 
 export async function initializeTools(
   tools: string[],
   dryRun = false,
 ): Promise<number | void> {
-  const container = prepareContainer();
-  return (await container.getAsync(PrepareToolService)).initialize(
-    tools,
-    dryRun,
-  );
+  const container = await prepareContainer();
+  const svc = await container.getAsync(PrepareToolService);
+  return svc.initialize(tools, dryRun);
 }

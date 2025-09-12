@@ -6,14 +6,14 @@ import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
 import { MissingParent } from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
-import { LegacyToolInstallService } from './install-legacy-tool.service';
+import { V1ToolInstallService } from './install-legacy-tool.service';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
 @injectable()
 export class InstallToolService {
-  @inject(LegacyToolInstallService)
-  private readonly legacySvc!: LegacyToolInstallService;
+  @inject(V1ToolInstallService)
+  private readonly legacySvc!: V1ToolInstallService;
   @multiInject(INSTALL_TOOL_TOKEN)
   @optional()
   private readonly toolSvcs: BaseInstallService[] = [];
@@ -103,6 +103,10 @@ export class InstallToolService {
         if (dryRun) {
           logger.info(`Dry run: install tool ${tool} v${version} ...`);
           return;
+        }
+        if (!(await this.pathSvc.isLegacyTool(tool, true))) {
+          logger.error({ tool }, 'tool not found');
+          return 1;
         }
         await this.legacySvc.execute(tool, version);
         if (!(await this.versionSvc.isInstalled({ name: tool, version }))) {

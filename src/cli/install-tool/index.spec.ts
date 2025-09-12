@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { VersionService, createContainer } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
@@ -9,10 +10,10 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { installTool, resolveVersion } from '.';
-import { ensurePaths } from '~test/path';
+import { ensurePaths, rootPath } from '~test/path';
 
 vi.mock('del');
-vi.mock('execa');
+vi.mock('nano-spawn');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 
@@ -22,7 +23,13 @@ describe('cli/install-tool/index', () => {
       'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
       'opt/containerbase/data',
+      'usr/local/containerbase/tools/v2',
     ]);
+
+    await fs.writeFile(
+      rootPath('usr/local/containerbase/tools/v2/dummy.sh'),
+      '',
+    );
 
     const verSvc = await createContainer().getAsync(VersionService);
 

@@ -2,12 +2,12 @@ import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { VersionService, createContainer } from '../services';
 import { BunInstallService } from '../tools/bun';
-import { LegacyToolInstallService } from './install-legacy-tool.service';
+import { V1ToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { ensurePaths } from '~test/path';
 
 vi.mock('del');
-vi.mock('execa');
+vi.mock('nano-spawn');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 vi.mock('../prepare-tool');
@@ -15,7 +15,7 @@ vi.mock('../prepare-tool');
 describe('cli/install-tool/install-tool', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
-  parent.bind(LegacyToolInstallService).toSelf();
+  parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
 
   let child: Container;

@@ -52,6 +52,7 @@
     "got": "14.4.8",
     "ini": "5.0.0",
     "inversify": "7.9.1",
+    "nano-spawn": "1.0.3",
     "pino": "9.9.4",
     "pino-pretty": "13.1.1",
     "pretty-ms": "9.2.0",
@@ -135,7 +136,8 @@
       "@semantic-release/github": "patches/@semantic-release__github.patch",
       "@yao-pkg/pkg": "patches/@yao-pkg__pkg.patch",
       "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
-      "global-agent": "patches/global-agent.patch"
+      "global-agent": "patches/global-agent.patch",
+      "nano-spawn": "patches/nano-spawn.patch"
     },
     "ignoredBuiltDependencies": [
       "esbuild",

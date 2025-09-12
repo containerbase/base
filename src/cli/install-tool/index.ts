@@ -1,5 +1,5 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
-import { createContainer } from '../services';
+import { PathService, createContainer } from '../services';
 import { ResolverMap } from '../tools';
 import { BazeliskInstallService } from '../tools/bazelisk';
 import { BunInstallService } from '../tools/bun';
@@ -68,22 +68,25 @@ import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
 import { WallyInstallService } from '../tools/wally';
 import { logger } from '../utils';
-import { LegacyToolInstallService } from './install-legacy-tool.service';
+import {
+  V1ToolInstallService,
+  V2ToolInstallService,
+} from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
 
 export type InstallToolType = 'gem' | 'npm' | 'pip';
 
-function prepareInstallContainer(): Container {
+async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
   const container = createContainer();
 
   // core services
   container.bind(InstallToolService).toSelf();
-  container.bind(LegacyToolInstallService).toSelf();
+  container.bind(V1ToolInstallService).toSelf();
 
-  // tool services
+  // modern tool services
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
@@ -116,6 +119,17 @@ function prepareInstallContainer(): Container {
   container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
+
+  // v2 tool services
+  const pathSvc = await container.getAsync(PathService);
+  for (const tool of await pathSvc.findLegacyTools()) {
+    @injectable()
+    @injectFromHierarchy()
+    class GenericInstallService extends V2ToolInstallService {
+      override readonly name: string = tool;
+    }
+    container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
+  }
 
   logger.trace('preparing install container done');
   return container;
@@ -152,7 +166,7 @@ export async function installTool(
   dryRun = false,
   type?: InstallToolType,
 ): Promise<number | void> {
-  const container = prepareInstallContainer();
+  const container = await prepareInstallContainer();
   if (type) {
     switch (type) {
       case 'gem': {
@@ -227,11 +241,9 @@ export async function installTool(
       }
     }
   }
-  return (await container.getAsync(InstallToolService)).install(
-    tool,
-    version,
-    dryRun,
-  );
+
+  const svc = await container.getAsync(InstallToolService);
+  return svc.install(tool, version, dryRun);
 }
 
 export async function resolveVersion(
@@ -272,8 +284,6 @@ export async function resolveVersion(
       }
     }
   }
-  return (await container.getAsync(ToolVersionResolverService)).resolve(
-    tool,
-    version,
-  );
+  const svc = await container.getAsync(ToolVersionResolverService);
+  return svc.resolve(tool, version);
 }
