@@ -3,7 +3,7 @@ import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -22,7 +22,7 @@ describe('cli/command/install-tool', () => {
 
   test('install-tool', async () => {
     const cli = new Cli({ binaryName: 'install-tool' });
-    prepareCommands(cli, 'install-tool');
+    registerCommands(cli, 'install-tool');
 
     expect(await cli.run(['bower'])).toBe(MissingVersion);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -48,7 +48,7 @@ describe('cli/command/install-tool', () => {
 
   test('containerbase-cli install tool', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(await cli.run(['install', 'tool', 'bower'])).toBe(MissingVersion);
     expect(logger.warn).toHaveBeenCalledWith(

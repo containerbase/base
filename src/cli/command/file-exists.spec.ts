@@ -1,7 +1,7 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 import { scope } from '~test/http-mock';
 
 const mocks = vi.hoisted(() => ({
@@ -23,7 +23,7 @@ describe('cli/command/file-exists', () => {
 
   test('file-exists', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     const baseUrl = 'https://example.com';
     scope(baseUrl)

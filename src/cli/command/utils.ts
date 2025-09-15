@@ -1,7 +1,7 @@
 import { env } from 'node:process';
-import type { CommandClass } from 'clipanion';
+import type { Cli, CommandClass } from 'clipanion';
 import { EnvService, createContainer } from '../services';
-import type { CliMode } from '../utils';
+import { type CliMode, logger } from '../utils';
 
 export function getVersion(tool: string): string | undefined {
   return env[tool.replace('-', '_').toUpperCase() + '_VERSION'];
@@ -27,6 +27,9 @@ export function command(mode: CliMode): CommandDecorator {
   };
 }
 
-export function getCommands(mode: CliMode): CommandClass[] {
-  return commands[mode] ?? [];
+export function registerCommands(cli: Cli, mode: CliMode | null): void {
+  logger.debug('prepare commands');
+  for (const command of commands[mode ?? 'containerbase-cli'] ?? []) {
+    cli.register(command);
+  }
 }

@@ -1,6 +1,6 @@
 import { argv, argv0, version } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
-import { prepareCommands } from './command';
+import { registerCommands } from './command';
 import { bootstrap } from './proxy';
 import { cliMode, logger, parseBinaryName, validateSystem } from './utils';
 
@@ -29,7 +29,7 @@ export async function main(): Promise<void> {
   cli.register(Builtins.HelpCommand);
   cli.register(Builtins.VersionCommand);
 
-  prepareCommands(cli, mode);
+  registerCommands(mode, cli);
 
   await cli.runExit(args);
 }

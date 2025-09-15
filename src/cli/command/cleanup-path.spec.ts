@@ -1,6 +1,6 @@
 import { Cli } from 'clipanion';
 import { describe, expect, test, vi } from 'vitest';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   deleteAsync: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock('del', () => mocks);
 describe('cli/command/cleanup-path', () => {
   test('works', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(
       await cli.run(['cleanup', 'path', '/tmp/**:/var/tmp', '/some/path/**']),
