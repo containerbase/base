@@ -240,7 +240,7 @@ RUN install-tool skopeo 1.20.0
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.10.2
 
-# renovate: datasource=github-releases packageName=protocolbuffers/protobuf
+# renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 29.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
@@ -288,7 +288,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 #--------------------------------------
 FROM base AS testf
 
-# renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf
+# renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf versioning=docker
 ARG PROTOC_VERSION=29.2
 
 RUN set -ex; \
