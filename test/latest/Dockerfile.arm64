@@ -146,7 +146,7 @@ RUN install-tool sops v3.10.2
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 29.2
+RUN install-tool protoc 29.5
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
 RUN install-tool pixi v0.54.2
