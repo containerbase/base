@@ -19,5 +19,9 @@ describe('cli/utils/index', () => {
     expect((await import('.')).cliMode()).toBe('install-tool');
     procMocks.argv0 = 'prepare-tool';
     expect((await import('.')).cliMode()).toBe('prepare-tool');
+    procMocks.argv0 = '/usr/bin/node';
+    expect((await import('.')).cliMode()).toBe('containerbase-cli');
+    procMocks.argv0 = '/bin/sh';
+    expect((await import('.')).cliMode()).toBeNull();
   });
 });

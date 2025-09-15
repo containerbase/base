@@ -54,8 +54,7 @@ describe('cli/command/install-tool', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `The 'install-tool bower' command is deprecated. Please use the 'install-npm bower'.`,
     );
-    env.NODE_VERSION = '16.13.0';
-    expect(await cli.run(['install', 'tool', 'node'])).toBe(0);
+    expect(await cli.run(['install', 'tool', 'node', 'v16.13.0'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'node',
@@ -63,6 +62,7 @@ describe('cli/command/install-tool', () => {
       false,
       undefined,
     );
+    env.NODE_VERSION = '16.13.0';
     expect(await cli.run(['install', 'tool', 'node', '-d'])).toBe(0);
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));

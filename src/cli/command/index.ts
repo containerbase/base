@@ -1,5 +1,7 @@
-import type { Cli } from 'clipanion';
+import process from 'node:process';
+import type { Cli, CommandClass } from 'clipanion';
 import type { CliMode } from '../utils';
+import { InvalidCommand } from '../utils/codes';
 import { logger } from '../utils/logger';
 import { CleanupPathCommand } from './cleanup-path';
 import { DownloadFileCommand, FileDownloadCommand } from './file-download';
@@ -12,41 +14,42 @@ import { InstallToolCommand, InstallToolShortCommand } from './install-tool';
 import { LinkToolCommand } from './link-tool';
 import { PrepareToolCommand, PrepareToolShortCommand } from './prepare-tool';
 
+const commands: Record<CliMode, CommandClass | CommandClass[]> = {
+  'containerbase-cli': [
+    CleanupPathCommand,
+    DownloadFileCommand,
+    FileDownloadCommand,
+    FileExistsCommand,
+    InitToolCommand,
+    InstallGemCommand,
+    InstallNpmCommand,
+    InstallPipCommand,
+    InstallToolCommand,
+    LinkToolCommand,
+    PrepareToolCommand,
+  ],
+  'install-gem': InstallGemShortCommand,
+  'install-npm': InstallNpmShortCommand,
+  'install-pip': InstallPipShortCommand,
+  'install-tool': InstallToolShortCommand,
+  'prepare-tool': PrepareToolShortCommand,
+};
+
+function register(mode: CliMode, cli: Cli): void {
+  const cmds = commands[mode];
+  for (const cmd of Array.isArray(cmds) ? cmds : [cmds]) {
+    cli.register(cmd);
+  }
+}
+
 export function prepareCommands(cli: Cli, mode: CliMode | null): void {
   logger.debug('prepare commands');
-  /*
-   * Workaround for linking the cli tool as different executables.
-   * So it can be called as
-   * - `install-tool node 1.2.3`
-   * - `install-npm corepack 1.2.3`
-   * - `prepare-tool node`
-   */
-  if (mode === 'install-tool') {
-    cli.register(InstallToolShortCommand);
-    return;
-  } else if (mode === 'prepare-tool') {
-    cli.register(PrepareToolShortCommand);
-    return;
-  } else if (mode === 'install-npm') {
-    cli.register(InstallNpmShortCommand);
-    return;
-  } else if (mode === 'install-gem') {
-    cli.register(InstallGemShortCommand);
-    return;
-  } else if (mode === 'install-pip') {
-    cli.register(InstallPipShortCommand);
-    return;
+  if (!mode) {
+    register('containerbase-cli', cli);
+  } else if (mode in commands) {
+    register(mode, cli);
+  } else {
+    logger.fatal(`Unknown CLI mode: ${mode}`);
+    process.exit(InvalidCommand);
   }
-
-  cli.register(FileDownloadCommand);
-  cli.register(DownloadFileCommand);
-  cli.register(FileExistsCommand);
-  cli.register(InstallGemCommand);
-  cli.register(InstallNpmCommand);
-  cli.register(InstallPipCommand);
-  cli.register(InstallToolCommand);
-  cli.register(LinkToolCommand);
-  cli.register(PrepareToolCommand);
-  cli.register(InitToolCommand);
-  cli.register(CleanupPathCommand);
 }

@@ -1,6 +1,6 @@
 import fs, { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
-import { argv0, exit } from 'node:process';
+import process from 'node:process';
 import { deleteAsync } from 'del';
 import { logger } from './logger';
 import type { CliMode, Distro } from './types';
@@ -11,16 +11,17 @@ let isDocker: undefined | Promise<boolean>;
 export async function validateSystem(): Promise<void> {
   if (os.platform() !== 'linux') {
     logger.fatal(`Unsupported platform: ${os.platform()}! Please use Linux.`);
-    exit(1);
+    process.exit(1);
   }
   if (os.arch() !== 'x64' && os.arch() !== 'arm64') {
     logger.fatal(
       `Unsupported architecture: ${os.arch()}! Please use 'x64' or 'arm64'.`,
     );
-    exit(1);
+    process.exit(1);
   }
   const d = await (distro ??= readDistro());
   switch (d.versionCode) {
+    /* v8 ignore next -- hard to test */
     case 'focal':
     case 'jammy':
     case 'noble':
@@ -30,7 +31,7 @@ export async function validateSystem(): Promise<void> {
         { distro: d },
         `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal', 'jammy' or 'noble'.`,
       );
-      exit(1);
+      process.exit(1);
   }
 }
 
@@ -103,7 +104,9 @@ export function parseBinaryName(
     return mode;
   }
 
-  return argv0.endsWith('/node') || argv0 === 'node' ? `${node} ${app}` : argv0;
+  return process.argv0.endsWith('/node') || process.argv0 === 'node'
+    ? `${node} ${app}`
+    : process.argv0;
 }
 
 export async function cleanAptFiles(dryRun = false): Promise<void> {
