@@ -96,7 +96,7 @@ RUN install-tool kustomize 5.7.1
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.54.2
+RUN install-tool pixi v0.55.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.5.3
