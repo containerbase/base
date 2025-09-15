@@ -29,7 +29,7 @@ export async function main(): Promise<void> {
   cli.register(Builtins.HelpCommand);
   cli.register(Builtins.VersionCommand);
 
-  registerCommands(mode, cli);
+  registerCommands(cli, mode);
 
   await cli.runExit(args);
 }
