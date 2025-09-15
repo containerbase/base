@@ -9,7 +9,9 @@ import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
-import { installTool, resolveVersion } from '.';
+import { logger } from '../utils';
+import { MissingParent } from '../utils/codes';
+import { installTool, linkTool, resolveVersion } from '.';
 import { ensurePaths, rootPath } from '~test/path';
 
 vi.mock('del');
@@ -20,10 +22,10 @@ vi.mock('../tools/php/composer');
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
     await ensurePaths([
-      'var/lib/containerbase/tool.prep.d',
-      'tmp/containerbase/tool.init.d',
       'opt/containerbase/data',
+      'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
+      'var/lib/containerbase/tool.prep.d',
     ]);
 
     await fs.writeFile(
@@ -50,6 +52,14 @@ describe('cli/install-tool/index', () => {
   });
 
   describe('installTool', () => {
+    test('fails if parent is missing', async () => {
+      expect(await installTool('gradle', '1.0.0')).toBe(MissingParent);
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'gradle', parent: 'java' },
+        'parent tool not installed',
+      );
+    });
+
     test('works', async () => {
       expect(await installTool('bun', '1.0.0')).toBeUndefined();
       expect(await installTool('dummy', '1.0.0')).toBeUndefined();
@@ -106,5 +116,11 @@ describe('cli/install-tool/index', () => {
       vi.spyOn(svc.prototype, 'resolve').mockResolvedValue('1.0.0');
       expect(await resolveVersion('dummy', '1.0.0', type)).toBe('1.0.0');
     });
+  });
+
+  test('linkTool', async () => {
+    const spy = vi.spyOn(fs, 'writeFile');
+    expect(await linkTool('node', { srcDir: '/bin/bash' })).toBeUndefined();
+    expect(spy).toHaveBeenCalledOnce();
   });
 });

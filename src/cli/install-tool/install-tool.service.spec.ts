@@ -13,7 +13,7 @@ vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 vi.mock('../prepare-tool');
 
-describe('cli/install-tool/install-tool', () => {
+describe('cli/install-tool/install-tool.service', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
@@ -24,9 +24,9 @@ describe('cli/install-tool/install-tool', () => {
   let install: InstallToolService;
   beforeAll(async () => {
     await ensurePaths([
-      'var/lib/containerbase/tool.prep.d',
-      'tmp/containerbase/tool.init.d',
       'opt/containerbase/data',
+      'tmp/containerbase/tool.init.d',
+      'var/lib/containerbase/tool.prep.d',
     ]);
   });
 

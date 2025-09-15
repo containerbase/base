@@ -21,8 +21,8 @@ describe('cli/services/path.service', () => {
     pathSvc = await child.getAsync(PathService);
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
     await ensurePaths([
-      'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
+      'var/lib/containerbase/tool.prep.d',
     ]);
   });
 

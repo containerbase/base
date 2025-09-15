@@ -43,6 +43,9 @@ export abstract class BaseInstallService {
 
   abstract install(version: string): Promise<void>;
 
+  /**
+   * @deprecated Unused
+   */
   async isInstalled(version: string): Promise<boolean> {
     return !!(await this.pathSvc.findVersionedToolPath(this.name, version));
   }

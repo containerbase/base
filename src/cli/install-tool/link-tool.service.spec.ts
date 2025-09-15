@@ -4,13 +4,13 @@ import { ensurePaths } from '../../../test/path';
 import { createContainer } from '../services';
 import { LinkToolService } from './link-tool.service';
 
-describe('cli/install-tool/link-tool', async () => {
+describe('cli/install-tool/link-tool.service', async () => {
   const child = createContainer();
   child.bind(LinkToolService).toSelf();
   const svc = await child.getAsync(LinkToolService);
 
   beforeAll(async () => {
-    await ensurePaths(['opt/containerbase/bin']);
+    await ensurePaths('opt/containerbase/bin');
   });
 
   test('shell-wrapper', async () => {

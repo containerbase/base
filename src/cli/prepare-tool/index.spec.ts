@@ -17,9 +17,9 @@ vi.mock('node:process', async (importOriginal) => ({
 describe('cli/prepare-tool/index', () => {
   beforeAll(async () => {
     await ensurePaths([
-      'var/lib/containerbase/tool.prep.d',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
+      'var/lib/containerbase/tool.prep.d',
     ]);
 
     await fs.writeFile(
