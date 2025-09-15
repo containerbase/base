@@ -2,7 +2,9 @@ import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { linkTool } from '../install-tool';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class LinkToolCommand extends Command {
   static override paths = [['link', 'tool'], ['lt']];
 

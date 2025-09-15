@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 import { scope } from '~test/http-mock';
 import { cachePath } from '~test/path';
 
@@ -25,7 +25,7 @@ describe('cli/command/file-download', () => {
 
   test('file-download', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     const baseUrl = 'https://example.com';
     scope(baseUrl)
@@ -61,7 +61,7 @@ describe('cli/command/file-download', () => {
 
   test('download-file', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     const baseUrl = 'https://example.com';
     scope(baseUrl)

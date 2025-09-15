@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -20,7 +20,7 @@ describe('cli/command/install-pip', () => {
 
   test('install-pip', async () => {
     const cli = new Cli({ binaryName: 'install-pip' });
-    prepareCommands(cli, 'install-pip');
+    registerCommands(cli, 'install-pip');
 
     expect(await cli.run(['poetry'])).toBe(MissingVersion);
 
@@ -48,9 +48,9 @@ describe('cli/command/install-pip', () => {
     expect(await cli.run(['poetry'])).toBe(1);
   });
 
-  test('containerbase-cli install-pip', async () => {
+  test('containerbase-cli install pip', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(await cli.run(['install', 'pip', 'poetry'])).toBe(MissingVersion);
 

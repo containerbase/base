@@ -2,7 +2,9 @@ import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { initializeTools } from '../prepare-tool';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class InitToolCommand extends Command {
   static override paths = [['init', 'tool']];
 

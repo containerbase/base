@@ -3,7 +3,7 @@ import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -22,7 +22,7 @@ describe('cli/command/install-tool', () => {
 
   test('install-tool', async () => {
     const cli = new Cli({ binaryName: 'install-tool' });
-    prepareCommands(cli, 'install-tool');
+    registerCommands(cli, 'install-tool');
 
     expect(await cli.run(['bower'])).toBe(MissingVersion);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -48,14 +48,13 @@ describe('cli/command/install-tool', () => {
 
   test('containerbase-cli install tool', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(await cli.run(['install', 'tool', 'bower'])).toBe(MissingVersion);
     expect(logger.warn).toHaveBeenCalledWith(
       `The 'install-tool bower' command is deprecated. Please use the 'install-npm bower'.`,
     );
-    env.NODE_VERSION = '16.13.0';
-    expect(await cli.run(['install', 'tool', 'node'])).toBe(0);
+    expect(await cli.run(['install', 'tool', 'node', 'v16.13.0'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'node',
@@ -63,6 +62,7 @@ describe('cli/command/install-tool', () => {
       false,
       undefined,
     );
+    env.NODE_VERSION = '16.13.0';
     expect(await cli.run(['install', 'tool', 'node', '-d'])).toBe(0);
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));

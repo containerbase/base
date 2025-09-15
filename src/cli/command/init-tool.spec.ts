@@ -1,6 +1,6 @@
 import { Cli } from 'clipanion';
 import { describe, expect, test, vi } from 'vitest';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('../prepare-tool', () => mocks);
 describe('cli/command/init-tool', () => {
   test('init-tool', async () => {
     const cli = new Cli({ binaryName: 'cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(await cli.run(['init', 'tool', 'node'])).toBe(0);
     expect(mocks.initializeTools).toHaveBeenCalledOnce();

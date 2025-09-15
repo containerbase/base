@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   linkTool: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock('../install-tool', () => mocks);
 
 describe('cli/command/link-tool', () => {
   const cli = new Cli({ binaryName: 'containerbase-cli' });
-  prepareCommands(cli, 'containerbase-cli');
+  registerCommands(cli, 'containerbase-cli');
 
   beforeEach(() => {
     delete env.TOOL_NAME;

@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes';
-import { prepareCommands } from '.';
+import { registerCommands } from '.';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -20,7 +20,7 @@ describe('cli/command/install-gem', () => {
 
   test('install-gem', async () => {
     const cli = new Cli({ binaryName: 'install-gem' });
-    prepareCommands(cli, 'install-gem');
+    registerCommands(cli, 'install-gem');
 
     expect(await cli.run(['rake'])).toBe(MissingVersion);
 
@@ -41,7 +41,7 @@ describe('cli/command/install-gem', () => {
 
   test('containerbase-cli install gem', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
-    prepareCommands(cli, null);
+    registerCommands(cli, null);
 
     expect(await cli.run(['install', 'gem', 'rake'])).toBe(MissingVersion);
 

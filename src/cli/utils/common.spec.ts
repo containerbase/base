@@ -104,6 +104,8 @@ UBUNTU_CODENAME=jammy`);
     expect(parseBinaryName('containerbase-cli', 'node', 'app')).toBe(
       'containerbase-cli',
     );
+    procMocks.argv0 = 'tsx';
+    expect(parseBinaryName(null, 'tsx', 'index.ts')).toBe('tsx');
   });
 
   test('cleanAptFiles', async () => {

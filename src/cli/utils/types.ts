@@ -4,12 +4,15 @@ export interface Distro {
   readonly versionId: string;
 }
 
-export type CliMode =
-  | 'containerbase-cli'
-  | 'install-gem'
-  | 'install-npm'
-  | 'install-pip'
-  | 'install-tool'
-  | 'prepare-tool';
+export const cliModes = [
+  'containerbase-cli',
+  'install-gem',
+  'install-npm',
+  'install-pip',
+  'install-tool',
+  'prepare-tool',
+] as const;
+
+export type CliMode = (typeof cliModes)[number];
 
 export type Arch = 'arm64' | 'amd64';

@@ -9,8 +9,9 @@ import {
 import { DeprecatedTools, ResolverMap } from '../tools';
 import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
-import { getVersion, isToolIgnored } from './utils';
+import { command, getVersion, isToolIgnored } from './utils';
 
+@command('containerbase-cli')
 export class InstallToolCommand extends Command {
   static override paths = [['install', 'tool'], ['it']];
 
@@ -96,6 +97,7 @@ export class InstallToolCommand extends Command {
   }
 }
 
+@command('install-tool')
 export class InstallToolShortCommand extends InstallToolCommand {
   static override paths = [Command.Default];
   static override usage = Command.Usage({
