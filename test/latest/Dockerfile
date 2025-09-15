@@ -241,7 +241,7 @@ RUN install-tool skopeo 1.20.0
 RUN install-tool sops v3.10.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 29.2
+RUN install-tool protoc 32.1
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=v0.44.0
@@ -289,7 +289,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 FROM base AS testf
 
 # renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf versioning=docker
-ARG PROTOC_VERSION=29.2
+ARG PROTOC_VERSION=32.1
 
 RUN set -ex; \
   ls -lah /opt/containerbase/; \
