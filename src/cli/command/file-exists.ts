@@ -4,7 +4,9 @@ import { got } from 'got';
 import prettyMilliseconds from 'pretty-ms';
 import { EnvService, createContainer } from '../services';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class FileExistsCommand extends Command {
   static override paths = [['file', 'exists'], ['fe']];
 

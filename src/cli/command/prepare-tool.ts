@@ -2,7 +2,9 @@ import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { prepareTools } from '../prepare-tool';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class PrepareToolCommand extends Command {
   static override paths = [['prepare', 'tool'], ['pt']];
 
@@ -46,6 +48,7 @@ export class PrepareToolCommand extends Command {
   }
 }
 
+@command('prepare-tool')
 export class PrepareToolShortCommand extends PrepareToolCommand {
   static override paths = [Command.Default];
 

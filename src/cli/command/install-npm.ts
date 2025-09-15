@@ -1,6 +1,8 @@
 import { Command } from 'clipanion';
 import { InstallToolCommand } from './install-tool';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class InstallNpmCommand extends InstallToolCommand {
   static override paths = [['install', 'npm']];
   static override usage = Command.Usage({
@@ -18,6 +20,7 @@ export class InstallNpmCommand extends InstallToolCommand {
   protected override type = 'npm' as const;
 }
 
+@command('install-npm')
 export class InstallNpmShortCommand extends InstallNpmCommand {
   static override paths = [Command.Default];
 

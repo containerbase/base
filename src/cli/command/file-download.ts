@@ -8,7 +8,9 @@ import { got } from 'got';
 import prettyMilliseconds from 'pretty-ms';
 import { EnvService, createContainer } from '../services';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class FileDownloadCommand extends Command {
   static override paths = [['file', 'download'], ['fd']];
 
@@ -70,6 +72,7 @@ export class FileDownloadCommand extends Command {
   }
 }
 
+@command('containerbase-cli')
 export class DownloadFileCommand extends FileDownloadCommand {
   static override paths = [['download', 'file'], ['df']];
 

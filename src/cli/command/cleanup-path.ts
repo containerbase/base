@@ -2,7 +2,9 @@ import { Command, Option } from 'clipanion';
 import { deleteAsync } from 'del';
 import prettyMilliseconds from 'pretty-ms';
 import { logger } from '../utils';
+import { command } from './utils';
 
+@command('containerbase-cli')
 export class CleanupPathCommand extends Command {
   static override paths = [['cleanup', 'path']];
 
