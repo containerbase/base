@@ -126,7 +126,7 @@ RUN install-tool vendir v0.44.0
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 29.2
+RUN install-tool protoc 32.1
 
 #--------------------------------------
 # Image: test-erlang
