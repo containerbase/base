@@ -20,7 +20,7 @@ export interface ToolVersion {
   name: string;
   version: string;
 
-  tool?: Tool;
+  parent?: Tool;
 }
 
 export interface ToolLink {
@@ -57,6 +57,10 @@ export class VersionService {
 
   async removeInstalled(tool: Partial<ToolVersion>): Promise<void> {
     await this._versions.removeAsync(tool, { multi: true });
+  }
+
+  getChilds(parent: Tool): Promise<ToolVersion[]> {
+    return this._versions.findAsync({ parent });
   }
 
   async isLinked(tool: ToolLink): Promise<boolean> {
@@ -120,11 +124,11 @@ export class VersionService {
     await versions.ensureIndexAsync({ fieldName: 'name' });
     await versions.ensureIndexAsync({ fieldName: ['name', 'version'] });
     await versions.ensureIndexAsync({
-      fieldName: ['tool.name', 'tool.version'],
+      fieldName: ['parent.name', 'parent.version'],
       sparse: true,
     });
     await versions.ensureIndexAsync({
-      fieldName: ['name', 'version', 'tool.name', 'tool.version'],
+      fieldName: ['name', 'version', 'parent.name', 'parent.version'],
       unique: true,
     });
   }

@@ -7,6 +7,7 @@ import { PathService } from './path.service';
 export type Database<T = unknown> = Pick<
   Nedb<T>,
   | 'ensureIndexAsync'
+  | 'findAsync'
   | 'findOneAsync'
   | 'insertAsync'
   | 'removeAsync'

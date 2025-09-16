@@ -55,7 +55,7 @@ export class InstallToolService {
           await this.versionSvc.isInstalled({
             name: tool,
             version,
-            ...(parent && { tool: parent.tool }),
+            ...(parent && { parent: parent.tool }),
           })
         ) {
           logger.info({ tool }, 'tool already installed');
@@ -95,7 +95,7 @@ export class InstallToolService {
           await this.versionSvc.addInstalled({
             name: tool,
             version,
-            ...(parent && { tool: parent.tool }),
+            ...(parent && { parent: parent.tool }),
           });
           await this.linkAndTest(toolSvc, version, parent);
         }

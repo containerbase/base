@@ -33,7 +33,7 @@ Stores the installed tool versions with an optional parent.
 
 - `name`: tool name
 - `version`: tool version
-- `tool`: the optional parent tool and version this tool depends on
+- `parent`: the optional parent tool and version this tool depends on
   - `name`: tool name
   - `version`: tool version
 
@@ -41,7 +41,8 @@ Stores the installed tool versions with an optional parent.
 
 - `name`: search all installed versions
 - `name` and `version`: is a version installed
-- `tool.name` and `tool.version` (`sparse`): find links by current tool version
+- `parent.name` and `parent.version` (`sparse`): find childs by current tool version
+- `name`, `version`, `parent.name` and `parent.version` (`unique`): is a version installed
 
 ## `links`
 
