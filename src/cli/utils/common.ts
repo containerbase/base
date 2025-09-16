@@ -120,7 +120,7 @@ export async function cleanTmpFiles(
   tmp: string,
   dryRun = false,
 ): Promise<void> {
-  await deleteAsync([`**`, `!containerbase/**`], {
+  await deleteAsync(['**', '!containerbase/**'], {
     dot: true,
     dryRun,
     force: true,

@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool';
@@ -144,8 +145,8 @@ export class InstallToolService {
           logger.debug('cleaning user caches');
           await deleteAsync(
             [
-              `${this.pathSvc.cachePath}/.cache/**`,
-              `${this.pathSvc.cachePath}/.local/share/virtualenv`,
+              path.join(this.pathSvc.cachePath, '.cache/**'),
+              path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
             ],
             {
               force: true,
