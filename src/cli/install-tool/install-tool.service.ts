@@ -6,7 +6,7 @@ import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { MissingParent } from '../utils/codes';
+import { CurrentVersion, MissingParent, NotSupported } from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
 import { V1ToolInstallService } from './install-legacy-tool.service';
 
@@ -201,7 +201,7 @@ export class InstallToolService {
           { tool, version },
           'tool version is currently linked and cannot be uninstalled',
         );
-        return 1;
+        return CurrentVersion;
       }
 
       // TODO: validate child tools
@@ -216,7 +216,7 @@ export class InstallToolService {
       }
     } else {
       logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');
-      return 2;
+      return NotSupported;
     }
   }
 
