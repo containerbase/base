@@ -223,7 +223,7 @@ RUN install-tool bazelisk v1.27.0
 RUN install-tool bun 1.2.21
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.5.0
+RUN install-tool deno 2.5.1
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.16.0
