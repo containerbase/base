@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.6",
+    "@containerbase/istanbul-reports-html": "1.0.4",
     "@eslint/js": "9.35.0",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node20": "20.1.6",

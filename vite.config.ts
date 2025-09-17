@@ -9,7 +9,9 @@ export default defineConfig({
   test: {
     coverage: {
       provider: 'v8',
-      reporter: ci ? ['lcovonly', 'text'] : ['html-spa', 'text'],
+      reporter: ci
+        ? ['lcovonly', 'text']
+        : ['@containerbase/istanbul-reports-html', 'text'],
       include: ['src/cli/**/*.ts', '!**/__mocks__/**', '!**/types.ts'],
     },
     reporters: ci ? ['default', 'github-actions'] : ['default', 'html'],
