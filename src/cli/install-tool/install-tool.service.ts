@@ -6,7 +6,12 @@ import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { CurrentVersion, MissingParent, NotSupported } from '../utils/codes';
+import {
+  BlockingChild,
+  CurrentVersion,
+  MissingParent,
+  NotSupported,
+} from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
 import { V1ToolInstallService } from './install-legacy-tool.service';
 
@@ -204,7 +209,18 @@ export class InstallToolService {
         return CurrentVersion;
       }
 
-      // TODO: validate child tools
+      const childs = await this.versionSvc.getChilds({ name: tool, version });
+      if (childs.length) {
+        logger.fatal(
+          {
+            tool,
+            version,
+            childs: childs.map(({ name, version }) => ({ name, version })),
+          },
+          'tool version has child dependencies and cannot be uninstalled',
+        );
+        return BlockingChild;
+      }
 
       if (dryRun) {
         logger.info(`Dry run: uninstall tool ${tool} ...`);

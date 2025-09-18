@@ -11,7 +11,12 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { isDockerBuild, logger } from '../utils';
-import { MissingParent } from '../utils/codes';
+import {
+  BlockingChild,
+  CurrentVersion,
+  MissingParent,
+  NotSupported,
+} from '../utils/codes';
 import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
 vi.mock('del');
@@ -42,6 +47,10 @@ describe('cli/install-tool/index', () => {
 
     const verSvc = await createContainer().getAsync(VersionService);
 
+    await verSvc.addInstalled({ name: 'node', version: '1.0.0' });
+    await verSvc.addInstalled({ name: 'python', version: '1.0.0' });
+    await verSvc.addInstalled({ name: 'ruby', version: '1.0.0' });
+
     await verSvc.setCurrent({
       name: 'node',
       tool: { name: 'node', version: '1.0.0' },
@@ -53,6 +62,13 @@ describe('cli/install-tool/index', () => {
     await verSvc.setCurrent({
       name: 'ruby',
       tool: { name: 'ruby', version: '1.0.0' },
+    });
+
+    await verSvc.addInstalled({ name: 'node', version: '1.0.1' });
+    await verSvc.addInstalled({
+      name: 'pnpm',
+      version: '1.0.0',
+      parent: { name: 'node', version: '1.0.1' },
     });
   });
 
@@ -135,15 +151,18 @@ describe('cli/install-tool/index', () => {
       // not installed
       expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
       // legacy not supported
-      expect(await uninstallTool('leg', '1.0.0')).toBe(2);
+      expect(await uninstallTool('leg', '1.0.0')).toBe(NotSupported);
       // linked tool uninstall not supported
       expect(await installTool('bun', '2.0.0')).toBeUndefined();
-      expect(await uninstallTool('bun', '2.0.0')).toBe(1);
+      expect(await uninstallTool('bun', '2.0.0')).toBe(CurrentVersion);
 
       // can uninstall old version
       expect(await installTool('bun', '2.0.1')).toBeUndefined();
       expect(await uninstallTool('bun', '2.0.0', true)).toBeUndefined();
       expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+
+      // cannot uninstall if has childs
+      expect(await uninstallTool('node', '1.0.1')).toBe(BlockingChild);
     });
 
     test.each([
