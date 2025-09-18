@@ -1,2 +1,10 @@
 packages: []
 allowUnusedPatches: true
+
+strictPeerDependencies: true
+
+onlyBuiltDependencies: []
+
+ignoredBuiltDependencies:
+  - esbuild
+  - unrs-resolver
