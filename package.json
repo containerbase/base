@@ -55,7 +55,7 @@
     "nano-spawn": "1.0.3",
     "pino": "9.9.5",
     "pino-pretty": "13.1.1",
-    "pretty-ms": "9.2.0",
+    "pretty-ms": "9.3.0",
     "reflect-metadata": "0.2.2",
     "semver": "7.7.2",
     "simple-git": "3.28.0",
