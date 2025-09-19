@@ -32,4 +32,8 @@ export class ComposerInstallService extends BaseInstallService {
   override test(_version: string): Promise<void> {
     return Promise.resolve();
   }
+
+  override uninstall(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
