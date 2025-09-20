@@ -36,7 +36,7 @@
   },
   "resolutions": {
     "bats-support": "0.3.0",
-    "esbuild": "0.25.9",
+    "esbuild": "0.25.10",
     "tsconfig-paths": "4.2.0"
   },
   "dependencies": {
@@ -84,7 +84,7 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "9.1.0",
-    "esbuild": "0.25.9",
+    "esbuild": "0.25.10",
     "esbuild-plugin-pino": "2.2.2",
     "eslint": "9.35.0",
     "eslint-config-prettier": "10.1.8",
