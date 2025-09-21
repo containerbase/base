@@ -1,6 +1,7 @@
 import type { InstallToolType } from '../install-tool';
 
 export const NoPrepareTools = [
+  'apko',
   'bazelisk',
   'bower',
   'bun',

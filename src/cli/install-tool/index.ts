@@ -1,6 +1,7 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
 import { PathService, createContainer } from '../services';
 import { ResolverMap } from '../tools';
+import { ApkoInstallService } from '../tools/apko';
 import { BazeliskInstallService } from '../tools/bazelisk';
 import { BunInstallService } from '../tools/bun';
 import { DartInstallService } from '../tools/dart';
@@ -89,6 +90,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(LinkToolService).toSelf();
 
   // modern tool services
+  container.bind(INSTALL_TOOL_TOKEN).to(ApkoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
