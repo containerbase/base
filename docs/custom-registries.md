@@ -30,6 +30,20 @@ RUN install-tool dart 2.18.0
 
 GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/download/<version>/<file>` to `https://objects.githubusercontent.com/<some-url>` which seems to be an Amazon S3 bucket.
 
+## `apko`
+
+apko releases are downloaded from:
+
+- `<https://github.com/chainguard-dev/apko/releases>
+
+Samples:
+
+```txt
+https://github.com/chainguard-dev/apko/releases/download/v0.30.11/apko_0.30.11_linux_amd64.tar.gz
+https://github.com/chainguard-dev/apko/releases/download/v0.30.11/apko_0.30.11_linux_arm64.tar.gz
+https://github.com/chainguard-dev/apko/releases/download/v0.30.11/checksums.txt
+```
+
 ## `bazelisk`
 
 Bazelisk releases are downloaded from:
