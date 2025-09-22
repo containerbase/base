@@ -99,3 +99,7 @@ function link_tool () {
   shell_wrapper erl "${versioned_tool_path}/bin"
   erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 }
+
+test_tool () {
+  erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
+}
