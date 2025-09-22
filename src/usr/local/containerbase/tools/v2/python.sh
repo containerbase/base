@@ -126,7 +126,9 @@ function link_tool () {
   shell_wrapper pip "${versioned_tool_path}/bin"
   shell_wrapper "pip${MAJOR}" "${versioned_tool_path}/bin"
   shell_wrapper "pip${MAJOR}.${MINOR}" "${versioned_tool_path}/bin"
+}
 
-  [[ -n $SKIP_VERSION ]] || python --version
-  [[ -n $SKIP_VERSION ]] || PYTHONWARNINGS=ignore pip --version
+function test_tool () {
+  python --version
+  PYTHONWARNINGS=ignore pip --version
 }

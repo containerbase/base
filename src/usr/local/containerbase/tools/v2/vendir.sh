@@ -19,5 +19,8 @@ function install_tool () {
 
 function link_tool () {
   shell_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
-  [[ -n $SKIP_VERSION ]] || vendir --version
+}
+
+function test_tool () {
+  vendir --version
 }

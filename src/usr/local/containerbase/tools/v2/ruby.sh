@@ -138,8 +138,10 @@ function link_tool () {
 
   shell_wrapper ruby "${versioned_tool_path}/bin"
   shell_wrapper gem "${versioned_tool_path}/bin"
+}
 
-  [[ -n $SKIP_VERSION ]] || ruby --version
-  [[ -n $SKIP_VERSION ]] || echo "gem $(gem --version)"
-  [[ -n $SKIP_VERSION ]] || gem env
+function test_tool () {
+  ruby --version
+  echo "gem $(gem --version)"
+  gem env
 }

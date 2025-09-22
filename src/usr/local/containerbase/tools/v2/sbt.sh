@@ -43,15 +43,17 @@ function install_tool () {
 
 function link_tool () {
   local versioned_tool_path
-  local temp_dir
   versioned_tool_path=$(find_versioned_tool_path)
 
   shell_wrapper sbt "${versioned_tool_path}/bin"
+}
 
+function test_tool () {
+  local temp_dir
   # https://github.com/sbt/sbt/issues/1458
   temp_dir="$(mktemp -d)"
   pushd "$temp_dir" || exit 1
-  [[ -n $SKIP_VERSION ]] || sbt --version
+  sbt --version
   popd || exit 1
 
   # fix, cleanup sbt temp data

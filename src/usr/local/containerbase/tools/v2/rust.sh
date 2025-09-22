@@ -74,7 +74,9 @@ function link_tool () {
 
   shell_wrapper "cargo" "${versioned_tool_path}/bin"
   shell_wrapper "rustc" "${versioned_tool_path}/bin"
+}
 
-  [[ -n $SKIP_VERSION ]] || cargo --version
-  [[ -n $SKIP_VERSION ]] || rustc --version
+function test_tool () {
+  cargo --version
+  rustc --version
 }

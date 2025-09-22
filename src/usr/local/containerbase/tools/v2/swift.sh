@@ -141,6 +141,8 @@ function link_tool () {
   tool_path=$(find_versioned_tool_path)
 
   shell_wrapper "$TOOL_NAME" "$tool_path/bin"
+}
 
-  [[ -n $SKIP_VERSION ]] || swift --version
+function test_tool () {
+  swift --version
 }
