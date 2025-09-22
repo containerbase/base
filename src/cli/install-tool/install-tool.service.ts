@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
+import spawn from 'nano-spawn';
 import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import type { ToolState } from '../services/version.service';
@@ -155,6 +156,12 @@ export class InstallToolService {
             },
           );
         }
+      }
+
+      if (this.envSvc.cacheDir) {
+        await spawn('bash', ['/usr/local/containerbase/bin/cleanup-cache.sh'], {
+          stdio: ['inherit', 'inherit', 1],
+        });
       }
     }
   }
