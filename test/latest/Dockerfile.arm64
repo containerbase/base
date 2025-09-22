@@ -57,6 +57,14 @@ FROM base AS test-deno
 RUN install-tool deno 2.5.1
 
 #--------------------------------------
+# Image: apko
+#--------------------------------------
+FROM base AS test-apko
+
+# renovate: datasource=github-releases packageName=chainguard-dev/apko
+RUN install-tool apko 0.30.11
+
+#--------------------------------------
 # Image: devbox
 #--------------------------------------
 FROM base AS test-devbox
@@ -159,6 +167,7 @@ FROM base
 COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-deno /.dummy /.dummy
+COPY --from=test-apko /.dummy /.dummy
 COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
