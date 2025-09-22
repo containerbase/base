@@ -96,7 +96,8 @@
         "swift",
         "uv",
         "vendir",
-        "wally"
+        "wally",
+        "yarn"
       ],
       "separateMinorPatch": false
     },
@@ -140,7 +141,8 @@
         "swift",
         "uv",
         "vendir",
-        "wally"
+        "wally",
+        "yarn"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
