@@ -18,8 +18,6 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 # shellcheck source=/dev/null
 . "${DIR}/utils/version.sh"
 # shellcheck source=/dev/null
-. "${DIR}/utils/install.sh"
-# shellcheck source=/dev/null
 . "${DIR}/utils/user.sh"
 
 check_debug() {
