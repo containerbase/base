@@ -13,15 +13,18 @@ export const NoPrepareTools = [
   'deno',
   'devbox',
   'flux',
+  'git-lfs',
   'gleam',
   'gradle',
   'hashin',
   'helm',
   'helmfile',
+  'jb',
   'kubectl',
   'kustomize',
   'lerna',
   'maven',
+  'nix',
   'npm',
   'pdm',
   'pip-tools',
@@ -31,15 +34,23 @@ export const NoPrepareTools = [
   'poetry',
   'protoc',
   'renovate',
+  'scala',
   'skopeo',
   'sops',
+  'terraform',
   'uv',
+  'vendir',
   'wally',
   'yarn',
   'yarn-slim',
 ];
 
-export const NoInitTools = [...NoPrepareTools];
+export const NoInitTools = [
+  ...NoPrepareTools,
+  'erlang',
+  'powershell',
+  'python',
+];
 
 /**
  * Tools in this map are implicit mapped from `install-tool` to `install-<type>`.

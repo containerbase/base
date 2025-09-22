@@ -16,3 +16,5 @@ export const cliModes = [
 export type CliMode = (typeof cliModes)[number];
 
 export type Arch = 'arm64' | 'amd64';
+
+export type ClazzDecorator<T> = <V extends T = T>(target: V) => V | void;

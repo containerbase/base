@@ -9,7 +9,7 @@ import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
-import { logger } from '../utils';
+import { isDockerBuild, logger } from '../utils';
 import { MissingParent } from '../utils/codes';
 import { installTool, linkTool, resolveVersion } from '.';
 import { ensurePaths, rootPath } from '~test/path';
@@ -18,6 +18,10 @@ vi.mock('del');
 vi.mock('nano-spawn');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
+vi.mock('../utils', async (importActual) => ({
+  ...(await importActual<typeof import('../utils')>()),
+  isDockerBuild: vi.fn(),
+}));
 
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
@@ -53,6 +57,7 @@ describe('cli/install-tool/index', () => {
 
   describe('installTool', () => {
     test('fails if parent is missing', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValueOnce(true);
       expect(await installTool('gradle', '1.0.0')).toBe(MissingParent);
       expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
         { tool: 'gradle', parent: 'java' },

@@ -8,9 +8,13 @@ import { DenoInstallService } from '../tools/deno';
 import { DevboxInstallService } from '../tools/devbox';
 import { DockerInstallService } from '../tools/docker';
 import { DotnetInstallService } from '../tools/dotnet';
+import { ErlangInstallService } from '../tools/erlang';
+import { ElixirInstallService } from '../tools/erlang/elixir';
 import { FlutterInstallService } from '../tools/flutter';
 import { FluxInstallService } from '../tools/flux';
+import { GitLfsInstallService } from '../tools/git/lfs';
 import { GleamInstallService } from '../tools/gleam';
+import { GolangInstallService } from '../tools/golang';
 import { HelmInstallService } from '../tools/helm';
 import { HelmfileInstallService } from '../tools/helmfile';
 import {
@@ -28,8 +32,12 @@ import {
   JavaJreVersionResolver,
   JavaVersionResolver,
 } from '../tools/java/resolver';
+import { SbtInstallService } from '../tools/java/sbt';
+import { ScalaInstallService } from '../tools/java/scala';
+import { JsonnetBundlerInstallService } from '../tools/jb';
 import { KubectlInstallService } from '../tools/kubectl';
 import { KustomizeInstallService } from '../tools/kustomize';
+import { NixInstallService } from '../tools/nix';
 import { NodeInstallService } from '../tools/node';
 import {
   RenovateInstallService,
@@ -48,7 +56,9 @@ import {
   ComposerVersionResolver,
 } from '../tools/php/composer';
 import { PixiInstallService } from '../tools/pixi';
+import { PowershellInstallService } from '../tools/powershell';
 import { ProtocInstallService } from '../tools/protoc';
+import { PythonInstallService } from '../tools/python';
 import {
   ConanInstallService,
   ConanVersionResolver,
@@ -56,6 +66,7 @@ import {
 import { PipVersionResolver } from '../tools/python/pip';
 import { PoetryVersionResolver } from '../tools/python/poetry';
 import { PipBaseInstallService } from '../tools/python/utils';
+import { RubyInstallService } from '../tools/ruby';
 import {
   CocoapodsInstallService,
   CocoapodsVersionResolver,
@@ -64,10 +75,15 @@ import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
+import { RustInstallService } from '../tools/rust';
 import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
+import { SwiftInstallService } from '../tools/swift';
+import { TerraformInstallService } from '../tools/terraform';
+import { VendirInstallService } from '../tools/vendir';
 import { WallyInstallService } from '../tools/wally';
 import { logger } from '../utils';
+import { isNotKnownV2Tool } from '../utils/v2-tool';
 import {
   V1ToolInstallService,
   V2ToolInstallService,
@@ -99,32 +115,48 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(DevboxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(ElixirInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(ErlangInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FluxInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GitLfsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GleamInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GolangInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GradleInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(HelmInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(HelmfileInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(JavaInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(JavaJreInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(JavaJdkInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(JsonnetBundlerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KubectlInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PixiInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(PowershellInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ProtocInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(PythonInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(RenovateInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(RubyInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(RustInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(SbtInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(ScalaInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SkopeoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(SwiftInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(TerraformInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(VendirInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
 
   // v2 tool services
   const pathSvc = await container.getAsync(PathService);
-  for (const tool of await pathSvc.findLegacyTools()) {
+  const legacyTools = await pathSvc.findLegacyTools();
+  for (const tool of legacyTools.filter(isNotKnownV2Tool)) {
     @injectable()
     @injectFromHierarchy()
     class GenericInstallService extends V2ToolInstallService {
