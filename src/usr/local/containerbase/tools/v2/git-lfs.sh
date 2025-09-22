@@ -35,7 +35,7 @@ function install_tool () {
 function link_tool () {
   shell_wrapper "${TOOL_NAME}" "$(find_versioned_tool_path)/bin"
 
-  [[ -n $SKIP_VERSION ]] || git lfs version
+  git lfs version
 
   if [ "$(is_root)" -eq 0 ]; then
     git lfs install --system

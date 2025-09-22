@@ -45,7 +45,7 @@ function post_install () {
   true
 }
 
-# Called after install_tool and link_tool. It's always called.
+# Called after install_tool and link_tool. It's not called when `SKIP_VERSION` is set.
 # Allow tools to do some testing
 function test_tool () {
   true
