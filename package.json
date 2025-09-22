@@ -52,7 +52,6 @@
     "got": "14.4.9",
     "ini": "5.0.0",
     "inversify": "7.10.0",
-    "istanbul-reports-html": "link:../../../../.local/share/pnpm/global/5/node_modules/@containerbase/istanbul-reports-html",
     "nano-spawn": "1.0.3",
     "pino": "9.10.0",
     "pino-pretty": "13.1.1",
