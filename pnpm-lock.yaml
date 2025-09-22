@@ -67,6 +67,9 @@ importers:
       inversify:
         specifier: 7.10.0
         version: 7.10.0(reflect-metadata@0.2.2)
+      istanbul-reports-html:
+        specifier: link:../../../../.local/share/pnpm/global/5/node_modules/@containerbase/istanbul-reports-html
+        version: link:../../../../.local/share/pnpm/global/5/node_modules/@containerbase/istanbul-reports-html
       markdownlint:
         specifier: '*'
         version: 0.38.0
