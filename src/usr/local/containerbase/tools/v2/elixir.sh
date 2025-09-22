@@ -67,9 +67,6 @@ function link_tool () {
   shell_wrapper "${TOOL_NAME}" "${versioned_tool_path}/bin"
   shell_wrapper mix "${versioned_tool_path}/bin"
 
-  elixir --version
-  mix --version
-
   if [[ $(is_root) -eq 0 ]]; then
     su -c 'mix local.hex --force' "${USER_NAME}"
     su -c 'mix local.rebar --force' "${USER_NAME}"
@@ -79,4 +76,9 @@ function link_tool () {
   fi
 
   # TODO: check rights of files and folder in ~/.mix and ~/.hex
+}
+
+function test_tool () {
+  elixir --version
+  mix --version
 }
