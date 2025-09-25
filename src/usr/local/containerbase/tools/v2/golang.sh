@@ -100,7 +100,9 @@ function link_tool () {
   versioned_tool_path=$(find_versioned_tool_path)
 
   shell_wrapper go "${versioned_tool_path}/bin" "GOBIN=\${GOBIN-${BIN_DIR}}"
+}
 
-  [[ -n $SKIP_VERSION ]] || go version
-  [[ -n $SKIP_VERSION ]] || go env
+function test_tool () {
+  go version
+  go env
 }
