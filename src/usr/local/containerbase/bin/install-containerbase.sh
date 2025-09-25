@@ -100,6 +100,10 @@ function link_tools () {
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-pip
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/install-tool
   ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/prepare-tool
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/uninstall-gem
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/uninstall-npm
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/uninstall-pip
+  ln -sf /usr/local/containerbase/bin/containerbase-cli /usr/local/sbin/uninstall-tool
 
   containerbase-cli --version
 }

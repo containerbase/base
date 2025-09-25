@@ -15,4 +15,8 @@ export class BunInstallService extends BaseInstallService {
   override link(_version: string): Promise<void> {
     return Promise.resolve();
   }
+
+  override uninstall(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
