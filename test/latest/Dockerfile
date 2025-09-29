@@ -226,7 +226,7 @@ RUN install-tool bun 1.2.22
 RUN install-tool deno 2.5.2
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 0.30.12
+RUN install-tool apko 0.30.13
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.16.0
