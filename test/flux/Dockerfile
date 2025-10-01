@@ -32,7 +32,7 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 # renovate: datasource=github-releases depName=flux packageName=fluxcd/flux2
-ARG FLUX_VERSION=v2.6.4
+ARG FLUX_VERSION=v2.7.0
 
 USER 12021
 
