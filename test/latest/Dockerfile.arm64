@@ -121,6 +121,14 @@ FROM base AS test-kustomize
 RUN install-tool kustomize 5.7.1
 
 #--------------------------------------
+# Image: opentofu
+#--------------------------------------
+FROM base AS test-tofu
+
+# renovate: datasource=github-releases packageName=opentofu/opentofu
+RUN install-tool tofu 1.10.6
+
+#--------------------------------------
 # Image: terraform
 #--------------------------------------
 FROM base AS test-terraform
@@ -175,6 +183,7 @@ COPY --from=test-git-lfs /.dummy /.dummy
 COPY --from=test-gleam /.dummy /.dummy
 COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy
+COPY --from=test-tofu /.dummy /.dummy
 COPY --from=test-terraform /.dummy /.dummy
 COPY --from=test-vendir /.dummy /.dummy
 

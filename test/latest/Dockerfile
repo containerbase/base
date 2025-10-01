@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, deno, devbox, vendir, helmfile, kustomize, skopeo
+# test: bazelisk, bun, deno, devbox, vendir, helmfile, kustomize, tofu, skopeo
 #--------------------------------------
 FROM base AS teste
 
@@ -236,6 +236,9 @@ RUN install-tool gleam 1.12.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.34.1
+
+# renovate: datasource=github-releases packageName=tofu/tofu
+RUN install-tool tofu 1.10.6
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.20.0

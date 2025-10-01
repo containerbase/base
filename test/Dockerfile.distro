@@ -95,6 +95,9 @@ RUN install-tool kustomize 5.7.1
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
+# renovate: datasource=github-releases packageName=opentofu/opentofu
+RUN install-tool tofu 1.10.6
+
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
 RUN install-tool pixi v0.55.0
 

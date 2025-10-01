@@ -455,6 +455,19 @@ https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linu
 https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-x64-108.br
 ```
 
+## `tofu`
+
+OpenTofu releases are downloaded from:
+
+- `https://github.com/opentofu/opentofu`
+
+Samples:
+
+```txt
+https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_amd64.tar.gz
+https://github.com/opentofu/opentofu/releases/download/v1.10.6/tofu_1.10.6_linux_arm64.tar.gz
+```
+
 ## `php`
 
 PHP releases are downloaded from:
