@@ -81,6 +81,7 @@ import { SkopeoInstallService } from '../tools/skopeo';
 import { SopsInstallService } from '../tools/sops';
 import { SwiftInstallService } from '../tools/swift';
 import { TerraformInstallService } from '../tools/terraform';
+import { tofuInstallService } from '../tools/tofu';
 import { VendirInstallService } from '../tools/vendir';
 import { WallyInstallService } from '../tools/wally';
 import { logger } from '../utils';
@@ -150,6 +151,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(SopsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(SwiftInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(TerraformInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(tofuInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(VendirInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
