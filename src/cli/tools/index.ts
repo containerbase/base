@@ -27,6 +27,7 @@ export const NoPrepareTools = [
   'maven',
   'nix',
   'npm',
+  'tofu',
   'pdm',
   'pip-tools',
   'pipenv',
