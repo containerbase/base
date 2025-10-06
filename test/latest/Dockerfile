@@ -237,14 +237,14 @@ RUN install-tool gleam 1.12.0
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.34.1
 
-# renovate: datasource=github-releases packageName=tofu/tofu
-RUN install-tool tofu 1.10.6
-
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.20.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.11.0
+
+# renovate: datasource=github-releases packageName=tofu/tofu
+RUN install-tool tofu 1.10.6
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 32.1

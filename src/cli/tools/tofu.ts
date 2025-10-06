@@ -6,7 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service';
 
 @injectable()
 @injectFromHierarchy()
-export class tofuInstallService extends BaseInstallService {
+export class TofuInstallService extends BaseInstallService {
   readonly name = 'tofu';
 
   private get ghArch(): string {
@@ -48,7 +48,6 @@ export class tofuInstallService extends BaseInstallService {
     await this.compress.extract({
       file,
       cwd: path,
-      strip: 0,
     });
   }
 

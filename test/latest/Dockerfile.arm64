@@ -183,8 +183,8 @@ COPY --from=test-git-lfs /.dummy /.dummy
 COPY --from=test-gleam /.dummy /.dummy
 COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy
-COPY --from=test-tofu /.dummy /.dummy
 COPY --from=test-terraform /.dummy /.dummy
+COPY --from=test-tofu /.dummy /.dummy
 COPY --from=test-vendir /.dummy /.dummy
 
 COPY --from=test-others /.dummy /.dummy
