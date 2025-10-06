@@ -121,20 +121,20 @@ FROM base AS test-kustomize
 RUN install-tool kustomize 5.7.1
 
 #--------------------------------------
-# Image: opentofu
-#--------------------------------------
-FROM base AS test-tofu
-
-# renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.10.6
-
-#--------------------------------------
 # Image: terraform
 #--------------------------------------
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.13.3
+
+#--------------------------------------
+# Image: tofu
+#--------------------------------------
+FROM base AS test-tofu
+
+# renovate: datasource=github-releases packageName=opentofu/opentofu
+RUN install-tool tofu 1.10.6
 
 #--------------------------------------
 # Image: vendir
