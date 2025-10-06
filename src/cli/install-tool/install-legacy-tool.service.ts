@@ -95,6 +95,26 @@ export abstract class V2ToolInstallService extends BaseInstallService {
     );
   }
 
+  override async uninstall(version: string): Promise<void> {
+    logger.debug(`Uninstall v2 tool ${this.name} v${version} ...`);
+
+    if (this._svc.hasUninstall(this.name)) {
+      await spawn(
+        'bash',
+        [
+          '/usr/local/containerbase/bin/v2-install-tool.sh',
+          'uninstall',
+          this.name,
+          version,
+        ],
+        {
+          stdio: ['inherit', 'inherit', 1],
+        },
+      );
+    }
+    await super.uninstall(version);
+  }
+
   override async validate(version: string): Promise<boolean> {
     logger.debug(`Validating v2 tool ${this.name} v${version} ...`);
     try {
