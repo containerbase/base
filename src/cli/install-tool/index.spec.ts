@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
+import { ensurePaths, rootPath } from '../../../test/path';
 import { VersionService, createContainer } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
@@ -10,9 +11,13 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { isDockerBuild, logger } from '../utils';
-import { MissingParent } from '../utils/codes';
-import { installTool, linkTool, resolveVersion } from '.';
-import { ensurePaths, rootPath } from '~test/path';
+import {
+  BlockingChild,
+  CurrentVersion,
+  MissingParent,
+  NotSupported,
+} from '../utils/codes';
+import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
 vi.mock('del');
 vi.mock('nano-spawn');
@@ -26,6 +31,7 @@ vi.mock('../utils', async (importActual) => ({
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
     await ensurePaths([
+      'opt/containerbase/bin',
       'opt/containerbase/data',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
@@ -41,6 +47,10 @@ describe('cli/install-tool/index', () => {
 
     const verSvc = await createContainer().getAsync(VersionService);
 
+    await verSvc.addInstalled({ name: 'node', version: '1.0.0' });
+    await verSvc.addInstalled({ name: 'python', version: '1.0.0' });
+    await verSvc.addInstalled({ name: 'ruby', version: '1.0.0' });
+
     await verSvc.setCurrent({
       name: 'node',
       tool: { name: 'node', version: '1.0.0' },
@@ -52,6 +62,13 @@ describe('cli/install-tool/index', () => {
     await verSvc.setCurrent({
       name: 'ruby',
       tool: { name: 'ruby', version: '1.0.0' },
+    });
+
+    await verSvc.addInstalled({ name: 'node', version: '1.0.1' });
+    await verSvc.addInstalled({
+      name: 'pnpm',
+      version: '1.0.0',
+      parent: { name: 'node', version: '1.0.1' },
     });
   });
 
@@ -127,5 +144,35 @@ describe('cli/install-tool/index', () => {
     const spy = vi.spyOn(fs, 'writeFile');
     expect(await linkTool('node', { srcDir: '/bin/bash' })).toBeUndefined();
     expect(spy).toHaveBeenCalledOnce();
+  });
+
+  describe('uninstallTool', () => {
+    test('works', async () => {
+      // not installed
+      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+      // legacy not supported
+      expect(await uninstallTool('leg', '1.0.0')).toBe(NotSupported);
+      // linked tool uninstall not supported
+      expect(await installTool('bun', '2.0.0')).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0')).toBe(CurrentVersion);
+
+      // can uninstall old version
+      expect(await installTool('bun', '2.0.1')).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0', true)).toBeUndefined();
+      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+
+      // cannot uninstall if has childs
+      expect(await uninstallTool('node', '1.0.1')).toBe(BlockingChild);
+    });
+
+    test.each([
+      { type: 'gem' as const },
+      { type: 'npm' as const },
+      { type: 'pip' as const },
+    ])('works: $type', async ({ type }) => {
+      expect(
+        await uninstallTool(`dummy-${type}`, '2.0.0', false, type),
+      ).toBeUndefined();
+    });
   });
 });

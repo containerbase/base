@@ -6,7 +6,12 @@ import { initializeTools, prepareTools } from '../prepare-tool';
 import { EnvService, PathService, VersionService } from '../services';
 import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { MissingParent } from '../utils/codes';
+import {
+  BlockingChild,
+  CurrentVersion,
+  MissingParent,
+  NotSupported,
+} from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
 import { V1ToolInstallService } from './install-legacy-tool.service';
 
@@ -163,6 +168,71 @@ export class InstallToolService {
           stdio: ['inherit', 'inherit', 1],
         });
       }
+    }
+  }
+
+  async uninstall(
+    tool: string,
+    version: string,
+    dryRun = false,
+  ): Promise<number | void> {
+    logger.trace(
+      { tools: this.toolSvcs.map((t) => t.name) },
+      'supported tools',
+    );
+
+    await this.pathSvc.ensureBasePaths();
+
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+    if (toolSvc) {
+      if (
+        !(await this.versionSvc.isInstalled({
+          name: tool,
+          version,
+        }))
+      ) {
+        logger.info({ tool }, 'tool not installed');
+        return;
+      }
+
+      logger.debug({ tool }, 'validate tool');
+      if (
+        await this.versionSvc.isCurrent({
+          name: tool,
+          tool: { name: tool, version },
+        })
+      ) {
+        logger.fatal(
+          { tool, version },
+          'tool version is currently linked and cannot be uninstalled',
+        );
+        return CurrentVersion;
+      }
+
+      const childs = await this.versionSvc.getChilds({ name: tool, version });
+      if (childs.length) {
+        logger.fatal(
+          {
+            tool,
+            version,
+            childs: childs.map(({ name, version }) => ({ name, version })),
+          },
+          'tool version has child dependencies and cannot be uninstalled',
+        );
+        return BlockingChild;
+      }
+
+      if (dryRun) {
+        logger.info(`Dry run: uninstall tool ${tool} ...`);
+        return;
+      } else {
+        logger.debug({ tool }, 'uninstall tool');
+        await toolSvc.uninstall(version);
+        await this.versionSvc.removeInstalled({ name: tool, version });
+      }
+    } else {
+      logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');
+      return NotSupported;
     }
   }
 

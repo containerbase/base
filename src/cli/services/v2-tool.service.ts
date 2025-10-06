@@ -12,6 +12,7 @@ import { PathService } from './path.service';
 
 @injectable(bindingScopeValues.Singleton)
 export class V2ToolService {
+  private readonly _hasUninstall: Record<string, boolean> = {};
   private readonly _needsInit: Record<string, boolean> = {};
   private readonly _needsPrep: Record<string, boolean> = {};
 
@@ -27,11 +28,28 @@ export class V2ToolService {
         { encoding: 'utf8' },
       );
 
+      this._hasUninstall[tool] = /\s+function\s+uninstall_tool\s*\(/.test(
+        content,
+      );
       this._needsPrep[tool] = /\s+function\s+prepare_tool\s*\(/.test(content);
       this._needsInit[tool] = /\s+function\s+init_tool\s*\(/.test(content);
     }
 
-    logger.trace({ init: this._needsInit, prep: this._needsPrep }, 'construct');
+    logger.trace(
+      {
+        init: this._needsInit,
+        prep: this._needsPrep,
+        uninstall: this._hasUninstall,
+      },
+      'construct',
+    );
+  }
+
+  hasUninstall(tool: string): boolean {
+    if (this._hasUninstall[tool] === undefined) {
+      throw new Error(`tool not supported: ${tool}`);
+    }
+    return this._hasUninstall[tool];
   }
 
   needsPrepare(tool: string): boolean {

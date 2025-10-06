@@ -49,6 +49,9 @@ function main() {
     test)
     test_tool
     ;;
+    uninstall)
+    uninstall_tool
+    ;;
   esac
 
 }

@@ -50,3 +50,8 @@ function post_install () {
 function test_tool () {
   true
 }
+
+# Uninstalls additional things from the tool with the given version
+function uninstall_tool () {
+  true
+}
