@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, deno, devbox, vendir, helmfile, kustomize, skopeo, tofu
+# test: bazelisk, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
