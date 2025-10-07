@@ -8,13 +8,6 @@ import { v2Tool } from '../utils/v2-tool';
 @v2Tool('powershell')
 export class PowershellPrepareService extends V2ToolPrepareService {
   override readonly name = 'powershell';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }
 
 @injectable()
@@ -22,11 +15,4 @@ export class PowershellPrepareService extends V2ToolPrepareService {
 @v2Tool('powershell')
 export class PowershellInstallService extends V2ToolInstallService {
   override readonly name = 'powershell';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

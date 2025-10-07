@@ -1,5 +1,4 @@
 #!/bin/bash
-export NEEDS_PREPARE=1
 
 function check_tool_requirements () {
   check_command java

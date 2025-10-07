@@ -8,13 +8,6 @@ import { v2Tool } from '../../utils/v2-tool';
 @v2Tool('ruby')
 export class RubyPrepareService extends V2ToolPrepareService {
   override readonly name = 'ruby';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }
 
 @injectable()
@@ -22,11 +15,4 @@ export class RubyPrepareService extends V2ToolPrepareService {
 @v2Tool('ruby')
 export class RubyInstallService extends V2ToolInstallService {
   override readonly name = 'ruby';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }

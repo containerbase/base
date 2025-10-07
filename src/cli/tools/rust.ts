@@ -8,13 +8,6 @@ import { v2Tool } from '../utils/v2-tool';
 @v2Tool('rust')
 export class RustPrepareService extends V2ToolPrepareService {
   override readonly name = 'rust';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }
 
 @injectable()
@@ -22,11 +15,4 @@ export class RustPrepareService extends V2ToolPrepareService {
 @v2Tool('rust')
 export class RustInstallService extends V2ToolInstallService {
   override readonly name = 'rust';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

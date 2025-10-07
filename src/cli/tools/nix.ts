@@ -7,11 +7,4 @@ import { v2Tool } from '../utils/v2-tool';
 @v2Tool('nix')
 export class NixInstallService extends V2ToolInstallService {
   override readonly name = 'nix';
-
-  override needsPrepare(): boolean {
-    return false;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

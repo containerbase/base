@@ -8,11 +8,4 @@ import { v2Tool } from '../../utils/v2-tool';
 export class GitLfsInstallService extends V2ToolInstallService {
   override readonly name = 'git-lfs';
   override readonly parent = 'git';
-
-  override needsPrepare(): boolean {
-    return false;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

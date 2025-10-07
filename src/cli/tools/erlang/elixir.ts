@@ -8,13 +8,6 @@ import { v2Tool } from '../../utils/v2-tool';
 @v2Tool('elixir')
 export class ElixirPrepareService extends V2ToolPrepareService {
   override readonly name = 'elixir';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }
 
 @injectable()
@@ -23,11 +16,4 @@ export class ElixirPrepareService extends V2ToolPrepareService {
 export class ElixirInstallService extends V2ToolInstallService {
   override readonly name = 'elixir';
   override readonly parent = 'erlang';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }
