@@ -39,6 +39,7 @@ export const NoPrepareTools = [
   'skopeo',
   'sops',
   'terraform',
+  'tofu',
   'uv',
   'vendir',
   'wally',

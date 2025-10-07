@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, deno, devbox, vendir, helmfile, kustomize, skopeo
+# test: bazelisk, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
@@ -242,6 +242,9 @@ RUN install-tool skopeo 1.20.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.11.0
+
+# renovate: datasource=github-releases packageName=tofu/tofu
+RUN install-tool tofu 1.10.6
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 32.1

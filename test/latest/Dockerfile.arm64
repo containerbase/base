@@ -129,6 +129,14 @@ FROM base AS test-terraform
 RUN install-tool terraform 1.13.3
 
 #--------------------------------------
+# Image: tofu
+#--------------------------------------
+FROM base AS test-tofu
+
+# renovate: datasource=github-releases packageName=opentofu/opentofu
+RUN install-tool tofu 1.10.6
+
+#--------------------------------------
 # Image: vendir
 #--------------------------------------
 FROM base AS test-vendir
@@ -176,6 +184,7 @@ COPY --from=test-gleam /.dummy /.dummy
 COPY --from=test-helmfile /.dummy /.dummy
 COPY --from=test-kustomize /.dummy /.dummy
 COPY --from=test-terraform /.dummy /.dummy
+COPY --from=test-tofu /.dummy /.dummy
 COPY --from=test-vendir /.dummy /.dummy
 
 COPY --from=test-others /.dummy /.dummy
