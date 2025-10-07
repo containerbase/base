@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export NEEDS_PREPARE=1
-
 # sets the correct shebang for python
 fix_python_shebangs() {
   # https://github.com/koalaman/shellcheck/wiki/SC2044

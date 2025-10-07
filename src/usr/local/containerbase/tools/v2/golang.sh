@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export NEEDS_PREPARE=1
-
 function prepare_tool() {
   local go_path
   # go suggests: git svn bzr mercurial

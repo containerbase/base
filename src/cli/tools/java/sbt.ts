@@ -8,13 +8,6 @@ import { v2Tool } from '../../utils/v2-tool';
 @v2Tool('sbt')
 export class SbtPrepareService extends V2ToolPrepareService {
   override readonly name = 'sbt';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }
 
 @injectable()
@@ -23,11 +16,4 @@ export class SbtPrepareService extends V2ToolPrepareService {
 export class SbtInstallService extends V2ToolInstallService {
   override readonly name = 'sbt';
   override readonly parent = 'java';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }

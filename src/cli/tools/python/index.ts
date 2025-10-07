@@ -8,13 +8,6 @@ import { v2Tool } from '../../utils/v2-tool';
 @v2Tool('python')
 export class PythonPrepareService extends V2ToolPrepareService {
   override readonly name = 'python';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }
 
 @injectable()
@@ -22,11 +15,4 @@ export class PythonPrepareService extends V2ToolPrepareService {
 @v2Tool('python')
 export class PythonInstallService extends V2ToolInstallService {
   override readonly name = 'python';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

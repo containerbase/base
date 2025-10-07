@@ -7,11 +7,4 @@ import { v2Tool } from '../utils/v2-tool';
 @v2Tool('vendir')
 export class VendirInstallService extends V2ToolInstallService {
   override readonly name = 'vendir';
-
-  override needsPrepare(): boolean {
-    return false;
-  }
-  override needsInitialize(): boolean {
-    return false;
-  }
 }

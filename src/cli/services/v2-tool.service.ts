@@ -7,7 +7,6 @@ import {
   postConstruct,
 } from 'inversify';
 import { logger } from '../utils';
-import { isNotKnownV2Tool } from '../utils/v2-tool';
 import { PathService } from './path.service';
 
 @injectable(bindingScopeValues.Singleton)
@@ -22,7 +21,7 @@ export class V2ToolService {
   @postConstruct()
   protected async [Symbol('_construct')](): Promise<void> {
     const tools = await this.pathSvc.findLegacyTools();
-    for (const tool of tools.filter(isNotKnownV2Tool)) {
+    for (const tool of tools) {
       const content = await readFile(
         join(this.pathSvc.usrPath, 'tools/v2', `${tool}.sh`),
         { encoding: 'utf8' },

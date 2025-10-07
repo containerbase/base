@@ -8,13 +8,6 @@ import { v2Tool } from '../utils/v2-tool';
 @v2Tool('swift')
 export class SwiftPrepareService extends V2ToolPrepareService {
   override readonly name = 'swift';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }
 
 @injectable()
@@ -22,11 +15,4 @@ export class SwiftPrepareService extends V2ToolPrepareService {
 @v2Tool('swift')
 export class SwiftInstallService extends V2ToolInstallService {
   override readonly name = 'swift';
-
-  override needsPrepare(): boolean {
-    return true;
-  }
-  override needsInitialize(): boolean {
-    return true;
-  }
 }

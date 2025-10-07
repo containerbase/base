@@ -2,8 +2,6 @@
 
 SEMVER_REGEX_ERLANG="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?(\+[0-9]+)?([a-z-].*)?$"
 
-export NEEDS_PREPARE=1
-
 function check_semver_erlang () {
   if [[ ! "${1}" =~ ${SEMVER_REGEX_ERLANG} ]]; then
     echo Not a semver like version - aborting: "${1}"
