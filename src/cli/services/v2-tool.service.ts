@@ -11,6 +11,7 @@ import { PathService } from './path.service';
 
 @injectable(bindingScopeValues.Singleton)
 export class V2ToolService {
+  private readonly _hasPostinstall: Record<string, boolean> = {};
   private readonly _hasUninstall: Record<string, boolean> = {};
   private readonly _needsInit: Record<string, boolean> = {};
   private readonly _needsPrep: Record<string, boolean> = {};
@@ -25,6 +26,10 @@ export class V2ToolService {
       const content = await readFile(
         join(this.pathSvc.usrPath, 'tools/v2', `${tool}.sh`),
         { encoding: 'utf8' },
+      );
+
+      this._hasPostinstall[tool] = /\s+function\s+post_install\s*\(/.test(
+        content,
       );
 
       this._hasUninstall[tool] = /\s+function\s+uninstall_tool\s*\(/.test(
@@ -42,6 +47,13 @@ export class V2ToolService {
       },
       'construct',
     );
+  }
+
+  hasPostinstall(tool: string): boolean {
+    if (this._hasPostinstall[tool] === undefined) {
+      throw new Error(`tool not supported: ${tool}`);
+    }
+    return this._hasPostinstall[tool];
   }
 
   hasUninstall(tool: string): boolean {
