@@ -27,12 +27,8 @@ jobs:
       uid: ${{ steps.init.outputs.uid }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
         with:
           save-cache: true
 
@@ -49,12 +45,8 @@ jobs:
       checks: write
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: lint
         run: |
@@ -84,17 +76,13 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: Install ubuntu dependencies
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y libarchive-tools
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
 
       - name: build
         run: pnpm build
@@ -108,12 +96,8 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: vitest
         run: pnpm test:vitest
@@ -130,12 +114,8 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: build
         run: pnpm build
@@ -167,9 +147,8 @@ jobs:
             tag: arm64
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: Check system
         uses: ./.github/actions/check
@@ -178,9 +157,6 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy
@@ -224,9 +200,8 @@ jobs:
       TAG: ${{ matrix.distro }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: Check system
         uses: ./.github/actions/check
@@ -234,9 +209,6 @@ jobs:
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy
@@ -305,9 +277,8 @@ jobs:
       TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          show-progress: false
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
 
       - name: Check system
         uses: ./.github/actions/check
@@ -316,9 +287,6 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE_IMAGE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
-
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
 
       - name: prepare apt proxy
         uses: ./.github/actions/prepare-proxy

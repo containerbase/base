@@ -61,8 +61,10 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
-      - name: 📥 Setup Node.js
-        uses: ./.github/actions/setup-node
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@44962a8401fc565ef0b0b2cb283177f659befc47 # v3.13.14
+        with:
+          checkout: false
 
       - name: Docker registry login
         if: github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, 'maint/')
