@@ -70,9 +70,9 @@ export abstract class BaseInstallService {
   }
 
   /**
-   * Post-installation steps
-   * @param _version Version that was installed
-   * @deprecated Link check is now smart enough to not need this
+   * Post-installation steps.
+   * Used for relinking executables.
+   * @param version Version that was installed
    */
   postInstall(_version: string): Promise<void> {
     return Promise.resolve();

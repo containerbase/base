@@ -95,6 +95,24 @@ export abstract class V2ToolInstallService extends BaseInstallService {
     );
   }
 
+  override async postInstall(version: string): Promise<void> {
+    if (this._svc.hasPostinstall(this.name)) {
+      logger.debug(`Postinstall v2 tool ${this.name} ...`);
+      await spawn(
+        'bash',
+        [
+          '/usr/local/containerbase/bin/v2-install-tool.sh',
+          'post-install',
+          this.name,
+          version,
+        ],
+        {
+          stdio: ['inherit', 'inherit', 1],
+        },
+      );
+    }
+  }
+
   override async uninstall(version: string): Promise<void> {
     logger.debug(`Uninstall v2 tool ${this.name} v${version} ...`);
 
