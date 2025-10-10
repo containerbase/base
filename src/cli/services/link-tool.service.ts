@@ -32,10 +32,27 @@ export class LinkToolService {
   @inject(EnvService)
   protected readonly envSvc!: EnvService;
 
+  private readonly _links: string[] = [];
+
+  /*
+   * Get the list of links created during the last shellwrapper() call
+   */
+  get links(): readonly string[] {
+    return this._links.toSorted();
+  }
+
+  /**
+   * Clear the list of links created during the last shellwrapper() call
+   */
+  clear(): void {
+    this._links.length = 0;
+  }
+
   async shellwrapper(
     tool: string,
     { args, name, srcDir, exports, extraToolEnvs, body }: ShellWrapperConfig,
   ): Promise<void> {
+    this._links.push(name ?? tool);
     const tgt = join(this.pathSvc.binDir, name ?? tool);
     const src = (await pathExists(srcDir, 'file'))
       ? srcDir
