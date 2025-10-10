@@ -4,6 +4,8 @@ import { CompressionService } from './compression.service';
 import { DataService } from './data.service';
 import { EnvService } from './env.service';
 import { HttpService } from './http.service';
+import { IpcClient, IpcServer } from './ipc.service';
+import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 import { PathService } from './path.service';
 import { V2ToolService } from './v2-tool.service';
 import { VersionService } from './version.service';
@@ -16,6 +18,10 @@ export {
   PathService,
   V2ToolService,
   VersionService,
+  LinkToolService,
+  type ShellWrapperConfig,
+  IpcClient,
+  IpcServer,
 };
 
 function init<T extends { bind: Bind }>(options: T): void {
@@ -27,6 +33,9 @@ function init<T extends { bind: Bind }>(options: T): void {
   options.bind(PathService).toSelf();
   options.bind(V2ToolService).toSelf();
   options.bind(VersionService).toSelf();
+  options.bind(LinkToolService).toSelf();
+  options.bind(IpcServer).toSelf();
+  options.bind(IpcClient).toSelf();
 }
 
 export const rootContainerModule = new ContainerModule(init);

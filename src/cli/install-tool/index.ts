@@ -1,5 +1,6 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
-import { PathService, createContainer } from '../services';
+import { IpcClient, PathService, createContainer } from '../services';
+import type { ShellWrapperConfig } from '../services';
 import { ResolverMap } from '../tools';
 import { ApkoInstallService } from '../tools/apko';
 import { BazeliskInstallService } from '../tools/bazelisk';
@@ -91,7 +92,6 @@ import {
   V2ToolInstallService,
 } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
-import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
 
@@ -104,7 +104,6 @@ async function prepareInstallContainer(): Promise<Container> {
   // core services
   container.bind(InstallToolService).toSelf();
   container.bind(V1ToolInstallService).toSelf();
-  container.bind(LinkToolService).toSelf();
 
   // modern tool services
   container.bind(INSTALL_TOOL_TOKEN).to(ApkoInstallService);
@@ -288,10 +287,15 @@ export async function linkTool(
   tool: string,
   options: ShellWrapperConfig,
 ): Promise<number | void> {
-  const container = await prepareInstallContainer();
+  const container = createContainer();
 
-  const svc = await container.getAsync(LinkToolService);
-  return svc.shellwrapper(tool, options);
+  const svc = await container.getAsync(IpcClient);
+  await svc.start();
+  try {
+    return await svc.linkTool(tool, options);
+  } finally {
+    svc.stop();
+  }
 }
 
 export async function resolveVersion(

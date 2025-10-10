@@ -4,7 +4,7 @@ import { ensurePaths } from '../../../test/path';
 import { createContainer } from '../services';
 import { LinkToolService } from './link-tool.service';
 
-describe('cli/install-tool/link-tool.service', async () => {
+describe('cli/services/link-tool.service', async () => {
   const child = createContainer();
   child.bind(LinkToolService).toSelf();
   const svc = await child.getAsync(LinkToolService);

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { ensurePaths, rootPath } from '../../../test/path';
-import { VersionService, createContainer } from '../services';
+import { IpcServer, VersionService, createContainer } from '../services';
 import { NpmVersionResolver } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
 import { PipVersionResolver } from '../tools/python/pip';
@@ -141,9 +141,15 @@ describe('cli/install-tool/index', () => {
   });
 
   test('linkTool', async () => {
-    const spy = vi.spyOn(fs, 'writeFile');
-    expect(await linkTool('node', { srcDir: '/bin/bash' })).toBeUndefined();
-    expect(spy).toHaveBeenCalledOnce();
+    const svr = await createContainer().getAsync(IpcServer);
+    await svr.start();
+    try {
+      const spy = vi.spyOn(fs, 'writeFile');
+      expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
+      expect(spy).toHaveBeenCalledOnce();
+    } finally {
+      svr.stop();
+    }
   });
 
   describe('uninstallTool', () => {
