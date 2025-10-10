@@ -4,7 +4,6 @@ import { VersionService, createContainer } from '../services';
 import { BunInstallService } from '../tools/bun';
 import { V1ToolInstallService } from './install-legacy-tool.service';
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
-import { LinkToolService } from './link-tool.service';
 import { ensurePaths } from '~test/path';
 
 vi.mock('del');
@@ -18,7 +17,6 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
-  parent.bind(LinkToolService).toSelf();
 
   let child: Container;
   let install: InstallToolService;

@@ -3,7 +3,12 @@ import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import spawn from 'nano-spawn';
 import { initializeTools, prepareTools } from '../prepare-tool';
-import { EnvService, PathService, VersionService } from '../services';
+import {
+  EnvService,
+  IpcServer,
+  PathService,
+  VersionService,
+} from '../services';
 import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
 import {
@@ -26,6 +31,10 @@ export class InstallToolService {
   private readonly toolSvcs: BaseInstallService[] = [];
   @inject(EnvService)
   private readonly envSvc!: EnvService;
+
+  @inject(IpcServer)
+  private readonly ipc!: IpcServer;
+
   @inject(PathService)
   private readonly pathSvc!: PathService;
   @inject(VersionService)
@@ -45,6 +54,7 @@ export class InstallToolService {
 
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+      await this.ipc.start();
       if (toolSvc) {
         let parent: ToolState | null = null;
 
@@ -131,6 +141,7 @@ export class InstallToolService {
       // TODO check and fix broken links
       throw e;
     } finally {
+      this.ipc.stop();
       if (this.envSvc.isRoot) {
         logger.debug('cleaning apt caches');
         await cleanAptFiles(dryRun);

@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
-import { inject, injectable } from 'inversify';
-import { EnvService, PathService } from '../services';
+import { bindingScopeValues, inject, injectable } from 'inversify';
 import { pathExists, tool2path } from '../utils';
+import { EnvService } from './env.service';
+import { PathService } from './path.service';
 
 export interface ShellWrapperConfig {
   name?: string | undefined;
@@ -24,7 +25,7 @@ export interface ShellWrapperConfig {
   body?: string | undefined;
 }
 
-@injectable()
+@injectable(bindingScopeValues.Singleton)
 export class LinkToolService {
   @inject(PathService)
   protected readonly pathSvc!: PathService;

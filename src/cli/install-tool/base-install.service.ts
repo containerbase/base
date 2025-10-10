@@ -6,9 +6,9 @@ import {
   HttpService,
   PathService,
 } from '../services';
+import { LinkToolService, type ShellWrapperConfig } from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
 import { isValid } from '../utils';
-import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 
 @injectable()
 export abstract class BaseInstallService {
