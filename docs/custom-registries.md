@@ -353,9 +353,8 @@ https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz
 Scala releases are downloaded from:
 
 - `https://downloads.lightbend.com`
-- `https://github.com/lampepfl/dotty/releases`
 
-The second url will be used soon for scala v3.
+Scala v3 is not supported.
 
 Samples:
 
