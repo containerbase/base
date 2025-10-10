@@ -6,6 +6,7 @@ import { initializeTools, prepareTools } from '../prepare-tool';
 import {
   EnvService,
   IpcServer,
+  LinkToolService,
   PathService,
   VersionService,
 } from '../services';
@@ -35,6 +36,9 @@ export class InstallToolService {
   @inject(IpcServer)
   private readonly ipc!: IpcServer;
 
+  @inject(LinkToolService)
+  private readonly _link!: LinkToolService;
+
   @inject(PathService)
   private readonly pathSvc!: PathService;
   @inject(VersionService)
@@ -55,6 +59,7 @@ export class InstallToolService {
     try {
       const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       await this.ipc.start();
+      this._link.clear();
       if (toolSvc) {
         let parent: ToolState | null = null;
 
@@ -133,6 +138,8 @@ export class InstallToolService {
           name: tool,
           tool: { name: tool, version },
         });
+
+        await this._storeLinks(tool, version);
       }
       await this.versionSvc.update(tool, version);
     } catch (e) {
@@ -268,9 +275,23 @@ export class InstallToolService {
     logger.debug({ tool: toolSvc.name }, 'post-install tool');
     await toolSvc.postInstall(version);
 
+    await this._storeLinks(toolSvc.name, version);
+
     logger.debug({ tool: toolSvc.name }, 'test tool');
     if (!this.envSvc.skipTests) {
       await toolSvc.test(version);
+    }
+  }
+
+  private async _storeLinks(tool: string, version: string): Promise<void> {
+    const links = this._link.links;
+    logger.debug({ tool, version, links }, 'linked tools');
+
+    for (const name of links) {
+      await this.versionSvc.setLink({
+        name,
+        tool: { name: tool, version },
+      });
     }
   }
 }
