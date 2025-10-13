@@ -1,5 +1,10 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
-import { IpcClient, PathService, createContainer } from '../services';
+import {
+  IpcClient,
+  PathService,
+  VersionService,
+  createContainer,
+} from '../services';
 import type { ShellWrapperConfig } from '../services';
 import { ResolverMap } from '../tools';
 import { ApkoInstallService } from '../tools/apko';
@@ -85,7 +90,7 @@ import { TerraformInstallService } from '../tools/terraform';
 import { TofuInstallService } from '../tools/tofu';
 import { VendirInstallService } from '../tools/vendir';
 import { WallyInstallService } from '../tools/wally';
-import { logger } from '../utils';
+import { type InstallToolType, logger } from '../utils';
 import { isNotKnownV2Tool } from '../utils/v2-tool';
 import {
   V1ToolInstallService,
@@ -94,8 +99,6 @@ import {
 import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
 import { ToolVersionResolverService } from './tool-version-resolver.service';
-
-export type InstallToolType = 'gem' | 'npm' | 'pip';
 
 async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
@@ -205,6 +208,8 @@ export async function installTool(
 ): Promise<number | void> {
   const container = await prepareInstallContainer();
   if (type) {
+    const verSvc = await container.getAsync(VersionService);
+    await verSvc.setType(tool, type);
     switch (type) {
       case 'gem': {
         @injectable()
@@ -340,14 +345,23 @@ export async function resolveVersion(
   return svc.resolve(tool, version);
 }
 
-export async function uninstallTool(
-  tool: string,
-  version: string,
+interface UninstallToolConfig {
+  tool: string;
+  version: string;
+  dryRun?: boolean;
+  recursive?: boolean;
+  type?: InstallToolType | undefined;
+}
+
+export async function uninstallTool({
+  tool,
+  version,
   dryRun = false,
-  type?: InstallToolType,
-): Promise<number | void> {
+  recursive = false,
+}: UninstallToolConfig): Promise<number | void> {
   const container = await prepareInstallContainer();
-  if (type) {
+  const verSvc = await container.getAsync(VersionService);
+  for (const { name: tool, type } of await verSvc.getTypes()) {
     switch (type) {
       case 'gem': {
         @injectable()
@@ -378,6 +392,7 @@ export async function uninstallTool(
       }
     }
   }
+
   const svc = await container.getAsync(InstallToolService);
-  return svc.uninstall(tool, version, dryRun);
+  return svc.uninstall(tool, version, dryRun, recursive);
 }

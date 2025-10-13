@@ -2,6 +2,7 @@ import { chmod, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable, postConstruct } from 'inversify';
 import { fileRights, logger, tool2path } from '../utils';
+import type { InstallToolType } from '../utils';
 import { DataService, type Database } from './data.service';
 import { PathService } from './path.service';
 
@@ -35,6 +36,11 @@ export interface ToolState {
   parent?: Tool;
 }
 
+export interface ToolType {
+  name: string;
+  type: InstallToolType;
+}
+
 @injectable()
 export class VersionService {
   @inject(DataService)
@@ -45,6 +51,7 @@ export class VersionService {
 
   private _links!: Database<Doc<ToolLink>>;
   private _state!: Database<Doc<ToolState>>;
+  private _types!: Database<Doc<ToolType>>;
   private _versions!: Database<Doc<ToolVersion>>;
 
   async isInstalled(tool: ToolVersion): Promise<boolean> {
@@ -97,8 +104,24 @@ export class VersionService {
     try {
       await rm(path);
     } catch (err) {
-      logger.error({ tool: name, err }, 'tool version not found');
+      logger.error({ tool: name, err }, 'tool version file not found');
     }
+  }
+
+  async getType(name: string): Promise<InstallToolType | undefined> {
+    const doc = await this._types.findOneAsync({ name });
+    return doc?.type;
+  }
+
+  async getTypes(): Promise<ToolType[]> {
+    return await this._types.findAsync({});
+  }
+
+  async setType(
+    name: string,
+    type: InstallToolType | undefined,
+  ): Promise<void> {
+    await this._types.updateAsync({ name }, { name, type }, { upsert: true });
   }
 
   /**
@@ -122,13 +145,15 @@ export class VersionService {
 
   @postConstruct()
   protected async [Symbol('construct')](): Promise<void> {
-    const [links, state, versions] = await Promise.all([
+    const [links, state, types, versions] = await Promise.all([
       this.dataSvc.load('links'),
       this.dataSvc.load('state'),
+      this.dataSvc.load('types'),
       this.dataSvc.load('versions'),
     ]);
     this._links = links;
     this._state = state;
+    this._types = types;
     this._versions = versions;
 
     await links.ensureIndexAsync({ fieldName: 'name', unique: true });
@@ -138,6 +163,8 @@ export class VersionService {
     });
 
     await state.ensureIndexAsync({ fieldName: 'name', unique: true });
+
+    await types.ensureIndexAsync({ fieldName: 'name', unique: true });
 
     await versions.ensureIndexAsync({ fieldName: 'name' });
     await versions.ensureIndexAsync({ fieldName: ['name', 'version'] });

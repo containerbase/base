@@ -1,12 +1,9 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import {
-  type InstallToolType,
-  installTool,
-  resolveVersion,
-} from '../install-tool';
+import { installTool, resolveVersion } from '../install-tool';
 import { DeprecatedTools, ResolverMap } from '../tools';
+import type { InstallToolType } from '../utils';
 import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
 import { command, getVersion, isToolIgnored } from './utils';

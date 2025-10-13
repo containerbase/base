@@ -8,7 +8,7 @@ import {
 } from '../services';
 import { LinkToolService, type ShellWrapperConfig } from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
-import { isValid } from '../utils';
+import { type InstallToolType, isValid } from '../utils';
 
 @injectable()
 export abstract class BaseInstallService {
@@ -41,6 +41,12 @@ export abstract class BaseInstallService {
    * Eg. composer depends on php.
    */
   readonly parent?: string;
+
+  /**
+   * Optional tool type for dynamic uninstallation support.
+   * Currently `npm`, `gem` or `pip`.
+   */
+  readonly type?: InstallToolType;
 
   abstract install(version: string): Promise<void>;
 

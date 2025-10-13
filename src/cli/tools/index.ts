@@ -1,4 +1,4 @@
-import type { InstallToolType } from '../install-tool';
+import type { InstallToolType } from '../utils';
 
 export const NoPrepareTools = [
   'apko',
