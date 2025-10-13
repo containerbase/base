@@ -12,12 +12,7 @@ import {
 } from '../services';
 import type { ToolState } from '../services/version.service';
 import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import {
-  BlockingChild,
-  CurrentVersion,
-  MissingParent,
-  NotSupported,
-} from '../utils/codes';
+import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
 import type { BaseInstallService } from './base-install.service';
 import { V1ToolInstallService } from './install-legacy-tool.service';
 
@@ -214,19 +209,6 @@ export class InstallToolService {
       }
 
       logger.debug({ tool }, 'validate tool');
-      if (
-        await this.versionSvc.isCurrent({
-          name: tool,
-          tool: { name: tool, version },
-        })
-      ) {
-        logger.fatal(
-          { tool, version },
-          'tool version is currently linked and cannot be uninstalled',
-        );
-        return CurrentVersion;
-      }
-
       const childs = await this.versionSvc.getChilds({ name: tool, version });
       if (childs.length) {
         logger.fatal(
@@ -246,7 +228,22 @@ export class InstallToolService {
       } else {
         logger.debug({ tool }, 'uninstall tool');
         await toolSvc.uninstall(version);
-        await this.versionSvc.removeInstalled({ name: tool, version });
+        const vTool = { name: tool, version };
+        await this.versionSvc.removeInstalled(vTool);
+        if (
+          await this.versionSvc.isCurrent({
+            name: tool,
+            tool: vTool,
+          })
+        ) {
+          await this.versionSvc.removeCurrent(tool);
+        }
+
+        for (const { name } of await this.versionSvc.findLinks(vTool)) {
+          await this._link.rm(name);
+        }
+
+        await this.versionSvc.removeLinks(vTool);
       }
     } else {
       logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');

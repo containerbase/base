@@ -52,9 +52,21 @@ RUN install-tool jb v0.6.0
 FROM build AS testa
 
 RUN set -ex; \
-    jb install; \
-    test -d vendor/github.com/prometheus-operator/prometheus-operator; \
-    test -d vendor/prometheus-operator
+  jb install; \
+  test -d vendor/github.com/prometheus-operator/prometheus-operator; \
+  test -d vendor/prometheus-operator
+
+#--------------------------------------
+# test: jb uninstall
+#--------------------------------------
+
+FROM build AS testb
+
+
+# renovate: datasource=github-releases depName=jb packageName=jsonnet-bundler/jsonnet-bundler
+ENV JB_VERSION=0.6.0
+RUN uninstall-tool jb ${JB_VERSION}
+RUN if command -v jb; then echo "jb not uninstalled" >&2; exit 1; fi
 
 #--------------------------------------
 # final
@@ -62,3 +74,4 @@ RUN set -ex; \
 FROM base
 
 COPY --from=testa /.dummy /.dummy
+COPY --from=testb /.dummy /.dummy

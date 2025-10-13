@@ -11,12 +11,7 @@ import {
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
 import { isDockerBuild, logger } from '../utils';
-import {
-  BlockingChild,
-  CurrentVersion,
-  MissingParent,
-  NotSupported,
-} from '../utils/codes';
+import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
 import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
 vi.mock('del');
@@ -158,9 +153,9 @@ describe('cli/install-tool/index', () => {
       expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
       // legacy not supported
       expect(await uninstallTool('leg', '1.0.0')).toBe(NotSupported);
-      // linked tool uninstall not supported
+      // linked tool uninstall supported
       expect(await installTool('bun', '2.0.0')).toBeUndefined();
-      expect(await uninstallTool('bun', '2.0.0')).toBe(CurrentVersion);
+      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
 
       // can uninstall old version
       expect(await installTool('bun', '2.0.1')).toBeUndefined();

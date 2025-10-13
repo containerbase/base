@@ -107,4 +107,11 @@ export class LinkToolService {
     await fs.writeFile(tgt, content, { encoding: 'utf8' });
     await this.pathSvc.setOwner({ path: tgt });
   }
+
+  async rm(name: string): Promise<void> {
+    const tgt = join(this.pathSvc.binDir, name);
+    if (await pathExists(tgt, 'file')) {
+      await fs.rm(tgt);
+    }
+  }
 }
