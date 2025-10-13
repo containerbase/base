@@ -59,7 +59,7 @@ export class VersionService {
     await this._versions.removeAsync(tool, { multi: true });
   }
 
-  getChilds(parent: Tool): Promise<ToolVersion[]> {
+  getChilds(parent: Tool): Promise<Doc<ToolVersion>[]> {
     return this._versions.findAsync({ parent });
   }
 
@@ -67,8 +67,16 @@ export class VersionService {
     return (await this._links.findOneAsync(tool)) !== null;
   }
 
+  findLinks(tool: Tool): Promise<Doc<ToolLink>[]> {
+    return this._links.findAsync({ tool });
+  }
+
   async setLink(tool: ToolLink): Promise<void> {
     await this._links.updateAsync({ name: tool.name }, tool, { upsert: true });
+  }
+
+  async removeLinks(tool: Tool): Promise<void> {
+    await this._links.removeAsync({ tool }, { multi: true });
   }
 
   async isCurrent(tool: ToolState): Promise<boolean> {
@@ -81,6 +89,10 @@ export class VersionService {
 
   async getCurrent(name: string): Promise<ToolState | null> {
     return await this._state.findOneAsync({ name });
+  }
+
+  async removeCurrent(name: string): Promise<void> {
+    await this._state.removeAsync({ name }, { multi: false });
   }
 
   /**
