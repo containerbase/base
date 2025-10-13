@@ -1,4 +1,4 @@
-import { chmod, stat, writeFile } from 'node:fs/promises';
+import { chmod, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable, postConstruct } from 'inversify';
 import { fileRights, logger, tool2path } from '../utils';
@@ -93,6 +93,12 @@ export class VersionService {
 
   async removeCurrent(name: string): Promise<void> {
     await this._state.removeAsync({ name }, { multi: false });
+    const path = join(this.pathSvc.versionPath, tool2path(name));
+    try {
+      await rm(path);
+    } catch (err) {
+      logger.error({ tool: name, err }, 'tool version not found');
+    }
   }
 
   /**

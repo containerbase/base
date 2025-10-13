@@ -66,7 +66,10 @@ FROM build AS testb
 # renovate: datasource=github-releases depName=jb packageName=jsonnet-bundler/jsonnet-bundler
 ENV JB_VERSION=0.6.0
 RUN uninstall-tool jb ${JB_VERSION}
-RUN if command -v jb; then echo "jb not uninstalled" >&2; exit 1; fi
+RUN set -ex; \
+  if command -v jb; then echo "jb not uninstalled" >&2; exit 1; fi; \
+  if [ -e /opt/containerbase/versions/jb ]; then echo "jb not uninstalled" >&2; exit 1; fi;\
+  true
 
 #--------------------------------------
 # final
