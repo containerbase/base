@@ -24,12 +24,13 @@ describe('cli/command/uninstall-gem', () => {
 
     expect(await cli.run([...(args ?? []), 'rake', '5.0.0'])).toBe(0);
 
-    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith(
-      'rake',
-      '5.0.0',
-      false,
-      'gem',
-    );
+    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
+      dryRun: false,
+      recursive: false,
+      tool: 'rake',
+      type: 'gem',
+      version: '5.0.0',
+    });
     expect(await cli.run([...(args ?? []), 'rake', '-d', '5.0.0'])).toBe(0);
 
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));

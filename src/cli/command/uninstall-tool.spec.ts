@@ -30,12 +30,13 @@ describe('cli/command/uninstall-tool', () => {
 
     expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(0);
     expect(mocks.uninstallTool).toHaveBeenCalledTimes(1);
-    expect(mocks.uninstallTool).toHaveBeenCalledWith(
-      'node',
-      '16.13.0',
-      false,
-      undefined,
-    );
+    expect(mocks.uninstallTool).toHaveBeenCalledWith({
+      dryRun: false,
+      recursive: false,
+      tool: 'node',
+      type: undefined,
+      version: '16.13.0',
+    });
     expect(await cli.run([...(args ?? []), 'node', '16.13.0', '-d'])).toBe(0);
 
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));

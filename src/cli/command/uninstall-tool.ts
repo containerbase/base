@@ -1,8 +1,9 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import { type InstallToolType, uninstallTool } from '../install-tool';
+import { uninstallTool } from '../install-tool';
 import { ResolverMap } from '../tools';
+import type { InstallToolType } from '../utils';
 import { logger } from '../utils';
 import { MissingVersion } from '../utils/codes';
 import { command, isToolIgnored } from './utils';
@@ -23,6 +24,8 @@ export class UninstallToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
+  recursive = Option.Boolean('-r,--recursive', false);
+
   version = Option.String({ required: false });
 
   protected type: InstallToolType | undefined;
@@ -38,6 +41,7 @@ export class UninstallToolCommand extends Command {
     let version = this.version;
 
     const type = ResolverMap[this.name] ?? this.type;
+    const { dryRun, recursive } = this;
 
     // TODO: support uninstall all versions
     if (!isNonEmptyStringAndNotWhitespace(version)) {
@@ -50,7 +54,17 @@ export class UninstallToolCommand extends Command {
     let error = false;
     logger.info(`Uninstalling ${type ?? 'tool'} ${this.name}@${version}...`);
     try {
-      return await uninstallTool(this.name, version, this.dryRun, type);
+      const res = await uninstallTool({
+        tool: this.name,
+        version,
+        dryRun,
+        recursive,
+        type,
+      });
+      if (res) {
+        error = true;
+      }
+      return res;
     } catch (err) {
       error = true;
       logger.debug(err);

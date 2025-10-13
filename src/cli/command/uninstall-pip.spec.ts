@@ -24,12 +24,13 @@ describe('cli/command/uninstall-pip', () => {
 
     expect(await cli.run([...(args ?? []), 'poetry', '5.0.0'])).toBe(0);
 
-    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith(
-      'poetry',
-      '5.0.0',
-      false,
-      'pip',
-    );
+    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
+      dryRun: false,
+      recursive: false,
+      tool: 'poetry',
+      type: 'pip',
+      version: '5.0.0',
+    });
     expect(await cli.run([...(args ?? []), 'poetry', '-d', '5.0.0'])).toBe(0);
 
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));

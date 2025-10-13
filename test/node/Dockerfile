@@ -459,7 +459,7 @@ RUN set -ex; \
   yarn -v | grep ${YARN_SLIM_VERSION};
 
 #--------------------------------------
-# test: renovate (rootless,readonly)
+# test: renovate (rootless,readonly,uninstall)
 #--------------------------------------
 FROM base AS testq
 
@@ -471,7 +471,7 @@ RUN set -ex; \
 
 RUN prepare-tool node
 
-# emulate emtpy containerbase folders
+# emulate empty containerbase folders
 RUN set -ex; \
   ls -la /tmp/containerbase/cache; \
   rm -rf /opt/containerbase/*; \
@@ -510,6 +510,14 @@ RUN set -ex; \
 RUN set -ex; \
   install-npm @microsoft/rush; \
   rush -h; \
+  true
+
+RUN set -ex; \
+  ls -la /usr/local/bin/;\
+  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
+  uninstall-tool node ${NODE_VERSION} -r; \
+  ls -la /usr/local/bin/;\
+  if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
   true
 
 #--------------------------------------

@@ -188,6 +188,7 @@ export class InstallToolService {
     tool: string,
     version: string,
     dryRun = false,
+    recursive = false,
   ): Promise<number | void> {
     logger.trace(
       { tools: this.toolSvcs.map((t) => t.name) },
@@ -196,30 +197,47 @@ export class InstallToolService {
 
     await this.pathSvc.ensureBasePaths();
 
+    if (
+      !(await this.versionSvc.isInstalled({
+        name: tool,
+        version,
+      }))
+    ) {
+      logger.info({ tool }, 'tool not installed');
+      return;
+    }
+
     const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (toolSvc) {
-      if (
-        !(await this.versionSvc.isInstalled({
-          name: tool,
-          version,
-        }))
-      ) {
-        logger.info({ tool }, 'tool not installed');
-        return;
-      }
-
       logger.debug({ tool }, 'validate tool');
       const childs = await this.versionSvc.getChilds({ name: tool, version });
       if (childs.length) {
-        logger.fatal(
-          {
-            tool,
-            version,
-            childs: childs.map(({ name, version }) => ({ name, version })),
-          },
-          'tool version has child dependencies and cannot be uninstalled',
-        );
-        return BlockingChild;
+        if (recursive) {
+          for (const child of childs) {
+            logger.info(
+              `Uninstalling child tool ${child.name}@${child.version}...`,
+            );
+            const res = await this.uninstall(
+              child.name,
+              child.version,
+              dryRun,
+              true,
+            );
+            if (res) {
+              return res;
+            }
+          }
+        } else {
+          logger.fatal(
+            {
+              tool,
+              version,
+              childs: childs.map(({ name, version }) => ({ name, version })),
+            },
+            'tool version has child dependencies and cannot be uninstalled',
+          );
+          return BlockingChild;
+        }
       }
 
       if (dryRun) {

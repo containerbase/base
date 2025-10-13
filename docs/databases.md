@@ -6,9 +6,27 @@ It's planned to eventually switch to [`node:sqlite`](https://nodejs.org/api/sqli
 
 ## List of created databases
 
-- `state`: Stores information about all the current linked version of installed tools.
-- `versions`: Stores information about installed tool versions.
 - `links`: Stores information about linked tool versions.
+- `state`: Stores information about all the current linked version of installed tools.
+- `types`: Stores information about all the installer types of tools.
+- `versions`: Stores information about installed tool versions.
+
+## `links`
+
+Stores information about linked tool versions.
+It stores which tool and version a shell wrapper was created from.
+
+**Meta:**
+
+- `name`: file name
+- `tool`: the tool the file is linked to
+  - `name`: tool name
+  - `version`: tool version
+
+**Index:**
+
+- `name` (`unique`): only one can exist
+- `tool.name` and `tool.version`: find links by current tool version
 
 ## `state`
 
@@ -20,6 +38,21 @@ Stores information about all the current linked version of installed tools.
 - `tool`: the tool and version
   - `name`: tool name
   - `version`: tool version
+
+**Index:**
+
+- `name` (`unique`): only one can exist
+
+## `types`
+
+Stores information about all the installer types of tools.
+Can be `gem`, `npm` or `pip`.
+It's used to add proper dynamic installer services.
+
+**Meta:**
+
+- `name`: tool name
+- `type`: the tool installer type
 
 **Index:**
 
@@ -43,22 +76,3 @@ Stores the installed tool versions with an optional parent.
 - `name` and `version`: is a version installed
 - `parent.name` and `parent.version` (`sparse`): find childs by current tool version
 - `name`, `version`, `parent.name` and `parent.version` (`unique`): is a version installed
-
-## `links`
-
-Stores information about linked tool versions.
-It stores which tool and version a shell wrapper was created from.
-
-⚠️ `links` database is currently unused. ⚠️
-
-**Meta:**
-
-- `name`: file name
-- `tool`: the tool the file is linked to
-  - `name`: tool name
-  - `version`: tool version
-
-**Index:**
-
-- `name` (`unique`): only one can exist
-- `tool.name` and `tool.version`: find links by current tool version

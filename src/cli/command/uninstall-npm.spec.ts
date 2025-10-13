@@ -24,12 +24,13 @@ describe('cli/command/uninstall-npm', () => {
 
     expect(await cli.run([...(args ?? []), 'del-cli', '5.0.0'])).toBe(0);
 
-    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith(
-      'del-cli',
-      '5.0.0',
-      false,
-      'npm',
-    );
+    expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
+      dryRun: false,
+      recursive: false,
+      tool: 'del-cli',
+      type: 'npm',
+      version: '5.0.0',
+    });
     expect(await cli.run([...(args ?? []), 'del-cli', '-d', '5.0.0'])).toBe(0);
 
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));

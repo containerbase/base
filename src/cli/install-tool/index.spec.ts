@@ -150,20 +150,32 @@ describe('cli/install-tool/index', () => {
   describe('uninstallTool', () => {
     test('works', async () => {
       // not installed
-      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+      expect(
+        await uninstallTool({ tool: 'bun', version: '2.0.0' }),
+      ).toBeUndefined();
       // legacy not supported
-      expect(await uninstallTool('leg', '1.0.0')).toBe(NotSupported);
+      expect(await uninstallTool({ tool: 'leg', version: '1.0.0' })).toBe(
+        NotSupported,
+      );
       // linked tool uninstall supported
       expect(await installTool('bun', '2.0.0')).toBeUndefined();
-      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+      expect(
+        await uninstallTool({ tool: 'bun', version: '2.0.0' }),
+      ).toBeUndefined();
 
       // can uninstall old version
       expect(await installTool('bun', '2.0.1')).toBeUndefined();
-      expect(await uninstallTool('bun', '2.0.0', true)).toBeUndefined();
-      expect(await uninstallTool('bun', '2.0.0')).toBeUndefined();
+      expect(
+        await uninstallTool({ tool: 'bun', version: '2.0.0', dryRun: true }),
+      ).toBeUndefined();
+      expect(
+        await uninstallTool({ tool: 'bun', version: '2.0.0' }),
+      ).toBeUndefined();
 
       // cannot uninstall if has childs
-      expect(await uninstallTool('node', '1.0.1')).toBe(BlockingChild);
+      expect(await uninstallTool({ tool: 'node', version: '1.0.1' })).toBe(
+        BlockingChild,
+      );
     });
 
     test.each([
@@ -172,7 +184,12 @@ describe('cli/install-tool/index', () => {
       { type: 'pip' as const },
     ])('works: $type', async ({ type }) => {
       expect(
-        await uninstallTool(`dummy-${type}`, '2.0.0', false, type),
+        await uninstallTool({
+          tool: `dummy-${type}`,
+          version: '2.0.0',
+          dryRun: false,
+          type,
+        }),
       ).toBeUndefined();
     });
   });
