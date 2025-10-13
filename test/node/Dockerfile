@@ -514,8 +514,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   ls -la /usr/local/bin/;\
-  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
-  uninstall-tool node ${NODE_VERSION} -r; \
+  uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
   true

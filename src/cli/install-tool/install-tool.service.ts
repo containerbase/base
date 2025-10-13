@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import spawn from 'nano-spawn';
@@ -186,7 +187,7 @@ export class InstallToolService {
 
   async uninstall(
     tool: string,
-    version: string,
+    version?: string,
     dryRun = false,
     recursive = false,
   ): Promise<number | void> {
@@ -196,6 +197,22 @@ export class InstallToolService {
     );
 
     await this.pathSvc.ensureBasePaths();
+
+    if (!isNonEmptyStringAndNotWhitespace(version)) {
+      const versions = new Set<string>();
+      for (const v of await this.versionSvc.findInstalled(tool)) {
+        if (versions.has(v.version)) {
+          continue;
+        }
+        versions.add(v.version);
+        logger.info(`Uninstalling ${tool}@${v.version}...`);
+        const res = await this.uninstall(tool, v.version, dryRun, recursive);
+        if (res) {
+          return res;
+        }
+      }
+      return 0;
+    }
 
     if (
       !(await this.versionSvc.isInstalled({

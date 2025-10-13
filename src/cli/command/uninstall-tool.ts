@@ -26,36 +26,39 @@ export class UninstallToolCommand extends Command {
 
   recursive = Option.Boolean('-r,--recursive', false);
 
+  all = Option.Boolean('-a,--all', false);
+
   version = Option.String({ required: false });
 
   protected type: InstallToolType | undefined;
 
   override async execute(): Promise<number | void> {
     const start = Date.now();
+    const { name: tool, dryRun, recursive, all } = this;
 
-    if (await isToolIgnored(this.name)) {
-      logger.info({ tool: this.name }, 'tool ignored');
+    if (await isToolIgnored(tool)) {
+      logger.info({ tool }, 'tool ignored');
       return 0;
     }
 
     let version = this.version;
 
-    const type = ResolverMap[this.name] ?? this.type;
-    const { dryRun, recursive } = this;
+    const type = ResolverMap[tool] ?? this.type;
 
-    // TODO: support uninstall all versions
-    if (!isNonEmptyStringAndNotWhitespace(version)) {
-      logger.error(`No version found for ${this.name}`);
+    if (!isNonEmptyStringAndNotWhitespace(version) && !all) {
+      logger.error(`No version found for ${tool}`);
       return MissingVersion;
     }
 
-    version = version.replace(/^v/, ''); // trim optional 'v' prefix
+    version = version?.replace(/^v/, ''); // trim optional 'v' prefix
 
     let error = false;
-    logger.info(`Uninstalling ${type ?? 'tool'} ${this.name}@${version}...`);
+    logger.info(
+      `Uninstalling ${type ?? 'tool'} ${tool}${version ? `@${version}` : ''}...`,
+    );
     try {
       const res = await uninstallTool({
-        tool: this.name,
+        tool,
         version,
         dryRun,
         recursive,
@@ -76,11 +79,11 @@ export class UninstallToolCommand extends Command {
     } finally {
       if (error) {
         logger.fatal(
-          `Uninstall ${this.type ?? 'tool'} ${this.name} failed in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Uninstall ${this.type ?? 'tool'} ${tool} failed in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       } else {
         logger.info(
-          `Uninstall ${this.type ?? 'tool'} ${this.name} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Uninstall ${this.type ?? 'tool'} ${tool} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }
