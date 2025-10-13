@@ -8,8 +8,8 @@ export class UninstallNpmCommand extends UninstallToolCommand {
   static override usage = Command.Usage({
     description: 'Uninstalls a npm package from the container.',
     examples: [
-      ['Uninstalls del-cli 5.0.0', '$0 install npm del-cli 5.0.0'],
-      // ['Installs latest del-cli version', '$0 install npm del-cli'],
+      ['Uninstalls del-cli v5.0.0', '$0 uninstall npm del-cli 5.0.0'],
+      ['Uninstalls all del-cli versions', '$0 uninstall npm del-cli --all'],
     ],
   });
 
@@ -23,7 +23,7 @@ export class UninstallNpmShortCommand extends UninstallNpmCommand {
     description: 'Uninstalls a npm package from the container.',
     examples: [
       ['Uninstalls del-cli v5.0.0', '$0 del-cli 5.0.0'],
-      // ['Installs latest del-cli version', '$0 del-cli'],
+      ['Uninstalls all del-cli versions', '$0 del-cli --all'],
     ],
   });
 }

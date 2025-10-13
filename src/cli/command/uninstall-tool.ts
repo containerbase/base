@@ -15,8 +15,16 @@ export class UninstallToolCommand extends Command {
   static override usage = Command.Usage({
     description: 'Uninstalls a tool from the container.',
     examples: [
-      ['Uninstalls node 14.17.0', '$0 uninstall tool node 14.17.0'],
-      // ['Uninstalls latest pnpm version', '$0 uninstall tool pnpm'],
+      ['Uninstalls node v14.17.0', '$0 uninstall tool node 14.17.0'],
+      [
+        'Uninstalls node v14.17.0 with all child tools',
+        '$0 uninstall tool node 14.17.0 --recursive',
+      ],
+      [
+        'Uninstalls all node versions with all child tools',
+        '$0 uninstall tool node --recursive --all',
+      ],
+      ['Uninstalls all jb versions', '$0 uninstall tool jb --all'],
     ],
   });
 
@@ -79,11 +87,11 @@ export class UninstallToolCommand extends Command {
     } finally {
       if (error) {
         logger.fatal(
-          `Uninstall ${this.type ?? 'tool'} ${tool} failed in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Uninstall ${type ?? 'tool'} ${tool} failed in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       } else {
         logger.info(
-          `Uninstall ${this.type ?? 'tool'} ${tool} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Uninstall ${type ?? 'tool'} ${tool} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }
@@ -97,7 +105,15 @@ export class UninstallToolShortCommand extends UninstallToolCommand {
     description: 'Uninstalls a tool from the container.',
     examples: [
       ['Uninstalls node v14.17.0', '$0 node 14.17.0'],
-      // ['Uninstalls all pnpm versions', '$0 pnpm'],
+      [
+        'Uninstalls node v14.17.0 with all child tools',
+        '$0 node 14.17.0 --recursive',
+      ],
+      [
+        'Uninstalls all node versions with all child tools',
+        '$0 node --recursive --all',
+      ],
+      ['Uninstalls all jb versions', '$0 jb --all'],
     ],
   });
 }
