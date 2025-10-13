@@ -347,7 +347,7 @@ export async function resolveVersion(
 
 interface UninstallToolConfig {
   tool: string;
-  version: string;
+  version?: string | undefined;
   dryRun?: boolean;
   recursive?: boolean;
   type?: InstallToolType | undefined;

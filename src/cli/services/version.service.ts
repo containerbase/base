@@ -58,6 +58,10 @@ export class VersionService {
     return (await this._versions.findOneAsync(tool)) !== null;
   }
 
+  findInstalled(name: string): Promise<Doc<ToolVersion>[]> {
+    return this._versions.findAsync({ name });
+  }
+
   async addInstalled(tool: ToolVersion): Promise<void> {
     await this._versions.insertAsync(tool);
   }
