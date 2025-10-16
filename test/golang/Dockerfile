@@ -131,6 +131,14 @@ RUN set -ex; \
 RUN set -ex; \
   [ "$(command -v mod)" = "/usr/local/bin/mod" ] && echo "works" || exit 1;
 
+
+RUN set -ex; \
+  ls -la /usr/local/bin/;\
+  uninstall-tool golang -a -r; \
+  ls -la /usr/local/bin/;\
+  if [ "$(ls -A /usr/local/bin/)" -eq "mod" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
+  true;
+
 #--------------------------------------
 # final
 #--------------------------------------
