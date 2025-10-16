@@ -1,7 +1,7 @@
 # Custom base image
 
 The following sample can be used to create a `containerbase/base` based image which does not extend `containerbase/base` directly.
-Currently only ubuntu focal and jammy based amd64 distro are suported.
+Currently only ubuntu focal, jammy and noble based amd64 distro are suported.
 
 You can also use our containerbase from GitHub container registry as `ghcr.io/containerbase/base`.
 `containerbase/base` and `ghcr.io/containerbase/base` are exchangeble.
@@ -15,7 +15,7 @@ Use this template for using a custom base image with our default user named `ubu
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy AS base
+FROM amd64/ubuntu:noble AS base
 
 # Allows custom apt proxy usage
 ARG APT_HTTP_PROXY
@@ -58,7 +58,7 @@ You can also customize username or userid by using this template.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy AS base
+FROM amd64/ubuntu:noble AS base
 
 # The containerbase supports custom user
 ARG USER_NAME=custom
@@ -107,7 +107,7 @@ The group must already exist.
 # This containerbase is used for tool intallation and user/directory setup
 FROM containerbase/base AS containerbase
 
-FROM amd64/ubuntu:jammy AS base
+FROM amd64/ubuntu:noble AS base
 
 ARG USER_NAME=gitpod
 ARG USER_ID=33333
