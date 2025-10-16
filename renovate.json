@@ -203,6 +203,12 @@
       "matchBaseBranches": ["/^maint/.+/"],
       "matchFileNames": ["test/**"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Group java test deps",
+      "matchDepNames": ["java", "java-jdk", "java-jre"],
+      "matchFileNames": ["test/**"],
+      "groupName": "java"
     }
   ],
   "customManagers": [
