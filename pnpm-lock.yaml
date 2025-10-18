@@ -153,8 +153,8 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4)
       '@yao-pkg/pkg':
-        specifier: 6.8.0
-        version: 6.8.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.9.0
+        version: 6.9.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.12.0
         version: 1.12.0
@@ -1162,12 +1162,12 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@yao-pkg/pkg-fetch@3.5.28':
-    resolution: {integrity: sha512-0dTu0yFgAuOp3OJBiwSZVkTMuGmvExwmG9mHKQhHkaNate5BWh6rBTzfQ0WId9DHXmg7GiT/kIyejEV0G3EHUQ==}
+  '@yao-pkg/pkg-fetch@3.5.29':
+    resolution: {integrity: sha512-Kpfpx9/XBkOZ/Nb41ybBGO+IaD9lu9svFxwqNt2xN0zwkxIQbaWU2gS5kOzkKPFlk2WUHoqtTkaDyYRARSOkkg==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.8.0':
-    resolution: {integrity: sha512-QQcMbQHlaw7dFy3Nk7XQ7Gm8DlczTBcgSQB1V068L5/2rSZ3TO4CMc7rU7DeIOOR0Pm+mb5TDR3yH4jT6nfkpw==}
+  '@yao-pkg/pkg@6.9.0':
+    resolution: {integrity: sha512-8K4P5ZRPtOIneylzmCgTWTNwxOuzju+ds/wSDli8EokmAYCG/Flr/NliFjfZ8I9t//FcG1Di7rBldyjEhPtKvQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -5140,7 +5140,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@yao-pkg/pkg-fetch@3.5.28':
+  '@yao-pkg/pkg-fetch@3.5.29':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
@@ -5156,12 +5156,12 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.8.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.9.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.28.3
       '@babel/parser': 7.28.4
       '@babel/types': 7.28.4
-      '@yao-pkg/pkg-fetch': 3.5.28
+      '@yao-pkg/pkg-fetch': 3.5.29
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
