@@ -51,7 +51,7 @@
     "global-agent": "3.0.0",
     "got": "14.5.0",
     "ini": "5.0.0",
-    "inversify": "7.10.2",
+    "inversify": "7.10.3",
     "nano-spawn": "1.0.3",
     "node-ipc": "12.0.0",
     "pino": "9.13.1",
