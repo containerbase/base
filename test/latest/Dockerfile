@@ -232,7 +232,7 @@ RUN install-tool apko 0.30.16
 RUN install-tool devbox 0.16.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.12.0
+RUN install-tool gleam 1.13.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.34.1
