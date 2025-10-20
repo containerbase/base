@@ -94,7 +94,7 @@ RUN install-tool docker v28.5.1
 FROM base AS test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.51.0
+RUN install-tool git v2.51.1
 
 #--------------------------------------
 # Image: git-lfs
