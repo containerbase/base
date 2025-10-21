@@ -65,7 +65,7 @@ FROM base AS testa
 RUN install-apt nginx
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.20.0
+RUN install-tool node 22.21.0
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
 RUN install-tool php 8.4.13
@@ -194,7 +194,7 @@ RUN install-tool git-lfs v3.7.1
 RUN install-tool powershell v7.5.4
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.20.0
+RUN install-tool node 22.21.0
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v28.5.1
