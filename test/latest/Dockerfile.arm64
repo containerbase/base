@@ -165,7 +165,7 @@ RUN install-tool wally 0.3.2
 RUN install-tool protoc 33.0
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.57.0
+RUN install-tool pixi v0.58.0
 
 #--------------------------------------
 # Image: final
