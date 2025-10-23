@@ -30,6 +30,7 @@ export class BazeliskInstallService extends BaseInstallService {
     await this.pathSvc.setOwner({
       path: binarypath,
     });
+    await fs.symlink(binarypath, join(path, 'bazel'));
   }
 
   override async link(version: string): Promise<void> {
@@ -38,10 +39,10 @@ export class BazeliskInstallService extends BaseInstallService {
     await this.shellwrapper({
       srcDir: src,
     });
-    await fs.symlink(
-      join(this.pathSvc.binDir, 'bazelisk'),
-      join(this.pathSvc.binDir, 'bazel'),
-    );
+    await this.shellwrapper({
+      name: 'bazel',
+      srcDir: src,
+    });
   }
 
   override async test(_version: string): Promise<void> {
