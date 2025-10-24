@@ -71,8 +71,8 @@ importers:
         specifier: '*'
         version: 0.39.0
       nano-spawn:
-        specifier: 1.0.3
-        version: 1.0.3(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf)
+        specifier: 2.0.0
+        version: 2.0.0(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf)
       node-ipc:
         specifier: 12.0.0
         version: 12.0.0
@@ -2929,10 +2929,6 @@ packages:
 
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
-
-  nano-spawn@1.0.3:
-    resolution: {integrity: sha512-jtpsQDetTnvS2Ts1fiRdci5rx0VYws5jGyC+4IYOTnIQ/wwdf6JdomlHBwqC3bJYOvaKu0C2GSZ1A60anrYpaA==}
-    engines: {node: '>=20.17'}
 
   nano-spawn@2.0.0:
     resolution: {integrity: sha512-tacvGzUY5o2D8CBh2rrwxyNojUsZNU2zjNTzKQrkgGJQTbGAfArVWXSKMBokBeeg6C7OLRGUEyoFlYbfeWQIqw==}
@@ -7174,8 +7170,6 @@ snapshots:
       any-promise: 1.3.0
       object-assign: 4.1.1
       thenify-all: 1.6.0
-
-  nano-spawn@1.0.3(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf): {}
 
   nano-spawn@2.0.0(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf): {}
 
