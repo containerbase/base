@@ -96,7 +96,7 @@
     "eslint-plugin-promise": "7.2.1",
     "globals": "16.4.0",
     "husky": "9.1.7",
-    "lint-staged": "16.2.5",
+    "lint-staged": "16.2.6",
     "markdownlint-cli2": "0.18.1",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
