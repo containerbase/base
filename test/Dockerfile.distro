@@ -137,7 +137,7 @@ RUN install-tool protoc 33.0
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 27.3.4.3
+RUN install-tool erlang 28.1.0.0
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.19.1
 
