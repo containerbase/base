@@ -16,6 +16,9 @@
     "no-emphasis-as-header": false,
     "no-inline-html": false,
     "single-h1": false,
+    "no-duplicate-heading": {
+      "siblings_only": true,
+    },
   },
 
   // Define glob expressions to use (only valid at root)
