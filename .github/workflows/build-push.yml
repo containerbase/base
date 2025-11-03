@@ -28,8 +28,7 @@ jobs:
     permissions:
       contents: read
       checks: write
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      id-token: write
 
   release:
     needs: [build]

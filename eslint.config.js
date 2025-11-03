@@ -74,7 +74,7 @@ export default tseslint.config(
             'eslint.config.js',
             'test/**',
             'tools/**',
-            'vite.config.ts',
+            'vitest.config.ts',
             '__mocks__/**',
             '**/*.spec.ts',
           ],

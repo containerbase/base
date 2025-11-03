@@ -14,7 +14,9 @@ export default defineConfig({
         : ['@containerbase/istanbul-reports-html', 'text'],
       include: ['src/cli/**/*.ts', '!**/__mocks__/**', '!**/types.ts'],
     },
-    reporters: ci ? ['default', 'github-actions'] : ['default', 'html'],
+    reporters: ci
+      ? ['default', 'github-actions', 'junit']
+      : ['default', 'html'],
     restoreMocks: true,
     setupFiles: './test/global-setup.ts',
     deps: { moduleDirectories: ['node_modules', '.yarn/'] },

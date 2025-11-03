@@ -2,9 +2,6 @@ name: build
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        required: false
 
 env:
   OWNER: ${{ github.repository_owner }}
@@ -94,6 +91,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: setup
     timeout-minutes: 15
+    permissions:
+      id-token: write
 
     steps:
       - name: ⚙️ Setup
@@ -102,11 +101,17 @@ jobs:
       - name: vitest
         run: pnpm test:vitest
 
-      - name: Codecov
+      - name: Codecov Coverage
         if: github.event_name != 'merge_group'
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
+
+      - name: Codecov Test Results
+        if: github.event_name != 'merge_group'
+        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
+        with:
+          use_oidc: true
 
   build:
     runs-on: ubuntu-24.04

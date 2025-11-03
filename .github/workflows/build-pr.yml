@@ -17,3 +17,4 @@ jobs:
     permissions:
       contents: read
       checks: write
+      id-token: write
