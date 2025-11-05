@@ -60,7 +60,7 @@ RUN install-tool deno 2.5.6
 RUN install-tool devbox 0.16.0
 
 # renovate: datasource=github-releases packageName=moby/moby
-RUN install-tool docker v28.5.1
+RUN install-tool docker v28.5.2
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 9.0.306
