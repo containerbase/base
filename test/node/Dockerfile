@@ -313,12 +313,13 @@ RUN node --version
 RUN npm --version
 RUN npm --version | grep "${NPM_VERSION}"
 
-# TODO: use bats test
+# verify node-gyp version is above minimum
+ARG MINIMUM_NODE_GYP_VERSION=11.0.0
 RUN set -ex; \
-  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
-  [ -r /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
-  [ "$(cat /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
-  && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
+  node_version=$(cat /opt/containerbase/versions/node); \
+  prefix="/opt/containerbase/tools/npm/${NPM_VERSION}/${node_version}"; \
+  node_gyp_version=$(npm explore npm --prefix "${prefix}" -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
+  printf '%s\n' "${MINIMUM_NODE_GYP_VERSION}" "${node_gyp_version}" | sort -V | head -n1 | grep -q "^${MINIMUM_NODE_GYP_VERSION}$"
 
 #--------------------------------------
 # test: corepack
@@ -528,33 +529,34 @@ RUN prepare-tool node
 
 USER 12021
 
-ARG MINIMUM_NODE_GYP_VERSION=11.0.0
-
 # exercises https://github.com/containerbase/base/issues/5404
 ARG npm_config_build_from_source=true
 
 # don't update!!
-RUN install-tool node 14.21.3
+ARG NODE_VERSION=14.21.3
+RUN install-tool node ${NODE_VERSION}
 
 RUN node --version
 RUN npm --version
 
 # verify global node-gyp version is above minimum
+ARG MINIMUM_NODE_GYP_VERSION=11.0.0
 RUN set -ex; \
   node_gyp_version=$(npm explore npm -g -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
-  printf '%s\n' "$MINIMUM_NODE_GYP_VERSION" "$node_gyp_version" | sort -V | head -n1 | grep -q "^$MINIMUM_NODE_GYP_VERSION$"
+  printf '%s\n' "${MINIMUM_NODE_GYP_VERSION}" "${node_gyp_version}" | sort -V | head -n1 | grep -q "^${MINIMUM_NODE_GYP_VERSION}$"
 
 # don't update!!
-RUN install-tool npm 6.14.18
+ARG NPM_VERSION=6.14.18
+RUN install-tool npm ${NPM_VERSION}
 
 RUN npm --version
-RUN npm --version | grep '6.14.18'
+RUN npm --version | grep "${NPM_VERSION}"
 
-# verify local node-gyp version is above minimum
+# verify node-gyp version is above minimum
 RUN set -ex; \
-  prefix=/opt/containerbase/tools/npm/6.14.18/14.21.3; \
-  node_gyp_version=$(npm explore npm --prefix "$prefix" -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
-  printf '%s\n' "$MINIMUM_NODE_GYP_VERSION" "$node_gyp_version" | sort -V | head -n1 | grep -q "^$MINIMUM_NODE_GYP_VERSION$"
+  prefix="/opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}"; \
+  node_gyp_version=$(npm explore npm --prefix "${prefix}" -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
+  printf '%s\n' "${MINIMUM_NODE_GYP_VERSION}" "${node_gyp_version}" | sort -V | head -n1 | grep -q "^${MINIMUM_NODE_GYP_VERSION}$"
 
 #--------------------------------------
 # final
