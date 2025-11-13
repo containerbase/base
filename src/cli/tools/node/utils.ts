@@ -49,25 +49,12 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
     env: NodeJS.ProcessEnv,
     global = false,
   ): Promise<void> {
+    const nodeModulesRoot = global ? `${prefix}/lib` : prefix;
+    const cwd = `${nodeModulesRoot}/node_modules/npm/node_modules/npm-lifecycle`;
     const res = await execa(
       join(prefix, 'bin/npm'),
-      [
-        'explore',
-        'npm',
-        ...(global ? ['-g'] : []),
-        '--prefix',
-        prefix,
-        // '--silent',
-        '--',
-        'npm',
-        'install',
-        'node-gyp@latest',
-        '--no-audit',
-        '--cache',
-        tmp,
-        '--silent',
-      ],
-      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
+      ['install', 'node-gyp@latest', '--no-audit', '--cache', tmp],
+      { reject: false, env, cwd, all: true },
     );
 
     if (res.failed) {

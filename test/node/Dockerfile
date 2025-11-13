@@ -230,15 +230,25 @@ RUN set -ex; yarn --version
 RUN set -ex; cd a; yarn install; [[ ! -d node_modules/.bin ]] || exit 1
 
 #--------------------------------------
-# test: npm (install-tool npm, node v14)
+# test: npm (install-tool npm v6, node v14, including node-gyp update)
 #--------------------------------------
 FROM base AS testi
 
 ARG CONTAINERBASE_DEBUG
 
+# exercises https://github.com/containerbase/base/issues/5404
+ARG npm_config_build_from_source=true
+
 # don't update!!
 RUN install-tool node v14.18.1
-RUN install-tool node v14.18.2
+ARG NODE_VERSION=14.18.2
+RUN install-tool node "v${NODE_VERSION}"
+
+# verify global node-gyp was updated
+ARG EXPECTED_NODE_GYP_ABOVE=11.0.0
+RUN set -ex; \
+  node_gyp_version=$(npm explore npm -g -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
+  printf '%s\n' "${EXPECTED_NODE_GYP_ABOVE}" "${node_gyp_version}" | sort -V | head -n1 | grep -q "^${EXPECTED_NODE_GYP_ABOVE}$"
 
 RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.npmrc
 
@@ -250,11 +260,20 @@ COPY --chown=12021:0 test/node/test test
 WORKDIR /test
 
 # don't update!!
-RUN install-tool npm 6.14.15
+ARG NPM_VERSION=6.14.15
+RUN install-tool npm "${NPM_VERSION}"
 
 RUN node --version
 RUN npm --version
-RUN npm --version | grep '6.14.15'
+RUN npm --version | grep "${NPM_VERSION}"
+
+# verify local node-gyp was updated
+RUN set -ex; \
+  prefix="/opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}"; \
+  node_gyp_version=$(npm explore npm --prefix "${prefix}" -- npm ls node-gyp --json | jq -er '.dependencies["npm-lifecycle"].dependencies["node-gyp"].version'); \
+  printf '%s\n' "${EXPECTED_NODE_GYP_ABOVE}" "${node_gyp_version}" | sort -V | head -n1 | grep -q "^${EXPECTED_NODE_GYP_ABOVE}$"
+
+
 # ignore scripts to speedup test (re2 is no longer compatible with node 14)
 RUN set -ex; cd a; npm install --ignore-scripts
 
@@ -307,18 +326,11 @@ RUN npm --version | grep '7.24.2'
 # don't update!!
 ENV NPM_VERSION=6.14.16
 
-RUN install-tool npm ${NPM_VERSION}
+RUN install-tool npm "${NPM_VERSION}"
 
 RUN node --version
 RUN npm --version
 RUN npm --version | grep "${NPM_VERSION}"
-
-# TODO: use bats test
-RUN set -ex; \
-  export NODE_VERSION=$(cat /opt/containerbase/versions/node); \
-  [ -r /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json ] || { echo "missing file"; exit 1; }; \
-  [ "$(cat /opt/containerbase/tools/npm/${NPM_VERSION}/${NODE_VERSION}/node_modules/npm/node_modules/node-gyp/package.json | jq -r .version)" != "5.1.0" ] \
-  && echo node-gyp works || { echo "node-gyp failure"; exit 1; };
 
 #--------------------------------------
 # test: corepack
