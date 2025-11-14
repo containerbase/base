@@ -171,8 +171,8 @@ importers:
         specifier: 0.26.0
         version: 0.26.0
       esbuild-plugin-pino:
-        specifier: 2.2.2
-        version: 2.2.2(esbuild@0.26.0)
+        specifier: 2.3.3
+        version: 2.3.3(esbuild@0.26.0)(pino-pretty@13.1.2)(pino@9.14.0)(thread-stream@3.1.0)
       eslint:
         specifier: 9.39.1
         version: 9.39.1
@@ -1776,10 +1776,18 @@ packages:
   es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
 
-  esbuild-plugin-pino@2.2.2:
-    resolution: {integrity: sha512-VABhtEBkjmv60Lz50Z44OH2NR1OA2HpKns86zR6FQQx5ctBl96p7Y28sv0/tBi+Ca5qMg0Y4k/OORgaSIarkhQ==}
+  esbuild-plugin-pino@2.3.3:
+    resolution: {integrity: sha512-5RIsILwgqy8wIV5pVg2gb13gJlH3EKKg613Js8q25p3tFsKA8ftsgWQFdgGbIkUe77Ttjl8lctuGkchRAvXGfw==}
     peerDependencies:
       esbuild: 0.26.0
+      pino: '>=7.0.0'
+      pino-pretty: '*'
+      thread-stream: '*'
+    peerDependenciesMeta:
+      pino-pretty:
+        optional: true
+      thread-stream:
+        optional: true
 
   esbuild@0.26.0:
     resolution: {integrity: sha512-3Hq7jri+tRrVWha+ZeIVhl4qJRha/XjRNSopvTsOaCvfPHrflTYTcUFcEjMKdxofsXXsdc4zjg5NOTnL4Gl57Q==}
@@ -5864,9 +5872,13 @@ snapshots:
 
   es6-error@4.1.1: {}
 
-  esbuild-plugin-pino@2.2.2(esbuild@0.26.0):
+  esbuild-plugin-pino@2.3.3(esbuild@0.26.0)(pino-pretty@13.1.2)(pino@9.14.0)(thread-stream@3.1.0):
     dependencies:
       esbuild: 0.26.0
+      pino: 9.14.0
+    optionalDependencies:
+      pino-pretty: 13.1.2
+      thread-stream: 3.1.0
 
   esbuild@0.26.0:
     optionalDependencies:
