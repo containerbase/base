@@ -17,8 +17,10 @@ describe('cli/command/init-tool', () => {
     registerCommands(cli, null);
 
     expect(await cli.run(['init', 'tool', 'node'])).toBe(0);
-    expect(mocks.initializeTools).toHaveBeenCalledOnce();
-    expect(mocks.initializeTools).toHaveBeenCalledWith(['node'], false);
+    expect(mocks.initializeTools).toHaveBeenCalledExactlyOnceWith(
+      ['node'],
+      false,
+    );
 
     mocks.initializeTools.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['init', 'tool', 'node'])).toBe(1);
