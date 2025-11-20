@@ -14,6 +14,8 @@ import { DartInstallService } from '../tools/dart';
 import { DenoInstallService } from '../tools/deno';
 import { DevboxInstallService } from '../tools/devbox';
 import { DockerInstallService } from '../tools/docker';
+import { BuildxInstallService } from '../tools/docker/buildx';
+import { DockerComposeInstallService } from '../tools/docker/compose';
 import { DotnetInstallService } from '../tools/dotnet';
 import { ErlangInstallService } from '../tools/erlang';
 import { ElixirInstallService } from '../tools/erlang/elixir';
@@ -112,6 +114,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(ApkoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(BuildxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);
@@ -119,6 +122,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(DenoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DevboxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DockerComposeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ElixirInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ErlangInstallService);
