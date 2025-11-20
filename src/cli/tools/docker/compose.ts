@@ -21,7 +21,7 @@ export class DockerComposeInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
-    const baseUrl = `https://github.com/docker/${this.name}/releases/download/v${version}/`;
+    const baseUrl = `https://github.com/docker/compose/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.ghArch}`;
 
     let expectedChecksum: string | undefined;
