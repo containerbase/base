@@ -14,7 +14,7 @@ export class BuildxInstallService extends BaseInstallService {
 
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/docker/${this.name}/releases/download/v${version}/`;
-    const filename = `${this.name}-v${version}.linux.${this.envSvc.arch}`;
+    const filename = `${this.name}-v${version}.linux-${this.envSvc.arch}`;
 
     let expectedChecksum: string | undefined;
     if (semverGte(version, '0.7.0')) {
