@@ -1,8 +1,11 @@
 import fs from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { exec } from '@yao-pkg/pkg';
 import { build } from 'esbuild';
-import esbuildPluginPino from 'esbuild-plugin-pino';
 import shell from 'shelljs';
+
+const __require = createRequire(import.meta.url);
+const esbuildPluginPino = __require('esbuild-plugin-pino');
 
 shell.config.fatal = true;
 
