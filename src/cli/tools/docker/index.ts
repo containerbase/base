@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service';
-import { BasePrepareService } from '../prepare-tool/base-prepare.service';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 
 @injectable()
 @injectFromHierarchy()
@@ -13,6 +13,16 @@ export class DockerPrepareService extends BasePrepareService {
   override async prepare(): Promise<void> {
     await execa('groupadd', ['-g', '999', 'docker']);
     await execa('usermod', ['-aG', 'docker', this.envSvc.userName]);
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.docker'),
+      join(this.envSvc.userHome, '.docker'),
+    );
+  }
+
+  override async initialize(): Promise<void> {
+    await this.pathSvc.createDir(
+      join(this.pathSvc.cachePath, '.docker', 'cli-plugins'),
+    );
   }
 }
 
