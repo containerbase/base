@@ -70,11 +70,11 @@ RUN set -ex;  \
 FROM base AS testb
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.416
+RUN install-tool dotnet 10.0.100
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.416
+RUN install-tool dotnet 10.0.100
 RUN set -ex; dotnet --version | grep 8.0.
 
 USER 12021
@@ -101,7 +101,7 @@ RUN set -ex; \
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.416
+RUN install-tool dotnet 10.0.100
 RUN set -ex; dotnet --version | grep 8.0.
 
 RUN set -ex; \
@@ -119,7 +119,7 @@ FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 9.0.308
+RUN install-tool dotnet 10.0.100
 RUN set -ex; dotnet --version | grep 9.0.
 
 RUN set -ex; \
