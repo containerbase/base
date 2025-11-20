@@ -40,8 +40,7 @@ describe('cli/command/link-tool', () => {
     env.TOOL_VERSION = '1.2.3';
 
     expect(await cli.run(['lt', 'node', 'bin'])).toBe(0);
-    expect(mocks.linkTool).toHaveBeenCalledOnce();
-    expect(mocks.linkTool).toHaveBeenCalledWith('node', {
+    expect(mocks.linkTool).toHaveBeenCalledExactlyOnceWith('node', {
       name: 'node',
       srcDir: 'bin',
     });

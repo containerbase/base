@@ -16,8 +16,7 @@ describe('cli/command/prepare-tool', () => {
     registerCommands(cli, 'prepare-tool');
 
     expect(await cli.run(['node'])).toBe(0);
-    expect(mocks.prepareTools).toHaveBeenCalledOnce();
-    expect(mocks.prepareTools).toHaveBeenCalledWith(['node'], false);
+    expect(mocks.prepareTools).toHaveBeenCalledExactlyOnceWith(['node'], false);
 
     mocks.prepareTools.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['node'])).toBe(1);
@@ -28,8 +27,7 @@ describe('cli/command/prepare-tool', () => {
     registerCommands(cli, 'containerbase-cli');
 
     expect(await cli.run(['prepare', 'tool', 'node'])).toBe(0);
-    expect(mocks.prepareTools).toHaveBeenCalledOnce();
-    expect(mocks.prepareTools).toHaveBeenCalledWith(['node'], false);
+    expect(mocks.prepareTools).toHaveBeenCalledExactlyOnceWith(['node'], false);
 
     mocks.prepareTools.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['prepare', 'tool', 'node'])).toBe(1);
