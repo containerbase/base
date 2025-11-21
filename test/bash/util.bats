@@ -46,6 +46,8 @@ teardown() {
 }
 
 @test "requires_user" {
+  # Can be set in parent env
+  unset USER_NAME
   run require_user
   assert_output --partial "No USER_NAME defined"
   assert_failure
