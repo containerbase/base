@@ -115,14 +115,51 @@ RUN set -ex; cd a; pnpm i
 # test: node 20
 #--------------------------------------
 
-FROM base AS testd
+FROM base AS test-v20
 
 RUN prepare-tool node
 
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.11.1
+RUN install-tool node 20.19.5
+
+RUN npm install -g yarn
+RUN set -ex; \
+  [ "$(command -v yarn)" = "" ] && echo "works" || exit 1; \
+  true;
+
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.22
+RUN set -ex; \
+  [ "$(command -v yarn)" = "/usr/local/bin/yarn" ] && echo "works" || exit 1; \
+  yarn --version;
+
+
+COPY --chown=12021:0 test/node/test test
+
+RUN set -ex; \
+  npm --version; \
+  command -v npm;
+
+RUN set -ex; cd test/a; npm i
+
+# renovate: datasource=npm
+RUN install-npm del-cli 7.0.0
+RUN del -d test/a/**
+
+#--------------------------------------
+# test: node 22
+#--------------------------------------
+
+FROM base AS test-v22
+
+RUN prepare-tool node
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.21.1
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -527,7 +564,6 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
-COPY --from=testd /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy
@@ -541,3 +577,6 @@ COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
+
+COPY --from=testv20 /.dummy /.dummy
+COPY --from=testv22 /.dummy /.dummy
