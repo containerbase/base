@@ -70,11 +70,11 @@ RUN set -ex;  \
 FROM base AS testb
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.100
+RUN install-tool dotnet 8.0.416
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.100
+RUN install-tool dotnet 8.0.416
 RUN set -ex; dotnet --version | grep 8.0.
 
 USER 12021
@@ -91,7 +91,7 @@ RUN set -ex;  \
     dotnet build
 
 #--------------------------------------
-# test: dotnet 8.0 (non-root, LTS)
+# test: dotnet 10.0 (non-root, LTS)
 #--------------------------------------
 FROM build AS testc
 
@@ -102,7 +102,7 @@ RUN set -ex; \
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.100
-RUN set -ex; dotnet --version | grep 8.0.
+RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -120,7 +120,7 @@ FROM build AS testd
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.100
-RUN set -ex; dotnet --version | grep 9.0.
+RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
