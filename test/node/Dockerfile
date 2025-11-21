@@ -578,5 +578,5 @@ COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
 
-COPY --from=testv20 /.dummy /.dummy
-COPY --from=testv22 /.dummy /.dummy
+COPY --from=test-v20 /.dummy /.dummy
+COPY --from=test-v22 /.dummy /.dummy
