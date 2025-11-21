@@ -68,7 +68,7 @@ RUN install-apt nginx
 RUN install-tool node 22.21.1
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.4.15
+RUN install-tool php 8.5.0
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
