@@ -201,8 +201,8 @@ importers:
         specifier: 16.2.7
         version: 16.2.7
       markdownlint-cli2:
-        specifier: 0.18.1
-        version: 0.18.1
+        specifier: 0.19.0
+        version: 0.19.0
       nock:
         specifier: 14.0.10
         version: 14.0.10
@@ -2198,6 +2198,10 @@ packages:
     resolution: {integrity: sha512-0Ia46fDOaT7k4og1PDW4YbodWWr3scS2vAr2lTbsplOt2WkKp0vQbkI9wKis/T5LV/dqPjO3bpS/z6GTJB82LA==}
     engines: {node: '>=18'}
 
+  globby@15.0.0:
+    resolution: {integrity: sha512-oB4vkQGqlMl682wL1IlWd02tXCbquGWM4voPEI85QmNKCaw8zGTm1f1rubFgkg3Eli2PtKlFgrnmUqasbQWlkw==}
+    engines: {node: '>=20'}
+
   globrex@0.1.2:
     resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
 
@@ -2615,6 +2619,10 @@ packages:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
 
+  js-yaml@4.1.1:
+    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+    hasBin: true
+
   jsesc@3.1.0:
     resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
     engines: {node: '>=6'}
@@ -2753,19 +2761,15 @@ packages:
     resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==}
     hasBin: true
 
-  markdownlint-cli2-formatter-default@0.0.5:
-    resolution: {integrity: sha512-4XKTwQ5m1+Txo2kuQ3Jgpo/KmnG+X90dWt4acufg6HVGadTUG5hzHF/wssp9b5MBYOMCnZ9RMPaU//uHsszF8Q==}
+  markdownlint-cli2-formatter-default@0.0.6:
+    resolution: {integrity: sha512-VVDGKsq9sgzu378swJ0fcHfSicUnMxnL8gnLm/Q4J/xsNJ4e5bA6lvAz7PCzIl0/No0lHyaWdqVD2jotxOSFMQ==}
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
 
-  markdownlint-cli2@0.18.1:
-    resolution: {integrity: sha512-/4Osri9QFGCZOCTkfA8qJF+XGjKYERSHkXzxSyS1hd3ZERJGjvsUao2h4wdnvpHp6Tu2Jh/bPHM0FE9JJza6ng==}
+  markdownlint-cli2@0.19.0:
+    resolution: {integrity: sha512-0+g7Fi/Y3qfvwfhJr77CpC/dEEoc4k7SvumlnL1tb68O+7fjKtIUG7aKzNUQIMXTVi8x63jcfXg4swz/ZYKyCw==}
     engines: {node: '>=20'}
     hasBin: true
-
-  markdownlint@0.38.0:
-    resolution: {integrity: sha512-xaSxkaU7wY/0852zGApM8LdlIfGCW8ETZ0Rr62IQtAnUMlMuifsg09vWJcNYeL4f0anvr8Vo4ZQar8jGpV0btQ==}
-    engines: {node: '>=20'}
 
   markdownlint@0.39.0:
     resolution: {integrity: sha512-Xt/oY7bAiHwukL1iru2np5LIkhwD19Y7frlsiDILK62v3jucXCD6JXlZlwMG12HZOR+roHIVuJZrfCkOhp6k3g==}
@@ -6396,6 +6400,15 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.3.0
 
+  globby@15.0.0:
+    dependencies:
+      '@sindresorhus/merge-streams': 4.0.0
+      fast-glob: 3.3.3
+      ignore: 7.0.5
+      path-type: 6.0.0
+      slash: 5.1.0
+      unicorn-magic: 0.3.0
+
   globrex@0.1.2: {}
 
   gopd@1.2.0: {}
@@ -6792,6 +6805,10 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
+  js-yaml@4.1.1:
+    dependencies:
+      argparse: 2.0.1
+
   jsesc@3.1.0: {}
 
   json-buffer@3.0.1: {}
@@ -6937,32 +6954,19 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
-  markdownlint-cli2-formatter-default@0.0.5(markdownlint-cli2@0.18.1):
+  markdownlint-cli2-formatter-default@0.0.6(markdownlint-cli2@0.19.0):
     dependencies:
-      markdownlint-cli2: 0.18.1
+      markdownlint-cli2: 0.19.0
 
-  markdownlint-cli2@0.18.1:
+  markdownlint-cli2@0.19.0:
     dependencies:
-      globby: 14.1.0
-      js-yaml: 4.1.0
+      globby: 15.0.0
+      js-yaml: 4.1.1
       jsonc-parser: 3.3.1
       markdown-it: 14.1.0
-      markdownlint: 0.38.0
-      markdownlint-cli2-formatter-default: 0.0.5(markdownlint-cli2@0.18.1)
+      markdownlint: 0.39.0
+      markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.19.0)
       micromatch: 4.0.8
-    transitivePeerDependencies:
-      - supports-color
-
-  markdownlint@0.38.0:
-    dependencies:
-      micromark: 4.0.2
-      micromark-core-commonmark: 2.0.3
-      micromark-extension-directive: 4.0.0
-      micromark-extension-gfm-autolink-literal: 2.1.0
-      micromark-extension-gfm-footnote: 2.1.0
-      micromark-extension-gfm-table: 2.1.1
-      micromark-extension-math: 3.1.0
-      micromark-util-types: 2.0.2
     transitivePeerDependencies:
       - supports-color
 
