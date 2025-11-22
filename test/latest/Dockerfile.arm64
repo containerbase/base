@@ -100,7 +100,7 @@ RUN install-tool docker-compose v2.40.3
 FROM base AS test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.51.2
+RUN install-tool git v2.52.0
 
 #--------------------------------------
 # Image: git-lfs
