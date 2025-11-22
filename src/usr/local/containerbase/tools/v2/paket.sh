@@ -14,5 +14,5 @@ function link_tool () {
 }
 
 function test_tool () {
-  paket --version
+  DOTNET_ROOT=/opt/containerbase/tools/dotnet paket --version
 }
