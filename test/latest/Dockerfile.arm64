@@ -96,7 +96,7 @@ RUN install-tool docker-compose v2.40.3
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \
-  docker compose version | grep Docker Compose version; \
+  docker compose version | grep 'Docker Compose version'; \
   true;
 
 #--------------------------------------

@@ -52,17 +52,17 @@ export class BuildxInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src });
 
     const tgt = join(
-      this.envSvc.userHome,
+      this.pathSvc.cachePath,
       `.docker/cli-plugins/docker-${this.name}`,
     );
     if (await pathExists(tgt)) {
       await fs.rm(tgt);
     }
-    await fs.symlink(src, tgt);
+    await fs.symlink(join(src, this.name), tgt);
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('docker', ['buildx', '--version'], {
+    await execa('docker', ['buildx', 'version'], {
       stdio: ['inherit', 'inherit', 1],
     });
   }

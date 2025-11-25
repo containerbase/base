@@ -172,7 +172,6 @@ RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
 #--------------------------------------
 FROM base AS testc
 
-RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
@@ -182,7 +181,7 @@ USER 12021
 
 RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(root),999(docker),${USER_ID}(${USER_NAME})"
 
-ARG IGNORED_TOOLS=powershell,node
+ARG IGNORED_TOOLS=powershell,node,docker
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.7.4
@@ -322,6 +321,36 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: docker (rootless)
+#--------------------------------------
+FROM base AS test-docker
+
+RUN prepare-tool docker
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v28.5.2
+
+# renovate: datasource=github-releases packageName=docker/buildx
+RUN install-tool buildx v0.30.1
+
+# renovate: datasource=github-releases packageName=docker/compose
+RUN install-tool docker-compose v2.40.3
+
+RUN set -ex; \
+  docker buildx version | grep github.com/docker/buildx; \
+  docker compose version | grep 'Docker Compose version'; \
+  true;
+
+USER root
+
+RUN set -ex; \
+  docker buildx version | grep github.com/docker/buildx; \
+  docker compose version | grep 'Docker Compose version'; \
+  true;
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -332,3 +361,4 @@ COPY --link --from=testc /.dummy /.dummy
 COPY --link --from=testd /.dummy /.dummy
 COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
+COPY --link --from=test-docker /.dummy /.dummy
