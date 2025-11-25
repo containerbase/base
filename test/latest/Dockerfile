@@ -322,6 +322,36 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: docker (rootless)
+#--------------------------------------
+FROM base AS test-docker
+
+RUN prepare-tool docker
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=moby/moby
+RUN install-tool docker v28.5.2
+
+# renovate: datasource=github-releases packageName=docker/buildx
+RUN install-tool buildx v0.30.1
+
+# renovate: datasource=github-releases packageName=docker/compose
+RUN install-tool docker-compose v2.40.3
+
+RUN set -ex; \
+  docker buildx version | grep github.com/docker/buildx; \
+  docker compose version | grep 'Docker Compose version'; \
+  true;
+
+USER root
+
+RUN set -ex; \
+  docker buildx version | grep github.com/docker/buildx; \
+  docker compose version | grep 'Docker Compose version'; \
+  true;
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -332,3 +362,4 @@ COPY --link --from=testc /.dummy /.dummy
 COPY --link --from=testd /.dummy /.dummy
 COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
+COPY --link --from=test-docker /.dummy /.dummy

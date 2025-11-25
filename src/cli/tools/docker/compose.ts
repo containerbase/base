@@ -59,15 +59,18 @@ export class DockerComposeInstallService extends BaseInstallService {
     // to track linked version
     await this.shellwrapper({ srcDir: src });
 
-    const tgt = join(this.envSvc.userHome, `.docker/cli-plugins/${this.name}`);
+    const tgt = join(
+      this.pathSvc.cachePath,
+      `.docker/cli-plugins/${this.name}`,
+    );
     if (await pathExists(tgt)) {
       await fs.rm(tgt);
     }
-    await fs.symlink(src, tgt);
+    await fs.symlink(join(src, this.name), tgt);
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('docker', ['compose', '--version'], {
+    await execa('docker', ['compose', 'version'], {
       stdio: ['inherit', 'inherit', 1],
     });
   }
