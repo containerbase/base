@@ -17,7 +17,7 @@ export class PaketInstallService extends BaseInstallService {
       'install',
       '--tool-path',
       toolPath,
-      'paket',
+      this.name,
       '--version',
       version,
     ]);
@@ -25,16 +25,10 @@ export class PaketInstallService extends BaseInstallService {
 
   override async link(_version: string): Promise<void> {
     const src = this.pathSvc.toolPath(this.name);
-    await this.shellwrapper({ srcDir: src });
+    await this.shellwrapper({ srcDir: src, extraToolEnvs: ['dotnet'] });
   }
 
   override async test(_version: string): Promise<void> {
-    const paket = join(this.pathSvc.toolPath('paket'), 'paket');
-    await execa(paket, ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-      env: {
-        DOTNET_ROOT: this.pathSvc.toolPath('dotnet'),
-      },
-    });
+    await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
   }
 }
