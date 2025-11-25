@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
         with:
           save-cache: true
 
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: lint
         run: |
@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: Install ubuntu dependencies
         run: |
@@ -96,7 +96,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: vitest
         run: pnpm test:vitest
@@ -120,7 +120,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: build
         run: pnpm build
@@ -153,7 +153,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: Check system
         uses: ./.github/actions/check
@@ -205,7 +205,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: Check system
         uses: ./.github/actions/check
@@ -282,7 +282,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools/setup@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
 
       - name: Check system
         uses: ./.github/actions/check
