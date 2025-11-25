@@ -13,9 +13,15 @@ export class DockerPrepareService extends BasePrepareService {
   override async prepare(): Promise<void> {
     await execa('groupadd', ['-g', '999', 'docker']);
     await execa('usermod', ['-aG', 'docker', this.envSvc.userName]);
+    const globalDocker = join(this.envSvc.rootDir, 'usr/local/lib/docker');
+    await fs.mkdir(globalDocker, { recursive: true });
     await fs.symlink(
       join(this.pathSvc.cachePath, '.docker'),
       join(this.envSvc.userHome, '.docker'),
+    );
+    await fs.symlink(
+      join(this.pathSvc.cachePath, '.docker', 'cli-plugins'),
+      join(globalDocker, 'cli-plugins'),
     );
   }
 

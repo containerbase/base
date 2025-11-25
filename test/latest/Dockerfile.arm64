@@ -94,6 +94,11 @@ RUN install-tool buildx v0.30.1
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v2.40.3
 
+RUN set -ex; \
+  docker buildx version | grep github.com/docker/buildx; \
+  docker compose version | grep Docker Compose version; \
+  true;
+
 #--------------------------------------
 # Image: git
 #--------------------------------------
