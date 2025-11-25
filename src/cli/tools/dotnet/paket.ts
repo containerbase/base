@@ -1,11 +1,40 @@
+import { join } from 'node:path';
+import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { V2ToolInstallService } from '../../install-tool/install-legacy-tool.service';
-import { v2Tool } from '../../utils/v2-tool';
+import { BaseInstallService } from '../../install-tool/base-install.service';
 
 @injectable()
 @injectFromHierarchy()
-@v2Tool('paket')
-export class PaketInstallService extends V2ToolInstallService {
-  override readonly name = 'paket';
-  override readonly parent = 'dotnet';
+export class PaketInstallService extends BaseInstallService {
+  readonly name = 'paket';
+
+  override async install(version: string): Promise<void> {
+    const toolPath = this.pathSvc.toolPath(this.name);
+
+    const dotnet = join(this.pathSvc.toolPath('dotnet'), 'dotnet');
+    await execa(dotnet, [
+      'tool',
+      'install',
+      '--tool-path',
+      toolPath,
+      'paket',
+      '--version',
+      version,
+    ]);
+  }
+
+  override async link(_version: string): Promise<void> {
+    const src = this.pathSvc.toolPath(this.name);
+    await this.shellwrapper({ srcDir: src });
+  }
+
+  override async test(_version: string): Promise<void> {
+    const paket = join(this.pathSvc.toolPath('paket'), 'paket');
+    await execa(paket, ['--version'], {
+      stdio: ['inherit', 'inherit', 1],
+      env: {
+        DOTNET_ROOT: this.pathSvc.toolPath('dotnet'),
+      },
+    });
+  }
 }
