@@ -389,7 +389,7 @@ RUN corepack --version | tee | grep '0.9.0'
 USER 12021
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 RUN corepack --version
 RUN corepack --version | grep '0.9.0' && exit 1 || echo 'success'
@@ -408,7 +408,7 @@ FROM build AS testm
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 # renovate: datasource=npm depName=yarn
 ARG YARN_VERSION=1.22.22
@@ -426,14 +426,14 @@ FROM build AS testn
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 # test if corepack is overriding yarn
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 
 # renovate: datasource=npm depName=yarn
@@ -454,14 +454,14 @@ FROM build AS testo
 SHELL [ "/bin/sh", "-c" ]
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
 RUN install-tool pnpm 10.23.0
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 # renovate: datasource=npm depName=pnpm
 ARG PNPM_VERSION=10.23.0
@@ -488,7 +488,7 @@ RUN install-tool yarn
 RUN install-tool yarn-slim
 
 # renovate: datasource=npm
-RUN install-tool corepack 0.34.4
+RUN install-tool corepack 0.34.5
 
 RUN install-tool pnpm
 RUN install-tool yarn
