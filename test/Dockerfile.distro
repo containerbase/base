@@ -111,7 +111,7 @@ RUN install-tool sops v3.11.0
 RUN install-tool swift 6.2.1
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.14.0
+RUN install-tool terraform 1.14.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
 RUN install-tool tofu 1.10.7
