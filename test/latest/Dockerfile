@@ -244,7 +244,7 @@ RUN install-tool skopeo 1.20.0
 RUN install-tool sops v3.11.0
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.10.7
+RUN install-tool tofu 1.10.8
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 33.1
