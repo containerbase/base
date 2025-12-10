@@ -101,7 +101,7 @@ RUN set -ex; \
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.100
+RUN install-tool dotnet 10.0.101
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
@@ -119,7 +119,7 @@ FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.100
+RUN install-tool dotnet 10.0.101
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
