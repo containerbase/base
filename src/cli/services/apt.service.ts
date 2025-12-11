@@ -1,8 +1,7 @@
 import { rm, writeFile } from 'fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { logger } from '../utils';
+import { logger, spawn } from '../utils';
 import { EnvService } from './env.service';
 
 @injectable()
@@ -39,8 +38,8 @@ export class AptService {
     }
 
     try {
-      await execa('apt-get', ['-qq', 'update']);
-      await execa('apt-get', ['-qq', 'install', '-y', ...todo]);
+      await spawn('apt-get', ['-qq', 'update']);
+      await spawn('apt-get', ['-qq', 'install', '-y', ...todo]);
     } finally {
       if (this.envSvc.aptProxy) {
         await rm(
@@ -58,7 +57,7 @@ export class AptService {
 
   private async isInstalled(pkg: string): Promise<boolean> {
     try {
-      const res = await execa('dpkg', ['-s', pkg]);
+      const res = await spawn('dpkg', ['-s', pkg]);
       return res.stdout.includes('Status: install ok installed');
     } catch {
       return false;

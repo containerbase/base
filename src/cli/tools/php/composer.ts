@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
@@ -35,9 +34,7 @@ export class ComposerInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('composer', ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn('composer', ['--version']);
   }
 }
 

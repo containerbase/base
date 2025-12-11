@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
@@ -88,10 +87,7 @@ export class MavenInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    // pkg bug, using `node` causes module load error
-    await execa('mvn', ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn('mvn', ['--version']);
   }
 
   private async readChecksum(url: string): Promise<string | undefined> {

@@ -1,5 +1,5 @@
-import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
+import { spawn } from '../utils';
 import { EnvService } from './env.service';
 
 export interface ExtractConfig {
@@ -27,7 +27,7 @@ export class CompressionService {
     files,
     options,
   }: ExtractConfig): Promise<void> {
-    await execa('bsdtar', [
+    await spawn('bsdtar', [
       '-xf',
       file,
       '-C',

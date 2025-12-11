@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { logger, parse, semverSatisfies } from '../../utils';
 import { NpmBaseInstallService } from './utils';
@@ -36,7 +35,7 @@ export class YarnInstallService extends NpmBaseInstallService {
   }
 
   override async test(): Promise<void> {
-    await execa(this.name, ['--version'], { stdio: 'inherit' });
+    await this._spawn(this.name, ['--version']);
   }
 }
 
@@ -54,14 +53,10 @@ export class YarnSlimInstallService extends NpmBaseInstallService {
     const node = await this.getNodeVersion();
     // TODO: replace with javascript
     const prefix = this.pathSvc.versionedToolPath(this.name, version);
-    await execa(
-      'sed',
-      [
-        '-i',
-        's/ steps,/ steps.slice(0,1),/',
-        `${prefix}/${node}/node_modules/yarn/lib/cli.js`,
-      ],
-      { stdio: ['inherit', 'inherit', 1] },
-    );
+    await this._spawn('sed', [
+      '-i',
+      's/ steps,/ steps.slice(0,1),/',
+      `${prefix}/${node}/node_modules/yarn/lib/cli.js`,
+    ]);
   }
 }

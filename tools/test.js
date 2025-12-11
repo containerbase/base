@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { Command, Option, runExit } from 'clipanion';
-import { execa } from 'execa';
+import spawn from 'nano-spawn';
 import shell from 'shelljs';
 
 shell.config.fatal = true;
@@ -58,7 +58,7 @@ class TestCommand extends Command {
         continue;
       }
       shell.echo('Processing:', d);
-      await execa('docker', ['buildx', 'bake', this.target ?? 'default'], {
+      await spawn('docker', ['buildx', 'bake', this.target ?? 'default'], {
         env: { ...env, TAG: d },
         stdio: 'inherit',
       });

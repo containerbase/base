@@ -164,7 +164,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
         name = 'pip-compile';
         break;
     }
-    await execa(name, ['--version'], { stdio: 'inherit' });
+    await this._spawn(name, ['--version']);
   }
 
   override validate(version: string): Promise<boolean> {

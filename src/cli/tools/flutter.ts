@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
@@ -91,9 +90,7 @@ export class FlutterInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('flutter', ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn('flutter', ['--version']);
   }
 
   private async getToolPath(): Promise<string> {

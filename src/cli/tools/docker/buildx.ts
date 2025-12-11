@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { pathExists, semverGte } from '../../utils';
@@ -62,8 +61,6 @@ export class BuildxInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('docker', ['buildx', 'version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn('docker', ['buildx', 'version']);
   }
 }

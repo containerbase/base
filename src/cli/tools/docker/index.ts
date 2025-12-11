@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
@@ -11,8 +10,8 @@ export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
   override async prepare(): Promise<void> {
-    await execa('groupadd', ['-g', '999', 'docker']);
-    await execa('usermod', ['-aG', 'docker', this.envSvc.userName]);
+    await this._spawn('groupadd', ['-g', '999', 'docker']);
+    await this._spawn('usermod', ['-aG', 'docker', this.envSvc.userName]);
     const globalDocker = join(this.envSvc.rootDir, 'usr/local/lib/docker');
     await fs.mkdir(globalDocker, { recursive: true });
     await fs.symlink(
@@ -70,6 +69,6 @@ export class DockerInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('docker', ['--version'], { stdio: ['inherit', 'inherit', 1] });
+    await this._spawn('docker', ['--version']);
   }
 }

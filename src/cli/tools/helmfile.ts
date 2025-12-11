@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 
@@ -44,9 +43,7 @@ export class HelmfileInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn(this.name, ['version']);
   }
 
   /** TODO: create helper */

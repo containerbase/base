@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService } from '.';
 import { testContainer } from '~test/di';
 
-vi.mock('execa');
+vi.mock('nano-spawn');
 
 describe('cli/services/compression.service', () => {
   let child!: Container;
