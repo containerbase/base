@@ -71,7 +71,11 @@ export class InstallToolCommand extends Command {
     let error = false;
     logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
     try {
-      return await installTool(this.name, version, this.dryRun, type);
+      const res = await installTool(this.name, version, this.dryRun, type);
+      if (res) {
+        error = true;
+      }
+      return res;
     } catch (err) {
       error = true;
       logger.debug(err);
