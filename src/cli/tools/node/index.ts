@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { getDistro, parse } from '../../utils';
@@ -147,14 +146,10 @@ export class NodeInstallService extends NodeBaseInstallService {
   override async test(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
-    await execa('node', ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
-    await execa('npm', ['--version'], { stdio: ['inherit', 'inherit', 1] });
+    await this._spawn('node', ['--version']);
+    await this._spawn('npm', ['--version']);
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
-      await execa('corepack', ['--version'], {
-        stdio: ['inherit', 'inherit', 1],
-      });
+      await this._spawn('corepack', ['--version']);
     }
   }
 

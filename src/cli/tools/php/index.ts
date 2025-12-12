@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
@@ -110,9 +109,7 @@ export class PhpInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('php', ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn('php', ['--version']);
   }
 
   private async getChecksum(checksumFileUrl: string): Promise<string> {

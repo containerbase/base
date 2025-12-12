@@ -11,7 +11,7 @@ import {
   type PathService,
   VersionService,
 } from '../../services';
-import { logger, parse, pathExists } from '../../utils';
+import { logger, parse, pathExists, spawn } from '../../utils';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 
@@ -181,7 +181,7 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     if (idx > 0) {
       name = name.slice(idx + 1);
     }
-    await execa(name, ['--version'], { stdio: 'inherit' });
+    await this._spawn(name, ['--version']);
   }
 
   private getNodeNpm(nodeVersion: string): string {
@@ -256,8 +256,8 @@ export async function prepareUserConfig({
   await appendFile(npmrc, `prefix = "${prefix}"`);
   await mkdir(`${home}/.npm/_logs`, { recursive: true });
   // fs isn't recursive, so we use system binaries
-  await execa('chown', ['-R', name, prefix, npmrc, `${home}/.npm`]);
-  await execa('chmod', ['-R', 'g+w', prefix, npmrc, `${home}/.npm`]);
+  await spawn('chown', ['-R', name, prefix, npmrc, `${home}/.npm`]);
+  await spawn('chmod', ['-R', 'g+w', prefix, npmrc, `${home}/.npm`]);
 }
 
 async function readPackageJson(path: string): Promise<PackageJson> {

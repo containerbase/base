@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { EnvService, PathService } from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
+import { type SpawnOptions, type SpawnResult, spawn } from '../utils';
 
 @injectable()
 export abstract class BasePrepareService {
@@ -28,5 +29,13 @@ export abstract class BasePrepareService {
 
   toString(): string {
     return this.name;
+  }
+
+  protected _spawn(
+    command: string,
+    args: string[],
+    options?: SpawnOptions,
+  ): Promise<SpawnResult> {
+    return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
 }

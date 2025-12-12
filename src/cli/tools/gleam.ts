@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { semverGte } from '../utils';
@@ -60,7 +59,7 @@ export class GleamInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['--version'], { stdio: ['inherit', 'inherit', 1] });
+    await this._spawn(this.name, ['--version']);
   }
 
   override async validate(version: string): Promise<boolean> {

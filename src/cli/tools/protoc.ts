@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { semverCoerce } from '../utils';
@@ -41,9 +40,7 @@ export class ProtocInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['--version'], {
-      stdio: ['inherit', 'inherit', 1],
-    });
+    await this._spawn(this.name, ['--version']);
   }
 
   override validate(version: string): Promise<boolean> {

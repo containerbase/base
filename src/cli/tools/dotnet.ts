@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service';
@@ -111,9 +110,9 @@ export class DotnetInstallService extends BaseInstallService {
     });
 
     const dotnet = join(toolPath, 'dotnet');
-    await execa(dotnet, ['new']);
+    await this._spawn(dotnet, ['new']);
     if (this.envSvc.isRoot) {
-      await execa('su', [this.envSvc.userName, '-c', `${dotnet} new`]);
+      await this._spawn('su', [this.envSvc.userName, '-c', `${dotnet} new`]);
     }
 
     const ver = parse(version);
@@ -121,9 +120,9 @@ export class DotnetInstallService extends BaseInstallService {
     // https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source
     if (ver.major > 3 || (ver.major === 3 && ver.minor >= 1)) {
       // See https://github.com/NuGet/Home/issues/11607
-      await execa(dotnet, ['nuget', 'list', 'source']);
+      await this._spawn(dotnet, ['nuget', 'list', 'source']);
       if (this.envSvc.isRoot) {
-        await execa('su', [
+        await this._spawn('su', [
           this.envSvc.userName,
           '-c',
           `${dotnet} nuget list source`,
@@ -150,6 +149,6 @@ export class DotnetInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa('dotnet', ['--info'], { stdio: ['inherit', 'inherit', 1] });
+    await this._spawn('dotnet', ['--info']);
   }
 }

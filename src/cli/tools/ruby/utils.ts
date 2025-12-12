@@ -107,7 +107,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
   }
 
   override async test(_version: string): Promise<void> {
-    await execa(this.name, ['--version'], { stdio: 'inherit' });
+    await this._spawn(this.name, ['--version']);
   }
 
   protected _postInstall(

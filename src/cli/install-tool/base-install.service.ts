@@ -8,7 +8,13 @@ import {
 } from '../services';
 import { LinkToolService, type ShellWrapperConfig } from '../services';
 import { NoInitTools, NoPrepareTools } from '../tools';
-import { type InstallToolType, isValid } from '../utils';
+import {
+  type InstallToolType,
+  type SpawnOptions,
+  type SpawnResult,
+  isValid,
+  spawn,
+} from '../utils';
 
 @injectable()
 export abstract class BaseInstallService {
@@ -105,5 +111,13 @@ export abstract class BaseInstallService {
 
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
+  }
+
+  protected _spawn(
+    command: string,
+    args: string[],
+    options?: SpawnOptions,
+  ): Promise<SpawnResult> {
+    return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
 }
