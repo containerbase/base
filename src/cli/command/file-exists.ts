@@ -39,6 +39,7 @@ export class FileExistsCommand extends Command {
       }
 
       logger.error(`status code: ${res.statusCode}`);
+      error = true;
       return 1;
     } catch (err) {
       error = true;
