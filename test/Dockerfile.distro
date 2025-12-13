@@ -108,7 +108,7 @@ RUN install-tool skopeo 1.21.0
 RUN install-tool sops v3.11.0
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 6.2.2
+RUN install-tool swift 6.2.3
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.14.2
