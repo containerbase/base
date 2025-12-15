@@ -65,7 +65,7 @@
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.21",
     "@containerbase/istanbul-reports-html": "1.1.16",
-    "@eslint/js": "9.39.1",
+    "@eslint/js": "9.39.2",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node20": "20.1.8",
     "@tsconfig/strictest": "2.0.8",
@@ -88,7 +88,7 @@
     "conventional-changelog-conventionalcommits": "9.1.0",
     "esbuild": "0.27.1",
     "esbuild-plugin-pino": "2.3.3",
-    "eslint": "9.39.1",
+    "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
     "eslint-import-resolver-typescript": "4.4.4",
