@@ -130,6 +130,19 @@ RUN set -ex;  \
     dotnet restore --force-evaluate
 
 #--------------------------------------
+# test: paket
+#--------------------------------------
+FROM build AS test-others
+
+# renovate: datasource=nuget packageName=Paket
+RUN install-tool paket 9.0.2
+
+WORKDIR /test
+RUN set -ex; \
+  ls -la; env; \
+  paket init
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -138,3 +151,4 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=test-others /.dummy /.dummy

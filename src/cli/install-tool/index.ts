@@ -17,6 +17,7 @@ import { DockerInstallService } from '../tools/docker';
 import { BuildxInstallService } from '../tools/docker/buildx';
 import { DockerComposeInstallService } from '../tools/docker/compose';
 import { DotnetInstallService } from '../tools/dotnet';
+import { PaketInstallService } from '../tools/dotnet/paket';
 import { ErlangInstallService } from '../tools/erlang';
 import { ElixirInstallService } from '../tools/erlang/elixir';
 import { FlutterInstallService } from '../tools/flutter';
@@ -143,6 +144,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PixiInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PowershellInstallService);
