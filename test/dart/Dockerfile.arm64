@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-dart
 
 # renovate: datasource=docker
-RUN install-tool dart 3.10.6
+RUN install-tool dart 3.10.7
 
 #--------------------------------------
 # Image: final
