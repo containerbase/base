@@ -154,11 +154,10 @@ function require_distro () {
   # shellcheck source=/dev/null
   VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
-  "focal") ;; #supported
   "jammy") ;; #supported
   "noble") ;; #supported
   *)
-    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal', 'jammy' or 'noble'." >&2
+    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'jammy' or 'noble'." >&2
     exit 1
    ;;
   esac
