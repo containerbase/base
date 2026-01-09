@@ -9,7 +9,7 @@ const esbuildPluginPino = __require('esbuild-plugin-pino');
 
 shell.config.fatal = true;
 
-const nodeVersion = 24;
+const nodeVersion = 22;
 const version = process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
 
 shell.rm('-rf', 'dist/docker');
