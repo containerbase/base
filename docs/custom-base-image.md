@@ -1,7 +1,7 @@
 # Custom base image
 
 The following sample can be used to create a `containerbase/base` based image which does not extend `containerbase/base` directly.
-Currently only ubuntu focal, jammy and noble based amd64 distro are suported.
+Currently only ubuntu jammy and noble based amd64 distro are suported.
 
 You can also use our containerbase from GitHub container registry as `ghcr.io/containerbase/base`.
 `containerbase/base` and `ghcr.io/containerbase/base` are exchangeble.

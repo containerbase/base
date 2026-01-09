@@ -415,8 +415,6 @@ Samples:
 ```txt
 https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-jammy-x86_x64.tar.xz.sha512
 https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-jammy-aarch64.tar.xz
-https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-focal-x86_x64.tar.xz.sha512
-https://github.com/containerbase/node-prebuild/releases/download/18.12.0/node-18.12.0-focal-aarch64.tar.xz
 https://nodejs.org/dist/v20.0.0/SHASUMS256.txt
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-x64.tar.xz
 https://nodejs.org/dist/v20.0.0/node-v20.0.0-linux-arm64.tar.xz

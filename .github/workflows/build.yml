@@ -250,7 +250,6 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - focal
           - jammy
 
     env:

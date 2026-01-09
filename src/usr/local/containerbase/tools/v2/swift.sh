@@ -6,24 +6,6 @@ function prepare_tool() {
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
-    "focal")
-      apt_install \
-        binutils \
-        gnupg2 \
-        libc6-dev \
-        libcurl4 \
-        libedit2 \
-        libgcc-9-dev \
-        libpython2.7 \
-        libsqlite3-0 \
-        libstdc++-9-dev \
-        libxml2 \
-        libz3-dev \
-        pkg-config \
-        tzdata \
-        uuid-dev \
-        zlib1g-dev \
-        ;;
     "jammy")
       apt_install \
         binutils \
@@ -62,7 +44,7 @@ function prepare_tool() {
         zlib1g-dev \
         ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'focal' or 'jammy'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
       exit 1
     ;;
   esac

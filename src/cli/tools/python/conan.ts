@@ -71,8 +71,6 @@ function getArchitecture(arch: string): string {
 
 function getCompilerVersion(distro: Distro): string {
   switch (distro.versionCode) {
-    case 'focal':
-      return '9';
     case 'jammy':
       return '11';
     case 'noble':

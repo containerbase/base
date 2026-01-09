@@ -148,11 +148,10 @@ function require_arch () {
 
 function require_distro () {
   case "$DISTRO_CODENAME" in
-  "focal") ;; #supported
   "jammy") ;; #supported
   "noble") ;; #supported
   *)
-    echo "Distro not supported: ${DISTRO_CODENAME}! Please use ubuntu 'focal', 'jammy' or 'noble'." >&2
+    echo "Distro not supported: ${DISTRO_CODENAME}! Please use ubuntu 'jammy' or 'noble'." >&2
     exit 1
    ;;
   esac

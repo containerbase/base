@@ -20,18 +20,6 @@ export class PhpPrepareService extends BasePrepareService {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
-      case 'focal':
-        await this.aptSvc.install(
-          'libjpeg-turbo8',
-          'libmcrypt4',
-          'libonig5',
-          'libpng16-16',
-          'libtidy5deb1',
-          'libxslt1.1',
-          'libzip5',
-        );
-        break;
-
       case 'jammy':
       case 'noble':
         await this.aptSvc.install(

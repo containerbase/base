@@ -22,14 +22,13 @@ export async function validateSystem(): Promise<void> {
   const d = await (distro ??= readDistro());
   switch (d.versionCode) {
     /* v8 ignore next -- hard to test */
-    case 'focal':
     case 'jammy':
     case 'noble':
       break;
     default:
       logger.fatal(
         { distro: d },
-        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'focal', 'jammy' or 'noble'.`,
+        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'jammy' or 'noble'.`,
       );
       process.exit(1);
   }
