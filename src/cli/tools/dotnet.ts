@@ -18,17 +18,6 @@ export class DotnetPrepareService extends BasePrepareService {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
-      case 'focal':
-        await this.aptSvc.install(
-          'libc6',
-          'libgcc1',
-          'libgssapi-krb5-2',
-          'libicu66',
-          'libssl1.1',
-          'libstdc++6',
-          'zlib1g',
-        );
-        break;
       case 'jammy':
         await this.aptSvc.install(
           'libc6',
