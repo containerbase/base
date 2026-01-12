@@ -44,6 +44,10 @@ group "test" {
   targets = ["build-test", "build-arm64"]
 }
 
+group "test-base" {
+  targets = ["build-base"]
+}
+
 group "test-distro" {
   targets = ["build-distro"]
 }
@@ -105,6 +109,14 @@ target "build-docker" {
     "${OWNER}/${FILE}",
     "containerbase/test"
   ]
+}
+
+target "build-base" {
+  inherits   = ["test-settings"]
+  args = {
+    BASE_IMAGE = "${TAG}"
+  }
+  dockerfile = "./test/Dockerfile.base"
 }
 
 target "build-distro" {

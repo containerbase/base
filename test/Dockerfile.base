@@ -1,0 +1,26 @@
+ARG BASE_IMAGE=latest
+
+
+#--------------------------------------
+# Images
+#--------------------------------------
+FROM ghcr.io/containerbase/ubuntu:20.04 AS focal
+FROM ghcr.io/containerbase/ubuntu:22.04 AS jammy
+FROM ghcr.io/containerbase/ubuntu:24.04 AS noble
+
+FROM ghcr.io/containerbase/ubuntu:24.04 AS latest
+#--------------------------------------
+# Image: base
+#--------------------------------------
+FROM ${BASE_IMAGE}
+
+ARG TARGETARCH
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_LOG_LEVEL
+
+RUN install-containerbase

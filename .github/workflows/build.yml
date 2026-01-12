@@ -198,7 +198,6 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - focal
           - jammy
           - noble
 
@@ -233,6 +232,58 @@ jobs:
 
       - name: test distro
         run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+
+  # test old distros on arm64
+  base-arm64:
+    runs-on: ubuntu-24.04-arm
+    needs:
+      - bats
+      - lint
+      - vitest
+      - build
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - focal
+          - jammy
+
+    env:
+      TAG: ${{ matrix.distro }}
+
+    steps:
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@b43d039a13b994ec09557a423ae0560019e99c7c # v3.14.48
+
+      - name: Check system
+        uses: ./.github/actions/check
+
+      - name: ⚙️  Init
+        run: |
+          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+
+      - name: prepare apt proxy
+        uses: ./.github/actions/prepare-proxy
+
+      - name: fetch dist
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: dist
+          path: dist
+
+      - name: fix executable
+        run: |
+          chmod +x dist/cli/*
+          chmod +x dist/docker/usr/local/containerbase/bin/*
+          chmod +x dist/docker/usr/local/sbin/*
+
+      - name: test distro
+        run: docker buildx bake test-base --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -306,6 +357,7 @@ jobs:
   # Catch-all required check for test matrix
   test-success:
     needs:
+      - base-arm64
       - distro
       - lang
     runs-on: ubuntu-24.04
