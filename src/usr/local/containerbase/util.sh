@@ -136,25 +136,24 @@ function apt_upgrade () {
 
 
 function require_arch () {
-  local arch
-  # shellcheck source=/dev/null
-  arch=$(uname -p)
-  case "$arch" in
+  case "$ARCHITECTURE" in
   "x86_64") ;; #supported
   "aarch64") ;; #supported
   *)
-    echo "Arch not supported: ${arch}! Please use 'x86_64' or 'aarch64'." >&2
+    echo "Arch not supported: ${ARCHITECTURE}! Please use 'x86_64' or 'aarch64'." >&2
     exit 1
    ;;
   esac
 }
 
 function require_distro () {
-  local VERSION_CODENAME
-  # shellcheck source=/dev/null
-  VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
   case "$VERSION_CODENAME" in
-  "focal") ;; #supported
+  "focal") #supported (only amd64)
+    if [[ "$ARCHITECTURE" != "x86_64" ]]; then
+      echo "Distro 'focal' only supported on 'x86_64' arch!" >&2
+      exit 1
+    fi
+  ;;
   "jammy") ;; #supported
   "noble") ;; #supported
   *)
@@ -166,8 +165,7 @@ function require_distro () {
 
 function get_distro() {
   require_distro
-  # shellcheck source=/dev/null disable=SC2005
-  echo "$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+  echo "${VERSION_CODENAME}"
 }
 
 function require_root () {

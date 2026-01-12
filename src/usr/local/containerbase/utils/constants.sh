@@ -35,3 +35,8 @@ export CONTAINERBASE_TMP_DIR=/tmp/containerbase
 # Used to find matching tool downloads
 ARCHITECTURE=$(uname -p)
 export ARCHITECTURE
+
+# Used in util.sh and others.
+# shellcheck source=/dev/null
+VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
+export VERSION_CODENAME
