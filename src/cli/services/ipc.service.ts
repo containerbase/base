@@ -1,10 +1,12 @@
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import ipc from 'node-ipc';
-import { logger } from '../utils';
+import { logger, pathExists } from '../utils';
 import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
 import { PathService } from './path.service';
 
+const maxTries = 3;
 ipc.config.retry = 1500;
+ipc.config.maxRetries = maxTries;
 ipc.config.logInColor = false;
 ipc.config.logger = (msg) => {
   logger.trace('ipc log: %s', msg);
@@ -80,11 +82,16 @@ export class IpcClient {
   @inject(PathService)
   private pathSvc!: PathService;
 
+  async hasServer(): Promise<boolean> {
+    return await pathExists(`${this.pathSvc.tmpDir}/ipc.sock`, 'socket');
+  }
+
   async start(): Promise<void> {
     if (clientRunning) {
       throw new Error('ipc client already started');
     }
     clientRunning = true;
+    let tries = 1;
     ipc.connectTo(id, `${this.pathSvc.tmpDir}/ipc.sock`);
     const c = ipc.of[id]!;
     const p = new Promise<void>((resolve, reject) => {
@@ -94,8 +101,11 @@ export class IpcClient {
       });
 
       c.on('error', (err: Error) => {
-        logger.error({ err }, 'ipc client error');
-        reject(err);
+        logger.debug({ err }, 'ipc client error');
+        if (++tries >= maxTries) {
+          logger.error({ err }, 'ipc client error');
+          reject(err);
+        }
       });
     });
 

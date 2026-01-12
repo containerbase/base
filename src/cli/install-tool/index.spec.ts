@@ -10,7 +10,7 @@ import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
 } from '../tools/ruby/utils';
-import { isDockerBuild, logger } from '../utils';
+import { isDockerBuild, logger, pathExists } from '../utils';
 import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
 import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
@@ -135,16 +135,39 @@ describe('cli/install-tool/index', () => {
     });
   });
 
-  test('linkTool', async () => {
-    const svr = await createContainer().getAsync(IpcServer);
-    await svr.start();
-    try {
+  describe('linkTool', () => {
+    test('without ipc server', async () => {
       const spy = vi.spyOn(fs, 'writeFile');
       expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
       expect(spy).toHaveBeenCalledOnce();
-    } finally {
-      svr.stop();
-    }
+      expect(logger.debug).toHaveBeenCalledWith(
+        'ipc server not running, linking tool directly',
+      );
+      expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
+        false,
+      );
+    });
+
+    test('with ipc server', async () => {
+      const svr = await createContainer().getAsync(IpcServer);
+      await svr.start();
+      expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
+        true,
+      );
+      try {
+        const spy = vi.spyOn(fs, 'writeFile');
+        expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
+        expect(spy).toHaveBeenCalledOnce();
+        expect(logger.debug).toHaveBeenCalledWith(
+          'ipc server found, linking tool via ipc',
+        );
+      } finally {
+        svr.stop();
+      }
+      expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
+        false,
+      );
+    });
   });
 
   describe('uninstallTool', () => {

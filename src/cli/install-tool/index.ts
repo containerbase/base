@@ -1,6 +1,7 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
 import {
   IpcClient,
+  LinkToolService,
   PathService,
   VersionService,
   createContainer,
@@ -299,6 +300,14 @@ export async function linkTool(
   const container = createContainer();
 
   const svc = await container.getAsync(IpcClient);
+  if (!(await svc.hasServer())) {
+    logger.debug('ipc server not running, linking tool directly');
+    const ltSvc = await container.getAsync(LinkToolService);
+    await ltSvc.shellwrapper(tool, options);
+    return 0;
+  }
+
+  logger.debug('ipc server found, linking tool via ipc');
   await svc.start();
   try {
     return await svc.linkTool(tool, options);

@@ -73,7 +73,7 @@ async function readDistro(): Promise<Distro> {
 export const fileRights =
   fs.constants.S_IRWXU | fs.constants.S_IRWXG | fs.constants.S_IRWXO;
 
-export type PathType = 'file' | 'dir' | 'symlink';
+export type PathType = 'file' | 'dir' | 'symlink' | 'socket';
 
 export async function pathExists(
   filePath: string,
@@ -88,6 +88,8 @@ export async function pathExists(
         return fstat.isDirectory();
       case 'symlink':
         return fstat.isSymbolicLink();
+      case 'socket':
+        return fstat.isSocket();
     }
     return !!fstat;
   } catch {
