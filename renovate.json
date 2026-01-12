@@ -134,6 +134,7 @@
         "pixi",
         "poetry",
         "pnpm",
+        "protoc",
         "rake",
         "renovate",
         "rust",
