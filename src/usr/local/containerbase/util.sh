@@ -147,7 +147,7 @@ function require_arch () {
 }
 
 function require_distro () {
-  case "$VERSION_CODENAME" in
+  case "$DISTRO_CODENAME" in
   "focal") #supported (only amd64)
     if [[ "$ARCHITECTURE" != "x86_64" ]]; then
       echo "Distro 'focal' only supported on 'x86_64' arch!" >&2
@@ -157,7 +157,7 @@ function require_distro () {
   "jammy") ;; #supported
   "noble") ;; #supported
   *)
-    echo "Distro not supported: ${VERSION_CODENAME}! Please use ubuntu 'focal', 'jammy' or 'noble'." >&2
+    echo "Distro not supported: ${DISTRO_CODENAME}! Please use ubuntu 'focal', 'jammy' or 'noble'." >&2
     exit 1
    ;;
   esac
@@ -165,7 +165,7 @@ function require_distro () {
 
 function get_distro() {
   require_distro
-  echo "${VERSION_CODENAME}"
+  echo "${DISTRO_CODENAME}"
 }
 
 function require_root () {

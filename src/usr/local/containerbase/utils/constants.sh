@@ -38,5 +38,5 @@ export ARCHITECTURE
 
 # Used in util.sh and others.
 # shellcheck source=/dev/null
-VERSION_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
-export VERSION_CODENAME
+DISTRO_CODENAME=$(. /etc/os-release && echo "${VERSION_CODENAME}")
+export DISTRO_CODENAME
