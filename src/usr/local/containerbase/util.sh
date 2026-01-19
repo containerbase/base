@@ -148,12 +148,7 @@ function require_arch () {
 
 function require_distro () {
   case "$DISTRO_CODENAME" in
-  "focal") #supported (only amd64)
-    if [[ "$ARCHITECTURE" != "x86_64" ]]; then
-      echo "Distro 'focal' only supported on 'x86_64' arch!" >&2
-      exit 1
-    fi
-  ;;
+  "focal") ;; #supported
   "jammy") ;; #supported
   "noble") ;; #supported
   *)
