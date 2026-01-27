@@ -32,7 +32,7 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 # renovate: datasource=github-releases depName=helm packageName=helm/helm
-ARG HELM_VERSION=4.0.5
+ARG HELM_VERSION=4.1.0
 
 #------------------------------------------------------------------
 # testa: install helm AS root, run AS both

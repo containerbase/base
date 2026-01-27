@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-helm
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v4.0.5
+RUN install-tool helm v4.1.0
 
 #--------------------------------------
 # Image: final
