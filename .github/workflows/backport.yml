@@ -1,0 +1,34 @@
+name: backport
+
+on:
+  pull_request_target:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  backporting:
+    if: >
+      github.event.pull_request.merged
+      && (
+        github.event.action == 'closed'
+          && contains(github.event.pull_request.labels.*.name, 'backport:')
+        || (
+          github.event.action == 'labeled'
+          && contains(github.event.label.name, 'backport:')
+        )
+      )
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: https://data.forgejo.org/kiegroup/git-backporting@baae3fe1e3c71bc6b1a2699b3bc1e153a19d5ac7 # v4.8.7
+        with:
+          target-branch-pattern: '^backport:(?<target>(.*))$'
+          strategy: ort
+          strategy-option: find-renames
+          cherry-pick-options: -x
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          pull-request: ${{ github.event.pull_request.url }}
+          auto-no-squash: true
+          enable-err-notification: true
