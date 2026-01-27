@@ -1,4 +1,4 @@
-import { argv, argv0, version } from 'node:process';
+import { argv, argv0, exit, version } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
 import { registerCommands } from './command';
 import { bootstrap } from './proxy';
@@ -31,5 +31,6 @@ export async function main(): Promise<void> {
 
   registerCommands(cli, mode);
 
-  await cli.runExit(args);
+  // Explicitly call exit to force pino shutdown
+  exit(await cli.run(args));
 }
