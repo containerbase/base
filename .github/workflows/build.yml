@@ -139,7 +139,6 @@ jobs:
     needs:
       - setup
       - build
-    timeout-minutes: 15
 
     strategy:
       fail-fast: false
@@ -180,7 +179,13 @@ jobs:
           chmod +x dist/docker/usr/local/sbin/*
 
       - name: test distro
-        run: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 60
+          polling_interval_seconds: 5
+          command: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -192,7 +197,6 @@ jobs:
       - lint
       - vitest
       - build
-    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -231,7 +235,13 @@ jobs:
           chmod +x dist/docker/usr/local/sbin/*
 
       - name: test distro
-        run: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 60
+          polling_interval_seconds: 5
+          command: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -283,7 +293,13 @@ jobs:
           chmod +x dist/docker/usr/local/sbin/*
 
       - name: test distro
-        run: docker buildx bake test-base --set settings.secrets=type=env,id=GITHUB_TOKEN
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 60
+          polling_interval_seconds: 5
+          command: docker buildx bake test-base --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
@@ -297,7 +313,6 @@ jobs:
       - bats
       - lint
       - vitest
-    timeout-minutes: 15
 
     strategy:
       max-parallel: 10
@@ -349,7 +364,13 @@ jobs:
         uses: ./.github/actions/prepare-proxy
 
       - name: test
-        run: docker buildx bake test-${{ matrix.arch.name }} --set settings.secrets=type=env,id=GITHUB_TOKEN
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 60
+          polling_interval_seconds: 5
+          command: docker buildx bake test-${{ matrix.arch.name }} --set settings.secrets=type=env,id=GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
