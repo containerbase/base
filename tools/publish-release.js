@@ -11,21 +11,24 @@ class ReleaseCommand extends Command {
 
   async execute() {
     await Promise.resolve();
-    const version = this.release;
-    const dry = this.dryRun;
+    const { channel, dryRun, gitSha, release } = this;
     /** @type {shell.ShellString} */
     let r;
 
-    shell.echo(`Publish version: ${version}`);
-    process.env.TAG = version;
-    process.env.CONTAINERBASE_VERSION = version;
+    shell.echo(`Publish version: ${release} (${gitSha}, ${channel})`);
+    process.env.TAG = release;
+    process.env.CONTAINERBASE_VERSION = release;
+
+    if (channel) {
+      process.env.CHANNEL = channel.replace('maint/', '');
+    }
 
     const tmp = await fs.mkdtemp(
       path.join(os.tmpdir(), 'renovate-docker-bake-'),
     );
     const metadataFile = path.join(tmp, 'metadata.json');
 
-    if (dry) {
+    if (dryRun) {
       shell.echo('DRY-RUN: done.');
       return 0;
     }
