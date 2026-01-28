@@ -60,6 +60,7 @@
       "matchFileNames": ["test/**"],
       "matchDepNames": [
         "bazelisk",
+        "buildx",
         "bun",
         "bundler",
         "conan",
@@ -107,6 +108,7 @@
       "matchFileNames": ["test/**"],
       "matchDepNames": [
         "bazelisk",
+        "buildx",
         "bun",
         "bundler",
         "conan",
