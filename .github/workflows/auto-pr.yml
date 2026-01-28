@@ -1,8 +1,9 @@
-name: backport
+name: auto-pr
 
 on:
   pull_request_target:
     types:
+      - opened
       - closed
       - labeled
 
@@ -16,7 +17,18 @@ jobs:
           ${{ toJSON(github) }}
           EOF
 
-  backporting:
+  review:
+    if: github.event.action == 'opened' && !endsWith(github.event.pull_request.user.login, '[bot]')
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158 # v1.4.0
+        with:
+          reviewers: ${{ vars.REVIEWERS }}
+          max-num-of-reviewers: 2
+
+  backport:
     if: >
       github.event.pull_request.merged
       && (
@@ -26,7 +38,7 @@ jobs:
         )
         || (
           github.event.action == 'labeled'
-          && contains(github.event.label.name, 'backport:')
+          && startsWith(github.event.label.name, 'backport:')
         )
       )
     runs-on: ubuntu-24.04
