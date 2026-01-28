@@ -7,6 +7,15 @@ on:
       - labeled
 
 jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: event info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+
   backporting:
     if: >
       github.event.pull_request.merged
