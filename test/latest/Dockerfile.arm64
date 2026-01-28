@@ -137,7 +137,7 @@ RUN install-tool kustomize 5.8.0
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.14.3
+RUN install-tool terraform 1.14.4
 
 #--------------------------------------
 # Image: tofu
