@@ -38,8 +38,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "pnpm release:prepare --release=${nextRelease.version} --sha=${nextRelease.gitHead}",
-        "publishCmd": "pnpm release:publish --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
+        "prepareCmd": "pnpm release:prepare --release=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead}",
+        "publishCmd": "pnpm release:publish --release=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead}"
       }
     ]
   ],
