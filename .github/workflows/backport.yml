@@ -11,6 +11,7 @@ jobs:
     if: >
       github.event.pull_request.merged
       && (
+        (
           github.event.action == 'closed'
           && contains(github.event.pull_request.labels.*.name, 'backport:')
         )
