@@ -17,6 +17,7 @@ export default defineConfig({
     reporters: ci
       ? ['default', 'github-actions', 'junit']
       : ['default', 'html'],
+    mockReset: true,
     restoreMocks: true,
     setupFiles: './test/global-setup.ts',
     deps: { moduleDirectories: ['node_modules', '.yarn/'] },
