@@ -46,7 +46,7 @@ RUN install-tool java 25.0.1+8.0.LTS
 FROM test-java AS test-gradle
 
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 9.3.0
+RUN install-tool gradle 9.3.1
 
 #--------------------------------------
 # Image: maven
