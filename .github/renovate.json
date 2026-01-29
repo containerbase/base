@@ -202,10 +202,11 @@
       "rebaseWhen": "auto"
     },
     {
-      "description": "Require approval for maintenace branches test deps",
+      "description": "Disable test deps on maintenance branches",
       "matchBaseBranches": ["/^maint/.+/"],
       "matchFileNames": ["test/**"],
-      "dependencyDashboardApproval": true
+      "matchDepNames": ["!git"],
+      "enabled": false
     },
     {
       "description": "Group java test deps",
