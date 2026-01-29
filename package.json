@@ -115,7 +115,7 @@
     "markdownlint": "*",
     "vite": "*"
   },
-  "packageManager": "pnpm@10.28.1",
+  "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": "^22.11.0 || >=24.10.0",
     "pnpm": "^10.0.0"
