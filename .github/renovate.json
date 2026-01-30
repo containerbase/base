@@ -59,6 +59,7 @@
       "description": "Don't separate minor and patch updates in tests",
       "matchFileNames": ["test/**"],
       "matchDepNames": [
+        "apko",
         "bazelisk",
         "buildx",
         "bun",
@@ -107,6 +108,7 @@
       "description": "Automerge test selected minor updates in tests",
       "matchFileNames": ["test/**"],
       "matchDepNames": [
+        "apko",
         "bazelisk",
         "buildx",
         "bun",
