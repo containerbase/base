@@ -192,7 +192,7 @@ FROM build AS test-python
 RUN install-tool python 3.14.2
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.2.497
+RUN install-tool checkov 3.2.500
 # renovate: datasource=pypi
 RUN install-tool conan 2.25.1
 # renovate: datasource=pypi
