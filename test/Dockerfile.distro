@@ -189,7 +189,7 @@ RUN install-tool composer 2.9.5
 FROM build AS test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.2
+RUN install-tool python 3.14.3
 
 # renovate: datasource=pypi
 RUN install-tool checkov 3.2.500
