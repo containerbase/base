@@ -6,6 +6,7 @@ import shell from 'shelljs';
 
 class ReleaseCommand extends Command {
   release = Option.String('-r,--release', { required: true });
+  channel = Option.String('-c,--channel', { required: true });
   gitSha = Option.String('--sha');
   dryRun = Option.Boolean('-d,--dry-run');
 
