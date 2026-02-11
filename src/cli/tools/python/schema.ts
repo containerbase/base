@@ -31,7 +31,10 @@ export const PypiJson = z.object({
       .transform((v) => Object.fromEntries(v.filter((d) => !!d)))
       .nullish(),
   }),
-  releases: z.record(z.array(PypiRelease).transform((v) => v[0])),
+  releases: z.record(
+    z.string(),
+    z.array(PypiRelease).transform((v) => v[0]),
+  ),
 });
 
 export type PypiJson = z.infer<typeof PypiJson>;

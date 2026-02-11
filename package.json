@@ -60,7 +60,7 @@
     "reflect-metadata": "0.2.2",
     "semver": "7.7.4",
     "simple-git": "3.30.0",
-    "zod": "3.25.76"
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.30",
