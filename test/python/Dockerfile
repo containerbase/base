@@ -86,7 +86,7 @@ USER 12021
 FROM build AS test-pip-tools-a
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.5.2
+RUN install-tool pip-tools 7.5.3
 
 #--------------------------------------
 # test pip-tools-b: pip-tools (older python)
@@ -98,7 +98,7 @@ FROM base AS test-pip-tools-b
 RUN install-tool python 3.8.18
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.5.2
+RUN install-tool pip-tools 7.5.3
 
 #--------------------------------------
 # test poetry-a: (rootless)
