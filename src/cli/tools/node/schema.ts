@@ -9,7 +9,7 @@ export type NodeVersionMeta = z.infer<typeof NodeVersionMeta>;
 export const NpmPackageMetaList = z.array(NodeVersionMeta);
 
 export const NpmPackageMeta = z.object({
-  'dist-tags': z.record(z.string()),
+  'dist-tags': z.record(z.string(), z.string()),
   name: z.string(),
 });
 
