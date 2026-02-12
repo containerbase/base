@@ -43,10 +43,8 @@ RUN install-tool dotnet 10.0.103
 #--------------------------------------
 # test: paket
 #--------------------------------------
-FROM base AS test-packet
+FROM test-dotnet AS test-paket
 
-# renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.100
 
 # renovate: datasource=nuget packageName=Paket
 RUN install-tool paket 9.0.2
@@ -62,4 +60,4 @@ RUN set -ex; \
 FROM base
 
 COPY --from=test-dotnet /.dummy /.dummy
-COPY --from=test-packet /.dummy /.dummy
+COPY --from=test-paket /.dummy /.dummy
