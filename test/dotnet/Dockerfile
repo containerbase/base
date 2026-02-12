@@ -132,7 +132,7 @@ RUN set -ex;  \
 #--------------------------------------
 # test: paket
 #--------------------------------------
-FROM build AS test-others
+FROM build AS test-paket
 
 # renovate: datasource=nuget packageName=Paket
 RUN install-tool paket 9.0.2
@@ -151,4 +151,4 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
-COPY --from=test-others /.dummy /.dummy
+COPY --from=test-paket /.dummy /.dummy

@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { execa } from 'execa';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
@@ -7,24 +6,33 @@ import { BaseInstallService } from '../../install-tool/base-install.service';
 @injectFromHierarchy()
 export class PaketInstallService extends BaseInstallService {
   readonly name = 'paket';
+  override readonly parent = 'dotnet';
 
   override async install(version: string): Promise<void> {
-    const toolPath = this.pathSvc.toolPath(this.name);
+    await this.pathSvc.ensureToolPath(this.name);
 
-    const dotnet = join(this.pathSvc.toolPath('dotnet'), 'dotnet');
-    await execa(dotnet, [
-      'tool',
-      'install',
-      '--tool-path',
-      toolPath,
+    const toolPath = await this.pathSvc.createVersionedToolPath(
       this.name,
-      '--version',
       version,
-    ]);
+    );
+
+    await execa(
+      'dotnet',
+      [
+        'tool',
+        'install',
+        '--tool-path',
+        toolPath,
+        this.name,
+        '--version',
+        version,
+      ],
+      { stdio: ['inherit', 'inherit', 1] },
+    );
   }
 
-  override async link(_version: string): Promise<void> {
-    const src = this.pathSvc.toolPath(this.name);
+  override async link(version: string): Promise<void> {
+    const src = this.pathSvc.versionedToolPath(this.name, version);
     await this.shellwrapper({ srcDir: src, extraToolEnvs: ['dotnet'] });
   }
 
