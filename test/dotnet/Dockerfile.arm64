@@ -41,8 +41,23 @@ FROM base AS test-dotnet
 RUN install-tool dotnet 10.0.103
 
 #--------------------------------------
+# test: paket
+#--------------------------------------
+FROM test-dotnet AS test-paket
+
+
+# renovate: datasource=nuget packageName=Paket
+RUN install-tool paket 9.0.2
+
+WORKDIR /test
+RUN set -ex; \
+  ls -la; env; \
+  paket init
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
 
 COPY --from=test-dotnet /.dummy /.dummy
+COPY --from=test-paket /.dummy /.dummy
