@@ -113,7 +113,7 @@ RUN install-tool swift 6.2.3
 RUN install-tool terraform 1.14.5
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.11.4
+RUN install-tool tofu 1.11.5
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
