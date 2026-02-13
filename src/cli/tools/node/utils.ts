@@ -25,7 +25,7 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
       npm_config_fund: 'false',
-      NODE_OPTIONS: penv.NODE_OPTIONS ?? '--use-openssl-ca',
+      NODE_OPTIONS: getNodeOptions(penv.NODE_OPTIONS),
     };
 
     if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
@@ -289,4 +289,23 @@ export async function prepareSymlinks(
     join(pathSvc.cachePath, '.npmrc'),
     join(envSvc.userHome, '.npmrc'),
   );
+}
+
+/**
+ * Merge the parent process' NODE_OPTIONS value with options needed by Containerbase.
+ */
+export function getNodeOptions(currentOptions: string | undefined): string {
+  if (!currentOptions) {
+    return '--use-openssl-ca';
+  }
+
+  // Check if --use-openssl-ca is already present as a complete option
+  // Split by whitespace and check for exact match
+  const options = currentOptions.split(/\s+/);
+  if (options.includes('--use-openssl-ca')) {
+    return currentOptions;
+  }
+
+  // Append --use-openssl-ca to existing options
+  return `${currentOptions} --use-openssl-ca`;
 }

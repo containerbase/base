@@ -6,6 +6,7 @@ import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { getDistro, parse } from '../../utils';
 import {
   NodeBaseInstallService,
+  getNodeOptions,
   prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
@@ -29,7 +30,7 @@ export class NodePrepareService extends BasePrepareService {
         NO_UPDATE_NOTIFIER: '1',
         npm_config_update_notifier: 'false',
         npm_config_fund: 'false',
-        NODE_OPTIONS: '--use-openssl-ca',
+        NODE_OPTIONS: getNodeOptions(penv.NODE_OPTIONS),
       });
     }
   }
