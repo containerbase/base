@@ -71,7 +71,7 @@ FROM base AS testb
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/nix-prebuild
-RUN install-tool nix 2.33.2
+RUN install-tool nix 2.33.3
 
 RUN set -ex; \
   nix --version
