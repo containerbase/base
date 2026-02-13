@@ -34,7 +34,7 @@ GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/d
 
 apko releases are downloaded from:
 
-- `<https://github.com/chainguard-dev/apko/releases>
+- `<https://github.com/chainguard-dev/apko/releases>`
 
 Samples:
 
