@@ -179,7 +179,7 @@ RUN install-tool yarn 4.12.0
 FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.2
+RUN install-tool php 8.5.3
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.9.5
 
