@@ -48,6 +48,7 @@ import { ScalaInstallService } from '../tools/java/scala';
 import { JsonnetBundlerInstallService } from '../tools/jb';
 import { KubectlInstallService } from '../tools/kubectl';
 import { KustomizeInstallService } from '../tools/kustomize';
+import { MiseInstallService, MiseVersionResolver } from '../tools/mise';
 import { NixInstallService } from '../tools/nix';
 import { NodeInstallService } from '../tools/node';
 import {
@@ -143,6 +144,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(KubectlInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(MiseInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);
@@ -198,6 +200,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(MiseVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(PoetryVersionResolver);
