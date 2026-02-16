@@ -352,6 +352,16 @@ RUN set -ex; \
   true;
 
 #--------------------------------------
+# test: mono (rootless)
+#--------------------------------------
+FROM base AS test-mono
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=containerbase/mono-prebuild
+RUN install-tool mono 6.14.1
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -363,3 +373,4 @@ COPY --link --from=testd /.dummy /.dummy
 COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
+COPY --link --from=test-mono /.dummy /.dummy
