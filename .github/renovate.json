@@ -14,7 +14,7 @@
   ],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
-  "baseBranchPatterns": ["$default", "maint/13.x", "zzz/don-not-delete"],
+  "baseBranchPatterns": ["$default", "zzz/don-not-delete"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
