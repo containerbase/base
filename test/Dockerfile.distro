@@ -164,7 +164,7 @@ RUN install-tool gradle 9.3.1
 #--------------------------------------
 # test: test-mono
 #--------------------------------------
-FROM base AS test-mono
+FROM build AS test-mono
 
 # renovate: datasource=github-releases packageName=containerbase/mono-prebuild
 RUN install-tool mono 6.14.1
