@@ -139,7 +139,7 @@ RUN set -ex;  \
 FROM build AS test-paket
 
 # renovate: datasource=nuget packageName=Paket
-RUN install-tool paket 9.0.2
+RUN install-tool paket 10.3.1
 
 WORKDIR /test
 RUN set -ex; \
