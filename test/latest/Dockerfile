@@ -356,6 +356,8 @@ RUN set -ex; \
 #--------------------------------------
 FROM base AS test-mono
 
+RUN prepare-tool mono
+
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/mono-prebuild

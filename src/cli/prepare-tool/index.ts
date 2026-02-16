@@ -13,6 +13,7 @@ import {
   JavaPrepareService,
 } from '../tools/java';
 import { SbtPrepareService } from '../tools/java/sbt';
+import { MonoPrepareService } from '../tools/mono';
 import { NodePrepareService } from '../tools/node';
 import { PhpPrepareService } from '../tools/php';
 import { PowershellPrepareService } from '../tools/powershell';
@@ -57,6 +58,7 @@ async function prepareContainer(): Promise<Container> {
   container.bind(PREPARE_TOOL_TOKEN).to(JavaPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJdkPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(MonoPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(NodePrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(PhpPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(PowershellPrepareService);

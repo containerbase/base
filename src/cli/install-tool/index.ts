@@ -48,6 +48,7 @@ import { ScalaInstallService } from '../tools/java/scala';
 import { JsonnetBundlerInstallService } from '../tools/jb';
 import { KubectlInstallService } from '../tools/kubectl';
 import { KustomizeInstallService } from '../tools/kustomize';
+import { MonoInstallService } from '../tools/mono';
 import { NixInstallService } from '../tools/nix';
 import { NodeInstallService } from '../tools/node';
 import {
@@ -143,6 +144,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(KubectlInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(MonoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);

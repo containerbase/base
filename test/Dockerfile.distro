@@ -161,7 +161,6 @@ RUN install-tool java 25.0.2+10.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 9.3.1
 
-
 #--------------------------------------
 # test: test-mono
 #--------------------------------------
