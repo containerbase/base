@@ -413,7 +413,7 @@ The last url is used to find the latest version if no version was provided.
 Samples:
 
 ```txt
-https://dist.nuget.org/win-x86-commandline/6.14.1/nuget.exe
+https://dist.nuget.org/win-x86-commandline/v6.14.1/nuget.exe
 https://dist.nuget.org/tools.json
 ```
 

@@ -13,7 +13,7 @@ export class NugetInstallService extends BaseInstallService {
   override parent = 'mono';
 
   override async install(version: string): Promise<void> {
-    const baseUrl = `https://dist.nuget.org/win-x86-commandline/${version}/`;
+    const baseUrl = `https://dist.nuget.org/win-x86-commandline/v${version}/`;
     const filename = `${this.name}.exe`;
 
     const file = await this.http.download({
