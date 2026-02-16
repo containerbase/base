@@ -386,6 +386,37 @@ Samples:
 https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
 ```
 
+## `mono`
+
+Mono releases are downloaded from:
+
+- `https://github.com/containerbase/mono-prebuild/releases`
+
+Samples:
+
+```txt
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz
+https://github.com/containerbase/mono-prebuild/releases/latest/download/version
+```
+
+### `nuget`
+
+Nuget releases are downloaded from:
+
+- `https://dist.nuget.org`
+
+The last url is used to find the latest version if no version was provided.
+
+Samples:
+
+```txt
+https://dist.nuget.org/win-x86-commandline/6.14.1/nuget.exe
+https://dist.nuget.org/tools.json
+```
+
 ## `nix`
 
 Nix releases are downloaded from:
@@ -395,10 +426,10 @@ Nix releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
-https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-aarch64.tar.xz
-https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-x86_x64.tar.xz.sha512
-https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/node-2.24.2-aarch64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/nix-2.24.2-x86_x64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/nix-2.24.2-x86_x64.tar.xz
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/nix-2.24.2-aarch64.tar.xz.sha512
+https://github.com/containerbase/nix-prebuild/releases/download/2.24.2/nix-2.24.2-aarch64.tar.xz
 ```
 
 ## `node`
@@ -509,7 +540,7 @@ https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python
 https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz
 ```
 
-## `pip` tools
+### `pip` tools
 
 Pip tools are downloaded from:
 

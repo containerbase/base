@@ -62,6 +62,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
+import { NugetInstallService, NugetVersionResolver } from '../tools/nuget';
 import { PhpInstallService, PhpVersionResolver } from '../tools/php';
 import {
   ComposerInstallService,
@@ -146,6 +147,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MonoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(NugetInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
@@ -201,6 +203,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(NugetVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(PoetryVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);

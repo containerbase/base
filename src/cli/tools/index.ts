@@ -28,6 +28,7 @@ export const NoPrepareTools = [
   'lerna',
   'maven',
   'nix',
+  'nuget',
   'npm',
   'paket',
   'pdm',
