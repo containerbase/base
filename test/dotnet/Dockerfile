@@ -34,13 +34,16 @@ ARG CONTAINERBASE_LOG_LEVEL
 COPY --chown=12021:0 test/dotnet/test test
 WORKDIR /test
 
+RUN prepare-tool dotnet
+
 #--------------------------------------
-# build: dotnet 6.0 base image (LTS)
+# build: dotnet 10.0 base image (LTS)
 #--------------------------------------
 FROM base AS build
 
-RUN install-tool dotnet 6.0.416
-RUN set -ex; dotnet --version | grep 6.0.
+# renovate: datasource=dotnet packageName=dotnet-sdk
+RUN install-tool dotnet 10.0.103
+RUN set -ex; dotnet --version | grep 10.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
 
@@ -52,9 +55,11 @@ SHELL [ "/bin/sh", "-c" ]
 RUN dotnet --info
 
 #--------------------------------------
-# test: dotnet 6.0 (LTS)
+# test: dotnet 6.0 (non-root, LTS)
 #--------------------------------------
 FROM build AS testa
+
+RUN install-tool dotnet 6.0.416
 
 RUN set -ex; \
     dotnet restore --use-lock-file
@@ -69,6 +74,7 @@ RUN set -ex;  \
 #--------------------------------------
 FROM base AS testb
 
+# only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.418
 
@@ -93,11 +99,9 @@ RUN set -ex;  \
 #--------------------------------------
 # test: dotnet 10.0 (non-root, LTS)
 #--------------------------------------
-FROM build AS testc
+FROM base AS testc
 
-RUN set -ex; \
-  ls -la /opt/containerbase/tools/dotnet; \
-  true
+USER 12021
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
@@ -113,7 +117,7 @@ RUN set -ex;  \
 
 
 #--------------------------------------
-# test: dotnet latest (non-root)
+# test: dotnet latest
 #--------------------------------------
 FROM build AS testd
 
