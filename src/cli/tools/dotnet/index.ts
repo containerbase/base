@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service';
-import { BasePrepareService } from '../prepare-tool/base-prepare.service';
-import { AptService } from '../services';
-import { getDistro, parse, pathExists } from '../utils';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
+import { AptService } from '../../services';
+import { getDistro, parse, pathExists } from '../../utils';
 
 @injectable()
 @injectFromHierarchy()
