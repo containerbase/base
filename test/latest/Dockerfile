@@ -363,6 +363,11 @@ USER 12021
 # renovate: datasource=github-releases packageName=containerbase/mono-prebuild
 RUN install-tool mono 6.14.1
 
+# renovate: datasource=nuget packageName=NuGet.CommandLine
+RUN install-tool nuget 7.3.0
+
+RUN nuget search nuget.commandline -Take 1
+
 #--------------------------------------
 # final
 #--------------------------------------
