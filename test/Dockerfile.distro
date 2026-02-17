@@ -88,6 +88,9 @@ RUN install-tool kubectl v1.35.1
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.8.1
 
+# renovate: datasource=github-releases packageName=jdx/mise
+RUN install-tool mise 2026.2.13
+
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
