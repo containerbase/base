@@ -223,7 +223,7 @@ RUN install-tool bazelisk v1.28.1
 RUN install-tool bun 1.3.9
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.6.9
+RUN install-tool deno 2.6.10
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
 RUN install-tool apko 1.1.8
