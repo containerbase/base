@@ -27,6 +27,7 @@ export const NoPrepareTools = [
   'kustomize',
   'lerna',
   'maven',
+  'mise',
   'nix',
   'nuget',
   'npm',

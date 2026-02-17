@@ -386,6 +386,23 @@ Samples:
 https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
 ```
 
+## `mise`
+
+mise releases are downloaded from:
+
+- `https://github.com/jdx/mise/releases`
+
+When no version is specified, the url `https://mise.jdx.dev/VERSION` is used to find the latest version.
+
+Samples:
+
+```txt
+https://github.com/jdx/mise/releases/download/v2026.2.13/mise-v2026.2.13-linux-x64.tar.xz
+https://github.com/jdx/mise/releases/download/v2026.2.13/mise-v2026.2.13-linux-arm64.tar.xz
+https://github.com/jdx/mise/releases/download/v2026.2.13/SHASUMS256.txt
+https://mise.jdx.dev/VERSION
+```
+
 ## `mono`
 
 Mono releases are downloaded from:
