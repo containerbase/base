@@ -153,8 +153,8 @@ importers:
         specifier: 4.0.18
         version: 4.0.18(vitest@4.0.18)
       '@yao-pkg/pkg':
-        specifier: 6.13.1
-        version: 6.13.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.14.0
+        version: 6.14.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -1168,9 +1168,9 @@ packages:
     resolution: {integrity: sha512-hS8zzze5VVyVAciZoNX4q3ZmCdn0gi34P2SElk4PFbzkA4LPs7qBJ3LhUKb4d4KGw1HVkFJJOMgGomH7cMqQ5Q==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.13.1':
-    resolution: {integrity: sha512-HZGrjKngYUpCAHUjBHb9VMb0V7FsJtoMHtw0tfSS4GeS/Ur8ZK/EGDWtdj+apGERyScc3QLOyg1mXYuv01gqvw==}
-    engines: {node: '>=18.0.0'}
+  '@yao-pkg/pkg@6.14.0':
+    resolution: {integrity: sha512-Bd3JPJaNQ4x9KXaNGTV13t7CNXmQTV3TYlIOd5epLfr4cj/QrRHGcL9nzfSk9c0a1nDKOqI+cPWfMYaRthJmqg==}
+    engines: {node: '>=20.0.0'}
     hasBin: true
 
   acorn-jsx@5.3.2:
@@ -2330,13 +2330,13 @@ packages:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
 
-  into-stream@6.0.0:
-    resolution: {integrity: sha512-XHbaOAvP+uFKUFsOgoNPRjLkwB+I22JFPFe5OjTkQ0nwgj6+pSjb4NmB6VMxaPshLiOf+zcpOCBQuLwC1KHhZA==}
-    engines: {node: '>=10'}
-
   into-stream@7.0.0:
     resolution: {integrity: sha512-2dYz766i9HprMBasCMvHMuazJ7u4WzhJwo5kb3iPSiW/iRYV6uPari3zHoqZlnuaR7V1bEiNMxikhp37rdBXbw==}
     engines: {node: '>=12'}
+
+  into-stream@9.1.0:
+    resolution: {integrity: sha512-DRsRnQrbzdFjaQ1oe4C6/EIUymIOEix1qROEJTF9dbMq+M4Zrm6VaLp6SD/B9IsiEjPZuBSnWWFN+udajugdWA==}
+    engines: {node: '>=20'}
 
   inversify@7.11.0:
     resolution: {integrity: sha512-yZDprSSr8TyVeMGI/AOV4ws6gwjX22hj9Z8/oHAVpJORY6WRFTcUzhnZtibBUHEw2U8ArvHcR+i863DplQ3Cwg==}
@@ -5090,7 +5090,7 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.13.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.14.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.0
@@ -5098,7 +5098,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@yao-pkg/pkg-fetch': 3.5.32
       esbuild: 0.27.3
-      into-stream: 6.0.0
+      into-stream: 9.1.0
       minimist: 1.2.8
       multistream: 4.1.0
       picocolors: 1.1.1
@@ -6403,15 +6403,12 @@ snapshots:
       hasown: 2.0.2
       side-channel: 1.1.0
 
-  into-stream@6.0.0:
-    dependencies:
-      from2: 2.3.0
-      p-is-promise: 3.0.0
-
   into-stream@7.0.0:
     dependencies:
       from2: 2.3.0
       p-is-promise: 3.0.0
+
+  into-stream@9.1.0: {}
 
   inversify@7.11.0(reflect-metadata@0.2.2):
     dependencies:
