@@ -73,7 +73,7 @@
     "@types/eslint-config-prettier": "6.11.3",
     "@types/global-agent": "3.0.0",
     "@types/ini": "4.1.1",
-    "@types/node": "22.19.11",
+    "@types/node": "24.10.13",
     "@types/node-ipc": "9.2.3",
     "@types/semver": "7.7.1",
     "@types/shelljs": "0.10.0",
