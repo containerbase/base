@@ -230,7 +230,7 @@ FROM build AS test-ruby
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 3.4.8
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 2.7.2
+RUN install-tool bundler 4.0.6
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.16.2
 
