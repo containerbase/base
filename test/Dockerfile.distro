@@ -80,7 +80,7 @@ RUN install-tool golang 1.26.0
 RUN install-tool helm v4.1.1
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.3.0
+RUN install-tool helmfile v1.3.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.35.1
