@@ -153,8 +153,8 @@ importers:
         specifier: 4.0.18
         version: 4.0.18(vitest@4.0.18)
       '@yao-pkg/pkg':
-        specifier: 6.14.0
-        version: 6.14.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        specifier: 6.14.1
+        version: 6.14.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -1164,8 +1164,8 @@ packages:
     resolution: {integrity: sha512-hS8zzze5VVyVAciZoNX4q3ZmCdn0gi34P2SElk4PFbzkA4LPs7qBJ3LhUKb4d4KGw1HVkFJJOMgGomH7cMqQ5Q==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.14.0':
-    resolution: {integrity: sha512-Bd3JPJaNQ4x9KXaNGTV13t7CNXmQTV3TYlIOd5epLfr4cj/QrRHGcL9nzfSk9c0a1nDKOqI+cPWfMYaRthJmqg==}
+  '@yao-pkg/pkg@6.14.1':
+    resolution: {integrity: sha512-kTtxr+r9/pi+POcuuJN9q2YRs1Ekp7iwsgU3du1XO6ozwjlp+F31ZF19WS2ZDIloWYGCvfbURrrXMgQJpWZb+Q==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -5088,7 +5088,7 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.14.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.14.1(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.0
