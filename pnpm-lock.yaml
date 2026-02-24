@@ -92,8 +92,8 @@ importers:
         specifier: 7.7.4
         version: 7.7.4
       simple-git:
-        specifier: 3.32.0
-        version: 3.32.0
+        specifier: 3.32.1
+        version: 3.32.1
       vite:
         specifier: '*'
         version: 7.3.1(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.2)
@@ -3577,8 +3577,8 @@ packages:
   simple-get@4.0.1:
     resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
 
-  simple-git@3.32.0:
-    resolution: {integrity: sha512-2z/zhmD2yZKcKj4fim7c/CUffq689WOerDSUhh6gd5fdzVfCrdSbdjNZVjIpCCGEuYtttMehDlyNn8sJsBzZpw==}
+  simple-git@3.32.1:
+    resolution: {integrity: sha512-Hz+lu+B1hxbGq6j+r45l789BHrc0DkhwoIrMjxKzSw9+9eFwUdfqgNe4Oe9R7vaTvy/dBl5/c5ZcDu7HO00cbg==}
 
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
@@ -7752,7 +7752,7 @@ snapshots:
       once: 1.4.0
       simple-concat: 1.0.1
 
-  simple-git@3.32.0:
+  simple-git@3.32.1:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
