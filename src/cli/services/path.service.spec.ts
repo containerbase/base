@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
@@ -156,8 +155,8 @@ describe('cli/services/path.service', () => {
         NODE_OPTIONS: '--use-openssl-ca',
       });
 
-      const contents = readFileSync(
-        `${pathSvc.installDir}/tools/node/env.sh`,
+      const contents = (
+        await readFile(`${pathSvc.installDir}/tools/node/env.sh`)
       ).toString();
 
       expect(contents).toContain(
