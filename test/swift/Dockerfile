@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 6.2.3
+RUN install-tool swift 6.2.4
 
 #--------------------------------------
 # testa: swift latest
