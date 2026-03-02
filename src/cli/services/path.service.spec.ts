@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
@@ -146,6 +147,22 @@ describe('cli/services/path.service', () => {
       await expect(
         stat(`${pathSvc.installDir}/tools/node/env.sh`),
       ).rejects.toThrow('ENOENT');
+    });
+
+    test('node with NODE_OPTIONS', async () => {
+      await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
+      await pathSvc.exportToolEnv('node', {
+        NODE_VERSION: 'v14.17.0',
+        NODE_OPTIONS: '--use-openssl-ca',
+      });
+
+      const contents = readFileSync(
+        `${pathSvc.installDir}/tools/node/env.sh`,
+      ).toString();
+
+      expect(contents).toContain(
+        'export NODE_OPTIONS=${NODE_OPTIONS---use-openssl-ca}',
+      );
     });
   });
 
