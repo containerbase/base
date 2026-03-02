@@ -32,8 +32,8 @@ importers:
   .:
     dependencies:
       '@renovatebot/pep440':
-        specifier: 4.2.1
-        version: 4.2.1
+        specifier: 4.2.2
+        version: 4.2.2
       '@seald-io/nedb':
         specifier: 4.1.2
         version: 4.1.2
@@ -672,8 +672,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@renovatebot/pep440@4.2.1':
-    resolution: {integrity: sha512-2FK1hF93Fuf1laSdfiEmJvSJPVIDHEUTz68D3Fi9s0IZrrpaEcj6pTFBTbYvsgC5du4ogrtf5re7yMMvrKNgkw==}
+  '@renovatebot/pep440@4.2.2':
+    resolution: {integrity: sha512-dSbrkSS9/NfNwhOgQ0rpKA9KNiKSFhgK707Wi+oX8SZLqvu8dvsVuzORbKOYq5eX4nSiwrHApWisecw0cZhjVQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
@@ -4642,7 +4642,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@renovatebot/pep440@4.2.1': {}
+  '@renovatebot/pep440@4.2.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
     optional: true
