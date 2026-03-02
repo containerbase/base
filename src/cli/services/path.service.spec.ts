@@ -5,6 +5,7 @@ import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
+import { getNodeOptions } from '../tools/node/utils';
 import { fileRights, pathExists } from '../utils';
 import { PathService } from '.';
 import { testContainer } from '~test/di';
@@ -162,6 +163,22 @@ describe('cli/services/path.service', () => {
 
       expect(contents).toContain(
         'export NODE_OPTIONS=${NODE_OPTIONS---use-openssl-ca}',
+      );
+    });
+
+    test('node with merged NODE_OPTIONS', async () => {
+      await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
+      await pathSvc.exportToolEnv('node', {
+        NODE_VERSION: 'v14.17.0',
+        NODE_OPTIONS: getNodeOptions('--max-old-space-size=4096'),
+      });
+
+      const contents = readFileSync(
+        `${pathSvc.installDir}/tools/node/env.sh`,
+      ).toString();
+
+      expect(contents).toContain(
+        'export NODE_OPTIONS=${NODE_OPTIONS---max-old-space-size=4096 --use-openssl-ca}',
       );
     });
   });
