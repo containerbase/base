@@ -93,7 +93,7 @@ export class MonoInstallService extends PrebuildInstallService {
     if (
       !(await pathExists(join(this.pathSvc.sslPath, 'mono/new-certs/Trust')))
     ) {
-      await this._spawn(path + '/bin/cert-sync', [
+      await this._spawn(`${path}/bin/cert-sync`, [
         '/etc/ssl/certs/ca-certificates.crt',
       ]);
     }
