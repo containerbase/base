@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
+import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
 import { getDistro, parse } from '../../utils';
@@ -29,8 +30,17 @@ export class NodePrepareService extends BasePrepareService {
         NO_UPDATE_NOTIFIER: '1',
         npm_config_update_notifier: 'false',
         npm_config_fund: 'false',
-        NODE_OPTIONS: '--use-openssl-ca',
+        // node v24.6.0, v22.19.0
+        NODE_USE_SYSTEM_CA: '1',
       });
+
+      // node v6.11.0
+      await this.pathSvc.exportToolEnvContent(
+        this.name,
+        codeBlock`
+          export NODE_OPTIONS="\${NODE_OPTIONS} --use-openssl-ca"
+        `,
+      );
     }
   }
 }

@@ -25,7 +25,10 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
       NO_UPDATE_NOTIFIER: '1',
       npm_config_update_notifier: 'false',
       npm_config_fund: 'false',
-      NODE_OPTIONS: penv.NODE_OPTIONS ?? '--use-openssl-ca',
+      // node v24.6.0, v22.19.0
+      NODE_USE_SYSTEM_CA: '1',
+      // node v6.11.0
+      NODE_OPTIONS: `${penv.NODE_OPTIONS ?? ''} --use-openssl-ca`,
     };
 
     if (!penv.npm_config_cache && !penv.NPM_CONFIG_CACHE) {
