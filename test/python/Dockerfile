@@ -97,7 +97,7 @@ FROM base AS test-pip-tools-b
 # so make sure we can still install on an older version
 RUN install-tool python 3.8.18
 
-# renovate: datasource=pypi
+# v7.5.3+ needs python 3.9+
 RUN install-tool pip-tools 7.5.2
 
 #--------------------------------------
