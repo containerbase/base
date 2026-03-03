@@ -7,6 +7,7 @@ import { ErlangPrepareService } from '../tools/erlang';
 import { ElixirPrepareService } from '../tools/erlang/elixir';
 import { FlutterPrepareService } from '../tools/flutter';
 import { GolangPrepareService } from '../tools/golang';
+import { CabalPrepareService } from '../tools/haskell/cabal';
 import {
   JavaJdkPrepareService,
   JavaJrePrepareService,
@@ -47,6 +48,7 @@ async function prepareContainer(): Promise<Container> {
   }
 
   // modern tool services
+  container.bind(PREPARE_TOOL_TOKEN).to(CabalPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(ConanPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DartPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(DotnetPrepareService);
