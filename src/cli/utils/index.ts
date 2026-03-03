@@ -1,12 +1,16 @@
 import { argv0 } from 'node:process';
-import nanoSpawn, { type Options, type Subprocess } from 'nano-spawn';
+import { type Options, type Result, type ResultPromise, execa } from 'execa';
 import { type CliMode, cliModes } from './types';
 
 export type * from './types';
 export * from './versions';
 export * from './logger';
 export * from './common';
-export type { Options as SpawnOptions, Subprocess as SpawnResult };
+export type {
+  Options as SpawnOptions,
+  Result as SpawnResult,
+  ResultPromise as SpawnResultPromise,
+};
 
 export function cliMode(): CliMode | null {
   for (const mode of cliModes) {
@@ -23,13 +27,15 @@ export function cliMode(): CliMode | null {
   return null;
 }
 
-export async function spawn(
+export function spawn(
   cmd: string,
   args: string[],
   options?: Options,
-): Promise<Subprocess> {
-  return await nanoSpawn(cmd, args, {
+): ResultPromise<Options> {
+  return execa<Options>(cmd, args, {
     stdio: ['inherit', 'inherit', 1],
     ...options,
+    preferLocal: false,
+    node: false,
   });
 }
