@@ -1,5 +1,5 @@
+import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import spawn from 'nano-spawn';
 import { V2ToolService } from '../services';
 import { logger } from '../utils';
 import { BasePrepareService } from './base-prepare.service';
@@ -19,7 +19,7 @@ export abstract class V2ToolPrepareService extends BasePrepareService {
 
   override async initialize(): Promise<void> {
     logger.debug(`Initializing v2 tool ${this.name} ...`);
-    await spawn(
+    await execa(
       'bash',
       ['/usr/local/containerbase/bin/v2-install-tool.sh', 'init', this.name],
       {
@@ -30,7 +30,7 @@ export abstract class V2ToolPrepareService extends BasePrepareService {
 
   override async prepare(): Promise<void> {
     logger.debug(`Preparing v2 tool ${this.name} ...`);
-    await spawn(
+    await execa(
       'bash',
       ['/usr/local/containerbase/bin/v2-install-tool.sh', 'prepare', this.name],
       {

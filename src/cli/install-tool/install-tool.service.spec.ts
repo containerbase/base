@@ -7,7 +7,7 @@ import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
 import { ensurePaths } from '~test/path';
 
 vi.mock('del');
-vi.mock('nano-spawn');
+vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 vi.mock('../prepare-tool');

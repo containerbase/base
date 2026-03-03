@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { deleteAsync } from 'del';
+import { execa } from 'execa';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import spawn from 'nano-spawn';
 import { initializeTools, prepareTools } from '../prepare-tool';
 import {
   EnvService,
@@ -178,7 +178,7 @@ export class InstallToolService {
       }
 
       if (this.envSvc.cacheDir) {
-        await spawn('bash', ['/usr/local/containerbase/bin/cleanup-cache.sh'], {
+        await execa('bash', ['/usr/local/containerbase/bin/cleanup-cache.sh'], {
           stdio: ['inherit', 'inherit', 1],
         });
       }

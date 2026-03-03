@@ -5,7 +5,7 @@ import { initializeTools, prepareTools } from '.';
 import { ensurePaths, rootPath } from '~test/path';
 
 vi.mock('del');
-vi.mock('nano-spawn');
+vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 

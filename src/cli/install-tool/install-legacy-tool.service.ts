@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import spawn from 'nano-spawn';
 import { V2ToolService } from '../services';
 import { logger } from '../utils';
 import { BaseInstallService } from './base-install.service';
@@ -12,7 +12,7 @@ export class V1ToolInstallService {
   async execute(tool: string, version: string): Promise<void> {
     logger.debug(`Installing legacy tool ${tool} v${version} ...`);
 
-    await spawn(
+    await execa(
       'bash',
       ['/usr/local/containerbase/bin/v1-install-tool.sh', tool, version],
       {
@@ -40,7 +40,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
       env.PIP_INDEX_URL = pipIndex;
     }
 
-    await spawn(
+    await execa(
       'bash',
       [
         '/usr/local/containerbase/bin/v2-install-tool.sh',
@@ -57,7 +57,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
 
   override async link(version: string): Promise<void> {
     logger.debug(`Linking v2 tool ${this.name} v${version} ...`);
-    await spawn(
+    await execa(
       'bash',
       [
         '/usr/local/containerbase/bin/v2-install-tool.sh',
@@ -81,7 +81,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
 
   override async test(version: string): Promise<void> {
     logger.debug(`Testing v2 tool ${this.name} v${version} ...`);
-    await spawn(
+    await execa(
       'bash',
       [
         '/usr/local/containerbase/bin/v2-install-tool.sh',
@@ -98,7 +98,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
   override async postInstall(version: string): Promise<void> {
     if (this._svc.hasPostinstall(this.name)) {
       logger.debug(`Postinstall v2 tool ${this.name} ...`);
-      await spawn(
+      await execa(
         'bash',
         [
           '/usr/local/containerbase/bin/v2-install-tool.sh',
@@ -117,7 +117,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
     logger.debug(`Uninstall v2 tool ${this.name} v${version} ...`);
 
     if (this._svc.hasUninstall(this.name)) {
-      await spawn(
+      await execa(
         'bash',
         [
           '/usr/local/containerbase/bin/v2-install-tool.sh',
@@ -136,7 +136,7 @@ export abstract class V2ToolInstallService extends BaseInstallService {
   override async validate(version: string): Promise<boolean> {
     logger.debug(`Validating v2 tool ${this.name} v${version} ...`);
     try {
-      await spawn(
+      await execa(
         'bash',
         [
           '/usr/local/containerbase/bin/v2-install-tool.sh',

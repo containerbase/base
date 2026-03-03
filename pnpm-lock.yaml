@@ -23,9 +23,6 @@ patchedDependencies:
   global-agent:
     hash: c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13
     path: patches/global-agent.patch
-  nano-spawn:
-    hash: 5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf
-    path: patches/nano-spawn.patch
 
 importers:
 
@@ -70,9 +67,6 @@ importers:
       markdownlint:
         specifier: '*'
         version: 0.40.0
-      nano-spawn:
-        specifier: 2.0.0
-        version: 2.0.0(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf)
       node-ipc:
         specifier: 12.0.0
         version: 12.0.0
@@ -6764,7 +6758,7 @@ snapshots:
       commander: 14.0.3
       listr2: 9.0.5
       micromatch: 4.0.8
-      nano-spawn: 2.0.0(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf)
+      nano-spawn: 2.0.0
       pidtree: 0.6.0
       string-argv: 0.3.2
       yaml: 2.8.2
@@ -7142,7 +7136,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nano-spawn@2.0.0(patch_hash=5b00dbfdb8607c3254965d27340aeda1bbea60bd9a11f3e17778f598887beabf): {}
+  nano-spawn@2.0.0: {}
 
   nanoid@3.3.11: {}
 

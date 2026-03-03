@@ -15,7 +15,7 @@ import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
 import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
 
 vi.mock('del');
-vi.mock('nano-spawn');
+vi.mock('execa');
 vi.mock('../tools/bun');
 vi.mock('../tools/php/composer');
 vi.mock('../utils', async (importActual) => ({

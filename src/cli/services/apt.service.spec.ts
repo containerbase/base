@@ -5,12 +5,12 @@ import { AptService } from '.';
 import { testContainer } from '~test/di';
 
 const mocks = vi.hoisted(() => ({
-  spawn: vi.fn(),
+  execa: vi.fn(),
   rm: vi.fn(),
   writeFile: vi.fn(),
 }));
 
-vi.mock('nano-spawn', () => ({ default: mocks.spawn }));
+vi.mock('execa', () => ({ execa: mocks.execa }));
 vi.mock('node:fs/promises', async (importActual) => ({
   default: { ...(await importActual<any>()), ...mocks },
   ...mocks,
@@ -27,26 +27,26 @@ describe('cli/services/apt.service', () => {
   });
 
   test('skips install', async () => {
-    mocks.spawn.mockResolvedValueOnce({
+    mocks.execa.mockResolvedValueOnce({
       stdout: 'Status: install ok installed',
     });
     await svc.install('some-pkg');
-    expect(mocks.spawn).toHaveBeenCalledTimes(1);
+    expect(mocks.execa).toHaveBeenCalledTimes(1);
   });
 
   test('works', async () => {
-    mocks.spawn.mockRejectedValueOnce(new Error('not installed'));
+    mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg');
-    expect(mocks.spawn).toHaveBeenCalledTimes(3);
+    expect(mocks.execa).toHaveBeenCalledTimes(3);
     expect(mocks.writeFile).not.toHaveBeenCalled();
     expect(mocks.rm).not.toHaveBeenCalled();
   });
 
   test('uses proxy', async () => {
     env.APT_HTTP_PROXY = 'http://proxy';
-    mocks.spawn.mockRejectedValueOnce(new Error('not installed'));
+    mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg', 'other-pkg');
-    expect(mocks.spawn).toHaveBeenCalledTimes(4);
+    expect(mocks.execa).toHaveBeenCalledTimes(4);
     expect(mocks.writeFile).toHaveBeenCalledOnce();
     expect(mocks.rm).toHaveBeenCalledOnce();
   });
