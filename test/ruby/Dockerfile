@@ -39,7 +39,7 @@ COPY --chown=12021:0 test/ruby/test test
 WORKDIR /test
 
 #--------------------------------------
-# build: ruby 3.x
+# build: ruby 4.x
 #--------------------------------------
 FROM base AS build
 
@@ -108,9 +108,9 @@ RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bund
 USER 12021
 
 # install old version
-RUN install-tool ruby 3.4.0
+RUN install-tool ruby 3.4.8
 
-# renovate: datasource=rubygems depName=bundler
+# install old version
 ENV BUNDLER_VERSION=2.7.2
 RUN install-tool bundler
 
