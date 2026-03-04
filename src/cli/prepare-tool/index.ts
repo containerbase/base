@@ -3,6 +3,8 @@ import { PathService, createContainer } from '../services';
 import { DartPrepareService } from '../tools/dart';
 import { DockerPrepareService } from '../tools/docker';
 import { DotnetPrepareService } from '../tools/dotnet';
+import { MonoPrepareService } from '../tools/dotnet/mono';
+import { PowershellPrepareService } from '../tools/dotnet/powershell';
 import { ErlangPrepareService } from '../tools/erlang';
 import { ElixirPrepareService } from '../tools/erlang/elixir';
 import { FlutterPrepareService } from '../tools/flutter';
@@ -15,10 +17,8 @@ import {
   JavaPrepareService,
 } from '../tools/java';
 import { SbtPrepareService } from '../tools/java/sbt';
-import { MonoPrepareService } from '../tools/mono';
 import { NodePrepareService } from '../tools/node';
 import { PhpPrepareService } from '../tools/php';
-import { PowershellPrepareService } from '../tools/powershell';
 import { PythonPrepareService } from '../tools/python';
 import { ConanPrepareService } from '../tools/python/conan';
 import { RubyPrepareService } from '../tools/ruby';

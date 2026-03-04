@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { z } from 'zod';
-import { BaseInstallService } from '../install-tool/base-install.service';
-import { ToolVersionResolver } from '../install-tool/tool-version-resolver';
+import { BaseInstallService } from '../../install-tool/base-install.service';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
 
 @injectable()
 @injectFromHierarchy()

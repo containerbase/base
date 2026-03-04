@@ -18,7 +18,13 @@ import { DockerInstallService } from '../tools/docker';
 import { BuildxInstallService } from '../tools/docker/buildx';
 import { DockerComposeInstallService } from '../tools/docker/compose';
 import { DotnetInstallService } from '../tools/dotnet';
+import { MonoInstallService } from '../tools/dotnet/mono';
+import {
+  NugetInstallService,
+  NugetVersionResolver,
+} from '../tools/dotnet/nuget';
 import { PaketInstallService } from '../tools/dotnet/paket';
+import { PowershellInstallService } from '../tools/dotnet/powershell';
 import { ErlangInstallService } from '../tools/erlang';
 import { ElixirInstallService } from '../tools/erlang/elixir';
 import { FlutterInstallService } from '../tools/flutter';
@@ -51,7 +57,6 @@ import { JsonnetBundlerInstallService } from '../tools/jb';
 import { KubectlInstallService } from '../tools/kubectl';
 import { KustomizeInstallService } from '../tools/kustomize';
 import { MiseInstallService, MiseVersionResolver } from '../tools/mise';
-import { MonoInstallService } from '../tools/mono';
 import { NixInstallService } from '../tools/nix';
 import { NodeInstallService } from '../tools/node';
 import {
@@ -65,14 +70,12 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver';
 import { NpmBaseInstallService } from '../tools/node/utils';
-import { NugetInstallService, NugetVersionResolver } from '../tools/nuget';
 import { PhpInstallService, PhpVersionResolver } from '../tools/php';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
 } from '../tools/php/composer';
 import { PixiInstallService } from '../tools/pixi';
-import { PowershellInstallService } from '../tools/powershell';
 import { ProtocInstallService } from '../tools/protoc';
 import { PythonInstallService } from '../tools/python';
 import {

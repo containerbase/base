@@ -2,12 +2,12 @@ import fs from 'fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BasePrepareService } from '../prepare-tool/base-prepare.service';
-import { logger, pathExists } from '../utils';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
+import { logger, pathExists } from '../../utils';
 import {
   PrebuildInstallService,
   PrebuildVersionResolver,
-} from './utils/prebuild';
+} from '../utils/prebuild';
 
 @injectable()
 @injectFromHierarchy()
