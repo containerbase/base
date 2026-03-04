@@ -26,6 +26,8 @@ import { FluxInstallService } from '../tools/flux';
 import { GitLfsInstallService } from '../tools/git/lfs';
 import { GleamInstallService } from '../tools/gleam';
 import { GolangInstallService } from '../tools/golang';
+import { CabalInstallService } from '../tools/haskell/cabal';
+import { GhcInstallService } from '../tools/haskell/ghc';
 import { HelmInstallService } from '../tools/helm';
 import { HelmfileInstallService } from '../tools/helmfile';
 import {
@@ -121,6 +123,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BuildxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(CabalInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DartInstallService);
@@ -134,6 +137,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FluxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GitLfsInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GhcInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GleamInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GolangInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GradleInstallService);

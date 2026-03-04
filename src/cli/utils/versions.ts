@@ -12,6 +12,10 @@ export function isValid(version: string): boolean {
   return semverValid(version) !== null;
 }
 
+export function isFourPartVersion(version: string): boolean {
+  return /^\d+\.\d+\.\d+\.\d+$/.test(version);
+}
+
 export function parse(version: string | undefined): SemVer {
   const res = semverParse(version);
   if (!res) {

@@ -255,6 +255,24 @@ https://dl.google.com/go/go1.21.6.linux-arm64.tar.gz
 https://dl.google.com/go/go1.17.5.linux-amd64.tar.gz
 ```
 
+## `haskell`
+
+Haskell tools are separated.
+
+### `cabal`
+
+Cabal releases are downloaded from:
+
+- `https://downloads.haskell.org/~cabal/`
+
+Samples:
+
+```txt
+https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-aarch64-linux-deb10.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-x86_64-linux-deb10.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/SHA256SUMS
+```
+
 ## `helm`
 
 Helm releases are downloaded from:

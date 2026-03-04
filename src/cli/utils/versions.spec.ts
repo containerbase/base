@@ -1,10 +1,16 @@
 import { describe, expect, test } from 'vitest';
-import { isValid, parse } from './versions';
+import { isFourPartVersion, isValid, parse } from './versions';
 
 describe('cli/utils/versions', () => {
   test('isValid', () => {
     expect(isValid('1.0.0')).toBe(true);
     expect(isValid('abc')).toBe(false);
+  });
+
+  test('isFourPartVersion', () => {
+    expect(isFourPartVersion('1.0.0.0')).toBe(true);
+    expect(isFourPartVersion('1.0.0')).toBe(false);
+    expect(isFourPartVersion('abc')).toBe(false);
   });
 
   test('parse', () => {

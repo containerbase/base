@@ -324,6 +324,7 @@ jobs:
           - flutter
           - flux
           - golang
+          - haskell
           - java
           - jb
           - helm
@@ -343,6 +344,13 @@ jobs:
           - name: aarch64
             os: ubuntu-24.04-arm
             tag: arm64
+        # include:
+        #   # no ubuntu arm64 support for haskell
+        #   - lang: haskell
+        #     arch:
+        #       name: x86_64
+        #       os: ubuntu-24.04
+        #       tag: amd64
 
     env:
       TAG: ${{ matrix.lang }}
