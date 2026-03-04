@@ -345,11 +345,11 @@ jobs:
             tag: arm64
         include:
           # no ubuntu arm64 support for haskell
-          - tag: haskell
+          - lang: haskell
             arch:
-              - name: x86_64
-                os: ubuntu-24.04
-                tag: amd64
+              name: x86_64
+              os: ubuntu-24.04
+              tag: amd64
 
     env:
       TAG: ${{ matrix.lang }}
