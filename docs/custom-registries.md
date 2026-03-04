@@ -273,6 +273,20 @@ https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/SHA256SUMS
 ```
 
+### `ghc`
+
+GHC releases are downloaded from:
+
+- `https://downloads.haskell.org/~ghc/`
+
+Samples:
+
+```txt
+https://downloads.haskell.org/~ghc/ghc-9.2.1/ghc-9.2.1-aarch64-deb10-linux.tar.xz
+https://downloads.haskell.org/~ghc/ghc-9.2.1/ghc-9.2.1-x86_64-deb10-linux.tar.xz
+https://downloads.haskell.org/~ghc/ghc-9.2.1/SHA256SUMS
+```
+
 ## `helm`
 
 Helm releases are downloaded from:
