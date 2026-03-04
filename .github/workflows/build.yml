@@ -305,7 +305,7 @@ jobs:
 
   lang:
     runs-on: ${{ matrix.arch.os }}
-    name: ${{ matrix.tag }} (${{ matrix.arch.name }})
+    name: ${{ matrix.lang }} (${{ matrix.arch.name }})
     needs:
       - setup
       - base
@@ -317,7 +317,7 @@ jobs:
       max-parallel: 10
       fail-fast: false
       matrix:
-        tag:
+        lang:
           - dart
           - dotnet
           - erlang
@@ -345,7 +345,7 @@ jobs:
             tag: arm64
 
     env:
-      TAG: ${{ matrix.tag }}
+      TAG: ${{ matrix.lang }}
 
     steps:
       - name: ⚙️ Setup
