@@ -40,7 +40,7 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-#RUN prepare-tool cabal
+RUN prepare-tool cabal
 
 #--------------------------------------
 # test: cabal (root)
@@ -56,15 +56,15 @@ USER 12021
 
 RUN set -ex; \
   cabal --version; \
-  cabal sandbox init; \
+  cd a; \
+  cabal list --installed; \
+  cabal update; \
   true;
 
 
 RUN set -ex; \
     ls -la $USER_HOME/; \
     true
-
-
 
 
 #--------------------------------------
