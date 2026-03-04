@@ -33,9 +33,12 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 #--------------------------------------
-# Image: cabal
+# Image: haskell
 #--------------------------------------
-FROM base AS test-cabal
+FROM base AS test-haskell
+
+# renovate: datasource=docker packageName=haskell
+RUN install-tool ghc 9.8.4
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0
@@ -46,4 +49,4 @@ RUN install-tool cabal 3.16.1.0
 #--------------------------------------
 FROM base
 
-COPY --from=test-cabal /.dummy /.dummy
+COPY --from=test-haskell /.dummy /.dummy

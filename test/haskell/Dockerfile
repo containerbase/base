@@ -32,7 +32,7 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 # test openshift compatibility 12021<>1001
-COPY --chown=1001:0 test/erlang/test test
+COPY --chown=1001:0 test/haskell/test test
 WORKDIR /test
 
 #--------------------------------------
@@ -40,12 +40,15 @@ WORKDIR /test
 #--------------------------------------
 FROM base AS build
 
-RUN prepare-tool cabal
+RUN prepare-tool cabal ghc
 
 #--------------------------------------
-# test: cabal (root)
+# test: haskell (root)
 #--------------------------------------
-FROM base AS cabal-a
+FROM base AS haskell-a
+
+# renovate: datasource=docker packageName=haskell
+RUN install-tool ghc 9.8.4
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0
@@ -68,8 +71,37 @@ RUN set -ex; \
 
 
 #--------------------------------------
+# test: haskell (root-less)
+#--------------------------------------
+FROM base AS haskell-b
+
+RUN chown -R 12021:0 /test
+
+USER 12021
+
+# renovate: datasource=docker packageName=haskell
+RUN install-tool ghc 9.8.4
+
+# renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
+RUN install-tool cabal 3.16.1.0
+
+
+RUN set -ex; \
+  cabal --version; \
+  cd a; \
+  cabal list --installed; \
+  cabal update; \
+  true;
+
+
+RUN set -ex; \
+    ls -la $USER_HOME/; \
+    true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
-COPY --from=cabal-a /.dummy /.dummy
+COPY --from=haskell-a /.dummy /.dummy
+COPY --from=haskell-b /.dummy /.dummy

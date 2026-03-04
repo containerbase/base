@@ -155,6 +155,16 @@ RUN install-tool erlang 28.3.2.0
 RUN install-tool elixir 1.19.5
 
 #--------------------------------------
+# Image: test-haskell
+#--------------------------------------
+FROM build AS test-haskell
+
+# renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
+RUN install-tool cabal 3.16.1.0
+# renovate: datasource=docker packageName=haskell
+RUN install-tool ghc 9.8.4
+
+#--------------------------------------
 # Image: test-java
 #--------------------------------------
 FROM build AS test-java
@@ -242,6 +252,7 @@ FROM base
 COPY --from=test /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-erlang /.dummy /.dummy
+COPY --from=test-haskell /.dummy /.dummy
 COPY --from=test-java /.dummy /.dummy
 COPY --from=test-mono /.dummy /.dummy
 COPY --from=test-node /.dummy /.dummy
