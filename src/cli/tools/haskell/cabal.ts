@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { getDistro } from '../../utils';
+import { getDistro, isFourPartVersion } from '../../utils';
 
 @injectable()
 @injectFromHierarchy()
@@ -58,6 +58,10 @@ export class CabalInstallService extends BaseInstallService {
       file,
       cwd: path,
     });
+  }
+
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(isFourPartVersion(version));
   }
 
   override async link(version: string): Promise<void> {
