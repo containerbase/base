@@ -46,7 +46,6 @@ export class GhcInstallService extends BaseInstallService {
     await this.pathSvc.ensureToolPath(this.name);
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-    await fs.mkdir(path);
     await this.compress.extract({
       file,
       cwd: path,

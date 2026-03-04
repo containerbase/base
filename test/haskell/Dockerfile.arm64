@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-haskell
 
 # renovate: datasource=docker packageName=haskell
-RUN install-tool ghc 9.8.4
+RUN install-tool ghc 9.14.1
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0

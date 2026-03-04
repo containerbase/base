@@ -43,25 +43,24 @@ FROM base AS build
 RUN prepare-tool cabal ghc
 
 #--------------------------------------
-# test: haskell (root)
+# test: haskell (root,open-shift)
 #--------------------------------------
 FROM base AS haskell-a
 
+RUN env
 # renovate: datasource=docker packageName=haskell
-RUN install-tool ghc 9.8.4
+RUN install-tool ghc 9.14.1
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0
 
 
-RUN chown -R 12021:0 /test
-USER 12021
+USER 1001
 
 RUN set -ex; \
   cabal --version; \
   cd a; \
   cabal list --installed; \
-  cabal update; \
   true;
 
 
@@ -71,16 +70,16 @@ RUN set -ex; \
 
 
 #--------------------------------------
-# test: haskell (root-less)
+# test: haskell (rootless)
 #--------------------------------------
-FROM base AS haskell-b
+FROM build AS haskell-b
 
 RUN chown -R 12021:0 /test
 
 USER 12021
 
 # renovate: datasource=docker packageName=haskell
-RUN install-tool ghc 9.8.4
+RUN install-tool ghc 9.14.1
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0
