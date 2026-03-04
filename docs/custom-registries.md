@@ -142,6 +142,43 @@ https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-
 https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-arm64.tar.gz
 ```
 
+### `mono`
+
+Mono releases are downloaded from:
+
+- `https://github.com/containerbase/mono-prebuild/releases`
+
+Samples:
+
+```txt
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz.sha512
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz
+https://github.com/containerbase/mono-prebuild/releases/latest/download/version
+```
+
+#### `nuget`
+
+Nuget releases are downloaded from:
+
+- `https://dist.nuget.org`
+
+The last url is used to find the latest version if no version was provided.
+
+Samples:
+
+```txt
+https://dist.nuget.org/win-x86-commandline/v6.14.1/nuget.exe
+https://dist.nuget.org/tools.json
+```
+
+### `paket`
+
+Paket releases are downloaded with `dotnet tool install paket` from:
+
+- `https://api.nuget.org/`
+
 ## `erlang`
 
 Erlang releases are downloaded from:
@@ -433,37 +470,6 @@ https://github.com/jdx/mise/releases/download/v2026.2.13/mise-v2026.2.13-linux-x
 https://github.com/jdx/mise/releases/download/v2026.2.13/mise-v2026.2.13-linux-arm64.tar.xz
 https://github.com/jdx/mise/releases/download/v2026.2.13/SHASUMS256.txt
 https://mise.jdx.dev/VERSION
-```
-
-## `mono`
-
-Mono releases are downloaded from:
-
-- `https://github.com/containerbase/mono-prebuild/releases`
-
-Samples:
-
-```txt
-https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz
-https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz.sha512
-https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz
-https://github.com/containerbase/mono-prebuild/releases/latest/download/version
-```
-
-### `nuget`
-
-Nuget releases are downloaded from:
-
-- `https://dist.nuget.org`
-
-The last url is used to find the latest version if no version was provided.
-
-Samples:
-
-```txt
-https://dist.nuget.org/win-x86-commandline/v6.14.1/nuget.exe
-https://dist.nuget.org/tools.json
 ```
 
 ## `nix`
