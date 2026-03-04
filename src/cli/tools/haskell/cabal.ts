@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { getDistro, isFourPartVersion } from '../../utils';
+import { isFourPartVersion } from '../../utils';
 
 @injectable()
 @injectFromHierarchy()
@@ -19,19 +19,16 @@ export class CabalInstallService extends BaseInstallService {
   private get arch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
-        throw new Error(
-          'arm64 architecture is currently not supported for cabal',
-        );
-      // return 'aarch64';
+        return 'aarch64';
       case 'amd64':
         return 'x86_64';
     }
   }
 
   override async install(version: string): Promise<void> {
-    const distro = await getDistro();
-    const baseUrl = `https://downloads.haskell.org/cabal/cabal-install-${version}/`;
-    const filename = `cabal-install-${version}-${this.arch}-linux-ubuntu${distro.versionId}.tar.xz`;
+    const baseUrl = `https://downloads.haskell.org/~cabal/cabal-install-${version}/`;
+    // use static deb10 binary as it is compatible with all supported ubuntu versions
+    const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}SHA256SUMS`,
