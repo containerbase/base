@@ -84,7 +84,7 @@
     "bats-assert": "2.2.4",
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
-    "conventional-changelog-conventionalcommits": "9.2.0",
+    "conventional-changelog-conventionalcommits": "9.3.0",
     "esbuild": "0.27.3",
     "esbuild-plugin-pino": "2.3.3",
     "eslint": "9.39.3",
