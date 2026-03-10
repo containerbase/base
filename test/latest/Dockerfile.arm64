@@ -177,7 +177,7 @@ FROM base AS test-others
 RUN install-tool kubectl v1.35.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.3.6
+RUN install-tool mise 2026.3.7
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.22.0
