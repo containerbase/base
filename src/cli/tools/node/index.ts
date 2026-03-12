@@ -31,7 +31,7 @@ export class NodePrepareService extends BasePrepareService {
         npm_config_update_notifier: 'false',
         npm_config_fund: 'false',
         // node v24.6.0, v22.19.0
-        NODE_USE_SYSTEM_CA: '1',
+        // NODE_USE_SYSTEM_CA: '1', // not compatible with --use-openssl-ca
       });
 
       // node v6.11.0
