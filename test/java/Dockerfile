@@ -207,7 +207,7 @@ USER 1001
 
 RUN install-tool maven 3.5.4
 
-# renovate: datasource=maven packageName=org.apache.maven:apache-maven
+# renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
 RUN install-tool maven 3.9.13
 
 RUN set -ex; \
