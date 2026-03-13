@@ -35,12 +35,12 @@ export class MavenInstallService extends BaseInstallService {
         expectedChecksum,
       });
     } else {
-      logger.info(`using archive.apache.org`);
+      logger.info(`using repo.maven.apache.org`);
       strip = 1;
-      // fallback to archive.apache.org
+      // fallback to repo.maven.apache.org
       const ver = parse(version);
       filename = `apache-${name}-${version}-bin.tar.gz`;
-      url = `https://archive.apache.org/dist/${name}/${name}-${ver.major}/${ver.version}/binaries/${filename}`;
+      url = `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${ver.version}/${filename}`;
       checksumFileUrl = `${url}.sha512`;
       let expectedChecksum: string | undefined;
       let checksumType: HttpChecksumType | undefined;
