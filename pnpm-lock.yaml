@@ -207,8 +207,8 @@ importers:
         specifier: 3.8.1
         version: 3.8.1
       prettier-plugin-packagejson:
-        specifier: 3.0.0
-        version: 3.0.0(prettier@3.8.1)
+        specifier: 3.0.2
+        version: 3.0.2(prettier@3.8.1)
       semantic-release:
         specifier: 25.0.3
         version: 25.0.3(typescript@5.9.3)
@@ -3332,8 +3332,8 @@ packages:
     resolution: {integrity: sha512-E6rsNU1QNJgB3sjj7OANinGncFKuK+164sLXw1/CqBjj/EkXSoSdHCtWQGBNlREIGLnL7IEUEGa08YFVUbrhVg==}
     engines: {node: '>=16'}
 
-  prettier-plugin-packagejson@3.0.0:
-    resolution: {integrity: sha512-z8/QmPSqx/ANvvQMWJSkSq1+ihBXeuwDEYdjX3ZjRJ5Ty1k7vGbFQfhzk2eDe0rwS/TNyRjWK/qnjJEStAOtDw==}
+  prettier-plugin-packagejson@3.0.2:
+    resolution: {integrity: sha512-kmoj3hEynXwoHDo8ZhmWAIjRBoQWCDUVackiWfSDWdgD0rS3LGB61T9zoVbume/cotYdCoadUh4sqViAmXvpBQ==}
     peerDependencies:
       prettier: ^3
     peerDependenciesMeta:
@@ -7473,7 +7473,7 @@ snapshots:
 
   presentable-error@0.0.1: {}
 
-  prettier-plugin-packagejson@3.0.0(prettier@3.8.1):
+  prettier-plugin-packagejson@3.0.2(prettier@3.8.1):
     dependencies:
       sort-package-json: 3.6.0
     optionalDependencies:
