@@ -174,7 +174,7 @@ RUN install-tool java 25.0.2+10.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 9.4.0
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.9.13
+RUN install-tool maven 3.9.14
 
 #--------------------------------------
 # test: test-mono
