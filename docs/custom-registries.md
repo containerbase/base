@@ -403,7 +403,7 @@ https://services.gradle.org/distributions/gradle-6.9.4-bin.zip
 Maven releases are downloaded from:
 
 - `https://github.com/containerbase/maven-prebuild/releases`
-- `https://archive.apache.org/dist/maven`
+- `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven`
 
 The first url is preferred and the second is used as fallback for older versions.
 
@@ -413,10 +413,10 @@ Samples:
 https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz.sha512
 https://github.com/containerbase/maven-prebuild/releases/download/3.0.4/maven-3.0.4.tar.xz
 https://github.com/containerbase/maven-prebuild/releases/latest/download/version
-https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz
-https://archive.apache.org/dist/maven/maven-3/3.0.4/binaries/apache-maven-3.0.4-bin.tar.gz.sha1
-https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar
-https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz.sha512
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.0.4/apache-maven-3.0.4-bin.tar.gz
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.0.4/apache-maven-3.0.4-bin.tar.gz.sha1
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.2/apache-maven-3.6.2-bin.tar
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.2/apache-maven-3.6.2-bin.tar.gz.sha512
 ```
 
 ### `sbt`
