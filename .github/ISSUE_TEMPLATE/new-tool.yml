@@ -1,0 +1,139 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-issue-forms.json
+name: New tool request
+description: Request support for a new tool to be installed
+title: 'New tool: <tool name>'
+assignees:
+  - viceice
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Pre-submission checklist
+
+        * Are you sure the tool is not already supported? Search the existing issues for "&lt;tool name&gt;".
+        * Have you gathered all required info (runtime/development, versions, license, commands, etc.)?
+        * If possible, add a **minimal Dockerfile snippet** that demonstrates how you would install it without `install-tool`.
+
+  - type: input
+    id: tool_name
+    attributes:
+      label: Tool name
+      placeholder: e.g., Mono, NuGet CLI, Rscript, Cabal, Android SDK
+    validations:
+      required: true
+
+  - type: textarea
+    id: usage_description
+    attributes:
+      label: What is the tool used for?
+      description: |
+        Briefly explain why this tool is needed for Renovate/Mend's Docker images, and how it will be used.
+
+        Please share relevant specifics such as:
+
+        - "Required to run NuGet restores during build"
+        - "Development headers required to build custom packages against SQLite codebase"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: runtime_or_dev
+    attributes:
+      label: Tool scope
+      description: |
+        Select the parts of the tool that are required.
+      options:
+        - label: Runtime only (CLI / binary)
+        - label: Full development stack (headers, SDK, compiler)
+
+  - type: textarea
+    id: supported_versions
+    attributes:
+      label: Supported version range
+      description: |
+        - If you need a specific version, list it here.
+        - Preferably, this will be for specific major release ranges
+        - If the customer can pick any release, specify "All available".
+            - Note that for some tools, this can introduce a lot more complexity - being specific would be appreciated
+      placeholder: 'e.g., >=6.12 <7.0 or All'
+    validations:
+      required: true
+
+  - type: textarea
+    id: command_list
+    attributes:
+      label: Key commands that must work
+      description: |
+        List the exact CLI invocations the tool will run (one per line).
+        Include any arguments that are mandatory for Mend's build or dependency‑resolution workflows.
+      placeholder: |
+        conda --version
+        nuget restore MyProject.csproj -PackagesDirectory ./packages
+        cabal new-build
+      render: sh
+    validations:
+      required: true
+
+  - type: textarea
+    id: uninstall_strategy
+    attributes:
+      label: Uninstall strategy
+      description: |
+        How should the tool be removed when `uninstall-tool` is invoked?
+        List files/directories that must be deleted and any cleanup steps.
+      placeholder: |
+        rm -f /usr/local/bin/mono
+        rm -rf /usr/share/mono
+      render: sh
+
+  - type: input
+    id: license
+    attributes:
+      label: License of the tool (and any pre‑built binaries)
+      description: |
+        Provide the SPDX identifier or a short URL to the license text.
+      placeholder: e.g., MIT, GPL-2.0-only
+
+  - type: textarea
+    id: dockerfile_snippet
+    attributes:
+      label: Minimal Dockerfile snippet (optional but highly encouraged)
+      description: |
+        Show how you would install this tool in a container.
+        If the tool is already available as a pre‑build image, point to it.
+      placeholder: |
+        ```dockerfile
+        FROM ubuntu:22.04 AS base
+        RUN apt-get update && apt-get install -y wget gnupg ca-certificates \
+            && wget https://download.mono-project.com/repo/ubuntu-stable.gpg.key \
+            && gpg --dearmor -o /usr/share/keyrings/mono-archive-keyring.gpg < ubuntu-stable.gpg.key
+        # …
+        ```
+      render: sh
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Suggested tests
+      description: |
+        Provide a short list of automated checks that would verify the tool works after install/uninstall.
+        E.g., run `mono --version`, `nuget help`, or build a tiny project.
+      placeholder: |
+        ```
+        # Test 1 – Runtime availability
+        RUN mono --version
+
+        # Test 2 – NuGet restore
+        COPY test.csproj /app/
+        RUN nuget restore /app/test.csproj -PackagesDirectory /app/packages
+        ```
+      render: sh
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Any other relevant information
+      description: |
+        Anything that didn't fit in the previous sections (security concerns, special build flags, known issues with bundled runtimes, etc.).
+      placeholder: |
+        "The Mono runtime must be embedded into NuGet.exe for security reasons..."
