@@ -154,6 +154,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -163,32 +166,14 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
 
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
-
-      - name: fetch dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - name: build base
+        uses: ./.github/actions/bake
         with:
-          name: dist
-          path: dist
-
-      - name: fix executable
-        run: |
-          chmod +x dist/cli/*
-          chmod +x dist/docker/usr/local/containerbase/bin/*
-          chmod +x dist/docker/usr/local/sbin/*
-
-      - name: test distro
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 60
-          polling_interval_seconds: 5
-          command: docker buildx bake --set build-ttl.tags=${{env.BASE}} build-ttl
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          args: >-
+            --set build-ttl.tags=${{env.BASE}}
+            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            build-ttl
 
   distro:
     runs-on: ubuntu-24.04
@@ -211,6 +196,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -219,32 +207,10 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
-
-      - name: fetch dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: dist
-          path: dist
-
-      - name: fix executable
-        run: |
-          chmod +x dist/cli/*
-          chmod +x dist/docker/usr/local/containerbase/bin/*
-          chmod +x dist/docker/usr/local/sbin/*
-
       - name: test distro
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: ./.github/actions/bake
         with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 60
-          polling_interval_seconds: 5
-          command: docker buildx bake test-distro --set settings.secrets=type=env,id=GITHUB_TOKEN
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          args: test-distro
 
   # test old distros on arm64
   base-arm64:
@@ -268,6 +234,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -276,32 +245,10 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
-
-      - name: fetch dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: dist
-          path: dist
-
-      - name: fix executable
-        run: |
-          chmod +x dist/cli/*
-          chmod +x dist/docker/usr/local/containerbase/bin/*
-          chmod +x dist/docker/usr/local/sbin/*
-
       - name: test distro
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: ./.github/actions/bake
         with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 60
-          polling_interval_seconds: 5
-          command: docker buildx bake test-base --set settings.secrets=type=env,id=GITHUB_TOKEN
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          args: test-base
 
   lang:
     runs-on: ${{ matrix.arch.os }}
@@ -358,6 +305,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -367,20 +317,19 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE_IMAGE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
 
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
-
-      - name: test
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+      - name: build base
+        uses: ./.github/actions/bake
         with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 60
-          polling_interval_seconds: 5
-          command: docker buildx bake test-${{ matrix.arch.name }} --set settings.secrets=type=env,id=GITHUB_TOKEN
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # CONTAINERBASE_CDN: ${{ vars.CONTAINERBASE_CDN }}
+          args: >-
+            --set build-ttl.tags=${{env.BASE_IMAGE}}
+            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            build-ttl
+
+      - name: test distro
+        uses: ./.github/actions/bake
+        with:
+          args: test-${{ matrix.arch.name }}
 
   # Catch-all required check for test matrix
   test-success:
