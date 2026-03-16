@@ -171,8 +171,8 @@ jobs:
         with:
           args: >-
             --set build-ttl.tags=${{env.BASE}}
-            --set build-ttl.cache-to=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            --set settings.cache-from+=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             build-ttl
 
   distro:
@@ -322,8 +322,8 @@ jobs:
         with:
           args: >-
             --set build-ttl.tags=${{env.BASE_IMAGE}}
-            --set build-ttl.cache-to=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            --set settings.cache-from+=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             build-ttl
 
       - name: test distro
