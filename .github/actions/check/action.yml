@@ -8,6 +8,9 @@ runs:
     - name: Set Up contained image store
       shell: bash
       run: |
+        if [ ! -f /etc/docker/daemon.json ]; then
+            echo "{}" | sudo tee /etc/docker/daemon.json
+        fi
         cat /etc/docker/daemon.json | jq '. | .+{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json
         cat /etc/docker/daemon.json
         sudo systemctl restart docker
