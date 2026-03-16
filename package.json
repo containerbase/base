@@ -23,7 +23,6 @@
     "lint-fix": "run-s prettier-fix eslint-fix 'lint-fix:*'",
     "lint-fix:markdown": "markdownlint-cli2 --fix '**/*.md'",
     "prepare": "husky",
-    "prepare:proxy": "node tools/prepare-proxy.js",
     "prettier": "prettier --cache -c -u \"**/*.*\"",
     "prettier-fix": "prettier --cache -w -u \"**/*.*\"",
     "release:prepare": "node tools/prepare-release.js",
