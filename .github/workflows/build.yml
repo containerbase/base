@@ -154,6 +154,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -162,9 +165,6 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
-
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
 
       - name: build base
         uses: ./.github/actions/bake
@@ -196,6 +196,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -203,9 +206,6 @@ jobs:
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
 
       - name: test distro
         uses: ./.github/actions/bake
@@ -234,6 +234,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -241,9 +244,6 @@ jobs:
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
 
       - name: test distro
         uses: ./.github/actions/bake
@@ -305,6 +305,9 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@5deae3a281a98870784309f9017eff5e54d2bf31 # v4.5.0
+        with:
+          node: false
+          apt-proxy: true
 
       - name: Check system
         uses: ./.github/actions/check
@@ -313,9 +316,6 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
           echo "BASE_IMAGE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
-
-      - name: prepare apt proxy
-        uses: ./.github/actions/prepare-proxy
 
       - name: build base
         uses: ./.github/actions/bake
