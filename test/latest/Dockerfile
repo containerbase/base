@@ -250,7 +250,7 @@ RUN install-tool sops v3.12.2
 RUN install-tool tofu 1.11.5
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 34.0
+RUN install-tool protoc 34.1
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=v0.45.2
@@ -298,7 +298,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 FROM base AS testf
 
 # renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf versioning=docker
-ARG PROTOC_VERSION=34.0
+ARG PROTOC_VERSION=34.1
 
 RUN set -ex; \
   ls -lah /opt/containerbase/; \
