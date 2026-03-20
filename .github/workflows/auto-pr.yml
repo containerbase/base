@@ -46,7 +46,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: kiegroup/git-backporting@baae3fe1e3c71bc6b1a2699b3bc1e153a19d5ac7 # v4.8.7
+      - uses: kiegroup/git-backporting@82e45d73f8d39bc3d7eb4b41859d313696c93ed9 # v4.9.0
         with:
           target-branch-pattern: '^backport:(?<target>(.*))$'
           strategy: ort
