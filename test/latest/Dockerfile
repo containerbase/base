@@ -238,7 +238,7 @@ RUN install-tool gleam 1.15.2
 RUN install-tool kubectl v1.35.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.3.10
+RUN install-tool mise 2026.3.12
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.22.0
