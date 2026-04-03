@@ -61,9 +61,9 @@ RUN install-tool python 3.14.3
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.5.1
+RUN install-tool pipenv 2026.5.2
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.5.1
+RUN install-tool pipenv 2026.5.2
 
 USER 12021
 
@@ -207,7 +207,7 @@ RUN install-tool python 3.10.17
 RUN install-tool python 3.14.3
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.5.1
+RUN install-tool pipenv 2026.5.2
 
 RUN set -ex; \
   cd pipenv-b; \
