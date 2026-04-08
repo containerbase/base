@@ -95,7 +95,7 @@
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
     "markdownlint-cli2": "0.22.0",
-    "nock": "14.0.11",
+    "nock": "14.0.12",
     "npm-run-all2": "8.0.4",
     "prettier": "3.8.1",
     "prettier-plugin-packagejson": "3.0.2",
