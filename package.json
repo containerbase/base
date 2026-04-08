@@ -105,12 +105,11 @@
     "type-fest": "5.5.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.58.0",
-    "vite-tsconfig-paths": "6.1.1",
+    "vite": "8.0.3",
     "vitest": "4.1.2"
   },
   "peerDependencies": {
-    "markdownlint": "*",
-    "vite": "*"
+    "markdownlint": "*"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
