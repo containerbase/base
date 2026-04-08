@@ -4,12 +4,11 @@ import { join } from 'node:path';
 import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import merge from 'deepmerge';
-import {
+import got, {
   HTTPError,
   type OptionsInit,
   type OptionsOfJSONResponseBody,
   type OptionsOfTextResponseBody,
-  got,
 } from 'got';
 import { inject, injectable, postConstruct } from 'inversify';
 import { hash, hashFile } from '../utils/hash.ts';
@@ -174,11 +173,11 @@ export class HttpService {
       try {
         return await got
           .get(
+            nUrl,
             merge.all([
               this._opts,
               opts,
               {
-                url: nUrl,
                 resolveBodyOnly: false,
               },
             ]),
