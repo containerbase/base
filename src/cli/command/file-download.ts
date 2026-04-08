@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { version } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import { Command, Option } from 'clipanion';
-import { got } from 'got';
+import got from 'got';
 import prettyMilliseconds from 'pretty-ms';
 import { EnvService, createContainer } from '../services/index.ts';
 import { logger } from '../utils/index.ts';
