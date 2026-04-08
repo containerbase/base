@@ -9,6 +9,7 @@ import {
 } from '../services/index.ts';
 import { ApkoInstallService } from '../tools/apko.ts';
 import { BazeliskInstallService } from '../tools/bazelisk.ts';
+import { BufInstallService } from '../tools/buf.ts';
 import { BunInstallService } from '../tools/bun.ts';
 import { DartInstallService } from '../tools/dart/index.ts';
 import { DenoInstallService } from '../tools/deno.ts';
@@ -132,6 +133,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BuildxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(BufInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CabalInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);

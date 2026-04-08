@@ -57,6 +57,20 @@ https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-
 https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64
 ```
 
+## `buf`
+
+Buf releases are downloaded from:
+
+- `https://github.com/bufbuild/buf/releases`
+
+Samples:
+
+```txt
+https://github.com/bufbuild/buf/releases/download/v1.67.0/buf-Linux-x84_64.tar.gz
+https://github.com/bufbuild/buf/releases/download/v1.67.0/buf-Linux-aarch64.tar.gz
+https://github.com/bufbuild/buf/releases/download/v1.67.0/sha256.txt
+```
+
 ## `bun`
 
 Bun releases are downloaded from:
