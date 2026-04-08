@@ -75,7 +75,7 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN install-tool powershell v7.6.0
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.14.3
+ARG PYTHON_VERSION=3.14.4
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
