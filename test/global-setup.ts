@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { afterAll, beforeAll, vi } from 'vitest';
 
 vi.mock('pino', () => ({
