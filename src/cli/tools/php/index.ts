@@ -2,11 +2,11 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { AptService } from '../../services';
-import { getDistro, logger } from '../../utils';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { AptService } from '../../services/index.ts';
+import { getDistro, logger } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()

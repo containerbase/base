@@ -4,9 +4,9 @@ import { major, minor, satisfies, valid } from '@renovatebot/pep440';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { VersionService } from '../../services';
-import { logger } from '../../utils';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { VersionService } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 
 @injectable()
 export abstract class PythonBaseInstallService extends BaseInstallService {

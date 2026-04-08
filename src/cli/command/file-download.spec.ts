@@ -1,18 +1,18 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { logger } from '../utils';
-import { registerCommands } from '.';
-import { scope } from '~test/http-mock';
-import { cachePath } from '~test/path';
+import { logger } from '../utils/index.ts';
+import { registerCommands } from './index.ts';
+import { scope } from '~test/http-mock.ts';
+import { cachePath } from '~test/path.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
   prepareTools: vi.fn(),
 }));
 
-vi.mock('../install-tool', () => mocks);
-vi.mock('../prepare-tool', () => mocks);
+vi.mock('../install-tool/index.ts', () => mocks);
+vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/file-download', () => {
   beforeEach(() => {

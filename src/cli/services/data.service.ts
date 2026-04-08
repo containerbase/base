@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import type Nedb from '@seald-io/nedb';
 import Datastore from '@seald-io/nedb';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { PathService } from './path.service';
+import { PathService } from './path.service.ts';
 
 export type Database<T = unknown> = Pick<
   Nedb<T>,

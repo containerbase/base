@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { ensurePaths } from '../../../test/path';
-import { createContainer } from '../services';
-import { LinkToolService } from './link-tool.service';
+import { ensurePaths } from '../../../test/path.ts';
+import { createContainer } from '../services/index.ts';
+import { LinkToolService } from './link-tool.service.ts';
 
 describe('cli/services/link-tool.service', async () => {
   const child = createContainer();

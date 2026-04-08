@@ -2,9 +2,9 @@ import { version } from 'node:process';
 import { Command, Option } from 'clipanion';
 import { got } from 'got';
 import prettyMilliseconds from 'pretty-ms';
-import { EnvService, createContainer } from '../services';
-import { logger } from '../utils';
-import { command } from './utils';
+import { EnvService, createContainer } from '../services/index.ts';
+import { logger } from '../utils/index.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class FileExistsCommand extends Command {

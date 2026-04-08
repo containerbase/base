@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { logger } from '../utils';
-import { VersionService } from '.';
-import { testContainer } from '~test/di';
-import { ensurePaths, rootPath } from '~test/path';
+import { logger } from '../utils/index.ts';
+import { VersionService } from './index.ts';
+import { testContainer } from '~test/di.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 describe('cli/services/version.service', () => {
   let child!: Container;

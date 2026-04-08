@@ -1,6 +1,6 @@
 import { Command } from 'clipanion';
-import { InstallToolCommand } from './install-tool';
-import { command } from './utils';
+import { InstallToolCommand } from './install-tool.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class InstallGemCommand extends InstallToolCommand {

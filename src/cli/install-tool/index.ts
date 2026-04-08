@@ -1,116 +1,122 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
+import type { ShellWrapperConfig } from '../services/index.ts';
 import {
   IpcClient,
   LinkToolService,
   PathService,
   VersionService,
   createContainer,
-} from '../services';
-import type { ShellWrapperConfig } from '../services';
-import { ResolverMap } from '../tools';
-import { ApkoInstallService } from '../tools/apko';
-import { BazeliskInstallService } from '../tools/bazelisk';
-import { BunInstallService } from '../tools/bun';
-import { DartInstallService } from '../tools/dart';
-import { DenoInstallService } from '../tools/deno';
-import { DevboxInstallService } from '../tools/devbox';
-import { DockerInstallService } from '../tools/docker';
-import { BuildxInstallService } from '../tools/docker/buildx';
-import { DockerComposeInstallService } from '../tools/docker/compose';
-import { DotnetInstallService } from '../tools/dotnet';
-import { MonoInstallService } from '../tools/dotnet/mono';
+} from '../services/index.ts';
+import { ApkoInstallService } from '../tools/apko.ts';
+import { BazeliskInstallService } from '../tools/bazelisk.ts';
+import { BunInstallService } from '../tools/bun.ts';
+import { DartInstallService } from '../tools/dart/index.ts';
+import { DenoInstallService } from '../tools/deno.ts';
+import { DevboxInstallService } from '../tools/devbox.ts';
+import { BuildxInstallService } from '../tools/docker/buildx.ts';
+import { DockerComposeInstallService } from '../tools/docker/compose.ts';
+import { DockerInstallService } from '../tools/docker/index.ts';
+import { DotnetInstallService } from '../tools/dotnet/index.ts';
+import { MonoInstallService } from '../tools/dotnet/mono.ts';
 import {
   NugetInstallService,
   NugetVersionResolver,
-} from '../tools/dotnet/nuget';
-import { PaketInstallService } from '../tools/dotnet/paket';
-import { PowershellInstallService } from '../tools/dotnet/powershell';
-import { ErlangInstallService } from '../tools/erlang';
-import { ElixirInstallService } from '../tools/erlang/elixir';
-import { FlutterInstallService } from '../tools/flutter';
-import { FluxInstallService } from '../tools/flux';
-import { GitLfsInstallService } from '../tools/git/lfs';
-import { GleamInstallService } from '../tools/gleam';
-import { GolangInstallService } from '../tools/golang';
-import { CabalInstallService } from '../tools/haskell/cabal';
-import { GhcInstallService } from '../tools/haskell/ghc';
-import { HelmInstallService } from '../tools/helm';
-import { HelmfileInstallService } from '../tools/helmfile';
+} from '../tools/dotnet/nuget.ts';
+import { PaketInstallService } from '../tools/dotnet/paket.ts';
+import { PowershellInstallService } from '../tools/dotnet/powershell.ts';
+import { ElixirInstallService } from '../tools/erlang/elixir.ts';
+import { ErlangInstallService } from '../tools/erlang/index.ts';
+import { FlutterInstallService } from '../tools/flutter.ts';
+import { FluxInstallService } from '../tools/flux.ts';
+import { GitLfsInstallService } from '../tools/git/lfs.ts';
+import { GleamInstallService } from '../tools/gleam.ts';
+import { GolangInstallService } from '../tools/golang.ts';
+import { CabalInstallService } from '../tools/haskell/cabal.ts';
+import { GhcInstallService } from '../tools/haskell/ghc.ts';
+import { HelmInstallService } from '../tools/helm.ts';
+import { HelmfileInstallService } from '../tools/helmfile.ts';
+import { ResolverMap } from '../tools/index.ts';
+import {
+  GradleInstallService,
+  GradleVersionResolver,
+} from '../tools/java/gradle.ts';
 import {
   JavaInstallService,
   JavaJdkInstallService,
   JavaJreInstallService,
-} from '../tools/java';
+} from '../tools/java/index.ts';
 import {
-  GradleInstallService,
-  GradleVersionResolver,
-} from '../tools/java/gradle';
-import { MavenInstallService, MavenVersionResolver } from '../tools/java/maven';
+  MavenInstallService,
+  MavenVersionResolver,
+} from '../tools/java/maven.ts';
 import {
   JavaJdkVersionResolver,
   JavaJreVersionResolver,
   JavaVersionResolver,
-} from '../tools/java/resolver';
-import { SbtInstallService } from '../tools/java/sbt';
-import { ScalaInstallService } from '../tools/java/scala';
-import { JsonnetBundlerInstallService } from '../tools/jb';
-import { KubectlInstallService } from '../tools/kubectl';
-import { KustomizeInstallService } from '../tools/kustomize';
-import { MiseInstallService, MiseVersionResolver } from '../tools/mise';
-import { NixInstallService } from '../tools/nix';
-import { NodeInstallService } from '../tools/node';
+} from '../tools/java/resolver.ts';
+import { SbtInstallService } from '../tools/java/sbt.ts';
+import { ScalaInstallService } from '../tools/java/scala.ts';
+import { JsonnetBundlerInstallService } from '../tools/jb.ts';
+import { KubectlInstallService } from '../tools/kubectl.ts';
+import { KustomizeInstallService } from '../tools/kustomize.ts';
+import { MiseInstallService, MiseVersionResolver } from '../tools/mise.ts';
+import { NixInstallService } from '../tools/nix.ts';
+import { NodeInstallService } from '../tools/node/index.ts';
 import {
   RenovateInstallService,
   YarnInstallService,
   YarnSlimInstallService,
-} from '../tools/node/npm';
+} from '../tools/node/npm.ts';
 import {
   NodeVersionResolver,
   NpmVersionResolver,
   YarnVersionResolver,
-} from '../tools/node/resolver';
-import { NpmBaseInstallService } from '../tools/node/utils';
-import { PhpInstallService, PhpVersionResolver } from '../tools/php';
+} from '../tools/node/resolver.ts';
+import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
-} from '../tools/php/composer';
-import { PixiInstallService } from '../tools/pixi';
-import { ProtocInstallService } from '../tools/protoc';
-import { PythonInstallService } from '../tools/python';
+} from '../tools/php/composer.ts';
+import { PhpInstallService, PhpVersionResolver } from '../tools/php/index.ts';
+import { PixiInstallService } from '../tools/pixi.ts';
+import { ProtocInstallService } from '../tools/protoc.ts';
 import {
   ConanInstallService,
   ConanVersionResolver,
-} from '../tools/python/conan';
-import { PipVersionResolver } from '../tools/python/pip';
-import { PoetryVersionResolver } from '../tools/python/poetry';
-import { PipBaseInstallService } from '../tools/python/utils';
-import { RubyInstallService } from '../tools/ruby';
+} from '../tools/python/conan.ts';
+import { PythonInstallService } from '../tools/python/index.ts';
+import { PipVersionResolver } from '../tools/python/pip.ts';
+import { PoetryVersionResolver } from '../tools/python/poetry.ts';
+import { PipBaseInstallService } from '../tools/python/utils.ts';
 import {
   CocoapodsInstallService,
   CocoapodsVersionResolver,
-} from '../tools/ruby/cocoapods';
+} from '../tools/ruby/cocoapods.ts';
+import { RubyInstallService } from '../tools/ruby/index.ts';
 import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
-} from '../tools/ruby/utils';
-import { RustInstallService } from '../tools/rust';
-import { SkopeoInstallService } from '../tools/skopeo';
-import { SopsInstallService } from '../tools/sops';
-import { SwiftInstallService } from '../tools/swift';
-import { TerraformInstallService } from '../tools/terraform';
-import { TofuInstallService } from '../tools/tofu';
-import { VendirInstallService } from '../tools/vendir';
-import { WallyInstallService } from '../tools/wally';
-import { type InstallToolType, logger } from '../utils';
-import { isNotKnownV2Tool } from '../utils/v2-tool';
+} from '../tools/ruby/utils.ts';
+import { RustInstallService } from '../tools/rust.ts';
+import { SkopeoInstallService } from '../tools/skopeo.ts';
+import { SopsInstallService } from '../tools/sops.ts';
+import { SwiftInstallService } from '../tools/swift.ts';
+import { TerraformInstallService } from '../tools/terraform.ts';
+import { TofuInstallService } from '../tools/tofu.ts';
+import { VendirInstallService } from '../tools/vendir.ts';
+import { WallyInstallService } from '../tools/wally.ts';
+import { type InstallToolType, logger } from '../utils/index.ts';
+import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
 import {
   V1ToolInstallService,
   V2ToolInstallService,
-} from './install-legacy-tool.service';
-import { INSTALL_TOOL_TOKEN, InstallToolService } from './install-tool.service';
-import { TOOL_VERSION_RESOLVER } from './tool-version-resolver';
-import { ToolVersionResolverService } from './tool-version-resolver.service';
+} from './install-legacy-tool.service.ts';
+import {
+  INSTALL_TOOL_TOKEN,
+  InstallToolService,
+} from './install-tool.service.ts';
+import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
+import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
 
 async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');

@@ -1,8 +1,8 @@
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { EnvService, PathService } from '../services';
-import { NoPrepareTools } from '../tools';
-import { cleanAptFiles, cleanTmpFiles, logger } from '../utils';
+import { EnvService, PathService } from '../services/index.ts';
+import { NoPrepareTools } from '../tools/index.ts';
+import { cleanAptFiles, cleanTmpFiles, logger } from '../utils/index.ts';
 import type { BasePrepareService } from './base-prepare.service';
 
 export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');

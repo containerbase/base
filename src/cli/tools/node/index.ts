@@ -3,14 +3,14 @@ import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { getDistro, parse } from '../../utils';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { getDistro, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
   prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
-} from './utils';
+} from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()

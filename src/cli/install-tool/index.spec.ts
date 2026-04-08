@@ -1,25 +1,34 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { ensurePaths, rootPath } from '../../../test/path';
-import { IpcServer, VersionService, createContainer } from '../services';
-import { NpmVersionResolver } from '../tools/node/resolver';
-import { NpmBaseInstallService } from '../tools/node/utils';
-import { PipVersionResolver } from '../tools/python/pip';
-import { PipBaseInstallService } from '../tools/python/utils';
+import {
+  IpcServer,
+  VersionService,
+  createContainer,
+} from '../services/index.ts';
+import { NpmVersionResolver } from '../tools/node/resolver.ts';
+import { NpmBaseInstallService } from '../tools/node/utils.ts';
+import { PipVersionResolver } from '../tools/python/pip.ts';
+import { PipBaseInstallService } from '../tools/python/utils.ts';
 import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
-} from '../tools/ruby/utils';
-import { isDockerBuild, logger, pathExists } from '../utils';
-import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
-import { installTool, linkTool, resolveVersion, uninstallTool } from '.';
+} from '../tools/ruby/utils.ts';
+import { BlockingChild, MissingParent, NotSupported } from '../utils/codes.ts';
+import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
+import {
+  installTool,
+  linkTool,
+  resolveVersion,
+  uninstallTool,
+} from './index.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
 vi.mock('execa');
-vi.mock('../tools/bun');
-vi.mock('../tools/php/composer');
-vi.mock('../utils', async (importActual) => ({
-  ...(await importActual<typeof import('../utils')>()),
+vi.mock('../tools/bun.ts');
+vi.mock('../tools/php/composer.ts');
+vi.mock('../utils/index.ts', async (importActual) => ({
+  ...(await importActual<typeof import('../utils/index.ts')>()),
   isDockerBuild: vi.fn(),
 }));
 

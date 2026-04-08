@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import type { EnvService, PathService } from '../../services';
-import { pathExists } from '../../utils';
+import { pathExists } from '../../utils/index.ts';
 
 export async function prepareDartHome(
   envSvc: EnvService,

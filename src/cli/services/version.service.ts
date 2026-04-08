@@ -1,10 +1,10 @@
 import { chmod, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable, postConstruct } from 'inversify';
-import { fileRights, logger, tool2path } from '../utils';
 import type { InstallToolType } from '../utils';
-import { DataService, type Database } from './data.service';
-import { PathService } from './path.service';
+import { fileRights, logger, tool2path } from '../utils/index.ts';
+import { DataService, type Database } from './data.service.ts';
+import { PathService } from './path.service.ts';
 
 export type Doc<T> = T & {
   _id?: string;

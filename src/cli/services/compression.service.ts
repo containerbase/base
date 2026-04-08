@@ -1,6 +1,6 @@
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { EnvService } from './env.service';
+import { EnvService } from './env.service.ts';
 
 export interface ExtractConfig {
   file: string;

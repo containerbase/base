@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { pathExists, tool2path } from '../utils';
-import { EnvService } from './env.service';
-import { PathService } from './path.service';
+import { pathExists, tool2path } from '../utils/index.ts';
+import { EnvService } from './env.service.ts';
+import { PathService } from './path.service.ts';
 
 export interface ShellWrapperConfig {
   name?: string | undefined;

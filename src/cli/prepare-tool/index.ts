@@ -1,33 +1,36 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
-import { PathService, createContainer } from '../services';
-import { DartPrepareService } from '../tools/dart';
-import { DockerPrepareService } from '../tools/docker';
-import { DotnetPrepareService } from '../tools/dotnet';
-import { MonoPrepareService } from '../tools/dotnet/mono';
-import { PowershellPrepareService } from '../tools/dotnet/powershell';
-import { ErlangPrepareService } from '../tools/erlang';
-import { ElixirPrepareService } from '../tools/erlang/elixir';
-import { FlutterPrepareService } from '../tools/flutter';
-import { GolangPrepareService } from '../tools/golang';
-import { CabalPrepareService } from '../tools/haskell/cabal';
-import { GhcPrepareService } from '../tools/haskell/ghc';
+import { PathService, createContainer } from '../services/index.ts';
+import { DartPrepareService } from '../tools/dart/index.ts';
+import { DockerPrepareService } from '../tools/docker/index.ts';
+import { DotnetPrepareService } from '../tools/dotnet/index.ts';
+import { MonoPrepareService } from '../tools/dotnet/mono.ts';
+import { PowershellPrepareService } from '../tools/dotnet/powershell.ts';
+import { ElixirPrepareService } from '../tools/erlang/elixir.ts';
+import { ErlangPrepareService } from '../tools/erlang/index.ts';
+import { FlutterPrepareService } from '../tools/flutter.ts';
+import { GolangPrepareService } from '../tools/golang.ts';
+import { CabalPrepareService } from '../tools/haskell/cabal.ts';
+import { GhcPrepareService } from '../tools/haskell/ghc.ts';
 import {
   JavaJdkPrepareService,
   JavaJrePrepareService,
   JavaPrepareService,
-} from '../tools/java';
-import { SbtPrepareService } from '../tools/java/sbt';
-import { NodePrepareService } from '../tools/node';
-import { PhpPrepareService } from '../tools/php';
-import { PythonPrepareService } from '../tools/python';
-import { ConanPrepareService } from '../tools/python/conan';
-import { RubyPrepareService } from '../tools/ruby';
-import { RustPrepareService } from '../tools/rust';
-import { SwiftPrepareService } from '../tools/swift';
-import { logger } from '../utils';
-import { isNotKnownV2Tool } from '../utils/v2-tool';
-import { V2ToolPrepareService } from './prepare-legacy-tools.service';
-import { PREPARE_TOOL_TOKEN, PrepareToolService } from './prepare-tool.service';
+} from '../tools/java/index.ts';
+import { SbtPrepareService } from '../tools/java/sbt.ts';
+import { NodePrepareService } from '../tools/node/index.ts';
+import { PhpPrepareService } from '../tools/php/index.ts';
+import { ConanPrepareService } from '../tools/python/conan.ts';
+import { PythonPrepareService } from '../tools/python/index.ts';
+import { RubyPrepareService } from '../tools/ruby/index.ts';
+import { RustPrepareService } from '../tools/rust.ts';
+import { SwiftPrepareService } from '../tools/swift.ts';
+import { logger } from '../utils/index.ts';
+import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
+import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
+import {
+  PREPARE_TOOL_TOKEN,
+  PrepareToolService,
+} from './prepare-tool.service.ts';
 
 async function prepareContainer(): Promise<Container> {
   logger.trace('preparing container');

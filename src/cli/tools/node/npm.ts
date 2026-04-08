@@ -1,6 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
-import { logger, parse, semverSatisfies } from '../../utils';
-import { NpmBaseInstallService } from './utils';
+import { logger, parse, semverSatisfies } from '../../utils/index.ts';
+import { NpmBaseInstallService } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()

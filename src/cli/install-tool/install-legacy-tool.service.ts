@@ -1,9 +1,9 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { V2ToolService } from '../services';
-import { logger } from '../utils';
-import { BaseInstallService } from './base-install.service';
+import { V2ToolService } from '../services/index.ts';
+import { logger } from '../utils/index.ts';
+import { BaseInstallService } from './base-install.service.ts';
 
 const defaultPipRegistry = 'https://pypi.org/simple/';
 

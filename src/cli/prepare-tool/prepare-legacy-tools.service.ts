@@ -1,8 +1,8 @@
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { V2ToolService } from '../services';
-import { logger } from '../utils';
-import { BasePrepareService } from './base-prepare.service';
+import { V2ToolService } from '../services/index.ts';
+import { logger } from '../utils/index.ts';
+import { BasePrepareService } from './base-prepare.service.ts';
 
 @injectable()
 export abstract class V2ToolPrepareService extends BasePrepareService {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { logger } from '../../utils';
+import { logger } from '../../utils/index.ts';
 
 // function fixPythonVersion(version: string): string {
 //   return version; //.replace('\u003C', '<').replace('\u003E', '>');

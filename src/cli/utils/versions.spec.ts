@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isFourPartVersion, isValid, parse } from './versions';
+import { isFourPartVersion, isValid, parse } from './versions.ts';
 
 describe('cli/utils/versions', () => {
   test('isValid', () => {

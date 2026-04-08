@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { semverSatisfies } from '../../utils';
-import { RubyBaseInstallService, RubyGemVersionResolver } from './utils';
+import { semverSatisfies } from '../../utils/index.ts';
+import { RubyBaseInstallService, RubyGemVersionResolver } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()

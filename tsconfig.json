@@ -4,7 +4,6 @@
     "@tsconfig/node24/tsconfig.json"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "allowJs": true,
     "noEmit": true,
     "types": ["node"],
@@ -16,7 +15,8 @@
     "moduleResolution": "Bundler",
     "paths": {
       "~test/*": ["./test/*"]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "exclude": ["node_modules", "bin", "dist", "coverage", "html"]
 }

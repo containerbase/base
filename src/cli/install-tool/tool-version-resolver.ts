@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { EnvService, HttpService } from '../services';
+import { EnvService, HttpService } from '../services/index.ts';
 
 export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 

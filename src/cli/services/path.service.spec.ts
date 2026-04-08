@@ -4,10 +4,10 @@ import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { fileRights, pathExists } from '../utils';
-import { PathService } from '.';
-import { testContainer } from '~test/di';
-import { ensurePaths, rootPath } from '~test/path';
+import { fileRights, pathExists } from '../utils/index.ts';
+import { PathService } from './index.ts';
+import { testContainer } from '~test/di.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 describe('cli/services/path.service', () => {
   const path = env.PATH;

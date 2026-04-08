@@ -5,13 +5,13 @@ import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import type { PackageJson } from 'type-fest';
-import { BaseInstallService } from '../../install-tool/base-install.service';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import {
   type EnvService,
   type PathService,
   VersionService,
-} from '../../services';
-import { logger, parse, pathExists, spawn } from '../../utils';
+} from '../../services/index.ts';
+import { logger, parse, pathExists, spawn } from '../../utils/index.ts';
 
 const defaultRegistry = 'https://registry.npmjs.org/';
 

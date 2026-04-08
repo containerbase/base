@@ -1,16 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { CompressionService, HttpService } from '../../services';
-import { logger, parse } from '../../utils';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { CompressionService, HttpService } from '../../services/index.ts';
+import { logger, parse } from '../../utils/index.ts';
 import {
   createGradleSettings,
   createMavenSettings,
   resolveJavaDownloadUrl,
   resolveLatestJavaLtsVersion,
-} from './utils';
+} from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()

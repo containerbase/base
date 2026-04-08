@@ -2,10 +2,10 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { semverCoerce } from '../../utils';
-import { GradleVersionData } from './schema';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { semverCoerce } from '../../utils/index.ts';
+import { GradleVersionData } from './schema.ts';
 
 @injectable()
 @injectFromHierarchy()

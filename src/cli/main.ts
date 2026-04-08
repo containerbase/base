@@ -1,8 +1,13 @@
 import { argv, argv0, exit, version } from 'node:process';
 import { Builtins, Cli } from 'clipanion';
-import { registerCommands } from './command';
-import { bootstrap } from './proxy';
-import { cliMode, logger, parseBinaryName, validateSystem } from './utils';
+import { registerCommands } from './command/index.ts';
+import { bootstrap } from './proxy.ts';
+import {
+  cliMode,
+  logger,
+  parseBinaryName,
+  validateSystem,
+} from './utils/index.ts';
 
 declare global {
   // needs to be this to make eslint happy

@@ -1,8 +1,11 @@
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import ipc from 'node-ipc';
-import { logger, pathExists } from '../utils';
-import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
-import { PathService } from './path.service';
+import { logger, pathExists } from '../utils/index.ts';
+import {
+  LinkToolService,
+  type ShellWrapperConfig,
+} from './link-tool.service.ts';
+import { PathService } from './path.service.ts';
 
 const maxTries = 3;
 ipc.config.retry = 1500;

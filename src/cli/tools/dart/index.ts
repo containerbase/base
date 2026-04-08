@@ -1,15 +1,15 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { parse } from '../../utils';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { parse } from '../../utils/index.ts';
 import {
   initDartHome,
   initPubCache,
   prepareDartHome,
   preparePubCache,
-} from './utils';
+} from './utils.ts';
 
 // Dart SDK sample urls
 // https://storage.googleapis.com/dart-archive/channels/stable/release/1.11.0/sdk/dartsdk-linux-x64-release.zip

@@ -12,10 +12,10 @@ import {
   got,
 } from 'got';
 import { inject, injectable, postConstruct } from 'inversify';
-import { logger } from '../utils';
-import { hash, hashFile } from '../utils/hash';
-import { EnvService } from './env.service';
-import { PathService } from './path.service';
+import { hash, hashFile } from '../utils/hash.ts';
+import { logger } from '../utils/index.ts';
+import { EnvService } from './env.service.ts';
+import { PathService } from './path.service.ts';
 
 export type HttpChecksumType =
   | 'sha1'

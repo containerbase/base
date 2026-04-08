@@ -3,19 +3,24 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { deleteAsync } from 'del';
 import { execa } from 'execa';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { initializeTools, prepareTools } from '../prepare-tool';
+import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
   EnvService,
   IpcServer,
   LinkToolService,
   PathService,
   VersionService,
-} from '../services';
+} from '../services/index.ts';
 import type { ToolState } from '../services/version.service';
-import { cleanAptFiles, cleanTmpFiles, isDockerBuild, logger } from '../utils';
-import { BlockingChild, MissingParent, NotSupported } from '../utils/codes';
+import { BlockingChild, MissingParent, NotSupported } from '../utils/codes.ts';
+import {
+  cleanAptFiles,
+  cleanTmpFiles,
+  isDockerBuild,
+  logger,
+} from '../utils/index.ts';
 import type { BaseInstallService } from './base-install.service';
-import { V1ToolInstallService } from './install-legacy-tool.service';
+import { V1ToolInstallService } from './install-legacy-tool.service.ts';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 

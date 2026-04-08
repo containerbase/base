@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isKnownV2Tool, isNotKnownV2Tool, v2Tool } from './v2-tool';
+import { isKnownV2Tool, isNotKnownV2Tool, v2Tool } from './v2-tool.ts';
 
 describe('cli/utils/v2-tool', () => {
   @v2Tool('test-tool')

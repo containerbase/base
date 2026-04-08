@@ -1,8 +1,8 @@
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import { prepareTools } from '../prepare-tool';
-import { logger } from '../utils';
-import { command } from './utils';
+import { prepareTools } from '../prepare-tool/index.ts';
+import { logger } from '../utils/index.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class PrepareToolCommand extends Command {

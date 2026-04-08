@@ -1,6 +1,6 @@
 import { Cli } from 'clipanion';
 import { describe, expect, test } from 'vitest';
-import { registerCommands } from '.';
+import { registerCommands } from './index.ts';
 
 describe('cli/command/index', () => {
   test('exits with error', () => {

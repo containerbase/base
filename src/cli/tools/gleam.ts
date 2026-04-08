@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service';
-import { semverGte } from '../utils';
+import { BaseInstallService } from '../install-tool/base-install.service.ts';
+import { semverGte } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()

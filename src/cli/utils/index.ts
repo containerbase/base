@@ -1,11 +1,11 @@
 import { argv0 } from 'node:process';
 import { type Options, type Result, type ResultPromise, execa } from 'execa';
-import { type CliMode, cliModes } from './types';
+import { type CliMode, cliModes } from './types.ts';
 
-export type * from './types';
-export * from './versions';
-export * from './logger';
-export * from './common';
+export type * from './types.ts';
+export * from './versions.ts';
+export * from './logger.ts';
+export * from './common.ts';
 export type {
   Options as SpawnOptions,
   Result as SpawnResult,

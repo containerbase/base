@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from 'vitest';
-import { testCli } from '../../../test/di';
-import { MissingVersion } from '../utils/codes';
+import { MissingVersion } from '../utils/codes.ts';
+import { testCli } from '~test/di.ts';
 
 const mocks = vi.hoisted(() => ({
   uninstallTool: vi.fn(),
 }));
 
-vi.mock('../install-tool', () => mocks);
+vi.mock('../install-tool/index.ts', () => mocks);
 
 describe('cli/command/uninstall-gem', () => {
   test.each([

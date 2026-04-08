@@ -2,11 +2,11 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { codeBlock } from 'common-tags';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
-import { BasePrepareService } from '../../prepare-tool/base-prepare.service';
-import { AptService } from '../../services';
-import { type Distro, getDistro } from '../../utils';
-import { PipVersionResolver } from './pip';
-import { PipBaseInstallService } from './utils';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { AptService } from '../../services/index.ts';
+import { type Distro, getDistro } from '../../utils/index.ts';
+import { PipVersionResolver } from './pip.ts';
+import { PipBaseInstallService } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()

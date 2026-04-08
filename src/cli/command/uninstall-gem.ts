@@ -1,6 +1,6 @@
 import { Command } from 'clipanion';
-import { UninstallToolCommand } from './uninstall-tool';
-import { command } from './utils';
+import { UninstallToolCommand } from './uninstall-tool.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class UninstallGemCommand extends UninstallToolCommand {

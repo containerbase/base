@@ -1,6 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
-import { V2ToolInstallService } from '../../install-tool/install-legacy-tool.service';
-import { v2Tool } from '../../utils/v2-tool';
+import { V2ToolInstallService } from '../../install-tool/install-legacy-tool.service.ts';
+import { v2Tool } from '../../utils/v2-tool.ts';
 
 @injectable()
 @injectFromHierarchy()

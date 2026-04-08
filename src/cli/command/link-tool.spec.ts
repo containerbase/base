@@ -1,14 +1,14 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { logger } from '../utils';
-import { registerCommands } from '.';
+import { logger } from '../utils/index.ts';
+import { registerCommands } from './index.ts';
 
 const mocks = vi.hoisted(() => ({
   linkTool: vi.fn(),
 }));
 
-vi.mock('../install-tool', () => mocks);
+vi.mock('../install-tool/index.ts', () => mocks);
 
 describe('cli/command/link-tool', () => {
   const cli = new Cli({ binaryName: 'containerbase-cli' });

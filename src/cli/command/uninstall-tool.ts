@@ -1,12 +1,12 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import { uninstallTool } from '../install-tool';
-import { ResolverMap } from '../tools';
+import { uninstallTool } from '../install-tool/index.ts';
+import { ResolverMap } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
-import { logger } from '../utils';
-import { MissingVersion } from '../utils/codes';
-import { command, isToolIgnored } from './utils';
+import { MissingVersion } from '../utils/codes.ts';
+import { logger } from '../utils/index.ts';
+import { command, isToolIgnored } from './utils.ts';
 
 @command('containerbase-cli')
 export class UninstallToolCommand extends Command {

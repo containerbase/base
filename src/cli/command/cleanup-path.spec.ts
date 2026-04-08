@@ -1,6 +1,6 @@
 import { Cli } from 'clipanion';
 import { describe, expect, test, vi } from 'vitest';
-import { registerCommands } from '.';
+import { registerCommands } from './index.ts';
 
 const mocks = vi.hoisted(() => ({
   deleteAsync: vi.fn(),

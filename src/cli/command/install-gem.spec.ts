@@ -1,8 +1,8 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { MissingVersion } from '../utils/codes';
-import { registerCommands } from '.';
+import { MissingVersion } from '../utils/codes.ts';
+import { registerCommands } from './index.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   prepareTools: vi.fn(),
 }));
 
-vi.mock('../install-tool', () => mocks);
-vi.mock('../prepare-tool', () => mocks);
+vi.mock('../install-tool/index.ts', () => mocks);
+vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/install-gem', () => {
   beforeEach(() => {

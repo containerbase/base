@@ -1,14 +1,17 @@
 import { type Bind, Container, ContainerModule } from 'inversify';
-import { AptService } from './apt.service';
-import { CompressionService } from './compression.service';
-import { DataService } from './data.service';
-import { EnvService } from './env.service';
-import { HttpService } from './http.service';
-import { IpcClient, IpcServer } from './ipc.service';
-import { LinkToolService, type ShellWrapperConfig } from './link-tool.service';
-import { PathService } from './path.service';
-import { V2ToolService } from './v2-tool.service';
-import { VersionService } from './version.service';
+import { AptService } from './apt.service.ts';
+import { CompressionService } from './compression.service.ts';
+import { DataService } from './data.service.ts';
+import { EnvService } from './env.service.ts';
+import { HttpService } from './http.service.ts';
+import { IpcClient, IpcServer } from './ipc.service.ts';
+import {
+  LinkToolService,
+  type ShellWrapperConfig,
+} from './link-tool.service.ts';
+import { PathService } from './path.service.ts';
+import { V2ToolService } from './v2-tool.service.ts';
+import { VersionService } from './version.service.ts';
 
 export {
   AptService,

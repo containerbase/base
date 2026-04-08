@@ -1,7 +1,7 @@
 import { env } from 'node:process';
 import type { Cli, CommandClass } from 'clipanion';
-import { EnvService, createContainer } from '../services';
-import { type CliMode, logger } from '../utils';
+import { EnvService, createContainer } from '../services/index.ts';
+import { type CliMode, logger } from '../utils/index.ts';
 
 export function getVersion(tool: string): string | undefined {
   return env[tool.replace('-', '_').toUpperCase() + '_VERSION'];

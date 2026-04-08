@@ -6,8 +6,8 @@ import {
   injectable,
   postConstruct,
 } from 'inversify';
-import { logger } from '../utils';
-import { PathService } from './path.service';
+import { logger } from '../utils/index.ts';
+import { PathService } from './path.service.ts';
 
 @injectable(bindingScopeValues.Singleton)
 export class V2ToolService {

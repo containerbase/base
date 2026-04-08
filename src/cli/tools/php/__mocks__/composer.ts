@@ -1,6 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../../install-tool/base-install.service';
-import { ToolVersionResolver } from '../../../install-tool/tool-version-resolver';
+import { BaseInstallService } from '../../../install-tool/base-install.service.ts';
+import { ToolVersionResolver } from '../../../install-tool/tool-version-resolver.ts';
 
 @injectable()
 @injectFromHierarchy()

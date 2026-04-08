@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service';
+import { BaseInstallService } from '../install-tool/base-install.service.ts';
 
 @injectable()
 @injectFromHierarchy()

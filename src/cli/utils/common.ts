@@ -2,8 +2,8 @@ import fs, { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
 import process from 'node:process';
 import { deleteAsync } from 'del';
-import { logger } from './logger';
-import type { CliMode, Distro } from './types';
+import { logger } from './logger.ts';
+import type { CliMode, Distro } from './types.ts';
 
 let distro: undefined | Promise<Distro>;
 let isDocker: undefined | Promise<boolean>;

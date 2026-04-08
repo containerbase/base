@@ -2,7 +2,7 @@ import { injectable, multiInject } from 'inversify';
 import {
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
-} from './tool-version-resolver';
+} from './tool-version-resolver.ts';
 
 @injectable()
 export class ToolVersionResolverService {

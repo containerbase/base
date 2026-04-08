@@ -1,7 +1,7 @@
 import { maxSatisfying } from '@renovatebot/pep440';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { logger } from '../../utils';
-import { PipVersionResolver } from './pip';
+import { logger } from '../../utils/index.ts';
+import { PipVersionResolver } from './pip.ts';
 
 @injectable()
 @injectFromHierarchy()

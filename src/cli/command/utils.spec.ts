@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { getVersion, isToolIgnored } from './utils';
+import { getVersion, isToolIgnored } from './utils.ts';
 
 describe('cli/command/utils', () => {
   beforeEach(() => {

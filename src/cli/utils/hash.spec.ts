@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { env } from 'node:process';
 import { describe, expect, test } from 'vitest';
-import { hash, hashFile } from './hash';
+import { hash, hashFile } from './hash.ts';
 
 describe('cli/utils/hash', () => {
   test('should hash data with sha256', () => {

@@ -66,6 +66,7 @@ export default tseslint.config(
       'import-x/named': 2,
       'import-x/namespace': 2,
       'import-x/no-named-as-default-member': 0,
+      'import-x/extensions': ['error', 'ignorePackages'],
 
       'import-x/no-extraneous-dependencies': [
         'error',

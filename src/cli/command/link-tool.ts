@@ -1,8 +1,8 @@
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
-import { linkTool } from '../install-tool';
-import { logger } from '../utils';
-import { command } from './utils';
+import { linkTool } from '../install-tool/index.ts';
+import { logger } from '../utils/index.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class LinkToolCommand extends Command {

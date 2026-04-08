@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-import { PathService, createContainer } from '../services';
-import { initializeTools, prepareTools } from '.';
-import { ensurePaths, rootPath } from '~test/path';
+import { PathService, createContainer } from '../services/index.ts';
+import { initializeTools, prepareTools } from './index.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
 vi.mock('execa');
-vi.mock('../tools/bun');
-vi.mock('../tools/php/composer');
+vi.mock('../tools/bun.ts');
+vi.mock('../tools/php/composer.ts');
 
 vi.mock('node:process', async (importOriginal) => ({
   ...(await importOriginal<any>()),

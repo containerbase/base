@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { fileRights, logger, pathExists, tool2path } from '../utils';
-import { EnvService } from './env.service';
+import { fileRights, logger, pathExists, tool2path } from '../utils/index.ts';
+import { EnvService } from './env.service.ts';
 
 export interface FileOwnerConfig {
   /**

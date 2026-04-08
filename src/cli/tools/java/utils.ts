@@ -1,12 +1,12 @@
 import path from 'node:path';
 import { codeBlock } from 'common-tags';
 import type { HttpService, PathService } from '../../services';
-import { type Arch, logger, pathExists } from '../../utils';
+import { type Arch, logger, pathExists } from '../../utils/index.ts';
 import {
   type AdoptiumPackage,
   AdoptiumReleaseVersions,
   AdoptiumReleases,
-} from './schema';
+} from './schema.ts';
 
 export async function resolveLatestJavaLtsVersion(
   http: HttpService,

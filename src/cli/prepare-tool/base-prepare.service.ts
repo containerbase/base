@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
-import { EnvService, PathService } from '../services';
-import { NoInitTools, NoPrepareTools } from '../tools';
-import { type SpawnOptions, type SpawnResult, spawn } from '../utils';
+import { EnvService, PathService } from '../services/index.ts';
+import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
+import { type SpawnOptions, type SpawnResult, spawn } from '../utils/index.ts';
 
 @injectable()
 export abstract class BasePrepareService {

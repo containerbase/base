@@ -1,8 +1,8 @@
 import { Command, Option } from 'clipanion';
 import { deleteAsync } from 'del';
 import prettyMilliseconds from 'pretty-ms';
-import { logger } from '../utils';
-import { command } from './utils';
+import { logger } from '../utils/index.ts';
+import { command } from './utils.ts';
 
 @command('containerbase-cli')
 export class CleanupPathCommand extends Command {

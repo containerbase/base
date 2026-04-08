@@ -1,7 +1,7 @@
 import { env } from 'node:process';
 import { createGlobalProxyAgent } from 'global-agent';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { bootstrap } from './proxy';
+import { bootstrap } from './proxy.ts';
 
 vi.mock('global-agent', () => ({ createGlobalProxyAgent: vi.fn() }));
 

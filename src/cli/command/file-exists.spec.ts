@@ -1,16 +1,16 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { registerCommands } from '.';
-import { scope } from '~test/http-mock';
+import { registerCommands } from './index.ts';
+import { scope } from '~test/http-mock.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
   prepareTools: vi.fn(),
 }));
 
-vi.mock('../install-tool', () => mocks);
-vi.mock('../prepare-tool', () => mocks);
+vi.mock('../install-tool/index.ts', () => mocks);
+vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/file-exists', () => {
   beforeEach(() => {

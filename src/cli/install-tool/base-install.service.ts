@@ -5,16 +5,16 @@ import {
   EnvService,
   HttpService,
   PathService,
-} from '../services';
-import { LinkToolService, type ShellWrapperConfig } from '../services';
-import { NoInitTools, NoPrepareTools } from '../tools';
+} from '../services/index.ts';
+import { LinkToolService, type ShellWrapperConfig } from '../services/index.ts';
+import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
   type InstallToolType,
   type SpawnOptions,
   type SpawnResult,
   isValid,
   spawn,
-} from '../utils';
+} from '../utils/index.ts';
 
 @injectable()
 export abstract class BaseInstallService {

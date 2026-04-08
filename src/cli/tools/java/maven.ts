@@ -2,10 +2,10 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
 import type { HttpChecksumType } from '../../services/http.service';
-import { logger, parse } from '../../utils';
+import { logger, parse } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()

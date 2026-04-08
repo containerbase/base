@@ -1,8 +1,8 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { logger } from '../../utils';
-import { NpmPackageMeta, NpmPackageMetaList } from './schema';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { logger } from '../../utils/index.ts';
+import { NpmPackageMeta, NpmPackageMetaList } from './schema.ts';
 
 @injectable()
 @injectFromHierarchy()

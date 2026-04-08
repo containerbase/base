@@ -3,11 +3,11 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { VersionService } from '../../services';
-import { logger } from '../../utils';
-import { RubyGemJson } from './schema';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { VersionService } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
+import { RubyGemJson } from './schema.ts';
 
 const defaultRegistry = 'https://rubygems.org/';
 

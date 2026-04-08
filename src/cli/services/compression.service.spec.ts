@@ -1,7 +1,7 @@
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { CompressionService } from '.';
-import { testContainer } from '~test/di';
+import { CompressionService } from './index.ts';
+import { testContainer } from '~test/di.ts';
 
 vi.mock('execa');
 

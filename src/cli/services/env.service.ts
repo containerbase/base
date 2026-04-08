@@ -2,7 +2,7 @@ import { arch } from 'node:os';
 import { join } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { bindingScopeValues, injectable } from 'inversify';
-import { type Arch, logger } from '../utils';
+import { type Arch, logger } from '../utils/index.ts';
 
 export type Replacements = [string, string][];
 

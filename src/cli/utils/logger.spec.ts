@@ -27,7 +27,7 @@ describe('cli/utils/logger', async () => {
     env.CONTAINERBASE_DEBUG = 'true';
     env.CONTAINERBASE_LOG_FILE = 'test.ndjson';
     const { default: pino } = await import('pino');
-    const mod = await import('./logger');
+    const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();
     expect(pino).toHaveBeenCalledWith(
       { level: 'debug' },
@@ -47,7 +47,7 @@ describe('cli/utils/logger', async () => {
   test('works - stdout with json', async () => {
     env.CONTAINERBASE_LOG_FORMAT = 'json';
     const { default: pino } = await import('pino');
-    const mod = await import('./logger');
+    const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();
     expect(pino).toHaveBeenCalledWith(
       { level: 'info' },
@@ -62,7 +62,7 @@ describe('cli/utils/logger', async () => {
     env.CONTAINERBASE_LOG_LEVEL = 'warn';
     env.CONTAINERBASE_LOG_FILE = 'test.ndjson';
     const { default: pino } = await import('pino');
-    const mod = await import('./logger');
+    const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();
     expect(pino).toHaveBeenCalledWith(
       { level: 'debug' },

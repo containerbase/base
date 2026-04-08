@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver';
-import { PypiJson } from './schema';
+import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { PypiJson } from './schema.ts';
 
 @injectable()
 export abstract class PipVersionResolver extends ToolVersionResolver {

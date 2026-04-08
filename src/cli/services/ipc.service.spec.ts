@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from 'vitest';
-import { ensurePaths, rootPath } from '../../../test/path';
-import { logger } from '../utils';
-import { IpcClient, createContainer } from '.';
+import { ensurePaths, rootPath } from '../../../test/path.ts';
+import { logger } from '../utils/index.ts';
+import { IpcClient, createContainer } from './index.ts';
 
 describe('cli/services/ipc.service', async () => {
   const child = createContainer();

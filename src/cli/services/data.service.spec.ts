@@ -3,10 +3,10 @@ import { platform } from 'node:os';
 import type Nedb from '@seald-io/nedb';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
-import { fileRights } from '../utils';
-import { DataService } from './data.service';
-import { testContainer } from '~test/di';
-import { ensurePaths, rootPath } from '~test/path';
+import { fileRights } from '../utils/index.ts';
+import { DataService } from './data.service.ts';
+import { testContainer } from '~test/di.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 async function fstat(path: string): Promise<number> {
   const s = await stat(path);

@@ -2,9 +2,9 @@ import { sep } from 'node:path';
 import { env } from 'node:process';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { EnvService } from '.';
-import { testContainer } from '~test/di';
-import { rootPath } from '~test/path';
+import { EnvService } from './index.ts';
+import { testContainer } from '~test/di.ts';
+import { rootPath } from '~test/path.ts';
 
 const mocks = vi.hoisted(() => ({ arch: vi.fn() }));
 

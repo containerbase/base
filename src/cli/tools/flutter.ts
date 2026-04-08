@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service';
-import { BasePrepareService } from '../prepare-tool/base-prepare.service';
+import { BaseInstallService } from '../install-tool/base-install.service.ts';
+import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
 import {
   initDartHome,
   initPubCache,
   prepareDartHome,
   preparePubCache,
-} from './dart/utils';
+} from './dart/utils.ts';
 
 @injectable()
 @injectFromHierarchy()

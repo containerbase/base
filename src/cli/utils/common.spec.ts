@@ -9,8 +9,8 @@ import {
   reset,
   tool2path,
   validateSystem,
-} from '.';
-import { rootPath } from '~test/path';
+} from './index.ts';
+import { rootPath } from '~test/path.ts';
 
 const osMocks = vi.hoisted(() => ({
   platform: vi.fn(),

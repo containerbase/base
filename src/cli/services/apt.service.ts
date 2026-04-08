@@ -2,8 +2,8 @@ import { rm, writeFile } from 'fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { logger } from '../utils';
-import { EnvService } from './env.service';
+import { logger } from '../utils/index.ts';
+import { EnvService } from './env.service.ts';
 
 @injectable()
 export class AptService {

@@ -1,7 +1,10 @@
 import { Cli } from 'clipanion';
 import { Container } from 'inversify';
-import { registerCommands } from '../src/cli/command';
-import { createContainer, rootContainerModule } from '../src/cli/services';
+import { registerCommands } from '../src/cli/command/index.ts';
+import {
+  createContainer,
+  rootContainerModule,
+} from '../src/cli/services/index.ts';
 import type { CliMode } from '../src/cli/utils';
 
 export async function testContainer() {

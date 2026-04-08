@@ -1,8 +1,8 @@
 import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { AptService } from '.';
-import { testContainer } from '~test/di';
+import { AptService } from './index.ts';
+import { testContainer } from '~test/di.ts';
 
 const mocks = vi.hoisted(() => ({
   execa: vi.fn(),
