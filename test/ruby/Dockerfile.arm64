@@ -46,7 +46,7 @@ RUN install-tool ruby 4.0.2
 FROM test-ruby AS test-bundler
 
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 4.0.9
+RUN install-tool bundler 4.0.10
 
 #--------------------------------------
 # Image: cocoapods
