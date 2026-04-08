@@ -24,7 +24,7 @@ export class BufInstallService extends BaseInstallService {
      */
     const baseUrl = `https://github.com/bufbuild/buf/releases/download/v${version}/`;
 
-    const filename = `buf_linux_${this.ghArch}.tar.gz`;
+    const filename = `buf-Linux-${this.ghArch}.tar.gz`;
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}sha256.txt`,
