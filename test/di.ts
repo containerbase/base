@@ -6,7 +6,7 @@ import type { CliMode } from '../src/cli/utils';
 
 export async function testContainer() {
   const parent = new Container();
-  await parent.load(rootContainerModule);
+  await parent.loadAsync(rootContainerModule);
   return createContainer(parent);
 }
 
