@@ -103,7 +103,7 @@
     "shelljs": "0.10.0",
     "tsx": "4.21.0",
     "type-fest": "5.5.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "typescript-eslint": "8.58.1",
     "vite": "8.0.7",
     "vitest": "4.1.3"
