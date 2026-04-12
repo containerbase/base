@@ -230,7 +230,7 @@ RUN install-tool pipenv 2026.5.2
 # renovate: datasource=pypi
 RUN install-tool pdm 2.26.7
 # renovate: datasource=pypi
-RUN install-tool poetry 2.3.3
+RUN install-tool poetry 2.3.4
 # renovate: datasource=pypi
 RUN install-tool uv 0.11.6
 
