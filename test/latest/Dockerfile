@@ -220,7 +220,7 @@ FROM base AS teste
 RUN install-tool bazelisk v1.28.1
 
 # renovate: datasource=npm
-RUN install-tool bun 1.3.11
+RUN install-tool bun 1.3.12
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.7.12
