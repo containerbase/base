@@ -340,7 +340,7 @@ RUN install-tool docker v28.5.2
 RUN install-tool buildx v0.33.0
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.1.2
+RUN install-tool docker-compose v5.1.3
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \
