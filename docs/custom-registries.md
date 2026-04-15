@@ -67,6 +67,7 @@ Samples:
 
 ```txt
 https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-x64.zip
+https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-x64-baseline.zip
 https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/bun-linux-aarch64.zip
 https://github.com/oven-sh/bun/releases/download/bun-v1.0.0/SHASUMS256.txt
 ```

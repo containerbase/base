@@ -19,7 +19,20 @@ export class BunInstallService extends BaseInstallService {
 
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/oven-sh/bun/releases/download/bun-v${version}/`;
-    const filename = `bun-linux-${this.ghArch}.zip`;
+    let { ghArch } = this;
+
+    if (ghArch === 'x64') {
+      try {
+        const cpuInfo = await fs.readFile('/proc/cpuinfo', 'utf-8');
+        if (!cpuInfo.includes('avx2')) {
+          ghArch = 'x64-baseline';
+        }
+      } catch {
+        ghArch = 'x64-baseline';
+      }
+    }
+
+    const filename = `bun-linux-${ghArch}.zip`;
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}SHASUMS256.txt`,
