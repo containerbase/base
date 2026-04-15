@@ -42,7 +42,7 @@ RUN prepare-tool dotnet
 FROM base AS build
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.201
+RUN install-tool dotnet 10.0.202
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
@@ -76,11 +76,11 @@ FROM base AS testb
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.419
+RUN install-tool dotnet 8.0.420
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.419
+RUN install-tool dotnet 8.0.420
 RUN set -ex; dotnet --version | grep 8.0.
 
 USER 12021
@@ -105,7 +105,7 @@ USER 12021
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.201
+RUN install-tool dotnet 10.0.202
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
@@ -123,7 +123,7 @@ FROM build AS testd
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.201
+RUN install-tool dotnet 10.0.202
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
