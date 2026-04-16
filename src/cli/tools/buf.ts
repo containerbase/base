@@ -51,7 +51,7 @@ export class BufInstallService extends BaseInstallService {
       file,
       cwd: path,
       strip: 1,
-      files: ['bin/buf'],
+      files: ['buf/bin/buf'],
     });
   }
 
