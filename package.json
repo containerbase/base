@@ -97,7 +97,7 @@
     "markdownlint-cli2": "0.22.0",
     "nock": "14.0.12",
     "npm-run-all2": "8.0.4",
-    "prettier": "3.8.2",
+    "prettier": "3.8.3",
     "prettier-plugin-packagejson": "3.0.2",
     "semantic-release": "25.0.3",
     "shelljs": "0.10.0",
