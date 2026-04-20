@@ -75,8 +75,11 @@ await fs.writeFile(
 );
 
 await exec([
-  '--no-bytecode',
-  '--public',
+  '--sea',
+  '--compress',
+  'gzip', // zstd needs pkg v6.17
+  // '--no-bytecode',
+  // '--public',
   '--options',
   'use-openssl-ca',
   // '--debug',
