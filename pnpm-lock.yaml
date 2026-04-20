@@ -14,9 +14,6 @@ patchedDependencies:
   '@semantic-release/github':
     hash: 52441cf894b1a1cbce4fd26db025093959005c4d686a31e1b26ef01b53c2c288
     path: patches/@semantic-release__github.patch
-  '@yao-pkg/pkg':
-    hash: 962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32
-    path: patches/@yao-pkg__pkg.patch
   clipanion@3.2.1:
     hash: ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299
     path: patches/clipanion@3.2.1.patch
@@ -142,7 +139,7 @@ importers:
         version: 4.1.4(vitest@4.1.4)
       '@yao-pkg/pkg':
         specifier: 6.15.0
-        version: 6.15.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)
+        version: 6.15.0
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -5154,7 +5151,7 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.15.0(patch_hash=962cec9feeb517459d6750d2f7006fc10f23bff901711cfd104eec8224562c32)':
+  '@yao-pkg/pkg@6.15.0':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.2
