@@ -18,7 +18,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: aquasecurity/trivy-action@8aa8af3ea1de8e968a3e49a40afb063692ab8eae # 0.10.0
+      - uses: aquasecurity/trivy-action@8aa8af3ea1de8e968a3e49a40afb063692ab8eae # v0.10.0
         with:
           image-ref: 'ghcr.io/containerbase/base:latest'
           format: 'sarif'
