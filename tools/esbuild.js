@@ -49,6 +49,9 @@ await fs.writeFile(
       pkg: {
         outputPath: './dist/cli',
         scripts: ['pino-*.js', 'thread-stream-worker.js'],
+        seaConfig: {
+          useCodeCache: true,
+        },
         targets: [
           `node${nodeVersion}-linux-x64`,
           `node${nodeVersion}-linux-arm64`,
@@ -77,7 +80,7 @@ await fs.writeFile(
 await exec([
   '--sea',
   '--compress',
-  'gzip', // zstd needs pkg v6.17
+  'zstd',
   // '--no-bytecode',
   // '--public',
   '--options',
