@@ -229,7 +229,7 @@ RUN install-tool deno 2.7.12
 RUN install-tool apko 1.2.4
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.17.1
+RUN install-tool devbox 0.17.2
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.15.4
