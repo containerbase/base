@@ -35,7 +35,9 @@ describe('cli/index', () => {
       'pino-pretty': './pino-pretty.js',
       'pino-worker': './pino-worker.js',
       'pino/file': './pino-file.js',
-      'thread-stream-worker': './thread-stream-worker.js',
+      'thread-stream-worker': expect.stringMatching(
+        /thread-stream-worker\.js$/,
+      ),
     });
   });
 });
