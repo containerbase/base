@@ -12,7 +12,7 @@
   "scripts": {
     "bats": "node tools/bats.js --timing --verbose-run",
     "build": "run-s 'build:*'",
-    "build:cli": "node tools/esbuild.js",
+    "build:cli": "node tools/build.js",
     "eslint": "eslint --cache .",
     "eslint-fix": "eslint --cache --fix .",
     "lint": "run-s prettier eslint lint:types lint:markdown",
