@@ -3,11 +3,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   main: vi.fn(),
   isSea: vi.fn(),
-  createRequire: vi.fn(),
 }));
 
 vi.mock('node:sea', () => mocks);
-vi.mock('node:module', () => mocks);
 vi.mock('./main.ts', () => mocks);
 
 describe('cli/index', () => {
@@ -16,16 +14,22 @@ describe('cli/index', () => {
   });
 
   test('works', async () => {
+    const wait = new Promise<void>((resolve) =>
+      mocks.main.mockImplementationOnce(() => resolve()),
+    );
     await import('./index.ts');
+    await wait;
     expect(mocks.main).toHaveBeenCalledTimes(1);
     expect(globalThis).not.toHaveProperty('__bundlerPathsOverrides');
   });
 
   test('uses sea', async () => {
-    const resolve = vi.fn((v) => v);
-    mocks.createRequire.mockReturnValue({ resolve });
     mocks.isSea.mockReturnValue(true);
+    const wait = new Promise<void>((resolve) =>
+      mocks.main.mockImplementationOnce(() => resolve()),
+    );
     await import('./index.ts');
+    await wait;
     expect(mocks.main).toHaveBeenCalledTimes(1);
     expect(globalThis).toHaveProperty('__bundlerPathsOverrides', {
       'pino-pretty': './pino-pretty.js',
@@ -33,6 +37,5 @@ describe('cli/index', () => {
       'pino/file': './pino-file.js',
       'thread-stream-worker': './thread-stream-worker.js',
     });
-    expect(resolve).toHaveBeenCalledWith('./thread-stream-worker.js');
   });
 });

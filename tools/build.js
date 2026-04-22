@@ -57,7 +57,7 @@ const bundle = await rolldown({
 });
 
 shell.echo('Writing containerbase-cli bundle ...');
-await bundle.write({ dir: 'dist/app', format: 'esm', cleanDir: true });
+await bundle.write({ dir: 'dist/app', format: 'commonjs', cleanDir: true });
 
 await fs.writeFile(
   './dist/package.json',
@@ -66,7 +66,7 @@ await fs.writeFile(
       name: 'containerbase-cli',
       version,
       private: true,
-      type: 'module',
+      type: 'commonjs',
       bin: {
         'containerbase-cli': './app/containerbase-cli.js',
       },
