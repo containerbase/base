@@ -16,7 +16,5 @@ if (isSea()) {
   });
 }
 
-void (async () => {
-  const m = await import('./main.ts');
-  await m.main();
-})();
+const m = await import('./main.ts');
+await m.main();

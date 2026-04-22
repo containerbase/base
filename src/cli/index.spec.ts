@@ -14,22 +14,14 @@ describe('cli/index', () => {
   });
 
   test('works', async () => {
-    const wait = new Promise<void>((resolve) =>
-      mocks.main.mockImplementationOnce(() => resolve()),
-    );
     await import('./index.ts');
-    await wait;
     expect(mocks.main).toHaveBeenCalledTimes(1);
     expect(globalThis).not.toHaveProperty('__bundlerPathsOverrides');
   });
 
   test('uses sea', async () => {
     mocks.isSea.mockReturnValue(true);
-    const wait = new Promise<void>((resolve) =>
-      mocks.main.mockImplementationOnce(() => resolve()),
-    );
     await import('./index.ts');
-    await wait;
     expect(mocks.main).toHaveBeenCalledTimes(1);
     expect(globalThis).toHaveProperty('__bundlerPathsOverrides', {
       'pino-pretty': './pino-pretty.js',
