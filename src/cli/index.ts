@@ -1,5 +1,22 @@
 #!/usr/bin/env node
 
-import { main } from './main.ts';
+import { isSea } from 'node:sea';
 
-void main();
+if (isSea()) {
+  Object.assign(globalThis, {
+    __bundlerPathsOverrides: {
+      'thread-stream-worker': new URL(
+        './thread-stream-worker.js',
+        import.meta.url,
+      ).pathname,
+      'pino/file': './pino-file.js',
+      'pino-pretty': './pino-pretty.js',
+      'pino-worker': './pino-worker.js',
+    },
+  });
+}
+
+void (async () => {
+  const m = await import('./main.ts');
+  await m.main();
+})();
