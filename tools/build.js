@@ -20,7 +20,7 @@ await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
 shell.echo('Bundling containerbase-cli ...');
 const bundle = await rolldown({
   input: {
-    'containerbase-cli': './src/cli/bundle.ts',
+    'containerbase-cli': './src/cli/index.ts',
     // bundle pino dependencies
     'pino-file': __require.resolve('pino/file.js'),
     'pino-pretty': __require.resolve('pino-pretty'),
