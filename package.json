@@ -83,8 +83,6 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "9.3.1",
-    "esbuild": "0.28.0",
-    "esbuild-plugin-pino": "2.3.3",
     "eslint": "9.39.4",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
@@ -99,6 +97,7 @@
     "npm-run-all2": "8.0.4",
     "prettier": "3.8.3",
     "prettier-plugin-packagejson": "3.0.2",
+    "rolldown": "1.0.0-rc.16",
     "semantic-release": "25.0.3",
     "shelljs": "0.10.0",
     "tsx": "4.21.0",
@@ -109,7 +108,8 @@
     "vitest": "4.1.4"
   },
   "peerDependencies": {
-    "markdownlint": "*"
+    "markdownlint": "*",
+    "thread-stream": "*"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

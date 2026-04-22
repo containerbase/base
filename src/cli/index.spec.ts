@@ -10,5 +10,6 @@ describe('cli/index', () => {
   test('works', async () => {
     await import('./index.ts');
     expect(mocks.main).toHaveBeenCalledTimes(1);
+    expect(globalThis).not.toHaveProperty('__bundlerPathsOverrides');
   });
 });

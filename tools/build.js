@@ -1,11 +1,10 @@
 import fs from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { exec } from '@yao-pkg/pkg';
-import { build } from 'esbuild';
+import { rolldown } from 'rolldown';
 import shell from 'shelljs';
 
 const __require = createRequire(import.meta.url);
-const esbuildPluginPino = __require('esbuild-plugin-pino');
 
 shell.config.fatal = true;
 
@@ -18,22 +17,47 @@ shell.cp('-r', 'src/usr', 'dist/docker/');
 
 await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
 
-await build({
-  entryPoints: { 'containerbase-cli': './src/cli/index.ts' },
-  bundle: true,
-  packages: 'bundle',
-  platform: 'node',
-  target: `node${nodeVersion}`,
-  minify: false,
-  tsconfig: 'tsconfig.dist.json',
-  // format: "esm", // not supported https://github.com/vercel/pkg/issues/1291
-  outdir: './dist',
-  define: {
-    'globalThis.CONTAINERBASE_VERSION': `"${version}"`,
-    'globalThis.rootDir': 'null',
+shell.echo('Bundling containerbase-cli ...');
+const bundle = await rolldown({
+  input: {
+    'containerbase-cli': './src/cli/bundle.ts',
+    // bundle pino dependencies
+    'pino-file': __require.resolve('pino/file.js'),
+    'pino-pretty': __require.resolve('pino-pretty'),
+    'pino-worker': __require.resolve('pino/lib/worker.js'),
+    'thread-stream-worker': __require.resolve('thread-stream/lib/worker.js'),
   },
-  plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
+  platform: 'node',
+  tsconfig: true,
+
+  transform: {
+    define: {
+      'globalThis.CONTAINERBASE_VERSION': `"${version}"`,
+      'globalThis.rootDir': 'null',
+    },
+  },
+
+  treeshake: {
+    moduleSideEffects: [
+      {
+        test: /.*/,
+        external: true,
+        sideEffects: false,
+      },
+      {
+        test: /^reflect-metadata$/,
+        sideEffects: true,
+      },
+      {
+        test: /\.ts$/,
+        sideEffects: true,
+      },
+    ],
+  },
 });
+
+shell.echo('Writing containerbase-cli bundle ...');
+await bundle.write({ dir: 'dist/app', format: 'esm', cleanDir: true });
 
 await fs.writeFile(
   './dist/package.json',
@@ -42,13 +66,12 @@ await fs.writeFile(
       name: 'containerbase-cli',
       version,
       private: true,
-      type: 'commonjs',
+      type: 'module',
       bin: {
-        'containerbase-cli': './containerbase-cli.js',
+        'containerbase-cli': './app/containerbase-cli.js',
       },
       pkg: {
-        outputPath: './dist/cli',
-        scripts: ['pino-*.js', 'thread-stream-worker.js'],
+        scripts: ['./app/*.js'],
         seaConfig: {
           useCodeCache: true,
         },
@@ -56,20 +79,6 @@ await fs.writeFile(
           `node${nodeVersion}-linux-x64`,
           `node${nodeVersion}-linux-arm64`,
         ],
-        patches: {
-          './containerbase-cli.js': [
-            'pinoBundlerAbsolutePath("./pino-file.js")',
-            '"/snapshot/dist/pino-file.js"',
-            'pinoBundlerAbsolutePath("./pino-pipeline-worker.js")',
-            '"/snapshot/dist/pino-pipeline-worker.js"',
-            'pinoBundlerAbsolutePath("./pino-pretty.js")',
-            '"/snapshot/dist/pino-pretty.js"',
-            'pinoBundlerAbsolutePath("./pino-worker.js")',
-            '"/snapshot/dist/pino-worker.js"',
-            'pinoBundlerAbsolutePath("./thread-stream-worker.js")',
-            '"/snapshot/dist/thread-stream-worker.js"',
-          ],
-        },
       },
     },
     undefined,
@@ -81,15 +90,17 @@ await exec([
   '--sea',
   '--compress',
   'zstd',
-  // '--no-bytecode',
-  // '--public',
   '--options',
   'use-openssl-ca',
+  '--out-path',
+  './dist/cli',
   // '--debug',
   'dist',
 ]);
 
-await fs.rename(
-  './dist/cli/containerbase-cli-x64',
-  './dist/cli/containerbase-cli-amd64',
-);
+if (!(await fs.stat('./dist/cli/containerbase-cli-amd64').catch(() => null))) {
+  await fs.symlink(
+    './containerbase-cli-x64',
+    './dist/cli/containerbase-cli-amd64',
+  );
+}
