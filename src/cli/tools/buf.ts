@@ -42,11 +42,7 @@ export class BufInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
-      'bin',
-    );
-    await fs.mkdir(path);
+    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
     await this.compress.extract({
       file,
       cwd: path,

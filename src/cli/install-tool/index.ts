@@ -132,8 +132,8 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BuildxInstallService);
-  container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BufInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CabalInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(CocoapodsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ConanInstallService);
