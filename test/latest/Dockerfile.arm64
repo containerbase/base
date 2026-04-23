@@ -173,6 +173,9 @@ RUN install-tool vendir v0.45.3
 #--------------------------------------
 FROM base AS test-others
 
+# renovate: datasource=github-releases packageName=bufbuild/buf
+RUN install-tool buf v1.67.0
+
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.36.0
 

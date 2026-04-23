@@ -4,6 +4,7 @@ export const NoPrepareTools = [
   'apko',
   'bazelisk',
   'bower',
+  'buf',
   'buildx',
   'bun',
   'bundler',

@@ -212,12 +212,15 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
+# test: bazelisk, buf, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
 RUN install-tool bazelisk v1.28.1
+
+# renovate: datasource=github-releases packageName=bufbuild/buf
+RUN install-tool buf v1.67.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.3.13
