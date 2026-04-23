@@ -174,7 +174,7 @@ RUN install-tool vendir v0.45.3
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.35.4
+RUN install-tool kubectl v1.36.0
 
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.4.19

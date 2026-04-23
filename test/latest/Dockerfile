@@ -235,7 +235,7 @@ RUN install-tool devbox 0.17.2
 RUN install-tool gleam 1.15.4
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.35.4
+RUN install-tool kubectl v1.36.0
 
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.4.19
