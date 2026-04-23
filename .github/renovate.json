@@ -61,6 +61,7 @@
       "matchDepNames": [
         "apko",
         "bazelisk",
+        "buf",
         "buildx",
         "bun",
         "bundler",
@@ -77,6 +78,7 @@
         "git-lfs",
         "gleam",
         "gradle",
+        "kubectl",
         "kustomize",
         "hashin",
         "helm",
@@ -111,6 +113,7 @@
       "matchDepNames": [
         "apko",
         "bazelisk",
+        "buf",
         "buildx",
         "bun",
         "bundler",
@@ -127,6 +130,7 @@
         "git-lfs",
         "gleam",
         "gradle",
+        "kubectl",
         "kustomize",
         "hashin",
         "helm",
