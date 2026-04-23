@@ -45,7 +45,7 @@ export class V2ToolService {
         prep: this._needsPrep,
         uninstall: this._hasUninstall,
       },
-      'construct',
+      'V2ToolService.construct',
     );
   }
 

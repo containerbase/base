@@ -52,7 +52,7 @@ export class InstallToolService {
   ): Promise<number | void> {
     logger.trace(
       { tools: this.toolSvcs.map((t) => t.name) },
-      'supported tools',
+      'InstallToolService.install: supported tools',
     );
 
     await this.pathSvc.ensureBasePaths();
@@ -198,7 +198,7 @@ export class InstallToolService {
   ): Promise<number | void> {
     logger.trace(
       { tools: this.toolSvcs.map((t) => t.name) },
-      'supported tools',
+      'InstallToolService.uninstall: supported tools',
     );
 
     await this.pathSvc.ensureBasePaths();

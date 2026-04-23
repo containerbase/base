@@ -19,7 +19,10 @@ export class PrepareToolService {
 
   async prepare(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
-    logger.trace({ tools: supportedTools }, 'supported tools');
+    logger.trace(
+      { tools: supportedTools },
+      'PrepareToolService.prepare: supported tools',
+    );
     if (dryRun) {
       logger.info(`Dry run: preparing tools ${tools.join(', ')} ...`);
       return;
@@ -71,7 +74,10 @@ export class PrepareToolService {
 
   async initialize(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
-    logger.trace({ tools: supportedTools }, 'supported tools');
+    logger.trace(
+      { tools: supportedTools },
+      'PrepareToolService.initialize: supported tools',
+    );
     if (dryRun) {
       logger.info(`Dry run: initializing tools ${tools.join(', ')} ...`);
       return;
