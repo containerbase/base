@@ -57,6 +57,14 @@ FROM test-python AS test-hashin
 RUN install-tool hashin 1.0.5
 
 #--------------------------------------
+# Image: kas
+#--------------------------------------
+FROM test-python AS test-kas
+
+# renovate: datasource=pypi
+RUN install-tool kas 5.2
+
+#--------------------------------------
 # Image: pipenv
 #--------------------------------------
 FROM test-python AS test-pipenv
@@ -106,6 +114,7 @@ COPY --from=test-checkov /.dummy /.dummy
 COPY --from=test-conan /.dummy /.dummy
 COPY --from=test-copier /.dummy /.dummy
 COPY --from=test-hashin /.dummy /.dummy
+COPY --from=test-kas /.dummy /.dummy
 COPY --from=test-pipenv /.dummy /.dummy
 COPY --from=test-poetry /.dummy /.dummy
 COPY --from=test-uv /.dummy /.dummy

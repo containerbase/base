@@ -241,6 +241,7 @@ RUN install-tool conan
 RUN install-pip checkov
 RUN install-pip copier
 RUN install-pip hashin
+RUN install-pip kas
 RUN install-pip pdm
 RUN install-pip pip-tools
 RUN install-pip pipenv

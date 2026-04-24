@@ -635,6 +635,7 @@ Known tools:
 - `checkov`
 - `conan`
 - `hashin`
+- `kas`
 - `pdm`
 - `pip-tools`
 - `pipenv`
