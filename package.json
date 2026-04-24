@@ -115,26 +115,5 @@
   "engines": {
     "node": ">=24.10.0",
     "pnpm": "^10.0.0"
-  },
-  "pnpm": {
-    "supportedArchitectures": {
-      "cpu": [
-        "x64",
-        "arm64"
-      ],
-      "os": [
-        "linux",
-        "win32",
-        "darwin"
-      ]
-    },
-    "overrides": {
-      "verbose": "-"
-    },
-    "patchedDependencies": {
-      "@semantic-release/github": "patches/@semantic-release__github.patch",
-      "clipanion@3.2.1": "patches/clipanion@3.2.1.patch",
-      "global-agent": "patches/global-agent.patch"
-    }
   }
 }
