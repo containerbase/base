@@ -24,11 +24,11 @@ describe('cli/index', () => {
     await import('./index.ts');
     expect(mocks.main).toHaveBeenCalledTimes(1);
     expect(globalThis).toHaveProperty('__bundlerPathsOverrides', {
-      'pino-pretty': './pino-pretty.js',
-      'pino-worker': './pino-worker.js',
-      'pino/file': './pino-file.js',
+      'pino-pretty': expect.stringMatching(/\/pino-pretty\.js$/),
+      'pino-worker': expect.stringMatching(/\/pino-worker\.js$/),
+      'pino/file': expect.stringMatching(/\/pino-file\.js$/),
       'thread-stream-worker': expect.stringMatching(
-        /thread-stream-worker\.js$/,
+        /\/thread-stream-worker\.js$/,
       ),
     });
   });
