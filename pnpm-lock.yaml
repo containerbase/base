@@ -141,8 +141,8 @@ importers:
         specifier: 4.1.4
         version: 4.1.4(vitest@4.1.4)
       '@yao-pkg/pkg':
-        specifier: 6.18.0
-        version: 6.18.0
+        specifier: 6.18.1
+        version: 6.18.1
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -1167,8 +1167,8 @@ packages:
     resolution: {integrity: sha512-j2UoH+eP4VobfovQg1gkWwDoB4O/tv8rlLnEjUEEHuWXJ5eBLNUIrobMSEp773/2pgUJUfqqPUFIhS1pN8OZuQ==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.18.0':
-    resolution: {integrity: sha512-bZzB+hvTmOfWCZ+39lV2DycT17IvM8mxM4hLNFIJJ+zaCevTZofJs5N8vd0kRXMiLB/5qt/TVrGRozKgmisI3w==}
+  '@yao-pkg/pkg@6.18.1':
+    resolution: {integrity: sha512-yBSlMa9joDvBAAKNbrMt9KFBLdbOg1+M+dQlxYXVpa+VwPYUju6Tjt6hESpdNdYZXo6ndEUlW1Y6sa9ohJTldQ==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -5220,7 +5220,7 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.18.0':
+  '@yao-pkg/pkg@6.18.1':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.2
