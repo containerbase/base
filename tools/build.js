@@ -71,7 +71,16 @@ await fs.writeFile(
         'containerbase-cli': './app/containerbase-cli.js',
       },
       pkg: {
-        scripts: ['./app/*.js'],
+        scripts: [
+          // Workaround to detect imports
+          // https://github.com/yao-pkg/pkg/issues/264
+          // https://github.com/yao-pkg/pkg/issues/269
+          './app/main-*.js',
+          './app/pino-file.js',
+          './app/pino-pretty.js',
+          './app/pino-worker.js',
+          './app/thread-stream-worker.js',
+        ],
         seaConfig: {
           useCodeCache: true,
         },
