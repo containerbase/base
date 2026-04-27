@@ -544,7 +544,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=43.110.12
+ARG RENOVATE_VERSION=43.140.0
 RUN install-tool renovate
 
 RUN set -ex; \
