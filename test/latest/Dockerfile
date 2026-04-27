@@ -217,7 +217,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.28.1
+RUN install-tool bazelisk v1.29.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
 RUN install-tool buf v1.68.4
