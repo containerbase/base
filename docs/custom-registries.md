@@ -334,6 +334,8 @@ Cabal releases are downloaded from:
 Samples:
 
 ```txt
+https://downloads.haskell.org/~cabal/cabal-install-1.24.0.2/cabal-install-1.24.0.2-x86_64-unknown-linux.tar.gz
+https://downloads.haskell.org/~cabal/cabal-install-2.4.1.0/cabal-install-2.4.1.0-x86_64-unknown-linux.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-aarch64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-x86_64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/SHA256SUMS

@@ -26,23 +26,43 @@ export class CabalInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
+    const major = parseInt(version.split('.').at(0)!);
     const baseUrl = `https://downloads.haskell.org/~cabal/cabal-install-${version}/`;
-    // use static deb10 binary as it is compatible with all supported ubuntu versions
-    const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}SHA256SUMS`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    let file: string;
+    const strip = major < 2 ? 7 : 0;
 
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    if (major < 3) {
+      if (this.arch !== 'x86_64') {
+        throw new Error(
+          `Unsupported architecture ${this.envSvc.arch} for cabal-install versions < 3.0. Only x86_64 is supported.`,
+        );
+      }
+      const filename =
+        major < 2
+          ? `cabal-install-${version}-${this.arch}-unknown-linux.tar.gz`
+          : `cabal-install-${version}-${this.arch}-unknown-linux.tar.xz`;
+
+      file = await this.http.download({
+        url: `${baseUrl}${filename}`,
+      });
+    } else {
+      // use static deb10 binary as it is compatible with all supported ubuntu versions
+      const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
+      const checksumFile = await this.http.download({
+        url: `${baseUrl}SHA256SUMS`,
+      });
+      const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
+        .split('\n')
+        .find((l) => l.includes(filename))
+        ?.split(' ')[0];
+
+      file = await this.http.download({
+        url: `${baseUrl}${filename}`,
+        checksumType: 'sha256',
+        expectedChecksum,
+      });
+    }
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -54,6 +74,7 @@ export class CabalInstallService extends BaseInstallService {
     await this.compress.extract({
       file,
       cwd: path,
+      strip,
     });
   }
 

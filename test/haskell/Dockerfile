@@ -43,13 +43,22 @@ FROM base AS build
 RUN prepare-tool cabal ghc
 
 #--------------------------------------
-# test: haskell (root,open-shift)
+# test-ghc
 #--------------------------------------
-FROM base AS haskell-a
+FROM build AS test-ghc
 
-RUN env
 # renovate: datasource=docker packageName=haskell
 RUN install-tool ghc 9.14.1
+
+RUN set -ex; \
+  ghc --version; \
+  ghc-pkg dot --global; \
+  true;
+
+#--------------------------------------
+# test: haskell (root,open-shift)
+#--------------------------------------
+FROM test-ghc AS haskell-a
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
 RUN install-tool cabal 3.16.1.0
@@ -98,9 +107,48 @@ RUN set -ex; \
     true
 
 #--------------------------------------
+# test: cabal v1 (root,open-shift)
+#--------------------------------------
+FROM test-ghc AS cabal-v1
+
+# renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
+RUN install-tool cabal 1.24.0.2
+
+
+USER 1001
+
+RUN set -ex; \
+  cabal --version; \
+  cabal sandbox init; \
+  true;
+#--------------------------------------
+# test: cabal v2 (root,open-shift)
+#--------------------------------------
+FROM test-ghc AS cabal-v2
+
+# cabal v2 need ghc <8.7
+# no binaries yet
+# RUN install-tool ghc 8.8.4
+
+# renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
+RUN install-tool cabal 2.4.1.0
+
+
+USER 1001
+
+RUN set -ex; \
+  cabal --version; \
+  cabal sandbox init; \
+  true;
+
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
-COPY --from=haskell-a /.dummy /.dummy
-COPY --from=haskell-b /.dummy /.dummy
+COPY --from=test-ghc /.dummy /.dummy
+# COPY --from=haskell-a /.dummy /.dummy
+# COPY --from=haskell-b /.dummy /.dummy
+COPY --from=cabal-v1 /.dummy /.dummy
+COPY --from=cabal-v2 /.dummy /.dummy

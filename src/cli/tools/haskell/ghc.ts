@@ -25,9 +25,20 @@ export class GhcInstallService extends BaseInstallService {
   }
 
   override async install(version: string): Promise<void> {
+    const major = parseInt(version.split('.').at(0)!);
     const baseUrl = `https://downloads.haskell.org/~ghc/${version}/`;
+
     // use static deb10 binary as it is compatible with all supported ubuntu versions
-    const filename = `ghc-${version}-${this.arch}-deb10-linux.tar.xz`;
+    let filename = `ghc-${version}-${this.arch}-deb10-linux.tar.xz`;
+
+    if (major < 9) {
+      if (this.arch !== 'x86_64') {
+        throw new Error(
+          `Unsupported architecture ${this.envSvc.arch} for ghc versions < 9.0. Only x86_64 is supported.`,
+        );
+      }
+      filename = `ghc-${version}-${this.arch}-deb9-linux.tar.xz`;
+    }
 
     const checksumFile = await this.http.download({
       url: `${baseUrl}SHA256SUMS`,
