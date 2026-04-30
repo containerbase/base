@@ -85,7 +85,7 @@ importers:
     devDependencies:
       '@containerbase/eslint-plugin':
         specifier: 2.0.2
-        version: 2.0.2(eslint-plugin-promise@7.2.1(eslint@9.39.4))(eslint@9.39.4)
+        version: 2.0.2(eslint-plugin-promise@7.3.0(eslint@9.39.4))(eslint@9.39.4)
       '@containerbase/istanbul-reports-html':
         specifier: 1.1.45
         version: 1.1.45
@@ -165,8 +165,8 @@ importers:
         specifier: 4.16.2
         version: 4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@6.0.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4)
       eslint-plugin-promise:
-        specifier: 7.2.1
-        version: 7.2.1(eslint@9.39.4)
+        specifier: 7.3.0
+        version: 7.3.0(eslint@9.39.4)
       globals:
         specifier: 17.5.0
         version: 17.5.0
@@ -1829,11 +1829,11 @@ packages:
       '@typescript-eslint/parser':
         optional: true
 
-  eslint-plugin-promise@7.2.1:
-    resolution: {integrity: sha512-SWKjd+EuvWkYaS+uN2csvj0KoP43YTu7+phKQ5v+xw6+A0gutVX2yqCeCkC3uLCJFiPfR2dD8Es5L7yUsmvEaA==}
+  eslint-plugin-promise@7.3.0:
+    resolution: {integrity: sha512-6uGiOR0INuujr6PEQmeSSP7GbIMJ/ebEXXiEzb/nOj68LknH5Pxzb/AbZivmr6VE6TkTE8rTjRK9zhKpK6HsRA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
+      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
 
   eslint-scope@8.4.0:
     resolution: {integrity: sha512-sNXOfKCn74rt8RICKMvJS7XKV/Xk9kA7DyJr8mJik3S7Cwgy3qlkkmyS2uQB3jiJg6VNdZd/pDBJu0nvG2NlTg==}
@@ -4324,10 +4324,10 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@containerbase/eslint-plugin@2.0.2(eslint-plugin-promise@7.2.1(eslint@9.39.4))(eslint@9.39.4)':
+  '@containerbase/eslint-plugin@2.0.2(eslint-plugin-promise@7.3.0(eslint@9.39.4))(eslint@9.39.4)':
     dependencies:
       eslint: 9.39.4
-      eslint-plugin-promise: 7.2.1(eslint@9.39.4)
+      eslint-plugin-promise: 7.3.0(eslint@9.39.4)
 
   '@containerbase/istanbul-reports-html@1.1.45':
     dependencies:
@@ -5948,7 +5948,7 @@ snapshots:
       - supports-color
     optional: true
 
-  eslint-plugin-promise@7.2.1(eslint@9.39.4):
+  eslint-plugin-promise@7.3.0(eslint@9.39.4):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.4)
       eslint: 9.39.4
