@@ -225,7 +225,7 @@ RUN install-tool checkov 3.2.525
 # renovate: datasource=pypi
 RUN install-tool conan 2.28.1
 # renovate: datasource=pypi
-RUN install-tool copier 9.14.3
+RUN install-tool copier 9.15.0
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
