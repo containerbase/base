@@ -113,8 +113,16 @@ RUN install-tool skopeo 1.22.2
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.12.2
 
-# renovate: datasource=docker versioning=docker
-RUN install-tool swift 6.3.1
+# not yet supported on resolute https://github.com/swiftlang/swift-docker/issues/524
+# renovate: datasource=docker depName=swift
+ARG SWIFT_VERSION=6.3.1
+RUN set -ex; \
+  if [ "$(. /etc/os-release && echo "${VERSION_CODENAME}")" = "resolute" ]; then \
+    echo "Skipping Swift installation on resolute."; \
+  else \
+    install-tool swift; \
+  fi; \
+  true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
 RUN install-tool terraform 1.15.0
