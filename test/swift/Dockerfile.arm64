@@ -24,7 +24,7 @@ RUN install-containerbase
 #--------------------------------------
 FROM ${BASE_IMAGE} AS base
 
-RUN uname -p | tee | grep aarch64
+RUN arch | tee | grep aarch64
 RUN touch /.dummy
 
 ARG APT_HTTP_PROXY

@@ -35,14 +35,13 @@ function check_tool_requirements () {
 function install_tool () {
   local versioned_tool_path
   local file
-  local arch
+  local arch=${ARCHITECTURE}
   local base_url
   local checksum_file
   local expected_checksum
   local ext=gz
   local file_name
 
-  arch=$(uname -p)
   file_name="rust-${TOOL_VERSION}-${arch}-unknown-linux-gnu.tar"
   base_url="https://static.rust-lang.org/dist/${file_name}"
 
