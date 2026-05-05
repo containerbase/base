@@ -78,7 +78,7 @@ function init_tool () {
 }
 
 function install_tool () {
-  local arch
+  local arch=${ARCHITECTURE}
   local base_url
   local checksum_file
   local expected_checksum
@@ -91,7 +91,6 @@ function install_tool () {
 
   tool_path=$(find_tool_path)
 
-  arch=$(uname -p)
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
