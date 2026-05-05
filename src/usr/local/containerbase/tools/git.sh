@@ -9,7 +9,7 @@ curl --retry 3 -fsSL -o /etc/apt/keyrings/git.asc \
   'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF911AB184317630C59970973E363C90F8F1B6217'
 chmod a+r /etc/apt/keyrings/git.asc
 
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git.asc] http://ppa.launchpad.net/git-core/ppa/ubuntu ${version_codename} main" | tee /etc/apt/sources.list.d/git.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git.asc] https://ppa.launchpadcontent.net/git-core/ppa/ubuntu ${version_codename} main" | tee /etc/apt/sources.list.d/git.list
 
 
 # TODO: Only latest version available on launchpad :-/
@@ -18,6 +18,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git.asc
 apt_install git
 
 # flutter workaround
-git config --system safe.directory "/opt/containerbase/tools/flutter/*"
+# allow all, so it works in older git versions when ppa is not working
+git config --system safe.directory "*"
 
 [[ -n $SKIP_VERSION ]] || git --version
