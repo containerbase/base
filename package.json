@@ -52,7 +52,7 @@
     "pretty-ms": "9.3.0",
     "reflect-metadata": "0.2.2",
     "semver": "7.7.4",
-    "zod": "4.3.6"
+    "zod": "4.4.2"
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "2.1.0",
