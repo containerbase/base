@@ -34,6 +34,18 @@ export class PhpPrepareService extends BasePrepareService {
 
         break;
 
+      case 'resolute':
+        await this.aptSvc.install(
+          'libjpeg-turbo8',
+          'libmcrypt4',
+          'libonig5',
+          'libpng16-16t64',
+          'libtidy58',
+          'libxslt1.1',
+          'libzip5',
+        );
+
+        break;
       default:
         throw new Error(`Unsupported distro version: ${distro.versionCode}`);
     }

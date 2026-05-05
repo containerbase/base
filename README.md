@@ -54,6 +54,15 @@ For other test images see the [`test`](./test/) folder.
 
 ### Distro test images
 
+#### Jammy
+
+Ubuntu `jammy` is deprecated and will be removed in the next major release.
+You can still run the tests with the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
+
+```sh
+TAG=jammy docker buildx bake test-distro
+```
+
 #### Noble
 
 To run the `noble` tests use the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
@@ -62,12 +71,12 @@ To run the `noble` tests use the following command, it will run the test from [`
 TAG=noble docker buildx bake test-distro
 ```
 
-#### Jammy
+#### Resolute
 
-To run the `jammy` tests use the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
+To run the `resolute` tests use the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
 
 ```sh
-TAG=jammy docker buildx bake test-distro
+TAG=resolute docker buildx bake test-distro
 ```
 
 ## Apt proxy

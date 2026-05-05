@@ -189,6 +189,7 @@ jobs:
         distro:
           - jammy
           - noble
+          - resolute
 
     env:
       TAG: ${{ matrix.distro }}
@@ -227,6 +228,7 @@ jobs:
       matrix:
         distro:
           - jammy
+          - resolute
 
     env:
       TAG: ${{ matrix.distro }}

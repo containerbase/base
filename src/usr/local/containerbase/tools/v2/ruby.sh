@@ -8,8 +8,9 @@ function prepare_tool() {
   case "${version_codename}" in
     "jammy");;
     "noble");;
+    "resolute");;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'noble' or 'resolute'." >&2
       exit 1
     ;;
   esac
@@ -93,7 +94,7 @@ function install_tool () {
   base_url="https://github.com/containerbase/${name}-prebuild/releases/download"
   version_codename=$(get_distro)
 
-  if [[ "${version_codename}" == "noble" ]]; then
+  if [[ "${version_codename}" == "noble" || "${version_codename}" == "resolute" ]]; then
     version_codename="jammy"
   fi
 
