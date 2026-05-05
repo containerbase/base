@@ -125,7 +125,7 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.0
+RUN install-tool terraform 1.15.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
 RUN install-tool tofu 1.11.6
@@ -246,7 +246,7 @@ RUN install-tool pdm 2.26.8
 # renovate: datasource=pypi
 RUN install-tool poetry 2.3.4
 # renovate: datasource=pypi
-RUN install-tool uv 0.11.8
+RUN install-tool uv 0.11.9
 
 #--------------------------------------
 # Image: test-ruby

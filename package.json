@@ -55,8 +55,8 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@containerbase/eslint-plugin": "2.0.2",
-    "@containerbase/istanbul-reports-html": "1.1.45",
+    "@containerbase/eslint-plugin": "2.1.0",
+    "@containerbase/istanbul-reports-html": "1.2.0",
     "@eslint/js": "9.39.4",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node24": "24.0.4",
@@ -92,7 +92,7 @@
     "npm-run-all2": "8.0.4",
     "prettier": "3.8.3",
     "prettier-plugin-packagejson": "3.0.2",
-    "rolldown": "1.0.0-rc.17",
+    "rolldown": "1.0.0-rc.18",
     "semantic-release": "25.0.3",
     "shelljs": "0.10.0",
     "tsx": "4.21.0",
