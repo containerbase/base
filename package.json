@@ -84,7 +84,7 @@
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import-x": "4.16.2",
     "eslint-plugin-promise": "7.3.0",
-    "globals": "17.5.0",
+    "globals": "17.6.0",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
     "markdownlint-cli2": "0.22.1",
