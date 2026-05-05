@@ -75,6 +75,8 @@ function getCompilerVersion(distro: Distro): string {
       return '11';
     case 'noble':
       return '13';
+    case 'resolute':
+      return '15';
   }
 
   throw new Error(`Unsupported distro: ${distro.name}`);
