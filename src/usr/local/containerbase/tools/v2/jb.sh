@@ -4,7 +4,7 @@ function install_tool () {
   local versioned_tool_path
   local file
   local arch=linux-amd64
-  if [[ "$(uname -p)" = "aarch64" ]]; then
+  if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
     arch=linux-arm64
   fi
 

@@ -32,7 +32,7 @@ RUN install-tool git v2.54.0
 #--------------------------------------
 FROM base AS build
 
-RUN uname -p | tee | grep x86_64
+RUN arch | tee | grep x86_64
 
 RUN touch /.dummy
 

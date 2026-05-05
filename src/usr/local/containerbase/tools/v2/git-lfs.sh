@@ -11,7 +11,7 @@ function install_tool () {
   local lfs_file
   local strip=0
 
-  if [[ "$(uname -p)" = "aarch64" ]]; then
+  if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
     arch=linux-arm64
   fi
 
