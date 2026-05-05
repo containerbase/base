@@ -187,6 +187,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
+          - jammy
           - noble
           - resolute
 
@@ -226,6 +227,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
+          - jammy
           - resolute
 
     env:
