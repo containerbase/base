@@ -17,6 +17,21 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git.asc
 
 apt_install git
 
+# Keep in sync renovate minimum git version
+# https://github.com/renovatebot/renovate/blob/main/lib/util/git/index.ts#L180
+function validate_git_version() {
+  local required_version="2.33.0"
+  local current_version
+  current_version=$(git --version | awk '{print $3}')
+
+  if  dpkg --compare-versions "${current_version}" lt "${required_version}"; then
+    echo "Git version mismatch! Expected: ${required_version}, got: ${current_version}"
+    exit 1
+  fi
+}
+
+validate_git_version
+
 # flutter workaround
 # allow all, so it works in older git versions when ppa is not working
 git config --system safe.directory "*"
