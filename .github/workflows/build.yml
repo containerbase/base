@@ -187,8 +187,8 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - jammy
           - noble
+          - resolute
 
     env:
       TAG: ${{ matrix.distro }}
@@ -226,7 +226,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - jammy
+          - resolute
 
     env:
       TAG: ${{ matrix.distro }}

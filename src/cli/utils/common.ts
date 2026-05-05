@@ -24,11 +24,12 @@ export async function validateSystem(): Promise<void> {
     /* v8 ignore next -- hard to test */
     case 'jammy':
     case 'noble':
+    case 'resolute':
       break;
     default:
       logger.fatal(
         { distro: d },
-        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'jammy' or 'noble'.`,
+        `Unsupported distro: ${d.versionCode}! Please use Ubuntu 'noble' or 'resolute'.`,
       );
       process.exit(1);
   }

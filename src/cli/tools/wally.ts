@@ -23,7 +23,7 @@ export class WallyInstallService extends BaseInstallService {
     const distro = await getDistro();
     let code = distro.versionCode;
 
-    if (code === 'noble') {
+    if (code === 'noble' || code === 'resolute') {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }

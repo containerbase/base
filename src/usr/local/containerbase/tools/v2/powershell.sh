@@ -5,10 +5,12 @@ function prepare_tool() {
 
   version_codename="$(get_distro)"
   case "${version_codename}" in
-    "jammy") apt_install libc6 libgcc1 libgssapi-krb5-2 libicu70 libssl3 libstdc++6 zlib1g;;
-    "noble") apt_install libc6 libgcc1 libgssapi-krb5-2 libicu74 libssl3 libstdc++6 zlib1g;;
+    # https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204#dependencies-4
+    "jammy") apt_install libc6 libgcc-s1 libgssapi-krb5-2 libicu70 libssl3 libstdc++6 tzdata zlib1g;;
+    "noble") apt_install libc6 libgcc-s1 libgssapi-krb5-2 libicu74 libssl3t64 libstdc++6 tzdata zlib1g;;
+    "resolute") apt_install libbrotli1 libc6 libgcc-s1 libgssapi-krb5-2 libicu78 libssl3t64 libstdc++6 tzdata zlib1g;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'noble' or 'resolute'." >&2
       exit 1
     ;;
   esac

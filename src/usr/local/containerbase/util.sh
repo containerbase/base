@@ -150,8 +150,9 @@ function require_distro () {
   case "$DISTRO_CODENAME" in
   "jammy") ;; #supported
   "noble") ;; #supported
+  "resolute") ;; #supported
   *)
-    echo "Distro not supported: ${DISTRO_CODENAME}! Please use ubuntu 'jammy' or 'noble'." >&2
+    echo "Distro not supported: ${DISTRO_CODENAME}! Please use ubuntu 'noble' or 'resolute'." >&2
     exit 1
    ;;
   esac

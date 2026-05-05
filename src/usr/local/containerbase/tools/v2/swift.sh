@@ -43,8 +43,27 @@ function prepare_tool() {
         unzip \
         zlib1g-dev \
         ;;
+    "resolute")
+      apt_install \
+        binutils \
+        gnupg2 \
+        libc6-dev \
+        libcurl4-openssl-dev \
+        libedit2 \
+        libgcc-11-dev \
+        libncurses6 \
+        libpython3.14 \
+        libsqlite3-0 \
+        libstdc++-11-dev \
+        libxml2-dev \
+        libz3-dev \
+        pkg-config \
+        tzdata \
+        unzip \
+        zlib1g-dev \
+        ;;
     *)
-      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'jammy' or 'noble'." >&2
+      echo "Tool '${TOOL_NAME}' not supported on: ${version_codename}! Please use ubuntu 'noble' or 'resolute'." >&2
       exit 1
     ;;
   esac

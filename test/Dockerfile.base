@@ -6,6 +6,7 @@ ARG BASE_IMAGE=latest
 #--------------------------------------
 FROM ghcr.io/containerbase/ubuntu:22.04 AS jammy
 FROM ghcr.io/containerbase/ubuntu:24.04 AS noble
+FROM ghcr.io/containerbase/ubuntu:26.04 AS resolute
 
 FROM ghcr.io/containerbase/ubuntu:24.04 AS latest
 #--------------------------------------
