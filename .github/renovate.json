@@ -180,6 +180,11 @@
       "semanticCommitType": "build"
     },
     {
+      "description": "Use `build` semantic commit scope for lockfile maintenance.",
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "semanticCommitType": "build"
+    },
+    {
       "description": "Use `chore` semantic commit scope for Actions updates",
       "matchManagers": ["github-actions"],
       "semanticCommitType": "chore"
