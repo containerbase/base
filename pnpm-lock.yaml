@@ -20,8 +20,8 @@ importers:
   .:
     dependencies:
       '@renovatebot/pep440':
-        specifier: 4.2.3
-        version: 4.2.3
+        specifier: 4.2.4
+        version: 4.2.4
       '@seald-io/nedb':
         specifier: 4.1.2
         version: 4.1.2
@@ -663,8 +663,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@renovatebot/pep440@4.2.3':
-    resolution: {integrity: sha512-xw5ypMfJyfVakxyQyNrOAtP2MQxfgkoX1WnDjRZNOeVDSvRLi+vDpgqvw0Cn1c09JhyJ4iRhwGptQz08dR8oXQ==}
+  '@renovatebot/pep440@4.2.4':
+    resolution: {integrity: sha512-r+Pwj9ud/5QOOHoSsD7mWzU0Qkj105UPOyPwihGAtbNCl9pqnWkEDNRM5an63QvsFsS9tt+X3o+npT3AKBiTVg==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: '>=10.0.0'}
 
   '@roberts_lando/vfs@0.3.3':
@@ -4816,7 +4816,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@renovatebot/pep440@4.2.3': {}
+  '@renovatebot/pep440@4.2.4': {}
 
   '@roberts_lando/vfs@0.3.3': {}
 
