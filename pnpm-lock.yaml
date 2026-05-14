@@ -26,8 +26,8 @@ importers:
         specifier: 4.1.2
         version: 4.1.2
       '@sindresorhus/is':
-        specifier: 8.0.0
-        version: 8.0.0
+        specifier: 8.1.0
+        version: 8.1.0
       clipanion:
         specifier: 3.2.1
         version: 3.2.1(patch_hash=ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299)(typanion@3.14.0)
@@ -818,8 +818,8 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@sindresorhus/is@8.0.0':
-    resolution: {integrity: sha512-YvOsokBE5NsyHuXMnwEVB7lgFk6lX8F4OXCruYVgFII0hUHof0RGUvhMoabVt9hRqbg+qVzayzEG24RCcxcYeA==}
+  '@sindresorhus/is@8.1.0':
+    resolution: {integrity: sha512-2SX/1jW6CIMAiebvVv5ZInoCEuWQmMyBoJXXGC6Vjakjp/fpxP5eHs7/V6WKuPEIbuK06+VpjH+vjLQhr98rDQ==}
     engines: {node: '>=22'}
 
   '@sindresorhus/merge-streams@2.3.0':
@@ -4455,7 +4455,7 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@sindresorhus/is@8.0.0': {}
+  '@sindresorhus/is@8.1.0': {}
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
@@ -5692,7 +5692,7 @@ snapshots:
 
   got@15.0.5:
     dependencies:
-      '@sindresorhus/is': 8.0.0
+      '@sindresorhus/is': 8.1.0
       byte-counter: 0.1.0
       cacheable-lookup: 7.0.0
       cacheable-request: 13.0.19
