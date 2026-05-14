@@ -370,7 +370,7 @@ USER 12021
 RUN install-tool mono 6.14.1
 
 # renovate: datasource=nuget packageName=NuGet.CommandLine
-RUN install-tool nuget 7.3.1
+RUN install-tool nuget 7.6.0
 
 RUN nuget search nuget.commandline -Take 1
 
