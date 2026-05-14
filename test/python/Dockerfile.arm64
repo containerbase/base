@@ -78,7 +78,7 @@ RUN install-tool pipenv 2026.6.1
 FROM test-python AS test-poetry
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.3.4
+RUN install-tool poetry 2.4.1
 
 #--------------------------------------
 # Image: conan
