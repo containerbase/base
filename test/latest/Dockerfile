@@ -223,7 +223,7 @@ RUN install-tool bazelisk v1.29.0
 RUN install-tool buf v1.69.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.3.13
+RUN install-tool bun 1.3.14
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.7.14
