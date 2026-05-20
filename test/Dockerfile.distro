@@ -140,7 +140,7 @@ RUN install-tool vendir v0.45.3
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 34.1
+RUN install-tool protoc 35.0
 
 #--------------------------------------
 # Image: test-docker
