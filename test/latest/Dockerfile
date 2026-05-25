@@ -220,7 +220,7 @@ FROM base AS teste
 RUN install-tool bazelisk v1.29.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.69.0
+RUN install-tool buf v1.70.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.3.14
