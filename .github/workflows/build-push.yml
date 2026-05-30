@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: docker-config
-        uses: containerbase/internal-tools@8686e98d1805ba8f2536f7d015726d48843933e7 # v4.6.35
+        uses: containerbase/internal-tools@89b85b4342022655c82b38be848c3c3c8b19329d # v4.6.36
         with:
           command: docker-config
 
@@ -66,7 +66,7 @@ jobs:
           echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
 
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@8686e98d1805ba8f2536f7d015726d48843933e7 # v4.6.35
+        uses: containerbase/internal-tools/setup@89b85b4342022655c82b38be848c3c3c8b19329d # v4.6.36
         with:
           checkout: false
           apt-proxy: true
