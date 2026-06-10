@@ -209,7 +209,7 @@ RUN install-tool node 24.16.0
 # renovate: datasource=npm
 RUN install-tool pnpm 10.34.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.15.0
+RUN install-tool yarn 4.16.0
 
 #--------------------------------------
 # Image: test-php
