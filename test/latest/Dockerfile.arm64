@@ -70,7 +70,7 @@ RUN install-tool apko 1.2.16
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.17.2
+RUN install-tool devbox 0.17.3
 
 #--------------------------------------
 # Image: gleam
