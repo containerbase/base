@@ -256,7 +256,7 @@ RUN install-tool tofu 1.12.1
 RUN install-tool protoc 35.0
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=v0.45.4
+ARG VENDIR_VERSION=v0.46.0
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=v1.5.3
