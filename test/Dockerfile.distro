@@ -63,7 +63,7 @@ RUN install-tool deno 2.8.2
 RUN install-tool devbox 0.17.3
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.300
+RUN install-tool dotnet 10.0.301
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
 RUN install-tool flutter 3.44.1
