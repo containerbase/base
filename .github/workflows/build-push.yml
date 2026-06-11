@@ -76,7 +76,9 @@ jobs:
           checkout: false
           apt-proxy: true
 
-      - name: testing
+      - name: build binaries
+        run: pnpm build
+      - name: build docker
         run: docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build
 
       - run: df -h
