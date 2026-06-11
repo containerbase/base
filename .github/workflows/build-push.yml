@@ -51,6 +51,11 @@ jobs:
       #   with:
       #     command: docker-config
 
+      - run: df -h
+
+      - name: Check system
+        uses: ./.github/actions/check
+
       # full checkout for semantic-release
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -73,6 +78,8 @@ jobs:
 
       - name: testing
         run: docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build
+
+      - run: df -h
 
       - name: Docker registry login
         if: github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, 'maint/')
