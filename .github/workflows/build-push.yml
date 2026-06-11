@@ -23,15 +23,15 @@ env:
   APT_HTTP_PROXY: http://172.17.0.1:8000
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-    permissions:
-      contents: read
-      checks: write
-      id-token: write
+  # build:
+  #   uses: ./.github/workflows/build.yml
+  #   permissions:
+  #     contents: read
+  #     checks: write
+  #     id-token: write
 
   release:
-    needs: [build]
+    # needs: [build]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -46,10 +46,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@6122c02bd82e1ff93edd4332ccea94a64034ad2a # v4.6.40
-        with:
-          command: docker-config
+      # - name: docker-config
+      #   uses: containerbase/internal-tools@6122c02bd82e1ff93edd4332ccea94a64034ad2a # v4.6.40
+      #   with:
+      #     command: docker-config
 
       # full checkout for semantic-release
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -70,6 +70,9 @@ jobs:
         with:
           checkout: false
           apt-proxy: true
+
+      - name: testing
+        run: docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build
 
       - name: Docker registry login
         if: github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, 'maint/')
