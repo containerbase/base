@@ -1,6 +1,8 @@
 packages: []
 allowUnusedPatches: true
 
+updateNotifier: false
+
 strictPeerDependencies: true
 
 allowBuilds:

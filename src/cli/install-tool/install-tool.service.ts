@@ -161,11 +161,17 @@ export class InstallToolService {
 
         if (this.envSvc.isRoot) {
           logger.debug('cleaning root caches');
-          await deleteAsync(['/root/.cache', '/root/.local/share/virtualenv'], {
-            force: true,
-            dryRun,
-            dot: true,
-          });
+          await deleteAsync(
+            [
+              '/root/.{android,android-sdk,cache}',
+              '/root/.local/share/virtualenv',
+            ],
+            {
+              force: true,
+              dryRun,
+              dot: true,
+            },
+          );
         } else {
           logger.debug('cleaning user caches');
           await deleteAsync(

@@ -38,6 +38,10 @@ import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
 import { ResolverMap } from '../tools/index.ts';
 import {
+  AndroidSdkCmdlineToolsInstallService,
+  AndroidSdkCmdlineToolsVersionResolver,
+} from '../tools/java/android.ts';
+import {
   GradleInstallService,
   GradleVersionResolver,
 } from '../tools/java/gradle.ts';
@@ -128,6 +132,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(V1ToolInstallService).toSelf();
 
   // modern tool services
+  container.bind(INSTALL_TOOL_TOKEN).to(AndroidSdkCmdlineToolsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ApkoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
@@ -211,6 +216,9 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
+  container
+    .bind(TOOL_VERSION_RESOLVER)
+    .to(AndroidSdkCmdlineToolsVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(CocoapodsVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);

@@ -1,6 +1,7 @@
 import type { InstallToolType } from '../utils';
 
 export const NoPrepareTools = [
+  'android-sdk-cmdline-tools',
   'apko',
   'bazelisk',
   'bower',

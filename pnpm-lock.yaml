@@ -19,6 +19,12 @@ importers:
 
   .:
     dependencies:
+      '@nodable/compact-builder':
+        specifier: 1.0.9
+        version: 1.0.9
+      '@nodable/flexible-xml-parser':
+        specifier: 1.2.2
+        version: 1.2.2
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -720,6 +726,18 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
+
+  '@nodable/base-output-builder@1.0.6':
+    resolution: {integrity: sha512-gDPvbt6GVhqA4lPZayqXYvO/510kVWGBXdvZF6jUtVcssziw6o27pwq6oI9CUwMk0Oq8BcucxYYxXM5wnHUB7A==}
+
+  '@nodable/compact-builder@1.0.9':
+    resolution: {integrity: sha512-90tD+khseKL+Wxf1gMiL3JsZrdevKI0g5oHbb8zqJzLsxMpwoSZu/EZDHl9I8+gmDSz7hzK1hcopC+4GnMZiKg==}
+
+  '@nodable/entities@2.1.1':
+    resolution: {integrity: sha512-Pig3HxDIoMgjdEH8OCf/dkcTmLFjJRjWuq8jSnklu284/TKOPibSRERmOykiwmyXTtv61mP+44f3GMx0tLAyjg==}
+
+  '@nodable/flexible-xml-parser@1.2.2':
+    resolution: {integrity: sha512-7nYGnBCN7dnF2cL1tCnA2w2HBYhHsUzCEpnJ5r4ZzKCQjB4QQcesrmgB7jibJApDe5J53fC372TVIROiAXp/tQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3316,6 +3334,10 @@ packages:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
 
+  path-expression-matcher@1.5.0:
+    resolution: {integrity: sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ==}
+    engines: {node: '>=14.0.0'}
+
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
@@ -3798,6 +3820,9 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
+  strnum@2.3.0:
+    resolution: {integrity: sha512-ums3KNd42PGyx5xaoVTO1mjU1bH3NpY4vsrVlnv9PNGqQj8wd7rJ6nEypLrJ7z5vxK5RP0yMLo6J/Gsm62DI5Q==}
+
   strong-type@0.1.6:
     resolution: {integrity: sha512-eJe5caH6Pi5oMMeQtIoBPpvNu/s4jiyb63u5tkHNnQXomK+puyQ5i+Z5iTLBr/xUz/pIcps0NSfzzFI34+gAXg==}
     engines: {node: '>=12.0.0'}
@@ -4185,6 +4210,10 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  xml-naming@0.1.0:
+    resolution: {integrity: sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==}
+    engines: {node: '>=16.0.0'}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -4594,6 +4623,25 @@ snapshots:
       '@emnapi/runtime': 1.10.0
       '@tybys/wasm-util': 0.10.2
     optional: true
+
+  '@nodable/base-output-builder@1.0.6':
+    dependencies:
+      '@nodable/entities': 2.1.1
+      strnum: 2.3.0
+
+  '@nodable/compact-builder@1.0.9':
+    dependencies:
+      '@nodable/base-output-builder': 1.0.6
+      path-expression-matcher: 1.5.0
+
+  '@nodable/entities@2.1.1': {}
+
+  '@nodable/flexible-xml-parser@1.2.2':
+    dependencies:
+      '@nodable/base-output-builder': 1.0.6
+      '@nodable/compact-builder': 1.0.9
+      path-expression-matcher: 1.5.0
+      xml-naming: 0.1.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -7194,6 +7242,8 @@ snapshots:
 
   path-exists@4.0.0: {}
 
+  path-expression-matcher@1.5.0: {}
+
   path-is-absolute@1.0.1: {}
 
   path-key@3.1.1: {}
@@ -7735,6 +7785,8 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
+  strnum@2.3.0: {}
+
   strong-type@0.1.6: {}
 
   strong-type@1.1.0: {}
@@ -8114,6 +8166,8 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
+
+  xml-naming@0.1.0: {}
 
   xtend@4.0.2: {}
 

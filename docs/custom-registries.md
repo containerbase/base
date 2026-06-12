@@ -395,6 +395,21 @@ https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12
 https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz
 ```
 
+### `android-sdk`
+
+`android-sdk-cmdline-tools` releases are downloaded from:
+
+- `https://dl.google.com/android/repository/`
+
+The `repository2-3.xml` file is used to determine the checksum and find latest release of the `cmdline-tools`.
+
+Samples:
+
+```txt
+https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip
+https://dl.google.com/android/repository/repository2-3.xml
+```
+
 ### `gradle`
 
 Gradle releases are downloaded from:
