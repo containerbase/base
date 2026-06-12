@@ -58,6 +58,12 @@ jobs:
           show-progress: false
           filter: blob:none # we don't need all blobs
 
+      - name: Check system
+        uses: ./.github/actions/check
+
+      # allow build cross arch images
+      - uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
+
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: init
