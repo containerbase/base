@@ -35,7 +35,7 @@ function install_tool () {
   local versioned_tool_path
   local file
   local base_url="https://github.com/elixir-lang/elixir/releases/download"
-  local base_file=elixir-otp-26.zip
+  local base_file=elixir-otp-27.zip
 
   check_command erl
 
@@ -49,6 +49,8 @@ function install_tool () {
     base_file=elixir-otp-24.zip
   elif dpkg --compare-versions "${TOOL_VERSION}" lt 1.19.0; then
     base_file=elixir-otp-25.zip
+  elif dpkg --compare-versions "${TOOL_VERSION}" lt 1.20.0; then
+    base_file=elixir-otp-26.zip
   fi
 
   file=$(get_from_url "${base_url}/v${TOOL_VERSION}/${base_file}")
