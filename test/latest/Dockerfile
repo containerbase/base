@@ -226,7 +226,7 @@ RUN install-tool buf v1.70.0
 RUN install-tool bun 1.3.14
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.8.2
+RUN install-tool deno 2.8.3
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
 RUN install-tool apko 1.2.16
@@ -241,7 +241,7 @@ RUN install-tool gleam 1.17.0
 RUN install-tool kubectl v1.36.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.6.2
+RUN install-tool mise 2026.6.3
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.22.2
@@ -253,7 +253,7 @@ RUN install-tool sops v3.13.1
 RUN install-tool tofu 1.12.1
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 35.0
+RUN install-tool protoc 35.1
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
 ARG VENDIR_VERSION=v0.46.0
@@ -301,7 +301,7 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 FROM base AS testf
 
 # renovate: datasource=github-releases depName=protoc packageName=protocolbuffers/protobuf versioning=docker
-ARG PROTOC_VERSION=35.0
+ARG PROTOC_VERSION=35.1
 
 RUN set -ex; \
   ls -lah /opt/containerbase/; \
