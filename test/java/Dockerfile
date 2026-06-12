@@ -272,6 +272,22 @@ RUN ls -la /tmp
 RUN containerbase-cli init tool java
 
 #--------------------------------------
+# test: android-sdk
+#--------------------------------------
+FROM build AS test-android-sdk
+
+# no version, so install latest
+RUN install-tool android-sdk-cmdline-tools
+
+USER 12021
+
+# Do no install as root, `/root/.{android,android-sdk}` folders will be removed on docker build
+RUN set -ex; \
+  yes | sdkmanager --licenses; \
+  sdkmanager "platforms;android-35"; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -285,3 +301,4 @@ COPY --from=test-maven-a /.dummy /.dummy
 COPY --from=test-others /.dummy /.dummy
 COPY --from=test-latest-version /.dummy /.dummy
 COPY --from=test-readonly /.dummy /.dummy
+COPY --from=test-android-sdk /.dummy /.dummy

@@ -16,12 +16,15 @@ import { logger } from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
 import { PathService } from './path.service.ts';
 
-export type HttpChecksumType =
-  | 'sha1'
-  | 'sha224'
-  | 'sha256'
-  | 'sha384'
-  | 'sha512';
+export const HttpChecksumTypes = [
+  'sha1',
+  'sha224',
+  'sha256',
+  'sha384',
+  'sha512',
+] as const;
+
+export type HttpChecksumType = (typeof HttpChecksumTypes)[number];
 
 export interface HttpDownloadConfig {
   url: string;

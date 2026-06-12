@@ -41,6 +41,14 @@ export class JavaPrepareService extends BasePrepareService {
       path.join(this.pathSvc.cachePath, '.gradle'),
       path.join(this.envSvc.userHome, '.gradle'),
     );
+    await fs.symlink(
+      path.join(this.pathSvc.cachePath, '.android'),
+      path.join(this.envSvc.userHome, '.android'),
+    );
+    await fs.symlink(
+      path.join(this.pathSvc.cachePath, '.android-sdk'),
+      path.join(this.envSvc.userHome, '.android-sdk'),
+    );
 
     const version = await resolveLatestJavaLtsVersion(
       this.httpSvc,
@@ -83,12 +91,17 @@ export class JavaPrepareService extends BasePrepareService {
 
     await fs.symlink(varCerts, cacerts);
 
+    await this.pathSvc.exportEnv({ ANDROID_HOME: '~/.android-sdk' });
+
     // cleanup will be done by caller
   }
 
   override async initialize(): Promise<void> {
     await createMavenSettings(this.pathSvc);
     await createGradleSettings(this.pathSvc);
+
+    await this.pathSvc.createDir(`${this.pathSvc.cachePath}/.android`);
+    await this.pathSvc.createDir(`${this.pathSvc.cachePath}/.android-sdk`);
 
     if (!(await this.pathSvc.toolEnvExists('gradle'))) {
       // fix: Failed to load native library 'libnative-platform.so' for Linux amd64.
