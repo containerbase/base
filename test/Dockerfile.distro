@@ -102,7 +102,7 @@ RUN install-tool nix 2.24.10
 RUN install-tool pixi v0.70.2
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.2
+RUN install-tool powershell v7.6.3
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.96.0
