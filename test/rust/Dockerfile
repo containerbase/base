@@ -117,6 +117,19 @@ RUN rustc --version
 RUN cargo --version
 
 #--------------------------------------
+# test e: nightly with date
+#--------------------------------------
+FROM base AS teste
+
+USER 12021
+
+RUN install-tool rust nightly-2026-06-19
+
+SHELL [ "/bin/sh", "-c" ]
+RUN rustc --version
+RUN cargo --version
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -125,3 +138,4 @@ COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
 COPY --from=testd /.dummy /.dummy
+COPY --from=teste /.dummy /.dummy

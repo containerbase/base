@@ -24,7 +24,7 @@ function init_tool () {
 }
 
 function check_tool_requirements () {
-  if [[ "${TOOL_VERSION}" == "nightly" || "${TOOL_VERSION}" == "beta" ]]; then
+  if [[ "${TOOL_VERSION}" == "beta" || "${TOOL_VERSION}" == "nightly" || "${TOOL_VERSION}" == nightly-* ]]; then
     # allow beta and nightly versions
     return
   fi
@@ -43,6 +43,10 @@ function install_tool () {
   local file_name
 
   file_name="rust-${TOOL_VERSION}-${arch}-unknown-linux-gnu.tar"
+  if [[ "${TOOL_VERSION}" == nightly-* ]]; then
+    NIGHTLY_DATE="${TOOL_VERSION#nightly-}"
+    file_name="${NIGHTLY_DATE}/rust-nightly-${arch}-unknown-linux-gnu.tar"
+  fi
   base_url="https://static.rust-lang.org/dist/${file_name}"
 
   # not all releases have checksums
