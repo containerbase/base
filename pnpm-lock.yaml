@@ -23,8 +23,8 @@ importers:
         specifier: 1.0.9
         version: 1.0.9
       '@nodable/flexible-xml-parser':
-        specifier: 1.2.2
-        version: 1.2.2
+        specifier: 1.3.0
+        version: 1.3.0
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -739,14 +739,17 @@ packages:
   '@nodable/base-output-builder@1.0.6':
     resolution: {integrity: sha512-gDPvbt6GVhqA4lPZayqXYvO/510kVWGBXdvZF6jUtVcssziw6o27pwq6oI9CUwMk0Oq8BcucxYYxXM5wnHUB7A==}
 
+  '@nodable/base-output-builder@1.0.7':
+    resolution: {integrity: sha512-MINlWeVuWXAbgUnWMdsRwQyEqdQx6FgTNsHUiYY70qUbpReynV0ZD4Gno/tfLVreLOgonef4nZVWW0cMws2qyw==}
+
   '@nodable/compact-builder@1.0.9':
     resolution: {integrity: sha512-90tD+khseKL+Wxf1gMiL3JsZrdevKI0g5oHbb8zqJzLsxMpwoSZu/EZDHl9I8+gmDSz7hzK1hcopC+4GnMZiKg==}
 
   '@nodable/entities@2.1.1':
     resolution: {integrity: sha512-Pig3HxDIoMgjdEH8OCf/dkcTmLFjJRjWuq8jSnklu284/TKOPibSRERmOykiwmyXTtv61mP+44f3GMx0tLAyjg==}
 
-  '@nodable/flexible-xml-parser@1.2.2':
-    resolution: {integrity: sha512-7nYGnBCN7dnF2cL1tCnA2w2HBYhHsUzCEpnJ5r4ZzKCQjB4QQcesrmgB7jibJApDe5J53fC372TVIROiAXp/tQ==}
+  '@nodable/flexible-xml-parser@1.3.0':
+    resolution: {integrity: sha512-Gjz9Z1NHCi7q/3vIh7fUTL3uTFoSf2AUGFmFp0VWyWvwUgliiy6CDcF2s9B+LyZp55kfCW1ilxZpH0XW/9MfNQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -4661,6 +4664,11 @@ snapshots:
       '@nodable/entities': 2.1.1
       strnum: 2.4.0
 
+  '@nodable/base-output-builder@1.0.7':
+    dependencies:
+      '@nodable/entities': 2.1.1
+      strnum: 2.4.0
+
   '@nodable/compact-builder@1.0.9':
     dependencies:
       '@nodable/base-output-builder': 1.0.6
@@ -4668,9 +4676,9 @@ snapshots:
 
   '@nodable/entities@2.1.1': {}
 
-  '@nodable/flexible-xml-parser@1.2.2':
+  '@nodable/flexible-xml-parser@1.3.0':
     dependencies:
-      '@nodable/base-output-builder': 1.0.6
+      '@nodable/base-output-builder': 1.0.7
       '@nodable/compact-builder': 1.0.9
       path-expression-matcher: 1.5.0
       xml-naming: 0.1.0
