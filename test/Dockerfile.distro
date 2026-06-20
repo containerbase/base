@@ -184,7 +184,7 @@ FROM build AS test-java
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java 25.0.3+9.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 9.5.1
+RUN install-tool gradle 9.6.0
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
 RUN install-tool maven 3.9.16
 
