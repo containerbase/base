@@ -78,7 +78,7 @@ target "settings" {
     notequal("", CHANNEL) ? "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${CHANNEL}" : "",
   ]
   extra-hosts = {
-    host.docker.internal = "host-gateway"
+    "host.docker.internal" = "host-gateway"
   }
 }
 
