@@ -148,7 +148,7 @@ jobs:
             os: ubuntu-24.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
 
     steps:
@@ -215,7 +215,7 @@ jobs:
 
   # test old distros on arm64
   base-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     needs:
       - bats
       - lint
@@ -291,7 +291,7 @@ jobs:
             os: ubuntu-24.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
         # include:
         #   # no ubuntu arm64 support for haskell
