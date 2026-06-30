@@ -111,7 +111,7 @@ RUN install-tool rust 1.96.0
 RUN install-tool skopeo 1.23.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.13.1
+RUN install-tool sops v3.13.2
 
 # not yet supported on resolute https://github.com/swiftlang/swift-docker/issues/524
 # renovate: datasource=docker depName=swift

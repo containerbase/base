@@ -247,7 +247,7 @@ RUN install-tool mise 2026.6.14
 RUN install-tool skopeo 1.23.0
 
 # renovate: datasource=github-releases packageName=getsops/sops
-RUN install-tool sops v3.13.1
+RUN install-tool sops v3.13.2
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
 RUN install-tool tofu 1.12.3
