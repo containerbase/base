@@ -23,8 +23,8 @@ importers:
         specifier: 1.0.9
         version: 1.0.9
       '@nodable/flexible-xml-parser':
-        specifier: 1.3.0
-        version: 1.3.0
+        specifier: 1.4.0
+        version: 1.4.0
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -739,17 +739,23 @@ packages:
   '@nodable/base-output-builder@1.0.6':
     resolution: {integrity: sha512-gDPvbt6GVhqA4lPZayqXYvO/510kVWGBXdvZF6jUtVcssziw6o27pwq6oI9CUwMk0Oq8BcucxYYxXM5wnHUB7A==}
 
-  '@nodable/base-output-builder@1.0.7':
-    resolution: {integrity: sha512-MINlWeVuWXAbgUnWMdsRwQyEqdQx6FgTNsHUiYY70qUbpReynV0ZD4Gno/tfLVreLOgonef4nZVWW0cMws2qyw==}
+  '@nodable/base-output-builder@2.0.0':
+    resolution: {integrity: sha512-DECrOg3zZuhOx2Iesj1mkINjFvasP3HV3pjGBs3A104V4zJIZJOeqOzF5qNWRl17oGheNsfnqINwUBVu6n7wrQ==}
 
   '@nodable/compact-builder@1.0.9':
     resolution: {integrity: sha512-90tD+khseKL+Wxf1gMiL3JsZrdevKI0g5oHbb8zqJzLsxMpwoSZu/EZDHl9I8+gmDSz7hzK1hcopC+4GnMZiKg==}
 
+  '@nodable/compact-builder@2.0.0':
+    resolution: {integrity: sha512-TLyrdyV+KIh9n7waO45m9LsbxpoNXkHfXmQ4tWgXJynsJwCCZm2qT5NFvcjzWq3AN+tsA7XpmQOwAC5vbqzjkg==}
+
   '@nodable/entities@2.1.1':
     resolution: {integrity: sha512-Pig3HxDIoMgjdEH8OCf/dkcTmLFjJRjWuq8jSnklu284/TKOPibSRERmOykiwmyXTtv61mP+44f3GMx0tLAyjg==}
 
-  '@nodable/flexible-xml-parser@1.3.0':
-    resolution: {integrity: sha512-Gjz9Z1NHCi7q/3vIh7fUTL3uTFoSf2AUGFmFp0VWyWvwUgliiy6CDcF2s9B+LyZp55kfCW1ilxZpH0XW/9MfNQ==}
+  '@nodable/entities@2.2.0':
+    resolution: {integrity: sha512-9uGyhaQavEUMC8AIddIjau4NsnsXhou+j5sBAGojCM1oxmQpVKTWR/9JxABD6UAv12vpIms55fPZKFQEhG6uBg==}
+
+  '@nodable/flexible-xml-parser@1.4.0':
+    resolution: {integrity: sha512-wl5aftg8fUVfqBGJI8yuBhZK78sIBK1PgMx1USdC85RTph/RBVGfqReTS7ovdixnTwy3Z8DURUrHiOm/q3BiOA==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1431,6 +1437,9 @@ packages:
 
   anynum@1.0.0:
     resolution: {integrity: sha512-xjR9/zBVnUOP6ztMIIgShjsxui80nQUQH+5xJnvrYLs+90bF25/KJqaAi8mk+B4RDtX1Nspi6fmp4YTEts8SfA==}
+
+  anynum@1.0.1:
+    resolution: {integrity: sha512-N6//FLET/tXYNM/F6ABca1oH6fWB+KlTt909Le28WMDBk8oaT4vY17DCrwg2MvmuqUKt3Ni4N5dGJ/EoBgcO6A==}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2494,6 +2503,9 @@ packages:
     resolution: {integrity: sha512-mE00Gnza5EEB3Ds0HfMyllZzbBrmLOX3vfWoj9A9PEnTfratQ/BcaJOuMhnkhjXvb2+FkY3VuHqtAGpTPmglFQ==}
     engines: {node: '>=18'}
 
+  is-unsafe@1.0.1:
+    resolution: {integrity: sha512-CLK2+VdgERgD96EYm5lUQssZYlRg2tkZnbsxZoacmSiRxiFJ4Nk4SzjCl+Ur+v3kXIY9dTIdb3IH22y1mZ56LA==}
+
   isarray@0.0.1:
     resolution: {integrity: sha512-D2S+3GLxWH+uhrNEcoh/fnmYeP8E8/zHl644d/jdA0g2uyXvy3sb0qxotE+ne0LtccHknQzWwZEzhak7oJ0COQ==}
 
@@ -3254,6 +3266,10 @@ packages:
     resolution: {integrity: sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ==}
     engines: {node: '>=14.0.0'}
 
+  path-expression-matcher@1.6.1:
+    resolution: {integrity: sha512-h7bxdzhHk8Knyc4Tj+jMaa7fEEoUJy7p1qtbVgkYg1Uhpe5Np5VuGXCRZnkZvU+Q42M1vStt0ifa3ueykRJPmQ==}
+    engines: {node: '>=14.0.0'}
+
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
@@ -3742,6 +3758,9 @@ packages:
 
   strnum@2.4.0:
     resolution: {integrity: sha512-sHrVyWWdq28RbhjuJdZsA1SnGRJV6NiXbk6AXBxDOsgAcA+lmpUZCYjOdLBxkXMwis6RRe7dlZt4VlIWFVzkmg==}
+
+  strnum@2.4.1:
+    resolution: {integrity: sha512-M9eUSMT2dCB2cTNPG7UYj6KuK7RJR2SN2+yCV/fTW3xzTCS6EaGZ5pSMgDIjB7r8zSfTGk+dvvn9rTjpVS9Mwg==}
 
   strong-type@0.1.6:
     resolution: {integrity: sha512-eJe5caH6Pi5oMMeQtIoBPpvNu/s4jiyb63u5tkHNnQXomK+puyQ5i+Z5iTLBr/xUz/pIcps0NSfzzFI34+gAXg==}
@@ -4568,23 +4587,32 @@ snapshots:
       '@nodable/entities': 2.1.1
       strnum: 2.4.0
 
-  '@nodable/base-output-builder@1.0.7':
+  '@nodable/base-output-builder@2.0.0':
     dependencies:
-      '@nodable/entities': 2.1.1
-      strnum: 2.4.0
+      '@nodable/entities': 2.2.0
+      is-unsafe: 1.0.1
+      path-expression-matcher: 1.6.1
+      strnum: 2.4.1
 
   '@nodable/compact-builder@1.0.9':
     dependencies:
       '@nodable/base-output-builder': 1.0.6
       path-expression-matcher: 1.5.0
 
+  '@nodable/compact-builder@2.0.0':
+    dependencies:
+      '@nodable/base-output-builder': 2.0.0
+      path-expression-matcher: 1.6.1
+
   '@nodable/entities@2.1.1': {}
 
-  '@nodable/flexible-xml-parser@1.3.0':
+  '@nodable/entities@2.2.0': {}
+
+  '@nodable/flexible-xml-parser@1.4.0':
     dependencies:
-      '@nodable/base-output-builder': 1.0.7
-      '@nodable/compact-builder': 1.0.9
-      path-expression-matcher: 1.5.0
+      '@nodable/base-output-builder': 2.0.0
+      '@nodable/compact-builder': 2.0.0
+      path-expression-matcher: 1.6.1
       xml-naming: 0.1.0
 
   '@nodelib/fs.scandir@2.1.5':
@@ -5299,6 +5327,8 @@ snapshots:
   any-promise@1.3.0: {}
 
   anynum@1.0.0: {}
+
+  anynum@1.0.1: {}
 
   argparse@2.0.1: {}
 
@@ -6398,6 +6428,8 @@ snapshots:
 
   is-unicode-supported@2.1.0: {}
 
+  is-unsafe@1.0.1: {}
+
   isarray@0.0.1: {}
 
   isarray@1.0.0: {}
@@ -7154,6 +7186,8 @@ snapshots:
 
   path-expression-matcher@1.5.0: {}
 
+  path-expression-matcher@1.6.1: {}
+
   path-is-absolute@1.0.1: {}
 
   path-key@3.1.1: {}
@@ -7680,6 +7714,10 @@ snapshots:
   strnum@2.4.0:
     dependencies:
       anynum: 1.0.0
+
+  strnum@2.4.1:
+    dependencies:
+      anynum: 1.0.1
 
   strong-type@0.1.6: {}
 
