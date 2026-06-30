@@ -20,7 +20,7 @@ env:
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
   CONTAINERBASE_VERSION: ${{ github.sha }}
-  APT_HTTP_PROXY: http://172.17.0.1:8000
+  APT_HTTP_PROXY: http://host.docker.internal:8000
 
 jobs:
   build:
