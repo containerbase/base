@@ -84,7 +84,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
     "eslint-import-resolver-typescript": "4.4.5",
-    "eslint-plugin-import-x": "4.17.0",
+    "eslint-plugin-import-x": "4.17.1",
     "eslint-plugin-promise": "7.3.0",
     "globals": "17.7.0",
     "husky": "9.1.7",
