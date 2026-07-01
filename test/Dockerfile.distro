@@ -99,7 +99,7 @@ RUN install-tool mise 2026.6.14
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.70.2
+RUN install-tool pixi v0.72.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.6.3
