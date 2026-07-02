@@ -34,7 +34,7 @@
     "test:vitest": "vitest run --coverage"
   },
   "dependencies": {
-    "@nodable/compact-builder": "1.0.9",
+    "@nodable/compact-builder": "2.0.0",
     "@nodable/flexible-xml-parser": "1.4.0",
     "@renovatebot/pep440": "5.0.0",
     "@seald-io/nedb": "4.1.2",
