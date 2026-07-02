@@ -154,7 +154,7 @@ RUN install-tool docker v28.5.2
 RUN install-tool buildx v0.35.0
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.2.0
+RUN install-tool docker-compose v5.3.0
 
 #--------------------------------------
 # Image: test-erlang
