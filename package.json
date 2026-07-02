@@ -91,7 +91,7 @@
     "lint-staged": "17.0.8",
     "markdownlint-cli2": "0.22.1",
     "nock": "14.0.16",
-    "npm-run-all2": "8.0.4",
+    "npm-run-all2": "9.0.2",
     "prettier": "3.9.3",
     "prettier-plugin-packagejson": "3.0.2",
     "rolldown": "1.1.3",
