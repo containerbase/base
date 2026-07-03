@@ -93,8 +93,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(eslint-plugin-promise@7.3.0(eslint@10.6.0))(eslint@10.6.0)
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.9
-        version: 2.0.9
+        specifier: 2.0.10
+        version: 2.0.10
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.6.0)
@@ -291,8 +291,8 @@ packages:
       eslint: ^9.0.0 || ^10.0.0
       eslint-plugin-promise: ^7.0.0
 
-  '@containerbase/istanbul-reports-html@2.0.9':
-    resolution: {integrity: sha512-m5lpKFG/7A+vj6o9AeFnYb+22C/q5jyZHHhhC71k9EHs692xAqskNllfK0FdlFVi2FOusyGd0KMnh3x9dQ9Bhw==}
+  '@containerbase/istanbul-reports-html@2.0.10':
+    resolution: {integrity: sha512-vJtaNB8F5tvmZNTlx4+2uWjvyaW9N062iyTuHt9Q9Jq4OJ0W7K/Dh/wUjIr3kCELK0UrAnmG5Pd242hf+Shs/w==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
   '@conventional-changelog/template@1.2.0':
@@ -4067,7 +4067,7 @@ snapshots:
       eslint: 10.6.0
       eslint-plugin-promise: 7.3.0(eslint@10.6.0)
 
-  '@containerbase/istanbul-reports-html@2.0.9':
+  '@containerbase/istanbul-reports-html@2.0.10':
     dependencies:
       istanbul-reports: 3.2.0
 
