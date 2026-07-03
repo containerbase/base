@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "4.1.9",
     "@vitest/eslint-plugin": "1.6.20",
     "@vitest/ui": "4.1.9",
-    "@yao-pkg/pkg": "6.20.0",
+    "@yao-pkg/pkg": "6.21.0",
     "bats": "1.13.0",
     "bats-assert": "2.2.4",
     "bats-support": "0.3.0",
