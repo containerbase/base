@@ -8,12 +8,8 @@ overrides:
   verbose: '-'
 
 patchedDependencies:
-  clipanion@3.2.1:
-    hash: ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299
-    path: patches/clipanion@3.2.1.patch
-  global-agent:
-    hash: c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13
-    path: patches/global-agent.patch
+  clipanion@3.2.1: ac3868f4215140b8fcca5f4bff573ca1db690c94e14447a23a66cb1ff48b1299
+  global-agent: c75e1f0c7587f683186562ba54a9d898998fc82cf72e8fd75f3eff4a93c43e13
 
 importers:
 
