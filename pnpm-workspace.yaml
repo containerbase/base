@@ -3,6 +3,8 @@ allowUnusedPatches: true
 
 updateNotifier: false
 
+saveExact: true
+
 strictPeerDependencies: true
 
 allowBuilds:
