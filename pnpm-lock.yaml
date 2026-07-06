@@ -149,8 +149,8 @@ importers:
         specifier: 0.3.0
         version: 0.3.0(bats@1.13.0)
       conventional-changelog-conventionalcommits:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 9.3.1
+        version: 9.3.1
       eslint:
         specifier: 10.6.0
         version: 10.6.0
@@ -290,10 +290,6 @@ packages:
   '@containerbase/istanbul-reports-html@2.0.11':
     resolution: {integrity: sha512-ysTUKv4xFYEBuqVda3ufUh68B+ub0RaLqFx7WuHGeiSz2CC/4WIwfGj4EPqUZ93JV86f3Ef6ECJaBWrpUDW/Qw==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
-
-  '@conventional-changelog/template@1.2.0':
-    resolution: {integrity: sha512-12qHxvlKjHmP0PQ+17EREgC7lWyLwbph1RKcZQZ7k7ZWGmrxfxC9gadHGfvzr0g0u8BhiBGg3tks93txodlyRQ==}
-    engines: {node: '>=22'}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -1504,9 +1500,9 @@ packages:
     resolution: {integrity: sha512-6gfI3otXK5Ph5DfCOI1dblr+kN3FAm5a97hYoQkqNZxOaYa5WKfXH+AnpsmS+iUH2mgVC2Cg2Qw9m5OKcmNrIg==}
     engines: {node: '>=18'}
 
-  conventional-changelog-conventionalcommits@10.2.0:
-    resolution: {integrity: sha512-UtlM9GqolY7OmlQh5L/UEVoKsTUpTgUVy1PU8JN5gl5Ydaejb7WRklGliG1SKPxxj7hzA173eG3Kt5fYWE2pmg==}
-    engines: {node: '>=22'}
+  conventional-changelog-conventionalcommits@9.3.1:
+    resolution: {integrity: sha512-dTYtpIacRpcZgrvBYvBfArMmK2xvIpv2TaxM0/ZI5CBtNUzvF2x0t15HsbRABWprS6UPmvj+PzHVjSx4qAVKyw==}
+    engines: {node: '>=18'}
 
   conventional-changelog-writer@8.4.0:
     resolution: {integrity: sha512-HHBFkk1EECxxmCi4CTu091iuDpQv5/OavuCUAuZmrkWpmYfyD816nom1CvtfXJ/uYfAAjavgHvXHX291tSLK8g==}
@@ -4016,8 +4012,6 @@ snapshots:
     dependencies:
       istanbul-reports: 3.2.0
 
-  '@conventional-changelog/template@1.2.0': {}
-
   '@emnapi/core@1.10.0':
     dependencies:
       '@emnapi/wasi-threads': 1.2.1
@@ -5168,9 +5162,9 @@ snapshots:
     dependencies:
       compare-func: 2.0.0
 
-  conventional-changelog-conventionalcommits@10.2.0:
+  conventional-changelog-conventionalcommits@9.3.1:
     dependencies:
-      '@conventional-changelog/template': 1.2.0
+      compare-func: 2.0.0
 
   conventional-changelog-writer@8.4.0:
     dependencies:
