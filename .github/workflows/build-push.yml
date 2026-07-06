@@ -46,11 +46,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: docker-config
-        uses: containerbase/internal-tools@5dad87b46900facdce3bb06ca07c109e67c2604f # v4.6.69
-        with:
-          command: docker-config
-
       # full checkout for semantic-release
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
