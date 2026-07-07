@@ -8,6 +8,7 @@ import {
   createContainer,
 } from '../services/index.ts';
 import { ApkoInstallService } from '../tools/apko.ts';
+import { ApmInstallService } from '../tools/apm.ts';
 import { BazeliskInstallService } from '../tools/bazelisk.ts';
 import { BufInstallService } from '../tools/buf.ts';
 import { BunInstallService } from '../tools/bun.ts';
@@ -134,6 +135,7 @@ async function prepareInstallContainer(): Promise<Container> {
   // modern tool services
   container.bind(INSTALL_TOOL_TOKEN).to(AndroidSdkCmdlineToolsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ApkoInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(ApmInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(ComposerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BazeliskInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(BuildxInstallService);
