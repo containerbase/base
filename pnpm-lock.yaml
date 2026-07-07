@@ -19,8 +19,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@nodable/flexible-xml-parser':
-        specifier: 1.6.1
-        version: 1.6.1
+        specifier: 1.7.0
+        version: 1.7.0
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -585,8 +585,8 @@ packages:
   '@nodable/entities@2.2.0':
     resolution: {integrity: sha512-9uGyhaQavEUMC8AIddIjau4NsnsXhou+j5sBAGojCM1oxmQpVKTWR/9JxABD6UAv12vpIms55fPZKFQEhG6uBg==}
 
-  '@nodable/flexible-xml-parser@1.6.1':
-    resolution: {integrity: sha512-8Y5J8QlqJIdip26bGNCZteosi1pgzpP6P33l6/V7LNKAhZA3zSOblZXuZLtgPKldePhvTlWRx4mirAinFIrj2g==}
+  '@nodable/flexible-xml-parser@1.7.0':
+    resolution: {integrity: sha512-kvPKvd/q543ZTFYYZ1KK6qzu1gE9tm0ZHD9c1gykPVxpcHnb/pU4otLh+zedvMXWQ0lbJZtNoZpSC68acdGTVw==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3885,8 +3885,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  xml-naming@0.1.0:
-    resolution: {integrity: sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==}
+  xml-naming@0.3.0:
+    resolution: {integrity: sha512-ghig2TBE/H11aOVgmahA3MhimvkBr6JIYknH/Dhdk10nXwdbIqBJsbfMxpvFPG8bAw77gN29aQWvKpmVoPlvPQ==}
     engines: {node: '>=16.0.0'}
 
   xtend@4.0.2:
@@ -4257,12 +4257,12 @@ snapshots:
 
   '@nodable/entities@2.2.0': {}
 
-  '@nodable/flexible-xml-parser@1.6.1':
+  '@nodable/flexible-xml-parser@1.7.0':
     dependencies:
       '@nodable/base-output-builder': 2.0.0
       '@nodable/compact-builder': 2.0.0
       path-expression-matcher: 1.6.1
-      xml-naming: 0.1.0
+      xml-naming: 0.3.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -7607,7 +7607,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  xml-naming@0.1.0: {}
+  xml-naming@0.3.0: {}
 
   xtend@4.0.2: {}
 
