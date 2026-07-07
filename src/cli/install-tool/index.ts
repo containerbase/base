@@ -68,6 +68,7 @@ import { MiseInstallService, MiseVersionResolver } from '../tools/mise.ts';
 import { NixInstallService } from '../tools/nix.ts';
 import { NodeInstallService } from '../tools/node/index.ts';
 import {
+  NubInstallService,
   RenovateInstallService,
   YarnInstallService,
   YarnSlimInstallService,
@@ -171,6 +172,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NugetInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(NubInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PixiInstallService);

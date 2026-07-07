@@ -22,6 +22,23 @@ export class RenovateInstallService extends NpmBaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
+export class NubInstallService extends NpmBaseInstallService {
+  override readonly name: string = 'nub';
+
+  // The tool is `nub`, but it ships on npm under the scoped package
+  // `@nubjs/nub` (with per-platform binary optionalDependencies), so the
+  // install target differs from the tool name.
+  protected override tool(): string {
+    return '@nubjs/nub';
+  }
+
+  override async test(): Promise<void> {
+    await this._spawn(this.name, ['--version']);
+  }
+}
+
+@injectable()
+@injectFromHierarchy()
 export class YarnInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn';
 
