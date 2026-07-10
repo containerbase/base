@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@nodable/compact-builder": "2.0.0",
-    "@nodable/flexible-xml-parser": "1.7.0",
+    "@nodable/flexible-xml-parser": "1.8.0",
     "@renovatebot/pep440": "5.0.0",
     "@seald-io/nedb": "4.1.2",
     "@sindresorhus/is": "8.1.0",
