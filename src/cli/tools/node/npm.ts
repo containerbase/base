@@ -31,10 +31,6 @@ export class NubInstallService extends NpmBaseInstallService {
   protected override tool(): string {
     return '@nubjs/nub';
   }
-
-  override async test(): Promise<void> {
-    await this._spawn(this.name, ['--version']);
-  }
 }
 
 @injectable()
