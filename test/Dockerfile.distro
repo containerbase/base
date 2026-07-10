@@ -105,7 +105,7 @@ RUN install-tool pixi v0.72.2
 RUN install-tool powershell v7.6.3
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.96.1
+RUN install-tool rust 1.97.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.23.0
