@@ -44,6 +44,21 @@ https://github.com/chainguard-dev/apko/releases/download/v0.30.11/apko_0.30.11_l
 https://github.com/chainguard-dev/apko/releases/download/v0.30.11/checksums.txt
 ```
 
+## `apm`
+
+APM (Agent Package Manager) releases are downloaded from:
+
+- `https://github.com/microsoft/apm/releases`
+
+Samples:
+
+```txt
+https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-x86_64.tar.gz
+https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-x86_64.tar.gz.sha256
+https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.gz
+https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.gz.sha256
+```
+
 ## `bazelisk`
 
 Bazelisk releases are downloaded from:
