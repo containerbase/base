@@ -19,8 +19,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@nodable/flexible-xml-parser':
-        specifier: 1.8.0
-        version: 1.8.0
+        specifier: 1.9.0
+        version: 1.9.0
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -585,8 +585,8 @@ packages:
   '@nodable/entities@2.2.0':
     resolution: {integrity: sha512-9uGyhaQavEUMC8AIddIjau4NsnsXhou+j5sBAGojCM1oxmQpVKTWR/9JxABD6UAv12vpIms55fPZKFQEhG6uBg==}
 
-  '@nodable/flexible-xml-parser@1.8.0':
-    resolution: {integrity: sha512-7aV8FAwLRslNzNGLEffrWfgX3tcatHbhFfZlfAYst1sjpBclpBK8gZ9Ltu3bUH1a+cWluu2juV+xM4h9u9GcMg==}
+  '@nodable/flexible-xml-parser@1.9.0':
+    resolution: {integrity: sha512-ak0XVenSOM2/y2irAL/mgMstDvIlDMFt1oJH6QUwmpN6naM9md+ToOMZ88bPgX6Uu4op/YP3is3N3oSU/sgWzw==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3062,6 +3062,10 @@ packages:
     resolution: {integrity: sha512-h7bxdzhHk8Knyc4Tj+jMaa7fEEoUJy7p1qtbVgkYg1Uhpe5Np5VuGXCRZnkZvU+Q42M1vStt0ifa3ueykRJPmQ==}
     engines: {node: '>=14.0.0'}
 
+  path-expression-matcher@1.6.2:
+    resolution: {integrity: sha512-enSlaiat05iasnzmgNxRj8reFdj3puY2QpNgP1aPIaVfT6nn9ICuPoFlKHk8EN22HcwewshO+mN2DGbkCEOtqQ==}
+    engines: {node: '>=14.0.0'}
+
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
@@ -4294,11 +4298,11 @@ snapshots:
 
   '@nodable/entities@2.2.0': {}
 
-  '@nodable/flexible-xml-parser@1.8.0':
+  '@nodable/flexible-xml-parser@1.9.0':
     dependencies:
       '@nodable/base-output-builder': 2.0.0
       '@nodable/compact-builder': 2.0.0
-      path-expression-matcher: 1.6.1
+      path-expression-matcher: 1.6.2
       xml-naming: 0.3.0
 
   '@nodelib/fs.scandir@2.1.5':
@@ -6806,6 +6810,8 @@ snapshots:
   path-exists@4.0.0: {}
 
   path-expression-matcher@1.6.1: {}
+
+  path-expression-matcher@1.6.2: {}
 
   path-is-absolute@1.0.1: {}
 
