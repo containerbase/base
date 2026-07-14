@@ -65,6 +65,14 @@ FROM base AS test-apko
 RUN install-tool apko 1.2.25
 
 #--------------------------------------
+# Image: apm
+#--------------------------------------
+FROM base AS test-apm
+
+# renovate: datasource=github-releases packageName=microsoft/apm
+RUN install-tool apm 0.24.0
+
+#--------------------------------------
 # Image: devbox
 #--------------------------------------
 FROM base AS test-devbox
@@ -206,6 +214,7 @@ COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-deno /.dummy /.dummy
 COPY --from=test-apko /.dummy /.dummy
+COPY --from=test-apm /.dummy /.dummy
 COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy

@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: bazelisk, buf, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
+# test: apm, bazelisk, buf, bun, deno, devbox, helmfile, kustomize, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
@@ -230,6 +230,9 @@ RUN install-tool deno 2.9.2
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
 RUN install-tool apko 1.2.25
+
+# renovate: datasource=github-releases packageName=microsoft/apm
+RUN install-tool apm 0.24.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.17.5
