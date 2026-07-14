@@ -72,7 +72,7 @@
     "@types/semver": "7.7.1",
     "@types/shelljs": "0.10.0",
     "@vitest/coverage-v8": "4.1.10",
-    "@vitest/eslint-plugin": "1.6.22",
+    "@vitest/eslint-plugin": "1.6.23",
     "@vitest/ui": "4.1.10",
     "@yao-pkg/pkg": "6.21.0",
     "bats": "1.13.0",
