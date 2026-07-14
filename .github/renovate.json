@@ -60,6 +60,7 @@
       "matchFileNames": ["test/**"],
       "matchDepNames": [
         "apko",
+        "apm",
         "bazelisk",
         "buf",
         "buildx",
@@ -113,6 +114,7 @@
       "matchFileNames": ["test/**"],
       "matchDepNames": [
         "apko",
+        "apm",
         "bazelisk",
         "buf",
         "buildx",
