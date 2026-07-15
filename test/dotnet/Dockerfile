@@ -76,11 +76,11 @@ FROM base AS testb
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.422
+RUN install-tool dotnet 10.0.302
 
 # Test duplicate install
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 8.0.422
+RUN install-tool dotnet 10.0.302
 RUN set -ex; dotnet --version | grep 8.0.
 
 USER 12021
