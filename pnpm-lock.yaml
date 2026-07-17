@@ -19,8 +19,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@nodable/flexible-xml-parser':
-        specifier: 1.10.0
-        version: 1.10.0
+        specifier: 1.10.1
+        version: 1.10.1
       '@renovatebot/pep440':
         specifier: 5.0.0
         version: 5.0.0
@@ -585,8 +585,8 @@ packages:
   '@nodable/entities@2.2.0':
     resolution: {integrity: sha512-9uGyhaQavEUMC8AIddIjau4NsnsXhou+j5sBAGojCM1oxmQpVKTWR/9JxABD6UAv12vpIms55fPZKFQEhG6uBg==}
 
-  '@nodable/flexible-xml-parser@1.10.0':
-    resolution: {integrity: sha512-QllUE17MLlfv3HiCbs56M2IC+xDOR2TJpRswGsK3WuoBkV5+M2NQCBlZeEink1RdnOQzRTXkPHVeFcyDamJShA==}
+  '@nodable/flexible-xml-parser@1.10.1':
+    resolution: {integrity: sha512-EsxgwzK1rEfWa1GZgdFxZwl0GNVqj115Si7YWFH3aZAeipPzNWqLiB4Rr/hYTJTqUT/Nc22kZ6olMG8mrz8OkQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -4257,7 +4257,7 @@ snapshots:
 
   '@nodable/entities@2.2.0': {}
 
-  '@nodable/flexible-xml-parser@1.10.0':
+  '@nodable/flexible-xml-parser@1.10.1':
     dependencies:
       '@nodable/base-output-builder': 2.0.0
       '@nodable/compact-builder': 2.0.0
