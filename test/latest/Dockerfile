@@ -229,7 +229,7 @@ RUN install-tool bun 1.3.14
 RUN install-tool deno 2.9.2
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.2.26
+RUN install-tool apko 1.2.27
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.26.0
