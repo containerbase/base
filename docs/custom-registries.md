@@ -59,6 +59,19 @@ https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.g
 https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.gz.sha256
 ```
 
+## `aube`
+
+Aube releases are downloaded from:
+
+- `https://github.com/jdx/aube/releases`
+
+Samples:
+
+```txt
+https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-x86_64-unknown-linux-gnu.tar.gz
+```
+
 ## `bazelisk`
 
 Bazelisk releases are downloaded from:
