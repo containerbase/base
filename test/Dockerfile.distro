@@ -232,7 +232,7 @@ RUN install-tool python 3.14.6
 # renovate: datasource=pypi
 RUN install-tool checkov 3.3.8
 # renovate: datasource=pypi
-RUN install-tool conan 2.30.0
+RUN install-tool conan 2.31.1
 # renovate: datasource=pypi
 RUN install-tool copier 9.17.0
 # renovate: datasource=pypi
