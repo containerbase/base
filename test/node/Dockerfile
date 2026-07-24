@@ -95,6 +95,11 @@ RUN install-tool yarn 3.8.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.17.1
 
+# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+RUN install-tool yarn 6.0.0-rc.19
+
+RUN test "$(yarn --version)" = "6.0.0-rc.19"
+
 #--------------------------------------
 # test: pnpm
 #--------------------------------------
