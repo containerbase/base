@@ -66,7 +66,7 @@ RUN install-tool devbox 0.17.5
 RUN install-tool dotnet 10.0.301
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.44.7
+RUN install-tool flutter 3.44.8
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.9.3
