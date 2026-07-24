@@ -73,6 +73,24 @@ FROM base AS test-apm
 RUN install-tool apm 0.26.0
 
 #--------------------------------------
+# Image: aube
+#--------------------------------------
+FROM base AS test-aube
+
+# renovate: datasource=github-releases packageName=jdx/aube
+RUN install-tool aube 1.32.0
+
+COPY --chown=12021:0 test/latest/src/test/aube /tmp/aube
+
+USER 12021
+
+WORKDIR /tmp/aube
+
+RUN aube install
+
+RUN aube install --ignore-scripts
+
+#--------------------------------------
 # Image: devbox
 #--------------------------------------
 FROM base AS test-devbox
@@ -215,6 +233,7 @@ COPY --from=test-bun /.dummy /.dummy
 COPY --from=test-deno /.dummy /.dummy
 COPY --from=test-apko /.dummy /.dummy
 COPY --from=test-apm /.dummy /.dummy
+COPY --from=test-aube /.dummy /.dummy
 COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
