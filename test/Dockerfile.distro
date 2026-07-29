@@ -172,7 +172,7 @@ RUN install-tool elixir 1.20.2
 FROM build AS test-haskell
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.16.1.0
+RUN install-tool cabal 3.18.1.0
 # renovate: datasource=docker packageName=haskell
 RUN install-tool ghc 9.14.1
 
