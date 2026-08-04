@@ -34,6 +34,7 @@ export const NoPrepareTools = [
   'nix',
   'nuget',
   'npm',
+  'nub',
   'paket',
   'pdm',
   'pip-tools',
