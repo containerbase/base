@@ -131,8 +131,8 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(vitest@4.1.10)
       '@vitest/eslint-plugin':
-        specifier: 1.6.24
-        version: 1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)(vitest@4.1.10)
+        specifier: 1.6.26
+        version: 1.6.26(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)(vitest@4.1.10)
       '@vitest/ui':
         specifier: 4.1.10
         version: 4.1.10(vitest@4.1.10)
@@ -1197,8 +1197,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.6.24':
-    resolution: {integrity: sha512-U5isuChJ58H1M6oRGaIotYbH2gM1rhzKUjtiarqpLNG/3+fzXIXs5RyTLrYQJmQPnXbvIMPFvI9z8ufpFZc8lg==}
+  '@vitest/eslint-plugin@1.6.26':
+    resolution: {integrity: sha512-2eawZk4MZvkEtMZFdScmCE0R1Rti85uRZpmbe9eAv5Q3blDZ5OxlrC9IHlSnxhDCqOO2xKNaD3oufl9BUlI0yA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': '*'
@@ -4847,7 +4847,7 @@ snapshots:
       tinyrainbow: 3.1.0
       vitest: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(tsx@4.23.1)(yaml@2.9.0))
 
-  '@vitest/eslint-plugin@1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)(vitest@4.1.10)':
+  '@vitest/eslint-plugin@1.6.26(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)(vitest@4.1.10)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.65.0
       '@typescript-eslint/utils': 8.65.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
