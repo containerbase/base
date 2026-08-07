@@ -137,8 +137,8 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(vitest@4.1.10)
       '@yao-pkg/pkg':
-        specifier: 6.21.0
-        version: 6.21.0(supports-color@7.2.0)
+        specifier: 6.22.0
+        version: 6.22.0(supports-color@7.2.0)
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -1247,12 +1247,12 @@ packages:
   '@vitest/utils@4.1.10':
     resolution: {integrity: sha512-fy9am/HWxbaGt/Sawrp90vt6Y6jQwf1RX77cz3uwoJwJVMli/e1IEwRPnMNJ7vKfPTwo0diXifkpPvwH9v7nGA==}
 
-  '@yao-pkg/pkg-fetch@3.6.4':
-    resolution: {integrity: sha512-2JXvS9HbMudLlzEjSaJ7bLNnF/WlTv7iaTAJp2Tk8pBsgwCyL9p4rIN8cztHlyZF7qVzr1EaBjd7DQooFk0azQ==}
+  '@yao-pkg/pkg-fetch@3.6.5':
+    resolution: {integrity: sha512-Sd1Hff7imsF2rcZ2GLQuIzVm2fc3Za+nE4KSWPTwIYegN/r90UFg3bq0MLSugbWQaVht72zzxV0MiKE0wvT1zA==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.21.0':
-    resolution: {integrity: sha512-dZl2C7rdwwEI4tv7WW+Cvnl+2K8OqHKUXfNQRq3mZCTC4degoFx1jA4d5wOn9d8lHrUy58xuEt1eJD0pTddW5w==}
+  '@yao-pkg/pkg@6.22.0':
+    resolution: {integrity: sha512-u+ZgwLsvEFB+Q1rA+IGymgxnm+anl1qGJWsTH6hDHyy2cCiOvMteDNK7NgqFYxN/zdithtORIlCsYSyhAXAgQA==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -4915,7 +4915,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@yao-pkg/pkg-fetch@3.6.4':
+  '@yao-pkg/pkg-fetch@3.6.5':
     dependencies:
       picocolors: 1.1.1
       progress: 2.0.3
@@ -4928,14 +4928,14 @@ snapshots:
       - bare-buffer
       - react-native-b4a
 
-  '@yao-pkg/pkg@6.21.0(supports-color@7.2.0)':
+  '@yao-pkg/pkg@6.22.0(supports-color@7.2.0)':
     dependencies:
       '@babel/generator': 7.29.7
       '@babel/parser': 7.29.7
       '@babel/traverse': 7.29.7(supports-color@7.2.0)
       '@babel/types': 7.29.7
       '@roberts_lando/vfs': 0.3.3
-      '@yao-pkg/pkg-fetch': 3.6.4
+      '@yao-pkg/pkg-fetch': 3.6.5
       esbuild: 0.28.1
       into-stream: 9.1.0
       multistream: 4.1.0
