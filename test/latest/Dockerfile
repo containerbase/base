@@ -238,7 +238,7 @@ RUN install-tool apm 0.26.0
 RUN install-tool devbox 0.17.5
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.18.0
+RUN install-tool gleam 1.18.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.36.3
