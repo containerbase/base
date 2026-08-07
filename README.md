@@ -79,6 +79,10 @@ To run the `resolute` tests use the following command, it will run the test from
 TAG=resolute docker buildx bake test-distro
 ```
 
+## Adding a new tool
+
+To add support for a new tool read the [new-tool](./docs/new-tool.md) docs.
+
 ## Apt proxy
 
 You can configure an apt proxy for the build by setting an `APT_HTTP_PROXY` argument.
