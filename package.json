@@ -97,7 +97,7 @@
     "rolldown": "1.2.2",
     "semantic-release": "25.0.8",
     "shelljs": "0.10.0",
-    "tsx": "4.23.6",
+    "tsx": "4.23.7",
     "type-fest": "5.8.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.66.0",
