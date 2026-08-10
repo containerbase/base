@@ -237,6 +237,8 @@ RUN install-tool apm 0.28.0
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.17.5
 
+# renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
+ENV GH_DASH_EXTENSION_VERSION=v4.25.2
 # renovate: datasource=github-releases packageName=cli/cli
 RUN install-tool gh v2.97.0
 
@@ -295,6 +297,8 @@ USER 12021
 RUN bazel --version
 
 RUN gh --version
+RUN gh extension install dlvhdr/gh-dash --pin $GH_DASH_EXTENSION_VERSION
+RUN gh dash --version
 
 RUN vendir --version | grep "${VENDIR_VERSION#v}"
 
