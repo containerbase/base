@@ -19,6 +19,7 @@ export const NoPrepareTools = [
   'devbox',
   'docker-compose',
   'flux',
+  'gh',
   'git-lfs',
   'gleam',
   'gradle',

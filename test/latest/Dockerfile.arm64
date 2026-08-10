@@ -81,6 +81,14 @@ FROM base AS test-devbox
 RUN install-tool devbox 0.17.5
 
 #--------------------------------------
+# Image: gh
+#--------------------------------------
+FROM base AS test-gh
+
+# renovate: datasource=github-releases packageName=cli/cli
+RUN install-tool gh v2.97.0
+
+#--------------------------------------
 # Image: gleam
 #--------------------------------------
 FROM base AS test-gleam
@@ -217,6 +225,7 @@ COPY --from=test-apko /.dummy /.dummy
 COPY --from=test-apm /.dummy /.dummy
 COPY --from=test-devbox /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
+COPY --from=test-gh /.dummy /.dummy
 COPY --from=test-git /.dummy /.dummy
 COPY --from=test-git-lfs /.dummy /.dummy
 COPY --from=test-gleam /.dummy /.dummy

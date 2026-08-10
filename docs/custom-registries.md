@@ -278,6 +278,20 @@ https://github.com/fluxcd/flux2/releases/download/v0.19.0/flux_0.19.0_linux_amd6
 https://github.com/fluxcd/flux2/releases/download/v2.1.0/flux_2.1.0_linux_arm64.tar.gz
 ```
 
+## `gh`
+
+GitHub CLI releases are downloaded from:
+
+- `https://github.com/cli/cli/releases`
+
+Samples:
+
+```txt
+https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_linux_amd64.tar.gz
+https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_linux_arm64.tar.gz
+https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_checksums.txt
+```
+
 ## `git`
 
 Git is downloaded from:
