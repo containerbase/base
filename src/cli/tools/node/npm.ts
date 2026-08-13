@@ -27,6 +27,11 @@ export class YarnInstallService extends NpmBaseInstallService {
 
   protected override tool(version: string): string {
     const ver = parse(version);
+    if (ver.major >= 6) {
+      const arch = this.envSvc.arch === 'arm64' ? 'aarch64' : 'x86_64';
+      logger.debug({ version, arch }, 'Using native yarn package');
+      return `@yarnpkg/yarn-${arch}-unknown-linux-musl`;
+    }
     if (ver.major >= 2) {
       logger.debug({ version }, 'Using yarnpkg/cli-dist');
       return '@yarnpkg/cli-dist';
