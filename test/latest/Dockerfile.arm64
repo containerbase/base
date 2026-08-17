@@ -78,7 +78,7 @@ RUN install-tool apm 0.28.0
 FROM base AS test-aube
 
 # renovate: datasource=github-releases packageName=jdx/aube
-RUN install-tool aube 1.32.0
+RUN install-tool aube 1.41.0
 
 COPY --chown=12021:0 test/latest/src/test/aube /tmp/aube
 

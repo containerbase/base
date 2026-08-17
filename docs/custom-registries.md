@@ -68,8 +68,8 @@ Aube releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-aarch64-unknown-linux-gnu.tar.gz
-https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/jdx/aube/releases/download/v1.41.0/aube-v1.41.0-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/jdx/aube/releases/download/v1.41.0/aube-v1.41.0-x86_64-unknown-linux-gnu.tar.gz
 ```
 
 ## `bazelisk`

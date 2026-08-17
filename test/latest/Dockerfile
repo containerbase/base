@@ -235,7 +235,7 @@ RUN install-tool apko 1.2.36
 RUN install-tool apm 0.28.0
 
 # renovate: datasource=github-releases packageName=jdx/aube
-RUN install-tool aube 1.32.0
+RUN install-tool aube 1.41.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.17.5
