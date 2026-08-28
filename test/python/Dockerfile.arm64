@@ -94,7 +94,7 @@ RUN install-tool conan 2.31.2
 FROM test-python AS test-copier
 
 # renovate: datasource=pypi
-RUN install-tool copier 9.17.1
+RUN install-tool copier 9.17.2
 
 
 #--------------------------------------
