@@ -182,7 +182,7 @@ RUN install-tool tofu 1.12.6
 FROM base AS test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.0
+RUN install-tool vendir v0.46.1
 
 #--------------------------------------
 # Image: others
