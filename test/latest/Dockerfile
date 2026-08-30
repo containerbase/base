@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: apm, bazelisk, buf, bun, deno, devbox, gh, helmfile, kustomize, skopeo, tofu, vendir
+# test: apm, aube, bazelisk, buf, bun, deno, devbox, gh, helmfile, kustomize, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
@@ -233,6 +233,9 @@ RUN install-tool apko 1.2.41
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.28.0
+
+# renovate: datasource=github-releases packageName=jdx/aube
+RUN install-tool aube 1.41.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.18.0
@@ -292,7 +295,15 @@ RUN helmfile version | grep "${HELMFILE_VERSION#v}"
 
 RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
+COPY --chown=12021:0 test/latest/src/test/aube /tmp/aube
+
+WORKDIR /tmp/aube
+
 USER 12021
+
+RUN aube install
+
+RUN aube install --ignore-scripts
 
 RUN bazel --version
 
