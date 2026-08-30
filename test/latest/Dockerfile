@@ -240,7 +240,7 @@ RUN install-tool devbox 0.18.0
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.25.2
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.97.0
+RUN install-tool gh v2.98.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.18.1
