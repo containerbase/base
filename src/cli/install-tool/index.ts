@@ -111,6 +111,7 @@ import { SwiftInstallService } from '../tools/swift.ts';
 import { TerraformInstallService } from '../tools/terraform.ts';
 import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
+import { VpInstallService } from '../tools/vp.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import { type InstallToolType, logger } from '../utils/index.ts';
 import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
@@ -192,6 +193,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(TerraformInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(TofuInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(VendirInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(VpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
