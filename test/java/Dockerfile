@@ -228,7 +228,7 @@ WORKDIR /
 RUN install-tool scala v2.13.16
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v1.12.15
+RUN install-tool sbt v2.0.8
 
 RUN install-tool gradle 8.8-rc-2
 
