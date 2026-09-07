@@ -103,7 +103,7 @@ RUN gradle --version
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.12+101.0.LTS
+RUN install-tool java-jre 25.0.4+101.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 9.7.1
@@ -157,7 +157,7 @@ RUN prepare-tool java gradle
 USER 1001
 
 # renovate: datasource=java-version depName=java packageName=java?os=linux&architecture=x64
-ARG JAVA_JDK_VERSION=17.0.20+101
+ARG JAVA_JDK_VERSION=25.0.4+101.0.LTS
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -174,7 +174,7 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 FROM base AS test-gradle-e
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.12+101.0.LTS
+RUN install-tool java-jre 25.0.4+101.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 8.14.5
