@@ -297,13 +297,11 @@ RUN kustomize version | grep "${KUSTOMIZE_VERSION}"
 
 COPY --chown=12021:0 test/latest/src/test/aube /tmp/aube
 
-WORKDIR /tmp/aube
-
 USER 12021
 
-RUN aube install
+RUN set -ex; cd /tmp/aube; aube install; test -f node_modules/is-number/index.js
 
-RUN aube install --ignore-scripts
+RUN set -ex; cd /tmp/aube; aube install --ignore-scripts
 
 RUN bazel --version
 

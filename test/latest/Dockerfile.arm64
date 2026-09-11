@@ -84,11 +84,9 @@ COPY --chown=12021:0 test/latest/src/test/aube /tmp/aube
 
 USER 12021
 
-WORKDIR /tmp/aube
+RUN set -ex; cd /tmp/aube; aube install; test -f node_modules/is-number/index.js
 
-RUN aube install
-
-RUN aube install --ignore-scripts
+RUN set -ex; cd /tmp/aube; aube install --ignore-scripts
 
 #--------------------------------------
 # Image: devbox
