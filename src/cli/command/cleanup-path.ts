@@ -24,6 +24,14 @@ export class CleanupPathCommand extends Command {
     const start = Date.now();
     let error = false;
     const paths = this.cleanupPaths.flatMap((p) => p.split(':'));
+
+    // reject path traversal sequences to avoid deleting files outside of the requested paths
+    const invalid = paths.filter((p) => /(^|[/\\])\.\.([/\\]|$)/.test(p));
+    if (invalid.length) {
+      logger.error({ paths: invalid }, 'Invalid cleanup path(s) detected');
+      return 1;
+    }
+
     logger.info({ paths }, `Cleanup paths ...`);
     try {
       const deleted = await deleteAsync(paths, { dot: true });
