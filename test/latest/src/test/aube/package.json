@@ -1,0 +1,7 @@
+{
+  "name": "containerbase-aube-test",
+  "private": true,
+  "dependencies": {
+    "is-number": "7.0.0"
+  }
+}
