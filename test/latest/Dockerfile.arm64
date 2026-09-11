@@ -46,7 +46,7 @@ RUN install-tool bazelisk v1.29.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.3.14
+RUN install-tool bun 1.4.2
 
 #--------------------------------------
 # Image: deno
@@ -54,7 +54,7 @@ RUN install-tool bun 1.3.14
 FROM base AS test-deno
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.5
+RUN install-tool deno 2.9.6
 
 #--------------------------------------
 # Image: apko
@@ -62,7 +62,7 @@ RUN install-tool deno 2.9.5
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.2.36
+RUN install-tool apko 1.2.41
 
 #--------------------------------------
 # Image: apm
@@ -96,7 +96,7 @@ RUN aube install --ignore-scripts
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.17.5
+RUN install-tool devbox 0.18.0
 
 #--------------------------------------
 # Image: gh
@@ -104,7 +104,7 @@ RUN install-tool devbox 0.17.5
 FROM base AS test-gh
 
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.97.0
+RUN install-tool gh v2.98.0
 
 #--------------------------------------
 # Image: gleam
@@ -147,7 +147,7 @@ RUN install-tool git v2.55.0
 FROM test-git AS test-git-lfs
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.7.1
+RUN install-tool git-lfs v3.8.0
 
 #--------------------------------------
 # Image: helmfile
@@ -155,7 +155,7 @@ RUN install-tool git-lfs v3.7.1
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.7.3
+RUN install-tool helmfile v1.7.4
 
 #--------------------------------------
 # Image: kustomize
@@ -184,7 +184,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.8
+RUN install-tool terraform 1.15.9
 
 #--------------------------------------
 # Image: tofu
@@ -192,7 +192,7 @@ RUN install-tool terraform 1.15.8
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.5
+RUN install-tool tofu 1.12.6
 
 #--------------------------------------
 # Image: vendir
@@ -200,7 +200,7 @@ RUN install-tool tofu 1.12.5
 FROM base AS test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.0
+RUN install-tool vendir v0.46.1
 
 #--------------------------------------
 # Image: others
@@ -214,7 +214,7 @@ RUN install-tool buf v1.72.0
 RUN install-tool kubectl v1.36.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.8.5
+RUN install-tool mise 2026.8.14
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.0

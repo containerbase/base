@@ -68,11 +68,11 @@ RUN install-apt nginx
 RUN install-tool node 24.19.0
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.9
+RUN install-tool php 8.5.10
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.4
+RUN install-tool powershell v7.6.6
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.14.7
@@ -162,7 +162,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.8
+RUN install-tool terraform 1.15.9
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -185,13 +185,13 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.4
+RUN install-tool flux v2.9.5
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.7.1
+RUN install-tool git-lfs v3.8.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.4
+RUN install-tool powershell v7.6.6
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 24.19.0
@@ -223,13 +223,13 @@ RUN install-tool bazelisk v1.29.0
 RUN install-tool buf v1.72.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.3.14
+RUN install-tool bun 1.4.2
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.5
+RUN install-tool deno 2.9.6
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.2.36
+RUN install-tool apko 1.2.41
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.28.0
@@ -238,12 +238,12 @@ RUN install-tool apm 0.28.0
 RUN install-tool aube 1.41.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.17.5
+RUN install-tool devbox 0.18.0
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.25.2
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.97.0
+RUN install-tool gh v2.98.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.18.1
@@ -252,7 +252,7 @@ RUN install-tool gleam 1.18.1
 RUN install-tool kubectl v1.36.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.8.5
+RUN install-tool mise 2026.8.14
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.0
@@ -261,16 +261,16 @@ RUN install-tool skopeo 1.24.0
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.5
+RUN install-tool tofu 1.12.6
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 35.1
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=v0.46.0
+ARG VENDIR_VERSION=v0.46.1
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.7.3
+ARG HELMFILE_VERSION=v1.7.4
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.8.1
