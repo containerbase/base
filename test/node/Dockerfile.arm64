@@ -57,6 +57,13 @@ FROM test-node AS test-yarn
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
+# renovate: datasource=npm packageName=@yarnpkg/yarn-aarch64-unknown-linux-musl
+ARG YARN_VERSION=6.0.0-rc.19
+
+RUN install-tool yarn "${YARN_VERSION}"
+
+RUN test "$(yarn --version)" = "${YARN_VERSION}"
+
 #--------------------------------------
 # Image: renovate
 #--------------------------------------
