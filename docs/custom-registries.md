@@ -776,6 +776,20 @@ Samples:
 https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.22.0/vendir-linux-amd64
 ```
 
+## `vp`
+
+Vite+ releases are downloaded from:
+
+- `https://github.com/voidzero-dev/vite-plus/releases`
+
+Release archives and their checksum manifest follow these paths:
+
+```txt
+https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-checksums.txt
+```
+
 ## `wally`
 
 Wally releases are downloaded from:

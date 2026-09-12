@@ -211,6 +211,13 @@ RUN install-tool pnpm 10.34.5
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.0
 
+# renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
+ARG VP_VERSION=0.3.1
+RUN install-tool vp "${VP_VERSION}"
+
+COPY test/vp/sync-versions.mjs /test/vp-sync-versions.mjs
+RUN node /test/vp-sync-versions.mjs "${VP_VERSION}"
+
 #--------------------------------------
 # Image: test-php
 #--------------------------------------
