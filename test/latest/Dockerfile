@@ -387,6 +387,25 @@ RUN install-tool nuget 7.6.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# Image: vp
+#--------------------------------------
+FROM base AS test-vp
+
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 24.19.0
+
+# renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
+ARG VP_VERSION=0.3.1
+RUN install-tool vp "${VP_VERSION}"
+
+COPY test/vp/sync-versions.mjs /test/vp-sync-versions.mjs
+
+USER 12021
+SHELL ["/bin/sh", "-c"]
+
+RUN node /test/vp-sync-versions.mjs "${VP_VERSION}"
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -399,3 +418,4 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-vp /.dummy /.dummy
