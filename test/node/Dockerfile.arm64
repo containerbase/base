@@ -70,6 +70,22 @@ RUN install-tool renovate 44.17.1
 # RUN npm install -g re2@1.20.9
 
 #--------------------------------------
+# Image: vp
+#--------------------------------------
+FROM test-node AS test-vp
+
+# renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
+ARG VP_VERSION=0.3.1
+RUN install-tool vp "${VP_VERSION}"
+
+COPY test/node/vp/sync-versions.mjs /test/vp-sync-versions.mjs
+
+USER 12021
+SHELL ["/bin/sh", "-c"]
+
+RUN node /test/vp-sync-versions.mjs "${VP_VERSION}"
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
@@ -78,3 +94,4 @@ COPY --from=test-node /.dummy /.dummy
 COPY --from=test-pnpm /.dummy /.dummy
 COPY --from=test-yarn /.dummy /.dummy
 COPY --from=test-renovate /.dummy /.dummy
+COPY --from=test-vp /.dummy /.dummy

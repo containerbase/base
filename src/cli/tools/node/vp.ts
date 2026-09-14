@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import type { Arch } from '../utils/index.ts';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import type { Arch } from '../../utils/index.ts';
 
 // Stable machine-readable marker consumed by Renovate. Do not reword it.
 export const VP_SYNC_VERSIONS_UNAVAILABLE =

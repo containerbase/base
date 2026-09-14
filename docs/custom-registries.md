@@ -782,12 +782,12 @@ Vite+ releases are downloaded from:
 
 - `https://github.com/voidzero-dev/vite-plus/releases`
 
-Release archives and their checksum manifest follow these paths:
+Samples:
 
 ```txt
-https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-x86_64-unknown-linux-gnu.tar.gz
-https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-aarch64-unknown-linux-gnu.tar.gz
-https://github.com/voidzero-dev/vite-plus/releases/download/v<version>/vp-checksums.txt
+https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-checksums.txt
 ```
 
 ## `wally`

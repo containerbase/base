@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
+import { execa } from 'execa';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -8,7 +9,7 @@ import {
   CompressionService,
   HttpService,
   LinkToolService,
-} from '../services/index.ts';
+} from '../../services/index.ts';
 import {
   VP_SYNC_VERSIONS_UNAVAILABLE,
   VpInstallService,
@@ -20,7 +21,7 @@ import { ensurePaths } from '~test/path.ts';
 
 vi.mock('execa');
 
-describe('cli/tools/vp', () => {
+describe('cli/tools/node/vp', () => {
   describe('release assets', () => {
     test.each([
       ['amd64', 'vp-x86_64-unknown-linux-gnu.tar.gz'],
@@ -136,7 +137,13 @@ describe('cli/tools/vp', () => {
     });
 
     test('checks the installed vp version', async () => {
-      await expect(service.test('0.4.0')).resolves.toBeUndefined();
+      await service.test('0.4.0');
+
+      expect(execa).toHaveBeenCalledExactlyOnceWith(
+        'vp',
+        ['--version'],
+        expect.any(Object),
+      );
     });
   });
 });

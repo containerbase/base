@@ -80,6 +80,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
+import { VpInstallService } from '../tools/node/vp.ts';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
@@ -111,7 +112,6 @@ import { SwiftInstallService } from '../tools/swift.ts';
 import { TerraformInstallService } from '../tools/terraform.ts';
 import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
-import { VpInstallService } from '../tools/vp.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import { type InstallToolType, logger } from '../utils/index.ts';
 import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
