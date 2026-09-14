@@ -611,6 +611,21 @@ https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linu
 https://github.com/containerbase/node-re2-prebuild/releases/download/1.20.9/linux-x64-108.br
 ```
 
+## `nub`
+
+Nub releases are downloaded from:
+
+- `https://github.com/nubjs/nub/releases`
+
+Samples:
+
+```txt
+https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-x64.tar.gz
+https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-x64.tar.gz.sha256
+https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-arm64.tar.gz
+https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-arm64.tar.gz.sha256
+```
+
 ## `php`
 
 PHP releases are downloaded from:
