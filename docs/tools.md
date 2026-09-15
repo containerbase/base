@@ -387,11 +387,12 @@ The currently linked version is printed first, additional installed versions fol
 A `-` is printed when no version of the tool is currently linked.
 
 With `--json` the list is printed as JSON, so it can be processed programmatically.
+The JSON output is described by [`list-tools.schema.json`](./list-tools.schema.json), which is generated from the `InstalledTools` schema in `src/cli/services/version.schema.ts`.
 Because containerbase logs to `stdout`, use `--out` to write the output to a file instead.
 
 #### Usage <a name="Usage-list-tools"></a>
 
-`$ containerbase-cli list tools [-j,--json] [-o,--out <file>]`
+`$ containerbase-cli list tools [--json] [--out <file>]`
 
 #### Examples <a name="Examples-list-tools"></a>
 
@@ -399,7 +400,7 @@ Because containerbase logs to `stdout`, use `--out` to write the output to a fil
 
   ```bash
   $ containerbase-cli list tools
-  node  22.11.0 (20.11.0)
+  node  22.11.0 (Other installed versions: 20.11.0)
   pnpm  10.0.1
   ```
 
@@ -412,12 +413,17 @@ Because containerbase logs to `stdout`, use `--out` to write the output to a fil
       {
         "name": "node",
         "version": "22.11.0",
-        "versions": ["20.11.0", "22.11.0"]
+        "versions": [{ "version": "20.11.0" }, { "version": "22.11.0" }]
       },
       {
         "name": "pnpm",
         "version": "10.0.1",
-        "versions": ["10.0.1"],
+        "versions": [
+          {
+            "version": "10.0.1",
+            "parent": { "name": "node", "version": "22.11.0" }
+          }
+        ],
         "type": "npm"
       }
     ]

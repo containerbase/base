@@ -27,6 +27,7 @@
     "prettier-fix": "prettier --cache -w -u \"**/*.*\"",
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js",
+    "schema": "node tools/schema.ts",
     "start": "tsx src/cli/index.ts",
     "test": "run-s 'test:*'",
     "test:bats": "node tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",

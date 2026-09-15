@@ -5,17 +5,17 @@ import type { InstallToolType } from '../utils';
 import { fileRights, logger, tool2path } from '../utils/index.ts';
 import { DataService, type Database } from './data.service.ts';
 import { PathService } from './path.service.ts';
+import type {
+  InstalledTool,
+  InstalledToolVersion,
+  Tool,
+} from './version.schema.ts';
 
 export type Doc<T> = T & {
   _id?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
-
-export interface Tool {
-  name: string;
-  version: string;
-}
 
 export interface ToolVersion {
   name: string;
@@ -39,25 +39,6 @@ export interface ToolState {
 export interface ToolType {
   name: string;
   type: InstallToolType;
-}
-
-export interface InstalledTool {
-  name: string;
-
-  /**
-   * The currently linked version, `null` if the tool isn't linked.
-   */
-  version: string | null;
-
-  /**
-   * All installed versions, sorted ascending.
-   */
-  versions: string[];
-
-  /**
-   * The installer type, only set for dynamically installed tools.
-   */
-  type?: InstallToolType;
 }
 
 @injectable()
@@ -91,13 +72,13 @@ export class VersionService {
       this._types.findAsync({}),
     ]);
 
-    const tools = new Map<string, Set<string>>();
-    for (const { name, version } of versions) {
-      let set = tools.get(name);
-      if (!set) {
-        tools.set(name, (set = new Set()));
+    const tools = new Map<string, InstalledToolVersion[]>();
+    for (const { name, version, parent } of versions) {
+      let installed = tools.get(name);
+      if (!installed) {
+        tools.set(name, (installed = []));
       }
-      set.add(version);
+      installed.push(parent ? { version, parent } : { version });
     }
 
     return Array.from(tools.entries())
@@ -107,8 +88,8 @@ export class VersionService {
         return {
           name,
           version: states.find((s) => s.name === name)?.tool.version ?? null,
-          versions: Array.from(versions).sort((a, b) =>
-            a.localeCompare(b, undefined, { numeric: true }),
+          versions: versions.sort((a, b) =>
+            a.version.localeCompare(b.version, undefined, { numeric: true }),
           ),
           ...(type ? { type } : {}),
         };
