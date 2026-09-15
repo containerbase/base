@@ -14,6 +14,8 @@
   - [uninstall-gem](#uninstall-gem-command)
   - [uninstall-npm](#uninstall-npm-command)
   - [uninstall-pip](#uninstall-pip-command)
+- [List](#list)
+  - [list-tools](#list-tools-command)
 
 ---
 
@@ -369,4 +371,67 @@ Uninstalls a pip package from the container.
 - Uninstalls all checkov versions
   ```bash
   uninstall-pip checkov --all
+  ```
+
+<br>
+
+## List
+
+### `containerbase-cli list tools` <a name="list-tools-command"></a>
+
+#### Description <a name="Description-list-tools"></a>
+
+Lists all installed tools and their versions.
+
+The currently linked version is printed first, additional installed versions follow in parentheses.
+A `-` is printed when no version of the tool is currently linked.
+
+With `--json` the list is printed as JSON, so it can be processed programmatically.
+The JSON output is described by [`list-tools.schema.json`](./list-tools.schema.json), which is generated from the `InstalledTools` schema in `src/cli/services/version.schema.ts`.
+Because containerbase logs to `stdout`, use `--out` to write the output to a file instead.
+JSON written to a file isn't pretty printed.
+
+#### Usage <a name="Usage-list-tools"></a>
+
+`$ containerbase-cli list tools [--json] [--out <file>]`
+
+#### Examples <a name="Examples-list-tools"></a>
+
+- Lists all installed tools
+
+  ```bash
+  $ containerbase-cli list tools
+  node  22.11.0 (Other installed versions: 20.11.0)
+  pnpm  10.0.1
+  ```
+
+- Lists all installed tools as JSON
+
+  ```bash
+  $ containerbase-cli list tools --json
+  {
+    "tools": [
+      {
+        "name": "node",
+        "version": "22.11.0",
+        "versions": [{ "version": "20.11.0" }, { "version": "22.11.0" }]
+      },
+      {
+        "name": "pnpm",
+        "version": "10.0.1",
+        "versions": [
+          {
+            "version": "10.0.1",
+            "parent": { "name": "node", "version": "22.11.0" }
+          }
+        ],
+        "type": "npm"
+      }
+    ]
+  }
+  ```
+
+- Writes the JSON output to a file
+  ```bash
+  containerbase-cli list tools --json --out /tmp/tools.json
   ```

@@ -5,17 +5,17 @@ import type { InstallToolType } from '../utils';
 import { fileRights, logger, tool2path } from '../utils/index.ts';
 import { DataService, type Database } from './data.service.ts';
 import { PathService } from './path.service.ts';
+import type {
+  InstalledTool,
+  InstalledToolVersion,
+  Tool,
+} from './version.schema.ts';
 
 export type Doc<T> = T & {
   _id?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
-
-export interface Tool {
-  name: string;
-  version: string;
-}
 
 export interface ToolVersion {
   name: string;
@@ -60,6 +60,44 @@ export class VersionService {
 
   findInstalled(name: string): Promise<Doc<ToolVersion>[]> {
     return this._versions.findAsync({ name });
+  }
+
+  /**
+   * Lists all installed tools with their versions, sorted by tool name.
+   *
+   * The current version is looked up by `tool.name`, because tools are linked
+   * under their alias, eg. `java-jdk` is linked as `java`.
+   */
+  async listInstalled(): Promise<InstalledTool[]> {
+    const [versions, states, types] = await Promise.all([
+      this._versions.findAsync({}),
+      this._state.findAsync({}),
+      this._types.findAsync({}),
+    ]);
+
+    const tools = new Map<string, InstalledToolVersion[]>();
+    for (const { name, version, parent } of versions) {
+      let installed = tools.get(name);
+      if (!installed) {
+        tools.set(name, (installed = []));
+      }
+      installed.push(parent ? { version, parent } : { version });
+    }
+
+    return Array.from(tools.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, versions]) => {
+        const type = types.find((t) => t.name === name)?.type;
+        return {
+          name,
+          version:
+            states.find((s) => s.tool.name === name)?.tool.version ?? null,
+          versions: versions.sort((a, b) =>
+            a.version.localeCompare(b.version, undefined, { numeric: true }),
+          ),
+          ...(type ? { type } : {}),
+        };
+      });
   }
 
   async addInstalled(tool: ToolVersion): Promise<void> {
