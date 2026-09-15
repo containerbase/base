@@ -1,26 +1,9 @@
 import fs from 'node:fs/promises';
-import { Writable } from 'node:stream';
 import { beforeAll, describe, expect, test } from 'vitest';
 import { VersionService } from '../services/index.ts';
 import { testCli, testContainer } from '~test/di.ts';
+import { StdoutMock } from '~test/mock.ts';
 import { cachePath, ensurePaths } from '~test/path.ts';
-
-class StdoutMock extends Writable {
-  private readonly chunks: string[] = [];
-
-  get output(): string {
-    return this.chunks.join('');
-  }
-
-  override _write(
-    chunk: unknown,
-    _encoding: BufferEncoding,
-    callback: (error?: Error | null) => void,
-  ): void {
-    this.chunks.push(String(chunk));
-    callback();
-  }
-}
 
 describe('cli/command/list-tools', () => {
   const cli = testCli('containerbase-cli');
