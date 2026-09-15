@@ -1,18 +1,25 @@
 import fs from 'node:fs/promises';
+import { Writable } from 'node:stream';
 import { beforeAll, describe, expect, test } from 'vitest';
 import { VersionService } from '../services/index.ts';
 import { testCli, testContainer } from '~test/di.ts';
 import { cachePath, ensurePaths } from '~test/path.ts';
 
-function stdoutMock(): { write: (s: string) => boolean; output: () => string } {
-  const chunks: string[] = [];
-  return {
-    write: (s: string) => {
-      chunks.push(s);
-      return true;
-    },
-    output: () => chunks.join(''),
-  };
+class StdoutMock extends Writable {
+  private readonly chunks: string[] = [];
+
+  get output(): string {
+    return this.chunks.join('');
+  }
+
+  override _write(
+    chunk: unknown,
+    _encoding: BufferEncoding,
+    callback: (error?: Error | null) => void,
+  ): void {
+    this.chunks.push(String(chunk));
+    callback();
+  }
 }
 
 describe('cli/command/list-tools', () => {
@@ -39,23 +46,19 @@ describe('cli/command/list-tools', () => {
   });
 
   test('lists tools', async () => {
-    const stdout = stdoutMock();
+    const stdout = new StdoutMock();
 
-    expect(await cli.run(['list', 'tools'], { stdout: stdout as never })).toBe(
-      0,
-    );
-    expect(stdout.output()).toBe(
+    expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
+    expect(stdout.output).toBe(
       'node  22.11.0 (20.11.0)\n' + 'pnpm  - (10.0.1)\n',
     );
   });
 
   test('lists tools as json', async () => {
-    const stdout = stdoutMock();
+    const stdout = new StdoutMock();
 
-    expect(
-      await cli.run(['list', 'tools', '--json'], { stdout: stdout as never }),
-    ).toBe(0);
-    expect(JSON.parse(stdout.output())).toEqual({
+    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+    expect(JSON.parse(stdout.output)).toEqual({
       tools: [
         { name: 'node', version: '22.11.0', versions: ['20.11.0', '22.11.0'] },
         { name: 'pnpm', version: null, versions: ['10.0.1'], type: 'npm' },
