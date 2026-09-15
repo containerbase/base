@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
         with:
           save-cache: true
 
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
 
       - name: lint
         run: |
@@ -54,7 +54,7 @@ jobs:
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
-        uses: reviewdog/action-shellcheck@0722bbdb0d47f04c1b53b8734d2422ac63a45ec6 # v1.32.1
+        uses: reviewdog/action-shellcheck@a94d585085f1f5215ae65f4de34e7bbd0523d550 # v1.33.0
         with:
           fail_level: any
           reporter: github-pr-annotations
@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
 
       - name: Install ubuntu dependencies
         run: |
@@ -96,7 +96,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
 
       - name: vitest
         run: pnpm test:vitest
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
 
       - name: build
         run: pnpm build
@@ -153,7 +153,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
         with:
           node: false
           apt-proxy: true
@@ -196,7 +196,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
         with:
           node: false
           apt-proxy: true
@@ -235,7 +235,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
         with:
           node: false
           apt-proxy: true
@@ -306,7 +306,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@6937aab9da5919caacdbf80308a6b7d7e7a4c09c # v5.0.16
+        uses: containerbase/internal-tools/setup@54316199fe8ebb5ff62cf59511c1944a60bb401f # v5.0.36
         with:
           node: false
           apt-proxy: true

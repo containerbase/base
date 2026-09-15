@@ -48,28 +48,28 @@ FROM build AS test
 RUN install-tool bazelisk v1.29.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.72.0
+RUN install-tool buf v1.73.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.0
+RUN install-tool bun 1.4.2
 
 # renovate: datasource=docker
-RUN install-tool dart 3.13.2
+RUN install-tool dart 3.13.3
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.6
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.0
+RUN install-tool devbox 0.18.1
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.400
+RUN install-tool dotnet 10.0.401
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.2
+RUN install-tool flutter 3.47.4
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.4
+RUN install-tool flux v2.9.5
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
@@ -78,7 +78,7 @@ RUN install-tool git-lfs v3.8.0
 RUN install-tool gleam 1.18.1
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.26.5
+RUN install-tool golang 1.27.1
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v4.2.4
@@ -102,7 +102,7 @@ RUN install-tool nix 2.24.10
 RUN install-tool pixi v0.76.2
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.5
+RUN install-tool powershell v7.6.6
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.97.1
@@ -134,7 +134,7 @@ RUN install-tool tofu 1.12.6
 RUN install-tool jb v0.6.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.1
+RUN install-tool vendir v0.46.2
 
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
@@ -151,10 +151,10 @@ FROM build AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.36.1
+RUN install-tool buildx v0.37.1
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.3.1
+RUN install-tool docker-compose v5.5.1
 
 #--------------------------------------
 # Image: test-erlang
@@ -162,7 +162,7 @@ RUN install-tool docker-compose v5.3.1
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 28.5.0.5
+RUN install-tool erlang 28.5.0.6
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.20.4
 
@@ -221,7 +221,7 @@ RUN install-tool vp "${VP_VERSION}"
 FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.9
+RUN install-tool php 8.5.10
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.10.3
 
@@ -236,9 +236,9 @@ RUN install-tool python 3.14.7
 # renovate: datasource=pypi
 RUN install-tool checkov 3.3.9
 # renovate: datasource=pypi
-RUN install-tool conan 2.31.2
+RUN install-tool conan 2.32.0
 # renovate: datasource=pypi
-RUN install-tool copier 9.17.2
+RUN install-tool copier 9.18.2
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
@@ -248,9 +248,9 @@ RUN install-tool pipenv 2026.7.1
 # renovate: datasource=pypi
 RUN install-tool pdm 2.28.1
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.2
+RUN install-tool poetry 2.4.3
 # renovate: datasource=pypi
-RUN install-tool uv 0.12.7
+RUN install-tool uv 0.12.13
 
 #--------------------------------------
 # Image: test-ruby
@@ -260,7 +260,7 @@ FROM build AS test-ruby
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 4.0.6
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 4.0.19
+RUN install-tool bundler 4.0.20
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.17.0
 

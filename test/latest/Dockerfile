@@ -68,11 +68,11 @@ RUN install-apt nginx
 RUN install-tool node 24.19.0
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.9
+RUN install-tool php 8.5.10
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.5
+RUN install-tool powershell v7.6.6
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.14.7
@@ -185,13 +185,13 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.4
+RUN install-tool flux v2.9.5
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.5
+RUN install-tool powershell v7.6.6
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 24.19.0
@@ -220,22 +220,22 @@ FROM base AS teste
 RUN install-tool bazelisk v1.29.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.72.0
+RUN install-tool buf v1.73.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.0
+RUN install-tool bun 1.4.2
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.6
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.2.41
+RUN install-tool apko 1.4.1
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.28.0
+RUN install-tool apm 0.30.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.0
+RUN install-tool devbox 0.18.1
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.25.2
@@ -264,7 +264,7 @@ RUN install-tool tofu 1.12.6
 RUN install-tool protoc 35.1
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=v0.46.1
+ARG VENDIR_VERSION=v0.46.2
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
 ARG HELMFILE_VERSION=v1.7.4
@@ -352,10 +352,10 @@ USER 12021
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.36.1
+RUN install-tool buildx v0.37.1
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.3.1
+RUN install-tool docker-compose v5.5.1
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \

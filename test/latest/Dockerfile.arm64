@@ -46,7 +46,7 @@ RUN install-tool bazelisk v1.29.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.0
+RUN install-tool bun 1.4.2
 
 #--------------------------------------
 # Image: deno
@@ -62,7 +62,7 @@ RUN install-tool deno 2.9.6
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.2.41
+RUN install-tool apko 1.4.1
 
 #--------------------------------------
 # Image: apm
@@ -70,7 +70,7 @@ RUN install-tool apko 1.2.41
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.28.0
+RUN install-tool apm 0.30.0
 
 #--------------------------------------
 # Image: devbox
@@ -78,7 +78,7 @@ RUN install-tool apm 0.28.0
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.0
+RUN install-tool devbox 0.18.1
 
 #--------------------------------------
 # Image: gh
@@ -105,10 +105,10 @@ FROM base AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.36.1
+RUN install-tool buildx v0.37.1
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.3.1
+RUN install-tool docker-compose v5.5.1
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \
@@ -182,7 +182,7 @@ RUN install-tool tofu 1.12.6
 FROM base AS test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.1
+RUN install-tool vendir v0.46.2
 
 #--------------------------------------
 # Image: others
@@ -190,7 +190,7 @@ RUN install-tool vendir v0.46.1
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.72.0
+RUN install-tool buf v1.73.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.36.3
