@@ -104,7 +104,11 @@ describe('cli/command/list-tools', () => {
     const file = cachePath('tools.json');
 
     expect(await cli.run(['list', 'tools', '--json', '--out', file])).toBe(0);
-    expect(JSON.parse(await fs.readFile(file, 'utf8'))).toHaveProperty('tools');
+
+    const content = await fs.readFile(file, 'utf8');
+    // written without pretty printing
+    expect(content.split('\n')).toHaveLength(2);
+    expect(JSON.parse(content)).toHaveProperty('tools');
   });
 
   test('fails on unwritable output file', async () => {

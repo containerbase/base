@@ -389,6 +389,7 @@ A `-` is printed when no version of the tool is currently linked.
 With `--json` the list is printed as JSON, so it can be processed programmatically.
 The JSON output is described by [`list-tools.schema.json`](./list-tools.schema.json), which is generated from the `InstalledTools` schema in `src/cli/services/version.schema.ts`.
 Because containerbase logs to `stdout`, use `--out` to write the output to a file instead.
+JSON written to a file isn't pretty printed.
 
 #### Usage <a name="Usage-list-tools"></a>
 

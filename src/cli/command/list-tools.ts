@@ -68,13 +68,16 @@ export class ListToolsCommand extends Command {
       const versionSvc = await container.getAsync(VersionService);
       const tools = await versionSvc.listInstalled();
 
-      const output = this.json
-        ? `${JSON.stringify({ tools }, null, 2)}\n`
-        : toText(tools);
-
       if (this.out) {
+        // no need to pretty print for a file
+        const output = this.json
+          ? `${JSON.stringify({ tools })}\n`
+          : toText(tools);
         await writeFile(this.out, output, { encoding: 'utf8' });
       } else {
+        const output = this.json
+          ? `${JSON.stringify({ tools }, null, 2)}\n`
+          : toText(tools);
         this.context.stdout.write(output);
       }
 
