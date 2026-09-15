@@ -18,8 +18,13 @@ function toText(tools: InstalledTool[]): string {
 
   return tools
     .map(({ name, version, versions }) => {
-      const others = versions.filter((v) => v !== version);
-      const rest = others.length ? ` (${others.join(', ')})` : '';
+      const others = new Set(versions.map((v) => v.version));
+      if (version) {
+        others.delete(version);
+      }
+      const rest = others.size
+        ? ` (Other installed versions: ${Array.from(others).join(', ')})`
+        : '';
       return `${name.padEnd(width)}  ${version ?? '-'}${rest}\n`;
     })
     .join('');
@@ -34,6 +39,7 @@ export class ListToolsCommand extends Command {
     details: `
       Prints the currently linked version of every installed tool.
       Additional installed versions are listed in parentheses.
+      The json output is described by \`docs/list-tools.schema.json\`.
     `,
     examples: [
       ['List all installed tools', '$0 list tools'],
@@ -45,11 +51,11 @@ export class ListToolsCommand extends Command {
     ],
   });
 
-  json = Option.Boolean('-j,--json', false, {
+  json = Option.Boolean('--json', false, {
     description: 'Outputs the tool list as json.',
   });
 
-  out = Option.String('-o,--out', {
+  out = Option.String('--out', {
     description: 'Writes the output to the given file instead of stdout.',
   });
 

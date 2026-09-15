@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test } from 'vitest';
-import { VersionService } from '../services/index.ts';
+import { z } from 'zod';
+import { InstalledTools, VersionService } from '../services/index.ts';
 import { testCli, testContainer } from '~test/di.ts';
 import { StdoutMock } from '~test/mock.ts';
 import { cachePath, ensurePaths } from '~test/path.ts';
@@ -33,7 +34,8 @@ describe('cli/command/list-tools', () => {
 
     expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
     expect(stdout.output).toBe(
-      'node  22.11.0 (20.11.0)\n' + 'pnpm  - (10.0.1)\n',
+      'node  22.11.0 (Other installed versions: 20.11.0)\n' +
+        'pnpm  - (Other installed versions: 10.0.1)\n',
     );
   });
 
@@ -43,10 +45,36 @@ describe('cli/command/list-tools', () => {
     expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
     expect(JSON.parse(stdout.output)).toEqual({
       tools: [
-        { name: 'node', version: '22.11.0', versions: ['20.11.0', '22.11.0'] },
-        { name: 'pnpm', version: null, versions: ['10.0.1'], type: 'npm' },
+        {
+          name: 'node',
+          version: '22.11.0',
+          versions: [{ version: '20.11.0' }, { version: '22.11.0' }],
+        },
+        {
+          name: 'pnpm',
+          version: null,
+          versions: [
+            {
+              version: '10.0.1',
+              parent: { name: 'node', version: '22.11.0' },
+            },
+          ],
+          type: 'npm',
+        },
       ],
     });
+  });
+
+  test('json output matches the published schema', async () => {
+    const stdout = new StdoutMock();
+
+    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+    expect(() => InstalledTools.parse(JSON.parse(stdout.output))).not.toThrow();
+
+    const schema = JSON.parse(
+      await fs.readFile('docs/list-tools.schema.json', 'utf8'),
+    );
+    expect(schema).toEqual(z.toJSONSchema(InstalledTools));
   });
 
   test('writes json to file', async () => {
