@@ -41,6 +41,25 @@ export interface ToolType {
   type: InstallToolType;
 }
 
+export interface InstalledTool {
+  name: string;
+
+  /**
+   * The currently linked version, `null` if the tool isn't linked.
+   */
+  version: string | null;
+
+  /**
+   * All installed versions, sorted ascending.
+   */
+  versions: string[];
+
+  /**
+   * The installer type, only set for dynamically installed tools.
+   */
+  type?: InstallToolType;
+}
+
 @injectable()
 export class VersionService {
   @inject(DataService)
@@ -60,6 +79,40 @@ export class VersionService {
 
   findInstalled(name: string): Promise<Doc<ToolVersion>[]> {
     return this._versions.findAsync({ name });
+  }
+
+  /**
+   * Lists all installed tools with their versions, sorted by tool name.
+   */
+  async listInstalled(): Promise<InstalledTool[]> {
+    const [versions, states, types] = await Promise.all([
+      this._versions.findAsync({}),
+      this._state.findAsync({}),
+      this._types.findAsync({}),
+    ]);
+
+    const tools = new Map<string, Set<string>>();
+    for (const { name, version } of versions) {
+      let set = tools.get(name);
+      if (!set) {
+        tools.set(name, (set = new Set()));
+      }
+      set.add(version);
+    }
+
+    return Array.from(tools.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, versions]) => {
+        const type = types.find((t) => t.name === name)?.type;
+        return {
+          name,
+          version: states.find((s) => s.name === name)?.tool.version ?? null,
+          versions: Array.from(versions).sort((a, b) =>
+            a.localeCompare(b, undefined, { numeric: true }),
+          ),
+          ...(type ? { type } : {}),
+        };
+      });
   }
 
   async addInstalled(tool: ToolVersion): Promise<void> {

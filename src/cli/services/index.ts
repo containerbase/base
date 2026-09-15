@@ -11,7 +11,7 @@ import {
 } from './link-tool.service.ts';
 import { PathService } from './path.service.ts';
 import { V2ToolService } from './v2-tool.service.ts';
-import { VersionService } from './version.service.ts';
+import { type InstalledTool, VersionService } from './version.service.ts';
 
 export {
   AptService,
@@ -21,6 +21,7 @@ export {
   PathService,
   V2ToolService,
   VersionService,
+  type InstalledTool,
   LinkToolService,
   type ShellWrapperConfig,
   IpcClient,
