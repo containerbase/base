@@ -570,9 +570,20 @@ RUN set -ex; \
 
 RUN set -ex; \
   ls -la /usr/local/bin/;\
+  containerbase-cli list tools --out /tmp/tools-before.txt; \
+  cat /tmp/tools-before.txt; \
+  grep -q '^node ' /tmp/tools-before.txt; \
+  grep -q '^yarn ' /tmp/tools-before.txt; \
+  grep -q '^renovate ' /tmp/tools-before.txt; \
+  containerbase-cli list tools --json --out /tmp/tools-before.json; \
+  cat /tmp/tools-before.json; \
+  grep -q '"name": "del-cli"' /tmp/tools-before.json; \
   uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
+  containerbase-cli list tools --out /tmp/tools-after.txt; \
+  cat /tmp/tools-after.txt; \
+  grep -q 'No tools installed.' /tmp/tools-after.txt; \
   true
 
 #--------------------------------------
