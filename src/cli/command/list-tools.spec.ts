@@ -88,16 +88,22 @@ describe('cli/command/list-tools', () => {
     });
   });
 
-  test('json output matches the published schema', async () => {
-    const stdout = new StdoutMock();
-
-    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
-    expect(() => InstalledTools.parse(JSON.parse(stdout.output))).not.toThrow();
-
+  test('published json schema is up to date', async () => {
+    // regenerate with `pnpm schema` when this fails
     const schema = JSON.parse(
       await fs.readFile('docs/list-tools.schema.json', 'utf8'),
     );
     expect(schema).toEqual(z.toJSONSchema(InstalledTools));
+  });
+
+  test('json output matches the schema', async () => {
+    const stdout = new StdoutMock();
+
+    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+
+    const output: unknown = JSON.parse(stdout.output);
+    // parsing strips unknown keys, so an equal result means no extra fields
+    expect(InstalledTools.parse(output)).toEqual(output);
   });
 
   test('writes json to file', async () => {
@@ -108,7 +114,9 @@ describe('cli/command/list-tools', () => {
     const content = await fs.readFile(file, 'utf8');
     // written without pretty printing
     expect(content.split('\n')).toHaveLength(2);
-    expect(JSON.parse(content)).toHaveProperty('tools');
+
+    const output: unknown = JSON.parse(content);
+    expect(InstalledTools.parse(output)).toEqual(output);
   });
 
   test('fails on unwritable output file', async () => {
