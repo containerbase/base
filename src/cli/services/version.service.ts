@@ -64,6 +64,9 @@ export class VersionService {
 
   /**
    * Lists all installed tools with their versions, sorted by tool name.
+   *
+   * The current version is looked up by `tool.name`, because tools are linked
+   * under their alias, eg. `java-jdk` is linked as `java`.
    */
   async listInstalled(): Promise<InstalledTool[]> {
     const [versions, states, types] = await Promise.all([
@@ -87,7 +90,8 @@ export class VersionService {
         const type = types.find((t) => t.name === name)?.type;
         return {
           name,
-          version: states.find((s) => s.name === name)?.tool.version ?? null,
+          version:
+            states.find((s) => s.tool.name === name)?.tool.version ?? null,
           versions: versions.sort((a, b) =>
             a.version.localeCompare(b.version, undefined, { numeric: true }),
           ),

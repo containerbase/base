@@ -22,9 +22,15 @@ describe('cli/command/list-tools', () => {
       version: '10.0.1',
       parent: { name: 'node', version: '22.11.0' },
     });
+    await versionSvc.addInstalled({ name: 'java-jdk', version: '21.0.12+7' });
     await versionSvc.setCurrent({
       name: 'node',
       tool: { name: 'node', version: '22.11.0' },
+    });
+    // java tools are linked under their `java` alias
+    await versionSvc.setCurrent({
+      name: 'java',
+      tool: { name: 'java-jdk', version: '21.0.12+7' },
     });
     await versionSvc.setType('pnpm', 'npm');
   });
@@ -34,9 +40,21 @@ describe('cli/command/list-tools', () => {
 
     expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
     expect(stdout.output).toBe(
-      'node  22.11.0 (Other installed versions: 20.11.0)\n' +
-        'pnpm  - (Other installed versions: 10.0.1)\n',
+      'java-jdk  21.0.12+7\n' +
+        'node      22.11.0 (Other installed versions: 20.11.0)\n' +
+        'pnpm      - (Other installed versions: 10.0.1)\n',
     );
+  });
+
+  test('resolves the current version of aliased tools', async () => {
+    const stdout = new StdoutMock();
+
+    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+    expect(JSON.parse(stdout.output).tools).toContainEqual({
+      name: 'java-jdk',
+      version: '21.0.12+7',
+      versions: [{ version: '21.0.12+7' }],
+    });
   });
 
   test('lists tools as json', async () => {
@@ -45,6 +63,11 @@ describe('cli/command/list-tools', () => {
     expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
     expect(JSON.parse(stdout.output)).toEqual({
       tools: [
+        {
+          name: 'java-jdk',
+          version: '21.0.12+7',
+          versions: [{ version: '21.0.12+7' }],
+        },
         {
           name: 'node',
           version: '22.11.0',
