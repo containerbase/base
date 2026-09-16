@@ -383,8 +383,11 @@ Uninstalls a pip package from the container.
 
 Lists all installed tools and their versions.
 
-The currently linked version is printed first, additional installed versions follow in parentheses.
+The tools are printed as a table, with the currently linked version and any other installed versions.
+Tools and versions are sorted alphabetically, with numbers in numeric order, so `9.0.0` comes before `10.0.0`.
+
 A `-` is printed when no version of the tool is currently linked.
+That happens when the linked version is uninstalled while other versions of the tool remain installed, as nothing relinks one of them.
 
 With `--json` the list is printed as JSON, so it can be processed programmatically.
 The JSON output is described by [`list-tools.schema.json`](./list-tools.schema.json), which is generated from the `InstalledTools` schema in `src/cli/services/version.schema.ts`.
@@ -401,9 +404,13 @@ JSON written to a file isn't pretty printed.
 
   ```bash
   $ containerbase-cli list tools
-  node  22.11.0 (Other installed versions: 20.11.0)
-  pnpm  10.0.1
+  NAME      VERSION  OTHER VERSIONS
+  java-jdk  -        21.0.12+7
+  node      22.11.0  20.11.0
+  pnpm      10.0.1
   ```
+
+  Here `java-jdk` is installed but not linked, while `node` is linked to `22.11.0` and keeps `20.11.0` installed.
 
 - Lists all installed tools as JSON
 
@@ -411,6 +418,11 @@ JSON written to a file isn't pretty printed.
   $ containerbase-cli list tools --json
   {
     "tools": [
+      {
+        "name": "java-jdk",
+        "version": null,
+        "versions": [{ "version": "21.0.12+7" }]
+      },
       {
         "name": "node",
         "version": "22.11.0",

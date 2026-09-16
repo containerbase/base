@@ -68,9 +68,10 @@ describe('cli/command/list-tools', () => {
 
       expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
       expect(stdout.output).toBe(
-        'java-jdk  21.0.12+7\n' +
-          'node      22.11.0 (Other installed versions: 20.11.0)\n' +
-          'pnpm      - (Other installed versions: 10.0.1)\n',
+        'NAME      VERSION    OTHER VERSIONS\n' +
+          'java-jdk  21.0.12+7\n' +
+          'node      22.11.0    20.11.0\n' +
+          'pnpm      -          10.0.1\n',
       );
     });
 

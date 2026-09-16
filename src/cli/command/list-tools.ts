@@ -9,24 +9,33 @@ import {
 import { logger } from '../utils/index.ts';
 import { command } from './utils.ts';
 
+const header = ['NAME', 'VERSION', 'OTHER VERSIONS'];
+
 function toText(tools: InstalledTool[]): string {
   if (!tools.length) {
     return 'No tools installed.\n';
   }
 
-  const width = Math.max(...tools.map((t) => t.name.length));
+  const rows = tools.map(({ name, version, versions }) => {
+    const others = new Set(versions.map((v) => v.version));
+    if (version) {
+      others.delete(version);
+    }
+    return [name, version ?? '-', Array.from(others).join(', ')];
+  });
 
-  return tools
-    .map(({ name, version, versions }) => {
-      const others = new Set(versions.map((v) => v.version));
-      if (version) {
-        others.delete(version);
-      }
-      const rest = others.size
-        ? ` (Other installed versions: ${Array.from(others).join(', ')})`
-        : '';
-      return `${name.padEnd(width)}  ${version ?? '-'}${rest}\n`;
-    })
+  const widths = header.map((column, idx) =>
+    Math.max(column.length, ...rows.map((row) => row[idx]!.length)),
+  );
+
+  return [header, ...rows]
+    .map(
+      (row) =>
+        `${row
+          .map((column, idx) => column.padEnd(widths[idx]!))
+          .join('  ')
+          .trimEnd()}\n`,
+    )
     .join('');
 }
 
@@ -37,8 +46,8 @@ export class ListToolsCommand extends Command {
   static override usage = Command.Usage({
     description: 'Lists all installed tools and their versions.',
     details: `
-      Prints the currently linked version of every installed tool.
-      Additional installed versions are listed in parentheses.
+      Prints a table of all installed tools, with the currently linked version
+      and any other installed versions.
       The json output is described by \`docs/list-tools.schema.json\`.
     `,
     examples: [

@@ -23,7 +23,9 @@ export const InstalledTool = z.object({
     .describe(`the currently linked version, null if the tool isn't linked`),
   versions: z
     .array(InstalledToolVersion)
-    .describe('all installed versions, sorted ascending'),
+    .describe(
+      'all installed versions, sorted alphabetically with numbers in numeric order, so 9.0.0 comes before 10.0.0',
+    ),
   type: z
     .enum(installToolTypes)
     .describe('the installer type, only set for dynamically installed tools')
@@ -37,6 +39,10 @@ export type InstalledTool = z.infer<typeof InstalledTool>;
  * The generated json schema lives in `docs/list-tools.schema.json`.
  */
 export const InstalledTools = z.object({
-  tools: z.array(InstalledTool).describe('all installed tools, sorted by name'),
+  tools: z
+    .array(InstalledTool)
+    .describe(
+      'all installed tools, sorted alphabetically by name with numbers in numeric order, so tool9 comes before tool10',
+    ),
 });
 export type InstalledTools = z.infer<typeof InstalledTools>;

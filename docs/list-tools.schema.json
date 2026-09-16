@@ -44,7 +44,7 @@
               "required": ["version"],
               "additionalProperties": false
             },
-            "description": "all installed versions, sorted ascending"
+            "description": "all installed versions, sorted alphabetically with numbers in numeric order, so 9.0.0 comes before 10.0.0"
           },
           "type": {
             "type": "string",
@@ -55,7 +55,7 @@
         "required": ["name", "version", "versions"],
         "additionalProperties": false
       },
-      "description": "all installed tools, sorted by name"
+      "description": "all installed tools, sorted alphabetically by name with numbers in numeric order, so tool9 comes before tool10"
     }
   },
   "required": ["tools"],
