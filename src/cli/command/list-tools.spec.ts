@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
-import { beforeAll, describe, expect, test } from 'vitest';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { z } from 'zod';
-import { InstalledTools, VersionService } from '../services/index.ts';
-import { testCli, testContainer } from '~test/di.ts';
+import {
+  InstalledTools,
+  VersionService,
+  createContainer,
+} from '../services/index.ts';
+import { testCli } from '~test/di.ts';
 import { StdoutMock } from '~test/mock.ts';
 import { cachePath, ensurePaths } from '~test/path.ts';
 
@@ -11,8 +15,29 @@ describe('cli/command/list-tools', () => {
 
   beforeAll(async () => {
     await ensurePaths(['opt/containerbase/data', 'opt/containerbase/versions']);
+  });
 
-    const container = await testContainer();
+  test('handles an empty tool list', async () => {
+    const stdout = new StdoutMock();
+
+    expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
+    expect(stdout.output).toBe('No tools installed.\n');
+  });
+
+  test('fails when something other than an error is thrown', async () => {
+    vi.spyOn(VersionService.prototype, 'listInstalled').mockRejectedValueOnce(
+      'oops',
+    );
+
+    expect(await cli.run(['list', 'tools'], { stdout: new StdoutMock() })).toBe(
+      1,
+    );
+  });
+
+  // the command resolves its services from the root container, so seed through
+  // it too, otherwise the command wouldn't see the tools added here
+  async function seed(): Promise<void> {
+    const container = createContainer();
     const versionSvc = await container.getAsync(VersionService);
 
     await versionSvc.addInstalled({ name: 'node', version: '20.11.0' });
@@ -33,100 +58,104 @@ describe('cli/command/list-tools', () => {
       tool: { name: 'java-jdk', version: '21.0.12+7' },
     });
     await versionSvc.setType('pnpm', 'npm');
-  });
+  }
 
-  test('lists tools', async () => {
-    const stdout = new StdoutMock();
+  describe('with installed tools', () => {
+    beforeAll(seed);
 
-    expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
-    expect(stdout.output).toBe(
-      'java-jdk  21.0.12+7\n' +
-        'node      22.11.0 (Other installed versions: 20.11.0)\n' +
-        'pnpm      - (Other installed versions: 10.0.1)\n',
-    );
-  });
+    test('lists tools', async () => {
+      const stdout = new StdoutMock();
 
-  test('resolves the current version of aliased tools', async () => {
-    const stdout = new StdoutMock();
-
-    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
-    expect(JSON.parse(stdout.output).tools).toContainEqual({
-      name: 'java-jdk',
-      version: '21.0.12+7',
-      versions: [{ version: '21.0.12+7' }],
+      expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
+      expect(stdout.output).toBe(
+        'java-jdk  21.0.12+7\n' +
+          'node      22.11.0 (Other installed versions: 20.11.0)\n' +
+          'pnpm      - (Other installed versions: 10.0.1)\n',
+      );
     });
-  });
 
-  test('lists tools as json', async () => {
-    const stdout = new StdoutMock();
+    test('resolves the current version of aliased tools', async () => {
+      const stdout = new StdoutMock();
 
-    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
-    expect(JSON.parse(stdout.output)).toEqual({
-      tools: [
-        {
-          name: 'java-jdk',
-          version: '21.0.12+7',
-          versions: [{ version: '21.0.12+7' }],
-        },
-        {
-          name: 'node',
-          version: '22.11.0',
-          versions: [{ version: '20.11.0' }, { version: '22.11.0' }],
-        },
-        {
-          name: 'pnpm',
-          version: null,
-          versions: [
-            {
-              version: '10.0.1',
-              parent: { name: 'node', version: '22.11.0' },
-            },
-          ],
-          type: 'npm',
-        },
-      ],
+      expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+      expect(JSON.parse(stdout.output).tools).toContainEqual({
+        name: 'java-jdk',
+        version: '21.0.12+7',
+        versions: [{ version: '21.0.12+7' }],
+      });
     });
-  });
 
-  test('published json schema is up to date', async () => {
-    // regenerate with `pnpm schema` when this fails
-    const schema = JSON.parse(
-      await fs.readFile('docs/list-tools.schema.json', 'utf8'),
-    );
-    expect(schema).toEqual(z.toJSONSchema(InstalledTools));
-  });
+    test('lists tools as json', async () => {
+      const stdout = new StdoutMock();
 
-  test('json output matches the schema', async () => {
-    const stdout = new StdoutMock();
+      expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+      expect(JSON.parse(stdout.output)).toEqual({
+        tools: [
+          {
+            name: 'java-jdk',
+            version: '21.0.12+7',
+            versions: [{ version: '21.0.12+7' }],
+          },
+          {
+            name: 'node',
+            version: '22.11.0',
+            versions: [{ version: '20.11.0' }, { version: '22.11.0' }],
+          },
+          {
+            name: 'pnpm',
+            version: null,
+            versions: [
+              {
+                version: '10.0.1',
+                parent: { name: 'node', version: '22.11.0' },
+              },
+            ],
+            type: 'npm',
+          },
+        ],
+      });
+    });
 
-    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+    test('published json schema is up to date', async () => {
+      // regenerate with `pnpm schema` when this fails
+      const schema = JSON.parse(
+        await fs.readFile('docs/list-tools.schema.json', 'utf8'),
+      );
+      expect(schema).toEqual(z.toJSONSchema(InstalledTools));
+    });
 
-    const output: unknown = JSON.parse(stdout.output);
-    // parsing strips unknown keys, so an equal result means no extra fields
-    expect(InstalledTools.parse(output)).toEqual(output);
-  });
+    test('json output matches the schema', async () => {
+      const stdout = new StdoutMock();
 
-  test('writes json to file', async () => {
-    const file = cachePath('tools.json');
+      expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
 
-    expect(await cli.run(['list', 'tools', '--json', '--out', file])).toBe(0);
+      const output: unknown = JSON.parse(stdout.output);
+      // parsing strips unknown keys, so an equal result means no extra fields
+      expect(InstalledTools.parse(output)).toEqual(output);
+    });
 
-    const content = await fs.readFile(file, 'utf8');
-    // written without pretty printing
-    expect(content.split('\n')).toHaveLength(2);
+    test('writes json to file', async () => {
+      const file = cachePath('tools.json');
 
-    const output: unknown = JSON.parse(content);
-    expect(InstalledTools.parse(output)).toEqual(output);
-  });
+      expect(await cli.run(['list', 'tools', '--json', '--out', file])).toBe(0);
 
-  test('fails on unwritable output file', async () => {
-    expect(
-      await cli.run([
-        'list',
-        'tools',
-        '--out',
-        cachePath('missing/tools.json'),
-      ]),
-    ).toBe(1);
+      const content = await fs.readFile(file, 'utf8');
+      // written without pretty printing
+      expect(content.split('\n')).toHaveLength(2);
+
+      const output: unknown = JSON.parse(content);
+      expect(InstalledTools.parse(output)).toEqual(output);
+    });
+
+    test('fails on unwritable output file', async () => {
+      expect(
+        await cli.run([
+          'list',
+          'tools',
+          '--out',
+          cachePath('missing/tools.json'),
+        ]),
+      ).toBe(1);
+    });
   });
 });
