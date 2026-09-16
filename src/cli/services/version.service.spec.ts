@@ -46,6 +46,10 @@ describe('cli/services/version.service', () => {
       }),
     ).rejects.toThrow();
 
+    expect(await svc.findInstalled('node')).toMatchObject([
+      { name: 'node', version: '14.17.0' },
+    ]);
+
     expect(await svc.isInstalled({ name: 'node', version: '14.17.0' })).toBe(
       true,
     );
@@ -135,6 +139,52 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.0' },
       }),
     ).toBe(false);
+  });
+
+  test('current', async () => {
+    const versionFile = rootPath('opt/containerbase/versions/node');
+
+    await svc.setCurrent({
+      name: 'node',
+      tool: { name: 'node', version: '14.17.0' },
+    });
+    expect(
+      await svc.isCurrent({
+        name: 'node',
+        tool: { name: 'node', version: '14.17.0' },
+      }),
+    ).toBe(true);
+    expect(await svc.getCurrent('node')).toMatchObject({
+      name: 'node',
+      tool: { name: 'node', version: '14.17.0' },
+    });
+
+    // creates the version file with the expected rights
+    await svc.update('node', '14.17.0');
+    await fs.chmod(versionFile, 0o600);
+    // the rights are corrected on the next write
+    await svc.update('node', '14.17.1');
+    expect((await fs.stat(versionFile)).mode & 0o777).toBe(0o664);
+
+    await svc.removeCurrent('node');
+    expect(await svc.getCurrent('node')).toBeNull();
+    await expect(fs.stat(versionFile)).rejects.toThrow();
+
+    // the version file is gone now
+    await svc.removeCurrent('node');
+    expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+      { tool: 'node', err: expect.any(Error) },
+      'tool version file not found',
+    );
+  });
+
+  test('types', async () => {
+    expect(await svc.getType('pnpm')).toBeUndefined();
+
+    await svc.setType('pnpm', 'npm');
+
+    expect(await svc.getType('pnpm')).toBe('npm');
+    expect(await svc.getTypes()).toMatchObject([{ name: 'pnpm', type: 'npm' }]);
   });
 
   test('legacy', async () => {
