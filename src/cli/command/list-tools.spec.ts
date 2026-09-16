@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
-import { beforeAll, describe, expect, test } from 'vitest';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { z } from 'zod';
 import { InstalledTools, VersionService } from '../services/index.ts';
+import { logger } from '../utils/index.ts';
 import { testCli, testContainer } from '~test/di.ts';
 import { StdoutMock } from '~test/mock.ts';
 import { cachePath, ensurePaths } from '~test/path.ts';
@@ -94,6 +95,18 @@ describe('cli/command/list-tools', () => {
       await fs.readFile('docs/list-tools.schema.json', 'utf8'),
     );
     expect(schema).toEqual(z.toJSONSchema(InstalledTools));
+  });
+
+  test('keeps status logs out of the json output', async () => {
+    const stdout = new StdoutMock();
+
+    expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
+    expect(logger.debug).toHaveBeenCalledWith('Listing tools...');
+
+    vi.mocked(logger.debug).mockClear();
+
+    expect(await cli.run(['list', 'tools', '--json'], { stdout })).toBe(0);
+    expect(logger.debug).not.toHaveBeenCalledWith('Listing tools...');
   });
 
   test('json output matches the schema', async () => {
