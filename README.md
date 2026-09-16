@@ -85,7 +85,7 @@ The following options are supported:
 | `--allow-host-network`      | Pass `--allow=network.host` to `docker buildx bake`, required to use `--network host`.                                     |
 | `--host-gateway <value>`    | Value used for the `host.docker.internal` host alias, defaults to `host-gateway`.                                          |
 
-To build against a service running on your host or when having dns issue frmo vpn, use the host network:
+To build against a service running on your host or when having DNS issues from a VPN, use the host network:
 
 ```sh
 pnpm test:docker --network host --allow-host-network -t test-x86_64 java
