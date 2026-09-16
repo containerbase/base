@@ -28,6 +28,8 @@ All tooling runs through `pnpm`:
 - `pnpm eslint`: lint
 - `pnpm prettier` and `pnpm prettier-fix`: check and fix formatting
 - `pnpm lint:markdown`: lint markdown
+- `pnpm lint:schema`: check the committed json schemas are up to date
+- `pnpm schema`: regenerate the committed json schemas
 - `pnpm test:docker -b -t test-x86_64 node`: run the container test in `test/node`
 
 The container tests build the whole image, so they take several minutes.

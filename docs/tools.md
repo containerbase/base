@@ -14,6 +14,8 @@
   - [uninstall-gem](#uninstall-gem-command)
   - [uninstall-npm](#uninstall-npm-command)
   - [uninstall-pip](#uninstall-pip-command)
+- [List](#list)
+  - [list-tools](#list-tools-command)
 
 ---
 
@@ -369,4 +371,79 @@ Uninstalls a pip package from the container.
 - Uninstalls all checkov versions
   ```bash
   uninstall-pip checkov --all
+  ```
+
+<br>
+
+## List
+
+### `containerbase-cli list tools` <a name="list-tools-command"></a>
+
+#### Description <a name="Description-list-tools"></a>
+
+Lists all installed tools and their versions.
+
+The tools are printed as a table, with the currently linked version and any other installed versions.
+Tools and versions are sorted alphabetically, with numbers in numeric order, so `9.0.0` comes before `10.0.0`.
+
+A `-` is printed when no version of the tool is currently linked.
+That happens when the linked version is uninstalled while other versions of the tool remain installed, as nothing relinks one of them.
+
+With `--json` the list is printed as JSON, so it can be processed programmatically.
+The JSON output is described by [the `list-tools.schema.json` JSON Schema](./list-tools.schema.json).
+Because containerbase logs to `stdout`, use `--out` to write the output to a file instead.
+When writing to a file, JSON output is minified.
+
+#### Usage <a name="Usage-list-tools"></a>
+
+`$ containerbase-cli list tools [--json] [--out <file>]`
+
+#### Examples <a name="Examples-list-tools"></a>
+
+- Lists all installed tools
+
+  ```bash
+  $ containerbase-cli list tools
+  NAME      VERSION  OTHER VERSIONS
+  java-jdk  -        21.0.12+7
+  node      22.11.0  20.11.0
+  pnpm      10.0.1
+  ```
+
+  Here `java-jdk` is installed but not linked, while `node` is linked to `22.11.0` and keeps `20.11.0` installed.
+
+- Lists all installed tools as JSON
+
+  ```bash
+  $ containerbase-cli list tools --json
+  {
+    "tools": [
+      {
+        "name": "java-jdk",
+        "version": null,
+        "versions": [{ "version": "21.0.12+7" }]
+      },
+      {
+        "name": "node",
+        "version": "22.11.0",
+        "versions": [{ "version": "20.11.0" }, { "version": "22.11.0" }]
+      },
+      {
+        "name": "pnpm",
+        "version": "10.0.1",
+        "versions": [
+          {
+            "version": "10.0.1",
+            "parent": { "name": "node", "version": "22.11.0" }
+          }
+        ],
+        "type": "npm"
+      }
+    ]
+  }
+  ```
+
+- Writes the JSON output to a file
+  ```bash
+  containerbase-cli list tools --json --out /tmp/tools.json
   ```
