@@ -52,6 +52,45 @@ TAG=java docker buildx bake test
 
 For other test images see the [`test`](./test/) folder.
 
+#### `pnpm test:docker`
+
+Instead of calling `docker buildx bake` directly, you can use the `test:docker` script, which wraps the bake calls.
+
+```sh
+# run all tests from the `test` folder
+pnpm test:docker
+
+# rebuild the CLI and run the x86_64 test from `test/java`
+pnpm test:docker -b -t test-x86_64 java
+
+# run multiple tests with debug logging
+pnpm test:docker -D java node
+```
+
+Any positional argument is the name of a folder in [`test`](./test/) which contains a `Dockerfile`.
+If no test is given, all tests from the [`test`](./test/) folder are run.
+Unknown test names are only reported as an error when they are passed explicitly.
+
+The following options are supported:
+
+| Option                      | Description                                                                                                                |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `-b`, `--build`             | Run `pnpm build` to compile the CLI sources before building the images.                                                    |
+| `-t`, `--target <name>`     | The bake target or group to build, defaults to `default`. Use e.g. `test`, `test-x86_64`, `test-aarch64` or `test-distro`. |
+| `-d`, `--dry-run`           | Reserved for a dry run, currently without effect.                                                                          |
+| `-D`, `--debug`             | Set `CONTAINERBASE_DEBUG=1` and use plain buildkit progress output.                                                        |
+| `-l`, `--log-level <level>` | Set `CONTAINERBASE_LOG_LEVEL` and use plain buildkit progress output.                                                      |
+| `-p`, `--plain`             | Use plain buildkit progress output.                                                                                        |
+| `--network <mode>`          | Docker network mode used for the build, allowed values are `default`, `host` and `none`.                                   |
+| `--allow-host-network`      | Pass `--allow=network.host` to `docker buildx bake`, required to use `--network host`.                                     |
+| `--host-gateway <value>`    | Value used for the `host.docker.internal` host alias, defaults to `host-gateway`.                                          |
+
+To build against a service running on your host or when having DNS issues from a VPN, use the host network:
+
+```sh
+pnpm test:docker --network host --allow-host-network -t test-x86_64 java
+```
+
 ### Distro test images
 
 #### Jammy

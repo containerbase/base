@@ -39,6 +39,14 @@ variable "CONTAINERBASE_LOG_LEVEL" {
   default = ""
 }
 
+variable "NETWORK_MODE" {
+  default = ""
+}
+
+variable "HOST_GATEWAY" {
+  default = "host-gateway"
+}
+
 group "default" {
   targets = ["build-docker"]
 }
@@ -66,6 +74,7 @@ group "test-aarch64" {
 
 target "settings" {
   context = "."
+  network = "${NETWORK_MODE}"
   args = {
     APT_HTTP_PROXY          = "${APT_HTTP_PROXY}"
     CONTAINERBASE_CDN       = "${CONTAINERBASE_CDN}"
@@ -78,7 +87,7 @@ target "settings" {
     notequal("", CHANNEL) ? "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${CHANNEL}" : "",
   ]
   extra-hosts = {
-    "host.docker.internal" = "host-gateway"
+    "host.docker.internal" = "${HOST_GATEWAY}"
   }
 }
 
