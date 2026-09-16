@@ -51,6 +51,7 @@ jobs:
           pnpm prettier
           pnpm lint:markdown
           pnpm lint:types
+          pnpm lint:schema
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
