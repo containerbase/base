@@ -8,3 +8,10 @@ node_modules/
 /html/
 
 .eslintcache
+
+# local development directories
+/.agents
+/.opencode
+## Claude
+/.claude/settings.local.json
+/.claude/worktrees
