@@ -85,7 +85,7 @@ export class VersionService {
     }
 
     return Array.from(tools.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
       .map(([name, versions]) => {
         const type = types.find((t) => t.name === name)?.type;
         return {

@@ -577,7 +577,7 @@ RUN set -ex; \
   grep -q '^renovate ' /tmp/tools-before.txt; \
   containerbase-cli list tools --json --out /tmp/tools-before.json; \
   cat /tmp/tools-before.json; \
-  grep -q '"name": "del-cli"' /tmp/tools-before.json; \
+  grep -q '"name":"del-cli"' /tmp/tools-before.json; \
   uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
