@@ -390,7 +390,7 @@ A `-` is printed when no version of the tool is currently linked.
 That happens when the linked version is uninstalled while other versions of the tool remain installed, as nothing relinks one of them.
 
 With `--json` the list is printed as JSON, so it can be processed programmatically.
-The JSON output is described by [`list-tools.schema.json`](./list-tools.schema.json), which is generated from the `InstalledTools` schema in `src/cli/services/version.schema.ts`.
+The JSON output is described by [the `list-tools.schema.json` JSON Schema](./list-tools.schema.json).
 Because containerbase logs to `stdout`, use `--out` to write the output to a file instead.
 JSON written to a file isn't pretty printed.
 
