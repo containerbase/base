@@ -62,10 +62,7 @@ export class ListToolsCommand extends Command {
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
-    // status logs go to stdout, where they would corrupt the json output
-    if (!this.json) {
-      logger.debug('Listing tools...');
-    }
+    logger.debug('Listing tools...');
     try {
       const container = createContainer();
       const versionSvc = await container.getAsync(VersionService);
@@ -98,7 +95,7 @@ export class ListToolsCommand extends Command {
         logger.fatal(
           `Listing tools failed in ${prettyMilliseconds(Date.now() - start)}.`,
         );
-      } else if (!this.json) {
+      } else {
         logger.debug(
           `Listing tools succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
