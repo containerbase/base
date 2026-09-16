@@ -4,7 +4,11 @@ Guidance for coding agents working in this repository.
 
 ## Git workflow
 
-Bring a pull request branch up to date by merging `main` into it:
+Pull requests land through a GitHub merge queue, which builds them against the
+current `main` before merging.
+A pull request therefore doesn't need to be up to date with `main`, so only
+merge `main` in when something actually needs it, like resolving a conflict or
+picking up a change the branch depends on:
 
 ```bash
 git fetch origin
