@@ -587,6 +587,24 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: vp
+#--------------------------------------
+FROM build AS test-vp
+
+USER root
+
+# renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
+ARG VP_VERSION=0.3.1
+RUN install-tool vp "${VP_VERSION}"
+
+COPY test/node/vp/sync-versions.mjs /test/vp-sync-versions.mjs
+
+USER 12021
+SHELL ["/bin/sh", "-c"]
+
+RUN node /test/vp-sync-versions.mjs "${VP_VERSION}"
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -607,6 +625,7 @@ COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
+COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
