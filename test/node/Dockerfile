@@ -109,7 +109,7 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.4.2
 
 RUN set -ex; \
   pnpm --version;
@@ -465,13 +465,13 @@ RUN install-tool corepack 0.36.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.4.2
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.36.0
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=10.34.5
+ARG PNPM_VERSION=12.4.2
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
