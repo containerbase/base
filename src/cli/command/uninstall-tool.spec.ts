@@ -42,6 +42,13 @@ describe('cli/command/uninstall-tool', () => {
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(1);
 
+    // a non-zero exit code from the uninstall is reported as a failure too
+    mocks.uninstallTool.mockResolvedValueOnce(2);
+    expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(2);
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Uninstall tool node failed'),
+    );
+
     expect(await cli.run([...(args ?? []), 'php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });

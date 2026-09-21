@@ -1,4 +1,4 @@
-import { mkdir, readFile, stat } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
@@ -71,6 +71,40 @@ describe('cli/services/path.service', () => {
       true,
     );
     expect(await pathExists(rootPath('tmp/containerbase'), 'dir')).toBe(true);
+  });
+
+  test('ensureBasePaths: throws when the system is not initialized', async () => {
+    await deleteAsync('var', { force: true, dot: true, cwd: rootPath() });
+
+    await expect(pathSvc.ensureBasePaths()).rejects.toThrow(
+      'System not initialized for containerbase',
+    );
+  });
+
+  test('findPreparedTools', async () => {
+    expect(await pathSvc.findPreparedTools()).toEqual([]);
+
+    await pathSvc.setPrepared('node');
+    await pathSvc.setPrepared('bun');
+
+    expect(await pathSvc.findPreparedTools()).toEqual(['node', 'bun']);
+  });
+
+  test('isLegacyTool', async () => {
+    await ensurePaths([
+      'usr/local/containerbase/tools',
+      'usr/local/containerbase/tools/v2',
+    ]);
+
+    expect(await pathSvc.isLegacyTool('leg')).toBe(false);
+    expect(await pathSvc.isLegacyTool('leg', true)).toBe(false);
+
+    await writeFile(rootPath('usr/local/containerbase/tools/leg.sh'), '');
+    expect(await pathSvc.isLegacyTool('leg')).toBe(false);
+    expect(await pathSvc.isLegacyTool('leg', true)).toBe(true);
+
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/leg.sh'), '');
+    expect(await pathSvc.isLegacyTool('leg')).toBe(true);
   });
 
   test('exportToolEnvContent', async () => {

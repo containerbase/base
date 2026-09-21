@@ -42,6 +42,13 @@ describe('cli/command/install-tool', () => {
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['node'])).toBe(1);
 
+    // a non-zero exit code from the install is reported as a failure too
+    mocks.installTool.mockResolvedValueOnce(2);
+    expect(await cli.run(['node'])).toBe(2);
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Install tool node failed'),
+    );
+
     expect(await cli.run(['php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });
