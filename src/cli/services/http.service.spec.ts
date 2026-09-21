@@ -5,7 +5,7 @@ import { logger } from '../utils/index.ts';
 import { HttpService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { scope } from '~test/http-mock.ts';
-import { cachePath } from '~test/path.ts';
+import { cachePath, rootPath } from '~test/path.ts';
 
 const baseUrl = 'https://example.com';
 describe('cli/services/http.service', () => {
@@ -47,6 +47,22 @@ describe('cli/services/http.service', () => {
         checksumType,
       }),
     ).rejects.toThrow();
+  });
+
+  test('download: falls back to the temp dir without a cache dir', async () => {
+    scope(baseUrl).get('/no-cache.txt').reply(200, 'ok');
+    const cacheDir = env.CONTAINERBASE_CACHE_DIR;
+    delete env.CONTAINERBASE_CACHE_DIR;
+    try {
+      const svc = await (await testContainer()).getAsync(HttpService);
+
+      const file = await svc.download({ url: `${baseUrl}/no-cache.txt` });
+
+      expect(file.startsWith(rootPath('tmp'))).toBe(true);
+      expect(file.endsWith('/no-cache.txt')).toBe(true);
+    } finally {
+      env.CONTAINERBASE_CACHE_DIR = cacheDir;
+    }
   });
 
   test('download', async () => {
