@@ -13,7 +13,6 @@
     "bats": "node tools/bats.js --timing --verbose-run",
     "build": "run-s 'build:*'",
     "build:cli": "node tools/build.js",
-    "build:test": "rolldown test/node/vp/sync-versions.mjs --platform node --format esm --file dist/test/vp-sync-versions.mjs",
     "eslint": "eslint --cache .",
     "eslint-fix": "eslint --cache --fix .",
     "lint": "run-s prettier eslint lint:types lint:markdown",
