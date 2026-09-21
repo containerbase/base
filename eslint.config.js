@@ -19,6 +19,8 @@ export default tseslint.config(
       'coverage/',
       'html/',
       '**/node_modules/',
+      '.claude/loop.md',
+      '.claude/worktrees/',
       '.pnpm-store',
     ],
   },

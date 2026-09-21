@@ -13,5 +13,6 @@ node_modules/
 /.agents
 /.opencode
 ## Claude
+/.claude/loop.md
 /.claude/settings.local.json
 /.claude/worktrees

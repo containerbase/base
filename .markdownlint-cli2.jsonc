@@ -24,14 +24,10 @@
   // Define glob expressions to use (only valid at root)
   // "globs": ["**/*.md"],
 
-  // Define glob expressions to ignore
-  "ignores": [
-    ".yarn",
-    "**/node_modules/**",
-    "**/TestResults/**",
-    "**/bin/**",
-    "**/obj/**",
-    "coverage/",
-    ".pnpm-store",
-  ],
+  // Skip anything git already ignores, such as the files Claude Code writes
+  // into `.claude`
+  "gitignore": true,
+
+  // Define glob expressions to ignore, on top of what `.gitignore` covers
+  "ignores": [".yarn", "**/TestResults/**", "**/bin/**", "**/obj/**"],
 }
