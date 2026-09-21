@@ -32,6 +32,7 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
 COPY --chown=12021:0 test/nix/test test
+COPY --chown=12021:0 test/nix/with-github-token.sh test/with-github-token.sh
 WORKDIR /test
 
 #--------------------------------------
@@ -55,9 +56,7 @@ RUN set -ex; \
     eval --raw --file flake.nix inputs.nixpkgs.url
 
 RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
-  set -ex; \
-  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
-  nix \
+  ./with-github-token.sh nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
     flake update
@@ -84,9 +83,7 @@ RUN set -ex; \
 
 
 RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
-  set -ex; \
-  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
-  nix \
+  ./with-github-token.sh nix \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes \
     flake update
