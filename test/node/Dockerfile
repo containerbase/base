@@ -586,7 +586,7 @@ USER root
 ARG VP_VERSION=0.3.1
 RUN install-tool vp "${VP_VERSION}"
 
-COPY test/node/vp/sync-versions.mjs /test/vp-sync-versions.mjs
+COPY dist/test/vp-sync-versions.mjs /test/vp-sync-versions.mjs
 
 USER 12021
 SHELL ["/bin/sh", "-c"]

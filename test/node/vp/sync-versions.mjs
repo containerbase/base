@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { execa } from 'execa';
 
 const version = process.argv[2];
 assert.ok(version, 'Expected the installed Vite+ version');
 
-const cwd = mkdtempSync(join(tmpdir(), 'containerbase-vp-'));
+const cwd = await mkdtemp(join(tmpdir(), 'containerbase-vp-'));
 const manifest = {
   name: 'vp-install-test',
   private: true,
@@ -23,9 +23,11 @@ const manifest = {
 const contents = JSON.stringify(manifest, null, 2) + '\n';
 const config = 'throw new Error("Project configuration must not be loaded");\n';
 
-function plan(manifestContents) {
-  return JSON.parse(
-    execFileSync(process.env.VP_TEST_BIN ?? 'vp', ['sync-versions', '--json'], {
+async function plan(manifestContents) {
+  const { stdout } = await execa(
+    process.env.VP_TEST_BIN ?? 'vp',
+    ['sync-versions', '--json'],
+    {
       cwd,
       encoding: 'utf8',
       input: JSON.stringify({
@@ -39,15 +41,16 @@ function plan(manifestContents) {
           },
         ],
       }),
-    }),
+    },
   );
+  return JSON.parse(stdout);
 }
 
 try {
-  writeFileSync(join(cwd, 'package.json'), contents);
-  writeFileSync(join(cwd, 'vite.config.mjs'), config);
+  await writeFile(join(cwd, 'package.json'), contents);
+  await writeFile(join(cwd, 'vite.config.mjs'), config);
 
-  const result = plan(contents);
+  const result = await plan(contents);
   assert.equal(result.schemaVersion, 1);
   assert.deepEqual(result.tool, { name: 'vite-plus', version });
   assert.equal(result.workspace, '.');
@@ -73,14 +76,14 @@ try {
     },
   });
 
-  assert.deepEqual(plan(replacement.after), {
+  assert.deepEqual(await plan(replacement.after), {
     schemaVersion: 1,
     tool: { name: 'vite-plus', version },
     workspace: '.',
     replacements: [],
   });
-  assert.equal(readFileSync(join(cwd, 'package.json'), 'utf8'), contents);
-  assert.equal(readFileSync(join(cwd, 'vite.config.mjs'), 'utf8'), config);
+  assert.equal(await readFile(join(cwd, 'package.json'), 'utf8'), contents);
+  assert.equal(await readFile(join(cwd, 'vite.config.mjs'), 'utf8'), config);
 } finally {
-  rmSync(cwd, { recursive: true, force: true });
+  await rm(cwd, { recursive: true, force: true });
 }
