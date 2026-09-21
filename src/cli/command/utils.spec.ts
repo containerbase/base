@@ -1,19 +1,18 @@
-import { env } from 'node:process';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getVersion, isToolIgnored } from './utils.ts';
 
 describe('cli/command/utils', () => {
   beforeEach(() => {
-    delete env.NODE_VERSION;
-    delete env.DEL_CLI_VERSION;
-    env.IGNORED_TOOLS = 'php,pnpm';
+    vi.stubEnv('NODE_VERSION', undefined);
+    vi.stubEnv('DEL_CLI_VERSION', undefined);
+    vi.stubEnv('IGNORED_TOOLS', 'php,pnpm');
   });
 
   test('getVersion', () => {
     expect(getVersion('node')).toBeUndefined();
-    env.NODE_VERSION = '1.0.0';
+    vi.stubEnv('NODE_VERSION', '1.0.0');
     expect(getVersion('node')).toBe('1.0.0');
-    env.DEL_CLI_VERSION = '1.0.1';
+    vi.stubEnv('DEL_CLI_VERSION', '1.0.1');
     expect(getVersion('del-cli')).toBe('1.0.1');
   });
 

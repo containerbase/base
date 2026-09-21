@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
@@ -15,7 +14,7 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/install-gem', () => {
   beforeEach(() => {
-    delete env.RAKE_VERSION;
+    vi.stubEnv('RAKE_VERSION', undefined);
   });
 
   test('install-gem', async () => {
@@ -24,7 +23,7 @@ describe('cli/command/install-gem', () => {
 
     expect(await cli.run(['rake'])).toBe(MissingVersion);
 
-    env.RAKE_VERSION = '13.0.6';
+    vi.stubEnv('RAKE_VERSION', '13.0.6');
     expect(await cli.run(['rake'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
@@ -45,7 +44,7 @@ describe('cli/command/install-gem', () => {
 
     expect(await cli.run(['install', 'gem', 'rake'])).toBe(MissingVersion);
 
-    env.RAKE_VERSION = '13.0.6';
+    vi.stubEnv('RAKE_VERSION', '13.0.6');
     expect(await cli.run(['install', 'gem', 'rake'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(

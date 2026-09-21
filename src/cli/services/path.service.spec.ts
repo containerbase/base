@@ -3,7 +3,7 @@ import { platform } from 'node:os';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { fileRights, pathExists } from '../utils/index.ts';
 import { PathService } from './index.ts';
 import { testContainer } from '~test/di.ts';
@@ -16,8 +16,8 @@ describe('cli/services/path.service', () => {
 
   beforeEach(async () => {
     child = await testContainer();
-    env.PATH = path;
-    delete env.NODE_VERSION;
+    vi.stubEnv('PATH', path);
+    vi.stubEnv('NODE_VERSION', undefined);
     pathSvc = await child.getAsync(PathService);
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
     await ensurePaths([
@@ -87,7 +87,11 @@ describe('cli/services/path.service', () => {
     await pathSvc.setPrepared('node');
     await pathSvc.setPrepared('bun');
 
-    expect(await pathSvc.findPreparedTools()).toEqual(['node', 'bun']);
+    // `readdir` order is filesystem dependent, so compare without it
+    expect((await pathSvc.findPreparedTools()).toSorted()).toEqual([
+      'bun',
+      'node',
+    ]);
   });
 
   test('isLegacyTool', async () => {

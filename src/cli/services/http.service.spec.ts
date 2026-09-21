@@ -1,6 +1,5 @@
-import { env } from 'node:process';
 import type { Container } from 'inversify';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils/index.ts';
 import { HttpService } from './index.ts';
 import { testContainer } from '~test/di.ts';
@@ -15,12 +14,6 @@ describe('cli/services/http.service', () => {
   beforeEach(async () => {
     child = await testContainer();
     http = await child.getAsync(HttpService);
-
-    for (const key of Object.keys(env)) {
-      if (key.startsWith('URL_REPLACE_')) {
-        delete env[key];
-      }
-    }
   });
 
   test('throws', async () => {
@@ -51,18 +44,13 @@ describe('cli/services/http.service', () => {
 
   test('download: falls back to the temp dir without a cache dir', async () => {
     scope(baseUrl).get('/no-cache.txt').reply(200, 'ok');
-    const cacheDir = env.CONTAINERBASE_CACHE_DIR;
-    delete env.CONTAINERBASE_CACHE_DIR;
-    try {
-      const svc = await (await testContainer()).getAsync(HttpService);
+    vi.stubEnv('CONTAINERBASE_CACHE_DIR', undefined);
+    const svc = await (await testContainer()).getAsync(HttpService);
 
-      const file = await svc.download({ url: `${baseUrl}/no-cache.txt` });
+    const file = await svc.download({ url: `${baseUrl}/no-cache.txt` });
 
-      expect(file.startsWith(rootPath('tmp'))).toBe(true);
-      expect(file.endsWith('/no-cache.txt')).toBe(true);
-    } finally {
-      env.CONTAINERBASE_CACHE_DIR = cacheDir;
-    }
+    expect(file.startsWith(rootPath('tmp'))).toBe(true);
+    expect(file.endsWith('/no-cache.txt')).toBe(true);
   });
 
   test('download', async () => {
@@ -164,17 +152,17 @@ describe('cli/services/http.service', () => {
       .head('/replace.txt')
       .reply(200);
 
-    env.URL_REPLACE_0_FROM = baseUrl;
-    env.URL_REPLACE_0_TO = 'https://example.test';
+    vi.stubEnv('URL_REPLACE_0_FROM', baseUrl);
+    vi.stubEnv('URL_REPLACE_0_TO', 'https://example.test');
 
-    env.URL_REPLACE_11_FROM = 'https://example.test';
-    env.URL_REPLACE_11_TO = 'https://example.corp';
+    vi.stubEnv('URL_REPLACE_11_FROM', 'https://example.test');
+    vi.stubEnv('URL_REPLACE_11_TO', 'https://example.corp');
 
-    env.URL_REPLACE_10_FROM = 'https://example.test';
-    env.URL_REPLACE_10_TO = 'https://example.org';
+    vi.stubEnv('URL_REPLACE_10_FROM', 'https://example.test');
+    vi.stubEnv('URL_REPLACE_10_TO', 'https://example.org');
 
     // coverage
-    env.URL_REPLACE_1_FROM = 'https://example.test';
+    vi.stubEnv('URL_REPLACE_1_FROM', 'https://example.test');
 
     const expected = cachePath(
       `f4eba41457a330d0fa5289e49836326c6a0208bbc639862e70bb378c88c62642/replace.txt`,

@@ -57,8 +57,8 @@ describe('cli/install-tool/install-tool.service', () => {
     test('writes version if tool is not installed', async () => {
       const ver = await child.getAsync(VersionService);
       const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsInitialize.mockResolvedValueOnce(true);
-      vi.mocked(bun).needsPrepare.mockResolvedValueOnce(true);
+      vi.mocked(bun).needsInitialize.mockReturnValueOnce(true);
+      vi.mocked(bun).needsPrepare.mockReturnValueOnce(true);
       expect(await install.install('bun', '1.0.0')).toBeUndefined();
       expect(await ver.getCurrent('bun')).toMatchObject({
         name: 'bun',

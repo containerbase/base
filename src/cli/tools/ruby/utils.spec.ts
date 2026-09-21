@@ -106,7 +106,6 @@ describe('cli/tools/ruby/utils', () => {
         ]),
         expect.any(Object),
       );
-      vi.unstubAllEnvs();
     });
 
     test('install: throws and cleans up on failure', async () => {

@@ -1,15 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   EnvService,
   LinkToolService,
@@ -89,8 +81,6 @@ describe('cli/tools/node/utils', () => {
       'opt/containerbase/data',
       'opt/containerbase/versions',
     ]);
-    // the npm install cleans up `$HOME/.npm/_logs`
-    vi.stubEnv('HOME', rootPath('home/ubuntu'));
 
     const verSvc = await (await testContainer()).getAsync(VersionService);
     await verSvc.setCurrent({
@@ -99,11 +89,9 @@ describe('cli/tools/node/utils', () => {
     });
   });
 
-  afterAll(() => {
-    vi.unstubAllEnvs();
-  });
-
   beforeEach(async () => {
+    // the npm install cleans up `$HOME/.npm/_logs`
+    vi.stubEnv('HOME', rootPath('home/ubuntu'));
     child = await testContainer();
     child.bind(CorepackInstallService).toSelf();
     child.bind(NpmInstallService).toSelf();
@@ -345,7 +333,6 @@ describe('cli/tools/node/utils', () => {
           }),
         }),
       );
-      vi.unstubAllEnvs();
     });
 
     test('link: falls back to the tool name without a package name', async () => {

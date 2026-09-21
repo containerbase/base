@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
@@ -12,7 +11,7 @@ vi.mock('../install-tool/index.ts', () => mocks);
 
 describe('cli/command/uninstall-tool', () => {
   beforeEach(() => {
-    env.IGNORED_TOOLS = 'pnpm,php';
+    vi.stubEnv('IGNORED_TOOLS', 'pnpm,php');
   });
 
   test.each([
