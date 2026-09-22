@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, LinkToolService } from '../../services/index.ts';
 import {
   AndroidSdkCmdlineToolsInstallService,
@@ -63,14 +63,19 @@ const repository = `<?xml version="1.0" ?>
   </remotePackage>
 </sdk:sdk-repository>`;
 
-/**
- * The repository is fetched once per run and cached in the module, so only the
- * first test that needs it mocks the download.
- */
 describe('cli/tools/java/android', () => {
   beforeAll(async () => {
     await ensurePaths(['tmp', 'opt/containerbase/bin']);
     execaMock.mockResolvedValue({ failed: false });
+  });
+
+  beforeEach(() => {
+    // the repository is fetched once per run and cached in the module, so
+    // whichever test runs first serves it and the rest reuse the cache
+    scope(baseUrl)
+      .get('/android/repository/repository2-3.xml')
+      .optionally()
+      .reply(200, repository);
   });
 
   test('install', async () => {
@@ -78,8 +83,6 @@ describe('cli/tools/java/android', () => {
       AndroidSdkCmdlineToolsInstallService,
     );
     scope(baseUrl)
-      .get('/android/repository/repository2-3.xml')
-      .reply(200, repository)
       .get('/android/repository/commandlinetools-linux-13.0.zip')
       .reply(200, zip);
     const extract = vi.spyOn(CompressionService.prototype, 'extract');
