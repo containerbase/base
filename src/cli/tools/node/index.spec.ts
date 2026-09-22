@@ -1,15 +1,7 @@
 import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   CompressionService,
   EnvService,
@@ -46,15 +38,11 @@ describe('cli/tools/node/index', () => {
       'opt/containerbase/bin',
       'opt/containerbase/tools',
     ]);
-    // the node-gyp update cleans up `$HOME/.npm/_logs`
-    vi.stubEnv('HOME', rootPath('home/ubuntu'));
-  });
-
-  afterAll(() => {
-    vi.unstubAllEnvs();
   });
 
   beforeEach(() => {
+    // the npm install cleans up `$HOME/.npm/_logs`
+    vi.stubEnv('HOME', rootPath('home/ubuntu'));
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',

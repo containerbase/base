@@ -98,7 +98,6 @@ describe('cli/install-tool/install-legacy-tool.service', () => {
           env: { PIP_INDEX_URL: 'https://pypi.example.com/simple/' },
         }),
       );
-      vi.unstubAllEnvs();
     });
 
     test('link', async () => {

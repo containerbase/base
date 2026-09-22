@@ -11,16 +11,16 @@ describe('cli/proxy', () => {
   const noProxy = 'http://example.org/no-proxy';
 
   beforeEach(() => {
-    delete env.HTTP_PROXY;
-    delete env.http_proxy;
-    delete env.HTTPS_PROXY;
-    delete env.https_proxy;
-    delete env.NO_PROXY;
-    delete env.no_proxy;
+    vi.stubEnv('HTTP_PROXY', undefined);
+    vi.stubEnv('http_proxy', undefined);
+    vi.stubEnv('HTTPS_PROXY', undefined);
+    vi.stubEnv('https_proxy', undefined);
+    vi.stubEnv('NO_PROXY', undefined);
+    vi.stubEnv('no_proxy', undefined);
   });
 
   test('respects HTTP_PROXY', () => {
-    env.HTTP_PROXY = httpProxy;
+    vi.stubEnv('HTTP_PROXY', httpProxy);
     bootstrap();
     expect(createGlobalProxyAgent).toHaveBeenCalledWith({
       environmentVariableNamespace: '',
@@ -28,7 +28,7 @@ describe('cli/proxy', () => {
   });
 
   test('copies upper case HTTP_PROXY to http_proxy', () => {
-    env.HTTP_PROXY = httpProxy;
+    vi.stubEnv('HTTP_PROXY', httpProxy);
     bootstrap();
     expect(env.HTTP_PROXY).toBeDefined();
     expect(env.http_proxy).toBeDefined();
@@ -43,7 +43,7 @@ describe('cli/proxy', () => {
   });
 
   test('respects HTTPS_PROXY', () => {
-    env.HTTPS_PROXY = httpsProxy;
+    vi.stubEnv('HTTPS_PROXY', httpsProxy);
     bootstrap();
     expect(createGlobalProxyAgent).toHaveBeenCalledWith({
       environmentVariableNamespace: '',
@@ -51,7 +51,7 @@ describe('cli/proxy', () => {
   });
 
   test('copies upper case HTTPS_PROXY to https_proxy', () => {
-    env.HTTPS_PROXY = httpsProxy;
+    vi.stubEnv('HTTPS_PROXY', httpsProxy);
     bootstrap();
     expect(env.HTTPS_PROXY).toBeDefined();
     expect(env.https_proxy).toBeDefined();
@@ -66,7 +66,7 @@ describe('cli/proxy', () => {
   });
 
   test('does nothing', () => {
-    env.no_proxy = noProxy;
+    vi.stubEnv('no_proxy', noProxy);
     bootstrap();
     expect(createGlobalProxyAgent).not.toHaveBeenCalled();
   });

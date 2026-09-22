@@ -1,14 +1,6 @@
 import { arch } from 'node:os';
 import { join } from 'node:path';
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { getDistro, logger } from '../../utils/index.ts';
 import {
@@ -50,10 +42,6 @@ describe('cli/tools/php/index', () => {
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
     execaMock.mockResolvedValue({ failed: false });
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
   });
 
   describe('PhpInstallService', () => {

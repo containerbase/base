@@ -19,6 +19,7 @@ export default defineConfig({
       : ['default', 'html'],
     mockReset: true,
     restoreMocks: true,
+    unstubEnvs: true,
     setupFiles: './test/global-setup.ts',
     deps: { moduleDirectories: ['node_modules', '.yarn/'] },
   },

@@ -1,15 +1,7 @@
 import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { PathService, VersionService } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
 import {
@@ -39,7 +31,6 @@ describe('cli/tools/node/npm', () => {
       'opt/containerbase/data',
       'opt/containerbase/versions',
     ]);
-    vi.stubEnv('HOME', rootPath('home/ubuntu'));
 
     const verSvc = await (await testContainer()).getAsync(VersionService);
     await verSvc.setCurrent({
@@ -48,11 +39,9 @@ describe('cli/tools/node/npm', () => {
     });
   });
 
-  afterAll(() => {
-    vi.unstubAllEnvs();
-  });
-
   beforeEach(() => {
+    // the npm install cleans up `$HOME/.npm/_logs`
+    vi.stubEnv('HOME', rootPath('home/ubuntu'));
     vi.mocked(arch).mockReturnValue('x64');
     execaMock.mockResolvedValue({ failed: false, all: 'ok' });
   });
