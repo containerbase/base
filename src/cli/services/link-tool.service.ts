@@ -72,10 +72,10 @@ export class LinkToolService {
         fi
         `;
 
-    if (envs) {
-      content +=
-        '\n' +
-        codeBlock`
+    // `envs` always holds at least the tool itself
+    content +=
+      '\n' +
+      codeBlock`
         # load tool envs
         include () {
             local file=${this.pathSvc.toolsPath}/$1/env.sh
@@ -83,12 +83,11 @@ export class LinkToolService {
         }
       `;
 
-      for (const t of envs) {
-        content += `\ninclude ${t}`;
-      }
-
-      content += `\nunset include`;
+    for (const t of envs) {
+      content += `\ninclude ${t}`;
     }
+
+    content += `\nunset include`;
 
     if (exports) {
       content += `\nexport ${exports}`;

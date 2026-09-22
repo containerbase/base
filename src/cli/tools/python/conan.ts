@@ -66,6 +66,7 @@ function getArchitecture(arch: string): string {
       return 'x86_64';
   }
 
+  /* v8 ignore next -- the switch above is exhaustive for `Arch` */
   throw new Error(`Unsupported architecture: ${arch}`);
 }
 

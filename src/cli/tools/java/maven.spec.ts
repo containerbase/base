@@ -102,6 +102,26 @@ describe('cli/tools/java/maven', () => {
     expect(extract).toHaveBeenCalledOnce();
   });
 
+  test('install: throws on an empty checksum file', async () => {
+    const { svc } = await toolContext(MavenInstallService);
+    const filename = 'apache-maven-3.8.9-bin.tar.gz';
+    const path = `/maven2/org/apache/maven/apache-maven/3.8.9/${filename}`;
+    scope(ghUrl)
+      .head(
+        '/containerbase/maven-prebuild/releases/download/3.8.9/maven-3.8.9.tar.xz.sha512',
+      )
+      .reply(404);
+    scope(repoUrl)
+      .head(`${path}.sha512`)
+      .reply(200)
+      .get(`${path}.sha512`)
+      .reply(200, '   \n');
+
+    await expect(svc.install('3.8.9')).rejects.toThrow(
+      `checksum not found for ${filename}`,
+    );
+  });
+
   test('install: throws without any checksum', async () => {
     const { svc } = await toolContext(MavenInstallService);
     const filename = 'apache-maven-3.8.7-bin.tar.gz';

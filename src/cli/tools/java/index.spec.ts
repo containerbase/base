@@ -244,6 +244,25 @@ describe('cli/tools/java/index', () => {
       await expect(svc.prepare()).resolves.toBeUndefined();
     });
 
+    test('prepare: throws on an empty version', async () => {
+      const { svc, child } = await toolContext(JavaPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const envSvc = await child.getAsync(EnvService);
+      await fs.rm(path.join(pathSvc.sslPath, 'cacerts'), { force: true });
+      for (const dir of ['.m2', '.gradle', '.android', '.android-sdk']) {
+        await fs.rm(path.join(envSvc.userHome, dir), { force: true });
+      }
+      // the schema accepts any string, so an empty semver reaches the guard
+      scope(apiUrl)
+        .get('/v3/info/release_versions')
+        .query(true)
+        .reply(200, { versions: [{ semver: '' }] });
+
+      await expect(svc.prepare()).rejects.toThrow(
+        'Could not resolve latest java version',
+      );
+    });
+
     test('prepare: throws without a download url', async () => {
       const { svc, child } = await toolContext(JavaPrepareService);
       const pathSvc = await child.getAsync(PathService);

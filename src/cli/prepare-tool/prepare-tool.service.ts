@@ -35,6 +35,7 @@ export class PrepareToolService {
       if (tools.length === 1 && tools[0] === 'all') {
         for (const tool of this.toolSvcs) {
           const res = await this._prepareTool(tool, dryRun);
+          /* v8 ignore if -- `_prepareTool` does not report failures yet */
           if (res) {
             return res;
           }
@@ -55,6 +56,7 @@ export class PrepareToolService {
             return 1;
           }
           const res = await this._prepareTool(svc, dryRun);
+          /* v8 ignore if -- `_prepareTool` does not report failures yet */
           if (res) {
             return res;
           }
@@ -89,6 +91,7 @@ export class PrepareToolService {
       const set = new Set(await this.pathSvc.findPreparedTools());
       for (const tool of this.toolSvcs.filter((t) => set.has(t.name))) {
         const res = await this._initTool(tool, dryRun);
+        /* v8 ignore if -- `_initTool` does not report failures yet */
         if (res) {
           return res;
         }
@@ -100,6 +103,7 @@ export class PrepareToolService {
         .filter((t) => set.has(t))
         .map((t) => this.toolSvcs.find((s) => s.name === t)!)) {
         const res = await this._initTool(tool, dryRun);
+        /* v8 ignore if -- `_initTool` does not report failures yet */
         if (res) {
           return res;
         }
