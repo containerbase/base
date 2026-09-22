@@ -22,9 +22,12 @@ export default defineConfig({
       exclude: [
         ...coverageConfigDefaults.exclude,
         '**/__mocks__/**',
+        '**/*.d.ts',
         '**/types.ts',
         'test/**',
       ],
+      // only on ci, so a local run against a single file does not fail
+      ...(ci && { thresholds: { 100: true } }),
     },
     reporters: ci
       ? ['default', 'github-actions', 'junit']

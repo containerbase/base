@@ -40,9 +40,11 @@ export class IpcServer {
     serverRunning = true;
     ipc.serve(`${this.pathSvc.tmpDir}/ipc.sock`);
 
+    /* v8 ignore start -- needs a real socket failure to reach */
     ipc.server.on('error', (err: Error) => {
       logger.error({ err }, 'ipc server error');
     });
+    /* v8 ignore stop */
 
     ipc.server.on('link-tool', (data: LinkToolIpcMessage, client) => {
       logger.debug({ data }, 'link-tool ipc message received');
