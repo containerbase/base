@@ -1,11 +1,11 @@
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { fileRights, pathExists } from '../utils/index.ts';
-import { PathService } from './index.ts';
+import { EnvService, PathService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -259,6 +259,22 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.isPrepared('node')).toBe(false);
     await pathSvc.setPrepared('node');
     expect(await pathSvc.isPrepared('node')).toBe(true);
+  });
+
+  test('setOwner: chowns root owned paths when running as root', async () => {
+    const file = rootPath('owned');
+    await writeFile(file, 'test');
+    // the file belongs to the user running the tests, so report it as root
+    // owned instead
+    const stats = await stat(file);
+    stats.uid = 0;
+    vi.spyOn(fs, 'stat').mockResolvedValueOnce(stats);
+    vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+    const chown = vi.spyOn(fs, 'chown').mockResolvedValue();
+
+    await pathSvc.setOwner({ path: file });
+
+    expect(chown).toHaveBeenCalledExactlyOnceWith(file, 12021, 0);
   });
 
   test('writeFile', async () => {

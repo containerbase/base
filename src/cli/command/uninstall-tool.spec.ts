@@ -48,6 +48,16 @@ describe('cli/command/uninstall-tool', () => {
       expect.stringContaining('Uninstall tool node failed'),
     );
 
+    // a rejection which is not an `Error` has no message to report
+    mocks.uninstallTool.mockRejectedValueOnce('boom');
+    expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
+
+    // `--all` uninstalls every version, so none is named in the log
+    expect(await cli.run([...(args ?? []), 'node', '--all'])).toBe(0);
+    expect(logger.info).toHaveBeenCalledWith('Uninstalling tool node...');
+
     expect(await cli.run([...(args ?? []), 'php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });

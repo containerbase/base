@@ -118,6 +118,30 @@ describe('cli/install-tool/index', () => {
         await installTool(`dummy-${type}`, '1.0.0', false, type),
       ).toBeUndefined();
     });
+
+    test('rethrows a failing test for a known pip tool', async () => {
+      // unlike the `dummy-*` tools above, `poetry` is in the `ResolverMap`, so
+      // its `--version` flag is expected to work
+      vi.spyOn(PipBaseInstallService.prototype, 'install').mockResolvedValue();
+      vi.spyOn(
+        PipBaseInstallService.prototype,
+        'needsInitialize',
+      ).mockReturnValue(false);
+      vi.spyOn(PipBaseInstallService.prototype, 'validate').mockResolvedValue(
+        true,
+      );
+      vi.spyOn(
+        PipBaseInstallService.prototype,
+        'postInstall',
+      ).mockResolvedValue();
+      vi.spyOn(PipBaseInstallService.prototype, 'test').mockRejectedValue(
+        new Error('no --version flag'),
+      );
+
+      await expect(
+        installTool('poetry', '1.0.0', false, 'pip'),
+      ).rejects.toThrow('no --version flag');
+    });
   });
 
   describe('resolveVersion', () => {

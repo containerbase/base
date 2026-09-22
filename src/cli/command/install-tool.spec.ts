@@ -48,6 +48,12 @@ describe('cli/command/install-tool', () => {
       expect.stringContaining('Install tool node failed'),
     );
 
+    // a rejection which is not an `Error` has no message to report
+    mocks.installTool.mockRejectedValueOnce('boom');
+    expect(await cli.run(['node'])).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
+
     expect(await cli.run(['php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
   });
