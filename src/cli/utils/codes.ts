@@ -22,3 +22,8 @@ export const CurrentVersion = 17;
  * A child dependency blocks removal of parent.
  */
 export const BlockingChild = 18;
+
+/**
+ * The tool can only be installed or uninstalled as root.
+ */
+export const NotRoot = 19;

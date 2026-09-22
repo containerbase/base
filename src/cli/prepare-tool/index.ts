@@ -8,6 +8,7 @@ import { PowershellPrepareService } from '../tools/dotnet/powershell.ts';
 import { ElixirPrepareService } from '../tools/erlang/elixir.ts';
 import { ErlangPrepareService } from '../tools/erlang/index.ts';
 import { FlutterPrepareService } from '../tools/flutter.ts';
+import { GitPrepareService } from '../tools/git/index.ts';
 import { GolangPrepareService } from '../tools/golang.ts';
 import { CabalPrepareService } from '../tools/haskell/cabal.ts';
 import { GhcPrepareService } from '../tools/haskell/ghc.ts';
@@ -61,6 +62,7 @@ async function prepareContainer(): Promise<Container> {
   container.bind(PREPARE_TOOL_TOKEN).to(ErlangPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(FlutterPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(GhcPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(GitPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(GolangPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);

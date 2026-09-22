@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { execa } from 'execa';
-import type { Container } from 'inversify';
+import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
@@ -10,8 +10,9 @@ import {
   createContainer,
 } from '../services/index.ts';
 import { BunInstallService } from '../tools/bun.ts';
-import { BlockingChild, NotSupported } from '../utils/codes.ts';
+import { BlockingChild, NotRoot, NotSupported } from '../utils/codes.ts';
 import { isDockerBuild, logger } from '../utils/index.ts';
+import { BaseInstallService } from './base-install.service.ts';
 import { V1ToolInstallService } from './install-legacy-tool.service.ts';
 import {
   INSTALL_TOOL_TOKEN,
@@ -29,11 +30,38 @@ vi.mock('../utils/index.ts', async (importActual) => ({
   isDockerBuild: vi.fn(),
 }));
 
+/** a tool which can only be installed at image build time, like `git` */
+@injectable()
+@injectFromHierarchy()
+class RootOnlyInstallService extends BaseInstallService {
+  override readonly name = 'root-only';
+
+  override readonly needsRoot = true;
+
+  override install(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  override link(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+}
+
 describe('cli/install-tool/install-tool.service', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+
+  // a second container, so the tool lookups above stay unambiguous
+  const rootOnlyParent = createContainer();
+  rootOnlyParent.bind(InstallToolService).toSelf();
+  rootOnlyParent.bind(V1ToolInstallService).toSelf();
+  rootOnlyParent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
+
+  function rootOnlyService(): Promise<InstallToolService> {
+    return createContainer(rootOnlyParent).getAsync(InstallToolService);
+  }
 
   let child: Container;
   let install: InstallToolService;
@@ -65,6 +93,16 @@ describe('cli/install-tool/install-tool.service', () => {
         name: 'bun',
         tool: { name: 'bun', version: '1.0.0' },
       });
+    });
+
+    test('fails if the tool needs root', async () => {
+      const svc = await rootOnlyService();
+
+      expect(await svc.install('root-only', '1.0.0')).toBe(NotRoot);
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'root-only' },
+        'tool must be installed as root',
+      );
     });
 
     test('writes version even if tool is installed', async () => {
@@ -213,6 +251,18 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(logger.info).toHaveBeenCalledWith(
         { tool: 'bun' },
         'tool not installed',
+      );
+    });
+
+    test('fails if the tool needs root', async () => {
+      const svc = await rootOnlyService();
+      const ver = await child.getAsync(VersionService);
+      await ver.addInstalled({ name: 'root-only', version: '1.0.0' });
+
+      expect(await svc.uninstall('root-only', '1.0.0')).toBe(NotRoot);
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'root-only' },
+        'tool must be uninstalled as root',
       );
     });
 
