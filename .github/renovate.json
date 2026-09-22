@@ -8,6 +8,7 @@
   "enabledManagers": [
     "dockerfile",
     "github-actions",
+    "mise",
     "nodenv",
     "npm",
     "custom.regex"
