@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { execa } from 'execa';
 import type { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
@@ -124,6 +125,18 @@ describe('cli/install-tool/install-tool.service', () => {
 
       expect(logger.debug).toHaveBeenCalledWith('cleaning apt caches');
       expect(logger.debug).toHaveBeenCalledWith('cleaning root caches');
+    });
+
+    test('skips the cache cleanup without a cache dir', async () => {
+      vi.spyOn(EnvService.prototype, 'cacheDir', 'get').mockReturnValue(null);
+
+      expect(await install.install('bun', '1.0.8')).toBeUndefined();
+
+      expect(vi.mocked(execa)).not.toHaveBeenCalledWith(
+        'bash',
+        ['/usr/local/containerbase/bin/cleanup-cache.sh'],
+        expect.any(Object),
+      );
     });
 
     test('skips the tool test when requested', async () => {

@@ -1,5 +1,9 @@
 import { env } from 'node:process';
-import { defaultExclude, defineConfig } from 'vitest/config';
+import {
+  coverageConfigDefaults,
+  defaultExclude,
+  defineConfig,
+} from 'vitest/config';
 
 const ci = !!env.CI;
 
@@ -12,7 +16,15 @@ export default defineConfig({
       reporter: ci
         ? ['lcovonly', 'text']
         : ['@containerbase/istanbul-reports-html', 'text'],
-      include: ['src/cli/**/*.ts', '!**/__mocks__/**', '!**/types.ts'],
+      include: ['src/cli/**/*.ts'],
+      // negated patterns in `include` have no effect, the mocks and the test
+      // helpers have to be dropped here
+      exclude: [
+        ...coverageConfigDefaults.exclude,
+        '**/__mocks__/**',
+        '**/types.ts',
+        'test/**',
+      ],
     },
     reporters: ci
       ? ['default', 'github-actions', 'junit']

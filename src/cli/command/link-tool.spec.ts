@@ -50,5 +50,11 @@ describe('cli/command/link-tool', () => {
     vi.stubEnv('TOOL_VERSION', '1.2.3');
     mocks.linkTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['lt', 'node', 'bin'])).toBe(1);
+
+    // a rejection which is not an `Error` has no message to report
+    mocks.linkTool.mockRejectedValueOnce('boom');
+    expect(await cli.run(['lt', 'node', 'bin'])).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.fatal).not.toHaveBeenCalledWith('boom');
   });
 });
