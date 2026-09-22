@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "tools": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["gem", "npm", "pip"],
+            "description": "the installer used for this tool, only set for dynamically installed tools"
+          },
+          "parent": {
+            "type": "string",
+            "description": "the tool this tool depends on, eg. composer depends on php"
+          },
+          "deprecated": {
+            "type": "boolean",
+            "const": true,
+            "description": "deprecated tools should not be used any more"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "all supported tools, keyed by tool name"
+    }
+  },
+  "required": ["tools"],
+  "additionalProperties": false
+}
