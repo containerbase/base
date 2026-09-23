@@ -70,6 +70,9 @@ export class GitInstallService extends BaseInstallService {
   /** git is installed system wide by apt, other tools depend on it */
   override readonly canUninstall = false;
 
+  /**
+   * Installs git from the ppa and verifies the version is new enough.
+   */
   override async install(_version: string): Promise<void> {
     // TODO: the ppa only serves the latest version, so the requested version is ignored
     await this.aptSvc.install(this.name);
@@ -89,16 +92,27 @@ export class GitInstallService extends BaseInstallService {
     return Promise.resolve();
   }
 
+  /**
+   * Marks every repository as safe, whoever owns it.
+   */
   override async postInstall(_version: string): Promise<void> {
     // flutter workaround
     // allow all, so it works in older git versions when the ppa is not working
     await this._spawn(this.name, ['config', '--system', 'safe.directory', '*']);
   }
 
+  /**
+   * Prints the installed version, which also proves git runs.
+   */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
 
+  /**
+   * The version apt installed, which is not necessarily the requested one.
+   *
+   * @throws when the output holds no version at all
+   */
   private async installedVersion(): Promise<string> {
     const res = await execa(this.name, ['--version']);
     // `git --version` prints eg. `git version 2.55.0`, but the vendor may add a

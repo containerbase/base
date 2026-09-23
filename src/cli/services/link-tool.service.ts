@@ -47,6 +47,11 @@ export class LinkToolService {
     this._links.length = 0;
   }
 
+  /**
+   * Writes the shell wrapper which puts a tool on the path. It loads the
+   * containerbase env, initializes the tool on first use, sources the tool envs
+   * and finally executes the tool.
+   */
   async shellwrapper(
     tool: string,
     { args, name, srcDir, exports, extraToolEnvs, body }: ShellWrapperConfig,
@@ -101,6 +106,7 @@ export class LinkToolService {
     await this.pathSvc.setOwner({ path: tgt });
   }
 
+  /** Removes a shell wrapper, if it exists. */
   async rm(name: string): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name);
     if (await pathExists(tgt, 'file')) {
