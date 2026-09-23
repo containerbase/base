@@ -6,7 +6,12 @@ import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService, HttpService } from '../../services/index.ts';
-import { getDistro, logger, parse, semverGte } from '../../utils/index.ts';
+import {
+  getDistro,
+  logger,
+  semverCoerce,
+  semverGte,
+} from '../../utils/index.ts';
 
 /**
  * Keep in sync with the minimum git version renovate needs.
@@ -97,9 +102,14 @@ export class GitInstallService extends BaseInstallService {
   }
 
   private async installedVersion(): Promise<string> {
-    // `git --version` prints eg. `git version 2.55.0`
     const res = await execa(this.name, ['--version']);
-    const { version } = parse(res.stdout.split(' ').pop());
+    // `git --version` prints eg. `git version 2.55.0`, but the vendor may add a
+    // suffix like `2.55.0-1ubuntu1`, which semver can't parse
+    const coerced = semverCoerce(res.stdout);
+    if (!coerced) {
+      throw new Error(`Could not parse the git version: ${res.stdout}`);
+    }
+    const version = coerced.version;
     logger.debug({ version }, 'installed git version');
     return version;
   }
