@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { codeBlock } from 'common-tags';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { getDistro, logger } from '../../utils/index.ts';
 import { GitInstallService, GitPrepareService } from './index.ts';
@@ -52,14 +53,14 @@ describe('cli/tools/git/index', () => {
       );
       expect(
         await readFile(rootPath('etc/apt/sources.list.d/git.sources'), 'utf8'),
-      ).toBe(
-        `Types: deb
-URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
-Suites: noble
-Components: main
-Architectures: amd64
-Signed-By: /etc/apt/keyrings/git.asc`,
-      );
+      ).toBe(codeBlock`
+        Types: deb
+        URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
+        Suites: noble
+        Components: main
+        Architectures: amd64
+        Signed-By: /etc/apt/keyrings/git.asc
+      `);
     });
   });
 
