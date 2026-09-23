@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { findChecksum } from '../../utils/hash.ts';
 import { fileContent, getDistro, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
@@ -101,9 +100,8 @@ export class NodeInstallService extends NodeBaseInstallService {
         // fallback to nodejs.org
         checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
         filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
-        const checksumFile = await this.http.download({ url: checksumFileUrl });
-        const expectedChecksum = findChecksum(
-          await fs.readFile(checksumFile, 'utf-8'),
+        const expectedChecksum = await this.findChecksum(
+          checksumFileUrl,
           filename,
         );
         file = await this.http.download({
@@ -161,11 +159,5 @@ export class NodeInstallService extends NodeBaseInstallService {
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
       await this._spawn('corepack', ['--version']);
     }
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }

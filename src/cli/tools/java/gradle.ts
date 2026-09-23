@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
@@ -19,7 +18,7 @@ export class GradleInstallService extends BaseInstallService {
     const url = `https://services.gradle.org/distributions/${filename}`;
     const checksumFileUrl = `${url}.sha256`;
 
-    const expectedChecksum = await this.readChecksum(checksumFileUrl);
+    const expectedChecksum = await this.getChecksum(checksumFileUrl);
     const file = await this.http.download({
       url,
       checksumType: 'sha256',
@@ -44,11 +43,6 @@ export class GradleInstallService extends BaseInstallService {
 
   override validate(version: string): Promise<boolean> {
     return Promise.resolve(semverCoerce(version) !== null);
-  }
-
-  private async readChecksum(url: string): Promise<string | undefined> {
-    const checksumFile = await this.http.download({ url });
-    return (await fs.readFile(checksumFile, 'utf-8')).split(' ')[0]?.trim();
   }
 }
 

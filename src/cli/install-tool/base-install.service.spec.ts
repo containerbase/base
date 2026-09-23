@@ -5,6 +5,7 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { LinkToolService, PathService } from '../services/index.ts';
 import { BaseInstallService } from './base-install.service.ts';
 import { testContainer } from '~test/di.ts';
+import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
@@ -27,6 +28,14 @@ class DummyInstallService extends BaseInstallService {
 
   run(command: string, args: string[]): Promise<unknown> {
     return this._spawn(command, args);
+  }
+
+  checksum(url: string): Promise<string> {
+    return this.getChecksum(url);
+  }
+
+  find(url: string, filename: string): Promise<string> {
+    return this.findChecksum(url, filename);
   }
 }
 
@@ -128,6 +137,51 @@ describe('cli/install-tool/base-install.service', () => {
     expect(await fs.readFile(join(pathSvc.binDir, 'dummy'), 'utf8')).toContain(
       'containerbase-cli init tool "dummy"',
     );
+  });
+
+  describe('getChecksum', () => {
+    const baseUrl = 'https://example.test';
+
+    test.each([
+      { name: 'bare', content: 'abc\n' },
+      { name: 'named', content: 'abc  tool.tar.gz\n' },
+    ])('reads a $name checksum', async ({ name, content }) => {
+      scope(baseUrl).get(`/${name}/tool.sha256`).reply(200, content);
+
+      await expect(
+        svc.checksum(`${baseUrl}/${name}/tool.sha256`),
+      ).resolves.toBe('abc');
+    });
+
+    test('throws on an empty checksum', async () => {
+      scope(baseUrl).get('/empty/tool.sha256').reply(200, '\n');
+
+      await expect(
+        svc.checksum(`${baseUrl}/empty/tool.sha256`),
+      ).rejects.toThrow('Checksum not found');
+    });
+  });
+
+  describe('findChecksum', () => {
+    const baseUrl = 'https://example.test';
+
+    test('finds the checksum in a list', async () => {
+      scope(baseUrl)
+        .get('/list/SHA256SUMS')
+        .reply(200, 'abc  tool-amd64.sig\ndef  tool-amd64\r\n');
+
+      await expect(
+        svc.find(`${baseUrl}/list/SHA256SUMS`, 'tool-amd64'),
+      ).resolves.toBe('def');
+    });
+
+    test('throws on a missing checksum', async () => {
+      scope(baseUrl).get('/missing/SHA256SUMS').reply(200, 'abc  tool-arm64\n');
+
+      await expect(
+        svc.find(`${baseUrl}/missing/SHA256SUMS`, 'tool-amd64'),
+      ).rejects.toThrow('Checksum for tool-amd64 not found');
+    });
   });
 
   test('_spawn runs in the temp dir', async () => {

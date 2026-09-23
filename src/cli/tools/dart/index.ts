@@ -1,9 +1,7 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { findChecksum } from '../../utils/hash.ts';
 import { parse } from '../../utils/index.ts';
 import {
   initDartHome,
@@ -61,11 +59,7 @@ export class DartInstallService extends BaseInstallService {
     const sdkFile = `dartsdk-linux-${this.arch}-release.zip`;
     const url = `${sdkUrl}/${sdkFile}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256sum` });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
-      sdkFile,
-    );
+    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
 
     const file = await this.http.download({
       url,

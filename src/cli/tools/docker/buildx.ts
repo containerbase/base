@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { findChecksum } from '../../utils/hash.ts';
 import { pathExists, semverGte } from '../../utils/index.ts';
 
 @injectable()
@@ -18,11 +17,8 @@ export class BuildxInstallService extends BaseInstallService {
 
     let expectedChecksum: string | undefined;
     if (semverGte(version, '0.7.0')) {
-      const checksumFile = await this.http.download({
-        url: `${baseUrl}checksums.txt`,
-      });
-      expectedChecksum = findChecksum(
-        await fs.readFile(checksumFile, 'utf-8'),
+      expectedChecksum = await this.findChecksum(
+        `${baseUrl}checksums.txt`,
         filename,
       );
     }

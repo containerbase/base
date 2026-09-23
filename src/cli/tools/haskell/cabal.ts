@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { findChecksum } from '../../utils/hash.ts';
 import { isFourPartVersion } from '../../utils/index.ts';
 
 @injectable()
@@ -31,11 +30,8 @@ export class CabalInstallService extends BaseInstallService {
     // use static deb10 binary as it is compatible with all supported ubuntu versions
     const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}SHA256SUMS`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}SHA256SUMS`,
       filename,
     );
 

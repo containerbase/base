@@ -121,6 +121,40 @@ export abstract class BaseInstallService {
     return Promise.resolve(isValid(version));
   }
 
+  /**
+   * Downloads a checksum file for a single file, eg. `tool.tar.gz.sha256`,
+   * and returns its checksum. A filename after the checksum is ignored.
+   *
+   * @throws when the file has no checksum
+   */
+  protected async getChecksum(url: string): Promise<string> {
+    const file = await this.http.download({ url });
+    const checksum = (await fs.readFile(file, 'utf-8')).trim().split(/\s+/)[0];
+    if (!checksum) {
+      throw new Error(`Checksum not found in ${url}`);
+    }
+    return checksum;
+  }
+
+  /**
+   * Downloads a checksum list like `SHA256SUMS`, which has one
+   * `<checksum>  <filename>` line per file, and returns the checksum of
+   * `filename`.
+   *
+   * @throws when the list has no checksum for `filename`
+   */
+  protected async findChecksum(url: string, filename: string): Promise<string> {
+    const file = await this.http.download({ url });
+    const checksum = (await fs.readFile(file, 'utf-8'))
+      .split('\n')
+      .find((l) => l.trimEnd().endsWith(filename))
+      ?.split(/\s+/)[0];
+    if (!checksum) {
+      throw new Error(`Checksum for ${filename} not found in ${url}`);
+    }
+    return checksum;
+  }
+
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
   }

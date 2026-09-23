@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -28,13 +27,7 @@ export class DenoInstallService extends BaseInstallService {
     const filename = `deno-${this.ghArch}-unknown-linux-gnu.zip`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${url}.sha256sum`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
-      filename,
-    );
+    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
 
     const file = await this.http.download({
       url,

@@ -13,23 +13,6 @@ export function hash(data: string | Buffer, algorithm: AlgorithmName): string {
   return hash.digest('hex');
 }
 
-/**
- * Finds the checksum of `filename` in a checksum list like `SHA256SUMS`,
- * which has one `<checksum>  <filename>` line per file.
- *
- * @throws when the list has no checksum for `filename`
- */
-export function findChecksum(content: string, filename: string): string {
-  const checksum = content
-    .split('\n')
-    .find((l) => l.includes(filename))
-    ?.split(' ')[0];
-  if (!checksum) {
-    throw new Error(`Checksum for ${filename} not found`);
-  }
-  return checksum;
-}
-
 export async function hashFile(
   file: string,
   algorithm: AlgorithmName,

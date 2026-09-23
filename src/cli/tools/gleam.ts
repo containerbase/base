@@ -1,8 +1,6 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { findChecksum } from '../utils/hash.ts';
 import { semverGte } from '../utils/index.ts';
 
 @injectable()
@@ -29,13 +27,7 @@ export class GleamInstallService extends BaseInstallService {
     const filename = `gleam-v${version}-${this.ghArch}-unknown-linux-musl.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${url}.sha512`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
-      filename,
-    );
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
 
     const file = await this.http.download({
       url,

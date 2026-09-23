@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -18,13 +17,10 @@ export class GhInstallService extends BaseInstallService {
     const dirname = `gh_${version}_linux_${this.envSvc.arch}`;
     const filename = `${dirname}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}gh_${version}_checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.endsWith(filename))
-      ?.split(/\s+/)[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}gh_${version}_checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

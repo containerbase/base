@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -13,11 +12,8 @@ export class SopsInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/getsops/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux.${this.envSvc.arch}`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}${this.name}-v${version}.checksums.txt`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}${this.name}-v${version}.checksums.txt`,
       filename,
     );
 

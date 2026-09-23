@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -31,8 +30,7 @@ export class WallyInstallService extends BaseInstallService {
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
     const checksumFileUrl = `${url}.sha512`;
 
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    const expectedChecksum = await this.getChecksum(checksumFileUrl);
 
     const file = await this.http.download({
       url,

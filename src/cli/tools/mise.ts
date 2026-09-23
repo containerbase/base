@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
@@ -28,19 +27,10 @@ export class MiseInstallService extends BaseInstallService {
 
     const filename = `mise-v${version}-linux-${this.arch}.tar.xz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}SHASUMS256.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.endsWith(` ./${filename}`))
-      ?.split(/\s+/)[0];
-
-    if (!expectedChecksum) {
-      throw new Error(
-        `Cannot find checksum for '${filename}' in SHASUMS256.txt`,
-      );
-    }
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}SHASUMS256.txt`,
+      `./${filename}`,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

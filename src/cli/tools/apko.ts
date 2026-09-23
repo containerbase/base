@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -27,11 +26,8 @@ export class ApkoInstallService extends BaseInstallService {
 
     const filename = `apko_${version}_linux_${this.ghArch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}checksums.txt`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}checksums.txt`,
       filename,
     );
 

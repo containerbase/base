@@ -61,9 +61,7 @@ describe('cli/tools/kubectl', () => {
       .get('/release/v1.30.0/bin/linux/amd64/kubectl.sha256')
       .reply(200, '\n');
 
-    await expect(svc.install('1.30.0')).rejects.toThrow(
-      'Checksum for kubectl not found',
-    );
+    await expect(svc.install('1.30.0')).rejects.toThrow('Checksum not found');
   });
 
   test('install: rejects a checksum mismatch', async () => {

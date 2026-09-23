@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -17,11 +16,8 @@ export class FluxInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/fluxcd/flux2/releases/download/v${version}/`;
     const filename = `flux_${version}_linux_${this.arch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}flux_${version}_checksums.txt`,
-    });
-    const expectedChecksum = findChecksum(
-      await fs.readFile(checksumFile, 'utf-8'),
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}flux_${version}_checksums.txt`,
       filename,
     );
 

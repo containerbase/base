@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 
@@ -28,11 +27,7 @@ export class ApmInstallService extends BaseInstallService {
     const filename = `apm-linux-${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(/\s+/)[0];
+    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
 
     const file = await this.http.download({
       url,
