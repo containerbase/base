@@ -6,6 +6,7 @@ export * from './types.ts';
 export * from './versions.ts';
 export * from './logger.ts';
 export * from './common.ts';
+export * from './tags.ts';
 export type {
   Options as SpawnOptions,
   Result as SpawnResult,

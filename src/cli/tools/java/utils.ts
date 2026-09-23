@@ -1,7 +1,11 @@
 import path from 'node:path';
-import { codeBlock } from 'common-tags';
 import type { HttpService, PathService } from '../../services';
-import { type Arch, logger, pathExists } from '../../utils/index.ts';
+import {
+  type Arch,
+  fileContent,
+  logger,
+  pathExists,
+} from '../../utils/index.ts';
 import {
   type AdoptiumPackage,
   AdoptiumReleaseVersions,
@@ -58,7 +62,7 @@ export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   logger.debug('Creating Maven settings');
   await pathSvc.writeFile(
     file,
-    codeBlock`
+    fileContent`
       <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -84,7 +88,7 @@ export async function createGradleSettings(
   logger.debug('Creating Gradle settings');
   await pathSvc.writeFile(
     file,
-    codeBlock`
+    fileContent`
       org.gradle.parallel=true
       org.gradle.configureondemand=true
       org.gradle.daemon=false
