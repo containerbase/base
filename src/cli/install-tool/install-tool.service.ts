@@ -330,8 +330,9 @@ export class InstallToolService {
   }
 
   /**
-   * Links the version onto the path, records it as the current one and runs
-   * the tool test, unless tests are skipped.
+   * Links the version onto the path and records it as the current one, unless
+   * it already is. Then runs the post-install step, records the created shell
+   * wrappers and runs the tool test, unless tests are skipped.
    */
   private async linkAndTest(
     toolSvc: BaseInstallService,

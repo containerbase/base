@@ -54,6 +54,16 @@ export class HttpService {
     });
   }
 
+  /**
+   * Downloads a file into the cache and returns its path.
+   *
+   * The cache folder is derived from the url, so a file downloaded before is
+   * reused, as long as it still matches the expected checksum when one is
+   * given. Urls go through the configured url replacements, eg. a CDN. A
+   * failed download or checksum mismatch is tried up to three times.
+   *
+   * @throws when all attempts failed
+   */
   async download({
     url,
     expectedChecksum,
@@ -123,6 +133,11 @@ export class HttpService {
     throw new Error('download failed');
   }
 
+  /**
+   * Whether the url exists, checked with a `HEAD` request.
+   *
+   * @throws on any error other than a 404
+   */
   async exists(url: string): Promise<boolean> {
     try {
       await got.head(this.envSvc.replaceUrl(url), this._opts);
@@ -137,6 +152,11 @@ export class HttpService {
     }
   }
 
+  /**
+   * Fetches the body as text, trying up to three times.
+   *
+   * @throws when all attempts failed
+   */
   async get(
     url: string,
     opts: OptionsOfTextResponseBody = {},
@@ -167,6 +187,12 @@ export class HttpService {
     throw new Error('download failed');
   }
 
+  /**
+   * Fetches and parses a json body, trying up to three times. The result is
+   * not validated, parse it with a schema.
+   *
+   * @throws when all attempts failed
+   */
   async getJson<T = unknown>(
     url: string,
     opts: OptionsOfJSONResponseBody = {},

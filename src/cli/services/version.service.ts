@@ -41,6 +41,15 @@ export interface ToolType {
   type: InstallToolType;
 }
 
+/**
+ * Keeps track of the installed tools in four separate stores:
+ *
+ * - versions: every installed version, a tool can have many, each optionally
+ *   installed for a parent tool version, eg. a npm package for a node version
+ * - state: the current version per tool, the one on the path
+ * - links: the shell wrapper names created for a tool version
+ * - types: the installer of dynamically installed tools, eg. `npm`
+ */
 @injectable()
 export class VersionService {
   @inject(DataService)
@@ -54,10 +63,14 @@ export class VersionService {
   private _types!: Database<Doc<ToolType>>;
   private _versions!: Database<Doc<ToolVersion>>;
 
+  /**
+   * Whether exactly this version is recorded, including its parent when given.
+   */
   async isInstalled(tool: ToolVersion): Promise<boolean> {
     return (await this._versions.findOneAsync(tool)) !== null;
   }
 
+  /** All recorded versions of a tool, for any parent. */
   findInstalled(name: string): Promise<Doc<ToolVersion>[]> {
     return this._versions.findAsync({ name });
   }
@@ -100,46 +113,66 @@ export class VersionService {
       });
   }
 
+  /** Records an installed version. */
   async addInstalled(tool: ToolVersion): Promise<void> {
     await this._versions.insertAsync(tool);
   }
 
+  /** Removes every recorded version matching the given fields. */
   async removeInstalled(tool: Partial<ToolVersion>): Promise<void> {
     await this._versions.removeAsync(tool, { multi: true });
   }
 
+  /**
+   * The versions installed for exactly this parent version. Children of other
+   * versions of the same parent tool are not included.
+   */
   getChilds(parent: Tool): Promise<Doc<ToolVersion>[]> {
     return this._versions.findAsync({ parent });
   }
 
+  /** Whether the shell wrapper name points at exactly this tool version. */
   async isLinked(tool: ToolLink): Promise<boolean> {
     return (await this._links.findOneAsync(tool)) !== null;
   }
 
+  /** The shell wrapper names created for a tool version. */
   findLinks(tool: Tool): Promise<Doc<ToolLink>[]> {
     return this._links.findAsync({ tool });
   }
 
+  /**
+   * Points a shell wrapper name at a tool version, replacing whatever it
+   * pointed at before.
+   */
   async setLink(tool: ToolLink): Promise<void> {
     await this._links.updateAsync({ name: tool.name }, tool, { upsert: true });
   }
 
+  /** Forgets every shell wrapper name created for a tool version. */
   async removeLinks(tool: Tool): Promise<void> {
     await this._links.removeAsync({ tool }, { multi: true });
   }
 
+  /** Whether exactly this version, and parent, is the current one. */
   async isCurrent(tool: ToolState): Promise<boolean> {
     return (await this._state.findOneAsync(tool)) !== null;
   }
 
+  /** Makes a version the current one, replacing the previous current one. */
   async setCurrent(tool: ToolState): Promise<void> {
     await this._state.updateAsync({ name: tool.name }, tool, { upsert: true });
   }
 
+  /**
+   * The current version, looked up by the name the tool is linked as, which
+   * is its alias, eg. `java` for `java-jdk`.
+   */
   async getCurrent(name: string): Promise<ToolState | null> {
     return await this._state.findOneAsync({ name });
   }
 
+  /** Forgets the current version and removes its legacy version file. */
   async removeCurrent(name: string): Promise<void> {
     await this._state.removeAsync({ name }, { multi: false });
     const path = join(this.pathSvc.versionPath, tool2path(name));
@@ -150,15 +183,18 @@ export class VersionService {
     }
   }
 
+  /** The installer a dynamically installed tool was installed with. */
   async getType(name: string): Promise<InstallToolType | undefined> {
     const doc = await this._types.findOneAsync({ name });
     return doc?.type;
   }
 
+  /** Every dynamically installed tool with its installer. */
   async getTypes(): Promise<ToolType[]> {
     return await this._types.findAsync({});
   }
 
+  /** Records the installer of a dynamically installed tool. */
   async setType(
     name: string,
     type: InstallToolType | undefined,
