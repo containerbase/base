@@ -1,18 +1,106 @@
-import { injectFromHierarchy, injectable } from 'inversify';
-import { V2ToolInstallService } from '../../install-tool/install-legacy-tool.service.ts';
-import { V2ToolPrepareService } from '../../prepare-tool/prepare-legacy-tools.service.ts';
-import { v2Tool } from '../../utils/v2-tool.ts';
+import fs from 'node:fs/promises';
+import { join } from 'node:path';
+import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { AptService } from '../../services/index.ts';
+import { getDistro } from '../../utils/index.ts';
+
+/**
+ * The distro specific dependencies.
+ * @see {@link https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204#dependencies-4}
+ */
+const distroPackages: Record<string, string[] | undefined> = {
+  jammy: ['libicu70', 'libssl3'],
+  noble: ['libicu74', 'libssl3t64'],
+  resolute: ['libbrotli1', 'libicu78', 'libssl3t64'],
+};
 
 @injectable()
 @injectFromHierarchy()
-@v2Tool('powershell')
-export class PowershellPrepareService extends V2ToolPrepareService {
+export class PowershellPrepareService extends BasePrepareService {
+  @inject(AptService)
+  private readonly aptSvc!: AptService;
+
   override readonly name = 'powershell';
+
+  override async prepare(): Promise<void> {
+    const distro = await getDistro();
+    const packages = distroPackages[distro.versionCode];
+    if (!packages) {
+      throw new Error(
+        `Tool '${this.name}' not supported on: ${distro.versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+      );
+    }
+
+    await this.aptSvc.install(
+      'libc6',
+      'libgcc-s1',
+      'libgssapi-krb5-2',
+      'libstdc++6',
+      'tzdata',
+      'zlib1g',
+      ...packages,
+    );
+  }
 }
 
 @injectable()
 @injectFromHierarchy()
-@v2Tool('powershell')
-export class PowershellInstallService extends V2ToolInstallService {
+export class PowershellInstallService extends BaseInstallService {
   override readonly name = 'powershell';
+
+  private get ghArch(): string {
+    return this.envSvc.arch === 'arm64' ? 'arm64' : 'x64';
+  }
+
+  override async install(version: string): Promise<void> {
+    const baseUrl = `https://github.com/PowerShell/PowerShell/releases/download/v${version}/`;
+    const filename = `${this.name}-${version}-linux-${this.ghArch}.tar.gz`;
+
+    const checksumFile = await this.http.download({
+      url: `${baseUrl}hashes.sha256`,
+    });
+    const expectedChecksum = readChecksums(await fs.readFile(checksumFile))
+      .split('\n')
+      .map((l) => l.trim())
+      .find((l) => l.endsWith(filename))
+      ?.split(' ')[0];
+    if (!expectedChecksum) {
+      throw new Error(`Checksum for ${filename} not found`);
+    }
+
+    const file = await this.http.download({
+      url: `${baseUrl}${filename}`,
+      checksumType: 'sha256',
+      expectedChecksum,
+    });
+
+    await this.pathSvc.ensureToolPath(this.name);
+
+    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
+    await this.compress.extract({ file, cwd: path });
+
+    // Happened on v7.3.0
+    await fs.chmod(join(path, 'pwsh'), this.envSvc.umask);
+  }
+
+  override async link(version: string): Promise<void> {
+    await this.shellwrapper({
+      name: 'pwsh',
+      srcDir: this.pathSvc.versionedToolPath(this.name, version),
+    });
+  }
+
+  override async test(_version: string): Promise<void> {
+    await this._spawn('pwsh', ['-version']);
+  }
+}
+
+/** The checksum file is UTF-16LE with a BOM. */
+function readChecksums(buf: Buffer): string {
+  if (buf[0] === 0xff && buf[1] === 0xfe) {
+    return buf.toString('utf16le');
+  }
+  return buf.toString('utf8');
 }
