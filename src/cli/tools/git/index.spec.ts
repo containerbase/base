@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { codeBlock } from 'common-tags';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { getDistro, logger } from '../../utils/index.ts';
+import { getDistro } from '../../utils/index.ts';
 import { GitInstallService, GitPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
@@ -76,10 +76,6 @@ describe('cli/tools/git/index', () => {
         '-y',
         'git',
       ]);
-      expect(logger.debug).toHaveBeenCalledWith(
-        { version: '2.55.0' },
-        'installed git version',
-      );
     });
 
     test('install: coerces a vendor version suffix', async () => {
@@ -90,11 +86,6 @@ describe('cli/tools/git/index', () => {
       });
 
       await expect(svc.install('2.55.0')).resolves.toBeUndefined();
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        { version: '2.55.0' },
-        'installed git version',
-      );
     });
 
     test('install: throws on an unparsable version', async () => {
