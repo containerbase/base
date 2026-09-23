@@ -34,14 +34,15 @@ import { SupportedTools, ToolName } from '@containerbase/base/zod';
 
 Each entry may carry the following metadata:
 
-| Field        | Description                                                   |
-| ------------ | ------------------------------------------------------------- |
-| `type`       | the installer used for the tool, one of `gem`, `npm` or `pip` |
-| `parent`     | the tool it depends on, eg. `composer` depends on `php`       |
-| `deprecated` | the tool should not be used any more                          |
+| Field        | Description                                                    |
+| ------------ | -------------------------------------------------------------- |
+| `type`       | the installer used for the tool, one of `gem`, `npm` or `pip`  |
+| `parent`     | the tool it depends on, eg. `composer` depends on `php`        |
+| `deprecated` | the tool should not be used any more                           |
+| `root`       | the tool can only be installed as root, so at image build time |
 
 Only the names `install-tool` accepts are listed.
-Packages installed with an arbitrary name via `install-gem`, `install-npm` or `install-pip` are not, as that list is unbounded, and neither are the v1 shell tools, which need root privileges and can't be installed on the fly.
+Packages installed with an arbitrary name via `install-gem`, `install-npm` or `install-pip` are not, as that list is unbounded.
 
 ## Development
 

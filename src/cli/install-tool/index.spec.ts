@@ -155,12 +155,14 @@ describe('cli/install-tool/index', () => {
       );
       // v2 shell tools are supported
       expect(names).toContain('dummy');
-      // v1 shell tools need root and can't be installed on the fly
+      // v1 shell tools have no install service to describe
       expect(names).not.toContain('leg');
 
       expect(tools).toEqual(
         expect.arrayContaining([
           { name: 'apko' },
+          { name: 'git', root: true },
+          { name: 'git-lfs', parent: 'git' },
           { name: 'maven', parent: 'java' },
           { name: 'kas', type: 'pip', parent: 'python' },
           { name: 'bower', type: 'npm', parent: 'node', deprecated: true },

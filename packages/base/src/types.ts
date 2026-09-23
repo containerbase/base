@@ -19,4 +19,8 @@ export interface ToolMetadata {
    * Deprecated tools should not be used any more.
    */
   deprecated?: true;
+  /**
+   * The tool can only be installed as root, so only at image build time.
+   */
+  root?: true;
 }

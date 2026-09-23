@@ -33,6 +33,7 @@ export const tools = {
   flux: {},
   gh: {},
   ghc: {},
+  git: { root: true },
   'git-lfs': { parent: 'git' },
   gleam: {},
   golang: {},

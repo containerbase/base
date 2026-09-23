@@ -279,6 +279,10 @@ export interface SupportedTool {
    * Deprecated tools should not be used any more.
    */
   deprecated?: true;
+  /**
+   * The tool can only be installed as root, so only at image build time.
+   */
+  root?: true;
 }
 
 /**
@@ -305,8 +309,9 @@ function addDynamicTools(
  *
  * Tools installed with an arbitrary package name via `install-gem`,
  * `install-npm` or `install-pip` are not included, as that list is unbounded.
- * The v1 shell tools are not included either, they need root privileges and
- * can't be installed on the fly.
+ * The v1 shell tools are not included either, this repository ships none and
+ * they have no install service to describe. Tools which need root to install
+ * are included, marked with `root`.
  */
 export async function listSupportedTools(): Promise<SupportedTool[]> {
   const container = await prepareInstallContainer();
@@ -322,6 +327,7 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
     tools.set(svc.name, {
       name: svc.name,
       ...(svc.parent && { parent: svc.parent }),
+      ...(svc.needsRoot && { root: true }),
     });
   }
 

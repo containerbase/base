@@ -21,6 +21,11 @@
             "type": "boolean",
             "const": true,
             "description": "deprecated tools should not be used any more"
+          },
+          "root": {
+            "type": "boolean",
+            "const": true,
+            "description": "the tool can only be installed as root, so only at image build time"
           }
         },
         "additionalProperties": false

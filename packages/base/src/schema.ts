@@ -22,6 +22,12 @@ export const ToolMetadata = z.object({
     .literal(true)
     .describe('deprecated tools should not be used any more')
     .optional(),
+  root: z
+    .literal(true)
+    .describe(
+      'the tool can only be installed as root, so only at image build time',
+    )
+    .optional(),
 });
 
 /**
