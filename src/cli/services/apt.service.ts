@@ -10,6 +10,9 @@ export class AptService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
 
+  /**
+   * Installs the packages which are not installed yet, honouring the apt proxy.
+   */
   async install(...packages: string[]): Promise<void> {
     const todo: string[] = [];
 
@@ -56,6 +59,9 @@ export class AptService {
     }
   }
 
+  /**
+   * Whether dpkg reports the package as installed and configured.
+   */
   private async isInstalled(pkg: string): Promise<boolean> {
     try {
       const res = await execa('dpkg', ['-s', pkg]);
