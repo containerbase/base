@@ -226,7 +226,7 @@ RUN install-tool buf v1.73.0
 RUN install-tool bun 1.4.2
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.2
+RUN install-tool nub 0.9.3
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.7

@@ -620,10 +620,10 @@ Nub releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-x64.tar.gz
-https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-x64.tar.gz.sha256
-https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-arm64.tar.gz
-https://github.com/nubjs/nub/releases/download/v0.9.2/nub-linux-arm64.tar.gz.sha256
+https://github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-x64.tar.gz
+https://github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-x64.tar.gz.sha256
+https://github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-arm64.tar.gz
+https://github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-arm64.tar.gz.sha256
 ```
 
 ## `php`
