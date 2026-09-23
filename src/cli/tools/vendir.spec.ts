@@ -75,6 +75,17 @@ describe('cli/tools/vendir', () => {
     ).toBe(binary);
   });
 
+  test('install: rejects a missing checksum', async () => {
+    const { svc } = await toolContext(VendirInstallService);
+    scope(baseUrl)
+      .get(`${releaseUrl}/v0.26.0/checksums.txt`)
+      .reply(200, `${checksum('other')}  vendir-darwin-amd64\n`);
+
+    await expect(svc.install('0.26.0')).rejects.toThrow(
+      'Checksum for vendir-linux-amd64 not found',
+    );
+  });
+
   test('install: rejects a checksum mismatch', async () => {
     const { svc } = await toolContext(VendirInstallService);
     scope(baseUrl)

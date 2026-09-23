@@ -18,13 +18,10 @@ export class VendirInstallService extends BaseInstallService {
 
     let expectedChecksum: string | undefined;
     if (semverGte(version, checksumsSince)) {
-      const checksumFile = await this.http.download({
-        url: `${baseUrl}checksums.txt`,
-      });
-      expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-        .split('\n')
-        .find((l) => l.endsWith(filename))
-        ?.split(' ')[0];
+      expectedChecksum = await this.findChecksum(
+        `${baseUrl}checksums.txt`,
+        filename,
+      );
     }
 
     const file = await this.http.download({
