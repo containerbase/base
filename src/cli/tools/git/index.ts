@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
@@ -40,15 +41,14 @@ export class GitPrepareService extends BasePrepareService {
     await writeFile(join(this.envSvc.rootDir, keyPath), key, { mode: 0o644 });
     await writeFile(
       join(this.envSvc.rootDir, 'etc/apt/sources.list.d/git.sources'),
-      [
-        'Types: deb',
-        'URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu',
-        `Suites: ${distro.versionCode}`,
-        'Components: main',
-        `Architectures: ${this.envSvc.arch}`,
-        `Signed-By: /${keyPath}`,
-        '',
-      ].join('\n'),
+      codeBlock`
+        Types: deb
+        URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
+        Suites: ${distro.versionCode}
+        Components: main
+        Architectures: ${this.envSvc.arch}
+        Signed-By: /${keyPath}
+      `,
     );
   }
 }

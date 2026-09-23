@@ -58,8 +58,7 @@ URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
 Suites: noble
 Components: main
 Architectures: amd64
-Signed-By: /etc/apt/keyrings/git.asc
-`,
+Signed-By: /etc/apt/keyrings/git.asc`,
       );
     });
   });
