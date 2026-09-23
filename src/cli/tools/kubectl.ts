@@ -16,10 +16,11 @@ export class KubectlInstallService extends BaseInstallService {
       url: `${baseUrl}${filename}.sha256`,
       fileName: `${filename}-v${version}-${this.envSvc.arch}.sha256`,
     });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    // the file only contains the checksum
+    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    if (!expectedChecksum) {
+      throw new Error(`Checksum for ${filename} not found`);
+    }
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

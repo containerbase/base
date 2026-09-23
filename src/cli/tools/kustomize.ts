@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
+import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -17,10 +18,10 @@ export class KustomizeInstallService extends BaseInstallService {
       url: `${baseUrl}checksums.txt`,
       fileName: `${name}_v${version}_checksums.txt`,
     });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = findChecksum(
+      await fs.readFile(checksumFile, 'utf-8'),
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

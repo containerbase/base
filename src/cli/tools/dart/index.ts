@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { findChecksum } from '../../utils/hash.ts';
 import { parse } from '../../utils/index.ts';
 import {
   initDartHome,
@@ -61,10 +62,10 @@ export class DartInstallService extends BaseInstallService {
     const url = `${sdkUrl}/${sdkFile}`;
 
     const checksumFile = await this.http.download({ url: `${url}.sha256sum` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(sdkFile))
-      ?.split(' ')[0];
+    const expectedChecksum = findChecksum(
+      await fs.readFile(checksumFile, 'utf-8'),
+      sdkFile,
+    );
 
     const file = await this.http.download({
       url,

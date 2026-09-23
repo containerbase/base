@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
+import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -29,10 +30,10 @@ export class BufInstallService extends BaseInstallService {
     const checksumFile = await this.http.download({
       url: `${baseUrl}sha256.txt`,
     });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = findChecksum(
+      await fs.readFile(checksumFile, 'utf-8'),
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { findChecksum } from '../../utils/hash.ts';
 import { isFourPartVersion } from '../../utils/index.ts';
 
 @injectable()
@@ -33,10 +34,10 @@ export class CabalInstallService extends BaseInstallService {
     const checksumFile = await this.http.download({
       url: `${baseUrl}SHA256SUMS`,
     });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = findChecksum(
+      await fs.readFile(checksumFile, 'utf-8'),
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

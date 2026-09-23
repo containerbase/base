@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
+import { findChecksum } from '../utils/hash.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -43,16 +44,8 @@ export class HelmInstallService extends BaseInstallService {
     await this._spawn(this.name, ['version']);
   }
 
-  /** TODO: create helper */
-  protected async _getChecksum(
-    url: string,
-    filename: string,
-  ): Promise<string | undefined> {
+  protected async _getChecksum(url: string, filename: string): Promise<string> {
     const checksumFile = await this.http.download({ url });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
-    return expectedChecksum;
+    return findChecksum(await fs.readFile(checksumFile, 'utf-8'), filename);
   }
 }
