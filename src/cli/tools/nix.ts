@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -24,8 +23,7 @@ export class NixInstallService extends BaseInstallService {
   override async install(version: string): Promise<void> {
     const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-${this.ghArch}.tar.xz`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha512` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
 
     const file = await this.http.download({
       url,

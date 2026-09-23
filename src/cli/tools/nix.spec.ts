@@ -50,6 +50,15 @@ describe('cli/tools/nix', () => {
     });
   });
 
+  test('install: rejects an empty checksum', async () => {
+    const { svc } = await toolContext(NixInstallService);
+    scope(baseUrl)
+      .get(`${prebuild}/2.34.0/nix-2.34.0-x86_64.tar.xz.sha512`)
+      .reply(200, '\n');
+
+    await expect(svc.install('2.34.0')).rejects.toThrow('Checksum not found');
+  });
+
   test('install: rejects a checksum mismatch', async () => {
     const { svc } = await toolContext(NixInstallService);
     const filename = '2.35.0/nix-2.35.0-x86_64.tar.xz';
