@@ -63,6 +63,9 @@ export class GitInstallService extends BaseInstallService {
 
   override readonly needsRoot = true;
 
+  /** git is installed system wide by apt, other tools depend on it */
+  override readonly canUninstall = false;
+
   override async install(_version: string): Promise<void> {
     // TODO: the ppa only serves the latest version, so the requested version is ignored
     await this.aptSvc.install(this.name);
@@ -90,10 +93,6 @@ export class GitInstallService extends BaseInstallService {
 
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
-  }
-
-  override async uninstall(_version: string): Promise<void> {
-    await this.aptSvc.remove(this.name);
   }
 
   private async installedVersion(): Promise<string> {

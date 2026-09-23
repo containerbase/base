@@ -55,6 +55,12 @@ export abstract class BaseInstallService {
   readonly needsRoot: boolean = false;
 
   /**
+   * Tools which are not installed into a versioned tool path can't be
+   * uninstalled, eg. git is installed system wide via apt.
+   */
+  readonly canUninstall: boolean = true;
+
+  /**
    * Optional tool type for dynamic uninstallation support.
    * Currently `npm`, `gem` or `pip`.
    */

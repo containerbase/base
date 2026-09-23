@@ -41,16 +41,6 @@ describe('cli/services/apt.service', () => {
     expect(mocks.rm).not.toHaveBeenCalled();
   });
 
-  test('removes packages', async () => {
-    await svc.remove('some-pkg');
-    expect(mocks.execa).toHaveBeenCalledExactlyOnceWith('apt-get', [
-      '-qq',
-      'remove',
-      '-y',
-      'some-pkg',
-    ]);
-  });
-
   test('uses proxy', async () => {
     vi.stubEnv('APT_HTTP_PROXY', 'http://proxy');
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));

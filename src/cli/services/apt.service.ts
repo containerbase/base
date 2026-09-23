@@ -56,12 +56,6 @@ export class AptService {
     }
   }
 
-  async remove(...packages: string[]): Promise<void> {
-    logger.debug({ packages }, 'removing packages');
-
-    await execa('apt-get', ['-qq', 'remove', '-y', ...packages]);
-  }
-
   private async isInstalled(pkg: string): Promise<boolean> {
     try {
       const res = await execa('dpkg', ['-s', pkg]);

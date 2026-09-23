@@ -30,14 +30,9 @@ vi.mock('../utils/index.ts', async (importActual) => ({
   isDockerBuild: vi.fn(),
 }));
 
-/** a tool which can only be installed at image build time, like `git` */
 @injectable()
 @injectFromHierarchy()
-class RootOnlyInstallService extends BaseInstallService {
-  override readonly name = 'root-only';
-
-  override readonly needsRoot = true;
-
+abstract class TestInstallService extends BaseInstallService {
   override install(_version: string): Promise<void> {
     return Promise.resolve();
   }
@@ -47,12 +42,31 @@ class RootOnlyInstallService extends BaseInstallService {
   }
 }
 
+/** a tool which can only be installed at image build time, like `git` */
+@injectable()
+@injectFromHierarchy()
+class RootOnlyInstallService extends TestInstallService {
+  override readonly name = 'root-only';
+
+  override readonly needsRoot = true;
+}
+
+/** a tool which is installed system wide, like `git` */
+@injectable()
+@injectFromHierarchy()
+class NoUninstallInstallService extends TestInstallService {
+  override readonly name = 'no-uninstall';
+
+  override readonly canUninstall = false;
+}
+
 describe('cli/install-tool/install-tool.service', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(NoUninstallInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -246,6 +260,19 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(logger.info).toHaveBeenCalledWith(
         { tool: 'bun' },
         'tool not installed',
+      );
+    });
+
+    test('fails if the tool cannot be uninstalled', async () => {
+      const ver = await child.getAsync(VersionService);
+      await ver.addInstalled({ name: 'no-uninstall', version: '1.0.0' });
+
+      expect(await install.uninstall('no-uninstall', '1.0.0')).toBe(
+        NotSupported,
+      );
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'no-uninstall' },
+        'tool cannot be uninstalled',
       );
     });
 

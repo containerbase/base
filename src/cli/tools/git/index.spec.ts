@@ -139,17 +139,10 @@ describe('cli/tools/git/index', () => {
       );
     });
 
-    test('uninstall', async () => {
+    test('cannot be uninstalled', async () => {
       const { svc } = await toolContext(GitInstallService);
 
-      await expect(svc.uninstall('2.55.0')).resolves.toBeUndefined();
-
-      expect(execaMock).toHaveBeenCalledWith('apt-get', [
-        '-qq',
-        'remove',
-        '-y',
-        'git',
-      ]);
+      expect(svc.canUninstall).toBe(false);
     });
   });
 });

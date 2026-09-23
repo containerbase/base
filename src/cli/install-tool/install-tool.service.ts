@@ -247,6 +247,11 @@ export class InstallToolService {
 
     const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (toolSvc) {
+      if (!toolSvc.canUninstall) {
+        logger.fatal({ tool }, 'tool cannot be uninstalled');
+        return NotSupported;
+      }
+
       if (toolSvc.needsRoot && !this.envSvc.isRoot) {
         logger.fatal({ tool }, 'tool must be uninstalled as root');
         return NotRoot;
