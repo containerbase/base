@@ -52,16 +52,7 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
-
-  // a second container, so the tool lookups above stay unambiguous
-  const rootOnlyParent = createContainer();
-  rootOnlyParent.bind(InstallToolService).toSelf();
-  rootOnlyParent.bind(V1ToolInstallService).toSelf();
-  rootOnlyParent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
-
-  function rootOnlyService(): Promise<InstallToolService> {
-    return createContainer(rootOnlyParent).getAsync(InstallToolService);
-  }
+  parent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -85,9 +76,12 @@ describe('cli/install-tool/install-tool.service', () => {
   describe('install', () => {
     test('writes version if tool is not installed', async () => {
       const ver = await child.getAsync(VersionService);
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsInitialize.mockReturnValueOnce(true);
-      vi.mocked(bun).needsPrepare.mockReturnValueOnce(true);
+      vi.mocked(
+        BunInstallService.prototype,
+      ).needsInitialize.mockReturnValueOnce(true);
+      vi.mocked(BunInstallService.prototype).needsPrepare.mockReturnValueOnce(
+        true,
+      );
       expect(await install.install('bun', '1.0.0')).toBeUndefined();
       expect(await ver.getCurrent('bun')).toMatchObject({
         name: 'bun',
@@ -96,9 +90,7 @@ describe('cli/install-tool/install-tool.service', () => {
     });
 
     test('fails if the tool needs root', async () => {
-      const svc = await rootOnlyService();
-
-      expect(await svc.install('root-only', '1.0.0')).toBe(NotRoot);
+      expect(await install.install('root-only', '1.0.0')).toBe(NotRoot);
       expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
         { tool: 'root-only' },
         'tool must be installed as root',
@@ -107,8 +99,9 @@ describe('cli/install-tool/install-tool.service', () => {
 
     test('writes version even if tool is installed', async () => {
       const ver = await child.getAsync(VersionService);
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).isInstalled.mockResolvedValueOnce(true);
+      vi.mocked(BunInstallService.prototype).isInstalled.mockResolvedValueOnce(
+        true,
+      );
       expect(await install.install('bun', '1.0.1')).toBeUndefined();
       expect(await ver.getCurrent('bun')).toMatchObject({
         name: 'bun',
@@ -198,16 +191,18 @@ describe('cli/install-tool/install-tool.service', () => {
     });
 
     test('aborts when the tool cannot be prepared', async () => {
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsPrepare.mockReturnValueOnce(true);
+      vi.mocked(BunInstallService.prototype).needsPrepare.mockReturnValueOnce(
+        true,
+      );
       vi.mocked(prepareTools).mockResolvedValueOnce(1);
 
       expect(await install.install('bun', '1.1.0')).toBe(1);
     });
 
     test('aborts when the tool cannot be initialized', async () => {
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsInitialize.mockReturnValueOnce(true);
+      vi.mocked(
+        BunInstallService.prototype,
+      ).needsInitialize.mockReturnValueOnce(true);
       vi.mocked(initializeTools).mockResolvedValueOnce(1);
 
       expect(await install.install('bun', '1.1.1')).toBe(1);
@@ -255,11 +250,10 @@ describe('cli/install-tool/install-tool.service', () => {
     });
 
     test('fails if the tool needs root', async () => {
-      const svc = await rootOnlyService();
       const ver = await child.getAsync(VersionService);
       await ver.addInstalled({ name: 'root-only', version: '1.0.0' });
 
-      expect(await svc.uninstall('root-only', '1.0.0')).toBe(NotRoot);
+      expect(await install.uninstall('root-only', '1.0.0')).toBe(NotRoot);
       expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
         { tool: 'root-only' },
         'tool must be uninstalled as root',
