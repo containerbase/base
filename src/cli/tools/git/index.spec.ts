@@ -15,7 +15,12 @@ vi.mock('../../utils/index.ts', async (importActual) => ({
 
 describe('cli/tools/git/index', () => {
   beforeAll(async () => {
-    await ensurePaths(['tmp', 'opt/containerbase/bin']);
+    // `etc/apt/sources.list.d` ships with the image
+    await ensurePaths([
+      'tmp',
+      'etc/apt/sources.list.d',
+      'opt/containerbase/bin',
+    ]);
   });
 
   beforeEach(() => {

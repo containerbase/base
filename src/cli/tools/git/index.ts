@@ -36,10 +36,6 @@ export class GitPrepareService extends BasePrepareService {
       recursive: true,
       mode: 0o755,
     });
-    await mkdir(join(this.envSvc.rootDir, 'etc/apt/sources.list.d'), {
-      recursive: true,
-      mode: 0o755,
-    });
 
     await writeFile(join(this.envSvc.rootDir, keyPath), key, { mode: 0o644 });
     await writeFile(
