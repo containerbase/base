@@ -12,13 +12,10 @@ export class TerraformInstallService extends BaseInstallService {
     const baseUrl = `https://releases.hashicorp.com/${this.name}/${version}/`;
     const filename = `${this.name}_${version}_linux_${this.envSvc.arch}.zip`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}${this.name}_${version}_SHA256SUMS`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.endsWith(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}${this.name}_${version}_SHA256SUMS`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

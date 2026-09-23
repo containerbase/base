@@ -56,6 +56,17 @@ describe('cli/tools/terraform', () => {
     },
   );
 
+  test('install: rejects a missing checksum', async () => {
+    const { svc } = await toolContext(TerraformInstallService);
+    scope(baseUrl)
+      .get('/terraform/1.16.0/terraform_1.16.0_SHA256SUMS')
+      .reply(200, `${checksum('other')}  terraform_1.16.0_linux_arm.zip\n`);
+
+    await expect(svc.install('1.16.0')).rejects.toThrow(
+      'Checksum for terraform_1.16.0_linux_amd64.zip not found',
+    );
+  });
+
   test('install: rejects a checksum mismatch', async () => {
     const { svc } = await toolContext(TerraformInstallService);
     scope(baseUrl)
