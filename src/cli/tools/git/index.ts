@@ -39,8 +39,16 @@ export class GitPrepareService extends BasePrepareService {
 
     await writeFile(join(this.envSvc.rootDir, keyPath), key, { mode: 0o644 });
     await writeFile(
-      join(this.envSvc.rootDir, 'etc/apt/sources.list.d/git.list'),
-      `deb [arch=${this.envSvc.arch} signed-by=/${keyPath}] https://ppa.launchpadcontent.net/git-core/ppa/ubuntu ${distro.versionCode} main\n`,
+      join(this.envSvc.rootDir, 'etc/apt/sources.list.d/git.sources'),
+      [
+        'Types: deb',
+        'URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu',
+        `Suites: ${distro.versionCode}`,
+        'Components: main',
+        `Architectures: ${this.envSvc.arch}`,
+        `Signed-By: /${keyPath}`,
+        '',
+      ].join('\n'),
     );
   }
 }

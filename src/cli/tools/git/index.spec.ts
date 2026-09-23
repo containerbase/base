@@ -51,9 +51,15 @@ describe('cli/tools/git/index', () => {
         'public key',
       );
       expect(
-        await readFile(rootPath('etc/apt/sources.list.d/git.list'), 'utf8'),
+        await readFile(rootPath('etc/apt/sources.list.d/git.sources'), 'utf8'),
       ).toBe(
-        'deb [arch=amd64 signed-by=/etc/apt/keyrings/git.asc] https://ppa.launchpadcontent.net/git-core/ppa/ubuntu noble main\n',
+        `Types: deb
+URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
+Suites: noble
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/git.asc
+`,
       );
     });
   });
