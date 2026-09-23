@@ -246,7 +246,7 @@ RUN install-tool gh v2.100.0
 RUN install-tool gleam 1.18.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.0
+RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.9.9
