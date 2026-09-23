@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { codeBlock } from 'common-tags';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService } from '../../services/index.ts';
-import { type Distro, getDistro } from '../../utils/index.ts';
+import { type Distro, fileContent, getDistro } from '../../utils/index.ts';
 import { PipVersionResolver } from './pip.ts';
 import { PipBaseInstallService } from './utils.ts';
 
@@ -29,7 +28,7 @@ export class ConanPrepareService extends BasePrepareService {
 
   override async initialize(): Promise<void> {
     const distro = await getDistro();
-    const profile = codeBlock`
+    const profile = fileContent`
     [settings]
     arch=${getArchitecture(this.envSvc.arch)}
     build_type=Release

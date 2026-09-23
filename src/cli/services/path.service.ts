@@ -284,9 +284,13 @@ export class PathService {
     await fs.rm(file, { force: true });
   }
 
+  /**
+   * Appends a block to the tool env, `content` should end with a newline, eg.
+   * by using the `fileContent` tag.
+   */
   async exportToolEnvContent(tool: string, content: string): Promise<void> {
     const file = join(await this.ensureToolPath(tool), 'env.sh');
-    await fs.appendFile(file, `\n${content.trim()}\n`);
+    await fs.appendFile(file, `\n${content}`);
     await this.setOwner({ path: file, mode: 0o644 });
   }
 

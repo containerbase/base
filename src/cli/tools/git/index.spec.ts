@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import { codeBlock } from 'common-tags';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { getDistro } from '../../utils/index.ts';
+import { fileContent, getDistro } from '../../utils/index.ts';
 import { GitInstallService, GitPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
@@ -53,7 +52,7 @@ describe('cli/tools/git/index', () => {
       );
       expect(
         await readFile(rootPath('etc/apt/sources.list.d/git.sources'), 'utf8'),
-      ).toBe(codeBlock`
+      ).toBe(fileContent`
         Types: deb
         URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
         Suites: noble

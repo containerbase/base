@@ -1,9 +1,8 @@
 import fs from 'fs/promises';
 import { join } from 'node:path';
-import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { logger, pathExists } from '../../utils/index.ts';
+import { fileContent, logger, pathExists } from '../../utils/index.ts';
 import {
   PrebuildInstallService,
   PrebuildVersionResolver,
@@ -32,7 +31,7 @@ export class MonoPrepareService extends BasePrepareService {
           this.envSvc.rootDir,
           'etc/ca-certificates/update.d/containerbase-mono-keystore',
         ),
-        codeBlock`
+        fileContent`
           #!/bin/sh
 
           set -e
@@ -80,10 +79,10 @@ export class MonoInstallService extends PrebuildInstallService {
     if (!(await pathExists(join(path, 'bin/cert-sync')))) {
       await fs.writeFile(
         join(path, 'bin/cert-sync'),
-        codeBlock`
-        #!/bin/sh
-        ${path}/bin/mono ${path}/lib/mono/4.5/cert-sync.exe "$@"
-      `,
+        fileContent`
+          #!/bin/sh
+          ${path}/bin/mono ${path}/lib/mono/4.5/cert-sync.exe "$@"
+        `,
         {
           mode: this.envSvc.umask,
         },

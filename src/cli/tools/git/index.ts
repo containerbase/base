@@ -1,12 +1,16 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService, HttpService } from '../../services/index.ts';
-import { getDistro, semverCoerce, semverGte } from '../../utils/index.ts';
+import {
+  fileContent,
+  getDistro,
+  semverCoerce,
+  semverGte,
+} from '../../utils/index.ts';
 
 /**
  * Keep in sync with the minimum git version renovate needs.
@@ -41,7 +45,7 @@ export class GitPrepareService extends BasePrepareService {
     await writeFile(join(this.envSvc.rootDir, keyPath), key, { mode: 0o644 });
     await writeFile(
       join(this.envSvc.rootDir, 'etc/apt/sources.list.d/git.sources'),
-      codeBlock`
+      fileContent`
         Types: deb
         URIs: https://ppa.launchpadcontent.net/git-core/ppa/ubuntu
         Suites: ${distro.versionCode}

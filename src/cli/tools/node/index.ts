@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { getDistro, parse } from '../../utils/index.ts';
+import { fileContent, getDistro, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
   prepareNpmCache,
@@ -37,7 +36,7 @@ export class NodePrepareService extends BasePrepareService {
       // node v6.11.0
       await this.pathSvc.exportToolEnvContent(
         this.name,
-        codeBlock`
+        fileContent`
           export NODE_OPTIONS="\${NODE_OPTIONS} --use-openssl-ca"
         `,
       );
