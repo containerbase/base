@@ -31,6 +31,7 @@ import { ErlangInstallService } from '../tools/erlang/index.ts';
 import { FlutterInstallService } from '../tools/flutter.ts';
 import { FluxInstallService } from '../tools/flux.ts';
 import { GhInstallService } from '../tools/gh.ts';
+import { GitInstallService } from '../tools/git/index.ts';
 import { GitLfsInstallService } from '../tools/git/lfs.ts';
 import { GleamInstallService } from '../tools/gleam.ts';
 import { GolangInstallService } from '../tools/golang.ts';
@@ -156,6 +157,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FluxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GhInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GitInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GitLfsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GhcInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GleamInstallService);

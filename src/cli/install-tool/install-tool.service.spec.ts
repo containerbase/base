@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { execa } from 'execa';
-import type { Container } from 'inversify';
+import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
@@ -10,8 +10,9 @@ import {
   createContainer,
 } from '../services/index.ts';
 import { BunInstallService } from '../tools/bun.ts';
-import { BlockingChild, NotSupported } from '../utils/codes.ts';
+import { BlockingChild, NotRoot, NotSupported } from '../utils/codes.ts';
 import { isDockerBuild, logger } from '../utils/index.ts';
+import { BaseInstallService } from './base-install.service.ts';
 import { V1ToolInstallService } from './install-legacy-tool.service.ts';
 import {
   INSTALL_TOOL_TOKEN,
@@ -29,11 +30,43 @@ vi.mock('../utils/index.ts', async (importActual) => ({
   isDockerBuild: vi.fn(),
 }));
 
+@injectable()
+@injectFromHierarchy()
+abstract class TestInstallService extends BaseInstallService {
+  override install(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  override link(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+}
+
+/** a tool which can only be installed at image build time, like `git` */
+@injectable()
+@injectFromHierarchy()
+class RootOnlyInstallService extends TestInstallService {
+  override readonly name = 'root-only';
+
+  override readonly needsRoot = true;
+}
+
+/** a tool which is installed system wide, like `git` */
+@injectable()
+@injectFromHierarchy()
+class NoUninstallInstallService extends TestInstallService {
+  override readonly name = 'no-uninstall';
+
+  override readonly canUninstall = false;
+}
+
 describe('cli/install-tool/install-tool.service', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(NoUninstallInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -57,9 +90,12 @@ describe('cli/install-tool/install-tool.service', () => {
   describe('install', () => {
     test('writes version if tool is not installed', async () => {
       const ver = await child.getAsync(VersionService);
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsInitialize.mockReturnValueOnce(true);
-      vi.mocked(bun).needsPrepare.mockReturnValueOnce(true);
+      vi.mocked(
+        BunInstallService.prototype,
+      ).needsInitialize.mockReturnValueOnce(true);
+      vi.mocked(BunInstallService.prototype).needsPrepare.mockReturnValueOnce(
+        true,
+      );
       expect(await install.install('bun', '1.0.0')).toBeUndefined();
       expect(await ver.getCurrent('bun')).toMatchObject({
         name: 'bun',
@@ -67,10 +103,19 @@ describe('cli/install-tool/install-tool.service', () => {
       });
     });
 
+    test('fails if the tool needs root', async () => {
+      expect(await install.install('root-only', '1.0.0')).toBe(NotRoot);
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'root-only' },
+        'tool must be installed as root',
+      );
+    });
+
     test('writes version even if tool is installed', async () => {
       const ver = await child.getAsync(VersionService);
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).isInstalled.mockResolvedValueOnce(true);
+      vi.mocked(BunInstallService.prototype).isInstalled.mockResolvedValueOnce(
+        true,
+      );
       expect(await install.install('bun', '1.0.1')).toBeUndefined();
       expect(await ver.getCurrent('bun')).toMatchObject({
         name: 'bun',
@@ -160,16 +205,18 @@ describe('cli/install-tool/install-tool.service', () => {
     });
 
     test('aborts when the tool cannot be prepared', async () => {
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsPrepare.mockReturnValueOnce(true);
+      vi.mocked(BunInstallService.prototype).needsPrepare.mockReturnValueOnce(
+        true,
+      );
       vi.mocked(prepareTools).mockResolvedValueOnce(1);
 
       expect(await install.install('bun', '1.1.0')).toBe(1);
     });
 
     test('aborts when the tool cannot be initialized', async () => {
-      const bun = await child.getAsync<BunInstallService>(INSTALL_TOOL_TOKEN);
-      vi.mocked(bun).needsInitialize.mockReturnValueOnce(true);
+      vi.mocked(
+        BunInstallService.prototype,
+      ).needsInitialize.mockReturnValueOnce(true);
       vi.mocked(initializeTools).mockResolvedValueOnce(1);
 
       expect(await install.install('bun', '1.1.1')).toBe(1);
@@ -213,6 +260,30 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(logger.info).toHaveBeenCalledWith(
         { tool: 'bun' },
         'tool not installed',
+      );
+    });
+
+    test('fails if the tool cannot be uninstalled', async () => {
+      const ver = await child.getAsync(VersionService);
+      await ver.addInstalled({ name: 'no-uninstall', version: '1.0.0' });
+
+      expect(await install.uninstall('no-uninstall', '1.0.0')).toBe(
+        NotSupported,
+      );
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'no-uninstall' },
+        'tool cannot be uninstalled',
+      );
+    });
+
+    test('fails if the tool needs root', async () => {
+      const ver = await child.getAsync(VersionService);
+      await ver.addInstalled({ name: 'root-only', version: '1.0.0' });
+
+      expect(await install.uninstall('root-only', '1.0.0')).toBe(NotRoot);
+      expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'root-only' },
+        'tool must be uninstalled as root',
       );
     });
 

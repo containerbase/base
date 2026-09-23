@@ -49,6 +49,18 @@ export abstract class BaseInstallService {
   readonly parent?: string;
 
   /**
+   * Some tools can only be installed as root, so they are only available at
+   * image build time. Eg. git is installed via apt.
+   */
+  readonly needsRoot: boolean = false;
+
+  /**
+   * Tools which are not installed into a versioned tool path can't be
+   * uninstalled, eg. git is installed system wide via apt.
+   */
+  readonly canUninstall: boolean = true;
+
+  /**
    * Optional tool type for dynamic uninstallation support.
    * Currently `npm`, `gem` or `pip`.
    */

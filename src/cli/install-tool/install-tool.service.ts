@@ -12,7 +12,12 @@ import {
   VersionService,
 } from '../services/index.ts';
 import type { ToolState } from '../services/version.service';
-import { BlockingChild, MissingParent, NotSupported } from '../utils/codes.ts';
+import {
+  BlockingChild,
+  MissingParent,
+  NotRoot,
+  NotSupported,
+} from '../utils/codes.ts';
 import {
   cleanAptFiles,
   cleanTmpFiles,
@@ -62,6 +67,11 @@ export class InstallToolService {
       await this.ipc.start();
       this._link.clear();
       if (toolSvc) {
+        if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+          logger.fatal({ tool }, 'tool must be installed as root');
+          return NotRoot;
+        }
+
         let parent: ToolState | null = null;
 
         if (toolSvc.parent) {
@@ -237,6 +247,16 @@ export class InstallToolService {
 
     const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (toolSvc) {
+      if (!toolSvc.canUninstall) {
+        logger.fatal({ tool }, 'tool cannot be uninstalled');
+        return NotSupported;
+      }
+
+      if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+        logger.fatal({ tool }, 'tool must be uninstalled as root');
+        return NotRoot;
+      }
+
       logger.debug({ tool }, 'validate tool');
       const childs = await this.versionSvc.getChilds({ name: tool, version });
       if (childs.length) {
