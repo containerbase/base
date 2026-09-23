@@ -747,6 +747,7 @@ Terraform releases are downloaded from:
 Samples:
 
 ```txt
+https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_SHA256SUMS
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_amd64.zip
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_arm64.zip
 ```
