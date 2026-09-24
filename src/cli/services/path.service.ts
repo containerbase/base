@@ -112,10 +112,16 @@ export class PathService {
   /**
    * Creates a folder and its missing parents, owned by the configured user.
    * An existing folder is left as is.
+   *
+   * @throws when the path exists but is no folder, eg. a symlink or a file
    */
   async createDir(path: string, mode = 0o775): Promise<void> {
-    if (await pathExists(path)) {
+    const stats = await fs.lstat(path).catch(() => null);
+    if (stats?.isDirectory()) {
       return;
+    }
+    if (stats) {
+      throw new Error(`Path exists and is not a directory: ${path}`);
     }
     const parent = dirname(path);
     if (!(await pathExists(parent))) {
