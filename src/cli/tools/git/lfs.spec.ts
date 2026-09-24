@@ -80,7 +80,7 @@ describe('cli/tools/git/lfs', () => {
       .reply(200, `${checksum('other')}  git-lfs-linux-arm64-v3.6.0.tar.gz\n`);
 
     await expect(svc.install('3.6.0')).rejects.toThrow(
-      'Checksum for git-lfs-linux-amd64-v3.6.0.tar.gz not found',
+      `Checksum not found in ${baseUrl}${releaseUrl}/v3.6.0/sha256sums.asc for git-lfs-linux-amd64-v3.6.0.tar.gz`,
     );
   });
 

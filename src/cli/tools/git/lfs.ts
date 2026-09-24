@@ -19,16 +19,10 @@ export class GitLfsInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/git-lfs/git-lfs/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}-v${version}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}sha256sums.asc`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.endsWith(filename))
-      ?.split(' ')[0];
-    if (!expectedChecksum) {
-      throw new Error(`Checksum for ${filename} not found`);
-    }
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}sha256sums.asc`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
