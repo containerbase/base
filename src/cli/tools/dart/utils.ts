@@ -3,6 +3,10 @@ import { join } from 'node:path';
 import type { EnvService, PathService } from '../../services';
 import { pathExists } from '../../utils/index.ts';
 
+/**
+ * Links the user's `.dart` and `.dart-tool` folders to the cache, and turns
+ * off the dart analytics for root.
+ */
 export async function prepareDartHome(
   envSvc: EnvService,
   pathSvc: PathService,
@@ -27,6 +31,10 @@ export async function prepareDartHome(
   }
 }
 
+/**
+ * Creates the `.dart` and `.dart-tool` folders in the cache, with analytics
+ * and telemetry turned off.
+ */
 export async function initDartHome(pathSvc: PathService): Promise<void> {
   // for user
   const dart = join(pathSvc.cachePath, '.dart');
@@ -44,6 +52,7 @@ export async function initDartHome(pathSvc: PathService): Promise<void> {
   }
 }
 
+/** Links the user's `.pub-cache` folder to the cache. */
 export async function preparePubCache(
   envSvc: EnvService,
   pathSvc: PathService,
@@ -54,6 +63,7 @@ export async function preparePubCache(
   }
 }
 
+/** Creates the `.pub-cache` folder in the cache. */
 export async function initPubCache(pathSvc: PathService): Promise<void> {
   await pathSvc.createDir(join(pathSvc.cachePath, '.pub-cache'));
 }

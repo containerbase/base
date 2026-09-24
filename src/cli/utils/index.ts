@@ -13,6 +13,10 @@ export type {
   ResultPromise as SpawnResultPromise,
 };
 
+/**
+ * The cli mode from the name the binary was called as, eg. `install-tool`.
+ * Running through node is the `containerbase-cli` mode.
+ */
 export function cliMode(): CliMode | null {
   for (const mode of cliModes) {
     if (argv0.endsWith(`/${mode}`) || argv0 === mode) {
@@ -28,6 +32,10 @@ export function cliMode(): CliMode | null {
   return null;
 }
 
+/**
+ * Runs a command, forwarding stdin and stdout and sending stderr to stdout.
+ * Binaries are never taken from local `node_modules`.
+ */
 export function spawn(
   cmd: string,
   args: string[],

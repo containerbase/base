@@ -1,5 +1,6 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
@@ -145,6 +146,27 @@ describe('cli/services/path.service', () => {
     );
   });
 
+  test('createVersionedToolPath with sub folders', async () => {
+    await ensurePaths('opt/containerbase/tools');
+
+    const path = await pathSvc.createVersionedToolPath(
+      'jb',
+      '0.6.0',
+      'lib',
+      'bin',
+    );
+
+    expect(path).toBe(rootPath('opt/containerbase/tools/jb/0.6.0/lib/bin'));
+    // tests don't run as root, so the umask is group writable
+    const mode = platform() === 'win32' ? 0 : 0o775;
+    expect((await stat(path)).mode & fileRights).toBe(mode);
+    expect((await stat(join(path, '..'))).mode & fileRights).toBe(mode);
+    // an existing folder is fine
+    await expect(
+      pathSvc.createVersionedToolPath('jb', '0.6.0', 'lib', 'bin'),
+    ).resolves.toBe(path);
+  });
+
   test('exportEnv', async () => {
     await mkdir(rootPath('usr/local/etc'), { recursive: true });
     await pathSvc.exportEnv({ NODE_VERSION: 'v14.17.1' });
@@ -241,6 +263,22 @@ describe('cli/services/path.service', () => {
     const s = await stat(dir);
     expect(s.mode & fileRights).toBe(platform() === 'win32' ? 0 : 0o775);
     expect(await pathSvc.createDir(dir)).toBeUndefined();
+  });
+
+  test('createDir: throws when the path is no folder', async () => {
+    const dir = rootPath('env123/dir');
+    const link = rootPath('env123/link');
+    const file = rootPath('env123/file');
+    await pathSvc.createDir(dir);
+    await fs.symlink(dir, link);
+    await writeFile(file, '');
+
+    await expect(pathSvc.createDir(link)).rejects.toThrow(
+      `Path exists and is not a directory: ${link}`,
+    );
+    await expect(pathSvc.createDir(file)).rejects.toThrow(
+      `Path exists and is not a directory: ${file}`,
+    );
   });
 
   test('toolInit', async () => {

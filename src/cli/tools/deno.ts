@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -8,6 +7,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class DenoInstallService extends BaseInstallService {
   readonly name = 'deno';
 
+  /** The architecture name used by the deno release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +17,10 @@ export class DenoInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the deno zip from GitHub, verified against its `.sha256sum`,
+   * and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -27,13 +31,7 @@ export class DenoInstallService extends BaseInstallService {
     const filename = `deno-${this.ghArch}-unknown-linux-gnu.zip`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${url}.sha256sum`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
 
     const file = await this.http.download({
       url,
@@ -43,11 +41,11 @@ export class DenoInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
 
     await this.compress.extract({
       file,
@@ -56,11 +54,13 @@ export class DenoInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `deno` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `deno --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

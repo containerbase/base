@@ -39,7 +39,7 @@ describe('cli/tools/kubectl', () => {
       const releaseUrl = `/release/v${version}/bin/linux/${toolArch}`;
       scope(baseUrl)
         .get(`${releaseUrl}/kubectl.sha256`)
-        .reply(200, `${checksum(binary)} kubectl\n`)
+        .reply(200, checksum(binary))
         .get(`${releaseUrl}/kubectl`)
         .reply(200, binary);
 
@@ -54,6 +54,27 @@ describe('cli/tools/kubectl', () => {
       expect((await fs.stat(file)).mode & 0o777).toBe(0o775);
     },
   );
+
+  test('install: rejects an empty checksum', async () => {
+    const { svc } = await toolContext(KubectlInstallService);
+    scope(baseUrl)
+      .get('/release/v1.30.0/bin/linux/amd64/kubectl.sha256')
+      .reply(200, '\n');
+
+    await expect(svc.install('1.30.0')).rejects.toThrow('Checksum not found');
+  });
+
+  test('install: rejects a checksum mismatch', async () => {
+    const { svc } = await toolContext(KubectlInstallService);
+    scope(baseUrl)
+      .get('/release/v1.29.0/bin/linux/amd64/kubectl.sha256')
+      .reply(200, checksum('other'))
+      .get('/release/v1.29.0/bin/linux/amd64/kubectl')
+      .times(3)
+      .reply(200, binary);
+
+    await expect(svc.install('1.29.0')).rejects.toThrow('download failed');
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(KubectlInstallService);

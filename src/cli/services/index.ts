@@ -30,6 +30,7 @@ export {
   IpcServer,
 };
 
+/** Binds the core services, shared by every container. */
 function init<T extends { bind: Bind }>(options: T): void {
   options.bind(AptService).toSelf();
   options.bind(CompressionService).toSelf();
@@ -49,6 +50,7 @@ export const rootContainerModule = new ContainerModule(init);
 const rootContainer = new Container();
 init(rootContainer);
 
+/** Creates a child container of the root container with the core services. */
 export function createContainer(parent = rootContainer): Container {
   return new Container({ parent });
 }

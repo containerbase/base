@@ -127,6 +127,10 @@ import {
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
 
+/**
+ * Creates a container with all install services, including a generic one for
+ * every v2 shell tool without its own service.
+ */
 async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
   const container = createContainer();
@@ -216,6 +220,7 @@ async function prepareInstallContainer(): Promise<Container> {
   return container;
 }
 
+/** Creates a container with all tool version resolvers. */
 function prepareResolveContainer(): Container {
   logger.trace('preparing resolve container');
   const container = createContainer();
@@ -246,6 +251,10 @@ function prepareResolveContainer(): Container {
   return container;
 }
 
+/**
+ * Installs a tool version. For a `gem`, `npm` or `pip` type, a generic
+ * install service is registered for the package first.
+ */
 export async function installTool(
   tool: string,
   version: string,
@@ -263,10 +272,12 @@ export async function installTool(
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /** Tests the package, ignoring failures of the version check. */
           override async test(version: string): Promise<void> {
             try {
               // some npm packages may not have a `--version` flag
@@ -285,10 +296,12 @@ export async function installTool(
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /** Tests the package, ignoring failures of the version check. */
           override async test(version: string): Promise<void> {
             try {
               // some npm packages may not have a `--version` flag
@@ -307,10 +320,15 @@ export async function installTool(
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /**
+           * Tests the package, ignoring failures of the version check unless
+           * it is a known pip tool.
+           */
           override async test(version: string): Promise<void> {
             try {
               // some pip packages may not have a `--version` flag
@@ -334,6 +352,10 @@ export async function installTool(
   return svc.install(tool, version, dryRun);
 }
 
+/**
+ * Creates a shell wrapper for a tool binary, through the ipc server of the
+ * running install when there is one, else directly.
+ */
 export async function linkTool(
   tool: string,
   options: ShellWrapperConfig,
@@ -357,6 +379,10 @@ export async function linkTool(
   }
 }
 
+/**
+ * Resolves the version to install, eg. `latest` to a concrete version. For a
+ * `gem`, `npm` or `pip` type, a generic resolver is registered first.
+ */
 export async function resolveVersion(
   tool: string,
   version: string | undefined,
@@ -407,6 +433,10 @@ interface UninstallToolConfig {
   type?: InstallToolType | undefined;
 }
 
+/**
+ * Uninstalls a tool version, or all versions without one. Generic install
+ * services are registered for every installed `gem`, `npm` or `pip` package.
+ */
 export async function uninstallTool({
   tool,
   version,

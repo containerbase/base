@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
@@ -9,6 +8,7 @@ import { getDistro, logger } from '../../utils/index.ts';
 @injectable()
 @injectFromHierarchy()
 export abstract class PrebuildInstallService extends BaseInstallService {
+  /** The architecture name used by the containerbase prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -18,10 +18,16 @@ export abstract class PrebuildInstallService extends BaseInstallService {
     }
   }
 
+  /** The binary to test, by default the tool name. */
   protected get tool(): string {
     return this.name;
   }
 
+  /**
+   * Downloads the distro specific containerbase prebuild, verified against
+   * its `.sha512` when there is one, and extracts it into the tool path.
+   * Newer ubuntu releases use the jammy prebuild.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
@@ -55,25 +61,22 @@ export abstract class PrebuildInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path });
   }
 
+  /** Links the tool binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that the tool binary runs with `--version`. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.tool, ['--version']);
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }
 
 @injectable()
 @injectFromHierarchy()
 export abstract class PrebuildVersionResolver extends ToolVersionResolver {
+  /** Resolves a missing version or `latest` to the latest prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.http.get(

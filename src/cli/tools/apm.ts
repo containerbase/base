@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 
@@ -7,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class ApmInstallService extends BaseInstallService {
   readonly name = 'apm';
 
+  /** The architecture name used by the apm release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -16,6 +16,10 @@ export class ApmInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the apm bundle from GitHub, verified against its `.sha256`, and
+   * extracts it into the versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     /**
      * APM (Agent Package Manager) ships self-contained PyInstaller `onedir`
@@ -28,11 +32,7 @@ export class ApmInstallService extends BaseInstallService {
     const filename = `apm-linux-${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(/\s+/)[0];
+    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
 
     const file = await this.http.download({
       url,
@@ -48,11 +48,13 @@ export class ApmInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
+  /** Links the `apm` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = this.pathSvc.versionedToolPath(this.name, version);
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `apm --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

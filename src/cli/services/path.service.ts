@@ -53,6 +53,9 @@ export class PathService {
     return join(this.installDir, 'data');
   }
 
+  /**
+   * Path to `/usr/local/etc/env`, the global env file.
+   */
   get envFile(): string {
     return join(this.envSvc.rootDir, 'usr/local/etc/env');
   }
@@ -106,9 +109,19 @@ export class PathService {
     return join(this.installDir, 'versions');
   }
 
+  /**
+   * Creates a folder and its missing parents, owned by the configured user.
+   * An existing folder is left as is.
+   *
+   * @throws when the path exists but is no folder, eg. a symlink or a file
+   */
   async createDir(path: string, mode = 0o775): Promise<void> {
-    if (await pathExists(path)) {
+    const stats = await fs.lstat(path).catch(() => null);
+    if (stats?.isDirectory()) {
       return;
+    }
+    if (stats) {
+      throw new Error(`Path exists and is not a directory: ${path}`);
     }
     const parent = dirname(path);
     if (!(await pathExists(parent))) {
@@ -118,21 +131,38 @@ export class PathService {
     await fs.mkdir(path);
     await this.setOwner({ path, mode });
   }
+
+  /** Creates the tool path and returns it. */
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
     await this.createDir(toolPath);
     return toolPath;
   }
 
+  /**
+   * Creates the versioned tool path and the optional sub folders below it,
+   * eg. `bin`, all owned by the configured user with the configured umask.
+   * Returns the innermost path.
+   */
   async createVersionedToolPath(
     tool: string,
     version: string,
+    ...subPaths: string[]
   ): Promise<string> {
-    const toolPath = this.versionedToolPath(tool, version);
-    await this.createDir(toolPath, this.envSvc.umask);
-    return toolPath;
+    let path = this.versionedToolPath(tool, version);
+    await this.createDir(path, this.envSvc.umask);
+    for (const sub of subPaths) {
+      path = join(path, sub);
+      await this.createDir(path, this.envSvc.umask);
+    }
+    return path;
   }
 
+  /**
+   * Creates the containerbase folders below the install, var and temp paths.
+   *
+   * @throws when the image was not set up for containerbase
+   */
   async ensureBasePaths(): Promise<void> {
     if (!(await pathExists(this.varPath, 'dir'))) {
       throw new Error('System not initialized for containerbase');
@@ -149,10 +179,12 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
   }
 
+  /** Returns the tool path, creating it when missing. */
   async ensureToolPath(tool: string): Promise<string> {
     return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));
   }
 
+  /** Returns the tool path when it exists, else `null`. */
   async findToolPath(tool: string): Promise<string | null> {
     const toolPath = this.toolPath(tool);
 
@@ -162,6 +194,7 @@ export class PathService {
     return null;
   }
 
+  /** Returns the versioned tool path when it exists, else `null`. */
   async findVersionedToolPath(
     tool: string,
     version: string,
@@ -174,6 +207,7 @@ export class PathService {
     return null;
   }
 
+  /** Returns the names of the v2 shell tools. */
   async findLegacyTools(): Promise<string[]> {
     const tools = await fs.readdir(join(this.usrPath, 'tools/v2'));
     return tools
@@ -181,6 +215,7 @@ export class PathService {
       .map((t) => t.substring(0, t.length - 3));
   }
 
+  /** Returns the names of the tools prepared in this image. */
   async findPreparedTools(): Promise<string[]> {
     const file = join(this.varPath, 'tool.prep');
 
@@ -193,18 +228,22 @@ export class PathService {
       .filter(isNonEmptyStringAndNotWhitespace);
   }
 
+  /** Whether the path exists and is a file. */
   async fileExists(filePath: string): Promise<boolean> {
     return await pathExists(filePath, 'file');
   }
 
+  /** Whether the tool was initialized in this container. */
   async isInitialized(tool: string): Promise<boolean> {
     return await this.fileExists(this.toolInitPath(tool));
   }
 
+  /** Whether the tool was prepared in this image. */
   async isPrepared(tool: string): Promise<boolean> {
     return await this.fileExists(this.toolPreparePath(tool));
   }
 
+  /** Whether the tool is a v2 shell tool, or with `v1` also a v1 one. */
   async isLegacyTool(tool: string, v1 = false): Promise<boolean> {
     let exists = await pathExists(join(this.usrPath, 'tools/v2', `${tool}.sh`));
     if (!exists && v1) {
@@ -213,33 +252,45 @@ export class PathService {
     return exists;
   }
 
+  /** Marks the tool as initialized in this container. */
   async setInitialized(tool: string): Promise<void> {
     const path = this.toolInitPath(tool);
     await fs.writeFile(path, '');
     await this.setOwner({ path });
   }
 
+  /** Marks the tool as prepared and adds it to the list of prepared tools. */
   async setPrepared(tool: string): Promise<void> {
     await fs.writeFile(this.toolPreparePath(tool), '');
     await fs.appendFile(join(this.varPath, 'tool.prep'), `${tool}\n`);
   }
 
+  /** Path of the tool's initialized marker file. */
   toolInitPath(tool: string): string {
     return join(this._toolInitPath, tool2path(tool));
   }
 
+  /** Path to `/opt/containerbase/tools/<tool>`. */
   toolPath(tool: string): string {
     return join(this.toolsPath, tool2path(tool));
   }
 
+  /** Path of the tool's prepared marker file. */
   toolPreparePath(tool: string): string {
     return join(this._toolPrepPath, tool2path(tool));
   }
 
+  /** Path to `/opt/containerbase/tools/<tool>/<version>`. */
   versionedToolPath(tool: string, version: string): string {
     return join(this.toolPath(tool), version);
   }
 
+  /**
+   * Exports the variables to the global env file and sets them in the current
+   * process. The env file keeps values that are already set when it is
+   * sourced. With `nonRootOnly` they only apply to non-root users and are not
+   * set in the current process.
+   */
   async exportEnv(
     values: Record<string, string>,
     nonRootOnly = false,
@@ -265,16 +316,19 @@ export class PathService {
     await fs.appendFile(this.envFile, content);
   }
 
+  /** Prepends the folder to `PATH` in the global env file and the process. */
   async exportPath(value: string): Promise<void> {
     env.PATH = `${value}:${env.PATH}`;
     await fs.appendFile(this.envFile, `export PATH=${value}:$PATH\n`);
   }
 
+  /** Whether the tool has an `env.sh`. */
   async toolEnvExists(tool: string): Promise<boolean> {
     const file = join(this.toolPath(tool), 'env.sh');
     return await pathExists(file);
   }
 
+  /** Removes the tool's `env.sh`, if any. */
   async resetToolEnv(tool: string): Promise<Promise<void>> {
     const file = join(this.toolPath(tool), 'env.sh');
     if (!(await pathExists(file))) {
@@ -294,6 +348,12 @@ export class PathService {
     await this.setOwner({ path: file, mode: 0o644 });
   }
 
+  /**
+   * Writes the variables to the tool's `env.sh` and sets them in the current
+   * process. The `env.sh` keeps values that are already set when it is
+   * sourced. With `nonRootOnly` they only apply to non-root users and are not
+   * set in the current process.
+   */
   async exportToolEnv(
     tool: string,
     values: Record<string, string>,
@@ -321,6 +381,10 @@ export class PathService {
     await this.writeFile(file, content);
   }
 
+  /**
+   * Adds the folder to `PATH` in the tool's `env.sh` and the current process,
+   * in front or with `toEnd` at the end.
+   */
   async exportToolPath(
     tool: string,
     value: string,
@@ -339,6 +403,10 @@ export class PathService {
     await this.setOwner({ path: file, mode: 0o664 });
   }
 
+  /**
+   * Sets the mode of the path, and when running as root gives the configured
+   * user ownership of root owned paths.
+   */
   async setOwner({ path, mode = 0o775 }: FileOwnerConfig): Promise<void> {
     const s = await fs.stat(path);
     if ((s.mode & fileRights) !== mode) {

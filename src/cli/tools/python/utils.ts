@@ -13,6 +13,7 @@ export abstract class PythonBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
 
+  /** The env for pip commands, currently empty. */
   protected prepareEnv(_version: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {};
 
@@ -30,12 +31,17 @@ export abstract class PythonBaseInstallService extends BaseInstallService {
 
 @injectable()
 export abstract class PipBaseInstallService extends PythonBaseInstallService {
+  /** The pip package to install, by default the tool name. */
   protected tool(_version: string): string {
     return this.name;
   }
 
   override readonly parent = 'python';
 
+  /**
+   * Installs the pip package into a virtualenv per python version below the
+   * versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     const pythonVersion = await this.getPythonVersion();
     const env = this.prepareEnv(version);
@@ -50,11 +56,17 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
 
     prefix = path.join(prefix, pythonVersion);
-    await fs.mkdir(prefix);
+    await this.pathSvc.createDir(prefix);
     await this.createVirtualenv(prefix, env);
     await this.installPackage(version, pythonVersion, env, prefix);
   }
 
+  /**
+   * Runs `pip install` for the package and its extra packages in the
+   * virtualenv, removing the virtualenv on failure.
+   *
+   * @throws when pip fails
+   */
   private async installPackage(
     version: string,
     pythonVersion: string,
@@ -88,6 +100,11 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
   }
 
+  /**
+   * Creates a virtualenv with the current python, removing it on failure.
+   *
+   * @throws when virtualenv fails
+   */
   private async createVirtualenv(
     prefix: string,
     env: NodeJS.ProcessEnv,
@@ -107,6 +124,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
   }
 
+  /** Whether the version is installed for the current python version. */
   override async isInstalled(version: string): Promise<boolean> {
     const pythonVersion = await this.getPythonVersion();
     return await this.pathSvc.fileExists(
@@ -114,10 +132,15 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     );
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /**
+   * Links every console script of the package, or else the tool name, into
+   * the global bin folder, with the python env.
+   */
   override async postInstall(version: string): Promise<void> {
     const pythonVersion = await this.getPythonVersion();
     const src = path.join(
@@ -157,6 +180,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     });
   }
 
+  /** Checks that the tool, or `pip-compile` for pip-tools, runs with `--version`. */
   override async test(_version: string): Promise<void> {
     let name = this.name;
     switch (name) {
@@ -167,10 +191,12 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     await this._spawn(name, ['--version']);
   }
 
+  /** Accepts valid pep440 versions. */
   override validate(version: string): Promise<boolean> {
     return Promise.resolve(!!valid(version));
   }
 
+  /** Path of the virtualenv's python binary. */
   private getPython(version: string, pythonVersion: string): string {
     return path.join(
       this.pathSvc.versionedToolPath(this.tool(version), version),
@@ -180,6 +206,11 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     );
   }
 
+  /**
+   * The current python version.
+   *
+   * @throws when python isn't installed
+   */
   protected async getPythonVersion(): Promise<string> {
     const version = await this.versionSvc.getCurrent('python');
 
@@ -189,6 +220,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     return version.tool.version;
   }
 
+  /** Extra packages some tools need installed next to them. */
   protected getAdditionalArgs(
     version: string,
     pythonVersion: string,
@@ -225,6 +257,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     return [];
   }
 
+  /** Path of a file in the installed package's `dist-info` folder. */
   private packageDistPath(
     version: string,
     pythonVersion: string,

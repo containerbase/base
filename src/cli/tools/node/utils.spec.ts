@@ -43,6 +43,7 @@ class NpmInstallService extends NpmBaseInstallService {
 class ScopedInstallService extends NpmBaseInstallService {
   readonly name = 'yarn';
 
+  /** Installs the scoped `@yarnpkg/cli-dist` package. */
   protected override tool(): string {
     return '@yarnpkg/cli-dist';
   }

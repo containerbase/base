@@ -13,6 +13,10 @@ import {
 export class MonoPrepareService extends BasePrepareService {
   readonly name = 'mono';
 
+  /**
+   * Initializes the cache, links `~/.mono` to it, and sets up the mono cert
+   * store with a hook that syncs it on ca certificate updates.
+   */
   override async prepare(): Promise<void> {
     // TODO: install mono dependencies if needed
     await this.initialize();
@@ -59,6 +63,7 @@ export class MonoPrepareService extends BasePrepareService {
     await fs.symlink(src, tgt);
   }
 
+  /** Creates the `.mono` folder in the containerbase cache. */
   override async initialize(): Promise<void> {
     const mono = join(this.pathSvc.cachePath, '.mono');
     if (!(await pathExists(mono))) {
@@ -72,6 +77,10 @@ export class MonoPrepareService extends BasePrepareService {
 export class MonoInstallService extends PrebuildInstallService {
   readonly name = 'mono';
 
+  /**
+   * Installs the mono prebuild, adds a `cert-sync` wrapper and fills the mono
+   * cert store once.
+   */
   override async install(version: string): Promise<void> {
     await super.install(version);
     // create cert-sync wrapper to create the mono cert store
@@ -98,6 +107,7 @@ export class MonoInstallService extends PrebuildInstallService {
     }
   }
 
+  /** Links the `mono` and `cert-sync` binaries into the global bin folder. */
   override async link(version: string): Promise<void> {
     await super.link(version);
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');

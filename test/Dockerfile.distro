@@ -66,7 +66,7 @@ RUN install-tool devbox 0.18.3
 RUN install-tool dotnet 10.0.401
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.4
+RUN install-tool flutter 3.47.5
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.9.5
@@ -87,19 +87,19 @@ RUN install-tool helm v4.3.0
 RUN install-tool helmfile v1.8.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.0
+RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.8.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.9
+RUN install-tool mise 2026.9.12
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.80.0
+RUN install-tool pixi v0.81.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.6.6
@@ -108,7 +108,7 @@ RUN install-tool powershell v7.6.6
 RUN install-tool rust 1.98.1
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.24.0
+RUN install-tool skopeo 1.24.1
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.13.3
@@ -125,7 +125,7 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.3
+RUN install-tool terraform 1.16.4
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
 RUN install-tool tofu 1.12.6
@@ -140,7 +140,7 @@ RUN install-tool vendir v0.46.2
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 35.1
+RUN install-tool protoc 36.2
 
 #--------------------------------------
 # Image: test-docker
@@ -242,11 +242,11 @@ RUN install-tool kas 5.2
 # renovate: datasource=pypi
 RUN install-tool pipenv 2026.8.0
 # renovate: datasource=pypi
-RUN install-tool pdm 2.29.1
+RUN install-tool pdm 2.29.2
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool uv 0.12.15
+RUN install-tool uv 0.12.18
 
 #--------------------------------------
 # Image: test-ruby
@@ -256,7 +256,7 @@ FROM build AS test-ruby
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 4.0.7
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 4.0.20
+RUN install-tool bundler 4.0.21
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.17.0
 

@@ -40,6 +40,7 @@ class ErlangVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'erlang';
 }
 
+/** The download path of an erlang prebuild. */
 function releasePath(version: string, code: string, ghArch: string): string {
   return `/containerbase/erlang-prebuild/releases/download/${version}/erlang-${version}-${code}-${ghArch}.tar.xz`;
 }

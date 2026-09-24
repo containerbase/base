@@ -20,6 +20,10 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
 
+  /**
+   * The env for npm commands: update notices and funding messages off, the
+   * openssl ca store, the temp npm cache and the configured npm registry.
+   */
   protected prepareEnv(_version: string, tmp: string): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = {
       NO_UPDATE_NOTIFIER: '1',
@@ -46,6 +50,12 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
     return env;
   }
 
+  /**
+   * Updates the node-gyp bundled with npm to the latest version, which
+   * supports python 3.
+   *
+   * @throws when the npm install fails
+   */
   protected async updateNodeGyp(
     prefix: string,
     tmp: string,
@@ -71,10 +81,17 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
 export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   override readonly parent = 'node';
 
+  /** The npm package to install, by default the tool name. */
   protected tool(_version: string): string {
     return this.name;
   }
 
+  /**
+   * Installs the npm package with the current node's npm into a folder per
+   * node version below the versioned tool path.
+   *
+   * @throws when the npm install fails
+   */
   override async install(version: string): Promise<void> {
     const nodeVersion = await this.getNodeVersion();
     const npm = this.getNodeNpm(nodeVersion);
@@ -139,15 +156,21 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     });
   }
 
+  /** Whether the version is installed for the current node version. */
   override async isInstalled(version: string): Promise<boolean> {
     const node = await this.getNodeVersion();
     return await this.pathSvc.fileExists(this.packageJsonPath(version, node));
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /**
+   * Links every binary listed in the package's `bin` into the global bin
+   * folder, with the node env.
+   */
   override async postInstall(version: string): Promise<void> {
     const node = await this.getNodeVersion();
     const src = join(
@@ -178,6 +201,7 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** Checks that the package binary runs with `--version`. */
   override async test(version: string): Promise<void> {
     let name = this.tool(version);
     const idx = name.lastIndexOf('/');
@@ -187,10 +211,16 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     await this._spawn(name, ['--version']);
   }
 
+  /** Path of the npm binary of the node version. */
   private getNodeNpm(nodeVersion: string): string {
     return join(this.pathSvc.versionedToolPath('node', nodeVersion), 'bin/npm');
   }
 
+  /**
+   * The current node version.
+   *
+   * @throws when node isn't installed
+   */
   protected async getNodeVersion(): Promise<string> {
     const nodeVersion = await this.versionSvc.getCurrent('node');
 
@@ -200,10 +230,12 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     return nodeVersion.tool.version;
   }
 
+  /** Additional arguments for `npm install`, none by default. */
   protected getAdditionalArgs(): string[] {
     return [];
   }
 
+  /** Path of the installed package's `package.json`. */
   private packageJsonPath(version: string, node: string): string {
     return join(
       this.pathSvc.versionedToolPath(this.name, version),
@@ -215,6 +247,7 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   }
 }
 
+/** Creates the `bin` and `lib` folders of an npm prefix. */
 async function preparePrefix(prefix: string): Promise<Promise<void>> {
   // npm 7 bug
   await mkdir(`${prefix}/bin`, { recursive: true });
@@ -263,16 +296,19 @@ export async function prepareUserConfig({
   await spawn('chmod', ['-R', 'g+w', prefix, npmrc, `${home}/.npm`]);
 }
 
+/** Reads and parses a `package.json`. */
 async function readPackageJson(path: string): Promise<PackageJson> {
   const data = await readFile(path, { encoding: 'utf8' });
   return JSON.parse(data);
 }
 
+/** Creates the `.npm` folder in the containerbase cache. */
 export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
   const path = join(pathSvc.cachePath, '.npm');
   await pathSvc.createDir(path);
 }
 
+/** Creates an empty `.npmrc` in the containerbase cache, unless there is one. */
 export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
   const path = join(pathSvc.cachePath, '.npmrc');
   if (!(await pathExists(path))) {
@@ -280,6 +316,7 @@ export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
   }
 }
 
+/** Links the user's `.npm` folder and `.npmrc` to the cache. */
 export async function prepareSymlinks(
   envSvc: EnvService,
   pathSvc: PathService,

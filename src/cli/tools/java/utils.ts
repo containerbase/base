@@ -12,6 +12,7 @@ import {
   AdoptiumReleases,
 } from './schema.ts';
 
+/** The newest adoptium lts version for the image type and architecture. */
 export async function resolveLatestJavaLtsVersion(
   http: HttpService,
   type: 'jre' | 'jdk',
@@ -30,6 +31,7 @@ export async function resolveLatestJavaLtsVersion(
   return res.versions[0]!.semver;
 }
 
+/** The adoptium package for the version, image type and architecture. */
 export async function resolveJavaDownloadUrl(
   http: HttpService,
   type: 'jre' | 'jdk',
@@ -49,6 +51,7 @@ export async function resolveJavaDownloadUrl(
   return res?.[0]?.binaries?.[0]?.package;
 }
 
+/** Creates an empty maven `settings.xml` in the cache, unless there is one. */
 export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   const dir = path.join(pathSvc.cachePath, '.m2');
   await pathSvc.createDir(dir);
@@ -73,6 +76,7 @@ export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   );
 }
 
+/** Creates the gradle `gradle.properties` in the cache, unless there is one. */
 export async function createGradleSettings(
   pathSvc: PathService,
 ): Promise<void> {

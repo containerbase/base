@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -8,10 +7,15 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class TofuInstallService extends BaseInstallService {
   readonly name = 'tofu';
 
+  /** The architecture name used by the tofu release assets. */
   private get ghArch(): string {
     return this.envSvc.arch;
   }
 
+  /**
+   * Downloads the tofu archive from GitHub, verified against the release's
+   * `SHA256SUMS`, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -22,13 +26,10 @@ export class TofuInstallService extends BaseInstallService {
     const filename = `tofu_${version}_linux_${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}tofu_${version}_SHA256SUMS`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}tofu_${version}_SHA256SUMS`,
+      filename,
+    );
 
     const file = await this.http.download({
       url,
@@ -38,11 +39,11 @@ export class TofuInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
 
     await this.compress.extract({
       file,
@@ -50,11 +51,13 @@ export class TofuInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `tofu` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `tofu --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

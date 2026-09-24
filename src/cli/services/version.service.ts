@@ -221,6 +221,7 @@ export class VersionService {
     }
   }
 
+  /** Loads the databases and creates their indexes. */
   @postConstruct()
   protected async [Symbol('construct')](): Promise<void> {
     const [links, state, types, versions] = await Promise.all([

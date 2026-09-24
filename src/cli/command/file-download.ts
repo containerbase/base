@@ -26,6 +26,10 @@ export class FileDownloadCommand extends Command {
 
   // dryRun = Option.Boolean('-d,--dry-run', false);
 
+  /**
+   * Downloads the url to the output path, applying the configured url
+   * replacements, and returns a non-zero exit code on failure.
+   */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
@@ -80,7 +84,7 @@ export class DownloadFileCommand extends FileDownloadCommand {
     description: 'Deprecated. Use `file download` command instead.',
   });
 
-  // Override the execute method to maintain compatibility with existing code
+  /** Runs the `file download` command, kept for backwards compatibility. */
   override execute(): Promise<number | void> {
     logger.debug(
       'DownloadFileCommand is deprecated. Use FileDownloadCommand instead.',

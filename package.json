@@ -83,7 +83,7 @@
     "bats-support": "0.3.0",
     "clipanion": "3.2.1",
     "conventional-changelog-conventionalcommits": "9.3.1",
-    "eslint": "10.10.0",
+    "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "2.0.1",
     "eslint-import-resolver-typescript": "4.4.5",
@@ -101,7 +101,7 @@
     "semantic-release": "25.0.9",
     "shelljs": "0.10.0",
     "tsx": "4.23.15",
-    "type-fest": "5.9.0",
+    "type-fest": "5.10.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.0",
     "vite": "8.3.0",
@@ -111,7 +111,7 @@
     "markdownlint": "*",
     "thread-stream": "*"
   },
-  "packageManager": "pnpm@11.26.0",
+  "packageManager": "pnpm@11.27.1",
   "engines": {
     "node": ">=24.10.0",
     "pnpm": "^11.0.0"

@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
@@ -23,12 +22,14 @@ import {
 export class DartPrepareService extends BasePrepareService {
   readonly name = 'dart';
 
+  /** Initializes the cache and links the dart and pub cache folders. */
   override async prepare(): Promise<void> {
     await this.initialize();
     await prepareDartHome(this.envSvc, this.pathSvc);
     await preparePubCache(this.envSvc, this.pathSvc);
   }
 
+  /** Creates the dart and pub cache folders in the containerbase cache. */
   override async initialize(): Promise<void> {
     await initDartHome(this.pathSvc);
     await initPubCache(this.pathSvc);
@@ -40,6 +41,7 @@ export class DartPrepareService extends BasePrepareService {
 export class DartInstallService extends BaseInstallService {
   readonly name = 'dart';
 
+  /** The architecture name used by the dart sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -49,6 +51,12 @@ export class DartInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the stable dart sdk zip, verified against its `.sha256sum`, and
+   * extracts it into the versioned tool path.
+   *
+   * @throws for versions below 2
+   */
   override async install(version: string): Promise<void> {
     const ver = parse(version);
 
@@ -60,11 +68,7 @@ export class DartInstallService extends BaseInstallService {
     const sdkFile = `dartsdk-linux-${this.arch}-release.zip`;
     const url = `${sdkUrl}/${sdkFile}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256sum` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(sdkFile))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
 
     const file = await this.http.download({
       url,
@@ -76,12 +80,14 @@ export class DartInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
+  /** Links the `dart` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `dart --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('dart', ['--version']);
   }

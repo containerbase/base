@@ -14,6 +14,10 @@ export class DotnetPrepareService extends BasePrepareService {
 
   readonly name = 'dotnet';
 
+  /**
+   * Installs the apt packages dotnet needs on jammy and noble, initializes the
+   * cache and links `~/.nuget` to it.
+   */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
 
@@ -49,6 +53,10 @@ export class DotnetPrepareService extends BasePrepareService {
     );
   }
 
+  /**
+   * Exports `DOTNET_ROOT` with telemetry and the first time experience turned
+   * off, and creates the `.nuget` folder in the containerbase cache.
+   */
   override async initialize(): Promise<void> {
     if (!(await this.pathSvc.toolEnvExists(this.name))) {
       await this.pathSvc.exportToolEnv(this.name, {
@@ -70,6 +78,7 @@ export class DotnetPrepareService extends BasePrepareService {
 export class DotnetInstallService extends BaseInstallService {
   readonly name = 'dotnet';
 
+  /** The architecture name used by the dotnet sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -79,11 +88,17 @@ export class DotnetInstallService extends BaseInstallService {
     }
   }
 
+  /** Whether the sdk version is installed, as all share one tool path. */
   override isInstalled(version: string): Promise<boolean> {
     const toolPath = this.pathSvc.toolPath(this.name);
     return this.pathSvc.fileExists(join(toolPath, 'sdk', version, '.version'));
   }
 
+  /**
+   * Downloads the dotnet sdk and extracts it into the shared tool path, then
+   * runs the first time setup and creates the nuget config, also for the user
+   * when running as root. No checksums are verified.
+   */
   override async install(version: string): Promise<void> {
     const toolPath = this.pathSvc.toolPath(this.name);
 
@@ -132,11 +147,13 @@ export class DotnetInstallService extends BaseInstallService {
     }
   }
 
+  /** Links the `dotnet` binary into the global bin folder. */
   override async link(_version: string): Promise<void> {
     const src = this.pathSvc.toolPath(this.name);
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `dotnet --info` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('dotnet', ['--info']);
   }

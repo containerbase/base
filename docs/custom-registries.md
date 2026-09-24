@@ -762,6 +762,7 @@ Terraform releases are downloaded from:
 Samples:
 
 ```txt
+https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_SHA256SUMS
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_amd64.zip
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_arm64.zip
 ```
@@ -785,10 +786,14 @@ Vendir releases are downloaded from:
 
 - `https://github.com/vmware-tanzu/carvel-vendir/releases`
 
+Since v0.25.0 the download is verified against the published `checksums.txt`.
+
 Samples:
 
 ```txt
-https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.22.0/vendir-linux-amd64
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/checksums.txt
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-linux-amd64
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-linux-arm64
 ```
 
 ## `wally`
