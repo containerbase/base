@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   setup:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
 
     outputs:
@@ -34,7 +34,7 @@ jobs:
         run: echo "uid=$(uuidgen)" >> ${GITHUB_OUTPUT}
 
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -70,7 +70,7 @@ jobs:
           check_all_files_with_shebangs: 'true'
 
   bats:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
 
@@ -90,7 +90,7 @@ jobs:
         run: pnpm test:bats
 
   vitest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -117,7 +117,7 @@ jobs:
           use_oidc: true
 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
 
@@ -147,10 +147,10 @@ jobs:
       matrix:
         arch:
           - name: x86_64
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
 
     steps:
@@ -178,7 +178,7 @@ jobs:
             build-ttl
 
   distro:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - bats
       - lint
@@ -217,7 +217,7 @@ jobs:
 
   # test old distros on arm64
   base-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     needs:
       - bats
       - lint
@@ -290,17 +290,17 @@ jobs:
           - latest
         arch:
           - name: x86_64
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
         # include:
         #   # no ubuntu arm64 support for haskell
         #   - lang: haskell
         #     arch:
         #       name: x86_64
-        #       os: ubuntu-24.04
+        #       os: ubuntu-26.04
         #       tag: amd64
 
     env:
@@ -341,7 +341,7 @@ jobs:
       - base-arm64
       - distro
       - lang
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     if: always()
     steps:
