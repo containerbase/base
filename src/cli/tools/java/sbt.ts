@@ -9,6 +9,7 @@ import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 export class SbtPrepareService extends BasePrepareService {
   override readonly name = 'sbt';
 
+  /** Initializes the cache and links `~/.sbt` to it. */
   override async prepare(): Promise<void> {
     await this.initialize();
 
@@ -18,6 +19,7 @@ export class SbtPrepareService extends BasePrepareService {
     );
   }
 
+  /** Creates the `.sbt` folder in the containerbase cache. */
   override async initialize(): Promise<void> {
     await this.pathSvc.createDir(join(this.pathSvc.cachePath, '.sbt'));
   }
@@ -29,6 +31,11 @@ export class SbtInstallService extends BaseInstallService {
   override readonly name = 'sbt';
   override readonly parent = 'java';
 
+  /**
+   * Downloads the sbt archive from GitHub, verified against its `.sha256`,
+   * extracts it into the versioned tool path and drops the macOS and Windows
+   * launchers.
+   */
   override async install(version: string): Promise<void> {
     const url = `https://github.com/sbt/sbt/releases/download/v${version}/${this.name}-${version}.tgz`;
 
@@ -59,14 +66,19 @@ export class SbtInstallService extends BaseInstallService {
     }
   }
 
+  /** Links the `sbt` launcher into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /**
+   * Checks that `sbt --version` runs in an empty folder, then removes the
+   * temp and home data it leaves behind.
+   * @see {@link https://github.com/sbt/sbt/issues/1458}
+   */
   override async test(_version: string): Promise<void> {
-    // https://github.com/sbt/sbt/issues/1458
     const tmp = await fs.mkdtemp(join(this.envSvc.tmpDir, `${this.name}-`));
     await this._spawn(this.name, ['--version'], { cwd: tmp });
 
