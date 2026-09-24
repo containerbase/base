@@ -10,6 +10,11 @@ export class GitLfsInstallService extends BaseInstallService {
   override readonly name = 'git-lfs';
   override readonly parent = 'git';
 
+  /**
+   * Downloads the git-lfs archive from GitHub, verified against the release's
+   * `sha256sums.asc`, and copies only the `git-lfs` binary into the versioned
+   * `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/git-lfs/git-lfs/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}-v${version}.tar.gz`;
@@ -50,6 +55,10 @@ export class GitLfsInstallService extends BaseInstallService {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 
+  /**
+   * Links the `git-lfs` binary into the global bin folder and registers its
+   * git filters, system wide when running as root.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -61,6 +70,7 @@ export class GitLfsInstallService extends BaseInstallService {
     ]);
   }
 
+  /** Checks that `git lfs version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('git', ['lfs', 'version']);
   }
