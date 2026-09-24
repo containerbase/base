@@ -8,6 +8,10 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class DevboxInstallService extends BaseInstallService {
   readonly name = 'devbox';
 
+  /**
+   * Downloads the devbox archive from GitHub, verified against the release's
+   * `checksums.txt`, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/jetify-com/devbox/releases/download/${version}/`;
     const filename = `devbox_${version}_linux_${this.envSvc.arch}.tar.gz`;
@@ -36,11 +40,13 @@ export class DevboxInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `devbox` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `devbox version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['version']);
   }

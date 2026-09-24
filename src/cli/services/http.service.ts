@@ -43,6 +43,7 @@ export class HttpService {
 
   private readonly _opts: Pick<OptionsInit, 'headers'> = {};
 
+  /** Sets the containerbase user agent for all requests. */
   @postConstruct()
   protected [Symbol('construct')](): void {
     Object.assign(this._opts, {

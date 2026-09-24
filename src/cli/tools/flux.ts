@@ -8,10 +8,15 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class FluxInstallService extends BaseInstallService {
   readonly name = 'flux';
 
+  /** The architecture name used by the flux release assets. */
   private get arch(): string {
     return this.envSvc.arch;
   }
 
+  /**
+   * Downloads the flux archive from GitHub, verified against the release's
+   * checksums file, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/fluxcd/flux2/releases/download/v${version}/`;
     const filename = `flux_${version}_linux_${this.arch}.tar.gz`;
@@ -40,12 +45,14 @@ export class FluxInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `flux` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `flux --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('flux', ['--version']);
   }

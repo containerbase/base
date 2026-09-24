@@ -8,10 +8,15 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class TofuInstallService extends BaseInstallService {
   readonly name = 'tofu';
 
+  /** The architecture name used by the tofu release assets. */
   private get ghArch(): string {
     return this.envSvc.arch;
   }
 
+  /**
+   * Downloads the tofu archive from GitHub, verified against the release's
+   * `SHA256SUMS`, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -47,11 +52,13 @@ export class TofuInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `tofu` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `tofu --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

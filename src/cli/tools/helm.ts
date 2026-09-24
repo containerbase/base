@@ -8,6 +8,10 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class HelmInstallService extends BaseInstallService {
   readonly name = 'helm';
 
+  /**
+   * Downloads the helm archive from get.helm.sh, verified against its
+   * `.sha256sum`, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-v${version}-linux-${this.envSvc.arch}.tar.gz`;
@@ -28,6 +32,7 @@ export class HelmInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd, strip: 1 });
   }
 
+  /** Links the `helm` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = path.join(
       this.pathSvc.versionedToolPath(this.name, version),
@@ -36,6 +41,7 @@ export class HelmInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `helm version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['version']);
   }

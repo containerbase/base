@@ -40,10 +40,12 @@ export abstract class BasePrepareService {
     return !NoPrepareTools.includes(this.name);
   }
 
+  /** The tool name, for logging. */
   toString(): string {
     return this.name;
   }
 
+  /** Runs a command, by default in the temp folder. */
   protected _spawn(
     command: string,
     args: string[],

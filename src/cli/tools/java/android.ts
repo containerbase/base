@@ -17,6 +17,13 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
   readonly name = 'android-sdk-cmdline-tools';
   override readonly parent = 'java';
 
+  /**
+   * Downloads the linux cmdline-tools package listed in the android sdk
+   * repository, verified against its checksum, and extracts it into the
+   * versioned tool path.
+   *
+   * @throws when the repository has no linux package for the version
+   */
   override async install(version: string): Promise<void> {
     const repo = await fetchRepo(this.http);
 
@@ -50,6 +57,10 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
+  /**
+   * Links the `sdkmanager` binary into the global bin folder, using
+   * `ANDROID_HOME` as sdk root.
+   */
   override async link(version: string): Promise<void> {
     const src = `${this.pathSvc.versionedToolPath(this.name, version)}/bin`;
     await this.shellwrapper({
@@ -59,10 +70,12 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
     });
   }
 
+  /** Checks that `sdkmanager --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('sdkmanager', ['--version']);
   }
 
+  /** Accepts any version semver can coerce, eg. `12.0`. */
   override validate(version: string): Promise<boolean> {
     return Promise.resolve(semverCoerce(version) !== null);
   }
@@ -73,6 +86,10 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
 export class AndroidSdkCmdlineToolsVersionResolver extends ToolVersionResolver {
   readonly tool = 'android-sdk-cmdline-tools';
 
+  /**
+   * Resolves a missing version or `latest` to the `cmdline-tools;latest`
+   * package of the android sdk repository.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const res = await fetchRepo(this.http);
@@ -114,12 +131,14 @@ const parser = new XMLParser({
 
 let repo: Promise<AndroidSdkRepo> | undefined;
 
+/** The android sdk repository, fetched once per run. */
 async function fetchRepo(http: HttpService): Promise<AndroidSdkRepo> {
   // load repo only once per run
   const res = (repo ??= _fetchRepo(http));
   return await res;
 }
 
+/** Downloads and parses the android sdk repository xml. */
 async function _fetchRepo(http: HttpService): Promise<AndroidSdkRepo> {
   const file = await http.download({
     url: repoUrl,
@@ -129,6 +148,7 @@ async function _fetchRepo(http: HttpService): Promise<AndroidSdkRepo> {
   return res;
 }
 
+/** Parses the xml file without the parts that are not needed. */
 async function parseXml(filename: string): Promise<unknown> {
   return await parser.parseStream(createReadStream(filename));
 }

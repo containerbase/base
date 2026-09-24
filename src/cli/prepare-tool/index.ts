@@ -33,6 +33,10 @@ import {
   PrepareToolService,
 } from './prepare-tool.service.ts';
 
+/**
+ * Creates a container with all prepare services, including a generic one for
+ * every v2 shell tool without its own service.
+ */
 async function prepareContainer(): Promise<Container> {
   logger.trace('preparing container');
   const container = createContainer();
@@ -81,6 +85,7 @@ async function prepareContainer(): Promise<Container> {
   return container;
 }
 
+/** Runs the prepare step of the passed tools, or of all tools for `all`. */
 export async function prepareTools(
   tools: string[],
   dryRun = false,
@@ -90,6 +95,10 @@ export async function prepareTools(
   return svc.prepare(tools, dryRun);
 }
 
+/**
+ * Runs the initialize step of the passed tools, or of all prepared tools for
+ * `all`.
+ */
 export async function initializeTools(
   tools: string[],
   dryRun = false,

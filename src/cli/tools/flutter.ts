@@ -15,6 +15,10 @@ import {
 export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
+  /**
+   * Initializes the cache, links the dart and pub cache folders, and turns
+   * off analytics and the welcome message for root and the user.
+   */
   override async prepare(): Promise<void> {
     await this.initialize();
     await prepareDartHome(this.envSvc, this.pathSvc);
@@ -38,6 +42,10 @@ export class FlutterPrepareService extends BasePrepareService {
     );
   }
 
+  /**
+   * Creates the dart and pub cache folders and the flutter settings in the
+   * containerbase cache.
+   */
   override async initialize(): Promise<void> {
     await initDartHome(this.pathSvc);
     await initPubCache(this.pathSvc);
@@ -60,6 +68,7 @@ export class FlutterPrepareService extends BasePrepareService {
 export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 
+  /** The architecture name used by the flutter prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -69,6 +78,10 @@ export class FlutterInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the containerbase flutter prebuild, verified against its
+   * `.sha512`, and extracts it into the tool path.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
@@ -83,15 +96,21 @@ export class FlutterInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: await this.getToolPath() });
   }
 
+  /**
+   * Links the `flutter` binary into the global bin folder, without its
+   * version check.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src, args: '--no-version-check' });
   }
 
+  /** Checks that `flutter --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('flutter', ['--version']);
   }
 
+  /** Returns the tool path, creating it when missing. */
   private async getToolPath(): Promise<string> {
     return await this.pathSvc.ensureToolPath(this.name);
   }

@@ -8,6 +8,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class ApkoInstallService extends BaseInstallService {
   readonly name = 'apko';
 
+  /** The architecture name used by the apko release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +18,10 @@ export class ApkoInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the apko archive from GitHub, verified against the release's
+   * `checksums.txt`, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -51,11 +56,13 @@ export class ApkoInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `apko` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `apko version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['version']);
   }

@@ -7,6 +7,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class BufInstallService extends BaseInstallService {
   readonly name = 'buf';
 
+  /** The architecture name used by the buf release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -16,6 +17,11 @@ export class BufInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the buf archive from GitHub, verified against the release's
+   * `sha256.txt`, and extracts only the `buf` binary into the versioned tool
+   * path.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -47,11 +53,13 @@ export class BufInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `buf` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `buf --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

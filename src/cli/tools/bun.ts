@@ -8,6 +8,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class BunInstallService extends BaseInstallService {
   readonly name = 'bun';
 
+  /** The architecture name used by the bun release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +18,11 @@ export class BunInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the bun archive from GitHub, verified against the release's
+   * `SHASUMS256.txt`, and extracts it into the versioned `bin` folder. On x64
+   * without AVX2 the baseline build is used.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/oven-sh/bun/releases/download/bun-v${version}/`;
     let { ghArch } = this;
@@ -59,12 +65,14 @@ export class BunInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `bun` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `bun --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

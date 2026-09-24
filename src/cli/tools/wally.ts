@@ -8,6 +8,7 @@ import { getDistro, logger } from '../utils/index.ts';
 export class WallyInstallService extends BaseInstallService {
   readonly name = 'wally';
 
+  /** The architecture name used by the wally prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +18,11 @@ export class WallyInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the containerbase wally prebuild, verified against its
+   * `.sha512`, and extracts it into the tool path. Newer ubuntu releases use
+   * the jammy prebuild.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
@@ -43,6 +49,7 @@ export class WallyInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd });
   }
 
+  /** Links the `wally` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = path.join(
       this.pathSvc.versionedToolPath(this.name, version),
@@ -51,6 +58,7 @@ export class WallyInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `wally --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

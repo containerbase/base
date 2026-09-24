@@ -18,6 +18,12 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 
   override readonly parent = 'ruby';
 
+  /**
+   * Installs the gem with the current ruby into a folder per ruby version
+   * below the versioned tool path, from the configured gem registry.
+   *
+   * @throws when the gem install fails
+   */
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
     const args: string[] = [];
@@ -73,15 +79,21 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     await this._postInstall(gem, version, prefix, env);
   }
 
+  /** Whether the version is installed for the current ruby version. */
   override async isInstalled(version: string): Promise<boolean> {
     const ruby = await this.getRubyVersion();
     return this.pathSvc.fileExists(this.getGemSpec(version, ruby));
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /**
+   * Links every executable listed in the gemspec into the global bin folder,
+   * with the gem path extended.
+   */
   override async postInstall(version: string): Promise<void> {
     const ruby = await this.getRubyVersion();
     const vtPath = this.pathSvc.versionedToolPath(this.name, version);
@@ -106,10 +118,12 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     }
   }
 
+  /** Checks that the gem binary runs with `--version`. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
 
+  /** Runs tool specific steps after the gem install, none by default. */
   protected _postInstall(
     _gem: string,
     _version: string,
@@ -119,12 +133,18 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     // no-op
   }
 
+  /** Path of the current ruby's `gem` binary. */
   private async getRubyGem(): Promise<string> {
     const rubyVersion = await this.getRubyVersion();
 
     return join(this.pathSvc.versionedToolPath('ruby', rubyVersion), 'bin/gem');
   }
 
+  /**
+   * The current ruby version.
+   *
+   * @throws when ruby isn't installed
+   */
   private async getRubyVersion(): Promise<string> {
     const rubyVersion = await this.versionSvc.getCurrent('ruby');
 
@@ -134,6 +154,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     return rubyVersion.tool.version;
   }
 
+  /** Path of the installed gem's gemspec. */
   private getGemSpec(version: string, ruby: string): string {
     return join(
       this.pathSvc.versionedToolPath(this.name, version),
@@ -146,6 +167,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 
 @injectable()
 export abstract class RubyGemVersionResolver extends ToolVersionResolver {
+  /** Resolves a missing version or `latest` to the latest rubygems release. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (version === undefined || version === 'latest') {
       const meta = RubyGemJson.parse(

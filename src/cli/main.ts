@@ -14,6 +14,10 @@ declare global {
   var CONTAINERBASE_VERSION: string | undefined;
 }
 
+/**
+ * The cli entry point: sets up the proxy, validates the system, and runs the
+ * commands of the mode the binary was called as.
+ */
 export async function main(): Promise<void> {
   logger.trace({ argv0, argv, version }, 'main');
   bootstrap();

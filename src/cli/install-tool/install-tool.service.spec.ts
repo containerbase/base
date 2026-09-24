@@ -33,10 +33,12 @@ vi.mock('../utils/index.ts', async (importActual) => ({
 @injectable()
 @injectFromHierarchy()
 abstract class TestInstallService extends BaseInstallService {
+  /** Does nothing, for tests. */
   override install(_version: string): Promise<void> {
     return Promise.resolve();
   }
 
+  /** Does nothing, for tests. */
   override link(_version: string): Promise<void> {
     return Promise.resolve();
   }

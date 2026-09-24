@@ -15,11 +15,17 @@ import {
 @injectFromHierarchy()
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
+
+  /** Initializes the cache and links the user's npm folders to it. */
   override async prepare(): Promise<void> {
     await this.initialize();
     await prepareSymlinks(this.envSvc, this.pathSvc);
   }
 
+  /**
+   * Creates the npm cache and `.npmrc`, and exports the node env with update
+   * notices and funding messages turned off and the openssl ca store used.
+   */
   override async initialize(): Promise<void> {
     await prepareNpmCache(this.pathSvc);
     await prepareNpmrc(this.pathSvc);
@@ -49,6 +55,7 @@ export class NodePrepareService extends BasePrepareService {
 export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
 
+  /** The architecture name used by the nodejs.org archives. */
   private get nodeArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -58,6 +65,7 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** The architecture name used by the node prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -67,6 +75,11 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /**
+   * Installs the containerbase node prebuild, a distro specific one, or the
+   * nodejs.org archive, each verified against its checksum. Node below 15
+   * gets the latest node-gyp.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     let filename = `${version}/${name}-${version}-${this.ghArch}.tar.xz`;
@@ -135,10 +148,15 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /**
+   * Links the `node`, `npm` and `npx` binaries, and `corepack` when bundled,
+   * into the global bin folder.
+   */
   override async postInstall(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -151,6 +169,7 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** Checks that `node`, `npm` and a bundled `corepack` run. */
   override async test(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 

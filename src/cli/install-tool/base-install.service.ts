@@ -66,6 +66,7 @@ export abstract class BaseInstallService {
    */
   readonly type?: InstallToolType;
 
+  /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;
 
   /**
@@ -75,20 +76,25 @@ export abstract class BaseInstallService {
     return !!(await this.pathSvc.findVersionedToolPath(this.name, version));
   }
 
+  /** Whether the tool was already initialized in this container. */
   async isInitialized(): Promise<boolean> {
     return await this.pathSvc.isInitialized(this.name);
   }
 
+  /** Whether the tool was already prepared in this image. */
   async isPrepared(): Promise<boolean> {
     return await this.pathSvc.isPrepared(this.name);
   }
 
+  /** Links the binaries of the installed version into the global bin folder. */
   abstract link(version: string): Promise<void>;
 
+  /** Whether the tool has an initialize step, see `NoInitTools`. */
   needsInitialize(): boolean {
     return !NoInitTools.includes(this.name);
   }
 
+  /** Whether the tool has a prepare step, see `NoPrepareTools`. */
   needsPrepare(): boolean {
     return !NoPrepareTools.includes(this.name);
   }
@@ -102,14 +108,20 @@ export abstract class BaseInstallService {
     return Promise.resolve();
   }
 
+  /**
+   * Does nothing by default. Tools override it to check that the installed
+   * version runs.
+   */
   test(_version: string): Promise<void> {
     return Promise.resolve();
   }
 
+  /** The tool name, for logging. */
   toString(): string {
     return this.name;
   }
 
+  /** Removes the versioned tool path of the version. */
   async uninstall(version: string): Promise<void> {
     await fs.rm(this.pathSvc.versionedToolPath(this.name, version), {
       recursive: true,
@@ -117,6 +129,7 @@ export abstract class BaseInstallService {
     });
   }
 
+  /** Whether the version can be installed, by default any semver version. */
   validate(version: string): Promise<boolean> {
     return Promise.resolve(isValid(version));
   }
@@ -168,10 +181,12 @@ export abstract class BaseInstallService {
     return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
   }
 
+  /** Creates a shell wrapper in the global bin folder for a tool binary. */
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
   }
 
+  /** Runs a command, by default in the temp folder. */
   protected _spawn(
     command: string,
     args: string[],

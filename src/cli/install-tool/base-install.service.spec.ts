@@ -16,16 +16,19 @@ vi.mock('execa', () => ({ execa: execaMock }));
 class DummyInstallService extends BaseInstallService {
   readonly name: string = 'dummy';
 
+  /** Does nothing, for tests. */
   override install(_version: string): Promise<void> {
     return Promise.resolve();
   }
 
+  /** Links the versioned tool path. */
   override link(version: string): Promise<void> {
     return this.shellwrapper({
       srcDir: this.pathSvc.versionedToolPath(this.name, version),
     });
   }
 
+  /** Exposes the protected `_spawn` to the tests. */
   run(command: string, args: string[]): Promise<unknown> {
     return this._spawn(command, args);
   }

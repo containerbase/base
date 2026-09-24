@@ -10,6 +10,10 @@ export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
   override readonly parent = 'php';
 
+  /**
+   * Downloads the containerbase composer prebuild, verified against its
+   * `.sha512`, and extracts it into the tool path.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-${version}.tar.xz`;
@@ -26,11 +30,13 @@ export class ComposerInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path });
   }
 
+  /** Links the `composer` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `composer --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('composer', ['--version']);
   }
@@ -41,6 +47,7 @@ export class ComposerInstallService extends BaseInstallService {
 export class ComposerVersionResolver extends ToolVersionResolver {
   readonly tool = 'composer';
 
+  /** Resolves a missing version or `latest` to the latest composer prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.http.get(

@@ -20,6 +20,10 @@ export class CompressionService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
 
+  /**
+   * Extracts an archive with `bsdtar` into `cwd`, owned by the configured
+   * user, optionally stripping leading path components or limiting to files.
+   */
   async extract({
     file,
     cwd,

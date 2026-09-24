@@ -12,6 +12,10 @@ export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
   override readonly parent = 'java';
 
+  /**
+   * Downloads the gradle distribution, verified against its `.sha256`, and
+   * extracts it into the versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-${version}-bin.zip`;
@@ -32,15 +36,18 @@ export class GradleInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
+  /** Links the `gradle` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `gradle --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('gradle', ['--version']);
   }
 
+  /** Accepts any version semver can coerce, eg. `8.5`. */
   override validate(version: string): Promise<boolean> {
     return Promise.resolve(semverCoerce(version) !== null);
   }
@@ -51,6 +58,7 @@ export class GradleInstallService extends BaseInstallService {
 export class GradleVersionResolver extends ToolVersionResolver {
   readonly tool = 'gradle';
 
+  /** Resolves a missing version or `latest` from services.gradle.org. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return GradleVersionData.parse(

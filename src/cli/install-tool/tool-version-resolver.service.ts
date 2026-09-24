@@ -6,10 +6,15 @@ import {
 
 @injectable()
 export class ToolVersionResolverService {
+  /** Takes all registered tool version resolvers. */
   constructor(
     @multiInject(TOOL_VERSION_RESOLVER) private resolver: ToolVersionResolver[],
   ) {}
 
+  /**
+   * Resolves the version with the tool's resolver, or returns it unchanged
+   * when the tool has none.
+   */
   async resolve(
     tool: string,
     version: string | undefined,

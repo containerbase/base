@@ -15,6 +15,10 @@ export class ConanPrepareService extends BasePrepareService {
 
   override readonly name: string = 'conan';
 
+  /**
+   * Installs the build tools conan needs, initializes the cache and links
+   * `~/.conan2` to it.
+   */
   override async prepare(): Promise<void> {
     await this.aptSvc.install('cmake', 'gcc', 'g++', 'make', 'perl');
 
@@ -26,6 +30,10 @@ export class ConanPrepareService extends BasePrepareService {
     );
   }
 
+  /**
+   * Writes the default conan profile for the architecture and the gcc of the
+   * current ubuntu release to the containerbase cache.
+   */
   override async initialize(): Promise<void> {
     const distro = await getDistro();
     const profile = fileContent`
@@ -57,6 +65,7 @@ export class ConanVersionResolver extends PipVersionResolver {
   override tool = 'conan';
 }
 
+/** The conan name of the architecture. */
 function getArchitecture(arch: string): string {
   switch (arch) {
     case 'arm64':
@@ -69,6 +78,11 @@ function getArchitecture(arch: string): string {
   throw new Error(`Unsupported architecture: ${arch}`);
 }
 
+/**
+ * The gcc major version shipped with the ubuntu release.
+ *
+ * @throws on an unsupported distro
+ */
 function getCompilerVersion(distro: Distro): string {
   switch (distro.versionCode) {
     case 'jammy':

@@ -8,6 +8,12 @@ import { PipVersionResolver } from './pip.ts';
 export class PoetryVersionResolver extends PipVersionResolver {
   override tool = 'poetry';
 
+  /**
+   * Resolves a missing version or `latest` to the newest poetry release
+   * supported by `poetry-plugin-pypi-mirror`.
+   *
+   * @throws when the plugin has no poetry requirement
+   */
   override async resolve(
     version: string | undefined,
   ): Promise<string | undefined> {
