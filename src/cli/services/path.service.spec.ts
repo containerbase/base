@@ -265,6 +265,22 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.createDir(dir)).toBeUndefined();
   });
 
+  test('createDir: throws when the path is no folder', async () => {
+    const dir = rootPath('env123/dir');
+    const link = rootPath('env123/link');
+    const file = rootPath('env123/file');
+    await pathSvc.createDir(dir);
+    await fs.symlink(dir, link);
+    await writeFile(file, '');
+
+    await expect(pathSvc.createDir(link)).rejects.toThrow(
+      `Path exists and is not a directory: ${link}`,
+    );
+    await expect(pathSvc.createDir(file)).rejects.toThrow(
+      `Path exists and is not a directory: ${file}`,
+    );
+  });
+
   test('toolInit', async () => {
     expect(pathSvc.toolInitPath('node')).toBe(
       rootPath('tmp/containerbase/tool.init.d/node'),
