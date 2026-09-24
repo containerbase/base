@@ -12,6 +12,10 @@ const checksumsSince = '0.25.0';
 export class VendirInstallService extends BaseInstallService {
   readonly name = 'vendir';
 
+  /**
+   * Downloads the vendir binary from GitHub into the versioned `bin` folder,
+   * verified against `checksums.txt` from v0.25.0.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/vmware-tanzu/carvel-vendir/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}`;
@@ -42,12 +46,14 @@ export class VendirInstallService extends BaseInstallService {
     await fs.chmod(target, this.envSvc.umask);
   }
 
+  /** Links the `vendir` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `vendir --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
