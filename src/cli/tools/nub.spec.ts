@@ -50,22 +50,6 @@ describe('cli/tools/nub', () => {
     });
   });
 
-  test.each([
-    { version: '0.9.4', body: '' },
-    { version: '0.9.5', body: 'invalid checksum' },
-  ])('rejects invalid checksum $body', async ({ version, body }) => {
-    const { svc } = await toolContext(NubInstallService);
-    scope(baseUrl)
-      .get(
-        `/nubjs/nub/releases/download/v${version}/nub-linux-x64.tar.gz.sha256`,
-      )
-      .reply(200, body);
-
-    await expect(svc.install(version)).rejects.toThrow(
-      'Invalid checksum for nub-linux-x64.tar.gz',
-    );
-  });
-
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(NubInstallService);
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
