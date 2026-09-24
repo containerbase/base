@@ -271,9 +271,10 @@ export class PathService {
   }
 
   /**
-   * Exports the variables to the global env file and the current process,
-   * keeping values that are already set. With `nonRootOnly` they only apply
-   * to non-root users and are not set in the current process.
+   * Exports the variables to the global env file and sets them in the current
+   * process. The env file keeps values that are already set when it is
+   * sourced. With `nonRootOnly` they only apply to non-root users and are not
+   * set in the current process.
    */
   async exportEnv(
     values: Record<string, string>,
@@ -333,9 +334,10 @@ export class PathService {
   }
 
   /**
-   * Writes the variables to the tool's `env.sh` and the current process,
-   * keeping values that are already set. With `nonRootOnly` they only apply
-   * to non-root users and are not set in the current process.
+   * Writes the variables to the tool's `env.sh` and sets them in the current
+   * process. The `env.sh` keeps values that are already set when it is
+   * sourced. With `nonRootOnly` they only apply to non-root users and are not
+   * set in the current process.
    */
   async exportToolEnv(
     tool: string,

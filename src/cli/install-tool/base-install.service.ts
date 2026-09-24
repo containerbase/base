@@ -108,7 +108,10 @@ export abstract class BaseInstallService {
     return Promise.resolve();
   }
 
-  /** Checks that the installed version runs. */
+  /**
+   * Does nothing by default. Tools override it to check that the installed
+   * version runs.
+   */
   test(_version: string): Promise<void> {
     return Promise.resolve();
   }
