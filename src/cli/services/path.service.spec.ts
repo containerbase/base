@@ -158,8 +158,9 @@ describe('cli/services/path.service', () => {
 
     expect(path).toBe(rootPath('opt/containerbase/tools/jb/0.6.0/lib/bin'));
     // tests don't run as root, so the umask is group writable
-    expect((await stat(path)).mode & fileRights).toBe(0o775);
-    expect((await stat(join(path, '..'))).mode & fileRights).toBe(0o775);
+    const mode = platform() === 'win32' ? 0 : 0o775;
+    expect((await stat(path)).mode & fileRights).toBe(mode);
+    expect((await stat(join(path, '..'))).mode & fileRights).toBe(mode);
     // an existing folder is fine
     await expect(
       pathSvc.createVersionedToolPath('jb', '0.6.0', 'lib', 'bin'),
