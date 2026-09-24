@@ -9,6 +9,7 @@ import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
 export class RustPrepareService extends BasePrepareService {
   override readonly name = 'rust';
 
+  /** Initializes the cache and links `~/.cargo` to it. */
   override async prepare(): Promise<void> {
     await this.initialize();
 
@@ -18,6 +19,7 @@ export class RustPrepareService extends BasePrepareService {
     );
   }
 
+  /** Creates the `.cargo` folder in the containerbase cache. */
   override async initialize(): Promise<void> {
     await this.pathSvc.createDir(join(this.pathSvc.cachePath, '.cargo'));
   }
@@ -28,10 +30,17 @@ export class RustPrepareService extends BasePrepareService {
 export class RustInstallService extends BaseInstallService {
   override readonly name = 'rust';
 
+  /** The architecture name used by the rust release archives. */
   private get rustArch(): string {
     return this.envSvc.arch === 'arm64' ? 'aarch64' : 'x86_64';
   }
 
+  /**
+   * Downloads the rust archive from static.rust-lang.org, verified against its
+   * `.sha256`, and runs its `install.sh` for cargo, rustc and the standard
+   * library into the versioned tool path. Uses the `.xz` archive when there
+   * is one, else the `.gz`.
+   */
   override async install(version: string): Promise<void> {
     const target = `${this.rustArch}-unknown-linux-gnu`;
     let filename = `rust-${version}-${target}.tar`;
@@ -71,6 +80,7 @@ export class RustInstallService extends BaseInstallService {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 
+  /** Links the `cargo` and `rustc` binaries into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -78,13 +88,14 @@ export class RustInstallService extends BaseInstallService {
     await this.shellwrapper({ name: 'rustc', srcDir: src });
   }
 
+  /** Checks that `cargo --version` and `rustc --version` run. */
   override async test(_version: string): Promise<void> {
     await this._spawn('cargo', ['--version']);
     await this._spawn('rustc', ['--version']);
   }
 
+  /** Accepts `beta`, `nightly`, `nightly-<date>` and semver versions. */
   override validate(version: string): Promise<boolean> {
-    // allow beta and nightly versions
     if (
       version === 'beta' ||
       version === 'nightly' ||
