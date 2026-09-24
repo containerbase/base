@@ -30,10 +30,12 @@ class DummyInstallService extends BaseInstallService {
     return this._spawn(command, args);
   }
 
+  /** Exposes the protected `getChecksum` to the tests. */
   checksum(url: string): Promise<string> {
     return this.getChecksum(url);
   }
 
+  /** Exposes the protected `findChecksum` to the tests. */
   find(url: string, filename: string): Promise<string> {
     return this.findChecksum(url, filename);
   }
