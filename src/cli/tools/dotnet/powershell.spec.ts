@@ -128,7 +128,7 @@ describe('cli/tools/dotnet/powershell', () => {
         );
 
       await expect(svc.install('7.6.4')).rejects.toThrow(
-        'Checksum for powershell-7.6.4-linux-x64.tar.gz not found',
+        `Checksum not found in ${baseUrl}${releaseUrl}/v7.6.4/hashes.sha256 for powershell-7.6.4-linux-x64.tar.gz`,
       );
     });
 

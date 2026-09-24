@@ -68,17 +68,10 @@ export class PowershellInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/PowerShell/PowerShell/releases/download/v${version}/`;
     const filename = `${this.name}-${version}-linux-${this.ghArch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}hashes.sha256`,
-    });
-    const expectedChecksum = readChecksums(await fs.readFile(checksumFile))
-      .split('\n')
-      .map((l) => l.trim())
-      .find((l) => l.endsWith(filename))
-      ?.split(' ')[0];
-    if (!expectedChecksum) {
-      throw new Error(`Checksum for ${filename} not found`);
-    }
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}hashes.sha256`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
@@ -107,15 +100,4 @@ export class PowershellInstallService extends BaseInstallService {
   override async test(_version: string): Promise<void> {
     await this._spawn('pwsh', ['-version']);
   }
-}
-
-/**
- * Decodes the release's checksum file, which is UTF-16LE with a BOM, falling
- * back to UTF-8 without one.
- */
-function readChecksums(buf: Buffer): string {
-  if (buf[0] === 0xff && buf[1] === 0xfe) {
-    return buf.toString('utf16le');
-  }
-  return buf.toString('utf8');
 }
