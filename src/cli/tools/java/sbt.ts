@@ -39,13 +39,7 @@ export class SbtInstallService extends BaseInstallService {
   override async install(version: string): Promise<void> {
     const url = `https://github.com/sbt/sbt/releases/download/v${version}/${this.name}-${version}.tgz`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).split(
-      ' ',
-    )[0];
-    if (!expectedChecksum) {
-      throw new Error(`Checksum for ${url} not found`);
-    }
+    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
 
     const file = await this.http.download({
       url,

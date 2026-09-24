@@ -78,7 +78,9 @@ describe('cli/tools/java/sbt', () => {
         .get(`${releaseUrl}/v1.11.0/sbt-1.11.0.tgz.sha256`)
         .reply(200, '');
 
-      await expect(svc.install('1.11.0')).rejects.toThrow('not found');
+      await expect(svc.install('1.11.0')).rejects.toThrow(
+        `Checksum not found in ${baseUrl}${releaseUrl}/v1.11.0/sbt-1.11.0.tgz.sha256`,
+      );
     });
 
     test('install: rejects a checksum mismatch', async () => {
