@@ -24,6 +24,11 @@ export class PowershellPrepareService extends BasePrepareService {
 
   override readonly name = 'powershell';
 
+  /**
+   * Installs the apt packages powershell needs on the current ubuntu release.
+   *
+   * @throws on an unsupported distro
+   */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
     const packages = distroPackages[distro.versionCode];
@@ -50,10 +55,15 @@ export class PowershellPrepareService extends BasePrepareService {
 export class PowershellInstallService extends BaseInstallService {
   override readonly name = 'powershell';
 
+  /** The architecture name used by the powershell release assets. */
   private get ghArch(): string {
     return this.envSvc.arch === 'arm64' ? 'arm64' : 'x64';
   }
 
+  /**
+   * Downloads the powershell archive from GitHub, verified against the
+   * release's `hashes.sha256`, and extracts it into the versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/PowerShell/PowerShell/releases/download/v${version}/`;
     const filename = `${this.name}-${version}-linux-${this.ghArch}.tar.gz`;
@@ -85,6 +95,7 @@ export class PowershellInstallService extends BaseInstallService {
     await fs.chmod(join(path, 'pwsh'), this.envSvc.umask);
   }
 
+  /** Links the `pwsh` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     await this.shellwrapper({
       name: 'pwsh',
@@ -92,12 +103,16 @@ export class PowershellInstallService extends BaseInstallService {
     });
   }
 
+  /** Checks that `pwsh -version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('pwsh', ['-version']);
   }
 }
 
-/** The checksum file is UTF-16LE with a BOM. */
+/**
+ * Decodes the release's checksum file, which is UTF-16LE with a BOM, falling
+ * back to UTF-8 without one.
+ */
 function readChecksums(buf: Buffer): string {
   if (buf[0] === 0xff && buf[1] === 0xfe) {
     return buf.toString('utf16le');
