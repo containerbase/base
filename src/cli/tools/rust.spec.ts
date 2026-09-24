@@ -102,7 +102,9 @@ describe('cli/tools/rust', () => {
         .get(`${file}.sha256`)
         .reply(200, '');
 
-      await expect(svc.install('1.97.0')).rejects.toThrow('not found');
+      await expect(svc.install('1.97.0')).rejects.toThrow(
+        `Checksum not found in ${baseUrl}${file}.sha256`,
+      );
     });
 
     test('install: rejects a checksum mismatch', async () => {
