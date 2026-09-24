@@ -82,7 +82,7 @@ describe('cli/tools/vendir', () => {
       .reply(200, `${checksum('other')}  vendir-darwin-amd64\n`);
 
     await expect(svc.install('0.26.0')).rejects.toThrow(
-      'Checksum for vendir-linux-amd64 not found',
+      `Checksum not found in ${baseUrl}${releaseUrl}/v0.26.0/checksums.txt for vendir-linux-amd64`,
     );
   });
 
