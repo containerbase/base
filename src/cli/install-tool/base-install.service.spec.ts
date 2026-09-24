@@ -177,12 +177,28 @@ describe('cli/install-tool/base-install.service', () => {
       ).resolves.toBe('def');
     });
 
+    test.each(['utf8', 'utf16le'] as const)(
+      'strips the BOM of a %s list',
+      async (encoding) => {
+        const bom = String.fromCharCode(0xfeff);
+        scope(baseUrl)
+          .get(`/${encoding}/hashes.sha256`)
+          .reply(200, Buffer.from(`${bom}abc *tool-amd64\r\n`, encoding));
+
+        await expect(
+          svc.find(`${baseUrl}/${encoding}/hashes.sha256`, 'tool-amd64'),
+        ).resolves.toBe('abc');
+      },
+    );
+
     test('throws on a missing checksum', async () => {
       scope(baseUrl).get('/missing/SHA256SUMS').reply(200, 'abc  tool-arm64\n');
 
       await expect(
         svc.find(`${baseUrl}/missing/SHA256SUMS`, 'tool-amd64'),
-      ).rejects.toThrow('Checksum for tool-amd64 not found');
+      ).rejects.toThrow(
+        `Checksum not found in ${baseUrl}/missing/SHA256SUMS for tool-amd64`,
+      );
     });
   });
 

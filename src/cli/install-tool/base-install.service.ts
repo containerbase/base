@@ -128,8 +128,7 @@ export abstract class BaseInstallService {
    * @throws when the file has no checksum
    */
   protected async getChecksum(url: string): Promise<string> {
-    const file = await this.http.download({ url });
-    const checksum = (await fs.readFile(file, 'utf-8')).trim().split(/\s+/)[0];
+    const checksum = (await this.readChecksumFile(url)).trim().split(/\s+/)[0];
     if (!checksum) {
       throw new Error(`Checksum not found in ${url}`);
     }
@@ -144,15 +143,28 @@ export abstract class BaseInstallService {
    * @throws when the list has no checksum for `filename`
    */
   protected async findChecksum(url: string, filename: string): Promise<string> {
-    const file = await this.http.download({ url });
-    const checksum = (await fs.readFile(file, 'utf-8'))
+    const checksum = (await this.readChecksumFile(url))
       .split('\n')
       .find((l) => l.trimEnd().endsWith(filename))
       ?.split(/\s+/)[0];
     if (!checksum) {
-      throw new Error(`Checksum for ${filename} not found in ${url}`);
+      throw new Error(`Checksum not found in ${url} for ${filename}`);
     }
     return checksum;
+  }
+
+  /**
+   * Downloads a checksum file and returns its text without a leading BOM.
+   * Files starting with a UTF-16LE BOM, like the PowerShell `hashes.sha256`,
+   * are decoded as UTF-16LE, all others as UTF-8.
+   */
+  private async readChecksumFile(url: string): Promise<string> {
+    const buf = await fs.readFile(await this.http.download({ url }));
+    const text =
+      buf[0] === 0xff && buf[1] === 0xfe
+        ? buf.toString('utf16le')
+        : buf.toString('utf8');
+    return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
   }
 
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {

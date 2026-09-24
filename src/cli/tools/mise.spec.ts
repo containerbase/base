@@ -62,7 +62,7 @@ describe('cli/tools/mise', () => {
       .reply(200, `${checksum(tarball)}  ./mise-v2026.2.15-linux-s390x.tar.xz`);
 
     await expect(svc.install('2026.2.15')).rejects.toThrow(
-      'Checksum for ./mise-v2026.2.15-linux-x64.tar.xz not found',
+      `Checksum not found in ${baseUrl}/jdx/mise/releases/download/v2026.2.15/SHASUMS256.txt for ./mise-v2026.2.15-linux-x64.tar.xz`,
     );
   });
 
