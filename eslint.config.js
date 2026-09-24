@@ -14,6 +14,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist/',
+      'packages/*/dist/',
       'tmp/',
       'bin/',
       'coverage/',

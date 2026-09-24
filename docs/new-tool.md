@@ -62,6 +62,7 @@ Files to change:
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to **both** `matchDepNames` lists (the "Don't separate minor and patch updates in tests" rule and the "Automerge test selected minor updates in tests" rule).
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
 
 Note the arm64 test files use one image stage per tool, terminating in a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage - add both halves.
 
@@ -219,6 +220,7 @@ Resolvers are bound with `container.bind(TOOL_VERSION_RESOLVER).to(...)` in the 
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to both `matchDepNames` lists.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
 
 > [!NOTE]
 > You'll notice that we lean on integration tests with Docker instead of unit tests.

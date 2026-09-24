@@ -18,5 +18,12 @@
     },
     "allowImportingTsExtensions": true
   },
-  "exclude": ["node_modules", "bin", "dist", "coverage", "html"]
+  "exclude": [
+    "node_modules",
+    "bin",
+    "dist",
+    "packages/*/dist",
+    "coverage",
+    "html"
+  ]
 }

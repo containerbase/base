@@ -1,0 +1,48 @@
+{
+  "name": "@containerbase/base",
+  "version": "0.0.0-semantic-release",
+  "description": "Metadata about the tools supported by containerbase",
+  "keywords": [
+    "containerbase",
+    "tools"
+  ],
+  "homepage": "https://github.com/containerbase/base#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/containerbase/base.git",
+    "directory": "packages/base"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./zod": {
+      "types": "./dist/zod.d.ts",
+      "default": "./dist/zod.js"
+    },
+    "./tools.json": "./data/tools.json",
+    "./tools.schema.json": "./data/tools.schema.json"
+  },
+  "files": [
+    "data",
+    "dist"
+  ],
+  "devDependencies": {
+    "zod": "4.6.2"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

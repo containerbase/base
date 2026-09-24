@@ -18,6 +18,7 @@ import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
 import {
   installTool,
   linkTool,
+  listSupportedTools,
   resolveVersion,
   uninstallTool,
 } from './index.ts';
@@ -141,6 +142,30 @@ describe('cli/install-tool/index', () => {
       await expect(
         installTool('poetry', '1.0.0', false, 'pip'),
       ).rejects.toThrow('no --version flag');
+    });
+  });
+
+  describe('listSupportedTools', () => {
+    test('works', async () => {
+      const tools = await listSupportedTools();
+      const names = tools.map((t) => t.name);
+
+      expect(names).toEqual(
+        [...names].sort((a, b) => a.localeCompare(b, 'en', { numeric: true })),
+      );
+      // v2 shell tools are supported
+      expect(names).toContain('dummy');
+      // v1 shell tools need root and can't be installed on the fly
+      expect(names).not.toContain('leg');
+
+      expect(tools).toEqual(
+        expect.arrayContaining([
+          { name: 'apko' },
+          { name: 'maven', parent: 'java' },
+          { name: 'kas', type: 'pip', parent: 'python' },
+          { name: 'bower', type: 'npm', parent: 'node', deprecated: true },
+        ]),
+      );
     });
   });
 

@@ -39,7 +39,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { ResolverMap } from '../tools/index.ts';
+import { DeprecatedTools, ResolverMap } from '../tools/index.ts';
 import {
   AndroidSdkCmdlineToolsInstallService,
   AndroidSdkCmdlineToolsVersionResolver,
@@ -115,6 +115,7 @@ import { VendirInstallService } from '../tools/vendir.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import { type InstallToolType, logger } from '../utils/index.ts';
 import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
+import type { BaseInstallService } from './base-install.service.ts';
 import {
   V1ToolInstallService,
   V2ToolInstallService,
@@ -242,6 +243,87 @@ function prepareResolveContainer(): Container {
 
   logger.trace('preparing container done');
   return container;
+}
+
+/**
+ * The parent tool a dynamically installed tool is installed for.
+ */
+const dynamicParents: Record<InstallToolType, string> = {
+  gem: 'ruby',
+  npm: 'node',
+  pip: 'python',
+};
+
+/**
+ * A tool `install-tool` accepts by name.
+ */
+export interface SupportedTool {
+  /**
+   * Tool name
+   */
+  name: string;
+  /**
+   * The installer used for this tool, only set for dynamically installed tools.
+   */
+  type?: InstallToolType;
+  /**
+   * The tool this tool depends on, eg. composer depends on php.
+   */
+  parent?: string;
+  /**
+   * Deprecated tools should not be used any more.
+   */
+  deprecated?: true;
+}
+
+/**
+ * Adds the tools which are implicit mapped to `install-<type>`, they have no
+ * install service of their own.
+ */
+function addDynamicTools(
+  tools: Map<string, SupportedTool>,
+  map: Record<string, InstallToolType>,
+  deprecated?: true,
+): void {
+  for (const [name, type] of Object.entries(map)) {
+    tools.set(name, {
+      name,
+      type,
+      parent: dynamicParents[type],
+      ...(deprecated && { deprecated }),
+    });
+  }
+}
+
+/**
+ * Lists all tools `install-tool` supports, sorted by name.
+ *
+ * Tools installed with an arbitrary package name via `install-gem`,
+ * `install-npm` or `install-pip` are not included, as that list is unbounded.
+ * The v1 shell tools are not included either, they need root privileges and
+ * can't be installed on the fly.
+ */
+export async function listSupportedTools(): Promise<SupportedTool[]> {
+  const container = await prepareInstallContainer();
+  const tools = new Map<string, SupportedTool>();
+
+  // the implicit mappings first, a tool with an install service overrides them
+  addDynamicTools(tools, ResolverMap);
+  addDynamicTools(tools, DeprecatedTools, true);
+
+  const toolSvcs =
+    await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN);
+  for (const svc of toolSvcs) {
+    tools.set(svc.name, {
+      name: svc.name,
+      ...(svc.parent && { parent: svc.parent }),
+    });
+  }
+
+  // explicit locale, the generated data must not depend on the system locale
+  return Array.from(tools.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { numeric: true }),
+  );
 }
 
 export async function installTool(

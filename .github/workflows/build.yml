@@ -52,6 +52,7 @@ jobs:
           pnpm lint:markdown
           pnpm lint:types
           pnpm lint:schema
+          pnpm lint:tools
           pnpm lint:versions
 
       - name: shellcheck
