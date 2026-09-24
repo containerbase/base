@@ -22,11 +22,11 @@ export class BazeliskInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
 
     const binarypath = join(path, 'bazelisk');
     await fs.copyFile(file, binarypath);

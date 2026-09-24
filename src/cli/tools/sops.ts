@@ -29,11 +29,11 @@ export class SopsInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     await fs.copyFile(file, join(path, this.name));
     await fs.chmod(join(path, this.name), this.envSvc.umask);
   }

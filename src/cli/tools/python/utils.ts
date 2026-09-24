@@ -56,7 +56,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
 
     prefix = path.join(prefix, pythonVersion);
-    await fs.mkdir(prefix);
+    await this.pathSvc.createDir(prefix);
     await this.createVirtualenv(prefix, env);
     await this.installPackage(version, pythonVersion, env, prefix);
   }

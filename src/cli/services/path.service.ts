@@ -133,14 +133,23 @@ export class PathService {
     return toolPath;
   }
 
-  /** Creates the versioned tool path with the configured umask and returns it. */
+  /**
+   * Creates the versioned tool path and the optional sub folders below it,
+   * eg. `bin`, all owned by the configured user with the configured umask.
+   * Returns the innermost path.
+   */
   async createVersionedToolPath(
     tool: string,
     version: string,
+    ...subPaths: string[]
   ): Promise<string> {
-    const toolPath = this.versionedToolPath(tool, version);
-    await this.createDir(toolPath, this.envSvc.umask);
-    return toolPath;
+    let path = this.versionedToolPath(tool, version);
+    await this.createDir(path, this.envSvc.umask);
+    for (const sub of subPaths) {
+      path = join(path, sub);
+      await this.createDir(path, this.envSvc.umask);
+    }
+    return path;
   }
 
   /**
