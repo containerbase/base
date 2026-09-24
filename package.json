@@ -111,7 +111,7 @@
     "markdownlint": "*",
     "thread-stream": "*"
   },
-  "packageManager": "pnpm@11.26.0",
+  "packageManager": "pnpm@11.27.1",
   "engines": {
     "node": ">=24.10.0",
     "pnpm": "^11.0.0"
