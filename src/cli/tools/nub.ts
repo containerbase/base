@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -22,13 +21,7 @@ export class NubInstallService extends BaseInstallService {
     const filename = `nub-linux-${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha256` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .trim()
-      .split(/\s+/)[0];
-    if (!expectedChecksum || !/^[a-f0-9]{64}$/i.test(expectedChecksum)) {
-      throw new Error(`Invalid checksum for ${filename}`);
-    }
+    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
 
     const file = await this.http.download({
       url,
