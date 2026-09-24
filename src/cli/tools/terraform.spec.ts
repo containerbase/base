@@ -63,7 +63,7 @@ describe('cli/tools/terraform', () => {
       .reply(200, `${checksum('other')}  terraform_1.16.0_linux_arm.zip\n`);
 
     await expect(svc.install('1.16.0')).rejects.toThrow(
-      'Checksum for terraform_1.16.0_linux_amd64.zip not found',
+      `Checksum not found in ${baseUrl}/terraform/1.16.0/terraform_1.16.0_SHA256SUMS for terraform_1.16.0_linux_amd64.zip`,
     );
   });
 
