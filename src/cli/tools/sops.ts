@@ -12,13 +12,10 @@ export class SopsInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/getsops/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux.${this.envSvc.arch}`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}${this.name}-v${version}.checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}${this.name}-v${version}.checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

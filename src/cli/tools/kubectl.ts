@@ -12,14 +12,9 @@ export class KubectlInstallService extends BaseInstallService {
     const baseUrl = `https://dl.k8s.io/release/v${version}/bin/linux/${this.envSvc.arch}/`;
     const filename = this.name;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}${filename}.sha256`,
-      fileName: `${filename}-v${version}-${this.envSvc.arch}.sha256`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.getChecksum(
+      `${baseUrl}${filename}.sha256`,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

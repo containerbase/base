@@ -16,13 +16,10 @@ export class FluxInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/fluxcd/flux2/releases/download/v${version}/`;
     const filename = `flux_${version}_linux_${this.arch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}flux_${version}_checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}flux_${version}_checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

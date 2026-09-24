@@ -34,13 +34,10 @@ export class BunInstallService extends BaseInstallService {
 
     const filename = `bun-linux-${ghArch}.zip`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}SHASUMS256.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}SHASUMS256.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

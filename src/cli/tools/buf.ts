@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -26,13 +25,10 @@ export class BufInstallService extends BaseInstallService {
 
     const filename = `buf-Linux-${this.ghArch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}sha256.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}sha256.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

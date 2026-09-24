@@ -12,13 +12,10 @@ export class DevboxInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/jetify-com/devbox/releases/download/${version}/`;
     const filename = `devbox_${version}_linux_${this.envSvc.arch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

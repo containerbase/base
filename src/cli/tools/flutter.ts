@@ -74,8 +74,7 @@ export class FlutterInstallService extends BaseInstallService {
     const filename = `${name}-${version}-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
 
-    const checksumFile = await this.http.download({ url: `${url}.sha512` });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
     const file = await this.http.download({
       url,
       checksumType: 'sha512',

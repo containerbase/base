@@ -27,13 +27,7 @@ export class DenoInstallService extends BaseInstallService {
     const filename = `deno-${this.ghArch}-unknown-linux-gnu.zip`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${url}.sha256sum`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
 
     const file = await this.http.download({
       url,

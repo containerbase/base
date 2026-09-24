@@ -13,7 +13,7 @@ export class HelmfileInstallService extends BaseInstallService {
     const filename = `${name}_${version}_linux_${this.envSvc.arch}.tar.gz`;
     const url = `https://github.com/${name}/${name}/releases/download/v${version}/`;
 
-    const expectedChecksum = await this._getChecksum(
+    const expectedChecksum = await this.findChecksum(
       `${url}${name}_${version}_checksums.txt`,
       filename,
     );
@@ -44,18 +44,5 @@ export class HelmfileInstallService extends BaseInstallService {
 
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['version']);
-  }
-
-  /** TODO: create helper */
-  protected async _getChecksum(
-    url: string,
-    filename: string,
-  ): Promise<string | undefined> {
-    const checksumFile = await this.http.download({ url });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
-    return expectedChecksum;
   }
 }

@@ -100,11 +100,10 @@ export class NodeInstallService extends NodeBaseInstallService {
         // fallback to nodejs.org
         checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
         filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
-        const checksumFile = await this.http.download({ url: checksumFileUrl });
-        const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-          .split('\n')
-          .find((l) => l.includes(filename))
-          ?.split(' ')[0];
+        const expectedChecksum = await this.findChecksum(
+          checksumFileUrl,
+          filename,
+        );
         file = await this.http.download({
           url: `https://nodejs.org/dist/v${version}/${filename}`,
           checksumType: 'sha256',
@@ -160,11 +159,5 @@ export class NodeInstallService extends NodeBaseInstallService {
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
       await this._spawn('corepack', ['--version']);
     }
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }

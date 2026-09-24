@@ -26,13 +26,10 @@ export class ApkoInstallService extends BaseInstallService {
 
     const filename = `apko_${version}_linux_${this.ghArch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

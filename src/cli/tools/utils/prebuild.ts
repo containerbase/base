@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
@@ -62,12 +61,6 @@ export abstract class PrebuildInstallService extends BaseInstallService {
 
   override async test(_version: string): Promise<void> {
     await this._spawn(this.tool, ['--version']);
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }
 

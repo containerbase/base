@@ -30,13 +30,10 @@ export class CabalInstallService extends BaseInstallService {
     // use static deb10 binary as it is compatible with all supported ubuntu versions
     const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}SHA256SUMS`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}SHA256SUMS`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

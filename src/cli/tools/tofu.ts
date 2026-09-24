@@ -22,13 +22,10 @@ export class TofuInstallService extends BaseInstallService {
     const filename = `tofu_${version}_linux_${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}tofu_${version}_SHA256SUMS`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}tofu_${version}_SHA256SUMS`,
+      filename,
+    );
 
     const file = await this.http.download({
       url,
