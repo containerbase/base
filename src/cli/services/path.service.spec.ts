@@ -1,5 +1,6 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
@@ -143,6 +144,26 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.findVersionedToolPath('node', '18.0.1')).toBe(
       rootPath('opt/containerbase/tools/node/18.0.1'),
     );
+  });
+
+  test('createVersionedToolPath with sub folders', async () => {
+    await ensurePaths('opt/containerbase/tools');
+
+    const path = await pathSvc.createVersionedToolPath(
+      'jb',
+      '0.6.0',
+      'lib',
+      'bin',
+    );
+
+    expect(path).toBe(rootPath('opt/containerbase/tools/jb/0.6.0/lib/bin'));
+    // tests don't run as root, so the umask is group writable
+    expect((await stat(path)).mode & fileRights).toBe(0o775);
+    expect((await stat(join(path, '..'))).mode & fileRights).toBe(0o775);
+    // an existing folder is fine
+    await expect(
+      pathSvc.createVersionedToolPath('jb', '0.6.0', 'lib', 'bin'),
+    ).resolves.toBe(path);
   });
 
   test('exportEnv', async () => {

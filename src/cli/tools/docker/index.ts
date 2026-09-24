@@ -59,11 +59,11 @@ export class DockerInstallService extends BaseInstallService {
     const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
     const file = await this.http.download({ url });
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     await this.compress.extract({
       file,
       cwd: path,

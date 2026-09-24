@@ -19,11 +19,11 @@ export class JsonnetBundlerInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     const target = join(path, this.name);
     await fs.copyFile(file, target);
     await fs.chmod(target, this.envSvc.umask);

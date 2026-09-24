@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -29,11 +28,11 @@ export class KustomizeInstallService extends BaseInstallService {
       expectedChecksum,
     });
     await this.pathSvc.ensureToolPath(this.name);
-    const cwd = path.join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const cwd = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(cwd);
     await this.compress.extract({ file, cwd });
   }
 

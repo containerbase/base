@@ -44,11 +44,11 @@ export class DockerComposeInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     const bin = join(path, this.name);
     await fs.copyFile(file, bin);
     await fs.chmod(bin, this.envSvc.umask);

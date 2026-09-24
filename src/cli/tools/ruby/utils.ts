@@ -1,4 +1,4 @@
-import { chmod, mkdir, readFile, rm } from 'node:fs/promises';
+import { chmod, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
@@ -49,7 +49,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     }
 
     prefix = join(prefix, ruby);
-    await mkdir(prefix);
+    await this.pathSvc.createDir(prefix);
 
     const res = await execa(
       gem,
