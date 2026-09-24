@@ -29,7 +29,7 @@ export class MiseInstallService extends BaseInstallService {
 
     const expectedChecksum = await this.findChecksum(
       `${baseUrl}SHASUMS256.txt`,
-      `./${filename}`,
+      filename,
     );
 
     const file = await this.http.download({

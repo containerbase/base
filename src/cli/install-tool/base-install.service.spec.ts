@@ -167,14 +167,29 @@ describe('cli/install-tool/base-install.service', () => {
   describe('findChecksum', () => {
     const baseUrl = 'https://example.test';
 
-    test('finds the checksum in a list', async () => {
+    test('finds the exact filename in a list', async () => {
       scope(baseUrl)
         .get('/list/SHA256SUMS')
-        .reply(200, 'abc  tool-amd64.sig\ndef  tool-amd64\r\n');
+        .reply(
+          200,
+          'aaa  tool-amd64.sig\nbbb  debug-tool-amd64\nccc  ./sub/tool-amd64\ndef  tool-amd64\r\n',
+        );
 
       await expect(
         svc.find(`${baseUrl}/list/SHA256SUMS`, 'tool-amd64'),
       ).resolves.toBe('def');
+    });
+
+    test.each([
+      { name: 'binary mode', line: 'abc *tool-amd64' },
+      { name: 'relative', line: 'abc  ./tool-amd64' },
+    ])('finds a $name entry', async ({ name, line }) => {
+      const path = `/${name.replace(' ', '-')}/SHA256SUMS`;
+      scope(baseUrl).get(path).reply(200, `${line}\n`);
+
+      await expect(svc.find(`${baseUrl}${path}`, 'tool-amd64')).resolves.toBe(
+        'abc',
+      );
     });
 
     test.each(['utf8', 'utf16le'] as const)(

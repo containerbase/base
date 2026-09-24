@@ -138,15 +138,16 @@ export abstract class BaseInstallService {
   /**
    * Downloads a checksum list like `SHA256SUMS`, which has one
    * `<checksum>  <filename>` line per file, and returns the checksum of
-   * `filename`.
+   * `filename`. The filename must match exactly, ignoring the binary mode
+   * `*` and a leading `./`.
    *
    * @throws when the list has no checksum for `filename`
    */
   protected async findChecksum(url: string, filename: string): Promise<string> {
     const checksum = (await this.readChecksumFile(url))
       .split('\n')
-      .find((l) => l.trimEnd().endsWith(filename))
-      ?.split(/\s+/)[0];
+      .map((l) => l.trim().split(/\s+/))
+      .find(([, name]) => name?.replace(/^\*?(?:\.\/)?/, '') === filename)?.[0];
     if (!checksum) {
       throw new Error(`Checksum not found in ${url} for ${filename}`);
     }
