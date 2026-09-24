@@ -11,6 +11,7 @@ const minVersion = '2.10.3';
 export class NixInstallService extends BaseInstallService {
   readonly name = 'nix';
 
+  /** The architecture name used by the nix prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -20,6 +21,10 @@ export class NixInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the containerbase nix prebuild, verified against its `.sha512`,
+   * and extracts it into the tool path.
+   */
   override async install(version: string): Promise<void> {
     const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-${this.ghArch}.tar.xz`;
 
@@ -35,6 +40,10 @@ export class NixInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path });
   }
 
+  /**
+   * Links the `nix` binary into the global bin folder, with the nix store and
+   * state folders below the containerbase cache.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     const cache = join(this.pathSvc.cachePath, this.name);
@@ -51,10 +60,12 @@ export class NixInstallService extends BaseInstallService {
     });
   }
 
+  /** Checks that `nix --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
 
+  /** Accepts semver versions from 2.10.3, the oldest one with a prebuild. */
   override async validate(version: string): Promise<boolean> {
     return (await super.validate(version)) && semverGte(version, minVersion);
   }
