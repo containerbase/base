@@ -7,12 +7,14 @@ export type AlgorithmName = LiteralUnion<
   string
 >;
 
+/** The hex digest of the data. */
 export function hash(data: string | Buffer, algorithm: AlgorithmName): string {
   const hash = crypto.createHash(algorithm);
   hash.update(data);
   return hash.digest('hex');
 }
 
+/** The hex digest of the file content. */
 export async function hashFile(
   file: string,
   algorithm: AlgorithmName,

@@ -9,6 +9,10 @@ import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
+  /**
+   * Adds the user to a `docker` group, and links the user's `.docker` folder
+   * and the global cli plugins folder to the cache.
+   */
   override async prepare(): Promise<void> {
     await this._spawn('groupadd', ['-g', '999', 'docker']);
     await this._spawn('usermod', ['-aG', 'docker', this.envSvc.userName]);
@@ -24,6 +28,7 @@ export class DockerPrepareService extends BasePrepareService {
     );
   }
 
+  /** Creates the docker cli plugins folder in the containerbase cache. */
   override async initialize(): Promise<void> {
     await this.pathSvc.createDir(
       join(this.pathSvc.cachePath, '.docker', 'cli-plugins'),
@@ -36,6 +41,7 @@ export class DockerPrepareService extends BasePrepareService {
 export class DockerInstallService extends BaseInstallService {
   readonly name = 'docker';
 
+  /** The architecture name used by the docker static builds. */
   private get arch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -45,6 +51,10 @@ export class DockerInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the static docker build and extracts only the `docker` cli into
+   * the versioned `bin` folder. No checksums are verified.
+   */
   override async install(version: string): Promise<void> {
     const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
     const file = await this.http.download({ url });
@@ -62,12 +72,14 @@ export class DockerInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `docker` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `docker --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('docker', ['--version']);
   }

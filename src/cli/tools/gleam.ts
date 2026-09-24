@@ -8,6 +8,7 @@ import { semverGte } from '../utils/index.ts';
 export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 
+  /** The architecture name used by the gleam release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +18,10 @@ export class GleamInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the gleam archive from GitHub, verified against its `.sha512`,
+   * and extracts it into the versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -46,15 +51,18 @@ export class GleamInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `gleam` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version));
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `gleam --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
 
+  /** Accepts semver versions from 0.19.0-rc1. */
   override async validate(version: string): Promise<boolean> {
     return (await super.validate(version)) && semverGte(version, '0.19.0-rc1');
   }

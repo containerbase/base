@@ -8,10 +8,15 @@ import { RubyBaseInstallService, RubyGemVersionResolver } from './utils.ts';
 export class CocoapodsInstallService extends RubyBaseInstallService {
   override readonly name: string = 'cocoapods';
 
+  /** Checks that `pod --version` runs, also as root. */
   override async test(_version: string): Promise<void> {
     await this._spawn('pod', ['--version', '--allow-root']);
   }
 
+  /**
+   * Pins activesupport below 7.1 for cocoapods 1.12.0 to 1.13.0, which break
+   * with newer versions.
+   */
   protected override async _postInstall(
     gem: string,
     version: string,

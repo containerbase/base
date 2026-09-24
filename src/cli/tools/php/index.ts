@@ -15,6 +15,11 @@ export class PhpPrepareService extends BasePrepareService {
 
   override readonly name = 'php';
 
+  /**
+   * Installs the apt packages php needs on the current ubuntu release.
+   *
+   * @throws on an unsupported distro
+   */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
 
@@ -56,6 +61,7 @@ export class PhpPrepareService extends BasePrepareService {
 export class PhpInstallService extends BaseInstallService {
   readonly name = 'php';
 
+  /** The architecture name used by the php prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -65,6 +71,11 @@ export class PhpInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the distro specific containerbase php prebuild, verified
+   * against its `.sha512` when there is one, and extracts it into the tool
+   * path. Noble uses the jammy prebuild.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
@@ -98,15 +109,18 @@ export class PhpInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path });
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /** Links the `php` binary into the global bin folder. */
   override async postInstall(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `php --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('php', ['--version']);
   }
@@ -117,6 +131,7 @@ export class PhpInstallService extends BaseInstallService {
 export class PhpVersionResolver extends ToolVersionResolver {
   readonly tool = 'php';
 
+  /** Resolves a missing version or `latest` to the latest php prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.http.get(

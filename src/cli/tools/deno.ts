@@ -8,6 +8,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class DenoInstallService extends BaseInstallService {
   readonly name = 'deno';
 
+  /** The architecture name used by the deno release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -17,6 +18,10 @@ export class DenoInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the deno zip from GitHub, verified against its `.sha256sum`,
+   * and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     /**
      * @example
@@ -50,11 +55,13 @@ export class DenoInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `deno` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `deno --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }

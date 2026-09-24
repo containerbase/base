@@ -21,6 +21,7 @@ export class InitToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
+  /** Initializes the passed tools, or all prepared tools for `all`. */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;

@@ -14,6 +14,7 @@ export class GhcPrepareService extends BasePrepareService {
 export class GhcInstallService extends BaseInstallService {
   readonly name = 'ghc';
 
+  /** The architecture name used by the ghc release archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -23,6 +24,11 @@ export class GhcInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the static deb10 ghc archive from downloads.haskell.org,
+   * verified against the release's `SHA256SUMS`, and extracts it into the
+   * versioned tool path.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://downloads.haskell.org/~ghc/${version}/`;
     // use static deb10 binary as it is compatible with all supported ubuntu versions
@@ -49,6 +55,7 @@ export class GhcInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `ghc` and `ghc-pkg` binaries into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -56,6 +63,7 @@ export class GhcInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src, name: 'ghc-pkg' });
   }
 
+  /** Checks that `ghc --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('ghc', ['--version']);
   }

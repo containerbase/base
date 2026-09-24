@@ -8,6 +8,7 @@ import { resolveLatestJavaLtsVersion } from './utils.ts';
 export class JavaVersionResolver extends ToolVersionResolver {
   readonly tool: string = 'java';
 
+  /** Resolves a missing version or `latest` to the latest adoptium lts. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       // we know that the latest version is the first entry, so search for first lts

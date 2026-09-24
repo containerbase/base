@@ -19,6 +19,7 @@ export class V2ToolService {
   @inject(PathService)
   protected readonly pathSvc!: PathService;
 
+  /** Scans every v2 shell tool for the optional functions it defines. */
   @postConstruct()
   protected async [Symbol('_construct')](): Promise<void> {
     const tools = await this.pathSvc.findLegacyTools();
@@ -49,6 +50,11 @@ export class V2ToolService {
     );
   }
 
+  /**
+   * Whether the v2 shell tool defines `post_install`.
+   *
+   * @throws for an unknown tool
+   */
   hasPostinstall(tool: string): boolean {
     if (this._hasPostinstall[tool] === undefined) {
       throw new Error(`tool not supported: ${tool}`);
@@ -56,6 +62,11 @@ export class V2ToolService {
     return this._hasPostinstall[tool];
   }
 
+  /**
+   * Whether the v2 shell tool defines `uninstall_tool`.
+   *
+   * @throws for an unknown tool
+   */
   hasUninstall(tool: string): boolean {
     if (this._hasUninstall[tool] === undefined) {
       throw new Error(`tool not supported: ${tool}`);
@@ -63,6 +74,11 @@ export class V2ToolService {
     return this._hasUninstall[tool];
   }
 
+  /**
+   * Whether the v2 shell tool defines `prepare_tool`.
+   *
+   * @throws for an unknown tool
+   */
   needsPrepare(tool: string): boolean {
     if (this._needsPrep[tool] === undefined) {
       throw new Error(`tool not supported: ${tool}`);
@@ -70,6 +86,11 @@ export class V2ToolService {
     return this._needsPrep[tool];
   }
 
+  /**
+   * Whether the v2 shell tool defines `init_tool`.
+   *
+   * @throws for an unknown tool
+   */
   needsInitialize(tool: string): boolean {
     if (this._needsInit[tool] === undefined) {
       throw new Error(`tool not supported: ${tool}`);

@@ -12,6 +12,7 @@ import {
 class DummyVersionResolver extends ToolVersionResolver {
   readonly tool = 'dummy';
 
+  /** Resolves `latest` to `1.2.3`. */
   resolve(version: string | undefined): Promise<string | undefined> {
     return Promise.resolve(version === 'latest' ? '1.2.3' : version);
   }

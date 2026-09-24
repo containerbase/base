@@ -8,14 +8,21 @@ import semverValid from 'semver/functions/valid';
 
 export { semverGte, semverSort, semverCoerce, semverSatisfies };
 
+/** Whether the version is valid semver. */
 export function isValid(version: string): boolean {
   return semverValid(version) !== null;
 }
 
+/** Whether the version has four numeric parts, eg. `3.10.1.0`. */
 export function isFourPartVersion(version: string): boolean {
   return /^\d+\.\d+\.\d+\.\d+$/.test(version);
 }
 
+/**
+ * Parses the version as semver.
+ *
+ * @throws on an invalid version
+ */
 export function parse(version: string | undefined): SemVer {
   const res = semverParse(version);
   if (!res) {

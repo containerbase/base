@@ -11,6 +11,10 @@ export class BuildxInstallService extends BaseInstallService {
 
   override readonly parent = 'docker';
 
+  /**
+   * Downloads the buildx binary from GitHub into the versioned `bin` folder,
+   * verified against the release's `checksums.txt` from v0.7.0.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/docker/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux-${this.envSvc.arch}`;
@@ -41,6 +45,10 @@ export class BuildxInstallService extends BaseInstallService {
     await fs.chmod(bin, this.envSvc.umask);
   }
 
+  /**
+   * Links the `buildx` binary into the global bin folder and as docker cli
+   * plugin.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -57,6 +65,7 @@ export class BuildxInstallService extends BaseInstallService {
     await fs.symlink(join(src, this.name), tgt);
   }
 
+  /** Checks that `docker buildx version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('docker', ['buildx', 'version']);
   }

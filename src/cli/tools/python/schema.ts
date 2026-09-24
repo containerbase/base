@@ -7,6 +7,7 @@ import { logger } from '../../utils/index.ts';
 
 const depRe = /^(?<name>[a-z-]+)(?<extra>\[[a-z,]+\])?(?<version>.+)(?:$|;)/;
 
+/** Parses a `requires_dist` entry to its name and version range. */
 function parseDep(dep: string): [string, string] | null {
   const groups = depRe.exec(dep)?.groups;
   if (!groups) {

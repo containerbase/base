@@ -33,7 +33,7 @@ export class LinkToolService {
 
   private readonly _links: string[] = [];
 
-  /*
+  /**
    * Get the list of links created during the last shellwrapper() call
    */
   get links(): readonly string[] {

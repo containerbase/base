@@ -13,6 +13,13 @@ export class MavenInstallService extends BaseInstallService {
 
   override readonly parent = 'java';
 
+  /**
+   * Installs the containerbase maven prebuild when there is one, else the
+   * apache distribution from repo.maven.apache.org. Both are verified
+   * against their `.sha512`, or a `.sha1` for old apache releases.
+   *
+   * @throws when no checksum file is found
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     let filename = `${name}-${version}.tar.xz`;
@@ -69,6 +76,7 @@ export class MavenInstallService extends BaseInstallService {
     await this.compress.extract({ file, cwd: path, strip });
   }
 
+  /** Links the `mvn` binary into the global bin folder, with the java env. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({
@@ -78,6 +86,7 @@ export class MavenInstallService extends BaseInstallService {
     });
   }
 
+  /** Checks that `mvn --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('mvn', ['--version']);
   }
@@ -88,6 +97,7 @@ export class MavenInstallService extends BaseInstallService {
 export class MavenVersionResolver extends ToolVersionResolver {
   readonly tool = 'maven';
 
+  /** Resolves a missing version or `latest` to the latest maven prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.http.get(
