@@ -211,6 +211,9 @@ RUN install-tool pnpm 10.34.5
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.0
 
+# renovate: datasource=github-releases packageName=voidzero-dev/vite-plus
+RUN install-tool vp 0.3.1
+
 #--------------------------------------
 # Image: test-php
 #--------------------------------------

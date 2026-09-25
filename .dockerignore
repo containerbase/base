@@ -2,3 +2,4 @@
 !test
 !dist/docker
 !dist/cli
+!dist/test

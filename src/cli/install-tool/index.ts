@@ -81,6 +81,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
+import { VpInstallService } from '../tools/node/vp.ts';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
@@ -198,6 +199,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(TerraformInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(TofuInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(VendirInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(VpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(WallyInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(YarnSlimInstallService);
