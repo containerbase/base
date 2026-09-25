@@ -41,6 +41,18 @@ describe('cli/tools/java/sbt', () => {
         (await fs.stat(join(pathSvc.cachePath, '.sbt'))).mode & 0o777,
       ).toBe(0o775);
     });
+
+    test('prepare keeps an existing .sbt link', async () => {
+      const { svc, child, pathSvc } = await toolContext(SbtPrepareService);
+      const envSvc = await child.getAsync(EnvService);
+
+      await expect(svc.prepare()).resolves.toBeUndefined();
+      await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(envSvc.userHome, '.sbt'))).toBe(
+        join(pathSvc.cachePath, '.sbt'),
+      );
+    });
   });
 
   describe('SbtInstallService', () => {
