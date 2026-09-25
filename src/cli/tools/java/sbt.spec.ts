@@ -72,6 +72,28 @@ describe('cli/tools/java/sbt', () => {
       expect(await fs.readdir(join(path, 'bin'))).toEqual(['sbt']);
     });
 
+    test('install: downloads without a checksum before v1.3.5', async () => {
+      const { svc, pathSvc } = await toolContext(SbtInstallService);
+      scope(baseUrl)
+        .get(`${releaseUrl}/v1.3.4/sbt-1.3.4.tgz`)
+        .reply(200, archive);
+      const extract = vi
+        .spyOn(CompressionService.prototype, 'extract')
+        .mockImplementationOnce(async ({ cwd }) => {
+          await fs.mkdir(join(cwd, 'bin'));
+          await fs.writeFile(join(cwd, 'bin', 'sbt'), 'sbt');
+        });
+
+      await expect(svc.install('1.3.4')).resolves.toBeUndefined();
+
+      const path = pathSvc.versionedToolPath('sbt', '1.3.4');
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining('sbt-1.3.4.tgz'),
+        cwd: path,
+        strip: 1,
+      });
+    });
+
     test('install: rejects an empty checksum', async () => {
       const { svc } = await toolContext(SbtInstallService);
       scope(baseUrl)
