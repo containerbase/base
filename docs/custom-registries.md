@@ -489,6 +489,7 @@ Samples:
 
 ```txt
 https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz
+https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz.sha256
 ```
 
 ### `scala`
