@@ -196,18 +196,22 @@ describe('cli/tools/dotnet/index', () => {
 
       await expect(svc.prepare()).resolves.toBeUndefined();
 
-      expect(execaMock).toHaveBeenCalledWith('apt-get', [
-        '-qq',
-        'install',
-        '-y',
-        'libc6',
-        'libgcc1',
-        'libgssapi-krb5-2',
-        icu,
-        'libssl3',
-        'libstdc++6',
-        'zlib1g',
-      ]);
+      expect(execaMock).toHaveBeenCalledWith(
+        'apt-get',
+        [
+          '-qq',
+          'install',
+          '-y',
+          'libc6',
+          'libgcc1',
+          'libgssapi-krb5-2',
+          icu,
+          'libssl3',
+          'libstdc++6',
+          'zlib1g',
+        ],
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
       expect(await fs.readlink(join(envSvc.userHome, '.nuget'))).toBe(
         join(pathSvc.cachePath, '.nuget'),
       );

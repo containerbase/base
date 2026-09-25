@@ -11,7 +11,8 @@ export class AptService {
   private readonly envSvc!: EnvService;
 
   /**
-   * Installs the packages which are not installed yet, honouring the apt proxy.
+   * Installs the packages which are not installed yet, honouring the apt
+   * proxy, running `apt-get` non-interactively.
    */
   async install(...packages: string[]): Promise<void> {
     const todo: string[] = [];
@@ -41,9 +42,11 @@ export class AptService {
       );
     }
 
+    const execOptions = { env: { DEBIAN_FRONTEND: 'noninteractive' } };
+
     try {
-      await execa('apt-get', ['-qq', 'update']);
-      await execa('apt-get', ['-qq', 'install', '-y', ...todo]);
+      await execa('apt-get', ['-qq', 'update'], execOptions);
+      await execa('apt-get', ['-qq', 'install', '-y', ...todo], execOptions);
     } finally {
       if (this.envSvc.aptProxy) {
         await rm(
