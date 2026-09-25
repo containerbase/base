@@ -69,12 +69,11 @@ describe('cli/tools/git/index', () => {
 
       await expect(svc.install('2.55.0')).resolves.toBeUndefined();
 
-      expect(execaMock).toHaveBeenCalledWith('apt-get', [
-        '-qq',
-        'install',
-        '-y',
-        'git',
-      ]);
+      expect(execaMock).toHaveBeenCalledWith(
+        'apt-get',
+        ['-qq', 'install', '-y', 'git'],
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
     });
 
     test('install: coerces a vendor version suffix', async () => {

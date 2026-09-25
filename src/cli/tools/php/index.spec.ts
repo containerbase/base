@@ -147,6 +147,7 @@ describe('cli/tools/php/index', () => {
       expect(execaMock).toHaveBeenCalledWith(
         'apt-get',
         expect.arrayContaining([zip]),
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
       );
     });
 

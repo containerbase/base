@@ -104,6 +104,7 @@ describe('cli/tools/python/conan', () => {
         expect(execaMock).toHaveBeenCalledWith(
           'apt-get',
           expect.arrayContaining(['cmake', 'gcc']),
+          { env: { DEBIAN_FRONTEND: 'noninteractive' } },
         );
         expect(await fs.readlink(join(envSvc.userHome, '.conan2'))).toBe(
           join(pathSvc.cachePath, '.conan2'),

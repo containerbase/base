@@ -37,6 +37,14 @@ describe('cli/services/apt.service', () => {
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg');
     expect(mocks.execa).toHaveBeenCalledTimes(3);
+    expect(mocks.execa).toHaveBeenCalledWith('apt-get', ['-qq', 'update'], {
+      env: { DEBIAN_FRONTEND: 'noninteractive' },
+    });
+    expect(mocks.execa).toHaveBeenCalledWith(
+      'apt-get',
+      ['-qq', 'install', '-y', 'some-pkg'],
+      { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+    );
     expect(mocks.writeFile).not.toHaveBeenCalled();
     expect(mocks.rm).not.toHaveBeenCalled();
   });
