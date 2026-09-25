@@ -15,6 +15,10 @@ import { BunInstallService } from '../tools/bun.ts';
 import { DartInstallService } from '../tools/dart/index.ts';
 import { DenoInstallService } from '../tools/deno.ts';
 import { DevboxInstallService } from '../tools/devbox.ts';
+import {
+  DevenvInstallService,
+  DevenvVersionResolver,
+} from '../tools/devenv.ts';
 import { BuildxInstallService } from '../tools/docker/buildx.ts';
 import { DockerComposeInstallService } from '../tools/docker/compose.ts';
 import { DockerInstallService } from '../tools/docker/index.ts';
@@ -153,6 +157,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(DartInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DenoInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DevboxInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(DevenvInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DockerComposeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(DotnetInstallService);
@@ -233,6 +238,7 @@ function prepareResolveContainer(): Container {
   container.bind(TOOL_VERSION_RESOLVER).to(CocoapodsVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
+  container.bind(TOOL_VERSION_RESOLVER).to(DevenvVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
   container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);

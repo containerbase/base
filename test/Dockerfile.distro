@@ -62,6 +62,9 @@ RUN install-tool deno 2.9.7
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.18.3
 
+# renovate: datasource=github-releases packageName=containerbase/devenv-prebuild versioning=docker
+RUN install-tool devenv 2.3.1
+
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.401
 
