@@ -724,8 +724,11 @@ Rust releases are downloaded from:
 Samples:
 
 ```txt
-https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.gz
-https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.gz
+https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz
 ```
 
 ## `swift`
