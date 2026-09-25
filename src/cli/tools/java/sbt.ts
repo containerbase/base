@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { semverGte } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -32,14 +33,17 @@ export class SbtInstallService extends BaseInstallService {
   override readonly parent = 'java';
 
   /**
-   * Downloads the sbt archive from GitHub, verified against its `.sha256`,
-   * extracts it into the versioned tool path and drops the macOS and Windows
-   * launchers.
+   * Downloads the sbt archive from GitHub, verified against its `.sha256`
+   * since v1.3.5, extracts it into the versioned tool path and drops the
+   * macOS and Windows launchers.
    */
   override async install(version: string): Promise<void> {
     const url = `https://github.com/sbt/sbt/releases/download/v${version}/${this.name}-${version}.tgz`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
+    // sbt only publishes a `.sha256` checksum file since v1.3.5.
+    const expectedChecksum = semverGte(version, '1.3.5')
+      ? await this.getChecksum(`${url}.sha256`)
+      : undefined;
 
     const file = await this.http.download({
       url,
