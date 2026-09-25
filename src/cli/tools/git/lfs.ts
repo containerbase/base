@@ -40,11 +40,11 @@ export class GitLfsInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     await fs.copyFile(join(tmp, this.name), join(path, this.name));
     await fs.rm(tmp, { recursive: true, force: true });
   }
