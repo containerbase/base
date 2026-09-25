@@ -98,7 +98,7 @@ describe('cli/tools/docker/index', () => {
 
       expect(execaMock).toHaveBeenCalledWith(
         'groupadd',
-        ['-g', '999', 'docker'],
+        ['-f', '-g', '999', 'docker'],
         expect.any(Object),
       );
       expect(execaMock).toHaveBeenCalledWith(

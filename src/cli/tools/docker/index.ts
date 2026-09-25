@@ -10,12 +10,12 @@ export class DockerPrepareService extends BasePrepareService {
   readonly name = 'docker';
 
   /**
-   * Adds the user to a `docker` group, and links the user's `.docker` folder
-   * and the global cli plugins folder to the cache, keeping any existing
-   * link.
+   * Adds the user to a `docker` group, creating it if it doesn't already
+   * exist, and links the user's `.docker` folder and the global cli plugins
+   * folder to the cache, keeping any existing link.
    */
   override async prepare(): Promise<void> {
-    await this._spawn('groupadd', ['-g', '999', 'docker']);
+    await this._spawn('groupadd', ['-f', '-g', '999', 'docker']);
     await this._spawn('usermod', ['-aG', 'docker', this.envSvc.userName]);
     const globalDocker = join(this.envSvc.rootDir, 'usr/local/lib/docker');
     await fs.mkdir(globalDocker, { recursive: true });
