@@ -132,6 +132,19 @@ export class PathService {
     await this.setOwner({ path, mode });
   }
 
+  /**
+   * Creates a symlink at `path` pointing to `target`. An existing file,
+   * folder or link at `path` is left as is.
+   */
+  async createSymlink(target: string, path: string): Promise<void> {
+    const stats = await fs.lstat(path).catch(() => null);
+    if (stats) {
+      logger.debug({ path }, 'path exists, skipping symlink');
+      return;
+    }
+    await fs.symlink(target, path);
+  }
+
   /** Creates the tool path and returns it. */
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);

@@ -316,16 +316,19 @@ export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
   }
 }
 
-/** Links the user's `.npm` folder and `.npmrc` to the cache. */
+/**
+ * Links the user's `.npm` folder and `.npmrc` to the cache, keeping any
+ * existing link.
+ */
 export async function prepareSymlinks(
   envSvc: EnvService,
   pathSvc: PathService,
 ): Promise<void> {
-  await fs.symlink(
+  await pathSvc.createSymlink(
     join(pathSvc.cachePath, '.npm'),
     join(envSvc.userHome, '.npm'),
   );
-  await fs.symlink(
+  await pathSvc.createSymlink(
     join(pathSvc.cachePath, '.npmrc'),
     join(envSvc.userHome, '.npmrc'),
   );

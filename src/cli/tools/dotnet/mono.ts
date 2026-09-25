@@ -14,16 +14,18 @@ export class MonoPrepareService extends BasePrepareService {
   readonly name = 'mono';
 
   /**
-   * Initializes the cache, links `~/.mono` to it, and sets up the mono cert
-   * store with a hook that syncs it on ca certificate updates.
+   * Initializes the cache, links `~/.mono` to it, keeping any existing link,
+   * and sets up the mono cert store with a hook that syncs it on ca
+   * certificate updates.
    */
   override async prepare(): Promise<void> {
     // TODO: install mono dependencies if needed
     await this.initialize();
     const mono = join(this.envSvc.userHome, '.mono');
-    if (!(await pathExists(mono))) {
-      await fs.symlink(join(this.pathSvc.cachePath, '.mono'), mono);
-    }
+    await this.pathSvc.createSymlink(
+      join(this.pathSvc.cachePath, '.mono'),
+      mono,
+    );
 
     const src = join(this.pathSvc.sslPath, 'mono');
     if (!(await pathExists(src))) {

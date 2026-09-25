@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
@@ -17,14 +16,14 @@ export class ConanPrepareService extends BasePrepareService {
 
   /**
    * Installs the build tools conan needs, initializes the cache and links
-   * `~/.conan2` to it.
+   * `~/.conan2` to it, keeping any existing link.
    */
   override async prepare(): Promise<void> {
     await this.aptSvc.install('cmake', 'gcc', 'g++', 'make', 'perl');
 
     await this.initialize();
 
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       join(this.pathSvc.cachePath, '.conan2'),
       join(this.envSvc.userHome, '.conan2'),
     );
