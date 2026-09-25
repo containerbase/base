@@ -157,6 +157,10 @@ describe('cli/tools/rust', () => {
       { version: 'nightly', valid: true },
       { version: 'nightly-2026-06-19', valid: true },
       { version: 'stable', valid: false },
+      { version: 'nightly-', valid: false },
+      { version: 'nightly-2026-6-19', valid: false },
+      { version: 'nightly-latest', valid: false },
+      { version: 'nightly-2026-06-19/../x', valid: false },
     ])('validates $version', async ({ version, valid }) => {
       const { svc } = await toolContext(RustInstallService);
 
