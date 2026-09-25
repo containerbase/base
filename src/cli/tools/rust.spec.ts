@@ -43,6 +43,18 @@ describe('cli/tools/rust', () => {
         join(pathSvc.cachePath, '.cargo'),
       );
     });
+
+    test('prepare keeps an existing .cargo link', async () => {
+      const { svc, child, pathSvc } = await toolContext(RustPrepareService);
+      const envSvc = await child.getAsync(EnvService);
+
+      await expect(svc.prepare()).resolves.toBeUndefined();
+      await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(envSvc.userHome, '.cargo'))).toBe(
+        join(pathSvc.cachePath, '.cargo'),
+      );
+    });
   });
 
   describe('RustInstallService', () => {
