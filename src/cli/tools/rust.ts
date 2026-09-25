@@ -4,6 +4,9 @@ import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
 
+/** Matches a dated nightly version, e.g. `nightly-2024-01-01`. */
+const nightlyDateRegex = /^nightly-\d{4}-\d{2}-\d{2}$/;
+
 @injectable()
 @injectFromHierarchy()
 export class RustPrepareService extends BasePrepareService {
@@ -88,12 +91,12 @@ export class RustInstallService extends BaseInstallService {
     await this._spawn('rustc', ['--version']);
   }
 
-  /** Accepts `beta`, `nightly`, `nightly-<date>` and semver versions. */
+  /** Accepts `beta`, `nightly`, `nightly-YYYY-MM-DD` and semver versions. */
   override validate(version: string): Promise<boolean> {
     if (
       version === 'beta' ||
       version === 'nightly' ||
-      version.startsWith('nightly-')
+      nightlyDateRegex.test(version)
     ) {
       return Promise.resolve(true);
     }
