@@ -52,7 +52,7 @@ RUN env
 RUN install-tool ghc 9.14.1
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.16.1.0
+RUN install-tool cabal 3.18.1.0
 
 
 USER 1001
@@ -82,7 +82,7 @@ USER 12021
 RUN install-tool ghc 9.14.1
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.16.1.0
+RUN install-tool cabal 3.18.1.0
 
 
 RUN set -ex; \
