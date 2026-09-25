@@ -4,6 +4,7 @@ export const NoPrepareTools = [
   'android-sdk-cmdline-tools',
   'apko',
   'apm',
+  'aube',
   'bazelisk',
   'bower',
   'buf',
