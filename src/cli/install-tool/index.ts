@@ -81,6 +81,7 @@ import {
   YarnVersionResolver,
 } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
+import { NubInstallService } from '../tools/nub.ts';
 import {
   ComposerInstallService,
   ComposerVersionResolver,
@@ -181,6 +182,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(NixInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NugetInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(NodeInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(NubInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PaketInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PhpInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(PixiInstallService);

@@ -49,6 +49,14 @@ FROM base AS test-bun
 RUN install-tool bun 1.4.2
 
 #--------------------------------------
+# Image: nub
+#--------------------------------------
+FROM base AS test-nub
+
+# renovate: datasource=github-releases packageName=nubjs/nub
+RUN install-tool nub 0.9.3
+
+#--------------------------------------
 # Image: deno
 #--------------------------------------
 FROM base AS test-deno
@@ -220,6 +228,7 @@ FROM base
 
 COPY --from=test-bazelisk /.dummy /.dummy
 COPY --from=test-bun /.dummy /.dummy
+COPY --from=test-nub /.dummy /.dummy
 COPY --from=test-deno /.dummy /.dummy
 COPY --from=test-apko /.dummy /.dummy
 COPY --from=test-apm /.dummy /.dummy
