@@ -73,7 +73,7 @@ export class SbtInstallService extends BaseInstallService {
 
   /**
    * Checks that `sbt --version` runs in an empty folder, then removes the
-   * temp and home data it leaves behind.
+   * temp and home data it leaves behind, keeping hidden entries in `~/.sbt`.
    * @see {@link https://github.com/sbt/sbt/issues/1458}
    */
   override async test(_version: string): Promise<void> {
@@ -88,6 +88,10 @@ export class SbtInstallService extends BaseInstallService {
     });
     const home = join(this.envSvc.home, '.sbt');
     for (const f of await fs.readdir(home).catch(() => [])) {
+      // keep hidden entries, like the shell glob `~/.sbt/*` did
+      if (f.startsWith('.')) {
+        continue;
+      }
       await fs.rm(join(home, f), { recursive: true, force: true });
     }
   }

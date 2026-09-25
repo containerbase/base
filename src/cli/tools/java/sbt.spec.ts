@@ -145,6 +145,7 @@ describe('cli/tools/java/sbt', () => {
       const { svc } = await toolContext(SbtInstallService);
       const home = rootPath('home/ubuntu/.sbt');
       await fs.mkdir(join(home, 'boot'), { recursive: true });
+      await fs.writeFile(join(home, '.credentials'), 'secret');
       await fs.mkdir(rootPath('tmp/.sbt'), { recursive: true });
 
       await expect(svc.test('1.13.0')).resolves.toBeUndefined();
@@ -156,7 +157,7 @@ describe('cli/tools/java/sbt', () => {
           cwd: expect.stringContaining(rootPath('tmp/sbt-')),
         }),
       );
-      expect(await fs.readdir(home)).toEqual([]);
+      expect(await fs.readdir(home)).toEqual(['.credentials']);
       await expect(fs.stat(rootPath('tmp/.sbt'))).rejects.toThrow();
     });
 
