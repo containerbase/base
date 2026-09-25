@@ -281,6 +281,50 @@ describe('cli/services/path.service', () => {
     );
   });
 
+  test('createSymlink', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+
+    expect(await pathSvc.createSymlink(target, link)).toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing link', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+    await pathSvc.createSymlink(target, link);
+
+    await expect(pathSvc.createSymlink(target, link)).resolves.toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing folder', async () => {
+    const target = rootPath('env123/target');
+    const dir = rootPath('env123/dir');
+    await pathSvc.createDir(dir);
+
+    await pathSvc.createSymlink(target, dir);
+
+    expect((await stat(dir)).isDirectory()).toBe(true);
+  });
+
+  test('createSymlink: keeps a dangling link', async () => {
+    const target = rootPath('env123/missing');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await fs.symlink(target, link);
+
+    await pathSvc.createSymlink(rootPath('env123/other'), link);
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
   test('toolInit', async () => {
     expect(pathSvc.toolInitPath('node')).toBe(
       rootPath('tmp/containerbase/tool.init.d/node'),

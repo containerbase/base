@@ -412,6 +412,9 @@ describe('cli/tools/node/utils', () => {
       expect(await fs.readlink(join(envSvc.userHome, '.npmrc'))).toBe(
         join(pathSvc.cachePath, '.npmrc'),
       );
+
+      // second run is a no-op
+      await expect(prepareSymlinks(envSvc, pathSvc)).resolves.toBeUndefined();
     });
 
     test('prepareGlobalConfig', async () => {

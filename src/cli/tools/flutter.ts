@@ -16,8 +16,9 @@ export class FlutterPrepareService extends BasePrepareService {
   readonly name = 'flutter';
 
   /**
-   * Initializes the cache, links the dart and pub cache folders, and turns
-   * off analytics and the welcome message for root and the user.
+   * Initializes the cache, links the dart and pub cache folders, keeping any
+   * existing link, and turns off analytics and the welcome message for root
+   * and the user.
    */
   override async prepare(): Promise<void> {
     await this.initialize();
@@ -31,12 +32,12 @@ export class FlutterPrepareService extends BasePrepareService {
     );
 
     // for user
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       join(this.pathSvc.cachePath, '.flutter'),
       join(this.envSvc.userHome, '.flutter'),
     );
 
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       join(this.pathSvc.cachePath, '.flutter_tool_state'),
       join(this.envSvc.userHome, '.flutter_tool_state'),
     );

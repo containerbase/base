@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
@@ -16,7 +15,7 @@ export class DotnetPrepareService extends BasePrepareService {
 
   /**
    * Installs the apt packages dotnet needs on jammy and noble, initializes the
-   * cache and links `~/.nuget` to it.
+   * cache and links `~/.nuget` to it, keeping any existing link.
    */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
@@ -47,7 +46,7 @@ export class DotnetPrepareService extends BasePrepareService {
     }
 
     await this.initialize();
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       join(this.pathSvc.cachePath, '.nuget'),
       join(this.envSvc.userHome, '.nuget'),
     );

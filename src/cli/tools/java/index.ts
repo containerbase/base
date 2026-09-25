@@ -24,7 +24,8 @@ export class JavaPrepareService extends BasePrepareService {
 
   /**
    * Initializes the cache, links the maven, gradle and android folders to it,
-   * and sets up the shared cacerts from the latest lts jre, once.
+   * keeping any existing link, and sets up the shared cacerts from the
+   * latest lts jre, once.
    *
    * @throws when the latest jre can't be resolved
    */
@@ -39,19 +40,19 @@ export class JavaPrepareService extends BasePrepareService {
     }
 
     // compatibility with gradle and maven
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.m2'),
       path.join(this.envSvc.userHome, '.m2'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.gradle'),
       path.join(this.envSvc.userHome, '.gradle'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.android'),
       path.join(this.envSvc.userHome, '.android'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.android-sdk'),
       path.join(this.envSvc.userHome, '.android-sdk'),
     );

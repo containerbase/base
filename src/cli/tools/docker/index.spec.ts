@@ -114,6 +114,9 @@ describe('cli/tools/docker/index', () => {
           join(envSvc.rootDir, 'usr/local/lib/docker', 'cli-plugins'),
         ),
       ).toBe(join(pathSvc.cachePath, '.docker', 'cli-plugins'));
+
+      // second run is a no-op, it would throw on existing symlinks otherwise
+      await expect(svc.prepare()).resolves.toBeUndefined();
     });
   });
 });

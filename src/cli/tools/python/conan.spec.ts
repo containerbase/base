@@ -108,6 +108,9 @@ describe('cli/tools/python/conan', () => {
         expect(await fs.readlink(join(envSvc.userHome, '.conan2'))).toBe(
           join(pathSvc.cachePath, '.conan2'),
         );
+
+        // second run is a no-op, it would throw on the existing symlink otherwise
+        await expect(svc.prepare()).resolves.toBeUndefined();
       },
     );
 
