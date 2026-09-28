@@ -166,16 +166,14 @@ jobs:
       - name: ⚙️ Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
 
       - name: build base
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set build-ttl.tags=${{env.BASE}}
-            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set build-docker.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            build-ttl
+            build-docker
 
   distro:
     runs-on: ubuntu-24.04
@@ -319,16 +317,17 @@ jobs:
       - name: ⚙️ Init
         run: |
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE_IMAGE=ttl.sh/${{ needs.setup.outputs.uid }}/${{ matrix.arch.tag }}:1d" >> ${GITHUB_ENV}
+          echo "BASE_IMAGE=containerbase/test" >> ${GITHUB_ENV}
 
       - name: build base
+        # rebuilds the base image from the GHA cache the `base` job filled,
+        # loading it into the local image store as `containerbase/test` for
+        # the test build below
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set build-ttl.tags=${{env.BASE_IMAGE}}
-            --set build-ttl.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            build-ttl
+            build-docker
 
       - name: test distro
         uses: ./.github/actions/bake

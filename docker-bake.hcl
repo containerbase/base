@@ -110,12 +110,6 @@ target "build" {
   ]
 }
 
-target "build-ttl" {
-  inherits = ["settings"]
-  output   = ["type=registry"]
-  tags = [ ]
-}
-
 target "build-docker" {
   inherits = ["settings"]
   output   = ["type=docker"]
