@@ -2,7 +2,11 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { isFourPartVersion } from '../../utils/index.ts';
+import {
+  isFourPartVersion,
+  semverCoerce,
+  semverGte,
+} from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -26,14 +30,19 @@ export class CabalInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the static deb10 cabal-install archive from downloads.haskell.org,
-   * verified against the release's `SHA256SUMS`, and extracts it into the
-   * versioned `bin` folder.
+   * Downloads the cabal-install archive from downloads.haskell.org, the
+   * generic `linux-unknown` build since v3.18 and the static `linux-deb10`
+   * one before, verified against the release's `SHA256SUMS`, and extracts it
+   * into the versioned `bin` folder.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://downloads.haskell.org/~cabal/cabal-install-${version}/`;
-    // use static deb10 binary as it is compatible with all supported ubuntu versions
-    const filename = `cabal-install-${version}-${this.arch}-linux-deb10.tar.xz`;
+    // cabal only publishes a generic linux build since v3.18, the static deb10
+    // one before, which is compatible with all supported ubuntu versions
+    const os = semverGte(semverCoerce(version)!, '3.18.0')
+      ? 'linux-unknown'
+      : 'linux-deb10';
+    const filename = `cabal-install-${version}-${this.arch}-${os}.tar.xz`;
 
     const expectedChecksum = await this.findChecksum(
       `${baseUrl}SHA256SUMS`,

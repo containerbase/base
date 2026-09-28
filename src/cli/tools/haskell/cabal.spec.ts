@@ -1,5 +1,6 @@
 import { arch } from 'node:os';
 import { join } from 'node:path';
+import { codeBlock } from 'common-tags';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { CabalInstallService, CabalPrepareService } from './cabal.ts';
@@ -52,6 +53,32 @@ describe('cli/tools/haskell/cabal', () => {
       });
     },
   );
+
+  test('install on 3.18.1.0 downloads the generic linux-unknown build', async () => {
+    const version = '3.18.1.0';
+    const { svc, pathSvc } = await toolContext(CabalInstallService);
+    const filename = `cabal-install-${version}-x86_64-linux-unknown.tar.xz`;
+    const releaseUrl = `/~cabal/cabal-install-${version}`;
+    scope(baseUrl)
+      .get(`${releaseUrl}/SHA256SUMS`)
+      .reply(
+        200,
+        codeBlock`
+          ${checksum(tarball)} ./cabal-install-${version}-aarch64-linux-unknown.tar.xz
+          ${checksum(tarball)} ./${filename}
+        `,
+      )
+      .get(`${releaseUrl}/${filename}`)
+      .reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+
+    await expect(svc.install(version)).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: join(pathSvc.versionedToolPath('cabal', version), 'bin'),
+    });
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(CabalInstallService);
