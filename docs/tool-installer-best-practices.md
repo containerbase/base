@@ -27,7 +27,8 @@ Verify every download against an upstream checksum.
 
 When upstream only started publishing checksums, or switched archive formats, from some version on, pick the right one by version with `semverGte` rather than probing URLs.
 For four-part versions, like cabal's `3.18.1.0`, coerce first with `semverCoerce`.
-Download older releases without `expectedChecksum` so nothing that worked before breaks:
+Leave `expectedChecksum` unset for older releases that have no upstream checksum, so nothing that worked before breaks.
+This is an explicit compatibility exception: `this.http.download` skips integrity validation in that case, so name the cutoff in a comment, and use another trusted integrity check if upstream offers one:
 
 ```ts
 // sbt only publishes a `.sha256` checksum file since v1.3.5.
