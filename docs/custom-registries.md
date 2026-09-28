@@ -738,7 +738,7 @@ https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-g
 https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz.sha256
 ```
 
-Releases without a `.tar.xz` archive are downloaded as `.tar.gz` instead, together with its `.tar.gz.sha256`.
+Releases before v1.19.0 and nightlies before 2017-05-05 are downloaded as `.tar.gz` instead, together with its `.tar.gz.sha256`.
 
 ## `swift`
 

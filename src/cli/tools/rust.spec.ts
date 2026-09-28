@@ -61,17 +61,45 @@ describe('cli/tools/rust', () => {
     test.each([
       {
         hostArch: 'x64',
-        version: '1.98.1',
-        file: '/dist/rust-1.98.1-x86_64-unknown-linux-gnu.tar',
+        version: '1.18.0',
+        file: '/dist/rust-1.18.0-x86_64-unknown-linux-gnu.tar',
+        target: 'x86_64-unknown-linux-gnu',
+        ext: 'gz',
+      },
+      {
+        hostArch: 'arm64',
+        version: '1.19.0',
+        file: '/dist/rust-1.19.0-aarch64-unknown-linux-gnu.tar',
+        target: 'aarch64-unknown-linux-gnu',
+        ext: 'xz',
+      },
+      {
+        hostArch: 'x64',
+        version: 'nightly-2017-05-04',
+        file: '/dist/2017-05-04/rust-nightly-x86_64-unknown-linux-gnu.tar',
+        target: 'x86_64-unknown-linux-gnu',
+        ext: 'gz',
+      },
+      {
+        hostArch: 'arm64',
+        version: 'nightly-2017-05-05',
+        file: '/dist/2017-05-05/rust-nightly-aarch64-unknown-linux-gnu.tar',
+        target: 'aarch64-unknown-linux-gnu',
+        ext: 'xz',
+      },
+      {
+        hostArch: 'x64',
+        version: 'beta',
+        file: '/dist/rust-beta-x86_64-unknown-linux-gnu.tar',
         target: 'x86_64-unknown-linux-gnu',
         ext: 'xz',
       },
       {
         hostArch: 'arm64',
-        version: 'nightly-2026-06-19',
-        file: '/dist/2026-06-19/rust-nightly-aarch64-unknown-linux-gnu.tar',
+        version: 'nightly',
+        file: '/dist/rust-nightly-aarch64-unknown-linux-gnu.tar',
         target: 'aarch64-unknown-linux-gnu',
-        ext: 'gz',
+        ext: 'xz',
       },
     ] as const)(
       'install $version on $target',
@@ -79,8 +107,6 @@ describe('cli/tools/rust', () => {
         vi.mocked(arch).mockReturnValue(hostArch);
         const { svc, pathSvc } = await toolContext(RustInstallService);
         scope(baseUrl)
-          .head(`${file}.xz.sha256`)
-          .reply(ext === 'xz' ? 200 : 404)
           .get(`${file}.${ext}.sha256`)
           .reply(200, `${checksum(archive)}  rust.tar.${ext}\n`)
           .get(`${file}.${ext}`)
@@ -108,11 +134,7 @@ describe('cli/tools/rust', () => {
     test('install: rejects an empty checksum', async () => {
       const { svc } = await toolContext(RustInstallService);
       const file = '/dist/rust-1.97.0-x86_64-unknown-linux-gnu.tar.xz';
-      scope(baseUrl)
-        .head(`${file}.sha256`)
-        .reply(200)
-        .get(`${file}.sha256`)
-        .reply(200, '');
+      scope(baseUrl).get(`${file}.sha256`).reply(200, '');
 
       await expect(svc.install('1.97.0')).rejects.toThrow(
         `Checksum not found in ${baseUrl}${file}.sha256`,
@@ -123,8 +145,6 @@ describe('cli/tools/rust', () => {
       const { svc } = await toolContext(RustInstallService);
       const file = '/dist/rust-1.98.0-x86_64-unknown-linux-gnu.tar.xz';
       scope(baseUrl)
-        .head(`${file}.sha256`)
-        .reply(200)
         .get(`${file}.sha256`)
         .reply(200, `${checksum('other')}  rust.tar.xz\n`)
         .get(file)

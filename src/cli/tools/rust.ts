@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
+import { semverGte } from '../utils/index.ts';
 
 /** Matches a dated nightly version, e.g. `nightly-2024-01-01`. */
 const nightlyDateRegex = /^nightly-\d{4}-\d{2}-\d{2}$/;
@@ -39,10 +40,25 @@ export class RustInstallService extends BaseInstallService {
   }
 
   /**
+   * Rust publishes `.tar.xz` archives since v1.19.0 and nightly 2017-05-05,
+   * the `.tar.gz` ones before.
+   */
+  private archiveExt(version: string): 'xz' | 'gz' {
+    if (version === 'beta' || version === 'nightly') {
+      return 'xz';
+    }
+    if (version.startsWith('nightly-')) {
+      // validate only lets `nightly-YYYY-MM-DD` through, so dates compare as strings
+      return version.slice('nightly-'.length) >= '2017-05-05' ? 'xz' : 'gz';
+    }
+    return semverGte(version, '1.19.0') ? 'xz' : 'gz';
+  }
+
+  /**
    * Downloads the rust archive from static.rust-lang.org, verified against its
    * `.sha256`, and runs its `install.sh` for cargo, rustc and the standard
-   * library into the versioned tool path. Uses the `.xz` archive when there
-   * is one, else the `.gz`.
+   * library into the versioned tool path. Uses the `.xz` archive since
+   * v1.19.0 / nightly 2017-05-05, and the `.gz` one before.
    */
   override async install(version: string): Promise<void> {
     const target = `${this.rustArch}-unknown-linux-gnu`;
@@ -52,9 +68,7 @@ export class RustInstallService extends BaseInstallService {
     }
     const baseUrl = `https://static.rust-lang.org/dist/${filename}`;
 
-    // not all releases have xz archives
-    const ext = (await this.http.exists(`${baseUrl}.xz.sha256`)) ? 'xz' : 'gz';
-    const url = `${baseUrl}.${ext}`;
+    const url = `${baseUrl}.${this.archiveExt(version)}`;
 
     const expectedChecksum = await this.getChecksum(`${url}.sha256`);
 
