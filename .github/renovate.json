@@ -33,6 +33,12 @@
       "enabled": false
     },
     {
+      "description": "Enable npm updates for the Vite+ test fixture",
+      "matchFileNames": ["test/node/vp/package.json"],
+      "matchManagers": ["npm"],
+      "enabled": true
+    },
+    {
       "description": "Enable the regex manager only for test/",
       "matchFileNames": ["test/**"],
       "matchManagers": ["custom.regex"],

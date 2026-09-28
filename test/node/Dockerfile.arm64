@@ -82,15 +82,16 @@ RUN install-tool renovate 44.17.1
 FROM test-node AS test-vp
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=0.3.1
+ARG VP_VERSION=1.0.0
 RUN install-tool vp "${VP_VERSION}"
 
-COPY dist/test/vp-sync-versions.mjs /test/vp-sync-versions.mjs
+COPY test/node/vp /test/vp
+RUN npm ci --prefix /test/vp --ignore-scripts --no-audit --no-fund
 
 USER 12021
 SHELL ["/bin/sh", "-c"]
 
-RUN node /test/vp-sync-versions.mjs "${VP_VERSION}"
+RUN node /test/vp/sync-versions.mjs "${VP_VERSION}"
 
 #--------------------------------------
 # Image: final

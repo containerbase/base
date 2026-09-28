@@ -785,9 +785,9 @@ Vite+ releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-x86_64-unknown-linux-gnu.tar.gz
-https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-aarch64-unknown-linux-gnu.tar.gz
-https://github.com/voidzero-dev/vite-plus/releases/download/v0.3.1/vp-checksums.txt
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-checksums.txt
 ```
 
 ## `wally`
