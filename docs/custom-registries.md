@@ -735,7 +735,10 @@ https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.xz.s
 https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz
 https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz.sha256
 https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz.sha256
 ```
+
+Releases without a `.tar.xz` archive are downloaded as `.tar.gz` instead, together with its `.tar.gz.sha256`.
 
 ## `swift`
 
