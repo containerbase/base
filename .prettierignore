@@ -1,3 +1,18 @@
 # Everything git ignores is ignored too, prettier reads `.gitignore` by default.
 
 pnpm-lock.yaml
+
+# Local Claude Code files, nothing in there is tracked
+/.claude/
+
+# Paths the Claude Code sandbox masks with unreadable /dev/null bind mounts
+/.bash_profile
+/.bashrc
+/.gitconfig
+/.gitmodules
+/.idea
+/.mcp.json
+/.profile
+/.ripgreprc
+/.zprofile
+/.zshrc
