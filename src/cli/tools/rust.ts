@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
-import { pathExists } from '../utils/index.ts';
 
 /** Matches a dated nightly version, e.g. `nightly-2024-01-01`. */
 const nightlyDateRegex = /^nightly-\d{4}-\d{2}-\d{2}$/;
@@ -13,14 +12,14 @@ const nightlyDateRegex = /^nightly-\d{4}-\d{2}-\d{2}$/;
 export class RustPrepareService extends BasePrepareService {
   override readonly name = 'rust';
 
-  /** Initializes the cache and links `~/.cargo` to it, if not already linked. */
+  /** Initializes the cache and links `~/.cargo` to it, keeping an existing one. */
   override async prepare(): Promise<void> {
     await this.initialize();
 
-    const link = join(this.envSvc.userHome, '.cargo');
-    if (!(await pathExists(link))) {
-      await fs.symlink(join(this.pathSvc.cachePath, '.cargo'), link);
-    }
+    await this.pathSvc.createSymlink(
+      join(this.pathSvc.cachePath, '.cargo'),
+      join(this.envSvc.userHome, '.cargo'),
+    );
   }
 
   /** Creates the `.cargo` folder in the containerbase cache. */
