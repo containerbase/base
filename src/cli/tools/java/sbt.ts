@@ -3,21 +3,21 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { pathExists, semverGte } from '../../utils/index.ts';
+import { semverGte } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class SbtPrepareService extends BasePrepareService {
   override readonly name = 'sbt';
 
-  /** Initializes the cache and links `~/.sbt` to it, if not already linked. */
+  /** Initializes the cache and links `~/.sbt` to it, keeping an existing one. */
   override async prepare(): Promise<void> {
     await this.initialize();
 
-    const link = join(this.envSvc.userHome, '.sbt');
-    if (!(await pathExists(link))) {
-      await fs.symlink(join(this.pathSvc.cachePath, '.sbt'), link);
-    }
+    await this.pathSvc.createSymlink(
+      join(this.pathSvc.cachePath, '.sbt'),
+      join(this.envSvc.userHome, '.sbt'),
+    );
   }
 
   /** Creates the `.sbt` folder in the containerbase cache. */
