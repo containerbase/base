@@ -360,12 +360,18 @@ Cabal releases are downloaded from:
 
 - `https://downloads.haskell.org/~cabal/`
 
+Releases since v3.18 only publish a generic `linux-unknown` build, earlier
+releases publish a static `linux-deb10` build.
+
 Samples:
 
 ```txt
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-aarch64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-x86_64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/SHA256SUMS
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/cabal-install-3.18.1.0-aarch64-linux-unknown.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/cabal-install-3.18.1.0-x86_64-linux-unknown.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/SHA256SUMS
 ```
 
 ### `ghc`
