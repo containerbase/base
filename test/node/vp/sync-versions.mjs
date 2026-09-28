@@ -32,6 +32,12 @@ async function plan(manifestContents) {
     ['sync-versions', '--json'],
     { cwd, encoding: 'utf8' },
   );
+  // vp can exit before reading stdin; execFile then rejects with its exit code and stderr.
+  run.child.stdin.on('error', (error) => {
+    if (error.code !== 'EPIPE') {
+      throw error;
+    }
+  });
   run.child.stdin.end(
     JSON.stringify({
       schemaVersion: 1,
