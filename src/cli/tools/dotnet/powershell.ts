@@ -4,7 +4,7 @@ import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService } from '../../services/index.ts';
-import { getDistro } from '../../utils/index.ts';
+import { getDistro, semverGte } from '../../utils/index.ts';
 
 /**
  * The distro specific dependencies.
@@ -62,16 +62,17 @@ export class PowershellInstallService extends BaseInstallService {
 
   /**
    * Downloads the powershell archive from GitHub, verified against the
-   * release's `hashes.sha256`, and extracts it into the versioned tool path.
+   * release's `hashes.sha256` since v7.2.0, and extracts it into the
+   * versioned tool path.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/PowerShell/PowerShell/releases/download/v${version}/`;
     const filename = `${this.name}-${version}-linux-${this.ghArch}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}hashes.sha256`,
-      filename,
-    );
+    // powershell only publishes a `hashes.sha256` checksum file since v7.2.0.
+    const expectedChecksum = semverGte(version, '7.2.0')
+      ? await this.findChecksum(`${baseUrl}hashes.sha256`, filename)
+      : undefined;
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,

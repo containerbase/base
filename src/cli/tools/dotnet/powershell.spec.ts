@@ -119,6 +119,28 @@ describe('cli/tools/dotnet/powershell', () => {
       },
     );
 
+    test('install: downloads without a checksum before v7.2.0', async () => {
+      const { svc, pathSvc } = await toolContext(PowershellInstallService);
+      const version = '7.1.3';
+      const filename = `powershell-${version}-linux-x64.tar.gz`;
+      scope(baseUrl)
+        .get(`${releaseUrl}/v${version}/${filename}`)
+        .reply(200, archive);
+      const path = pathSvc.versionedToolPath('powershell', version);
+      const extract = vi
+        .spyOn(CompressionService.prototype, 'extract')
+        .mockImplementationOnce(({ cwd }) =>
+          fs.writeFile(join(cwd, 'pwsh'), 'pwsh', { mode: 0o644 }),
+        );
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining(filename),
+        cwd: path,
+      });
+    });
+
     test('install: rejects a missing checksum', async () => {
       const { svc } = await toolContext(PowershellInstallService);
       scope(baseUrl)
