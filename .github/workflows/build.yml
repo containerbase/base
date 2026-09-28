@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   setup:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     timeout-minutes: 15
 
     outputs:
@@ -342,7 +342,7 @@ jobs:
       - base-arm64
       - distro
       - lang
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     timeout-minutes: 1
     if: always()
     steps:
