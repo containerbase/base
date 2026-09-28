@@ -310,6 +310,7 @@ Samples:
 
 ```txt
 https://github.com/git-lfs/git-lfs/releases/download/v3.4.1/git-lfs-linux-amd64-v3.4.1.tar.gz
+https://github.com/git-lfs/git-lfs/releases/download/v3.4.1/sha256sums.asc
 ```
 
 ## gleam
