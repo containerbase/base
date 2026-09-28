@@ -1,3 +1,4 @@
+import { execa } from 'execa';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService } from './index.ts';
@@ -22,5 +23,17 @@ describe('cli/services/compression.service', () => {
     await expect(
       svc.extract({ file: 'some.txz', cwd: globalThis.cacheDir, strip: 1 }),
     ).resolves.toBeUndefined();
+  });
+
+  test('extracts with a utf-8 locale', async () => {
+    const svc = await child.getAsync(CompressionService);
+
+    await svc.extract({ file: 'some.txz', cwd: globalThis.cacheDir });
+
+    expect(execa).toHaveBeenCalledWith(
+      'bsdtar',
+      expect.arrayContaining(['-xf', 'some.txz']),
+      { env: { LC_ALL: 'C.UTF-8', LANG: 'C.UTF-8' } },
+    );
   });
 });
