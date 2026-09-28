@@ -58,6 +58,7 @@ describe('cli/tools/dotnet/powershell', () => {
       expect(execaMock).toHaveBeenCalledWith(
         'apt-get',
         expect.arrayContaining(['libc6', 'zlib1g', ...pkgs]),
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
       );
     });
 
