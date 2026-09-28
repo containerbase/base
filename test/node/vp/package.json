@@ -1,8 +1,0 @@
-{
-  "name": "test-vp",
-  "version": "0.0.0",
-  "private": true,
-  "dependencies": {
-    "execa": "9.6.1"
-  }
-}

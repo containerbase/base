@@ -85,8 +85,7 @@ FROM test-node AS test-vp
 ARG VP_VERSION=1.0.0
 RUN install-tool vp "${VP_VERSION}"
 
-COPY test/node/vp /test/vp
-RUN npm ci --prefix /test/vp --ignore-scripts --no-audit --no-fund
+COPY test/node/vp/sync-versions.mjs /test/vp/
 
 USER 12021
 SHELL ["/bin/sh", "-c"]

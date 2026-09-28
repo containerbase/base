@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { execa } from 'execa';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 const version = process.argv[2];
 assert.ok(version, 'Expected the installed Vite+ version');
@@ -24,25 +27,25 @@ const contents = JSON.stringify(manifest, null, 2) + '\n';
 const config = 'throw new Error("Project configuration must not be loaded");\n';
 
 async function plan(manifestContents) {
-  const { stdout } = await execa(
+  const run = execFileAsync(
     process.env.VP_TEST_BIN ?? 'vp',
     ['sync-versions', '--json'],
-    {
-      cwd,
-      encoding: 'utf8',
-      input: JSON.stringify({
-        schemaVersion: 1,
-        workspace: '.',
-        manifests: [
-          {
-            path: 'package.json',
-            kind: 'packageJson',
-            contents: manifestContents,
-          },
-        ],
-      }),
-    },
+    { cwd, encoding: 'utf8' },
   );
+  run.child.stdin.end(
+    JSON.stringify({
+      schemaVersion: 1,
+      workspace: '.',
+      manifests: [
+        {
+          path: 'package.json',
+          kind: 'packageJson',
+          contents: manifestContents,
+        },
+      ],
+    }),
+  );
+  const { stdout } = await run;
   return JSON.parse(stdout);
 }
 
