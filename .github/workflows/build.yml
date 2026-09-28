@@ -334,9 +334,11 @@ jobs:
         with:
           args: test-${{ matrix.arch.name }}
 
-  # Catch-all required check for test matrix
+  # Catch-all required check for the test matrix, `base` is listed too because
+  # `lang` is skipped when it fails
   test-success:
     needs:
+      - base
       - base-arm64
       - distro
       - lang
@@ -344,20 +346,8 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
-      - name: Fail for failed or cancelled distro tests
+      - name: Fail for failed or cancelled tests
         if: |
-          needs.base-arm64.result == 'failure' ||
-          needs.base-arm64.result == 'cancelled'
-        run: exit 1
-
-      - name: Fail for failed or cancelled distro tests
-        if: |
-          needs.distro.result == 'failure' ||
-          needs.distro.result == 'cancelled'
-        run: exit 1
-
-      - name: Fail for failed or cancelled lang tests
-        if: |
-          needs.lang.result == 'failure' ||
-          needs.lang.result == 'cancelled'
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled')
         run: exit 1
