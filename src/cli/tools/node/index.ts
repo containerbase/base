@@ -132,14 +132,12 @@ export class NodeInstallService extends NodeBaseInstallService {
 
     const ver = parse(version);
     if (ver.major < 15) {
-      const tmp = await fs.mkdtemp(
-        join(this.envSvc.tmpDir, 'containerbase-npm-'),
-      );
-      const env = this.prepareEnv(version, tmp);
-      env.PATH = `${path}/bin:${penv.PATH}`;
-      // update to latest node-gyp to fully support python3
-      await this.updateNodeGyp(path, tmp, env, true);
-      await fs.rm(tmp, { recursive: true, force: true });
+      await this.pathSvc.withTempDir('containerbase-npm-', async (tmp) => {
+        const env = this.prepareEnv(version, tmp);
+        env.PATH = `${path}/bin:${penv.PATH}`;
+        // update to latest node-gyp to fully support python3
+        await this.updateNodeGyp(path, tmp, env, true);
+      });
 
       await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
         recursive: true,

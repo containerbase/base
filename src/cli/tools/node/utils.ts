@@ -95,10 +95,6 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   override async install(version: string): Promise<void> {
     const nodeVersion = await this.getNodeVersion();
     const npm = this.getNodeNpm(nodeVersion);
-    const tmp = await fs.mkdtemp(
-      join(this.envSvc.tmpDir, 'containerbase-npm-'),
-    );
-    const env = this.prepareEnv(version, tmp);
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -112,44 +108,47 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     prefix = join(prefix, nodeVersion);
     await this.pathSvc.createDir(prefix);
 
-    const res = await execa(
-      npm,
-      [
-        'install',
-        `${this.tool(version)}@${version}`,
-        '--save-exact',
-        '--no-audit',
-        '--prefix',
-        prefix,
-        '--cache',
-        tmp,
-        ...this.getAdditionalArgs(),
-        '-d',
-      ],
-      { reject: false, env, cwd: this.pathSvc.installDir, all: true },
-    );
+    await this.pathSvc.withTempDir('containerbase-npm-', async (tmp) => {
+      const env = this.prepareEnv(version, tmp);
 
-    if (res.failed) {
-      logger.warn(`Npm error:\n${res.all}`);
-      await fs.rm(prefix, { recursive: true, force: true });
-      throw new Error('npm install command failed');
-    } else {
-      logger.trace(`npm install:\n${res.all}`);
-    }
-
-    await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
-    if (this.name === 'npm') {
-      const pkg = await readPackageJson(
-        this.packageJsonPath(version, nodeVersion),
+      const res = await execa(
+        npm,
+        [
+          'install',
+          `${this.tool(version)}@${version}`,
+          '--save-exact',
+          '--no-audit',
+          '--prefix',
+          prefix,
+          '--cache',
+          tmp,
+          ...this.getAdditionalArgs(),
+          '-d',
+        ],
+        { reject: false, env, cwd: this.pathSvc.installDir, all: true },
       );
-      const ver = parse(pkg.version);
-      if (ver.major < 7) {
-        // update to latest node-gyp to fully support python3
-        await this.updateNodeGyp(prefix, tmp, env);
-      }
-    }
 
-    await fs.rm(tmp, { recursive: true, force: true });
+      if (res.failed) {
+        logger.warn(`Npm error:\n${res.all}`);
+        await fs.rm(prefix, { recursive: true, force: true });
+        throw new Error('npm install command failed');
+      } else {
+        logger.trace(`npm install:\n${res.all}`);
+      }
+
+      await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
+      if (this.name === 'npm') {
+        const pkg = await readPackageJson(
+          this.packageJsonPath(version, nodeVersion),
+        );
+        const ver = parse(pkg.version);
+        if (ver.major < 7) {
+          // update to latest node-gyp to fully support python3
+          await this.updateNodeGyp(prefix, tmp, env);
+        }
+      }
+    });
+
     await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
       recursive: true,
       force: true,

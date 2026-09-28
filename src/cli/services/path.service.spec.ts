@@ -359,6 +359,36 @@ describe('cli/services/path.service', () => {
     expect(chown).toHaveBeenCalledExactlyOnceWith(file, 12021, 0);
   });
 
+  describe('withTempDir', () => {
+    test('returns the result and removes the folder afterwards', async () => {
+      let dirInFn: string | undefined;
+      let existedInFn = false;
+
+      const result = await pathSvc.withTempDir('test-', async (dir) => {
+        dirInFn = dir;
+        existedInFn = await pathExists(dir, 'dir');
+        return 'result';
+      });
+
+      expect(result).toBe('result');
+      expect(existedInFn).toBe(true);
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
+
+    test('removes the folder when fn throws', async () => {
+      let dirInFn: string | undefined;
+
+      await expect(
+        pathSvc.withTempDir('test-', (dir) => {
+          dirInFn = dir;
+          return Promise.reject(new Error('test error'));
+        }),
+      ).rejects.toThrow('test error');
+
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
+  });
+
   test('writeFile', async () => {
     const file = rootPath('env123');
     await pathSvc.writeFile(file, 'test');

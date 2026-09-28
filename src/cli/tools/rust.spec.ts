@@ -9,7 +9,7 @@ import {
 } from '../services/index.ts';
 import { RustInstallService, RustPrepareService } from './rust.ts';
 import { scope } from '~test/http-mock.ts';
-import { ensurePaths } from '~test/path.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 import { checksum, toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
@@ -130,6 +130,25 @@ describe('cli/tools/rust', () => {
         );
       },
     );
+
+    test('install: removes the temp folder when extraction fails', async () => {
+      const version = '1.99.0';
+      const file = `/dist/rust-${version}-x86_64-unknown-linux-gnu.tar.xz`;
+      const { svc } = await toolContext(RustInstallService);
+      scope(baseUrl)
+        .get(`${file}.sha256`)
+        .reply(200, `${checksum(archive)}  rust.tar.xz\n`)
+        .get(file)
+        .reply(200, archive);
+      vi.spyOn(CompressionService.prototype, 'extract').mockRejectedValueOnce(
+        new Error('extract failed'),
+      );
+
+      await expect(svc.install(version)).rejects.toThrow('extract failed');
+
+      const entries = await fs.readdir(rootPath('tmp'));
+      expect(entries.some((e) => e.startsWith('rust-'))).toBe(false);
+    });
 
     test('install: rejects an empty checksum', async () => {
       const { svc } = await toolContext(RustInstallService);

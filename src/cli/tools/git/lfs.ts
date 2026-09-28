@@ -30,23 +30,23 @@ export class GitLfsInstallService extends BaseInstallService {
       expectedChecksum,
     });
 
-    const tmp = await fs.mkdtemp(join(this.envSvc.tmpDir, `${this.name}-`));
-    // v3.2+ has a subdir https://github.com/git-lfs/git-lfs/pull/4980
-    await this.compress.extract({
-      file,
-      cwd: tmp,
-      strip: semverGte(version, '3.2.0') ? 1 : 0,
+    await this.pathSvc.withTempDir(`${this.name}-`, async (tmp) => {
+      // v3.2+ has a subdir https://github.com/git-lfs/git-lfs/pull/4980
+      await this.compress.extract({
+        file,
+        cwd: tmp,
+        strip: semverGte(version, '3.2.0') ? 1 : 0,
+      });
+
+      await this.pathSvc.ensureToolPath(this.name);
+
+      const path = await this.pathSvc.createVersionedToolPath(
+        this.name,
+        version,
+        'bin',
+      );
+      await fs.copyFile(join(tmp, this.name), join(path, this.name));
     });
-
-    await this.pathSvc.ensureToolPath(this.name);
-
-    const path = await this.pathSvc.createVersionedToolPath(
-      this.name,
-      version,
-      'bin',
-    );
-    await fs.copyFile(join(tmp, this.name), join(path, this.name));
-    await fs.rm(tmp, { recursive: true, force: true });
   }
 
   /**

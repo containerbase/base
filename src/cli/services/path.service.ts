@@ -145,6 +145,22 @@ export class PathService {
     await fs.symlink(target, path);
   }
 
+  /**
+   * Creates a temp folder below the containerbase temp dir, passes it to
+   * `fn`, and always removes it afterwards, also when `fn` throws.
+   */
+  async withTempDir<T>(
+    prefix: string,
+    fn: (dir: string) => Promise<T>,
+  ): Promise<T> {
+    const dir = await fs.mkdtemp(join(this.envSvc.tmpDir, prefix));
+    try {
+      return await fn(dir);
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  }
+
   /** Creates the tool path and returns it. */
   async createToolPath(tool: string): Promise<string> {
     const toolPath = this.toolPath(tool);
