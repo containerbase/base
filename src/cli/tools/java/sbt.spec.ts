@@ -161,6 +161,16 @@ describe('cli/tools/java/sbt', () => {
       await expect(fs.stat(rootPath('tmp/.sbt'))).rejects.toThrow();
     });
 
+    test('runs the tool test: removes the temp folder when the spawn fails', async () => {
+      const { svc } = await toolContext(SbtInstallService);
+      execaMock.mockRejectedValueOnce(new Error('spawn failed'));
+
+      await expect(svc.test('1.13.0')).rejects.toThrow('spawn failed');
+
+      const entries = await fs.readdir(rootPath('tmp'));
+      expect(entries.some((e) => e.startsWith('sbt-'))).toBe(false);
+    });
+
     test('runs the tool test without sbt data', async () => {
       vi.stubEnv('HOME', rootPath('home/none'));
       const { svc } = await toolContext(SbtInstallService);

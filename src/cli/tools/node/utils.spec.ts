@@ -185,6 +185,10 @@ describe('cli/tools/node/utils', () => {
           join(pathSvc.versionedToolPath('corepack', '2.0.0'), nodeVersion),
         ),
       ).rejects.toThrow();
+      const entries = await fs.readdir(envSvc.tmpDir);
+      expect(entries.some((e) => e.startsWith('containerbase-npm-'))).toBe(
+        false,
+      );
     });
 
     test('install: uses the replaced npm registry', async () => {

@@ -9,7 +9,7 @@ import {
 } from '../../services/index.ts';
 import { GitLfsInstallService } from './lfs.ts';
 import { scope } from '~test/http-mock.ts';
-import { ensurePaths } from '~test/path.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 import { checksum, toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
@@ -72,6 +72,28 @@ describe('cli/tools/git/lfs', () => {
       ).toBe(binary);
     },
   );
+
+  test('install: removes the temp folder when extraction fails', async () => {
+    const version = '3.9.0';
+    const { svc } = await toolContext(GitLfsInstallService);
+    const filename = `git-lfs-linux-amd64-v${version}.tar.gz`;
+    scope(baseUrl)
+      .get(`${releaseUrl}/v${version}/sha256sums.asc`)
+      .reply(
+        200,
+        `-----BEGIN PGP SIGNED MESSAGE-----\n${checksum('other')}  git-lfs-darwin-amd64-v${version}.zip\n${checksum(archive)}  ${filename}\n`,
+      )
+      .get(`${releaseUrl}/v${version}/${filename}`)
+      .reply(200, archive);
+    vi.spyOn(CompressionService.prototype, 'extract').mockRejectedValueOnce(
+      new Error('extract failed'),
+    );
+
+    await expect(svc.install(version)).rejects.toThrow('extract failed');
+
+    const entries = await fs.readdir(rootPath('tmp'));
+    expect(entries.some((e) => e.startsWith('git-lfs-'))).toBe(false);
+  });
 
   test('install: rejects a missing checksum', async () => {
     const { svc } = await toolContext(GitLfsInstallService);

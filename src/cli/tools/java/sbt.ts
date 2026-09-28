@@ -77,11 +77,11 @@ export class SbtInstallService extends BaseInstallService {
    * @see {@link https://github.com/sbt/sbt/issues/1458}
    */
   override async test(_version: string): Promise<void> {
-    const tmp = await fs.mkdtemp(join(this.envSvc.tmpDir, `${this.name}-`));
-    await this._spawn(this.name, ['--version'], { cwd: tmp });
+    await this.pathSvc.withTempDir(`${this.name}-`, async (tmp) => {
+      await this._spawn(this.name, ['--version'], { cwd: tmp });
+    });
 
     // cleanup sbt temp data
-    await fs.rm(tmp, { recursive: true, force: true });
     await fs.rm(join(this.envSvc.tmpDir, '.sbt'), {
       recursive: true,
       force: true,

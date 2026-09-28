@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -78,17 +77,20 @@ export class RustInstallService extends BaseInstallService {
       expectedChecksum,
     });
 
-    const tmp = await fs.mkdtemp(join(this.envSvc.tmpDir, `${this.name}-`));
-    await this.compress.extract({ file, cwd: tmp, strip: 1 });
+    await this.pathSvc.withTempDir(`${this.name}-`, async (tmp) => {
+      await this.compress.extract({ file, cwd: tmp, strip: 1 });
 
-    await this.pathSvc.ensureToolPath(this.name);
+      await this.pathSvc.ensureToolPath(this.name);
 
-    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-    await this._spawn(join(tmp, 'install.sh'), [
-      `--prefix=${path}`,
-      `--components=cargo,rust-std-${target},rustc`,
-    ]);
-    await fs.rm(tmp, { recursive: true, force: true });
+      const path = await this.pathSvc.createVersionedToolPath(
+        this.name,
+        version,
+      );
+      await this._spawn(join(tmp, 'install.sh'), [
+        `--prefix=${path}`,
+        `--components=cargo,rust-std-${target},rustc`,
+      ]);
+    });
   }
 
   /** Links the `cargo` and `rustc` binaries into the global bin folder. */
