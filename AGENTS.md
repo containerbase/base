@@ -33,3 +33,7 @@ All tooling runs through `pnpm`:
 - `pnpm test:docker -b -t test-x86_64 node`: run the container test in `test/node`
 
 The container tests build the whole image, so they take several minutes.
+
+## Tool installers
+
+When adding or changing a tool installer, follow the [tool installer best practices](./docs/tool-installer-best-practices.md).
