@@ -15,7 +15,7 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>" \
   org.opencontainers.image.source="https://github.com/containerbase/base"
 
 #  autoloading containerbase env
-ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/ubuntu/bin:$PATH
+ENV BASH_ENV=/usr/local/etc/env ENV=/usr/local/etc/env PATH=/home/ubuntu/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8
 SHELL ["/bin/bash" , "-c"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
