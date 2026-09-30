@@ -232,8 +232,10 @@ Erlang releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_64.tar.xz
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-aarch64.tar.xz
 ```
 
 ### `elixir`
