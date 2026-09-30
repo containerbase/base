@@ -145,7 +145,7 @@ RUN install-tool helmfile v1.8.1
 FROM base AS test-kustomize
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.1
+RUN install-tool kustomize 5.8.2
 
 #--------------------------------------
 # test: mono
