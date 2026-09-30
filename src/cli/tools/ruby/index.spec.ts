@@ -137,8 +137,6 @@ describe('cli/tools/ruby/index', () => {
         const { svc, pathSvc } = await toolContext(RubyInstallService);
         const path = prebuildPath(version, 'jammy', ghArch);
         scope(githubUrl)
-          .head(`${path}.sha512`)
-          .reply(200)
           .get(`${path}.sha512`)
           .reply(200, `${checksum(archive, 'sha512')}\n`)
           .get(path)
@@ -170,18 +168,18 @@ describe('cli/tools/ruby/index', () => {
       },
     );
 
-    test('install without checksum', async () => {
+    test('install on noble uses the jammy prebuild', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: 'noble',
         versionId: '24.04',
       });
-      const version = '2.7.6';
+      const version = '3.3.0';
       const { svc, pathSvc } = await toolContext(RubyInstallService);
       const path = prebuildPath(version, 'jammy', 'x86_64');
       scope(githubUrl)
-        .head(`${path}.sha512`)
-        .reply(404)
+        .get(`${path}.sha512`)
+        .reply(200, `${checksum(archive, 'sha512')}\n`)
         .get(path)
         .reply(200, archive);
       const extract = vi.spyOn(CompressionService.prototype, 'extract');

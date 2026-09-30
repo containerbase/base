@@ -718,7 +718,7 @@ https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4
 https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz
 ```
 
-The `.sha512` checksum is used when the release has one, older releases are installed without it.
+The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
 
 ### `gem` tools
 
