@@ -165,11 +165,15 @@ describe('cli/tools/erlang/index', () => {
       },
     );
 
-    test('install: skips the checksum for a version below 25.3.0.0', async () => {
+    test('install: verifies a version below 25.3.0.0 too', async () => {
       const version = '24.3.4.17';
       const { svc, pathSvc } = await toolContext(ErlangInstallService);
       const path = prebuildPath(version, 'jammy', 'x86_64');
-      scope(githubUrl).get(path).reply(200, archive);
+      scope(githubUrl)
+        .get(`${path}.sha512`)
+        .reply(200, checksum(archive, 'sha512'))
+        .get(path)
+        .reply(200, archive);
       const extract = vi.spyOn(CompressionService.prototype, 'extract');
 
       await expect(svc.install(version)).resolves.toBeUndefined();
