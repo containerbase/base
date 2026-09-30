@@ -84,7 +84,7 @@ RUN install-tool golang 1.27.1
 RUN install-tool helm v4.3.0
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.0
+RUN install-tool helmfile v1.8.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.37.1
@@ -246,7 +246,7 @@ RUN install-tool pdm 2.29.2
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool uv 0.12.20
+RUN install-tool uv 0.12.21
 
 #--------------------------------------
 # Image: test-ruby

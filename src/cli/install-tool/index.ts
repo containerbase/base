@@ -39,7 +39,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { ResolverMap } from '../tools/index.ts';
+import { ResolverMap, getToolType } from '../tools/index.ts';
 import {
   AndroidSdkCmdlineToolsInstallService,
   AndroidSdkCmdlineToolsVersionResolver,
@@ -332,7 +332,7 @@ export async function installTool(
               // some pip packages may not have a `--version` flag
               await super.test(version);
             } catch (err) {
-              if (ResolverMap[tool] === 'pip') {
+              if (getToolType(ResolverMap, tool) === 'pip') {
                 // those tools are known and should work
                 throw err;
               }
