@@ -279,6 +279,46 @@ describe('cli/tools/python/index', () => {
       );
     });
 
+    test.each([
+      { cdnPip: 'true', index: 'https://cdn.example.com/pypi.org/simple/' },
+      { cdnPip: undefined, index: undefined },
+    ])(
+      'install: with a cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
+      async ({ cdnPip, index }) => {
+        vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+        vi.stubEnv('CONTAINERBASE_CDN_PIP', cdnPip);
+        const version = cdnPip ? '3.13.1' : '3.13.2';
+        const { svc, pathSvc } = await toolContext(PythonInstallService);
+        // the prebuild is downloaded through the cdn too
+        const path = `/github.com${prebuildPath(version, 'jammy', 'x86_64')}`;
+        scope('https://cdn.example.com')
+          .get(`${path}.sha512`)
+          .reply(200, `${checksum(archive, 'sha512')}\n`)
+          .get(path)
+          .reply(200, archive);
+        const bin = join(pathSvc.versionedToolPath('python', version), 'bin');
+        vi.spyOn(CompressionService.prototype, 'extract').mockImplementation(
+          async () => {
+            await fs.mkdir(bin, { recursive: true });
+          },
+        );
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(execaMock).toHaveBeenCalledExactlyOnceWith(
+          join(bin, 'python'),
+          expect.any(Array),
+          expect.objectContaining({
+            env: {
+              PIP_ROOT_USER_ACTION: 'ignore',
+              PIP_USE_PEP517: 'true',
+              ...(index && { PIP_INDEX_URL: index }),
+            },
+          }),
+        );
+      },
+    );
+
     test('link', async () => {
       const { svc, pathSvc } = await toolContext(PythonInstallService);
       const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');

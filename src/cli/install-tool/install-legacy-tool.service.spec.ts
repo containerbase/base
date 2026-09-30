@@ -80,7 +80,7 @@ describe('cli/install-tool/install-legacy-tool.service', () => {
       expect(execaMock).toHaveBeenCalledExactlyOnceWith(
         'bash',
         [v2Script, 'install', 'full', '1.0.0'],
-        expect.any(Object),
+        { stdio: ['inherit', 'inherit', 1] },
       );
     });
 
