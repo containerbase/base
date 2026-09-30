@@ -712,9 +712,13 @@ Ruby releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-x86_64.tar.xz
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz
 ```
+
+The `.sha512` checksum is used when the release has one, older releases are installed without it.
 
 ### `gem` tools
 
