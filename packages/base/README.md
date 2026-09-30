@@ -1,9 +1,9 @@
 # `@containerbase/base`
 
-Metadata about the tools [containerbase](https://github.com/containerbase/base) supports.
+Metadata about the tools that [Containerbase](https://github.com/containerbase/base) supports.
 
-The data is generated from the containerbase sources and released with the same version as containerbase itself.
-A consumer can therefore compare this package's version with the version an image reports in `/usr/local/containerbase/version`: if the image version is greater than or equal to the package version, every tool listed here can be installed in that image.
+The data is generated from the Containerbase sources and released with the same version as Containerbase itself.
+This allows a consumer of this library to determine which tools can be used with a given version of Containerbase (via `/usr/local/containerbase/version`): if the image version is greater than or equal to the package version, every tool listed here can be installed in that image.
 
 ## Usage
 
@@ -34,12 +34,12 @@ import { SupportedTools, ToolName } from '@containerbase/base/zod';
 
 Each entry may carry the following metadata:
 
-| Field        | Description                                                    |
-| ------------ | -------------------------------------------------------------- |
-| `type`       | the installer used for the tool, one of `gem`, `npm` or `pip`  |
-| `parent`     | the tool it depends on, eg. `composer` depends on `php`        |
-| `deprecated` | the tool should not be used any more                           |
-| `root`       | the tool can only be installed as root, so at image build time |
+| Field        | Description                                                                                                     |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `type`       | the installer used for the tool, one of `gem`, `npm` or `pip`                                                   |
+| `parent`     | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer` |
+| `deprecated` | the tool should not be used any more                                                                            |
+| `root`       | the tool can only be installed as root, so at image build time                                                  |
 
 Only the names `install-tool` accepts are listed.
 Packages installed with an arbitrary name via `install-gem`, `install-npm` or `install-pip` are not, as that list is unbounded.
