@@ -91,3 +91,17 @@ export const DeprecatedTools: Record<string, InstallToolType> = {
   bower: 'npm',
   lerna: 'npm',
 };
+
+/**
+ * Looks up the install type of a tool in the given map.
+ * Only own keys resolve, so names like `constructor` never match.
+ * @param map - tool to install type map
+ * @param name - tool name
+ * @returns the mapped install type or `undefined`
+ */
+export function getToolType(
+  map: Record<string, InstallToolType>,
+  name: string,
+): InstallToolType | undefined {
+  return Object.hasOwn(map, name) ? map[name] : undefined;
+}
