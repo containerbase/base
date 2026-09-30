@@ -22,6 +22,13 @@ export class JavaPrepareService extends BasePrepareService {
 
   readonly name: string = 'java';
 
+  /**
+   * Initializes the cache, links the maven, gradle and android folders to it,
+   * keeping any existing link, and sets up the shared cacerts from the
+   * latest lts jre, once.
+   *
+   * @throws when the latest jre can't be resolved
+   */
   override async prepare(): Promise<void> {
     await this.initialize();
 
@@ -33,19 +40,19 @@ export class JavaPrepareService extends BasePrepareService {
     }
 
     // compatibility with gradle and maven
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.m2'),
       path.join(this.envSvc.userHome, '.m2'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.gradle'),
       path.join(this.envSvc.userHome, '.gradle'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.android'),
       path.join(this.envSvc.userHome, '.android'),
     );
-    await fs.symlink(
+    await this.pathSvc.createSymlink(
       path.join(this.pathSvc.cachePath, '.android-sdk'),
       path.join(this.envSvc.userHome, '.android-sdk'),
     );
@@ -96,6 +103,10 @@ export class JavaPrepareService extends BasePrepareService {
     // cleanup will be done by caller
   }
 
+  /**
+   * Creates the maven and gradle settings and the android folders in the
+   * containerbase cache, and points `GRADLE_USER_HOME` there.
+   */
   override async initialize(): Promise<void> {
     await createMavenSettings(this.pathSvc);
     await createGradleSettings(this.pathSvc);
@@ -131,6 +142,12 @@ export class JavaJrePrepareService extends JavaPrepareService {
 export class JavaInstallService extends BaseInstallService {
   override name = 'java';
 
+  /**
+   * Downloads the adoptium jdk or jre, verified against its checksum, into the
+   * versioned tool path and replaces its cacerts with the shared ones.
+   *
+   * @throws when adoptium has no package for the version
+   */
   override async install(version: string): Promise<void> {
     const type = this.name === 'java-jre' ? 'jre' : 'jdk';
 
@@ -173,12 +190,14 @@ export class JavaInstallService extends BaseInstallService {
     await fs.symlink(path.join(this.pathSvc.sslPath, 'cacerts'), cacerts);
   }
 
+  /** Whether the shared cacerts exist, which prepare creates. */
   override async isPrepared(): Promise<boolean> {
     return await this.pathSvc.fileExists(
       path.join(this.pathSvc.sslPath, 'cacerts'),
     );
   }
 
+  /** Links the `java` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = path.join(
       this.pathSvc.versionedToolPath(this.name, version),
@@ -187,6 +206,7 @@ export class JavaInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src, name: 'java' });
   }
 
+  /** Checks that `java -version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('java', ['-version']);
   }
@@ -197,6 +217,7 @@ export class JavaInstallService extends BaseInstallService {
 export class JavaJreInstallService extends JavaInstallService {
   override readonly name = 'java-jre';
 
+  /** Other tools depend on it as `java`. */
   override get alias(): string {
     return 'java';
   }
@@ -207,6 +228,7 @@ export class JavaJreInstallService extends JavaInstallService {
 export class JavaJdkInstallService extends JavaInstallService {
   override readonly name = 'java-jdk';
 
+  /** Other tools depend on it as `java`. */
   override get alias(): string {
     return 'java';
   }

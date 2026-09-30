@@ -8,18 +8,17 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class KubectlInstallService extends BaseInstallService {
   readonly name = 'kubectl';
 
+  /**
+   * Downloads the kubectl binary from dl.k8s.io, verified against its
+   * `.sha256`, into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://dl.k8s.io/release/v${version}/bin/linux/${this.envSvc.arch}/`;
     const filename = this.name;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}${filename}.sha256`,
-      fileName: `${filename}-v${version}-${this.envSvc.arch}.sha256`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.getChecksum(
+      `${baseUrl}${filename}.sha256`,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
@@ -30,21 +29,23 @@ export class KubectlInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     await fs.copyFile(file, join(path, filename));
     await fs.chmod(join(path, filename), this.envSvc.umask);
   }
 
+  /** Links the `kubectl` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `kubectl version --client` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['version', '--client']);
   }

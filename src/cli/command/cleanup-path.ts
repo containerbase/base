@@ -20,6 +20,7 @@ export class CleanupPathCommand extends Command {
 
   cleanupPaths = Option.Rest({ required: 1 });
 
+  /** Deletes the passed glob patterns, returning a non-zero exit code on failure. */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 // checks that the tool versions pinned in `mise.toml` match the ones used by CI
 
+/** Reads a file from the repository root. */
 async function read(file: string): Promise<string> {
   return await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 }
@@ -14,11 +15,13 @@ const { packageManager } = JSON.parse(await read('package.json')) as {
 
 let failed = false;
 
+/** Reports a mismatch and makes the script exit non zero. */
 function fail(message: string): void {
   console.error(message);
   failed = true;
 }
 
+/** Compares the version `mise.toml` pins for a tool with the given one. */
 function compare(tool: string, version: string, source: string): void {
   const match = new RegExp(`^${tool} = "(?<version>[^"]+)"`, 'm').exec(mise);
   const pinned = match?.groups?.version ?? 'nothing';

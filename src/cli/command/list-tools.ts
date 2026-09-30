@@ -11,6 +11,10 @@ import { command } from './utils.ts';
 
 const header = ['NAME', 'VERSION', 'OTHER VERSIONS'];
 
+/**
+ * Formats the installed tools as a table, with the linked version and any
+ * other installed versions per tool.
+ */
 function toText(tools: InstalledTool[]): string {
   if (!tools.length) {
     return 'No tools installed.\n';
@@ -68,6 +72,7 @@ export class ListToolsCommand extends Command {
     description: 'Writes the output to the given file instead of stdout.',
   });
 
+  /** Prints the installed tools as a table or json, to stdout or a file. */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;

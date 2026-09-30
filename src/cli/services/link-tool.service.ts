@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { codeBlock } from 'common-tags';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { pathExists, tool2path } from '../utils/index.ts';
+import { fileContent, pathExists, tool2path } from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
 import { PathService } from './path.service.ts';
 
@@ -34,7 +33,7 @@ export class LinkToolService {
 
   private readonly _links: string[] = [];
 
-  /*
+  /**
    * Get the list of links created during the last shellwrapper() call
    */
   get links(): readonly string[] {
@@ -48,6 +47,11 @@ export class LinkToolService {
     this._links.length = 0;
   }
 
+  /**
+   * Writes the shell wrapper which puts a tool on the path. It loads the
+   * containerbase env, initializes the tool on first use, sources the tool envs
+   * and finally executes the tool.
+   */
   async shellwrapper(
     tool: string,
     { args, name, srcDir, exports, extraToolEnvs, body }: ShellWrapperConfig,
@@ -59,7 +63,7 @@ export class LinkToolService {
       : `${srcDir}/${name ?? tool}`;
 
     const envs = [...(extraToolEnvs ?? []), tool].map(tool2path);
-    let content = codeBlock`
+    let content = fileContent`
         #!/bin/bash
 
         if [[ -z "\${CONTAINERBASE_ENV+x}" ]]; then
@@ -70,34 +74,29 @@ export class LinkToolService {
           # set logging to only warn and above to not interfere with tool output
           CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${tool}"
         fi
-        `;
-
-    // `envs` always holds at least the tool itself
-    content +=
-      '\n' +
-      codeBlock`
         # load tool envs
         include () {
             local file=${this.pathSvc.toolsPath}/$1/env.sh
             [[ -f "$file" ]] && source "$file"
         }
-      `;
+        `;
 
+    // `envs` always holds at least the tool itself
     for (const t of envs) {
-      content += `\ninclude ${t}`;
+      content += `include ${t}\n`;
     }
 
-    content += `\nunset include`;
+    content += `unset include\n`;
 
     if (exports) {
-      content += `\nexport ${exports}`;
+      content += `export ${exports}\n`;
     }
 
     if (body) {
-      content += `\n${body}`;
+      content += `${body}\n`;
     }
 
-    content += `\n${src}`;
+    content += src;
     if (args) {
       content += ` ${args}`;
     }
@@ -107,6 +106,7 @@ export class LinkToolService {
     await this.pathSvc.setOwner({ path: tgt });
   }
 
+  /** Removes a shell wrapper, if it exists. */
   async rm(name: string): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name);
     if (await pathExists(tgt, 'file')) {

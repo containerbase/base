@@ -13,12 +13,14 @@ export type Database<T = unknown> = Pick<
   | 'removeAsync'
   | 'updateAsync'
 > & {
+  /** The path of the database file. */
   get filename(): string;
 };
 
 class DatabaseWrapper extends Datastore {
   declare public readonly filename: string;
 
+  /** Opens the `<name>.nedb` database in the containerbase data folder. */
   constructor(
     private readonly _pathSvc: PathService,
     name: string,
@@ -33,16 +35,19 @@ class DatabaseWrapper extends Datastore {
     });
   }
 
+  /** Loads the database and fixes the ownership of its file. */
   override async loadDatabaseAsync(): Promise<void> {
     await super.loadDatabaseAsync();
     await this._sync();
   }
 
+  /** Compacts the database file and fixes its ownership. */
   override async compactDatafileAsync(): Promise<void> {
     await super.compactDatafileAsync();
     await this._sync();
   }
 
+  /** Gives the configured user ownership of the database file. */
   private async _sync(): Promise<void> {
     await this._pathSvc.setOwner({
       path: this.filename,
@@ -58,10 +63,12 @@ export class DataService {
   @inject(PathService)
   private readonly pathSvc!: PathService;
 
+  /** Returns the named database, loading it on first use. */
   load<T>(name: string): Promise<Database<T>> {
     return (this._stores[name] ??= this._load(name));
   }
 
+  /** Opens and loads the named database. */
   private async _load<T>(name: string): Promise<Database<T>> {
     const db = new DatabaseWrapper(this.pathSvc, name);
 

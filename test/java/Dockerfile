@@ -106,7 +106,7 @@ FROM base AS test-gradle-b
 RUN install-tool java-jre 21.0.12+101.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 9.7.1
+RUN install-tool gradle 9.8.0
 
 USER 12021
 
@@ -225,7 +225,7 @@ WORKDIR /
 
 # not required / used for sbt
 # renovate: datasource=github-releases packageName=scala/scala
-RUN install-tool scala v2.13.16
+RUN install-tool scala v2.13.18
 
 # renovate: datasource=github-releases packageName=sbt/sbt
 RUN install-tool sbt v1.13.0

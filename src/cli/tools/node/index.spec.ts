@@ -103,6 +103,35 @@ describe('cli/tools/node/index', () => {
       expect(extract).toHaveBeenCalledOnce();
     });
 
+    test('install: removes the temp folder when node-gyp update fails', async () => {
+      const { svc } = await toolContext(NodeInstallService);
+      const version = '14.21.9';
+      const filename = `${version}/node-${version}-x86_64.tar.xz`;
+      const distroFile = `%20${version}/node-${version}-noble-x86_64.tar.xz`;
+      const distFile = `node-v${version}-linux-x64.tar.xz`;
+      scope(ghUrl)
+        .head(`${prebuild}/${filename}.sha512`)
+        .reply(404)
+        .head(`${prebuild}/${distroFile}.sha512`)
+        .reply(404);
+      scope(nodeUrl)
+        .get(`/dist/v${version}/SHASUMS256.txt`)
+        .reply(200, `${checksum(tarball)}  ${distFile}\n`)
+        .get(`/dist/v${version}/${distFile}`)
+        .reply(200, tarball);
+      vi.spyOn(CompressionService.prototype, 'extract').mockResolvedValue();
+      execaMock.mockResolvedValueOnce({ failed: true, all: 'npm error' });
+
+      await expect(svc.install(version)).rejects.toThrow(
+        'node-gyp update command failed',
+      );
+
+      const entries = await fs.readdir(rootPath('tmp'));
+      expect(entries.some((e) => e.startsWith('containerbase-npm-'))).toBe(
+        false,
+      );
+    });
+
     test('install falls back to nodejs.org and updates node-gyp', async () => {
       const { svc, pathSvc } = await toolContext(NodeInstallService);
       const version = '14.21.3';

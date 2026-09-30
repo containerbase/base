@@ -43,6 +43,7 @@ class NpmInstallService extends NpmBaseInstallService {
 class ScopedInstallService extends NpmBaseInstallService {
   readonly name = 'yarn';
 
+  /** Installs the scoped `@yarnpkg/cli-dist` package. */
   protected override tool(): string {
     return '@yarnpkg/cli-dist';
   }
@@ -184,6 +185,10 @@ describe('cli/tools/node/utils', () => {
           join(pathSvc.versionedToolPath('corepack', '2.0.0'), nodeVersion),
         ),
       ).rejects.toThrow();
+      const entries = await fs.readdir(envSvc.tmpDir);
+      expect(entries.some((e) => e.startsWith('containerbase-npm-'))).toBe(
+        false,
+      );
     });
 
     test('install: uses the replaced npm registry', async () => {
@@ -411,6 +416,9 @@ describe('cli/tools/node/utils', () => {
       expect(await fs.readlink(join(envSvc.userHome, '.npmrc'))).toBe(
         join(pathSvc.cachePath, '.npmrc'),
       );
+
+      // second run is a no-op
+      await expect(prepareSymlinks(envSvc, pathSvc)).resolves.toBeUndefined();
     });
 
     test('prepareGlobalConfig', async () => {

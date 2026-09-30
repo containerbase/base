@@ -54,7 +54,7 @@ RUN install-tool bun 1.4.2
 FROM base AS test-deno
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.6
+RUN install-tool deno 2.9.7
 
 #--------------------------------------
 # Image: apko
@@ -62,7 +62,7 @@ RUN install-tool deno 2.9.6
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.1
+RUN install-tool apko 1.4.5
 
 #--------------------------------------
 # Image: apm
@@ -70,7 +70,7 @@ RUN install-tool apko 1.4.1
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.30.0
+RUN install-tool apm 0.32.0
 
 #--------------------------------------
 # Image: devbox
@@ -78,7 +78,7 @@ RUN install-tool apm 0.30.0
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.1
+RUN install-tool devbox 0.18.4
 
 #--------------------------------------
 # Image: gh
@@ -86,7 +86,7 @@ RUN install-tool devbox 0.18.1
 FROM base AS test-gh
 
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.100.0
+RUN install-tool gh v2.101.0
 
 #--------------------------------------
 # Image: gleam
@@ -166,7 +166,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.9
+RUN install-tool terraform 1.16.4
 
 #--------------------------------------
 # Image: tofu
@@ -193,13 +193,13 @@ FROM base AS test-others
 RUN install-tool buf v1.73.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.0
+RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.9
+RUN install-tool mise 2026.9.17
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.24.0
+RUN install-tool skopeo 1.24.1
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.13.3
@@ -208,10 +208,10 @@ RUN install-tool sops v3.13.3
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 35.1
+RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.80.0
+RUN install-tool pixi v0.81.0
 
 #--------------------------------------
 # Image: final

@@ -11,5 +11,9 @@ export abstract class ToolVersionResolver {
   @inject(EnvService)
   protected readonly env!: EnvService;
 
+  /**
+   * Resolves the requested version, eg. a missing version or `latest` to the
+   * latest release.
+   */
   abstract resolve(version: string | undefined): Promise<string | undefined>;
 }

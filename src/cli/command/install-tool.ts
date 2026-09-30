@@ -32,6 +32,10 @@ export class InstallToolCommand extends Command {
 
   protected type: InstallToolType | undefined;
 
+  /**
+   * Resolves the version to install, from the argument, the `<TOOL>_VERSION`
+   * environment variable or the latest release, then installs the tool.
+   */
   override async execute(): Promise<number | void> {
     const start = Date.now();
 

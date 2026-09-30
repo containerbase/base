@@ -40,6 +40,10 @@ export class UninstallToolCommand extends Command {
 
   protected type: InstallToolType | undefined;
 
+  /**
+   * Uninstalls one version, or all versions with `--all`, and optionally the
+   * tools depending on it with `--recursive`.
+   */
   override async execute(): Promise<number | void> {
     const start = Date.now();
     const { name: tool, dryRun, recursive, all } = this;

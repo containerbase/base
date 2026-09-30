@@ -11,19 +11,20 @@ export class BuildxInstallService extends BaseInstallService {
 
   override readonly parent = 'docker';
 
+  /**
+   * Downloads the buildx binary from GitHub into the versioned `bin` folder,
+   * verified against the release's `checksums.txt` from v0.7.0.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/docker/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux-${this.envSvc.arch}`;
 
     let expectedChecksum: string | undefined;
     if (semverGte(version, '0.7.0')) {
-      const checksumFile = await this.http.download({
-        url: `${baseUrl}checksums.txt`,
-      });
-      expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-        .split('\n')
-        .find((l) => l.includes(filename))
-        ?.split(' ')[0];
+      expectedChecksum = await this.findChecksum(
+        `${baseUrl}checksums.txt`,
+        filename,
+      );
     }
 
     const file = await this.http.download({
@@ -34,16 +35,20 @@ export class BuildxInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     const bin = join(path, this.name);
     await fs.copyFile(file, bin);
     await fs.chmod(bin, this.envSvc.umask);
   }
 
+  /**
+   * Links the `buildx` binary into the global bin folder and as docker cli
+   * plugin.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -60,6 +65,7 @@ export class BuildxInstallService extends BaseInstallService {
     await fs.symlink(join(src, this.name), tgt);
   }
 
+  /** Checks that `docker buildx version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('docker', ['buildx', 'version']);
   }

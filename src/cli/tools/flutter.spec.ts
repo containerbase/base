@@ -111,6 +111,9 @@ describe('cli/tools/flutter', () => {
       expect(
         await fs.readlink(join(envSvc.userHome, '.flutter_tool_state')),
       ).toBe(join(pathSvc.cachePath, '.flutter_tool_state'));
+
+      // second run is a no-op, it would throw on existing symlinks otherwise
+      await expect(svc.prepare()).resolves.toBeUndefined();
     });
   });
 });

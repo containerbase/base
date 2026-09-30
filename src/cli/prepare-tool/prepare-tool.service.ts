@@ -17,6 +17,12 @@ export class PrepareToolService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
 
+  /**
+   * Prepares the given tools, or every tool for `all`, and marks them as
+   * prepared. Must run as root.
+   *
+   * @returns an exit code when the tools could not be prepared
+   */
   async prepare(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
     logger.trace(
@@ -74,6 +80,12 @@ export class PrepareToolService {
     }
   }
 
+  /**
+   * Initializes the given tools, or for `all` every tool which was prepared in
+   * this image, and marks them as initialized.
+   *
+   * @returns an exit code when the tools could not be initialized
+   */
   async initialize(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
     logger.trace(
@@ -112,6 +124,7 @@ export class PrepareToolService {
     }
   }
 
+  /** Initializes a tool, unless it is ignored, needs no init or already had it. */
   private async _initTool(
     tool: BasePrepareService,
     _dryRun: boolean,
@@ -134,6 +147,7 @@ export class PrepareToolService {
     await tool.initialize();
   }
 
+  /** Prepares a tool, unless it is ignored, needs no prepare or already had it. */
   private async _prepareTool(
     tool: BasePrepareService,
     _dryRun: boolean,

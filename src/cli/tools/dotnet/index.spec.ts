@@ -196,18 +196,22 @@ describe('cli/tools/dotnet/index', () => {
 
       await expect(svc.prepare()).resolves.toBeUndefined();
 
-      expect(execaMock).toHaveBeenCalledWith('apt-get', [
-        '-qq',
-        'install',
-        '-y',
-        'libc6',
-        'libgcc1',
-        'libgssapi-krb5-2',
-        icu,
-        'libssl3',
-        'libstdc++6',
-        'zlib1g',
-      ]);
+      expect(execaMock).toHaveBeenCalledWith(
+        'apt-get',
+        [
+          '-qq',
+          'install',
+          '-y',
+          'libc6',
+          'libgcc1',
+          'libgssapi-krb5-2',
+          icu,
+          'libssl3',
+          'libstdc++6',
+          'zlib1g',
+        ],
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
       expect(await fs.readlink(join(envSvc.userHome, '.nuget'))).toBe(
         join(pathSvc.cachePath, '.nuget'),
       );
@@ -216,6 +220,9 @@ describe('cli/tools/dotnet/index', () => {
       ).toContain(
         'export DOTNET_CLI_TELEMETRY_OPTOUT=${DOTNET_CLI_TELEMETRY_OPTOUT-1}',
       );
+
+      // second run is a no-op, it would throw on the existing symlink otherwise
+      await expect(svc.prepare()).resolves.toBeUndefined();
     });
 
     test('initialize is idempotent', async () => {

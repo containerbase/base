@@ -12,6 +12,10 @@ export class NugetInstallService extends BaseInstallService {
   readonly name = 'nuget';
   override parent = 'mono';
 
+  /**
+   * Downloads `nuget.exe` into the versioned `bin` folder with a wrapper that
+   * runs it with mono. No checksums are verified.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://dist.nuget.org/win-x86-commandline/v${version}/`;
     const filename = `${this.name}.exe`;
@@ -23,11 +27,11 @@ export class NugetInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     const binary = join(path, filename);
     await fs.copyFile(file, binary);
     // create shell wrapper to be able to execute it with mono
@@ -36,12 +40,14 @@ export class NugetInstallService extends BaseInstallService {
     await fs.chmod(wrapper, this.envSvc.umask);
   }
 
+  /** Links the `nuget` wrapper into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `nuget help` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['help']);
   }
@@ -61,6 +67,10 @@ const NugetTools = z.object({
 export class NugetVersionResolver extends ToolVersionResolver {
   readonly tool = 'nuget';
 
+  /**
+   * Resolves a missing version or `latest` to the newest released and
+   * blessed version from dist.nuget.org.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NugetTools.parse(

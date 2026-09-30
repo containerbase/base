@@ -16,6 +16,10 @@ export class FileExistsCommand extends Command {
 
   url = Option.String();
 
+  /**
+   * Sends a `HEAD` request to the url, applying the configured url
+   * replacements, and returns 0 when it answers with status 200.
+   */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;

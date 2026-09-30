@@ -73,7 +73,7 @@ describe('cli/tools/dotnet/mono', () => {
 
       const certSync = join(path, 'bin/cert-sync');
       expect(await fs.readFile(certSync, 'utf8')).toBe(
-        `#!/bin/sh\n${path}/bin/mono ${path}/lib/mono/4.5/cert-sync.exe "$@"`,
+        `#!/bin/sh\n${path}/bin/mono ${path}/lib/mono/4.5/cert-sync.exe "$@"\n`,
       );
       expect(execaMock).toHaveBeenCalledWith(
         certSync,

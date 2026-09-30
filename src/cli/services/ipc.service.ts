@@ -33,6 +33,12 @@ export class IpcServer {
   @inject(PathService)
   private pathSvc!: PathService;
 
+  /**
+   * Starts the ipc server on `ipc.sock` in the temp folder, which links tools
+   * for the legacy shell installers.
+   *
+   * @throws when the server already runs
+   */
   async start(): Promise<void> {
     if (serverRunning) {
       throw new Error('ipc server already started');
@@ -63,6 +69,11 @@ export class IpcServer {
     await p;
   }
 
+  /**
+   * Stops the ipc server.
+   *
+   * @throws when the server does not run
+   */
   stop(): void {
     if (!serverRunning) {
       throw new Error('ipc server not started');
@@ -71,6 +82,7 @@ export class IpcServer {
     ipc.server.stop();
   }
 
+  /** Links the requested tool and reports the result back to the client. */
   private async _linkTool(data: LinkToolIpcMessage, client: any): Promise<any> {
     try {
       await this._link.shellwrapper(data.tool, data.config);
@@ -87,10 +99,16 @@ export class IpcClient {
   @inject(PathService)
   private pathSvc!: PathService;
 
+  /** Whether an ipc server socket exists in the temp folder. */
   async hasServer(): Promise<boolean> {
     return await pathExists(`${this.pathSvc.tmpDir}/ipc.sock`, 'socket');
   }
 
+  /**
+   * Connects to the ipc server, retrying a few times.
+   *
+   * @throws when the client already runs or cannot connect
+   */
   async start(): Promise<void> {
     if (clientRunning) {
       throw new Error('ipc client already started');
@@ -117,6 +135,7 @@ export class IpcClient {
     await p;
   }
 
+  /** Asks the server to link a tool, resolving to its exit code. */
   async linkTool(tool: string, config: ShellWrapperConfig): Promise<number> {
     const c = ipc.of[id]!;
 
@@ -136,6 +155,11 @@ export class IpcClient {
     return await r;
   }
 
+  /**
+   * Disconnects from the ipc server.
+   *
+   * @throws when the client does not run
+   */
   stop(): void {
     if (!clientRunning) {
       throw new Error('ipc client not started');

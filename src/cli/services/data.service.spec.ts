@@ -8,6 +8,7 @@ import { DataService } from './data.service.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
+/** The permission bits of the path. */
 async function fstat(path: string): Promise<number> {
   const s = await stat(path);
   return s.mode & fileRights;

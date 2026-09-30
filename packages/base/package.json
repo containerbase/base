@@ -31,7 +31,7 @@
     "dist"
   ],
   "devDependencies": {
-    "zod": "4.6.2"
+    "zod": "4.6.5"
   },
   "peerDependencies": {
     "zod": "^4.0.0"

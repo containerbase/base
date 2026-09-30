@@ -1,13 +1,18 @@
 import path from 'node:path';
-import { codeBlock } from 'common-tags';
 import type { HttpService, PathService } from '../../services';
-import { type Arch, logger, pathExists } from '../../utils/index.ts';
+import {
+  type Arch,
+  fileContent,
+  logger,
+  pathExists,
+} from '../../utils/index.ts';
 import {
   type AdoptiumPackage,
   AdoptiumReleaseVersions,
   AdoptiumReleases,
 } from './schema.ts';
 
+/** The newest adoptium lts version for the image type and architecture. */
 export async function resolveLatestJavaLtsVersion(
   http: HttpService,
   type: 'jre' | 'jdk',
@@ -26,6 +31,7 @@ export async function resolveLatestJavaLtsVersion(
   return res.versions[0]!.semver;
 }
 
+/** The adoptium package for the version, image type and architecture. */
 export async function resolveJavaDownloadUrl(
   http: HttpService,
   type: 'jre' | 'jdk',
@@ -45,6 +51,7 @@ export async function resolveJavaDownloadUrl(
   return res?.[0]?.binaries?.[0]?.package;
 }
 
+/** Creates an empty maven `settings.xml` in the cache, unless there is one. */
 export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   const dir = path.join(pathSvc.cachePath, '.m2');
   await pathSvc.createDir(dir);
@@ -58,7 +65,7 @@ export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   logger.debug('Creating Maven settings');
   await pathSvc.writeFile(
     file,
-    codeBlock`
+    fileContent`
       <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -69,6 +76,7 @@ export async function createMavenSettings(pathSvc: PathService): Promise<void> {
   );
 }
 
+/** Creates the gradle `gradle.properties` in the cache, unless there is one. */
 export async function createGradleSettings(
   pathSvc: PathService,
 ): Promise<void> {
@@ -84,7 +92,7 @@ export async function createGradleSettings(
   logger.debug('Creating Gradle settings');
   await pathSvc.writeFile(
     file,
-    codeBlock`
+    fileContent`
       org.gradle.parallel=true
       org.gradle.configureondemand=true
       org.gradle.daemon=false

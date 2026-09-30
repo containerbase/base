@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { getDistro, parse } from '../../utils/index.ts';
+import { fileContent, getDistro, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
   prepareNpmCache,
@@ -16,11 +15,17 @@ import {
 @injectFromHierarchy()
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
+
+  /** Initializes the cache and links the user's npm folders to it. */
   override async prepare(): Promise<void> {
     await this.initialize();
     await prepareSymlinks(this.envSvc, this.pathSvc);
   }
 
+  /**
+   * Creates the npm cache and `.npmrc`, and exports the node env with update
+   * notices and funding messages turned off and the openssl ca store used.
+   */
   override async initialize(): Promise<void> {
     await prepareNpmCache(this.pathSvc);
     await prepareNpmrc(this.pathSvc);
@@ -37,7 +42,7 @@ export class NodePrepareService extends BasePrepareService {
       // node v6.11.0
       await this.pathSvc.exportToolEnvContent(
         this.name,
-        codeBlock`
+        fileContent`
           export NODE_OPTIONS="\${NODE_OPTIONS} --use-openssl-ca"
         `,
       );
@@ -50,6 +55,7 @@ export class NodePrepareService extends BasePrepareService {
 export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
 
+  /** The architecture name used by the nodejs.org archives. */
   private get nodeArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -59,6 +65,7 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** The architecture name used by the node prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -68,6 +75,11 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /**
+   * Installs the containerbase node prebuild, a distro specific one, or the
+   * nodejs.org archive, each verified against its checksum. Node below 15
+   * gets the latest node-gyp.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     let filename = `${version}/${name}-${version}-${this.ghArch}.tar.xz`;
@@ -101,11 +113,10 @@ export class NodeInstallService extends NodeBaseInstallService {
         // fallback to nodejs.org
         checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
         filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
-        const checksumFile = await this.http.download({ url: checksumFileUrl });
-        const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-          .split('\n')
-          .find((l) => l.includes(filename))
-          ?.split(' ')[0];
+        const expectedChecksum = await this.findChecksum(
+          checksumFileUrl,
+          filename,
+        );
         file = await this.http.download({
           url: `https://nodejs.org/dist/v${version}/${filename}`,
           checksumType: 'sha256',
@@ -121,14 +132,12 @@ export class NodeInstallService extends NodeBaseInstallService {
 
     const ver = parse(version);
     if (ver.major < 15) {
-      const tmp = await fs.mkdtemp(
-        join(this.envSvc.tmpDir, 'containerbase-npm-'),
-      );
-      const env = this.prepareEnv(version, tmp);
-      env.PATH = `${path}/bin:${penv.PATH}`;
-      // update to latest node-gyp to fully support python3
-      await this.updateNodeGyp(path, tmp, env, true);
-      await fs.rm(tmp, { recursive: true, force: true });
+      await this.pathSvc.withTempDir('containerbase-npm-', async (tmp) => {
+        const env = this.prepareEnv(version, tmp);
+        env.PATH = `${path}/bin:${penv.PATH}`;
+        // update to latest node-gyp to fully support python3
+        await this.updateNodeGyp(path, tmp, env, true);
+      });
 
       await fs.rm(join(this.envSvc.home, '.npm/_logs'), {
         recursive: true,
@@ -137,10 +146,15 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /**
+   * Links the `node`, `npm` and `npx` binaries, and `corepack` when bundled,
+   * into the global bin folder.
+   */
   override async postInstall(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -153,6 +167,7 @@ export class NodeInstallService extends NodeBaseInstallService {
     }
   }
 
+  /** Checks that `node`, `npm` and a bundled `corepack` run. */
   override async test(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -161,11 +176,5 @@ export class NodeInstallService extends NodeBaseInstallService {
     if (await this.pathSvc.fileExists(join(src, 'corepack'))) {
       await this._spawn('corepack', ['--version']);
     }
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }

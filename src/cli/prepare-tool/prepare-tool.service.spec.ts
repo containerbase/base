@@ -26,14 +26,17 @@ vi.mock('node:process', async (importOriginal) => ({
 class DummyPrepareService extends BasePrepareService {
   readonly name: string = 'dummy';
 
+  /** Does nothing, for tests. */
   override prepare(): Promise<void> {
     return Promise.resolve();
   }
 
+  /** Does nothing, for tests. */
   override initialize(): Promise<void> {
     return Promise.resolve();
   }
 
+  /** Exposes the protected `_spawn` to the tests. */
   run(command: string, args: string[]): Promise<unknown> {
     return this._spawn(command, args);
   }

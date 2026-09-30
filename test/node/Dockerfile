@@ -93,7 +93,7 @@ RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.18.0
+RUN install-tool yarn 4.18.1
 
 # renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN_VERSION=6.0.0-rc.19
@@ -166,7 +166,7 @@ RUN prepare-tool node
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.23.2
+RUN install-tool node 22.23.3
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -551,7 +551,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=44.17.1
+ARG RENOVATE_VERSION=44.115.13
 RUN install-tool renovate
 
 RUN set -ex; \

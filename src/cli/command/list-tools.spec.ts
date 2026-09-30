@@ -34,8 +34,10 @@ describe('cli/command/list-tools', () => {
     );
   });
 
-  // the command resolves its services from the root container, so seed through
-  // it too, otherwise the command wouldn't see the tools added here
+  /**
+   * Adds installed tools through the root container, which the command
+   * resolves its services from, so it sees them.
+   */
   async function seed(): Promise<void> {
     const container = createContainer();
     const versionSvc = await container.getAsync(VersionService);

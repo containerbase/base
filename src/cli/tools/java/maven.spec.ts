@@ -118,7 +118,7 @@ describe('cli/tools/java/maven', () => {
       .reply(200, '   \n');
 
     await expect(svc.install('3.8.9')).rejects.toThrow(
-      `checksum not found for ${filename}`,
+      `Checksum not found in ${repoUrl}${path}.sha512`,
     );
   });
 

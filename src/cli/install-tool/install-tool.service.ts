@@ -12,7 +12,12 @@ import {
   VersionService,
 } from '../services/index.ts';
 import type { ToolState } from '../services/version.service';
-import { BlockingChild, MissingParent, NotSupported } from '../utils/codes.ts';
+import {
+  BlockingChild,
+  MissingParent,
+  NotRoot,
+  NotSupported,
+} from '../utils/codes.ts';
 import {
   cleanAptFiles,
   cleanTmpFiles,
@@ -45,6 +50,12 @@ export class InstallToolService {
   @inject(VersionService)
   private readonly versionSvc!: VersionService;
 
+  /**
+   * Runs the install lifecycle of a tool: prepare, initialize, validate,
+   * install, link and test.
+   *
+   * @returns an exit code when the tool could not be installed
+   */
   async install(
     tool: string,
     version: string,
@@ -62,6 +73,11 @@ export class InstallToolService {
       await this.ipc.start();
       this._link.clear();
       if (toolSvc) {
+        if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+          logger.fatal({ tool }, 'tool must be installed as root');
+          return NotRoot;
+        }
+
         let parent: ToolState | null = null;
 
         if (toolSvc.parent) {
@@ -196,6 +212,12 @@ export class InstallToolService {
     }
   }
 
+  /**
+   * Removes a tool version, or every installed version when none is given.
+   *
+   * @returns an exit code when the tool could not be uninstalled, eg. because
+   * another tool depends on the version
+   */
   async uninstall(
     tool: string,
     version?: string,
@@ -237,6 +259,16 @@ export class InstallToolService {
 
     const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (toolSvc) {
+      if (!toolSvc.canUninstall) {
+        logger.fatal({ tool }, 'tool cannot be uninstalled');
+        return NotSupported;
+      }
+
+      if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+        logger.fatal({ tool }, 'tool must be uninstalled as root');
+        return NotRoot;
+      }
+
       logger.debug({ tool }, 'validate tool');
       const childs = await this.versionSvc.getChilds({ name: tool, version });
       if (childs.length) {
@@ -297,6 +329,11 @@ export class InstallToolService {
     }
   }
 
+  /**
+   * Links the version onto the path and records it as the current one, unless
+   * it already is. Then runs the post-install step, records the created shell
+   * wrappers and runs the tool test, unless tests are skipped.
+   */
   private async linkAndTest(
     toolSvc: BaseInstallService,
     version: string,
@@ -326,6 +363,10 @@ export class InstallToolService {
     }
   }
 
+  /**
+   * Records which shell wrappers the last link step created, so they can be
+   * removed again when the version is uninstalled.
+   */
   private async _storeLinks(tool: string, version: string): Promise<void> {
     const links = this._link.links;
     logger.debug({ tool, version, links }, 'linked tools');

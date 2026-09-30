@@ -232,8 +232,10 @@ Erlang releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_x64.tar.xz
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-x86_64.tar.xz
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/erlang-prebuild/releases/download/25.3.2.8/erlang-25.3.2.8-jammy-aarch64.tar.xz
 ```
 
 ### `elixir`
@@ -245,9 +247,11 @@ Elixir releases are downloaded from:
 Samples:
 
 ```txt
+https://github.com/elixir-lang/elixir/releases/download/v1.16.0/elixir-otp-24.zip.sha256sum
 https://github.com/elixir-lang/elixir/releases/download/v1.16.0/elixir-otp-24.zip
 https://github.com/elixir-lang/elixir/releases/download/v1.14.0/elixir-otp-23.zip
 https://github.com/elixir-lang/elixir/releases/download/v1.13.0/Precompiled.zip
+https://github.com/elixir-lang/elixir/releases/download/v1.20.0/elixir-otp-27.zip
 ```
 
 ## `flutter`
@@ -310,6 +314,7 @@ Samples:
 
 ```txt
 https://github.com/git-lfs/git-lfs/releases/download/v3.4.1/git-lfs-linux-amd64-v3.4.1.tar.gz
+https://github.com/git-lfs/git-lfs/releases/download/v3.4.1/sha256sums.asc
 ```
 
 ## gleam
@@ -360,12 +365,18 @@ Cabal releases are downloaded from:
 
 - `https://downloads.haskell.org/~cabal/`
 
+Releases since v3.18 only publish a generic `linux-unknown` build, earlier
+releases publish a static `linux-deb10` build.
+
 Samples:
 
 ```txt
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-aarch64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-x86_64-linux-deb10.tar.xz
 https://downloads.haskell.org/~cabal/cabal-install-3.16.1.0/SHA256SUMS
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/cabal-install-3.18.1.0-aarch64-linux-unknown.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/cabal-install-3.18.1.0-x86_64-linux-unknown.tar.xz
+https://downloads.haskell.org/~cabal/cabal-install-3.18.1.0/SHA256SUMS
 ```
 
 ### `ghc`
@@ -488,20 +499,25 @@ Samples:
 
 ```txt
 https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz
+https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz.sha256
 ```
 
 ### `scala`
 
 Scala releases are downloaded from:
 
+- `https://github.com/scala/scala/releases`
 - `https://downloads.lightbend.com`
+
+The first url is used for v2.10.5 and later, the second only for older releases.
 
 Scala v3 is not supported.
 
 Samples:
 
 ```txt
-https://downloads.lightbend.com/scala/2.13.6/scala-2.13.6.tgz
+https://github.com/scala/scala/releases/download/v2.13.18/scala-2.13.18.tgz
+https://downloads.lightbend.com/scala/2.10.4/scala-2.10.4.tgz
 ```
 
 ## `jb`
@@ -722,9 +738,15 @@ Rust releases are downloaded from:
 Samples:
 
 ```txt
-https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.gz
-https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.gz
+https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/rust-1.75.0-aarch64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/rust-1.75.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz
+https://static.rust-lang.org/dist/2024-01-01/rust-nightly-x86_64-unknown-linux-gnu.tar.xz.sha256
 ```
+
+Releases before v1.19.0 and nightlies before 2017-05-05 are downloaded as `.tar.gz` instead, together with its `.tar.gz.sha256`.
 
 ## `swift`
 
@@ -736,6 +758,8 @@ Samples:
 
 ```txt
 https://download.swift.org/swift-5.7-release/ubuntu2204/swift-5.7-RELEASE/swift-5.7-RELEASE-ubuntu22.04.tar.gz
+https://download.swift.org/swift-5.7.3-release/ubuntu2204/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04.tar.gz
+https://download.swift.org/swift-5.7.3-release/ubuntu2204-aarch64/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04-aarch64.tar.gz
 ```
 
 ## `terraform`
@@ -747,6 +771,7 @@ Terraform releases are downloaded from:
 Samples:
 
 ```txt
+https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_SHA256SUMS
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_amd64.zip
 https://releases.hashicorp.com/terraform/1.0.11/terraform_1.0.11_linux_arm64.zip
 ```
@@ -770,10 +795,14 @@ Vendir releases are downloaded from:
 
 - `https://github.com/vmware-tanzu/carvel-vendir/releases`
 
+Since v0.25.0 the download is verified against the published `checksums.txt`.
+
 Samples:
 
 ```txt
-https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.22.0/vendir-linux-amd64
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/checksums.txt
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-linux-amd64
+https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-linux-arm64
 ```
 
 ## `wally`

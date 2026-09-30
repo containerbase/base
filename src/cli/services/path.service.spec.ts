@@ -1,5 +1,6 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
@@ -145,6 +146,27 @@ describe('cli/services/path.service', () => {
     );
   });
 
+  test('createVersionedToolPath with sub folders', async () => {
+    await ensurePaths('opt/containerbase/tools');
+
+    const path = await pathSvc.createVersionedToolPath(
+      'jb',
+      '0.6.0',
+      'lib',
+      'bin',
+    );
+
+    expect(path).toBe(rootPath('opt/containerbase/tools/jb/0.6.0/lib/bin'));
+    // tests don't run as root, so the umask is group writable
+    const mode = platform() === 'win32' ? 0 : 0o775;
+    expect((await stat(path)).mode & fileRights).toBe(mode);
+    expect((await stat(join(path, '..'))).mode & fileRights).toBe(mode);
+    // an existing folder is fine
+    await expect(
+      pathSvc.createVersionedToolPath('jb', '0.6.0', 'lib', 'bin'),
+    ).resolves.toBe(path);
+  });
+
   test('exportEnv', async () => {
     await mkdir(rootPath('usr/local/etc'), { recursive: true });
     await pathSvc.exportEnv({ NODE_VERSION: 'v14.17.1' });
@@ -243,6 +265,66 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.createDir(dir)).toBeUndefined();
   });
 
+  test('createDir: throws when the path is no folder', async () => {
+    const dir = rootPath('env123/dir');
+    const link = rootPath('env123/link');
+    const file = rootPath('env123/file');
+    await pathSvc.createDir(dir);
+    await fs.symlink(dir, link);
+    await writeFile(file, '');
+
+    await expect(pathSvc.createDir(link)).rejects.toThrow(
+      `Path exists and is not a directory: ${link}`,
+    );
+    await expect(pathSvc.createDir(file)).rejects.toThrow(
+      `Path exists and is not a directory: ${file}`,
+    );
+  });
+
+  test('createSymlink', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+
+    expect(await pathSvc.createSymlink(target, link)).toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing link', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+    await pathSvc.createSymlink(target, link);
+
+    await expect(pathSvc.createSymlink(target, link)).resolves.toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing folder', async () => {
+    const target = rootPath('env123/target');
+    const dir = rootPath('env123/dir');
+    await pathSvc.createDir(dir);
+
+    await pathSvc.createSymlink(target, dir);
+
+    expect((await stat(dir)).isDirectory()).toBe(true);
+  });
+
+  test('createSymlink: keeps a dangling link', async () => {
+    const target = rootPath('env123/missing');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await fs.symlink(target, link);
+
+    await pathSvc.createSymlink(rootPath('env123/other'), link);
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
   test('toolInit', async () => {
     expect(pathSvc.toolInitPath('node')).toBe(
       rootPath('tmp/containerbase/tool.init.d/node'),
@@ -275,6 +357,36 @@ describe('cli/services/path.service', () => {
     await pathSvc.setOwner({ path: file });
 
     expect(chown).toHaveBeenCalledExactlyOnceWith(file, 12021, 0);
+  });
+
+  describe('withTempDir', () => {
+    test('returns the result and removes the folder afterwards', async () => {
+      let dirInFn: string | undefined;
+      let existedInFn = false;
+
+      const result = await pathSvc.withTempDir('test-', async (dir) => {
+        dirInFn = dir;
+        existedInFn = await pathExists(dir, 'dir');
+        return 'result';
+      });
+
+      expect(result).toBe('result');
+      expect(existedInFn).toBe(true);
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
+
+    test('removes the folder when fn throws', async () => {
+      let dirInFn: string | undefined;
+
+      await expect(
+        pathSvc.withTempDir('test-', (dir) => {
+          dirInFn = dir;
+          return Promise.reject(new Error('test error'));
+        }),
+      ).rejects.toThrow('test error');
+
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
   });
 
   test('writeFile', async () => {
