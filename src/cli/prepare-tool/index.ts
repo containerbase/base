@@ -26,7 +26,6 @@ import { RubyPrepareService } from '../tools/ruby/index.ts';
 import { RustPrepareService } from '../tools/rust.ts';
 import { SwiftPrepareService } from '../tools/swift.ts';
 import { logger } from '../utils/index.ts';
-import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
 import {
   PREPARE_TOOL_TOKEN,
@@ -35,7 +34,7 @@ import {
 
 /**
  * Creates a container with all prepare services, including a generic one for
- * every v2 shell tool without its own service.
+ * every v2 shell tool.
  */
 async function prepareContainer(): Promise<Container> {
   logger.trace('preparing container');
@@ -47,7 +46,7 @@ async function prepareContainer(): Promise<Container> {
   // v2 tool services
   const pathSvc = await container.getAsync(PathService);
   const v2Tools = await pathSvc.findLegacyTools();
-  for (const tool of v2Tools.filter(isNotKnownV2Tool)) {
+  for (const tool of v2Tools) {
     @injectable()
     @injectFromHierarchy()
     class GenericV2ToolPrepareService extends V2ToolPrepareService {
