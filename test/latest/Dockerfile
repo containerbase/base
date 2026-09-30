@@ -387,6 +387,38 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: v1 and v2 shell tools of custom images
+#--------------------------------------
+FROM base AS test-legacy
+
+COPY test/latest/legacy-tools/ /usr/local/containerbase/tools/
+
+RUN install-tool dummy-v1 1.2.3
+
+RUN prepare-tool dummy-v2
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/prepared ]
+
+RUN install-tool dummy-v2 1.2.3
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/initialized ]
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 1.2.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v1 +1\.2\.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +1\.2\.3$'; \
+  true
+
+USER 12021
+
+RUN install-tool dummy-v2 2.0.0
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 2.0.0$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +2\.0\.0 +1\.2\.3$'; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -399,3 +431,4 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-legacy /.dummy /.dummy
