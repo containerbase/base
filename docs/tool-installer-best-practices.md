@@ -8,7 +8,7 @@ See [`new-tool.md`](./new-tool.md) for the full walkthrough of adding a tool; th
 
 Every tool is a TypeScript install service extending `BaseInstallService` ([`src/cli/install-tool/base-install.service.ts`](../src/cli/install-tool/base-install.service.ts)), living under [`src/cli/tools/`](../src/cli/tools/).
 
-Do not add new `.sh` files under [`src/usr/local/containerbase/tools/v2`](../src/usr/local/containerbase/tools/v2/).
+Do not add new `.sh` files under `src/usr/local/containerbase/tools/v2`.
 Both the v1 and v2 shell tool formats are deprecated and being migrated to TypeScript install services.
 
 When converting a legacy shell tool, keep installing every version the shell script could install.
