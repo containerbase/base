@@ -27,20 +27,12 @@ vi.mock('../../utils/index.ts', async (importActual) => ({
 
 const baseUrl = 'https://github.com';
 const tarball = 'prebuilt tool';
+const checksum = createHash('sha512').update(tarball).digest('hex');
 
 @injectable()
 @injectFromHierarchy()
 class ErlangInstallService extends PrebuildInstallService {
   readonly name = 'erlang';
-}
-
-@injectable()
-@injectFromHierarchy()
-class VerifiedInstallService extends ErlangInstallService {
-  /** Always verifies the checksum, without probing for it. */
-  protected override hasChecksum(_checksumFileUrl: string): Promise<boolean> {
-    return Promise.resolve(true);
-  }
 }
 
 @injectable()
@@ -75,19 +67,15 @@ describe('cli/tools/utils/prebuild', () => {
     });
     child = await testContainer();
     child.bind(ErlangInstallService).toSelf();
-    child.bind(VerifiedInstallService).toSelf();
     child.bind(ErlangVersionResolver).toSelf();
     pathSvc = await child.getAsync(PathService);
     execaMock.mockResolvedValue({ failed: false });
   });
 
   describe('PrebuildInstallService', () => {
-    test('install: with checksum', async () => {
-      const checksum = createHash('sha512').update(tarball).digest('hex');
+    test('install: verified against the checksum', async () => {
       const path = releasePath('26.0.0', 'jammy', 'x86_64');
       scope(baseUrl)
-        .head(`${path}.sha512`)
-        .reply(200)
         .get(`${path}.sha512`)
         .reply(200, `${checksum}\n`)
         .get(path)
@@ -103,35 +91,6 @@ describe('cli/tools/utils/prebuild', () => {
       });
     });
 
-    test('install: without checksum', async () => {
-      const path = releasePath('25.0.0', 'jammy', 'x86_64');
-      scope(baseUrl)
-        .head(`${path}.sha512`)
-        .reply(404)
-        .get(path)
-        .reply(200, tarball);
-      const spy = vi.spyOn(CompressionService.prototype, 'extract');
-      const svc = await child.getAsync(ErlangInstallService);
-
-      await expect(svc.install('25.0.0')).resolves.toBeUndefined();
-
-      expect(spy).toHaveBeenCalledOnce();
-    });
-
-    test('install: checksum required by the tool', async () => {
-      const checksum = createHash('sha512').update(tarball).digest('hex');
-      const path = releasePath('26.1.0', 'jammy', 'x86_64');
-      // no head request, the checksum file is fetched right away
-      scope(baseUrl)
-        .get(`${path}.sha512`)
-        .reply(200, `${checksum}\n`)
-        .get(path)
-        .reply(200, tarball);
-      const svc = await child.getAsync(VerifiedInstallService);
-
-      await expect(svc.install('26.1.0')).resolves.toBeUndefined();
-    });
-
     test.each([{ code: 'noble' }, { code: 'resolute' }])(
       'install: uses the jammy prebuild on $code',
       async ({ code }) => {
@@ -143,8 +102,8 @@ describe('cli/tools/utils/prebuild', () => {
         const version = `27.0.0-${code}`;
         const path = releasePath(version, 'jammy', 'x86_64');
         scope(baseUrl)
-          .head(`${path}.sha512`)
-          .reply(404)
+          .get(`${path}.sha512`)
+          .reply(200, checksum)
           .get(path)
           .reply(200, tarball);
         const svc = await child.getAsync(ErlangInstallService);
@@ -161,8 +120,8 @@ describe('cli/tools/utils/prebuild', () => {
       vi.mocked(arch).mockReturnValue('arm64');
       const path = releasePath('28.0.0', 'jammy', 'aarch64');
       scope(baseUrl)
-        .head(`${path}.sha512`)
-        .reply(404)
+        .get(`${path}.sha512`)
+        .reply(200, checksum)
         .get(path)
         .reply(200, tarball);
       const arm = await testContainer();
