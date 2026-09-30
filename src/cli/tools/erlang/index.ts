@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { getDistro, semverCoerce, semverGte } from '../../utils/index.ts';
+import { getDistro } from '../../utils/index.ts';
 
 /**
  * Matches erlang's version format: up to four numeric parts (major, minor,
@@ -49,8 +49,8 @@ export class ErlangInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the containerbase prebuild, verified against its `.sha512`
-   * since v25.3.0.0, and extracts it into the tool path.
+   * Downloads the containerbase prebuild, verified against its `.sha512`,
+   * and extracts it into the tool path.
    *
    * @throws on an unsupported distro
    */
@@ -65,10 +65,8 @@ export class ErlangInstallService extends BaseInstallService {
     // only jammy prebuilds are published, noble and resolute use them too
     const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-jammy-${this.arch}.tar.xz`;
 
-    // the prebuild repo only started publishing a `.sha512` checksum with v25.3.0.0
-    const expectedChecksum = semverGte(semverCoerce(version)!, '25.3.0')
-      ? await this.getChecksum(`${url}.sha512`)
-      : undefined;
+    // every jammy prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
 
     const file = await this.http.download({
       url,
