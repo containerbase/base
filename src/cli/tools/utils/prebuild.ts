@@ -24,16 +24,8 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
-   * Whether the prebuild has a `.sha512` checksum file. Older prebuilds of
-   * some tools have none, so by default this probes for it.
-   */
-  protected async hasChecksum(checksumFileUrl: string): Promise<boolean> {
-    return await this.http.exists(checksumFileUrl);
-  }
-
-  /**
    * Downloads the distro specific containerbase prebuild, verified against
-   * its `.sha512` when there is one, and extracts it into the tool path.
+   * its `.sha512`, and extracts it into the tool path.
    * Newer ubuntu releases use the jammy prebuild.
    */
   override async install(version: string): Promise<void> {
@@ -46,12 +38,8 @@ export abstract class PrebuildInstallService extends BaseInstallService {
       code = 'jammy';
     }
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `${url}.sha512`;
-
-    // no checksums for older prebuilds
-    const expectedChecksum = (await this.hasChecksum(checksumFileUrl))
-      ? await this.getChecksum(checksumFileUrl)
-      : undefined;
+    // every jammy prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
     const file = await this.http.download({
       url,
       checksumType: 'sha512',
