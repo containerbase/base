@@ -54,14 +54,6 @@ export class PythonInstallService extends PrebuildInstallService {
   override readonly name = 'python';
 
   /**
-   * Every python prebuild for jammy, which noble and resolute use too, has a
-   * `.sha512`, so the checksum is always verified without probing for it.
-   */
-  protected override hasChecksum(_checksumFileUrl: string): Promise<boolean> {
-    return Promise.resolve(true);
-  }
-
-  /**
    * Installs the python prebuild, points the python shebangs in its `bin`
    * folder to the installed python, and updates `pip` and `virtualenv`.
    */
