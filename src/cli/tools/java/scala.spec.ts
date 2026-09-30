@@ -18,18 +18,34 @@ describe('cli/tools/java/scala', () => {
     execaMock.mockResolvedValue({ failed: false });
   });
 
-  test('install', async () => {
+  test('install from github', async () => {
     const { svc, pathSvc } = await toolContext(ScalaInstallService);
-    scope('https://downloads.lightbend.com')
-      .get('/scala/2.13.16/scala-2.13.16.tgz')
+    scope('https://github.com')
+      .get('/scala/scala/releases/download/v2.13.18/scala-2.13.18.tgz')
       .reply(200, 'scala archive');
     const extract = vi.spyOn(CompressionService.prototype, 'extract');
 
-    await expect(svc.install('2.13.16')).resolves.toBeUndefined();
+    await expect(svc.install('2.13.18')).resolves.toBeUndefined();
 
     expect(extract).toHaveBeenCalledExactlyOnceWith({
-      file: expect.stringContaining('scala-2.13.16.tgz'),
-      cwd: pathSvc.versionedToolPath('scala', '2.13.16'),
+      file: expect.stringContaining('scala-2.13.18.tgz'),
+      cwd: pathSvc.versionedToolPath('scala', '2.13.18'),
+      strip: 1,
+    });
+  });
+
+  test('install from lightbend before v2.10.5', async () => {
+    const { svc, pathSvc } = await toolContext(ScalaInstallService);
+    scope('https://downloads.lightbend.com')
+      .get('/scala/2.10.4/scala-2.10.4.tgz')
+      .reply(200, 'scala archive');
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+
+    await expect(svc.install('2.10.4')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining('scala-2.10.4.tgz'),
+      cwd: pathSvc.versionedToolPath('scala', '2.10.4'),
       strip: 1,
     });
   });
