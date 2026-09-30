@@ -11,23 +11,24 @@ export const InstallToolType = z
  * zod free version used by the default export.
  */
 export const ToolMetadata = z.strictObject({
+  // exact optionals, so the inferred type matches the zod free interface
   type: InstallToolType.describe(
     'the installer used for this tool, only set for dynamically installed tools',
-  ).optional(),
+  ).exactOptional(),
   parent: z
     .string()
     .describe('the tool this tool depends on, eg. composer depends on php')
-    .optional(),
+    .exactOptional(),
   deprecated: z
     .literal(true)
     .describe('deprecated tools should not be used any more')
-    .optional(),
+    .exactOptional(),
   root: z
     .literal(true)
     .describe(
       'the tool can only be installed as root, so only at image build time',
     )
-    .optional(),
+    .exactOptional(),
 });
 
 /**
