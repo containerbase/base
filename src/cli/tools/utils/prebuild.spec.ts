@@ -36,6 +36,15 @@ class ErlangInstallService extends PrebuildInstallService {
 
 @injectable()
 @injectFromHierarchy()
+class VerifiedInstallService extends ErlangInstallService {
+  /** Always verifies the checksum, without probing for it. */
+  protected override hasChecksum(_checksumFileUrl: string): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+}
+
+@injectable()
+@injectFromHierarchy()
 class ErlangVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'erlang';
 }
@@ -66,6 +75,7 @@ describe('cli/tools/utils/prebuild', () => {
     });
     child = await testContainer();
     child.bind(ErlangInstallService).toSelf();
+    child.bind(VerifiedInstallService).toSelf();
     child.bind(ErlangVersionResolver).toSelf();
     pathSvc = await child.getAsync(PathService);
     execaMock.mockResolvedValue({ failed: false });
@@ -106,6 +116,20 @@ describe('cli/tools/utils/prebuild', () => {
       await expect(svc.install('25.0.0')).resolves.toBeUndefined();
 
       expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('install: checksum required by the tool', async () => {
+      const checksum = createHash('sha512').update(tarball).digest('hex');
+      const path = releasePath('26.1.0', 'jammy', 'x86_64');
+      // no head request, the checksum file is fetched right away
+      scope(baseUrl)
+        .get(`${path}.sha512`)
+        .reply(200, `${checksum}\n`)
+        .get(path)
+        .reply(200, tarball);
+      const svc = await child.getAsync(VerifiedInstallService);
+
+      await expect(svc.install('26.1.0')).resolves.toBeUndefined();
     });
 
     test.each([{ code: 'noble' }, { code: 'resolute' }])(
