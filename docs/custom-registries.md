@@ -247,9 +247,11 @@ Elixir releases are downloaded from:
 Samples:
 
 ```txt
+https://github.com/elixir-lang/elixir/releases/download/v1.16.0/elixir-otp-24.zip.sha256sum
 https://github.com/elixir-lang/elixir/releases/download/v1.16.0/elixir-otp-24.zip
 https://github.com/elixir-lang/elixir/releases/download/v1.14.0/elixir-otp-23.zip
 https://github.com/elixir-lang/elixir/releases/download/v1.13.0/Precompiled.zip
+https://github.com/elixir-lang/elixir/releases/download/v1.20.0/elixir-otp-27.zip
 ```
 
 ## `flutter`
