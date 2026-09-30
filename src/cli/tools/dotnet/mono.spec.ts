@@ -60,8 +60,6 @@ describe('cli/tools/dotnet/mono', () => {
       const releaseUrl =
         '/containerbase/mono-prebuild/releases/download/6.12.0';
       scope(baseUrl)
-        .head(`${releaseUrl}/${filename}.sha512`)
-        .reply(200)
         .get(`${releaseUrl}/${filename}.sha512`)
         .reply(200, `${checksum(tarball, 'sha512')}\n`)
         .get(`${releaseUrl}/${filename}`)
@@ -88,8 +86,6 @@ describe('cli/tools/dotnet/mono', () => {
       const releaseUrl =
         '/containerbase/mono-prebuild/releases/download/6.12.1';
       scope(baseUrl)
-        .head(`${releaseUrl}/${filename}.sha512`)
-        .reply(200)
         .get(`${releaseUrl}/${filename}.sha512`)
         .reply(200, `${checksum(tarball, 'sha512')}\n`)
         .get(`${releaseUrl}/${filename}`)
