@@ -678,8 +678,10 @@ The second url is used to install and update global `pip` and `virtualenv` packa
 Samples:
 
 ```txt
-https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_x64.tar.xz
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-x86_64.tar.xz
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/python-prebuild/releases/download/3.12.1/python-3.12.1-jammy-aarch64.tar.xz
 ```
 
 ### `pip` tools

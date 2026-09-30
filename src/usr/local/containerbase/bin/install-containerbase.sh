@@ -118,6 +118,9 @@ function prepare_v2_tools () {
 
   setup_directories
 
+  # custom images may still add their own v2 tools, and the cli lists this folder
+  mkdir -p /usr/local/containerbase/tools/v2
+
   # compability with current custom images
   ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
 }

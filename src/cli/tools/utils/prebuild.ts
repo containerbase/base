@@ -24,6 +24,14 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
+   * Whether the prebuild has a `.sha512` checksum file. Older prebuilds of
+   * some tools have none, so by default this probes for it.
+   */
+  protected async hasChecksum(checksumFileUrl: string): Promise<boolean> {
+    return await this.http.exists(checksumFileUrl);
+  }
+
+  /**
    * Downloads the distro specific containerbase prebuild, verified against
    * its `.sha512` when there is one, and extracts it into the tool path.
    * Newer ubuntu releases use the jammy prebuild.
@@ -37,24 +45,18 @@ export abstract class PrebuildInstallService extends BaseInstallService {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }
-    const filename = `${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    const hasChecksum = await this.http.exists(checksumFileUrl);
-    let file: string;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    const checksumFileUrl = `${url}.sha512`;
 
-    if (hasChecksum) {
-      // no checksums for older prebuilds
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-      });
-    }
+    // no checksums for older prebuilds
+    const expectedChecksum = (await this.hasChecksum(checksumFileUrl))
+      ? await this.getChecksum(checksumFileUrl)
+      : undefined;
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 

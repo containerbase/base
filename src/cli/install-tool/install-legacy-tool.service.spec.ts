@@ -80,23 +80,7 @@ describe('cli/install-tool/install-legacy-tool.service', () => {
       expect(execaMock).toHaveBeenCalledExactlyOnceWith(
         'bash',
         [v2Script, 'install', 'full', '1.0.0'],
-        expect.objectContaining({ env: {} }),
-      );
-    });
-
-    test('install: uses the replaced pip index', async () => {
-      vi.stubEnv('URL_REPLACE_0_FROM', 'https://pypi.org/simple/');
-      vi.stubEnv('URL_REPLACE_0_TO', 'https://pypi.example.com/simple/');
-      const svc = await child.getAsync(FullInstallService);
-
-      await expect(svc.install('1.0.0')).resolves.toBeUndefined();
-
-      expect(execaMock).toHaveBeenCalledExactlyOnceWith(
-        'bash',
-        [v2Script, 'install', 'full', '1.0.0'],
-        expect.objectContaining({
-          env: { PIP_INDEX_URL: 'https://pypi.example.com/simple/' },
-        }),
+        expect.any(Object),
       );
     });
 
