@@ -1,4 +1,4 @@
-import { chmod, rm, stat, writeFile } from 'node:fs/promises';
+import { chmod, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable, postConstruct } from 'inversify';
 import type { InstallToolType } from '../utils';
@@ -203,7 +203,8 @@ export class VersionService {
   }
 
   /**
-   * Required for v2 tool to find parent tool version
+   * Required for v2 tool to find parent tool version.
+   * The version file is only written when its content changes.
    * @param tool
    * @param version
    * @deprecated legacy v2 tools compability
@@ -211,6 +212,12 @@ export class VersionService {
   async update(tool: string, version: string): Promise<void> {
     const path = join(this.pathSvc.versionPath, tool2path(tool));
     try {
+      const current = await readFile(path, { encoding: 'utf8' }).catch(
+        () => null,
+      );
+      if (current === version) {
+        return;
+      }
       await writeFile(path, version, { encoding: 'utf8' });
       const s = await stat(path);
       if ((s.mode & fileRights) !== 0o664) {
