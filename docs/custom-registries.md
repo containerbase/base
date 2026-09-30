@@ -502,14 +502,18 @@ https://github.com/sbt/sbt/releases/download/v1.5.5/sbt-1.5.5.tgz.sha256
 
 Scala releases are downloaded from:
 
+- `https://github.com/scala/scala/releases`
 - `https://downloads.lightbend.com`
+
+The first url is used for v2.10.5 and later, the second only for older releases.
 
 Scala v3 is not supported.
 
 Samples:
 
 ```txt
-https://downloads.lightbend.com/scala/2.13.6/scala-2.13.6.tgz
+https://github.com/scala/scala/releases/download/v2.13.18/scala-2.13.18.tgz
+https://downloads.lightbend.com/scala/2.10.4/scala-2.10.4.tgz
 ```
 
 ## `jb`

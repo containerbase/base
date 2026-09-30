@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { semverGte } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -10,14 +11,18 @@ export class ScalaInstallService extends BaseInstallService {
   override readonly parent = 'java';
 
   /**
-   * Downloads the scala archive from lightbend and extracts it into the
-   * versioned tool path. Lightbend publishes no checksums, so the download is
-   * unverified.
+   * Downloads the scala archive from GitHub releases, or from lightbend for
+   * versions before v2.10.5, and extracts it into the versioned tool path.
+   * Neither host publishes checksums, so the download is unverified.
    */
   override async install(version: string): Promise<void> {
-    const file = await this.http.download({
-      url: `https://downloads.lightbend.com/${this.name}/${version}/${this.name}-${version}.tgz`,
-    });
+    const filename = `${this.name}-${version}.tgz`;
+    // scala publishes its releases on GitHub since v2.10.5, lightbend no longer has v2.13.17+
+    const url = semverGte(version, '2.10.5')
+      ? `https://github.com/scala/scala/releases/download/v${version}/${filename}`
+      : `https://downloads.lightbend.com/${this.name}/${version}/${filename}`;
+
+    const file = await this.http.download({ url });
 
     await this.pathSvc.ensureToolPath(this.name);
 
