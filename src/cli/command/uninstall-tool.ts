@@ -2,7 +2,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { uninstallTool } from '../install-tool/index.ts';
-import { ResolverMap } from '../tools/index.ts';
+import { ResolverMap, getToolType } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
@@ -55,7 +55,7 @@ export class UninstallToolCommand extends Command {
 
     let version = this.version;
 
-    const type = ResolverMap[tool] ?? this.type;
+    const type = getToolType(ResolverMap, tool) ?? this.type;
 
     if (!isNonEmptyStringAndNotWhitespace(version) && !all) {
       logger.error(`No version found for ${tool}`);
