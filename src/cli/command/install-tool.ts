@@ -2,7 +2,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { installTool, resolveVersion } from '../install-tool/index.ts';
-import { DeprecatedTools, ResolverMap } from '../tools/index.ts';
+import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
@@ -46,14 +46,14 @@ export class InstallToolCommand extends Command {
 
     let version = this.version?.replace(/^v/, ''); // trim optional 'v' prefix
 
-    let type = DeprecatedTools[this.name];
+    let type = getToolType(DeprecatedTools, this.name);
 
     if (type) {
       logger.warn(
         `The 'install-tool ${this.name}' command is deprecated. Please use the 'install-${type} ${this.name}'.`,
       );
     } else {
-      type = ResolverMap[this.name] ?? this.type;
+      type = getToolType(ResolverMap, this.name) ?? this.type;
     }
 
     if (!isNonEmptyStringAndNotWhitespace(version)) {
