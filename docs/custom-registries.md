@@ -754,6 +754,8 @@ Samples:
 
 ```txt
 https://download.swift.org/swift-5.7-release/ubuntu2204/swift-5.7-RELEASE/swift-5.7-RELEASE-ubuntu22.04.tar.gz
+https://download.swift.org/swift-5.7.3-release/ubuntu2204/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04.tar.gz
+https://download.swift.org/swift-5.7.3-release/ubuntu2204-aarch64/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04-aarch64.tar.gz
 ```
 
 ## `terraform`
