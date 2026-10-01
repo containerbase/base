@@ -91,6 +91,9 @@ importers:
       '@containerbase/istanbul-reports-html':
         specifier: 2.0.19
         version: 2.0.19
+      '@containerbase/semantic-release-pnpm':
+        specifier: 1.4.3
+        version: 1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.11.0(supports-color@7.2.0))
@@ -302,6 +305,12 @@ packages:
   '@containerbase/istanbul-reports-html@2.0.19':
     resolution: {integrity: sha512-rKEi42KqcYT3w8h+8nMO9jMnfZt5Vd+n+ANDlOZJVEXwy4f44rfmEyC4yjjQGaeTbKAGHqXpFzz1E4XA+scE8w==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
+
+  '@containerbase/semantic-release-pnpm@1.4.3':
+    resolution: {integrity: sha512-dOMyBw+mzcKHt6OqYyRj6arFeszoINlNRq1eIR7oEE0TB0i0lhj8BsJ/2IFISJUPwf9lUxKbV8ES6vjqqMIQYg==}
+    engines: {node: ^22.11.0 || ^24}
+    peerDependencies:
+      semantic-release: ^24.0.0 || ^25.0.0
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -4006,6 +4015,14 @@ snapshots:
   '@containerbase/istanbul-reports-html@2.0.19':
     dependencies:
       istanbul-reports: 3.2.0
+
+  '@containerbase/semantic-release-pnpm@1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))':
+    dependencies:
+      '@semantic-release/error': 4.0.0
+      aggregate-error: 5.0.0
+      execa: 9.6.1
+      semantic-release: 25.0.9(supports-color@7.2.0)(typescript@6.0.3)
+      semver: 7.8.5
 
   '@emnapi/core@1.10.0':
     dependencies:
