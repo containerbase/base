@@ -23,6 +23,7 @@
       "types": "./dist/zod.d.ts",
       "default": "./dist/zod.js"
     },
+    "./package.json": "./package.json",
     "./tools.json": "./data/tools.json",
     "./tools.schema.json": "./data/tools.schema.json"
   },
