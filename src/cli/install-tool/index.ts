@@ -114,7 +114,6 @@ import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import { type InstallToolType, logger } from '../utils/index.ts';
-import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
 import {
   V1ToolInstallService,
   V2ToolInstallService,
@@ -205,7 +204,7 @@ async function prepareInstallContainer(): Promise<Container> {
   // v2 tool services
   const pathSvc = await container.getAsync(PathService);
   const legacyTools = await pathSvc.findLegacyTools();
-  for (const tool of legacyTools.filter(isNotKnownV2Tool)) {
+  for (const tool of legacyTools) {
     @injectable()
     @injectFromHierarchy()
     class GenericInstallService extends V2ToolInstallService {

@@ -712,9 +712,13 @@ Ruby releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz.sha512
-https://github.com/containerbase/ruby-prebuild/releases/download/3.0.3/ruby-3.0.3-jammy-x86_x64.tar.xz
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-x86_64.tar.xz
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz
 ```
+
+The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
 
 ### `gem` tools
 
