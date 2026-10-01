@@ -9,6 +9,7 @@ import { NpmPackageMeta, NpmPackageMetaList } from './schema.ts';
 export class NodeVersionResolver extends ToolVersionResolver {
   readonly tool = 'node';
 
+  /** Resolves a missing version or `latest` to the newest lts from nodejs.org. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMetaList.parse(
@@ -23,6 +24,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
 
 @injectable()
 export abstract class NpmVersionResolver extends ToolVersionResolver {
+  /** Resolves a missing version or `latest` to the npm `latest` dist tag. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMeta.parse(
@@ -43,6 +45,11 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
 @injectFromHierarchy()
 export class YarnVersionResolver extends ToolVersionResolver {
   readonly tool = 'yarn';
+
+  /**
+   * Resolves a missing version or `latest` to the `latest` dist tag of
+   * `@yarnpkg/cli-dist`.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       const meta = NpmPackageMeta.parse(

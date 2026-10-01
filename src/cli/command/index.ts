@@ -7,6 +7,7 @@ import './install-npm.ts';
 import './install-pip.ts';
 import './install-tool.ts';
 import './link-tool.ts';
+import './list-tools.ts';
 import './prepare-tool.ts';
 import './uninstall-gem.ts';
 import './uninstall-npm.ts';

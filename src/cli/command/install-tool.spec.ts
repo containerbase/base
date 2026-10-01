@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
@@ -16,8 +15,8 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/install-tool', () => {
   beforeEach(() => {
-    delete env.NODE_VERSION;
-    env.IGNORED_TOOLS = 'pnpm,php';
+    vi.stubEnv('NODE_VERSION', undefined);
+    vi.stubEnv('IGNORED_TOOLS', 'pnpm,php');
   });
 
   test('install-tool', async () => {
@@ -28,7 +27,7 @@ describe('cli/command/install-tool', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `The 'install-tool bower' command is deprecated. Please use the 'install-npm bower'.`,
     );
-    env.NODE_VERSION = '16.13.0';
+    vi.stubEnv('NODE_VERSION', '16.13.0');
     expect(await cli.run(['node'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
@@ -41,6 +40,19 @@ describe('cli/command/install-tool', () => {
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['node'])).toBe(1);
+
+    // a non-zero exit code from the install is reported as a failure too
+    mocks.installTool.mockResolvedValueOnce(2);
+    expect(await cli.run(['node'])).toBe(2);
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Install tool node failed'),
+    );
+
+    // a rejection which is not an `Error` has no message to report
+    mocks.installTool.mockRejectedValueOnce('boom');
+    expect(await cli.run(['node'])).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
 
     expect(await cli.run(['php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
@@ -62,7 +74,7 @@ describe('cli/command/install-tool', () => {
       false,
       undefined,
     );
-    env.NODE_VERSION = '16.13.0';
+    vi.stubEnv('NODE_VERSION', '16.13.0');
     expect(await cli.run(['install', 'tool', 'node', '-d'])).toBe(0);
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));

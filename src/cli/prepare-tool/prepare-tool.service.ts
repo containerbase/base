@@ -17,6 +17,12 @@ export class PrepareToolService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
 
+  /**
+   * Prepares the given tools, or every tool for `all`, and marks them as
+   * prepared. Must run as root.
+   *
+   * @returns an exit code when the tools could not be prepared
+   */
   async prepare(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
     logger.trace(
@@ -35,6 +41,7 @@ export class PrepareToolService {
       if (tools.length === 1 && tools[0] === 'all') {
         for (const tool of this.toolSvcs) {
           const res = await this._prepareTool(tool, dryRun);
+          /* v8 ignore if -- `_prepareTool` does not report failures yet */
           if (res) {
             return res;
           }
@@ -55,6 +62,7 @@ export class PrepareToolService {
             return 1;
           }
           const res = await this._prepareTool(svc, dryRun);
+          /* v8 ignore if -- `_prepareTool` does not report failures yet */
           if (res) {
             return res;
           }
@@ -72,6 +80,12 @@ export class PrepareToolService {
     }
   }
 
+  /**
+   * Initializes the given tools, or for `all` every tool which was prepared in
+   * this image, and marks them as initialized.
+   *
+   * @returns an exit code when the tools could not be initialized
+   */
   async initialize(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
     logger.trace(
@@ -89,6 +103,7 @@ export class PrepareToolService {
       const set = new Set(await this.pathSvc.findPreparedTools());
       for (const tool of this.toolSvcs.filter((t) => set.has(t.name))) {
         const res = await this._initTool(tool, dryRun);
+        /* v8 ignore if -- `_initTool` does not report failures yet */
         if (res) {
           return res;
         }
@@ -100,6 +115,7 @@ export class PrepareToolService {
         .filter((t) => set.has(t))
         .map((t) => this.toolSvcs.find((s) => s.name === t)!)) {
         const res = await this._initTool(tool, dryRun);
+        /* v8 ignore if -- `_initTool` does not report failures yet */
         if (res) {
           return res;
         }
@@ -108,6 +124,7 @@ export class PrepareToolService {
     }
   }
 
+  /** Initializes a tool, unless it is ignored, needs no init or already had it. */
   private async _initTool(
     tool: BasePrepareService,
     _dryRun: boolean,
@@ -130,6 +147,7 @@ export class PrepareToolService {
     await tool.initialize();
   }
 
+  /** Prepares a tool, unless it is ignored, needs no prepare or already had it. */
   private async _prepareTool(
     tool: BasePrepareService,
     _dryRun: boolean,

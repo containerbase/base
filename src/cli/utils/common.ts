@@ -8,6 +8,10 @@ import type { CliMode, Distro } from './types.ts';
 let distro: undefined | Promise<Distro>;
 let isDocker: undefined | Promise<boolean>;
 
+/**
+ * Exits the process unless it runs on linux x64 or arm64 with a supported
+ * ubuntu release.
+ */
 export async function validateSystem(): Promise<void> {
   if (os.platform() !== 'linux') {
     logger.fatal(`Unsupported platform: ${os.platform()}! Please use Linux.`);
@@ -35,6 +39,7 @@ export async function validateSystem(): Promise<void> {
   }
 }
 
+/** The distro from `/etc/os-release`, read once. */
 export async function getDistro(): Promise<Distro> {
   return await (distro ??= readDistro());
 }
@@ -51,6 +56,7 @@ export function reset(): void {
 }
 /* v8 ignore stop */
 
+/** Parses `/etc/os-release`, falling back to an unknown distro. */
 async function readDistro(): Promise<Distro> {
   const data = await readFile('/etc/os-release', { encoding: 'utf-8' });
   const name = /^NAME="?(\w+)"?$/m.exec(data)?.[1];
@@ -75,6 +81,7 @@ export const fileRights =
 
 export type PathType = 'file' | 'dir' | 'symlink' | 'socket';
 
+/** Whether the path exists, optionally with the given type. */
 export async function pathExists(
   filePath: string,
   type?: PathType,
@@ -97,6 +104,7 @@ export async function pathExists(
   }
 }
 
+/** The binary name shown in the cli help, based on how the cli was called. */
 export function parseBinaryName(
   mode: CliMode | null,
   node: string,
@@ -111,6 +119,7 @@ export function parseBinaryName(
     : process.argv0;
 }
 
+/** Removes the apt lists and logs left behind by package installs. */
 export async function cleanAptFiles(dryRun = false): Promise<void> {
   await deleteAsync(
     ['/var/lib/apt/lists/**', '/var/log/dpkg.*', '/var/log/apt'],
@@ -118,6 +127,7 @@ export async function cleanAptFiles(dryRun = false): Promise<void> {
   );
 }
 
+/** Empties the temp folder, keeping the `containerbase` folder. */
 export async function cleanTmpFiles(
   tmp: string,
   dryRun = false,
@@ -135,6 +145,7 @@ const buildKitMounts = [
   '/buildkit/executor/resolv.conf',
 ];
 
+/** Whether the mounts show a buildkit build. */
 async function checkDocker(): Promise<boolean> {
   try {
     const mountInfo = await readFile('/proc/self/mountinfo', {
@@ -147,10 +158,12 @@ async function checkDocker(): Promise<boolean> {
   }
 }
 
+/** Whether the cli runs inside a docker build, checked once. */
 export function isDockerBuild(): Promise<boolean> {
   return (isDocker ??= checkDocker());
 }
 
+/** Maps a tool name to a folder name, replacing `/` with `__`. */
 export function tool2path(tool: string): string {
   return tool.replace(/\//g, '__');
 }

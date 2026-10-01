@@ -1,11 +1,12 @@
-import { mkdir, readFile, stat } from 'node:fs/promises';
+import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { fileRights, pathExists } from '../utils/index.ts';
-import { PathService } from './index.ts';
+import { EnvService, PathService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -16,8 +17,8 @@ describe('cli/services/path.service', () => {
 
   beforeEach(async () => {
     child = await testContainer();
-    env.PATH = path;
-    delete env.NODE_VERSION;
+    vi.stubEnv('PATH', path);
+    vi.stubEnv('NODE_VERSION', undefined);
     pathSvc = await child.getAsync(PathService);
     await deleteAsync('**', { force: true, dot: true, cwd: rootPath() });
     await ensurePaths([
@@ -73,6 +74,54 @@ describe('cli/services/path.service', () => {
     expect(await pathExists(rootPath('tmp/containerbase'), 'dir')).toBe(true);
   });
 
+  test('ensureBasePaths: throws when the system is not initialized', async () => {
+    await deleteAsync('var', { force: true, dot: true, cwd: rootPath() });
+
+    await expect(pathSvc.ensureBasePaths()).rejects.toThrow(
+      'System not initialized for containerbase',
+    );
+  });
+
+  test('findPreparedTools', async () => {
+    expect(await pathSvc.findPreparedTools()).toEqual([]);
+
+    await pathSvc.setPrepared('node');
+    await pathSvc.setPrepared('bun');
+
+    // `readdir` order is filesystem dependent, so compare without it
+    expect((await pathSvc.findPreparedTools()).toSorted()).toEqual([
+      'bun',
+      'node',
+    ]);
+  });
+
+  test('findLegacyTools', async () => {
+    // no v2 folder, eg. when running from the repository
+    expect(await pathSvc.findLegacyTools()).toEqual([]);
+
+    await ensurePaths('usr/local/containerbase/tools/v2');
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/leg.sh'), '');
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/readme'), '');
+    expect(await pathSvc.findLegacyTools()).toEqual(['leg']);
+  });
+
+  test('isLegacyTool', async () => {
+    await ensurePaths([
+      'usr/local/containerbase/tools',
+      'usr/local/containerbase/tools/v2',
+    ]);
+
+    expect(await pathSvc.isLegacyTool('leg')).toBe(false);
+    expect(await pathSvc.isLegacyTool('leg', true)).toBe(false);
+
+    await writeFile(rootPath('usr/local/containerbase/tools/leg.sh'), '');
+    expect(await pathSvc.isLegacyTool('leg')).toBe(false);
+    expect(await pathSvc.isLegacyTool('leg', true)).toBe(true);
+
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/leg.sh'), '');
+    expect(await pathSvc.isLegacyTool('leg')).toBe(true);
+  });
+
   test('exportToolEnvContent', async () => {
     await mkdir(`${pathSvc.installDir}/tools`, { recursive: true });
 
@@ -105,6 +154,27 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.findVersionedToolPath('node', '18.0.1')).toBe(
       rootPath('opt/containerbase/tools/node/18.0.1'),
     );
+  });
+
+  test('createVersionedToolPath with sub folders', async () => {
+    await ensurePaths('opt/containerbase/tools');
+
+    const path = await pathSvc.createVersionedToolPath(
+      'jb',
+      '0.6.0',
+      'lib',
+      'bin',
+    );
+
+    expect(path).toBe(rootPath('opt/containerbase/tools/jb/0.6.0/lib/bin'));
+    // tests don't run as root, so the umask is group writable
+    const mode = platform() === 'win32' ? 0 : 0o775;
+    expect((await stat(path)).mode & fileRights).toBe(mode);
+    expect((await stat(join(path, '..'))).mode & fileRights).toBe(mode);
+    // an existing folder is fine
+    await expect(
+      pathSvc.createVersionedToolPath('jb', '0.6.0', 'lib', 'bin'),
+    ).resolves.toBe(path);
   });
 
   test('exportEnv', async () => {
@@ -205,6 +275,66 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.createDir(dir)).toBeUndefined();
   });
 
+  test('createDir: throws when the path is no folder', async () => {
+    const dir = rootPath('env123/dir');
+    const link = rootPath('env123/link');
+    const file = rootPath('env123/file');
+    await pathSvc.createDir(dir);
+    await fs.symlink(dir, link);
+    await writeFile(file, '');
+
+    await expect(pathSvc.createDir(link)).rejects.toThrow(
+      `Path exists and is not a directory: ${link}`,
+    );
+    await expect(pathSvc.createDir(file)).rejects.toThrow(
+      `Path exists and is not a directory: ${file}`,
+    );
+  });
+
+  test('createSymlink', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+
+    expect(await pathSvc.createSymlink(target, link)).toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing link', async () => {
+    const target = rootPath('env123/target');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(target, '');
+    await pathSvc.createSymlink(target, link);
+
+    await expect(pathSvc.createSymlink(target, link)).resolves.toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
+  test('createSymlink: keeps an existing folder', async () => {
+    const target = rootPath('env123/target');
+    const dir = rootPath('env123/dir');
+    await pathSvc.createDir(dir);
+
+    await pathSvc.createSymlink(target, dir);
+
+    expect((await stat(dir)).isDirectory()).toBe(true);
+  });
+
+  test('createSymlink: keeps a dangling link', async () => {
+    const target = rootPath('env123/missing');
+    const link = rootPath('env123/link');
+    await pathSvc.createDir(rootPath('env123'));
+    await fs.symlink(target, link);
+
+    await pathSvc.createSymlink(rootPath('env123/other'), link);
+
+    expect(await fs.readlink(link)).toBe(target);
+  });
+
   test('toolInit', async () => {
     expect(pathSvc.toolInitPath('node')).toBe(
       rootPath('tmp/containerbase/tool.init.d/node'),
@@ -221,6 +351,52 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.isPrepared('node')).toBe(false);
     await pathSvc.setPrepared('node');
     expect(await pathSvc.isPrepared('node')).toBe(true);
+  });
+
+  test('setOwner: chowns root owned paths when running as root', async () => {
+    const file = rootPath('owned');
+    await writeFile(file, 'test');
+    // the file belongs to the user running the tests, so report it as root
+    // owned instead
+    const stats = await stat(file);
+    stats.uid = 0;
+    vi.spyOn(fs, 'stat').mockResolvedValueOnce(stats);
+    vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+    const chown = vi.spyOn(fs, 'chown').mockResolvedValue();
+
+    await pathSvc.setOwner({ path: file });
+
+    expect(chown).toHaveBeenCalledExactlyOnceWith(file, 12021, 0);
+  });
+
+  describe('withTempDir', () => {
+    test('returns the result and removes the folder afterwards', async () => {
+      let dirInFn: string | undefined;
+      let existedInFn = false;
+
+      const result = await pathSvc.withTempDir('test-', async (dir) => {
+        dirInFn = dir;
+        existedInFn = await pathExists(dir, 'dir');
+        return 'result';
+      });
+
+      expect(result).toBe('result');
+      expect(existedInFn).toBe(true);
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
+
+    test('removes the folder when fn throws', async () => {
+      let dirInFn: string | undefined;
+
+      await expect(
+        pathSvc.withTempDir('test-', (dir) => {
+          dirInFn = dir;
+          return Promise.reject(new Error('test error'));
+        }),
+      ).rejects.toThrow('test error');
+
+      expect(await pathExists(dirInFn!, 'dir')).toBe(false);
+    });
   });
 
   test('writeFile', async () => {

@@ -41,7 +41,8 @@
         "prepareCmd": "pnpm release:prepare --release=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead}",
         "publishCmd": "pnpm release:publish --release=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead}"
       }
-    ]
+    ],
+    "@containerbase/semantic-release-pnpm"
   ],
   "analyzeCommits": {
     "releaseRules": [

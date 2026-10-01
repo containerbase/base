@@ -1,6 +1,8 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { EnvService } from '../services/index.ts';
+import { logger } from '../utils/index.ts';
 import { registerCommands } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 
@@ -44,5 +46,16 @@ describe('cli/command/file-exists', () => {
     ).toBe(1);
 
     expect(await cli.run(['file', 'exists', ''])).toBe(-1);
+
+    // a failure which is not an `Error` has no message to report
+    const boom: unknown = 'boom';
+    vi.spyOn(EnvService.prototype, 'replaceUrl').mockImplementationOnce(() => {
+      throw boom;
+    });
+    expect(
+      await cli.run(['file', 'exists', 'https://example.test/file.txt']),
+    ).toBe(-1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
   });
 });

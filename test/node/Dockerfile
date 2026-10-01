@@ -41,7 +41,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.19.0
+RUN install-tool node 24.21.0
 
 # ensure npmrc is writable by user
 RUN set -ex; [ $(stat --format '%u' "/tmp/containerbase/cache/.npmrc") -eq ${USER_ID} ]
@@ -93,7 +93,7 @@ RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.18.0
+RUN install-tool yarn 4.18.1
 
 # renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN_VERSION=6.0.0-rc.19
@@ -166,7 +166,7 @@ RUN prepare-tool node
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.23.2
+RUN install-tool node 22.23.3
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -551,7 +551,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=44.17.1
+ARG RENOVATE_VERSION=44.115.13
 RUN install-tool renovate
 
 RUN set -ex; \
@@ -570,9 +570,20 @@ RUN set -ex; \
 
 RUN set -ex; \
   ls -la /usr/local/bin/;\
+  containerbase-cli list tools --out /tmp/tools-before.txt; \
+  cat /tmp/tools-before.txt; \
+  grep -q '^node ' /tmp/tools-before.txt; \
+  grep -q '^yarn ' /tmp/tools-before.txt; \
+  grep -q '^renovate ' /tmp/tools-before.txt; \
+  containerbase-cli list tools --json --out /tmp/tools-before.json; \
+  cat /tmp/tools-before.json; \
+  grep -q '"name":"del-cli"' /tmp/tools-before.json; \
   uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
+  containerbase-cli list tools --out /tmp/tools-after.txt; \
+  cat /tmp/tools-after.txt; \
+  grep -q 'No tools installed.' /tmp/tools-after.txt; \
   true
 
 #--------------------------------------

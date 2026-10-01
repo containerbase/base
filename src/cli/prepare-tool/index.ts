@@ -8,6 +8,7 @@ import { PowershellPrepareService } from '../tools/dotnet/powershell.ts';
 import { ElixirPrepareService } from '../tools/erlang/elixir.ts';
 import { ErlangPrepareService } from '../tools/erlang/index.ts';
 import { FlutterPrepareService } from '../tools/flutter.ts';
+import { GitPrepareService } from '../tools/git/index.ts';
 import { GolangPrepareService } from '../tools/golang.ts';
 import { CabalPrepareService } from '../tools/haskell/cabal.ts';
 import { GhcPrepareService } from '../tools/haskell/ghc.ts';
@@ -25,31 +26,22 @@ import { RubyPrepareService } from '../tools/ruby/index.ts';
 import { RustPrepareService } from '../tools/rust.ts';
 import { SwiftPrepareService } from '../tools/swift.ts';
 import { logger } from '../utils/index.ts';
-import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
 import {
   PREPARE_TOOL_TOKEN,
   PrepareToolService,
 } from './prepare-tool.service.ts';
 
+/**
+ * Creates a container with all prepare services, including a generic one for
+ * every v2 shell tool.
+ */
 async function prepareContainer(): Promise<Container> {
   logger.trace('preparing container');
   const container = createContainer();
 
   // core services
   container.bind(PrepareToolService).toSelf();
-
-  // v2 tool services
-  const pathSvc = await container.getAsync(PathService);
-  const v2Tools = await pathSvc.findLegacyTools();
-  for (const tool of v2Tools.filter(isNotKnownV2Tool)) {
-    @injectable()
-    @injectFromHierarchy()
-    class GenericV2ToolPrepareService extends V2ToolPrepareService {
-      override readonly name: string = tool;
-    }
-    container.bind(PREPARE_TOOL_TOKEN).to(GenericV2ToolPrepareService);
-  }
 
   // modern tool services
   container.bind(PREPARE_TOOL_TOKEN).to(CabalPrepareService);
@@ -61,6 +53,7 @@ async function prepareContainer(): Promise<Container> {
   container.bind(PREPARE_TOOL_TOKEN).to(ErlangPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(FlutterPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(GhcPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(GitPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(GolangPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);
@@ -75,10 +68,24 @@ async function prepareContainer(): Promise<Container> {
   container.bind(PREPARE_TOOL_TOKEN).to(SbtPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(SwiftPrepareService);
 
+  // v2 tool services, after the modern ones so a custom v2 shell tool with the
+  // same name doesn't replace a modern tool's prepare, like on install
+  const pathSvc = await container.getAsync(PathService);
+  const v2Tools = await pathSvc.findLegacyTools();
+  for (const tool of v2Tools) {
+    @injectable()
+    @injectFromHierarchy()
+    class GenericV2ToolPrepareService extends V2ToolPrepareService {
+      override readonly name: string = tool;
+    }
+    container.bind(PREPARE_TOOL_TOKEN).to(GenericV2ToolPrepareService);
+  }
+
   logger.trace('preparing container done');
   return container;
 }
 
+/** Runs the prepare step of the passed tools, or of all tools for `all`. */
 export async function prepareTools(
   tools: string[],
   dryRun = false,
@@ -88,6 +95,10 @@ export async function prepareTools(
   return svc.prepare(tools, dryRun);
 }
 
+/**
+ * Runs the initialize step of the passed tools, or of all prepared tools for
+ * `all`.
+ */
 export async function initializeTools(
   tools: string[],
   dryRun = false,

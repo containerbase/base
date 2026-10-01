@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.19.0
+RUN install-tool node 24.21.0
 
 
 #--------------------------------------
@@ -70,7 +70,7 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 FROM test-node AS test-renovate
 
 # renovate: datasource=npm
-RUN install-tool renovate 44.17.1
+RUN install-tool renovate 44.115.13
 
 # ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # # renovate: datasource=npm

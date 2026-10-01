@@ -22,6 +22,7 @@ describe('cli/services/env.service', () => {
   let rootDir: string | undefined;
   let svc!: EnvService;
 
+  /** Creates a fresh container and env service. */
   async function init() {
     child = await testContainer();
     svc = await child.getAsync(EnvService);

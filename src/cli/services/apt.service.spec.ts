@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { AptService } from './index.ts';
@@ -23,7 +22,7 @@ describe('cli/services/apt.service', () => {
   beforeEach(async () => {
     child = await testContainer();
     svc = await child.getAsync(AptService);
-    delete env.APT_HTTP_PROXY;
+    vi.stubEnv('APT_HTTP_PROXY', undefined);
   });
 
   test('skips install', async () => {
@@ -38,12 +37,20 @@ describe('cli/services/apt.service', () => {
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg');
     expect(mocks.execa).toHaveBeenCalledTimes(3);
+    expect(mocks.execa).toHaveBeenCalledWith('apt-get', ['-qq', 'update'], {
+      env: { DEBIAN_FRONTEND: 'noninteractive' },
+    });
+    expect(mocks.execa).toHaveBeenCalledWith(
+      'apt-get',
+      ['-qq', 'install', '-y', 'some-pkg'],
+      { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+    );
     expect(mocks.writeFile).not.toHaveBeenCalled();
     expect(mocks.rm).not.toHaveBeenCalled();
   });
 
   test('uses proxy', async () => {
-    env.APT_HTTP_PROXY = 'http://proxy';
+    vi.stubEnv('APT_HTTP_PROXY', 'http://proxy');
     mocks.execa.mockRejectedValueOnce(new Error('not installed'));
     await svc.install('some-pkg', 'other-pkg');
     expect(mocks.execa).toHaveBeenCalledTimes(4);

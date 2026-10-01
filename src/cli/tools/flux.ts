@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -8,21 +7,23 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class FluxInstallService extends BaseInstallService {
   readonly name = 'flux';
 
+  /** The architecture name used by the flux release assets. */
   private get arch(): string {
     return this.envSvc.arch;
   }
 
+  /**
+   * Downloads the flux archive from GitHub, verified against the release's
+   * checksums file, and extracts it into the versioned `bin` folder.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/fluxcd/flux2/releases/download/v${version}/`;
     const filename = `flux_${version}_linux_${this.arch}.tar.gz`;
 
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}flux_${version}_checksums.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}flux_${version}_checksums.txt`,
+      filename,
+    );
 
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
@@ -32,23 +33,25 @@ export class FluxInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
     await this.compress.extract({
       file,
       cwd: path,
     });
   }
 
+  /** Links the `flux` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `flux --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('flux', ['--version']);
   }

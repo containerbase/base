@@ -61,9 +61,9 @@ RUN install-tool python 3.14.7
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.7.1
+RUN install-tool pipenv 2026.8.0
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.7.1
+RUN install-tool pipenv 2026.8.0
 
 USER 12021
 
@@ -74,9 +74,9 @@ FROM build AS poetry
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 
 USER 12021
 
@@ -86,7 +86,7 @@ USER 12021
 FROM build AS test-pip-tools-a
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.6.0
+RUN install-tool pip-tools 7.6.1
 
 #--------------------------------------
 # test pip-tools-b: pip-tools (older python)
@@ -110,7 +110,7 @@ FROM build-rootless AS test-poetry-a
 RUN install-tool python 3.14.7
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -156,7 +156,7 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 FROM build AS test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 
 USER 1001
 
@@ -164,7 +164,7 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 
 #--------------------------------------
 # test b: non-root
@@ -207,7 +207,7 @@ RUN install-tool python 3.10.17
 RUN install-tool python 3.14.7
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.7.1
+RUN install-tool pipenv 2026.8.0
 
 RUN set -ex; \
   cd pipenv-b; \
@@ -223,7 +223,7 @@ RUN prepare-tool conan
 USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.32.0
+RUN install-tool conan 2.33.0
 
 RUN set -ex; \
     cd b-conan; \

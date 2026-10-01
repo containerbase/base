@@ -68,7 +68,7 @@ export const NoInitTools = [
  * Tools in this map are implicit mapped from `install-tool` to `install-<type>`.
  * So no need for an extra install service.
  */
-export const ResolverMap: Record<string, InstallToolType | undefined> = {
+export const ResolverMap: Record<string, InstallToolType> = {
   bundler: 'gem',
   checkov: 'pip',
   copier: 'pip',
@@ -88,7 +88,21 @@ export const ResolverMap: Record<string, InstallToolType | undefined> = {
  * This tools are deprecated and should not be used anymore via `install-tool`.
  * They are implicit mapped from `install-tool` to `install-<type>`.
  */
-export const DeprecatedTools: Record<string, InstallToolType | undefined> = {
+export const DeprecatedTools: Record<string, InstallToolType> = {
   bower: 'npm',
   lerna: 'npm',
 };
+
+/**
+ * Looks up the install type of a tool in the given map.
+ * Only own keys resolve, so names like `constructor` never match.
+ * @param map - tool to install type map
+ * @param name - tool name
+ * @returns the mapped install type or `undefined`
+ */
+export function getToolType(
+  map: Record<string, InstallToolType>,
+  name: string,
+): InstallToolType | undefined {
+  return Object.hasOwn(map, name) ? map[name] : undefined;
+}

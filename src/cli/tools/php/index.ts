@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
@@ -16,6 +15,11 @@ export class PhpPrepareService extends BasePrepareService {
 
   override readonly name = 'php';
 
+  /**
+   * Installs the apt packages php needs on the current ubuntu release.
+   *
+   * @throws on an unsupported distro
+   */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
 
@@ -57,6 +61,7 @@ export class PhpPrepareService extends BasePrepareService {
 export class PhpInstallService extends BaseInstallService {
   readonly name = 'php';
 
+  /** The architecture name used by the php prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -66,6 +71,11 @@ export class PhpInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the distro specific containerbase php prebuild, verified
+   * against its `.sha512`, and extracts it into the tool path. Noble uses the
+   * jammy prebuild.
+   */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
@@ -75,47 +85,35 @@ export class PhpInstallService extends BaseInstallService {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }
-    const filename = `${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    const hasChecksum = await this.http.exists(checksumFileUrl);
-    let file: string;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
 
-    if (hasChecksum) {
-      // no distro specific prebuilds
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-      });
-    }
+    // every jammy and resolute prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 
     await this.compress.extract({ file, cwd: path });
   }
 
+  /** Links the binaries, see `postInstall`. */
   override async link(version: string): Promise<void> {
     await this.postInstall(version);
   }
 
+  /** Links the `php` binary into the global bin folder. */
   override async postInstall(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `php --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('php', ['--version']);
-  }
-
-  private async getChecksum(checksumFileUrl: string): Promise<string> {
-    const checksumFile = await this.http.download({ url: checksumFileUrl });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8')).trim();
-    return expectedChecksum;
   }
 }
 
@@ -124,6 +122,7 @@ export class PhpInstallService extends BaseInstallService {
 export class PhpVersionResolver extends ToolVersionResolver {
   readonly tool = 'php';
 
+  /** Resolves a missing version or `latest` to the latest php prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.http.get(

@@ -12,7 +12,7 @@ jobs:
   cancel-workflows:
     name: Cancel Workflow Runs
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     if: github.event.reason != 'merged'
 

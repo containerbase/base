@@ -9,6 +9,7 @@ import { NpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { PipVersionResolver } from '../tools/python/pip.ts';
 import { PipBaseInstallService } from '../tools/python/utils.ts';
+import { RubyInstallService } from '../tools/ruby/index.ts';
 import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
@@ -18,9 +19,11 @@ import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
 import {
   installTool,
   linkTool,
+  listSupportedTools,
   resolveVersion,
   uninstallTool,
 } from './index.ts';
+import { V2ToolInstallService } from './install-legacy-tool.service.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -117,6 +120,79 @@ describe('cli/install-tool/index', () => {
       expect(
         await installTool(`dummy-${type}`, '1.0.0', false, type),
       ).toBeUndefined();
+    });
+
+    test('prefers a modern service over a v2 shell tool with the same name', async () => {
+      const script = rootPath('usr/local/containerbase/tools/v2/ruby.sh');
+      await fs.writeFile(script, '');
+      const proto = RubyInstallService.prototype;
+      vi.spyOn(proto, 'needsPrepare').mockReturnValue(false);
+      vi.spyOn(proto, 'needsInitialize').mockReturnValue(false);
+      vi.spyOn(proto, 'validate').mockResolvedValue(true);
+      vi.spyOn(proto, 'link').mockResolvedValue();
+      vi.spyOn(proto, 'postInstall').mockResolvedValue();
+      vi.spyOn(proto, 'test').mockResolvedValue();
+      const ruby = vi.spyOn(proto, 'install').mockResolvedValue();
+      const v2 = vi.spyOn(V2ToolInstallService.prototype, 'install');
+
+      try {
+        expect(await installTool('ruby', '3.4.11')).toBeUndefined();
+      } finally {
+        await fs.rm(script);
+      }
+
+      expect(ruby).toHaveBeenCalledExactlyOnceWith('3.4.11');
+      expect(v2).not.toHaveBeenCalled();
+    });
+
+    test('rethrows a failing test for a known pip tool', async () => {
+      // unlike the `dummy-*` tools above, `poetry` is in the `ResolverMap`, so
+      // its `--version` flag is expected to work
+      vi.spyOn(PipBaseInstallService.prototype, 'install').mockResolvedValue();
+      vi.spyOn(
+        PipBaseInstallService.prototype,
+        'needsInitialize',
+      ).mockReturnValue(false);
+      vi.spyOn(PipBaseInstallService.prototype, 'validate').mockResolvedValue(
+        true,
+      );
+      vi.spyOn(
+        PipBaseInstallService.prototype,
+        'postInstall',
+      ).mockResolvedValue();
+      vi.spyOn(PipBaseInstallService.prototype, 'test').mockRejectedValue(
+        new Error('no --version flag'),
+      );
+
+      await expect(
+        installTool('poetry', '1.0.0', false, 'pip'),
+      ).rejects.toThrow('no --version flag');
+    });
+  });
+
+  describe('listSupportedTools', () => {
+    test('works', async () => {
+      const tools = await listSupportedTools();
+      const names = tools.map((t) => t.name);
+
+      expect(names).toEqual(
+        [...names].sort((a, b) => a.localeCompare(b, 'en', { numeric: true })),
+      );
+      // v2 shell tools are supported
+      expect(names).toContain('dummy');
+      // v1 shell tools have no install service to describe
+      expect(names).not.toContain('leg');
+
+      expect(tools).toEqual(
+        expect.arrayContaining([
+          { name: 'apko' },
+          { name: 'git', root: true },
+          { name: 'git-lfs', parent: 'git' },
+          { name: 'maven', parent: 'java' },
+          { name: 'kas', type: 'pip', parent: 'python' },
+          { name: 'bower', type: 'npm', parent: 'node', deprecated: true },
+        ]),
+      );
     });
   });
 

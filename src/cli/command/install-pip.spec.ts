@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
@@ -15,7 +14,7 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/install-pip', () => {
   beforeEach(() => {
-    delete env.POETRY_VERSION;
+    vi.stubEnv('POETRY_VERSION', undefined);
   });
 
   test('install-pip', async () => {
@@ -27,7 +26,7 @@ describe('cli/command/install-pip', () => {
     mocks.resolveVersion.mockResolvedValueOnce('4.0.0');
     expect(await cli.run(['poetry'])).toBe(0);
 
-    env.POETRY_VERSION = '5.0.0';
+    vi.stubEnv('POETRY_VERSION', '5.0.0');
     expect(await cli.run(['poetry'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
@@ -57,7 +56,7 @@ describe('cli/command/install-pip', () => {
     mocks.resolveVersion.mockResolvedValueOnce('4.0.0');
     expect(await cli.run(['install', 'pip', 'poetry'])).toBe(0);
 
-    env.POETRY_VERSION = '5.0.0';
+    vi.stubEnv('POETRY_VERSION', '5.0.0');
     expect(await cli.run(['install', 'pip', 'poetry'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(

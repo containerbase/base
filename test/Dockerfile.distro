@@ -54,22 +54,22 @@ RUN install-tool buf v1.73.0
 RUN install-tool bun 1.4.2
 
 # renovate: datasource=docker
-RUN install-tool dart 3.13.3
+RUN install-tool dart 3.13.5
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.6
+RUN install-tool deno 2.9.7
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.1
+RUN install-tool devbox 0.18.4
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.401
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.4
+RUN install-tool flutter 3.47.5
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.5
+RUN install-tool flux v2.9.6
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
@@ -81,34 +81,34 @@ RUN install-tool gleam 1.18.1
 RUN install-tool golang 1.27.1
 
 # renovate: datasource=github-releases packageName=helm/helm
-RUN install-tool helm v4.2.4
+RUN install-tool helm v4.3.0
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.7.4
+RUN install-tool helmfile v1.8.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.36.3
+RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.1
+RUN install-tool kustomize 5.8.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.8.14
+RUN install-tool mise 2026.9.18
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.76.2
+RUN install-tool pixi v0.81.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.6.6
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.97.1
+RUN install-tool rust 1.98.1
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.24.0
+RUN install-tool skopeo 1.24.1
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.13.3
@@ -125,10 +125,10 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.9
+RUN install-tool terraform 1.16.4
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.6
+RUN install-tool tofu 1.13.0
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -140,7 +140,7 @@ RUN install-tool vendir v0.46.2
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 35.1
+RUN install-tool protoc 36.2
 
 #--------------------------------------
 # Image: test-docker
@@ -151,7 +151,7 @@ FROM build AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.37.1
+RUN install-tool buildx v0.37.2
 
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v5.5.1
@@ -162,7 +162,7 @@ RUN install-tool docker-compose v5.5.1
 FROM build AS test-erlang
 
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 28.5.0.6
+RUN install-tool erlang 28.5.0.7
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.20.4
 
@@ -172,7 +172,7 @@ RUN install-tool elixir 1.20.4
 FROM build AS test-haskell
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.16.1.0
+RUN install-tool cabal 3.18.1.0
 # renovate: datasource=docker packageName=haskell
 RUN install-tool ghc 9.14.1
 
@@ -184,7 +184,7 @@ FROM build AS test-java
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java 25.0.4+101.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 9.7.1
+RUN install-tool gradle 9.8.0
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
 RUN install-tool maven 3.9.16
 
@@ -197,7 +197,7 @@ FROM build AS test-mono
 RUN install-tool mono 6.14.1
 
 # renovate: datasource=nuget packageName=NuGet.CommandLine
-RUN install-tool nuget 7.6.0
+RUN install-tool nuget 7.9.0
 
 #--------------------------------------
 # Image: test-node
@@ -205,11 +205,11 @@ RUN install-tool nuget 7.6.0
 FROM build AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.19.0
+RUN install-tool node 24.21.0
 # renovate: datasource=npm
 RUN install-tool pnpm 10.34.5
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.18.0
+RUN install-tool yarn 4.18.1
 
 # renovate: datasource=github-releases packageName=voidzero-dev/vite-plus
 RUN install-tool vp 1.0.0
@@ -220,7 +220,7 @@ RUN install-tool vp 1.0.0
 FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.10
+RUN install-tool php 8.5.11
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.10.3
 
@@ -233,9 +233,9 @@ FROM build AS test-python
 RUN install-tool python 3.14.7
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.3.9
+RUN install-tool checkov 3.3.20
 # renovate: datasource=pypi
-RUN install-tool conan 2.32.0
+RUN install-tool conan 2.33.0
 # renovate: datasource=pypi
 RUN install-tool copier 9.18.2
 # renovate: datasource=pypi
@@ -243,13 +243,13 @@ RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
 RUN install-tool kas 5.2
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.7.1
+RUN install-tool pipenv 2026.8.0
 # renovate: datasource=pypi
-RUN install-tool pdm 2.28.1
+RUN install-tool pdm 2.29.2
 # renovate: datasource=pypi
-RUN install-tool poetry 2.4.3
+RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool uv 0.12.13
+RUN install-tool uv 0.12.21
 
 #--------------------------------------
 # Image: test-ruby
@@ -257,9 +257,9 @@ RUN install-tool uv 0.12.13
 FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 4.0.6
+RUN install-tool ruby 4.0.7
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 4.0.20
+RUN install-tool bundler 4.0.22
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.17.0
 

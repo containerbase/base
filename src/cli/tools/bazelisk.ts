@@ -8,6 +8,10 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class BazeliskInstallService extends BaseInstallService {
   readonly name = 'bazelisk';
 
+  /**
+   * Downloads the bazelisk binary from GitHub into the versioned `bin`
+   * folder, with a `bazel` symlink to it. No checksums are verified.
+   */
   override async install(version: string): Promise<void> {
     const baseurl = `https://github.com/bazelbuild/bazelisk/releases/download/v${version}/`;
     const filename = `bazelisk-linux-${this.envSvc.arch}`;
@@ -18,11 +22,11 @@ export class BazeliskInstallService extends BaseInstallService {
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = join(
-      await this.pathSvc.createVersionedToolPath(this.name, version),
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
       'bin',
     );
-    await fs.mkdir(path);
 
     const binarypath = join(path, 'bazelisk');
     await fs.copyFile(file, binarypath);
@@ -32,6 +36,7 @@ export class BazeliskInstallService extends BaseInstallService {
     await fs.symlink(binarypath, join(path, 'bazel'));
   }
 
+  /** Links the `bazelisk` and `bazel` binaries into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
@@ -44,6 +49,7 @@ export class BazeliskInstallService extends BaseInstallService {
     });
   }
 
+  /** Checks that `bazelisk version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('bazelisk', ['version']);
   }

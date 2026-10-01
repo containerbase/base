@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 4.0.6
+RUN install-tool ruby 4.0.7
 
 #--------------------------------------
 # test: global bundler
@@ -74,7 +74,7 @@ FROM build AS test-bundler-c
 USER 12021
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=4.0.20
+ENV BUNDLER_VERSION=4.0.22
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -100,7 +100,7 @@ true
 FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=4.0.20
+ENV BUNDLER_VERSION=4.0.22
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 12021 ]

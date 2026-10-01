@@ -24,6 +24,10 @@ export class LinkToolCommand extends Command {
   tool = Option.String('--tool-name', { env: 'TOOL_NAME' });
   version = Option.String('--tool-version', { env: 'TOOL_VERSION' });
 
+  /**
+   * Creates a shell wrapper for a binary of the tool named by `TOOL_NAME`,
+   * used by the legacy shell installers.
+   */
   async execute(): Promise<number | void> {
     if (!this.tool) {
       logger.error(`Missing 'TOOL_NAME' environment variable`);

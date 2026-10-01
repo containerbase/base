@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
@@ -12,7 +11,7 @@ vi.mock('../install-tool/index.ts', () => mocks);
 
 describe('cli/command/uninstall-tool', () => {
   beforeEach(() => {
-    env.IGNORED_TOOLS = 'pnpm,php';
+    vi.stubEnv('IGNORED_TOOLS', 'pnpm,php');
   });
 
   test.each([
@@ -41,6 +40,23 @@ describe('cli/command/uninstall-tool', () => {
 
     mocks.uninstallTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(1);
+
+    // a non-zero exit code from the uninstall is reported as a failure too
+    mocks.uninstallTool.mockResolvedValueOnce(2);
+    expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(2);
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Uninstall tool node failed'),
+    );
+
+    // a rejection which is not an `Error` has no message to report
+    mocks.uninstallTool.mockRejectedValueOnce('boom');
+    expect(await cli.run([...(args ?? []), 'node', '16.13.0'])).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
+
+    // `--all` uninstalls every version, so none is named in the log
+    expect(await cli.run([...(args ?? []), 'node', '--all'])).toBe(0);
+    expect(logger.info).toHaveBeenCalledWith('Uninstalling tool node...');
 
     expect(await cli.run([...(args ?? []), 'php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');

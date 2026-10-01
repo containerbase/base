@@ -20,6 +20,7 @@ export class PrepareToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
+  /** Prepares the passed tools, or all tools for `all`. */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;

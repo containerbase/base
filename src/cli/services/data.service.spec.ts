@@ -1,13 +1,15 @@
-import { chmod, stat } from 'node:fs/promises';
+import fs, { chmod, readFile, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
 import type Nedb from '@seald-io/nedb';
 import { Container } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
-import { fileRights } from '../utils/index.ts';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { fileRights, logger } from '../utils/index.ts';
 import { DataService } from './data.service.ts';
+import { PathService } from './path.service.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
+/** The permission bits of the path. */
 async function fstat(path: string): Promise<number> {
   const s = await stat(path);
   return s.mode & fileRights;
@@ -33,9 +35,14 @@ describe('cli/services/data.service', () => {
 
   test('works', async () => {
     expect(await fstat(dataDir)).toBe(0o775);
+    const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
 
     const db = await svc.load('test');
     expect(await fstat(db.filename)).toBe(expectedMode);
+    expect(setOwner).toHaveBeenCalledExactlyOnceWith({
+      path: db.filename,
+      mode: 0o664,
+    });
 
     await db.ensureIndexAsync({ fieldName: 'test' });
     expect(await fstat(db.filename)).toBe(expectedMode);
@@ -50,5 +57,74 @@ describe('cli/services/data.service', () => {
       `ENOENT: no such file or directory, stat '${rootPath('/opt/containerbase/data/test.nedb')}'`,
     );
     expect(await fstat(dataDir)).toBe(0o775);
+  });
+
+  test('loads without writing when the data folder is not writable', async () => {
+    // an update is appended, so the file holds two lines for one document
+    const db = await svc.load<{ name: string; version: string }>('readonly');
+    await db.insertAsync({ name: 'node', version: '1.0.0' });
+    await db.updateAsync({ name: 'node' }, { $set: { version: '2.0.0' } });
+    const content = await readFile(db.filename, 'utf8');
+    expect(content.trim().split('\n')).toHaveLength(2);
+
+    const roChild = await testContainer();
+    const roSvc = await roChild.getAsync(DataService);
+    const roSetOwner = vi.spyOn(
+      await roChild.getAsync(PathService),
+      'setOwner',
+    );
+    const access = vi.spyOn(fs, 'access').mockRejectedValueOnce(
+      Object.assign(new Error('EROFS: read-only file system'), {
+        code: 'EROFS',
+      }),
+    );
+
+    const roDb = await roSvc.load<{ name: string; version: string }>(
+      'readonly',
+    );
+    expect(access).toHaveBeenCalledWith(dataDir, fs.constants.W_OK);
+    expect(await roDb.findAsync({})).toMatchObject([
+      { name: 'node', version: '2.0.0' },
+    ]);
+    expect(await readFile(roDb.filename, 'utf8')).toBe(content);
+    expect(roSetOwner).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      { file: roDb.filename },
+      'opening database read-only',
+    );
+
+    // the data folder is checked once for all databases
+    await roSvc.load('other');
+    expect(access.mock.calls.filter(([path]) => path === dataDir)).toHaveLength(
+      1,
+    );
+
+    // a writable load compacts the file again
+    const rwChild = await testContainer();
+    const rwDb = await (
+      await rwChild.getAsync(DataService)
+    ).load<{ name: string; version: string }>('readonly');
+    expect(await rwDb.findAsync({})).toMatchObject([
+      { name: 'node', version: '2.0.0' },
+    ]);
+    expect(
+      (await readFile(rwDb.filename, 'utf8')).trim().split('\n'),
+    ).toHaveLength(1);
+  });
+
+  test('loads writable when the data folder check fails otherwise', async () => {
+    const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
+    vi.spyOn(fs, 'access').mockRejectedValueOnce(
+      Object.assign(new Error('ENOENT: no such file or directory'), {
+        code: 'ENOENT',
+      }),
+    );
+
+    const db = await svc.load('missing');
+
+    expect(setOwner).toHaveBeenCalledExactlyOnceWith({
+      path: db.filename,
+      mode: 0o664,
+    });
   });
 });

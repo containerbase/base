@@ -1,6 +1,7 @@
 import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { EnvService } from '../services/index.ts';
 import { logger } from '../utils/index.ts';
 import { registerCommands } from './index.ts';
 import { scope } from '~test/http-mock.ts';
@@ -57,6 +58,22 @@ describe('cli/command/file-download', () => {
     expect(logger.debug).not.toHaveBeenCalledWith(
       'DownloadFileCommand is deprecated. Use FileDownloadCommand instead.',
     );
+
+    // a failure which is not an `Error` has no message to report
+    const boom: unknown = 'boom';
+    vi.spyOn(EnvService.prototype, 'replaceUrl').mockImplementationOnce(() => {
+      throw boom;
+    });
+    expect(
+      await cli.run([
+        'file',
+        'download',
+        'https://example.test/file.txt',
+        cachePath('file.txt'),
+      ]),
+    ).toBe(1);
+    expect(logger.debug).toHaveBeenCalledWith('boom');
+    expect(logger.error).not.toHaveBeenCalledWith('boom');
   });
 
   test('download-file', async () => {

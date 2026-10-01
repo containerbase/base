@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { MissingVersion } from '../utils/codes.ts';
@@ -15,7 +14,7 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 
 describe('cli/command/install-npm', () => {
   beforeEach(() => {
-    delete env.DEL_CLI_VERSION;
+    vi.stubEnv('DEL_CLI_VERSION', undefined);
   });
 
   test('install-npm', async () => {
@@ -27,7 +26,7 @@ describe('cli/command/install-npm', () => {
     mocks.resolveVersion.mockResolvedValueOnce('4.0.0');
     expect(await cli.run(['del-cli'])).toBe(0);
 
-    env.DEL_CLI_VERSION = '5.0.0';
+    vi.stubEnv('DEL_CLI_VERSION', '5.0.0');
     expect(await cli.run(['del-cli'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
@@ -57,7 +56,7 @@ describe('cli/command/install-npm', () => {
     mocks.resolveVersion.mockResolvedValueOnce('4.0.0');
     expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(0);
 
-    env.DEL_CLI_VERSION = '5.0.0';
+    vi.stubEnv('DEL_CLI_VERSION', '5.0.0');
     expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(

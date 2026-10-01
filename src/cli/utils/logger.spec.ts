@@ -1,4 +1,3 @@
-import { env } from 'node:process';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // TODO: can't do full coverage because of some vitest mock issues.
@@ -8,13 +7,13 @@ describe('cli/utils/logger', async () => {
 
   beforeEach(() => {
     vi.resetModules();
-    delete env.CONTAINERBASE_LOG_LEVEL;
-    delete env.CONTAINERBASE_LOG_FORMAT;
-    delete env.LOG_LEVEL;
-    delete env.LOG_FORMAT;
-    delete env.CONTAINERBASE_LOG_FILE;
-    delete env.CONTAINERBASE_LOG_FILE_LEVEL;
-    delete env.CONTAINERBASE_DEBUG;
+    vi.stubEnv('CONTAINERBASE_LOG_LEVEL', undefined);
+    vi.stubEnv('CONTAINERBASE_LOG_FORMAT', undefined);
+    vi.stubEnv('LOG_LEVEL', undefined);
+    vi.stubEnv('LOG_FORMAT', undefined);
+    vi.stubEnv('CONTAINERBASE_LOG_FILE', undefined);
+    vi.stubEnv('CONTAINERBASE_LOG_FILE_LEVEL', undefined);
+    vi.stubEnv('CONTAINERBASE_DEBUG', undefined);
 
     vi.doMock('pino', () => ({
       default: vi.fn(() => ({})),
@@ -24,8 +23,8 @@ describe('cli/utils/logger', async () => {
   });
 
   test('works', async () => {
-    env.CONTAINERBASE_DEBUG = 'true';
-    env.CONTAINERBASE_LOG_FILE = 'test.ndjson';
+    vi.stubEnv('CONTAINERBASE_DEBUG', 'true');
+    vi.stubEnv('CONTAINERBASE_LOG_FILE', 'test.ndjson');
     const { default: pino } = await import('pino');
     const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();
@@ -45,7 +44,7 @@ describe('cli/utils/logger', async () => {
   });
 
   test('works - stdout with json', async () => {
-    env.CONTAINERBASE_LOG_FORMAT = 'json';
+    vi.stubEnv('CONTAINERBASE_LOG_FORMAT', 'json');
     const { default: pino } = await import('pino');
     const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();
@@ -58,9 +57,9 @@ describe('cli/utils/logger', async () => {
   });
 
   test('works - debug stdout with json with file', async () => {
-    env.LOG_FORMAT = 'json';
-    env.CONTAINERBASE_LOG_LEVEL = 'warn';
-    env.CONTAINERBASE_LOG_FILE = 'test.ndjson';
+    vi.stubEnv('LOG_FORMAT', 'json');
+    vi.stubEnv('CONTAINERBASE_LOG_LEVEL', 'warn');
+    vi.stubEnv('CONTAINERBASE_LOG_FILE', 'test.ndjson');
     const { default: pino } = await import('pino');
     const mod = await import('./logger.ts');
     expect(mod.logger).toBeDefined();

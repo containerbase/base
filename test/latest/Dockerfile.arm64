@@ -54,7 +54,7 @@ RUN install-tool bun 1.4.2
 FROM base AS test-deno
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.6
+RUN install-tool deno 2.9.7
 
 #--------------------------------------
 # Image: apko
@@ -62,7 +62,7 @@ RUN install-tool deno 2.9.6
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.1
+RUN install-tool apko 1.4.6
 
 #--------------------------------------
 # Image: apm
@@ -70,7 +70,7 @@ RUN install-tool apko 1.4.1
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.30.0
+RUN install-tool apm 0.32.0
 
 #--------------------------------------
 # Image: devbox
@@ -78,7 +78,7 @@ RUN install-tool apm 0.30.0
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.1
+RUN install-tool devbox 0.18.4
 
 #--------------------------------------
 # Image: gh
@@ -86,7 +86,7 @@ RUN install-tool devbox 0.18.1
 FROM base AS test-gh
 
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.98.0
+RUN install-tool gh v2.102.0
 
 #--------------------------------------
 # Image: gleam
@@ -105,7 +105,7 @@ FROM base AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.37.1
+RUN install-tool buildx v0.37.2
 
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v5.5.1
@@ -137,7 +137,7 @@ RUN install-tool git-lfs v3.8.0
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.7.4
+RUN install-tool helmfile v1.8.1
 
 #--------------------------------------
 # Image: kustomize
@@ -145,7 +145,7 @@ RUN install-tool helmfile v1.7.4
 FROM base AS test-kustomize
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.1
+RUN install-tool kustomize 5.8.2
 
 #--------------------------------------
 # test: mono
@@ -166,7 +166,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.15.9
+RUN install-tool terraform 1.16.4
 
 #--------------------------------------
 # Image: tofu
@@ -174,7 +174,7 @@ RUN install-tool terraform 1.15.9
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.6
+RUN install-tool tofu 1.13.0
 
 #--------------------------------------
 # Image: vendir
@@ -193,13 +193,13 @@ FROM base AS test-others
 RUN install-tool buf v1.73.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.36.3
+RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.8.14
+RUN install-tool mise 2026.9.18
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.24.0
+RUN install-tool skopeo 1.24.1
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.13.3
@@ -208,10 +208,42 @@ RUN install-tool sops v3.13.3
 RUN install-tool wally 0.3.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
-RUN install-tool protoc 35.1
+RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.76.2
+RUN install-tool pixi v0.81.0
+
+#--------------------------------------
+# Image: v1 and v2 shell tools of custom images
+#--------------------------------------
+FROM base AS test-legacy
+
+COPY test/latest/legacy-tools/ /usr/local/containerbase/tools/
+
+RUN install-tool dummy-v1 1.2.3
+
+RUN prepare-tool dummy-v2
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/prepared ]
+
+RUN install-tool dummy-v2 1.2.3
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/initialized ]
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 1.2.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v1 +1\.2\.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +1\.2\.3$'; \
+  true
+
+USER 12021
+
+RUN install-tool dummy-v2 2.0.0
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 2.0.0$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +2\.0\.0 +1\.2\.3$'; \
+  true
 
 #--------------------------------------
 # Image: final
@@ -237,3 +269,4 @@ COPY --from=test-tofu /.dummy /.dummy
 COPY --from=test-vendir /.dummy /.dummy
 
 COPY --from=test-others /.dummy /.dummy
+COPY --from=test-legacy /.dummy /.dummy

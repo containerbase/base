@@ -31,6 +31,7 @@ import { ErlangInstallService } from '../tools/erlang/index.ts';
 import { FlutterInstallService } from '../tools/flutter.ts';
 import { FluxInstallService } from '../tools/flux.ts';
 import { GhInstallService } from '../tools/gh.ts';
+import { GitInstallService } from '../tools/git/index.ts';
 import { GitLfsInstallService } from '../tools/git/lfs.ts';
 import { GleamInstallService } from '../tools/gleam.ts';
 import { GolangInstallService } from '../tools/golang.ts';
@@ -38,7 +39,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { ResolverMap } from '../tools/index.ts';
+import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
 import {
   AndroidSdkCmdlineToolsInstallService,
   AndroidSdkCmdlineToolsVersionResolver,
@@ -114,7 +115,7 @@ import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import { type InstallToolType, logger } from '../utils/index.ts';
-import { isNotKnownV2Tool } from '../utils/v2-tool.ts';
+import type { BaseInstallService } from './base-install.service.ts';
 import {
   V1ToolInstallService,
   V2ToolInstallService,
@@ -126,6 +127,11 @@ import {
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
 
+/**
+ * Creates a container with all install services, including a generic one for
+ * every v2 shell tool. The generic ones are bound last, so a modern service
+ * wins over a custom v2 shell tool with the same name.
+ */
 async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
   const container = createContainer();
@@ -157,6 +163,7 @@ async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(FlutterInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(FluxInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GhInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(GitInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GitLfsInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GhcInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(GleamInstallService);
@@ -201,7 +208,7 @@ async function prepareInstallContainer(): Promise<Container> {
   // v2 tool services
   const pathSvc = await container.getAsync(PathService);
   const legacyTools = await pathSvc.findLegacyTools();
-  for (const tool of legacyTools.filter(isNotKnownV2Tool)) {
+  for (const tool of legacyTools) {
     @injectable()
     @injectFromHierarchy()
     class GenericInstallService extends V2ToolInstallService {
@@ -214,6 +221,7 @@ async function prepareInstallContainer(): Promise<Container> {
   return container;
 }
 
+/** Creates a container with all tool version resolvers. */
 function prepareResolveContainer(): Container {
   logger.trace('preparing resolve container');
   const container = createContainer();
@@ -244,6 +252,97 @@ function prepareResolveContainer(): Container {
   return container;
 }
 
+/**
+ * The parent tool a dynamically installed tool is installed for.
+ */
+const dynamicParents: Record<InstallToolType, string> = {
+  gem: 'ruby',
+  npm: 'node',
+  pip: 'python',
+};
+
+/**
+ * A tool `install-tool` accepts by name.
+ */
+export interface SupportedTool {
+  /**
+   * Tool name
+   */
+  name: string;
+  /**
+   * The installer used for this tool, only set for dynamically installed tools.
+   */
+  type?: InstallToolType;
+  /**
+   * The tool this tool depends on, eg. composer depends on php.
+   */
+  parent?: string;
+  /**
+   * Deprecated tools should not be used any more.
+   */
+  deprecated?: true;
+  /**
+   * The tool can only be installed as root, so only at image build time.
+   */
+  root?: true;
+}
+
+/**
+ * Adds the tools which are implicitly mapped to `install-<type>`, they have no
+ * install service of their own.
+ */
+function addDynamicTools(
+  tools: Map<string, SupportedTool>,
+  map: Record<string, InstallToolType>,
+  deprecated?: true,
+): void {
+  for (const [name, type] of Object.entries(map)) {
+    tools.set(name, {
+      name,
+      type,
+      parent: dynamicParents[type],
+      ...(deprecated && { deprecated }),
+    });
+  }
+}
+
+/**
+ * Lists all tools `install-tool` supports, sorted by name.
+ *
+ * Tools installed with an arbitrary package name via `install-gem`,
+ * `install-npm` or `install-pip` are not included, as that list is unbounded.
+ * The v1 shell tools are not included either, this repository ships none and
+ * they have no install service to describe. Tools which need root to install
+ * are included, marked with `root`.
+ */
+export async function listSupportedTools(): Promise<SupportedTool[]> {
+  const container = await prepareInstallContainer();
+  const tools = new Map<string, SupportedTool>();
+
+  // the implicit mappings first, a tool with an install service overrides them
+  addDynamicTools(tools, ResolverMap);
+  addDynamicTools(tools, DeprecatedTools, true);
+
+  const toolSvcs =
+    await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN);
+  for (const svc of toolSvcs) {
+    tools.set(svc.name, {
+      name: svc.name,
+      ...(svc.parent && { parent: svc.parent }),
+      ...(svc.needsRoot && { root: true }),
+    });
+  }
+
+  // explicit locale, the generated data must not depend on the system locale
+  return Array.from(tools.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { numeric: true }),
+  );
+}
+
+/**
+ * Installs a tool version. For a `gem`, `npm` or `pip` type, a generic
+ * install service is registered for the package first.
+ */
 export async function installTool(
   tool: string,
   version: string,
@@ -261,10 +360,12 @@ export async function installTool(
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /** Tests the package, ignoring failures of the version check. */
           override async test(version: string): Promise<void> {
             try {
               // some npm packages may not have a `--version` flag
@@ -283,10 +384,12 @@ export async function installTool(
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /** Tests the package, ignoring failures of the version check. */
           override async test(version: string): Promise<void> {
             try {
               // some npm packages may not have a `--version` flag
@@ -305,16 +408,21 @@ export async function installTool(
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
 
+          /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
           }
 
+          /**
+           * Tests the package, ignoring failures of the version check unless
+           * it is a known pip tool.
+           */
           override async test(version: string): Promise<void> {
             try {
               // some pip packages may not have a `--version` flag
               await super.test(version);
             } catch (err) {
-              if (ResolverMap[tool] === 'pip') {
+              if (getToolType(ResolverMap, tool) === 'pip') {
                 // those tools are known and should work
                 throw err;
               }
@@ -332,6 +440,10 @@ export async function installTool(
   return svc.install(tool, version, dryRun);
 }
 
+/**
+ * Creates a shell wrapper for a tool binary, through the ipc server of the
+ * running install when there is one, else directly.
+ */
 export async function linkTool(
   tool: string,
   options: ShellWrapperConfig,
@@ -355,6 +467,10 @@ export async function linkTool(
   }
 }
 
+/**
+ * Resolves the version to install, eg. `latest` to a concrete version. For a
+ * `gem`, `npm` or `pip` type, a generic resolver is registered first.
+ */
 export async function resolveVersion(
   tool: string,
   version: string | undefined,
@@ -405,6 +521,10 @@ interface UninstallToolConfig {
   type?: InstallToolType | undefined;
 }
 
+/**
+ * Uninstalls a tool version, or all versions without one. Generic install
+ * services are registered for every installed `gem`, `npm` or `pip` package.
+ */
 export async function uninstallTool({
   tool,
   version,

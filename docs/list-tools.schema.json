@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "tool name"
+          },
+          "version": {
+            "description": "the currently linked version, null if the tool isn't linked",
+            "type": ["string", "null"]
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "installed version"
+                },
+                "parent": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "tool name"
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "tool version"
+                    }
+                  },
+                  "required": ["name", "version"],
+                  "additionalProperties": false,
+                  "description": "the tool this version was installed for, eg. the node version a npm package was installed with"
+                }
+              },
+              "required": ["version"],
+              "additionalProperties": false
+            },
+            "description": "all installed versions, sorted alphabetically with numbers in numeric order, so 9.0.0 comes before 10.0.0"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["gem", "npm", "pip"],
+            "description": "the installer type, only set for dynamically installed tools"
+          }
+        },
+        "required": ["name", "version", "versions"],
+        "additionalProperties": false
+      },
+      "description": "all installed tools, sorted alphabetically by name with numbers in numeric order, so tool9 comes before tool10"
+    }
+  },
+  "required": ["tools"],
+  "additionalProperties": false
+}

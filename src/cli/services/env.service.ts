@@ -21,6 +21,12 @@ export class EnvService {
   private replacements: Replacements | undefined;
   private ignoredTools: Set<string> | undefined;
 
+  /**
+   * Reads the effective user id and maps the node architecture to `amd64` or
+   * `arm64`.
+   *
+   * @throws on an unsupported architecture
+   */
   constructor() {
     this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
     switch (arch()) {
@@ -36,19 +42,23 @@ export class EnvService {
     }
   }
 
+  /** The apt proxy from `APT_HTTP_PROXY`. */
   get aptProxy(): string | null {
     return env.APT_HTTP_PROXY ?? null;
   }
 
+  /** The download cache folder from `CONTAINERBASE_CACHE_DIR`. */
   get cacheDir(): string | null {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
   }
 
+  /** The home folder of the current user, from `HOME`. */
   get home(): string {
     // TODO: validate
     return env.HOME!;
   }
 
+  /** Whether the process runs as root. */
   get isRoot(): boolean {
     return this.uid === 0;
   }
@@ -68,34 +78,45 @@ export class EnvService {
     return join(this.rootDir, 'root');
   }
 
+  /** The temp folder of the container. */
   get tmpDir(): string {
     return join(this.rootDir, 'tmp');
   }
 
+  /** The home folder of the containerbase user, from `USER_HOME`. */
   get userHome(): string {
     return env.USER_HOME ?? join(this.rootDir, 'home', this.userName);
   }
 
+  /** The name of the containerbase user, from `USER_NAME`. */
   get userName(): string {
     return env.USER_NAME ?? 'ubuntu';
   }
 
+  /** The id of the containerbase user, from `USER_ID`. */
   get userId(): number {
     return parseInt(env.USER_ID ?? '12021', 10);
   }
 
+  /** The mode for created folders and binaries, group writable unless root. */
   get umask(): number {
     return this.isRoot ? 0o755 : 0o775;
   }
 
+  /** The containerbase version, `dev` for local builds. */
   get version(): string {
     return globalThis.CONTAINERBASE_VERSION ?? 'dev';
   }
 
+  /** Whether tool tests are skipped, set by `SKIP_VERSION`. */
   get skipTests(): boolean {
     return !!env.SKIP_VERSION;
   }
 
+  /**
+   * The url replacements from the `URL_REPLACE_<n>_FROM` and
+   * `URL_REPLACE_<n>_TO` environment variables, in numerical order.
+   */
   get urlReplacements(): [string, string][] {
     if (this.replacements) {
       return this.replacements;
@@ -120,6 +141,7 @@ export class EnvService {
     return (this.replacements = replacements);
   }
 
+  /** Whether the tool is listed in `IGNORED_TOOLS`, ignoring case. */
   public isToolIgnored(tool: string): boolean {
     this.ignoredTools ??= new Set(
       (env.IGNORED_TOOLS ?? '').toUpperCase().split(','),

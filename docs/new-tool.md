@@ -62,6 +62,7 @@ Files to change:
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to **both** `matchDepNames` lists (the "Don't separate minor and patch updates in tests" rule and the "Automerge test selected minor updates in tests" rule).
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
 
 Note the arm64 test files use one image stage per tool, terminating in a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage - add both halves.
 
@@ -81,7 +82,6 @@ Create `src/cli/tools/<tool>.ts` (or a subdirectory if the tool belongs to an ex
 For instance, [`src/cli/tools/buf.ts`](../src/cli/tools/buf.ts) is a good template:
 
 ```ts
-import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
@@ -91,7 +91,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class BufInstallService extends BaseInstallService {
   readonly name = 'buf';
 
-  // `this.envSvc.arch` is 'amd64' | 'arm64'; map it to whatever upstream names its assets
+  /** The architecture name used by the buf release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -101,20 +101,20 @@ export class BufInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Downloads the buf archive from GitHub, verified against the release's
+   * `sha256.txt`, and extracts only the `buf` binary into the versioned tool
+   * path.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/bufbuild/buf/releases/download/v${version}/`;
     const filename = `buf-Linux-${this.ghArch}.tar.gz`;
 
-    // download the checksum file and pick out the line for our asset
-    const checksumFile = await this.http.download({
-      url: `${baseUrl}sha256.txt`,
-    });
-    const expectedChecksum = (await fs.readFile(checksumFile, 'utf-8'))
-      .split('\n')
-      .find((l) => l.includes(filename))
-      ?.split(' ')[0];
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}sha256.txt`,
+      filename,
+    );
 
-    // `http.download` applies url replacements and CDN resolution for us
     const file = await this.http.download({
       url: `${baseUrl}${filename}`,
       checksumType: 'sha256',
@@ -132,11 +132,13 @@ export class BufInstallService extends BaseInstallService {
     });
   }
 
+  /** Links the `buf` binary into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
+  /** Checks that `buf --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
@@ -145,6 +147,7 @@ export class BufInstallService extends BaseInstallService {
 
 Things worth knowing:
 
+- Follow the [tool installer best practices](./tool-installer-best-practices.md) for checksums, folders and shared helpers.
 - Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 - `checksumType` accepts `sha1`, `sha224`, `sha256`, `sha384` and `sha512`.
   If upstream ships a checksum per artifact, see [`src/cli/tools/apm.ts`](../src/cli/tools/apm.ts).
@@ -219,6 +222,7 @@ Resolvers are bound with `container.bind(TOOL_VERSION_RESOLVER).to(...)` in the 
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to both `matchDepNames` lists.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
 
 > [!NOTE]
 > You'll notice that we lean on integration tests with Docker instead of unit tests.
@@ -248,9 +252,10 @@ Expect more discussion on the Issue for tools in this category.
 #### Legacy shell installers
 
 > [!NOTE]
-> Do not add a `.sh` file into [`src/usr/local/containerbase/tools/v2`](../src/usr/local/containerbase/tools/v2/).
+> Do not add a `.sh` file into `src/usr/local/containerbase/tools/v2`.
 >
 > These are the legacy installer formats that we are in the process of migrating away from.
+> When converting an existing shell tool to a TypeScript install service, see the [tool installer best practices](./tool-installer-best-practices.md) for what to keep and what not to change.
 
 ### Kind 3: a tool that must be built from source
 
