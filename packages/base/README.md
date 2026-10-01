@@ -6,6 +6,14 @@ The data is generated from the Containerbase sources and released with the same 
 This allows a consumer of this library to determine which tools can be used with a given version of Containerbase (via `/usr/local/containerbase/version`): if the image has the same major version as this package and a version greater than or equal to the package version, every tool listed here can be installed in that image.
 A new major version may remove tools, so compare against the package of the image's major version.
 
+The package version to compare with is exported too:
+
+```ts
+import pkg from '@containerbase/base/package.json' with { type: 'json' };
+
+pkg.version; // eg. '14.2.0'
+```
+
 ## Usage
 
 ```ts
