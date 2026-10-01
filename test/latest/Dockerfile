@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: apm, bazelisk, buf, bun, deno, devbox, gh, helmfile, kustomize, skopeo, tofu, vendir
+# test: apm, bazelisk, buf, bun, deno, devbox, gh, helmfile, kustomize, nub, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
@@ -224,6 +224,9 @@ RUN install-tool buf v1.73.0
 
 # renovate: datasource=npm
 RUN install-tool bun 1.4.2
+
+# renovate: datasource=github-releases packageName=nubjs/nub
+RUN install-tool nub 0.9.3
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.7
