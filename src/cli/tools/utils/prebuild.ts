@@ -25,7 +25,7 @@ export abstract class PrebuildInstallService extends BaseInstallService {
 
   /**
    * Downloads the distro specific containerbase prebuild, verified against
-   * its `.sha512` when there is one, and extracts it into the tool path.
+   * its `.sha512`, and extracts it into the tool path.
    * Newer ubuntu releases use the jammy prebuild.
    */
   override async install(version: string): Promise<void> {
@@ -37,24 +37,14 @@ export abstract class PrebuildInstallService extends BaseInstallService {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }
-    const filename = `${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    const hasChecksum = await this.http.exists(checksumFileUrl);
-    let file: string;
-
-    if (hasChecksum) {
-      // no checksums for older prebuilds
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-      });
-    }
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    // every jammy prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 
