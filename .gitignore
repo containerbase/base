@@ -4,6 +4,7 @@ node_modules/
 /bin/
 /tmp/
 /dist/
+/packages/*/dist/
 /coverage
 /html/
 

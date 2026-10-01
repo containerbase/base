@@ -236,9 +236,16 @@ export class PathService {
     return null;
   }
 
-  /** Returns the names of the v2 shell tools. */
+  /**
+   * Returns the names of the v2 shell tools. The repository ships none, so
+   * only images, and custom images adding their own, have the folder.
+   */
   async findLegacyTools(): Promise<string[]> {
-    const tools = await fs.readdir(join(this.usrPath, 'tools/v2'));
+    const dir = join(this.usrPath, 'tools/v2');
+    if (!(await pathExists(dir, 'dir'))) {
+      return [];
+    }
+    const tools = await fs.readdir(dir);
     return tools
       .filter((t) => t.endsWith('.sh'))
       .map((t) => t.substring(0, t.length - 3));

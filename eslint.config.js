@@ -14,6 +14,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist/',
+      'packages/*/dist/',
       'tmp/',
       'bin/',
       'coverage/',
@@ -228,6 +229,11 @@ export default tseslint.config(
       'max-classes-per-file': 0,
       'class-methods-use-this': 0,
       'no-console': 0,
+      // type tests only assert with `expectTypeOf`
+      'vitest/expect-expect': [
+        'error',
+        { assertFunctionNames: ['expect', 'expectTypeOf'] },
+      ],
     },
   },
   {
