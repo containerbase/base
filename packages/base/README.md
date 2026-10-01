@@ -3,7 +3,7 @@
 Metadata about the tools that [Containerbase](https://github.com/containerbase/base) supports.
 
 The data is generated from the Containerbase sources and released with the same version as Containerbase itself.
-This allows a consumer of this library to determine which tools can be used with a given version of Containerbase (via `/usr/local/containerbase/version`): if the image has the same major version and a greater or equal version than the package, every tool listed here can be installed in that image.
+This allows a consumer of this library to determine which tools can be used with a given version of Containerbase (via `/usr/local/containerbase/version`): if the image has the same major version as this package and a version greater than or equal to the package version, every tool listed here can be installed in that image.
 A new major version may remove tools, so compare against the package of the image's major version.
 
 ## Usage

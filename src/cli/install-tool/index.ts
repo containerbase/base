@@ -286,7 +286,7 @@ export interface SupportedTool {
 }
 
 /**
- * Adds the tools which are implicit mapped to `install-<type>`, they have no
+ * Adds the tools which are implicitly mapped to `install-<type>`, they have no
  * install service of their own.
  */
 function addDynamicTools(
