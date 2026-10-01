@@ -23,6 +23,11 @@ globalThis.rootDir = rootDir;
 
 const { listSupportedTools } = await import('../src/cli/install-tool/index.ts');
 
+/**
+ * Writes a generated file of the base package, formatted with prettier.
+ * @param file - path relative to `packages/base/`
+ * @param content - the unformatted content
+ */
 async function write(file: string, content: string): Promise<void> {
   const target = fileURLToPath(new URL(file, pkgDir));
   const options = await resolveConfig(target);
