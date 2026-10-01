@@ -41,8 +41,17 @@ FROM base AS test-nix
 RUN install-tool nix 2.35.2
 
 #--------------------------------------
+# Image: devenv
+#--------------------------------------
+FROM base AS test-devenv
+
+# renovate: datasource=github-releases packageName=containerbase/devenv-prebuild versioning=docker
+RUN install-tool devenv 2.3.1
+
+#--------------------------------------
 # Image: final
 #--------------------------------------
 FROM base
 
 COPY --from=test-nix /.dummy /.dummy
+COPY --from=test-devenv /.dummy /.dummy

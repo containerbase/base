@@ -92,9 +92,33 @@ RUN set -ex; \
   ls -la $USER_HOME; \
   true
 #--------------------------------------
+# test: devenv
+#--------------------------------------
+FROM base AS testc
+
+COPY --chown=12021:0 test/nix/devenv devenv
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=containerbase/devenv-prebuild versioning=docker
+RUN install-tool devenv 2.3.1
+
+RUN set -ex; \
+  devenv version
+
+WORKDIR /test/devenv
+
+RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
+  set -ex; \
+  [ -f /run/secrets/GITHUB_TOKEN ] && export NIX_CONFIG="access-tokens = github.com=$(cat /run/secrets/GITHUB_TOKEN)"; \
+  devenv update; \
+  test -f devenv.lock
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy

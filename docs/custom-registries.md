@@ -146,6 +146,22 @@ https://github.com/jetify-com/devbox/releases/download/0.12.0/devbox_0.12.0_linu
 https://github.com/jetify-com/devbox/releases/download/0.12.0/checksums.txt
 ```
 
+## `devenv`
+
+Devenv releases are downloaded from:
+
+- `https://github.com/containerbase/devenv-prebuild/releases`
+
+Samples:
+
+```txt
+https://github.com/containerbase/devenv-prebuild/releases/download/2.3.1/devenv-2.3.1-x86_64.tar.xz.sha512
+https://github.com/containerbase/devenv-prebuild/releases/download/2.3.1/devenv-2.3.1-x86_64.tar.xz
+https://github.com/containerbase/devenv-prebuild/releases/download/2.3.1/devenv-2.3.1-aarch64.tar.xz.sha512
+https://github.com/containerbase/devenv-prebuild/releases/download/2.3.1/devenv-2.3.1-aarch64.tar.xz
+https://github.com/containerbase/devenv-prebuild/releases/latest/download/version
+```
+
 ## `docker`
 
 Docker releases are downloaded from:
