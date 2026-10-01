@@ -95,6 +95,16 @@ describe('cli/services/path.service', () => {
     ]);
   });
 
+  test('findLegacyTools', async () => {
+    // no v2 folder, eg. when running from the repository
+    expect(await pathSvc.findLegacyTools()).toEqual([]);
+
+    await ensurePaths('usr/local/containerbase/tools/v2');
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/leg.sh'), '');
+    await writeFile(rootPath('usr/local/containerbase/tools/v2/readme'), '');
+    expect(await pathSvc.findLegacyTools()).toEqual(['leg']);
+  });
+
   test('isLegacyTool', async () => {
     await ensurePaths([
       'usr/local/containerbase/tools',
