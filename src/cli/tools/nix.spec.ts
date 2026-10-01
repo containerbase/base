@@ -72,7 +72,7 @@ describe('cli/tools/nix', () => {
     await expect(svc.install('2.35.0')).rejects.toThrow('download failed');
   });
 
-  test('link exports the nix dirs below the cache', async () => {
+  test('link exports the nix dirs below the cache unless already set', async () => {
     const { svc, pathSvc } = await toolContext(NixInstallService);
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
     const cache = join(pathSvc.cachePath, 'nix');
@@ -81,7 +81,7 @@ describe('cli/tools/nix', () => {
 
     expect(spy).toHaveBeenCalledExactlyOnceWith('nix', {
       srcDir: join(pathSvc.versionedToolPath('nix', '2.35.2'), 'bin'),
-      exports: `NIX_STORE_DIR=${cache}/store NIX_DATA_DIR=${cache}/data NIX_LOG_DIR=${cache}/log NIX_STATE_DIR=${cache}/state NIX_CONF_DIR=${cache}/conf`,
+      exports: `NIX_STORE_DIR=\${NIX_STORE_DIR:-${cache}/store} NIX_DATA_DIR=\${NIX_DATA_DIR:-${cache}/data} NIX_LOG_DIR=\${NIX_LOG_DIR:-${cache}/log} NIX_STATE_DIR=\${NIX_STATE_DIR:-${cache}/state} NIX_CONF_DIR=\${NIX_CONF_DIR:-${cache}/conf}`,
     });
   });
 
