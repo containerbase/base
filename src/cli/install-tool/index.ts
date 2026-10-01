@@ -128,7 +128,8 @@ import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
 
 /**
  * Creates a container with all install services, including a generic one for
- * every v2 shell tool without its own service.
+ * every v2 shell tool. The generic ones are bound last, so a modern service
+ * wins over a custom v2 shell tool with the same name.
  */
 async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');

@@ -9,6 +9,7 @@ import { NpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { PipVersionResolver } from '../tools/python/pip.ts';
 import { PipBaseInstallService } from '../tools/python/utils.ts';
+import { RubyInstallService } from '../tools/ruby/index.ts';
 import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
@@ -22,6 +23,7 @@ import {
   resolveVersion,
   uninstallTool,
 } from './index.ts';
+import { V2ToolInstallService } from './install-legacy-tool.service.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -118,6 +120,29 @@ describe('cli/install-tool/index', () => {
       expect(
         await installTool(`dummy-${type}`, '1.0.0', false, type),
       ).toBeUndefined();
+    });
+
+    test('prefers a modern service over a v2 shell tool with the same name', async () => {
+      const script = rootPath('usr/local/containerbase/tools/v2/ruby.sh');
+      await fs.writeFile(script, '');
+      const proto = RubyInstallService.prototype;
+      vi.spyOn(proto, 'needsPrepare').mockReturnValue(false);
+      vi.spyOn(proto, 'needsInitialize').mockReturnValue(false);
+      vi.spyOn(proto, 'validate').mockResolvedValue(true);
+      vi.spyOn(proto, 'link').mockResolvedValue();
+      vi.spyOn(proto, 'postInstall').mockResolvedValue();
+      vi.spyOn(proto, 'test').mockResolvedValue();
+      const ruby = vi.spyOn(proto, 'install').mockResolvedValue();
+      const v2 = vi.spyOn(V2ToolInstallService.prototype, 'install');
+
+      try {
+        expect(await installTool('ruby', '3.4.11')).toBeUndefined();
+      } finally {
+        await fs.rm(script);
+      }
+
+      expect(ruby).toHaveBeenCalledExactlyOnceWith('3.4.11');
+      expect(v2).not.toHaveBeenCalled();
     });
 
     test('rethrows a failing test for a known pip tool', async () => {

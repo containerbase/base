@@ -46,6 +46,8 @@ describe('cli/prepare-tool/index', () => {
       .spyOn(RubyPrepareService.prototype, 'prepare')
       .mockResolvedValue();
     const v2 = vi.spyOn(V2ToolPrepareService.prototype, 'prepare');
+    // keep ruby unprepared, so later tests don't initialize it
+    vi.spyOn(PathService.prototype, 'setPrepared').mockResolvedValue();
 
     try {
       expect(await prepareTools(['ruby'])).toBeUndefined();
