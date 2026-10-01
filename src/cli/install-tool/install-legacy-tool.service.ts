@@ -1,11 +1,8 @@
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
 import { V2ToolService } from '../services/index.ts';
 import { logger } from '../utils/index.ts';
 import { BaseInstallService } from './base-install.service.ts';
-
-const defaultPipRegistry = 'https://pypi.org/simple/';
 
 @injectable()
 export class V1ToolInstallService {
@@ -31,17 +28,6 @@ export abstract class V2ToolInstallService extends BaseInstallService {
   /** Runs the `install` step of the v2 shell tool. */
   override async install(version: string): Promise<void> {
     logger.debug(`Installing v2 tool ${this.name} v${version} ...`);
-    const env: NodeJS.ProcessEnv = {};
-
-    // TODO: drop when python is converted
-    const pipIndex = this.envSvc.replaceUrl(
-      defaultPipRegistry,
-      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_PIP),
-    );
-    if (pipIndex !== defaultPipRegistry) {
-      env.PIP_INDEX_URL = pipIndex;
-    }
-
     await execa(
       'bash',
       [
@@ -52,7 +38,6 @@ export abstract class V2ToolInstallService extends BaseInstallService {
       ],
       {
         stdio: ['inherit', 'inherit', 1],
-        env,
       },
     );
   }

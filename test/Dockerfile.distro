@@ -69,7 +69,7 @@ RUN install-tool dotnet 10.0.401
 RUN install-tool flutter 3.47.5
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.5
+RUN install-tool flux v2.9.6
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
@@ -90,10 +90,10 @@ RUN install-tool helmfile v1.8.1
 RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.1
+RUN install-tool kustomize 5.8.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.17
+RUN install-tool mise 2026.9.18
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
@@ -128,7 +128,7 @@ RUN set -ex; \
 RUN install-tool terraform 1.16.4
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.6
+RUN install-tool tofu 1.13.0
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -151,7 +151,7 @@ FROM build AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.37.1
+RUN install-tool buildx v0.37.2
 
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v5.5.1

@@ -53,8 +53,6 @@ describe('cli/tools/php/index', () => {
       const { svc, pathSvc } = await toolContext(PhpInstallService);
       const filename = `${version}/php-${version}-jammy-${ghArch}.tar.xz`;
       scope(baseUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(200)
         .get(`${prebuild}/${filename}.sha512`)
         .reply(200, `${checksum(tarball, 'sha512')}\n`)
         .get(`${prebuild}/${filename}`)
@@ -69,21 +67,6 @@ describe('cli/tools/php/index', () => {
       });
     });
 
-    test('install: without a checksum', async () => {
-      const { svc } = await toolContext(PhpInstallService);
-      const filename = '8.2.0/php-8.2.0-jammy-x86_64.tar.xz';
-      scope(baseUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
-        .get(`${prebuild}/${filename}`)
-        .reply(200, tarball);
-      const extract = vi.spyOn(CompressionService.prototype, 'extract');
-
-      await expect(svc.install('8.2.0')).resolves.toBeUndefined();
-
-      expect(extract).toHaveBeenCalledOnce();
-    });
-
     test('install: uses the jammy prebuild on noble', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
@@ -93,8 +76,8 @@ describe('cli/tools/php/index', () => {
       const { svc } = await toolContext(PhpInstallService);
       const filename = '8.3.15/php-8.3.15-jammy-x86_64.tar.xz';
       scope(baseUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
+        .get(`${prebuild}/${filename}.sha512`)
+        .reply(200, `${checksum(tarball, 'sha512')}\n`)
         .get(`${prebuild}/${filename}`)
         .reply(200, tarball);
 

@@ -73,8 +73,8 @@ export class PhpInstallService extends BaseInstallService {
 
   /**
    * Downloads the distro specific containerbase php prebuild, verified
-   * against its `.sha512` when there is one, and extracts it into the tool
-   * path. Noble uses the jammy prebuild.
+   * against its `.sha512`, and extracts it into the tool path. Noble uses the
+   * jammy prebuild.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
@@ -85,24 +85,15 @@ export class PhpInstallService extends BaseInstallService {
       logger.debug(`Using jammy prebuild for ${name} on ${code}`);
       code = 'jammy';
     }
-    const filename = `${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    const hasChecksum = await this.http.exists(checksumFileUrl);
-    let file: string;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
 
-    if (hasChecksum) {
-      // no distro specific prebuilds
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-      });
-    }
+    // every jammy and resolute prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    const file = await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 

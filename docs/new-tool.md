@@ -252,7 +252,7 @@ Expect more discussion on the Issue for tools in this category.
 #### Legacy shell installers
 
 > [!NOTE]
-> Do not add a `.sh` file into [`src/usr/local/containerbase/tools/v2`](../src/usr/local/containerbase/tools/v2/).
+> Do not add a `.sh` file into `src/usr/local/containerbase/tools/v2`.
 >
 > These are the legacy installer formats that we are in the process of migrating away from.
 > When converting an existing shell tool to a TypeScript install service, see the [tool installer best practices](./tool-installer-best-practices.md) for what to keep and what not to change.

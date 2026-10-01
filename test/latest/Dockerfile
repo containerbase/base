@@ -185,7 +185,7 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.5
+RUN install-tool flux v2.9.6
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
@@ -229,7 +229,7 @@ RUN install-tool bun 1.4.2
 RUN install-tool deno 2.9.7
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.5
+RUN install-tool apko 1.4.6
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.32.0
@@ -240,7 +240,7 @@ RUN install-tool devbox 0.18.4
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.26.0
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.101.0
+RUN install-tool gh v2.102.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.18.1
@@ -249,7 +249,7 @@ RUN install-tool gleam 1.18.1
 RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.17
+RUN install-tool mise 2026.9.18
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -258,7 +258,7 @@ RUN install-tool skopeo 1.24.1
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.12.6
+RUN install-tool tofu 1.13.0
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2
@@ -270,7 +270,7 @@ ARG VENDIR_VERSION=v0.46.2
 ARG HELMFILE_VERSION=v1.8.1
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.8.1
+ARG KUSTOMIZE_VERSION=5.8.2
 
 RUN install-tool vendir "${VENDIR_VERSION}"
 
@@ -352,7 +352,7 @@ USER 12021
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.37.1
+RUN install-tool buildx v0.37.2
 
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v5.5.1
@@ -387,6 +387,38 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: v1 and v2 shell tools of custom images
+#--------------------------------------
+FROM base AS test-legacy
+
+COPY test/latest/legacy-tools/ /usr/local/containerbase/tools/
+
+RUN install-tool dummy-v1 1.2.3
+
+RUN prepare-tool dummy-v2
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/prepared ]
+
+RUN install-tool dummy-v2 1.2.3
+RUN set -ex; [ -f /opt/containerbase/tools/dummy-v2/initialized ]
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 1.2.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v1 +1\.2\.3$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +1\.2\.3$'; \
+  true
+
+USER 12021
+
+RUN install-tool dummy-v2 2.0.0
+
+RUN set -ex; \
+  dummy-v1 --version | grep '^dummy-v1 1.2.3$'; \
+  dummy-v2 --version | grep '^dummy-v2 2.0.0$'; \
+  containerbase-cli list tools | grep -E '^dummy-v2 +2\.0\.0 +1\.2\.3$'; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -399,3 +431,4 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-legacy /.dummy /.dummy
