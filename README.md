@@ -50,17 +50,8 @@ docker buildx bake  --set *.cache-from=
 
 ### Test images
 
-To run one of the tests use the following command, it will run the Java tests from [`test/java`](./test/java/).
-
-```sh
-TAG=java docker buildx bake test
-```
-
-For other test images see the [`test`](./test/) folder.
-
-#### `pnpm test:docker`
-
-Instead of calling `docker buildx bake` directly, you can use the `test:docker` script, which wraps the bake calls.
+Run the test images with the `test:docker` script, which wraps the `docker buildx bake` calls.
+The tool tests live in the [`test`](./test/) folder, the distro tests in [`test/Dockerfile.distro`](./test/Dockerfile.distro) and [`test/Dockerfile.base`](./test/Dockerfile.base).
 
 ```sh
 # run all tests from the `test` folder
@@ -71,57 +62,40 @@ pnpm test:docker -b -t test-x86_64 java
 
 # run multiple tests with debug logging
 pnpm test:docker -D java node
+
+# rebuild the CLI and run the distro tests from `test/Dockerfile.distro` on jammy, noble and resolute
+pnpm test:docker -b -t test-distro
+
+# run the base test from `test/Dockerfile.base` on noble only
+pnpm test:docker -t test-base noble
 ```
 
 Any positional argument is the name of a folder in [`test`](./test/) which contains a `Dockerfile`.
 If no test is given, all tests from the [`test`](./test/) folder are run.
 Unknown test names are only reported as an error when they are passed explicitly.
 
+With the `test-distro` or `test-base` target, the positional arguments are distro names instead: `jammy`, `noble` or `resolute`.
+If no distro is given, all three are run, like in CI.
+Ubuntu `jammy` is deprecated and will be removed in the next major release.
+
 The following options are supported:
 
-| Option                      | Description                                                                                                                |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `-b`, `--build`             | Run `pnpm build` to compile the CLI sources before building the images.                                                    |
-| `-t`, `--target <name>`     | The bake target or group to build, defaults to `default`. Use e.g. `test`, `test-x86_64`, `test-aarch64` or `test-distro`. |
-| `-d`, `--dry-run`           | Reserved for a dry run, currently without effect.                                                                          |
-| `-D`, `--debug`             | Set `CONTAINERBASE_DEBUG=1` and use plain buildkit progress output.                                                        |
-| `-l`, `--log-level <level>` | Set `CONTAINERBASE_LOG_LEVEL` and use plain buildkit progress output.                                                      |
-| `-p`, `--plain`             | Use plain buildkit progress output.                                                                                        |
-| `--network <mode>`          | Docker network mode used for the build, allowed values are `default`, `host` and `none`.                                   |
-| `--allow-host-network`      | Pass `--allow=network.host` to `docker buildx bake`, required to use `--network host`.                                     |
-| `--host-gateway <value>`    | Value used for the `host.docker.internal` host alias, defaults to `host-gateway`.                                          |
+| Option                      | Description                                                                                                                             |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `-b`, `--build`             | Run `pnpm build` to compile the CLI sources before building the images.                                                                 |
+| `-t`, `--target <name>`     | The bake target or group to build, defaults to `default`. Use e.g. `test`, `test-x86_64`, `test-aarch64`, `test-distro` or `test-base`. |
+| `-d`, `--dry-run`           | Reserved for a dry run, currently without effect.                                                                                       |
+| `-D`, `--debug`             | Set `CONTAINERBASE_DEBUG=1` and use plain buildkit progress output.                                                                     |
+| `-l`, `--log-level <level>` | Set `CONTAINERBASE_LOG_LEVEL` and use plain buildkit progress output.                                                                   |
+| `-p`, `--plain`             | Use plain buildkit progress output.                                                                                                     |
+| `--network <mode>`          | Docker network mode used for the build, allowed values are `default`, `host` and `none`.                                                |
+| `--allow-host-network`      | Pass `--allow=network.host` to `docker buildx bake`, required to use `--network host`.                                                  |
+| `--host-gateway <value>`    | Value used for the `host.docker.internal` host alias, defaults to `host-gateway`.                                                       |
 
 To build against a service running on your host or when having DNS issues from a VPN, use the host network:
 
 ```sh
 pnpm test:docker --network host --allow-host-network -t test-x86_64 java
-```
-
-### Distro test images
-
-#### Jammy
-
-Ubuntu `jammy` is deprecated and will be removed in the next major release.
-You can still run the tests with the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
-
-```sh
-TAG=jammy docker buildx bake test-distro
-```
-
-#### Noble
-
-To run the `noble` tests use the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
-
-```sh
-TAG=noble docker buildx bake test-distro
-```
-
-#### Resolute
-
-To run the `resolute` tests use the following command, it will run the test from [`test/Dockerfile.distro`](./test/Dockerfile.distro).
-
-```sh
-TAG=resolute docker buildx bake test-distro
 ```
 
 ## Adding a new tool

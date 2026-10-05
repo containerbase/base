@@ -5,6 +5,12 @@ import shell from 'shelljs';
 
 shell.config.fatal = true;
 
+/** Bake targets which test `test/Dockerfile.distro` or `test/Dockerfile.base` on a distro. */
+const distroTargets = ['test-distro', 'test-base'];
+
+/** The distros tested in CI, which are the stages in the distro Dockerfiles. */
+const distros = ['jammy', 'noble', 'resolute'];
+
 class TestCommand extends Command {
   tests = Option.Rest();
   dryRun = Option.Boolean('-d,--dry-run');
@@ -36,7 +42,21 @@ class TestCommand extends Command {
       shell.exec('pnpm build');
     }
 
-    if (!tests.length) {
+    const distroTest = distroTargets.includes(this.target);
+
+    if (distroTest) {
+      const unknown = tests.filter((d) => !distros.includes(d));
+      if (unknown.length) {
+        shell.echo(
+          `unknown distro '${unknown.join("', '")}', use ${distros.join(', ')}`,
+        );
+        return 1;
+      }
+      if (!tests.length) {
+        tests = distros;
+        shell.echo('Running all distros');
+      }
+    } else if (!tests.length) {
       tests = shell.ls('test');
       explicit = false;
       shell.echo('Running all tests');
@@ -79,6 +99,7 @@ class TestCommand extends Command {
 
     for (const d of tests) {
       if (
+        !distroTest &&
         !(await fs.stat(`test/${d}/Dockerfile`).catch(() => null))?.isFile()
       ) {
         if (explicit) {
