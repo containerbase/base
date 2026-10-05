@@ -1,7 +1,8 @@
 import { tools } from './data.ts';
 
-export { tools } from './data.ts';
 export type { InstallToolType, ToolMetadata } from './types.ts';
+
+export { tools };
 
 /**
  * A tool name `install-tool` accepts.
