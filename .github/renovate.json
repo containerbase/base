@@ -91,6 +91,7 @@
         "nix",
         "node",
         "npm",
+        "nub",
         "pdm",
         "pipenv",
         "pixi",
@@ -146,6 +147,7 @@
         "nix",
         "node",
         "npm",
+        "nub",
         "pdm",
         "pipenv",
         "pixi",
@@ -172,6 +174,11 @@
       "matchDepNames": ["git"],
       "semanticCommitType": "fix",
       "minimumReleaseAge": "5 days"
+    },
+    {
+      "description": "Wait for cabal binaries, which are uploaded after the GitHub release",
+      "matchPackageNames": ["haskell/cabal"],
+      "minimumReleaseAge": "2 days"
     },
     {
       "description": "Corepack can't run pnpm 11+, keep the corepack test on pnpm 10",

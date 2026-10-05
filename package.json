@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "2.1.1",
-    "@containerbase/istanbul-reports-html": "2.0.19",
+    "@containerbase/istanbul-reports-html": "2.0.20",
     "@containerbase/semantic-release-pnpm": "1.4.3",
     "@eslint/js": "10.0.1",
     "@semantic-release/exec": "7.1.0",
@@ -74,7 +74,7 @@
     "@types/eslint-config-prettier": "6.11.3",
     "@types/global-agent": "3.0.0",
     "@types/ini": "4.1.1",
-    "@types/node": "24.19.0",
+    "@types/node": "24.19.1",
     "@types/node-ipc": "9.2.3",
     "@types/semver": "7.8.0",
     "@types/shelljs": "0.10.0",
@@ -101,21 +101,21 @@
     "npm-run-all2": "9.0.3",
     "prettier": "3.9.9",
     "prettier-plugin-packagejson": "3.0.2",
-    "rolldown": "1.2.11",
+    "rolldown": "1.2.12",
     "semantic-release": "25.0.9",
     "shelljs": "0.10.0",
     "tsx": "4.23.15",
     "type-fest": "5.10.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
-    "vite": "8.3.1",
+    "vite": "8.3.2",
     "vitest": "4.1.11"
   },
   "peerDependencies": {
     "markdownlint": "*",
     "thread-stream": "*"
   },
-  "packageManager": "pnpm@11.28.1",
+  "packageManager": "pnpm@11.28.3",
   "engines": {
     "node": ">=24.10.0",
     "pnpm": "^11.0.0"

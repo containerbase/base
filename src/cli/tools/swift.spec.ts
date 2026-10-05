@@ -142,6 +142,20 @@ describe('cli/tools/swift', () => {
         platform: 'ubuntu22.04',
         releaseVersion: '5.7',
       },
+      {
+        hostArch: 'x64',
+        versionId: '22.04',
+        version: '6.3.0',
+        platform: 'ubuntu22.04',
+        releaseVersion: '6.3',
+      },
+      {
+        hostArch: 'x64',
+        versionId: '22.04',
+        version: '6.4.0',
+        platform: 'ubuntu22.04',
+        releaseVersion: '6.4.0',
+      },
     ] as const)(
       'install $version on $platform ($versionId)',
       async ({ hostArch, versionId, version, platform, releaseVersion }) => {

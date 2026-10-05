@@ -172,7 +172,7 @@ RUN install-tool elixir 1.20.4
 FROM build AS test-haskell
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.18.1.0
+RUN install-tool cabal 3.18.2.0
 # renovate: datasource=docker packageName=haskell
 RUN install-tool ghc 9.14.1
 
@@ -186,7 +186,7 @@ RUN install-tool java 25.0.4+101.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 9.8.0
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.9.16
+RUN install-tool maven 3.10.0
 
 #--------------------------------------
 # test: test-mono
