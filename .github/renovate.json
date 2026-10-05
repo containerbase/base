@@ -176,6 +176,11 @@
       "minimumReleaseAge": "5 days"
     },
     {
+      "description": "Wait for cabal binaries, which are uploaded after the GitHub release",
+      "matchPackageNames": ["haskell/cabal"],
+      "minimumReleaseAge": "2 days"
+    },
+    {
       "description": "Trigger fix release for ubuntu digest updates",
       "matchDepNames": ["ubuntu", "ghcr.io/containerbase/ubuntu"],
       "matchUpdateTypes": ["digest"],
