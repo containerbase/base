@@ -70,7 +70,7 @@ RUN install-tool deno 2.9.7
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.7
+RUN install-tool apko 1.4.8
 
 #--------------------------------------
 # Image: apm
