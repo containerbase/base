@@ -475,7 +475,7 @@ RUN install-tool corepack 0.36.0
 
 # corepack can't run pnpm 11+, which no longer ships `bin/pnpm.cjs`
 # renovate: datasource=npm depName=pnpm-corepack packageName=pnpm
-ARG PNPM_VERSION=10.34.5
+ARG PNPM_VERSION=10.34.6
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
