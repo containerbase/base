@@ -246,7 +246,7 @@ ENV GH_DASH_EXTENSION_VERSION=v4.26.0
 RUN install-tool gh v2.102.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.18.1
+RUN install-tool gleam 1.19.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.37.1
