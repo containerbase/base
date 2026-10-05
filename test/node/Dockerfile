@@ -109,14 +109,17 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.8.2
 
 RUN set -ex; \
   pnpm --version;
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN set -ex; cd a; pnpm i
+# pnpm 11+ fails on unreviewed build scripts, skip them like older versions did
+RUN set -ex; cd a; \
+  printf 'allowBuilds:\n  re2: false\n' > pnpm-workspace.yaml; \
+  pnpm i
 
 #--------------------------------------
 # test: node 20
@@ -465,12 +468,13 @@ RUN install-tool corepack 0.36.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.8.2
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.36.0
 
-# renovate: datasource=npm depName=pnpm
+# corepack can't run pnpm 11+, which no longer ships `bin/pnpm.cjs`
+# renovate: datasource=npm depName=pnpm-corepack packageName=pnpm
 ARG PNPM_VERSION=10.34.5
 
 RUN set -ex; cd a; \
