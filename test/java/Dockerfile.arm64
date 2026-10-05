@@ -54,7 +54,7 @@ RUN install-tool gradle 9.8.0
 FROM test-java AS test-maven
 
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.9.16
+RUN install-tool maven 3.10.0
 
 #--------------------------------------
 # Image: final
