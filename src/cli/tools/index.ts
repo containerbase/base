@@ -33,6 +33,7 @@ export const NoPrepareTools = [
   'maven',
   'mise',
   'nix',
+  'nub',
   'nuget',
   'npm',
   'paket',

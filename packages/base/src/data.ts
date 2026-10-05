@@ -55,6 +55,7 @@ export const tools = {
   nix: {},
   node: {},
   npm: { type: 'npm', parent: 'node' },
+  nub: {},
   nuget: { parent: 'mono' },
   paket: { parent: 'dotnet' },
   pdm: { type: 'pip', parent: 'python' },
