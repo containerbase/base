@@ -17,6 +17,7 @@ export const NoPrepareTools = [
   'corepack',
   'deno',
   'devbox',
+  'devenv',
   'docker-compose',
   'flux',
   'gh',
