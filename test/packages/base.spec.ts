@@ -1,5 +1,6 @@
-import { describe, expectTypeOf, test } from 'vitest';
+import { describe, expect, expectTypeOf, test } from 'vitest';
 import type { z } from 'zod';
+import { toolNames } from '../../packages/base/src/index.ts';
 import type {
   InstallToolType,
   ToolMetadata,
@@ -19,5 +20,12 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof ToolMetadata>
     >().toEqualTypeOf<types.ToolMetadata>();
+  });
+
+  test('tools are sorted alphabetically', () => {
+    // same order as `listSupportedTools`, which generates the data
+    expect(toolNames).toEqual(
+      toolNames.toSorted((a, b) => a.localeCompare(b, 'en', { numeric: true })),
+    );
   });
 });
