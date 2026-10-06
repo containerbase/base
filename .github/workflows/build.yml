@@ -181,6 +181,8 @@ jobs:
 
   distro:
     runs-on: ubuntu-24.04
+    # docker tests are skipped for draft pull requests
+    if: github.event.pull_request.draft != true
     needs:
       - bats
       - lint
@@ -220,6 +222,7 @@ jobs:
   # test old distros on arm64
   base-arm64:
     runs-on: ubuntu-24.04-arm
+    if: github.event.pull_request.draft != true
     needs:
       - bats
       - lint
@@ -259,6 +262,7 @@ jobs:
   lang:
     runs-on: ${{ matrix.arch.os }}
     name: ${{ matrix.lang }} (${{ matrix.arch.name }})
+    if: github.event.pull_request.draft != true
     needs:
       - setup
       - base

@@ -2,8 +2,10 @@ name: build-push
 
 on:
   push:
-    branches-ignore:
-      - gh-readonly-queue/**
+    # other branches are built by their pull request
+    branches:
+      - main
+      - maint/**
   merge_group:
 
 concurrency:
