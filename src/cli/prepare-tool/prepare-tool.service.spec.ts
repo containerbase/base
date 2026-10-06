@@ -127,7 +127,7 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       const spy = vi.spyOn(DummyPrepareService.prototype, 'prepare');
 
       await expect(svc.prepare(['dummy'])).rejects.toThrow(
-        `Can't write to ${pathSvc.varPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+        `EROFS: can't write to ${pathSvc.varPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
       );
 
       expect(spy).not.toHaveBeenCalled();

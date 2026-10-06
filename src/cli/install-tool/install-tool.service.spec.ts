@@ -269,7 +269,7 @@ describe('cli/install-tool/install-tool.service', () => {
       const spy = vi.spyOn(BunInstallService.prototype, 'uninstall');
 
       await expect(install.uninstall('bun', '1.0.0')).rejects.toThrow(
-        `Can't write to ${pathSvc.binDir}, the current user has no write permission. Run as root or as the user owning the folder.`,
+        `EACCES: can't write to ${pathSvc.binDir}, the current user has no write permission. Run as root or as the user owning the folder.`,
       );
 
       expect(spy).not.toHaveBeenCalled();

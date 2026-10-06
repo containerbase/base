@@ -14,6 +14,24 @@ export interface FileOwnerConfig {
   mode?: number;
 }
 
+/**
+ * The error for a folder that can't be written. The message starts with the
+ * error code, eg. `EROFS`, which is also kept as `code`, with the original
+ * error as `cause`.
+ */
+function writeError(
+  err: NodeJS.ErrnoException,
+  path: string,
+  reason: string,
+): NodeJS.ErrnoException {
+  return Object.assign(
+    new Error(`${err.code}: can't write to ${path}, ${reason}`, {
+      cause: err,
+    }),
+    { code: err.code },
+  );
+}
+
 @injectable(bindingScopeValues.Singleton)
 export class PathService {
   @inject(EnvService)
@@ -231,12 +249,16 @@ export class PathService {
       );
       switch (err?.code) {
         case 'EROFS':
-          throw new Error(
-            `Can't write to ${path}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+          throw writeError(
+            err,
+            path,
+            'the file system is read-only. Install tools at image build time or mount the containerbase folders writable.',
           );
         case 'EACCES':
-          throw new Error(
-            `Can't write to ${path}, the current user has no write permission. Run as root or as the user owning the folder.`,
+          throw writeError(
+            err,
+            path,
+            'the current user has no write permission. Run as root or as the user owning the folder.',
           );
       }
     }

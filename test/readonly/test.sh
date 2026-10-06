@@ -51,7 +51,7 @@ for user in root 12021; do
     exit 1
   fi
   echo "${output}"
-  grep 'the file system is read-only' > /dev/null <<< "${output}"
+  grep "EROFS: can't write to" > /dev/null <<< "${output}"
 done
 
 echo "--- read-only tests passed"

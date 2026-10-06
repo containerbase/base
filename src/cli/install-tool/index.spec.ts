@@ -244,7 +244,7 @@ describe('cli/install-tool/index', () => {
       const spy = vi.spyOn(fs, 'writeFile');
 
       await expect(linkTool('node', { srcDir: '/bin/bash' })).rejects.toThrow(
-        `Can't write to ${pathSvc.binDir}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+        `EROFS: can't write to ${pathSvc.binDir}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
       );
 
       expect(spy).not.toHaveBeenCalled();

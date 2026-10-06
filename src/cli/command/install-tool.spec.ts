@@ -69,7 +69,7 @@ describe('cli/command/install-tool', () => {
         ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
         : Promise.resolve(),
     );
-    const message = `Can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`;
+    const message = `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`;
 
     expect(await cli.run(['install', 'tool', 'flux', '0.27.2'])).toBe(1);
     // the npm, pip and gem installers share the install command

@@ -106,7 +106,11 @@ describe('cli/services/path.service', () => {
       failAccess(pathSvc.toolsPath, 'EROFS');
 
       await expect(pathSvc.ensureWritable()).rejects.toThrow(
-        `Can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+        expect.objectContaining({
+          message: `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+          code: 'EROFS',
+          cause: expect.objectContaining({ code: 'EROFS' }),
+        }),
       );
     });
 
@@ -114,7 +118,11 @@ describe('cli/services/path.service', () => {
       failAccess(pathSvc.varPath, 'EACCES');
 
       await expect(pathSvc.ensureWritable(pathSvc.varPath)).rejects.toThrow(
-        `Can't write to ${pathSvc.varPath}, the current user has no write permission. Run as root or as the user owning the folder.`,
+        expect.objectContaining({
+          message: `EACCES: can't write to ${pathSvc.varPath}, the current user has no write permission. Run as root or as the user owning the folder.`,
+          code: 'EACCES',
+          cause: expect.objectContaining({ code: 'EACCES' }),
+        }),
       );
     });
   });
