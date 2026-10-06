@@ -112,6 +112,37 @@ describe('cli/services/data.service', () => {
     ).toHaveLength(1);
   });
 
+  test('loads read-only on request when the data folder is writable', async () => {
+    const db = await svc.load<{ name: string }>('forced');
+    await db.insertAsync({ name: 'node' });
+    const content = await readFile(db.filename, 'utf8');
+    // the file holds no index yet, nedb would append it on index creation
+    expect(content.trim().split('\n')).toHaveLength(1);
+
+    const roChild = await testContainer();
+    const roSvc = await roChild.getAsync(DataService);
+    const roSetOwner = vi.spyOn(
+      await roChild.getAsync(PathService),
+      'setOwner',
+    );
+    const access = vi.spyOn(fs, 'access');
+    roSvc.readOnly();
+
+    const roDb = await roSvc.load<{ name: string }>('forced');
+    await roDb.ensureIndexAsync({ fieldName: 'name', unique: true });
+    expect(await roDb.findAsync({ name: 'node' })).toMatchObject([
+      { name: 'node' },
+    ]);
+    expect(await readFile(roDb.filename, 'utf8')).toBe(content);
+    expect(roSetOwner).not.toHaveBeenCalled();
+    // the data folder isn't checked
+    expect(access).not.toHaveBeenCalledWith(dataDir, fs.constants.W_OK);
+    expect(logger.debug).toHaveBeenCalledWith(
+      { file: roDb.filename },
+      'opening database read-only',
+    );
+  });
+
   test('loads writable when the data folder check fails otherwise', async () => {
     const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
     vi.spyOn(fs, 'access').mockRejectedValueOnce(

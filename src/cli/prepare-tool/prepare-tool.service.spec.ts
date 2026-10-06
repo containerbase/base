@@ -118,6 +118,22 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       );
     });
 
+    test('fails when the folders are not writable', async () => {
+      vi.spyOn(fs, 'access').mockImplementation((path) =>
+        path === pathSvc.varPath
+          ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
+          : Promise.resolve(),
+      );
+      const spy = vi.spyOn(DummyPrepareService.prototype, 'prepare');
+
+      await expect(svc.prepare(['dummy'])).rejects.toThrow(
+        `Can't write to ${pathSvc.varPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+      );
+
+      expect(spy).not.toHaveBeenCalled();
+      expect(execaMock).not.toHaveBeenCalled();
+    });
+
     test('fails for an unknown tool', async () => {
       expect(await svc.prepare(['not-exist'])).toBe(1);
 

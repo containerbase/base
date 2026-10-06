@@ -208,6 +208,40 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
   }
 
+  /**
+   * Checks that the containerbase data, tools, bin and versions folders and
+   * the extra `paths` are writable, so a command fails before resolving or
+   * downloading anything. Missing folders are skipped, `ensureBasePaths`
+   * creates them.
+   *
+   * @throws when a folder is on a read-only file system or the current user
+   * can't write it
+   */
+  async ensureWritable(...paths: string[]): Promise<void> {
+    for (const path of [
+      this.dataPath,
+      this.toolsPath,
+      this.binDir,
+      this.versionPath,
+      ...paths,
+    ]) {
+      const err = await fs.access(path, fs.constants.W_OK).then(
+        () => null,
+        (err: NodeJS.ErrnoException) => err,
+      );
+      switch (err?.code) {
+        case 'EROFS':
+          throw new Error(
+            `Can't write to ${path}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+          );
+        case 'EACCES':
+          throw new Error(
+            `Can't write to ${path}, the current user has no write permission. Run as root or as the user owning the folder.`,
+          );
+      }
+    }
+  }
+
   /** Returns the tool path, creating it when missing. */
   async ensureToolPath(tool: string): Promise<string> {
     return (await this.findToolPath(tool)) ?? (await this.createToolPath(tool));

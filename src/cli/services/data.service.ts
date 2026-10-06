@@ -23,12 +23,14 @@ class DatabaseWrapper extends Datastore {
   declare public readonly filename: string;
 
   /**
-   * nedb's persistence, typed with the internal method which rewrites the
-   * whole database file. nedb calls it at the end of every load.
-   * Typed as a property, as it is swapped out for a read-only load.
+   * nedb's persistence, typed with the internal methods which rewrite the
+   * whole database file, called at the end of every load, and which append to
+   * it, called on every change and index creation.
+   * Typed as properties, as they are swapped out for a read-only database.
    */
   declare public persistence: Nedb.Persistence & {
     persistCachedDatabaseAsync: () => Promise<void>;
+    persistNewStateAsync: (docs: unknown[]) => Promise<void>;
   };
 
   /**
@@ -74,6 +76,29 @@ class DatabaseWrapper extends Datastore {
     }
   }
 
+  /**
+   * Creates the index. For a read-only database the index is only created in
+   * memory, nedb would append it to the file when the file has none yet.
+   */
+  override async ensureIndexAsync(
+    options: Nedb.EnsureIndexOptions,
+  ): Promise<void> {
+    if (!this._readOnly) {
+      await super.ensureIndexAsync(options);
+      return;
+    }
+
+    const { persistence } = this;
+    const persist = persistence.persistNewStateAsync;
+    // skip the append, nedb has no option to create an index without it
+    persistence.persistNewStateAsync = () => Promise.resolve();
+    try {
+      await super.ensureIndexAsync(options);
+    } finally {
+      persistence.persistNewStateAsync = persist;
+    }
+  }
+
   /** Compacts the database file and fixes its ownership. */
   override async compactDatafileAsync(): Promise<void> {
     await super.compactDatafileAsync();
@@ -97,14 +122,24 @@ export class DataService {
   @inject(PathService)
   private readonly pathSvc!: PathService;
 
+  /**
+   * Opens the databases read-only, also when the data folder is writable, for
+   * commands which only read. Call it before the first database is loaded:
+   * databases which are already loaded stay as they are, only the ones loaded
+   * afterwards are opened read-only.
+   */
+  readOnly(): void {
+    this._readOnly = Promise.resolve(true);
+  }
+
   /** Returns the named database, loading it on first use. */
   load<T>(name: string): Promise<Database<T>> {
     return (this._stores[name] ??= this._load(name));
   }
 
   /**
-   * Opens and loads the named database, read-only when the data folder is
-   * not writable.
+   * Opens and loads the named database, read-only when requested with
+   * `readOnly()` or when the data folder is not writable.
    */
   private async _load<T>(name: string): Promise<Database<T>> {
     const db = new DatabaseWrapper(

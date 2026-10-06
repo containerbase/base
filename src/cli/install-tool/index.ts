@@ -443,12 +443,15 @@ export async function installTool(
 /**
  * Creates a shell wrapper for a tool binary, through the ipc server of the
  * running install when there is one, else directly.
+ *
+ * @throws when the containerbase folders are not writable
  */
 export async function linkTool(
   tool: string,
   options: ShellWrapperConfig,
 ): Promise<number | void> {
   const container = createContainer();
+  await (await container.getAsync(PathService)).ensureWritable();
 
   const svc = await container.getAsync(IpcClient);
   if (!(await svc.hasServer())) {

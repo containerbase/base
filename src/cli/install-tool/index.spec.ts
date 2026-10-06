@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import {
   IpcServer,
+  PathService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -231,6 +232,22 @@ describe('cli/install-tool/index', () => {
       expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
         false,
       );
+    });
+
+    test('fails when the folders are not writable', async () => {
+      const pathSvc = await createContainer().getAsync(PathService);
+      vi.spyOn(fs, 'access').mockImplementation((path) =>
+        path === pathSvc.binDir
+          ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
+          : Promise.resolve(),
+      );
+      const spy = vi.spyOn(fs, 'writeFile');
+
+      await expect(linkTool('node', { srcDir: '/bin/bash' })).rejects.toThrow(
+        `Can't write to ${pathSvc.binDir}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+      );
+
+      expect(spy).not.toHaveBeenCalled();
     });
 
     test('with ipc server', async () => {

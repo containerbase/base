@@ -82,6 +82,43 @@ describe('cli/services/path.service', () => {
     );
   });
 
+  describe('ensureWritable', () => {
+    /** Lets `fs.access` fail with the error code for the path only. */
+    function failAccess(path: string, code: string): void {
+      vi.spyOn(fs, 'access').mockImplementation((p) =>
+        p === path
+          ? Promise.reject(Object.assign(new Error(code), { code }))
+          : Promise.resolve(),
+      );
+    }
+
+    test('passes for writable and missing folders', async () => {
+      // nothing below `/opt/containerbase` exists yet
+      await expect(pathSvc.ensureWritable()).resolves.toBeUndefined();
+
+      await pathSvc.ensureBasePaths();
+      await expect(
+        pathSvc.ensureWritable(pathSvc.varPath),
+      ).resolves.toBeUndefined();
+    });
+
+    test('throws on a read-only file system', async () => {
+      failAccess(pathSvc.toolsPath, 'EROFS');
+
+      await expect(pathSvc.ensureWritable()).rejects.toThrow(
+        `Can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+      );
+    });
+
+    test('throws when the current user may not write', async () => {
+      failAccess(pathSvc.varPath, 'EACCES');
+
+      await expect(pathSvc.ensureWritable(pathSvc.varPath)).rejects.toThrow(
+        `Can't write to ${pathSvc.varPath}, the current user has no write permission. Run as root or as the user owning the folder.`,
+      );
+    });
+  });
+
   test('findPreparedTools', async () => {
     expect(await pathSvc.findPreparedTools()).toEqual([]);
 

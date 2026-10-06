@@ -22,6 +22,7 @@ export class PrepareToolService {
    * prepared. Must run as root.
    *
    * @returns an exit code when the tools could not be prepared
+   * @throws when the containerbase folders are not writable
    */
   async prepare(tools: string[], dryRun = false): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
@@ -37,6 +38,7 @@ export class PrepareToolService {
       logger.fatal('prepare tools must be run as root');
       return 1;
     }
+    await this.pathSvc.ensureWritable(this.pathSvc.varPath);
     try {
       if (tools.length === 1 && tools[0] === 'all') {
         for (const tool of this.toolSvcs) {
