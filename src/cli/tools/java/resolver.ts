@@ -16,7 +16,9 @@ export function toVersionRange(version: string): string | undefined {
   }
 
   const parts = version.split('.');
-  const next = [...parts.slice(0, -1), Number(parts.at(-1)) + 1].join('.');
+  // the regex guarantees at least one part
+  const last = parseInt(parts.pop()!, 10);
+  const next = [...parts, last + 1].join('.');
   return `[${version},${next})`;
 }
 
