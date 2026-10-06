@@ -144,6 +144,11 @@ RUN install-tool docker 20.10.7
 `java`, `java-jre` and `java-jdk` accept a major (`install-tool java 21`), major.minor or major.minor.patch version and install the newest matching GA release.
 Without a version, or with `latest`, the newest LTS is installed.
 
+### Node versions
+
+`node` accepts a major (`install-tool node 22`) or major.minor version and installs the newest matching release.
+Without a version, or with `latest`, the newest LTS is installed.
+
 ### Custom registries
 
 You can replace the default registries used to download the tools.
