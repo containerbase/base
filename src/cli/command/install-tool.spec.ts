@@ -1,5 +1,7 @@
+import fs from 'node:fs/promises';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { PathService, createContainer } from '../services/index.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
 import { registerCommands } from './index.ts';
@@ -56,6 +58,51 @@ describe('cli/command/install-tool', () => {
 
     expect(await cli.run(['php'])).toBe(0);
     expect(logger.info).toHaveBeenCalledWith({ tool: 'php' }, 'tool ignored');
+  });
+
+  test('fails before resolving when the folders are not writable', async () => {
+    const cli = new Cli({ binaryName: 'containerbase-cli' });
+    registerCommands(cli, null);
+    const pathSvc = await createContainer().getAsync(PathService);
+    vi.spyOn(fs, 'access').mockImplementation((path) =>
+      path === pathSvc.toolsPath
+        ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
+        : Promise.resolve(),
+    );
+    const message = `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`;
+
+    expect(await cli.run(['install', 'tool', 'flux', '0.27.2'])).toBe(1);
+    // the npm, pip and gem installers share the install command
+    expect(await cli.run(['install', 'npm', 'del-cli', '5.0.0'])).toBe(1);
+
+    expect(logger.error).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(message);
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Install tool flux failed'),
+    );
+    expect(logger.fatal).toHaveBeenCalledWith(
+      expect.stringContaining('Install npm del-cli failed'),
+    );
+    expect(mocks.resolveVersion).not.toHaveBeenCalled();
+    expect(mocks.installTool).not.toHaveBeenCalled();
+  });
+
+  test('skips the writable check for a dry run', async () => {
+    const cli = new Cli({ binaryName: 'containerbase-cli' });
+    registerCommands(cli, null);
+    const access = vi
+      .spyOn(fs, 'access')
+      .mockRejectedValue(Object.assign(new Error('EROFS'), { code: 'EROFS' }));
+
+    expect(await cli.run(['install', 'tool', 'flux', '0.27.2', '-d'])).toBe(0);
+
+    expect(access).not.toHaveBeenCalled();
+    expect(mocks.installTool).toHaveBeenCalledExactlyOnceWith(
+      'flux',
+      '0.27.2',
+      true,
+      undefined,
+    );
   });
 
   test('containerbase-cli install tool', async () => {

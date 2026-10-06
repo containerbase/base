@@ -96,8 +96,16 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
 
   describe('prepare', () => {
     test('dry run', async () => {
+      // the folders aren't checked for a dry run
+      const access = vi
+        .spyOn(fs, 'access')
+        .mockRejectedValue(
+          Object.assign(new Error('EROFS'), { code: 'EROFS' }),
+        );
+
       expect(await svc.prepare(['dummy'], true)).toBeUndefined();
 
+      expect(access).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         'Dry run: preparing tools dummy ...',
       );
@@ -116,6 +124,22 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
         'prepare tools must be run as root',
       );
+    });
+
+    test('fails when the folders are not writable', async () => {
+      vi.spyOn(fs, 'access').mockImplementation((path) =>
+        path === pathSvc.varPath
+          ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
+          : Promise.resolve(),
+      );
+      const spy = vi.spyOn(DummyPrepareService.prototype, 'prepare');
+
+      await expect(svc.prepare(['dummy'])).rejects.toThrow(
+        `EROFS: can't write to ${pathSvc.varPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+      );
+
+      expect(spy).not.toHaveBeenCalled();
+      expect(execaMock).not.toHaveBeenCalled();
     });
 
     test('fails for an unknown tool', async () => {

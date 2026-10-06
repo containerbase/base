@@ -19,6 +19,7 @@ export { type InstalledTool, InstalledTools };
 export {
   AptService,
   CompressionService,
+  DataService,
   EnvService,
   HttpService,
   PathService,

@@ -19,29 +19,49 @@ export type Database<T = unknown> = Pick<
   get filename(): string;
 };
 
+/**
+ * Whether the file does not exist. Other errors, like missing permissions,
+ * are thrown, so an unreadable database is not mistaken for an empty one.
+ */
+async function isMissing(file: string): Promise<boolean> {
+  try {
+    await fs.stat(file);
+    return false;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      return true;
+    }
+    throw err;
+  }
+}
+
 class DatabaseWrapper extends Datastore {
   declare public readonly filename: string;
 
   /**
-   * nedb's persistence, typed with the internal method which rewrites the
-   * whole database file. nedb calls it at the end of every load.
-   * Typed as a property, as it is swapped out for a read-only load.
+   * nedb's persistence, typed with the internal methods which rewrite the
+   * whole database file, called at the end of every load, and which append to
+   * it, called on every change and index creation.
+   * Typed as properties, as they are swapped out for a read-only database.
    */
   declare public persistence: Nedb.Persistence & {
     persistCachedDatabaseAsync: () => Promise<void>;
+    persistNewStateAsync: (docs: unknown[]) => Promise<void>;
   };
 
   /**
-   * Opens the `<name>.nedb` database in the containerbase data folder.
-   * A read-only database is loaded without writing to its file.
+   * Opens the database file. A read-only database is loaded without writing
+   * to its file, an `inMemoryOnly` one never touches the disk.
    */
   constructor(
     private readonly _pathSvc: PathService,
-    name: string,
+    filename: string,
     private readonly _readOnly: boolean,
+    inMemoryOnly: boolean,
   ) {
     super({
-      filename: join(_pathSvc.dataPath, `${name}.nedb`),
+      filename,
+      inMemoryOnly,
       timestampData: true,
       modes: {
         dirMode: 0o775,
@@ -74,6 +94,29 @@ class DatabaseWrapper extends Datastore {
     }
   }
 
+  /**
+   * Creates the index. For a read-only database the index is only created in
+   * memory, nedb would append it to the file when the file has none yet.
+   */
+  override async ensureIndexAsync(
+    options: Nedb.EnsureIndexOptions,
+  ): Promise<void> {
+    if (!this._readOnly) {
+      await super.ensureIndexAsync(options);
+      return;
+    }
+
+    const { persistence } = this;
+    const persist = persistence.persistNewStateAsync;
+    // skip the append, nedb has no option to create an index without it
+    persistence.persistNewStateAsync = () => Promise.resolve();
+    try {
+      await super.ensureIndexAsync(options);
+    } finally {
+      persistence.persistNewStateAsync = persist;
+    }
+  }
+
   /** Compacts the database file and fixes its ownership. */
   override async compactDatafileAsync(): Promise<void> {
     await super.compactDatafileAsync();
@@ -97,20 +140,35 @@ export class DataService {
   @inject(PathService)
   private readonly pathSvc!: PathService;
 
+  /**
+   * Opens the databases read-only, also when the data folder is writable, for
+   * commands which only read. Call it before the first database is loaded:
+   * databases which are already loaded stay as they are, only the ones loaded
+   * afterwards are opened read-only.
+   */
+  readOnly(): void {
+    this._readOnly = Promise.resolve(true);
+  }
+
   /** Returns the named database, loading it on first use. */
   load<T>(name: string): Promise<Database<T>> {
     return (this._stores[name] ??= this._load(name));
   }
 
   /**
-   * Opens and loads the named database, read-only when the data folder is
-   * not writable.
+   * Opens and loads the `<name>.nedb` database in the containerbase data
+   * folder, read-only when requested with `readOnly()` or when the data folder
+   * is not writable. A read-only database without a file is kept in memory
+   * only, so neither the data folder nor the file are created.
    */
   private async _load<T>(name: string): Promise<Database<T>> {
+    const readOnly = await this._isReadOnly();
+    const filename = join(this.pathSvc.dataPath, `${name}.nedb`);
     const db = new DatabaseWrapper(
       this.pathSvc,
-      name,
-      await this._isReadOnly(),
+      filename,
+      readOnly,
+      readOnly && (await isMissing(filename)),
     );
 
     await db.loadDatabaseAsync();

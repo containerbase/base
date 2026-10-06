@@ -14,6 +14,35 @@ export interface FileOwnerConfig {
   mode?: number;
 }
 
+/**
+ * The error for a folder that can't be written. The message starts with the
+ * error code, eg. `EROFS`, which is also kept as `code`, with the original
+ * error as `cause`.
+ */
+function writeError(
+  err: NodeJS.ErrnoException,
+  path: string,
+  reason: string,
+): NodeJS.ErrnoException {
+  return Object.assign(
+    new Error(`${err.code}: can't write to ${path}, ${reason}`, {
+      cause: err,
+    }),
+    { code: err.code },
+  );
+}
+
+/**
+ * The error of a write check of the folder, `null` when files can be created
+ * in it, which needs write and search permission.
+ */
+function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
+  return fs.access(path, fs.constants.W_OK | fs.constants.X_OK).then(
+    () => null,
+    (err: NodeJS.ErrnoException) => err,
+  );
+}
+
 @injectable(bindingScopeValues.Singleton)
 export class PathService {
   @inject(EnvService)
@@ -206,6 +235,57 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.cache'));
     await this.createDir(join(this.tmpDir, 'cache', '.config'));
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
+  }
+
+  /**
+   * Checks that the containerbase data, tools, bin and versions folders and
+   * the extra `paths` are writable, so a command fails before resolving or
+   * downloading anything. For a missing folder, which `ensureBasePaths`
+   * creates, its nearest existing parent is checked.
+   *
+   * @throws when a folder is on a read-only file system or the current user
+   * can't write it
+   */
+  async ensureWritable(...paths: string[]): Promise<void> {
+    await this.ensureWritableDirs(
+      this.dataPath,
+      this.toolsPath,
+      this.binDir,
+      this.versionPath,
+      ...paths,
+    );
+  }
+
+  /**
+   * Checks that exactly the given folders are writable. For a missing folder
+   * its nearest existing parent is checked, where it would be created.
+   *
+   * @throws when a folder is on a read-only file system or the current user
+   * can't write it
+   */
+  async ensureWritableDirs(...paths: string[]): Promise<void> {
+    for (const path of paths) {
+      let dir = path;
+      let err = await accessError(dir);
+      while (err?.code === 'ENOENT' && dirname(dir) !== dir) {
+        dir = dirname(dir);
+        err = await accessError(dir);
+      }
+      switch (err?.code) {
+        case 'EROFS':
+          throw writeError(
+            err,
+            path,
+            'the file system is read-only. Install tools at image build time or mount the containerbase folders writable.',
+          );
+        case 'EACCES':
+          throw writeError(
+            err,
+            path,
+            'the current user has no write permission. Run as root or as the user owning the folder.',
+          );
+      }
+    }
   }
 
   /** Returns the tool path, creating it when missing. */

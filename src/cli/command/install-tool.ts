@@ -6,7 +6,7 @@ import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
-import { command, getVersion, isToolIgnored } from './utils.ts';
+import { command, ensureWritable, getVersion, isToolIgnored } from './utils.ts';
 
 @command('containerbase-cli')
 export class InstallToolCommand extends Command {
@@ -35,6 +35,8 @@ export class InstallToolCommand extends Command {
   /**
    * Resolves the version to install, from the argument, the `<TOOL>_VERSION`
    * environment variable or the latest release, then installs the tool.
+   * Fails first when the containerbase folders are not writable, except for a
+   * dry run.
    */
   override async execute(): Promise<number | void> {
     const start = Date.now();
@@ -60,21 +62,27 @@ export class InstallToolCommand extends Command {
       version = getVersion(this.name)?.replace(/^v/, ''); // trim optional 'v' prefix
     }
 
-    logger.debug(
-      `Try resolving version for ${this.name}@${version ?? 'latest'} ...`,
-    );
-    version = await resolveVersion(this.name, version, type);
-
-    if (!isNonEmptyStringAndNotWhitespace(version)) {
-      logger.error(`No version found for ${this.name}`);
-      return MissingVersion;
-    }
-
-    version = version.replace(/^v/, ''); // trim optional 'v' prefix
-
     let error = false;
-    logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
     try {
+      if (!this.dryRun) {
+        // fail before anything is resolved or downloaded
+        await ensureWritable();
+      }
+
+      logger.debug(
+        `Try resolving version for ${this.name}@${version ?? 'latest'} ...`,
+      );
+      version = await resolveVersion(this.name, version, type);
+
+      if (!isNonEmptyStringAndNotWhitespace(version)) {
+        error = true;
+        logger.error(`No version found for ${this.name}`);
+        return MissingVersion;
+      }
+
+      version = version.replace(/^v/, ''); // trim optional 'v' prefix
+
+      logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
       const res = await installTool(this.name, version, this.dryRun, type);
       if (res) {
         error = true;

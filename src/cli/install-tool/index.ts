@@ -442,7 +442,10 @@ export async function installTool(
 
 /**
  * Creates a shell wrapper for a tool binary, through the ipc server of the
- * running install when there is one, else directly.
+ * running install when there is one, else directly. The running install has
+ * already checked the folders, so only a direct link checks the bin folder.
+ *
+ * @throws when the bin folder is not writable
  */
 export async function linkTool(
   tool: string,
@@ -453,6 +456,8 @@ export async function linkTool(
   const svc = await container.getAsync(IpcClient);
   if (!(await svc.hasServer())) {
     logger.debug('ipc server not running, linking tool directly');
+    const pathSvc = await container.getAsync(PathService);
+    await pathSvc.ensureWritableDirs(pathSvc.binDir);
     const ltSvc = await container.getAsync(LinkToolService);
     await ltSvc.shellwrapper(tool, options);
     return 0;
@@ -524,6 +529,9 @@ interface UninstallToolConfig {
 /**
  * Uninstalls a tool version, or all versions without one. Generic install
  * services are registered for every installed `gem`, `npm` or `pip` package.
+ *
+ * @throws when the containerbase folders are not writable, except for a dry
+ * run
  */
 export async function uninstallTool({
   tool,
@@ -532,6 +540,9 @@ export async function uninstallTool({
   recursive = false,
 }: UninstallToolConfig): Promise<number | void> {
   const container = await prepareInstallContainer();
+  if (!dryRun) {
+    await (await container.getAsync(PathService)).ensureWritable();
+  }
   const verSvc = await container.getAsync(VersionService);
   for (const { name: tool, type } of await verSvc.getTypes()) {
     switch (type) {

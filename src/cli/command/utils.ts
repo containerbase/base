@@ -1,6 +1,6 @@
 import { env } from 'node:process';
 import type { Cli, CommandClass } from 'clipanion';
-import { EnvService, createContainer } from '../services/index.ts';
+import { EnvService, PathService, createContainer } from '../services/index.ts';
 import { type CliMode, logger } from '../utils/index.ts';
 
 /** Reads the tool version from the `<TOOL>_VERSION` environment variable. */
@@ -12,6 +12,15 @@ export function getVersion(tool: string): string | undefined {
 export async function isToolIgnored(tool: string): Promise<boolean> {
   const container = createContainer();
   return (await container.getAsync(EnvService)).isToolIgnored(tool);
+}
+
+/**
+ * Throws when the containerbase folders are not writable, see
+ * `PathService.ensureWritable`.
+ */
+export async function ensureWritable(): Promise<void> {
+  const container = createContainer();
+  await (await container.getAsync(PathService)).ensureWritable();
 }
 
 const commands: Record<CliMode, CommandClass[]> = {} as never;

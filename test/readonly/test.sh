@@ -25,6 +25,8 @@ done
 
 docker build --load --tag "${image}" "${build_args[@]}" test/readonly
 
+# Runs the test image with a read-only root file system and a tmpfs `/tmp`,
+# passing the `docker run` args after `--` and then the given arguments.
 function run() {
   docker run --rm --read-only --tmpfs /tmp "${run_args[@]}" "$@"
 }
@@ -42,14 +44,17 @@ for user in root 12021; do
   run --user "${user}" "${image}" npm --version
   run --user "${user}" "${image}" flux --version
 
-  # installing tools needs a writable `/opt/containerbase` and isn't supported yet,
-  # use a version that isn't installed yet
+  # installing tools needs a writable `/opt/containerbase`, so it fails before
+  # downloading anything, use a version that isn't installed yet
   if output=$(run --user "${user}" "${image}" install-tool flux 0.27.2 2>&1); then
     echo "install-tool should fail on a read-only file system"
     exit 1
   fi
   echo "${output}"
-  grep 'EROFS: read-only file system' > /dev/null <<< "${output}"
+  grep "EROFS: can't write to" > /dev/null <<< "${output}"
+
+  # a dry run writes nothing, so it works on a read-only file system
+  run --user "${user}" "${image}" install-tool --dry-run flux 0.27.2
 done
 
 echo "--- read-only tests passed"
