@@ -47,7 +47,7 @@ FROM test-dotnet AS test-paket
 
 
 # renovate: datasource=nuget packageName=Paket
-RUN install-tool paket 10.3.1
+RUN install-tool paket 11.0.0
 
 WORKDIR /test
 RUN set -ex; \
