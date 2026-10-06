@@ -176,6 +176,9 @@ jobs:
             --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             build-docker
 
+      - name: test read-only file system
+        run: test/readonly/test.sh
+
   distro:
     runs-on: ubuntu-24.04
     needs:
