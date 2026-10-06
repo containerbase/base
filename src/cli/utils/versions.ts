@@ -5,8 +5,15 @@ import semverParse from 'semver/functions/parse';
 import semverSatisfies from 'semver/functions/satisfies';
 import semverSort from 'semver/functions/sort';
 import semverValid from 'semver/functions/valid';
+import semverMaxSatisfying from 'semver/ranges/max-satisfying';
 
-export { semverGte, semverSort, semverCoerce, semverSatisfies };
+export {
+  semverGte,
+  semverMaxSatisfying,
+  semverSort,
+  semverCoerce,
+  semverSatisfies,
+};
 
 /** Whether the version is valid semver. */
 export function isValid(version: string): boolean {

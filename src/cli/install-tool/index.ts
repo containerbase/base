@@ -58,7 +58,7 @@ import {
   YarnInstallService,
   YarnSlimInstallService,
 } from '../tools/node/npm.ts';
-import { NpmVersionResolver } from '../tools/node/resolver.ts';
+import { createNpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { NubInstallService } from '../tools/nub.ts';
 import { ComposerInstallService } from '../tools/php/composer.ts';
@@ -451,12 +451,9 @@ export async function resolveVersion(
         break;
       }
       case 'npm': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends NpmVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
+        container
+          .bind(TOOL_VERSION_RESOLVER)
+          .to(createNpmVersionResolver(tool));
         break;
       }
       case 'pip': {

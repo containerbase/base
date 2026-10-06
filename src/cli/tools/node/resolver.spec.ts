@@ -1,12 +1,19 @@
+import { arch } from 'node:os';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   NodeVersionResolver,
   NpmVersionResolver,
   YarnVersionResolver,
+  createNpmVersionResolver,
 } from './resolver.ts';
 import { scope } from '~test/http-mock.ts';
 import { toolContext } from '~test/tool.ts';
+
+vi.mock('node:os', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:os')>()),
+  arch: vi.fn(() => 'x64'),
+}));
 
 const registryUrl = 'https://registry.npmjs.org';
 
@@ -87,9 +94,122 @@ describe('cli/tools/node/resolver', () => {
 
       expect(await svc.resolve('9.14.2')).toBe('9.14.2');
     });
+
+    describe('partial versions', () => {
+      const meta = {
+        name: 'pnpm',
+        'dist-tags': { latest: '10.0.0' },
+        versions: {
+          '8.15.9': {},
+          '9.0.0': {},
+          '9.15.0': {},
+          '9.15.4': {},
+          '9.16.0-beta.1': {},
+          '10.0.0': {},
+        },
+      };
+
+      test.each([
+        { version: '9', expected: '9.15.4' },
+        { version: '9.15', expected: '9.15.4' },
+        { version: '9.0', expected: '9.0.0' },
+        { version: '10', expected: '10.0.0' },
+      ])('resolves $version to $expected', async ({ version, expected }) => {
+        scope(registryUrl).get('/pnpm').reply(200, meta);
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve(version)).toBe(expected);
+      });
+
+      test.each(['7', '9.14', '11'])('throws for %s', async (version) => {
+        scope(registryUrl).get('/pnpm').reply(200, meta);
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        await expect(svc.resolve(version)).rejects.toThrow(
+          `No pnpm release found for version ${version}`,
+        );
+      });
+    });
+
+    test('creates a resolver for a tool', async () => {
+      scope(registryUrl)
+        .get('/del-cli')
+        .reply(200, { name: 'del-cli', 'dist-tags': { latest: '6.0.0' } });
+      const { svc } = await toolContext(createNpmVersionResolver('del-cli'));
+
+      expect(svc.tool).toBe('del-cli');
+      expect(await svc.resolve(undefined)).toBe('6.0.0');
+    });
   });
 
   describe('YarnVersionResolver', () => {
+    beforeEach(() => {
+      vi.mocked(arch).mockReturnValue('x64');
+    });
+
+    describe('partial versions', () => {
+      test.each([
+        {
+          hostArch: 'x64',
+          version: '1',
+          pkg: 'yarn',
+          versions: ['1.21.0', '1.22.22', '2.0.0'],
+          expected: '1.22.22',
+        },
+        {
+          hostArch: 'x64',
+          version: '4.5',
+          pkg: '@yarnpkg/cli-dist',
+          versions: ['4.5.0', '4.5.3', '4.6.0'],
+          expected: '4.5.3',
+        },
+        {
+          hostArch: 'x64',
+          version: '6',
+          pkg: '@yarnpkg/yarn-x86_64-unknown-linux-musl',
+          versions: ['6.0.0', '6.1.0', '7.0.0'],
+          expected: '6.1.0',
+        },
+        {
+          hostArch: 'arm64',
+          version: '6',
+          pkg: '@yarnpkg/yarn-aarch64-unknown-linux-musl',
+          versions: ['6.0.0', '6.1.0', '7.0.0'],
+          expected: '6.1.0',
+        },
+      ] as const)(
+        'resolves $version on $hostArch from $pkg',
+        async ({ hostArch, version, pkg, versions, expected }) => {
+          vi.mocked(arch).mockReturnValue(hostArch);
+          scope(registryUrl)
+            .get(`/${pkg}`)
+            .reply(200, {
+              name: pkg,
+              'dist-tags': { latest: expected },
+              versions: Object.fromEntries(versions.map((v) => [v, {}])),
+            });
+          const { svc } = await toolContext(YarnVersionResolver);
+
+          expect(await svc.resolve(version)).toBe(expected);
+        },
+      );
+
+      test('throws if no release matches', async () => {
+        scope(registryUrl)
+          .get('/@yarnpkg/cli-dist')
+          .reply(200, {
+            name: '@yarnpkg/cli-dist',
+            'dist-tags': { latest: '4.5.3' },
+            versions: { '4.5.3': {} },
+          });
+        const { svc } = await toolContext(YarnVersionResolver);
+
+        await expect(svc.resolve('4.9')).rejects.toThrow(
+          'No yarn release found for version 4.9',
+        );
+      });
+    });
+
     test('resolves latest', async () => {
       scope(registryUrl)
         .get('/@yarnpkg/cli-dist')

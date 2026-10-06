@@ -149,6 +149,11 @@ Without a version, or with `latest`, the newest LTS is installed.
 `node` accepts a major (`install-tool node 22`) or major.minor version and installs the newest matching release.
 Without a version, or with `latest`, the newest LTS is installed.
 
+### npm based tool versions
+
+`yarn`, `corepack`, `npm`, `pnpm` and any package installed with `install-npm` accept a major (`install-tool pnpm 10`) or major.minor version and install the newest matching release.
+Prereleases are skipped. Without a version, or with `latest`, the `latest` release is installed.
+
 ### Custom registries
 
 You can replace the default registries used to download the tools.

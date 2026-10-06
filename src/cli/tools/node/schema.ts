@@ -11,6 +11,8 @@ export const NpmPackageMetaList = z.array(NodeVersionMeta);
 export const NpmPackageMeta = z.object({
   'dist-tags': z.record(z.string(), z.string()),
   name: z.string(),
+  // the abbreviated document lists all versions as keys
+  versions: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type NpmPackageMeta = z.infer<typeof NpmPackageMeta>;
