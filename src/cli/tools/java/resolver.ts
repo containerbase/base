@@ -27,25 +27,32 @@ export class JavaVersionResolver extends ToolVersionResolver {
 
   /**
    * Resolves a missing version or `latest` to the newest adoptium lts and a
-   * partial version, like `11` or `11.0`, to its newest ga release.
-   * Any other version is returned unchanged.
+   * partial version (`11`, `11.0` or `11.0.24`) to its newest ga release.
+   * Any other version, like a full version with a build such as `17.0.12+7`,
+   * is returned unchanged.
+   *
+   * @throws when no release matches a partial version
    */
   async resolve(version: string | undefined): Promise<string | undefined> {
     const type = this.tool === 'java-jre' ? 'jre' : 'jdk';
 
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      // we know that the latest version is the first entry, so search for first lts
+      // newest lts first
       return await resolveLatestJavaVersion(this.http, type, this.env.arch);
     }
 
     const range = toVersionRange(version);
     if (range) {
-      return await resolveLatestJavaVersion(
+      const resolved = await resolveLatestJavaVersion(
         this.http,
         type,
         this.env.arch,
         range,
       );
+      if (!resolved) {
+        throw new Error(`No ${this.tool} release found for version ${version}`);
+      }
+      return resolved;
     }
     return version;
   }

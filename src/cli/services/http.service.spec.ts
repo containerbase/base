@@ -213,6 +213,28 @@ describe('cli/services/http.service', () => {
     expect((err as Error).cause).not.toBeInstanceOf(HTTPError);
   });
 
+  test('getJsonOrUndefined', async () => {
+    scope(baseUrl)
+      .get('/test.json')
+      .reply(200, { test: true })
+      .get('/missing.json')
+      .reply(404)
+      .get('/fail.json')
+      .times(3)
+      .reply(501);
+
+    expect(await http.getJsonOrUndefined(`${baseUrl}/test.json`)).toEqual({
+      test: true,
+    });
+    // a 404 is answered once, without retries
+    expect(await http.getJsonOrUndefined(`${baseUrl}/missing.json`)).toBe(
+      undefined,
+    );
+    await expect(
+      http.getJsonOrUndefined(`${baseUrl}/fail.json`),
+    ).rejects.toThrow('download failed');
+  });
+
   test('replaces url', async () => {
     scope('https://example.org')
       .get('/replace.txt')

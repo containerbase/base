@@ -34,13 +34,16 @@ export async function resolveLatestJavaVersion(
     ? `version=${encodeURIComponent(range)}`
     : 'lts=true&semver=true';
 
-  const res = AdoptiumReleaseVersions.parse(
-    await http.getJson(
-      `${base_url}?architecture=${arch === 'amd64' ? 'x64' : 'aarch64'}&image_type=${type}&${api_args}&${filter}`,
-    ),
+  // adoptium answers 404 when no release matches
+  const body = await http.getJsonOrUndefined(
+    `${base_url}?architecture=${arch === 'amd64' ? 'x64' : 'aarch64'}&image_type=${type}&${api_args}&${filter}`,
   );
 
-  return res.versions[0]?.semver;
+  if (!body) {
+    return undefined;
+  }
+
+  return AdoptiumReleaseVersions.parse(body).versions[0]?.semver;
 }
 
 /** The adoptium package for the version, image type and architecture. */

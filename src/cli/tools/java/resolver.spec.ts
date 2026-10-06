@@ -66,14 +66,19 @@ describe('cli/tools/java/resolver', () => {
     expect(await svc.resolve('21')).toBe('21.0.4+7');
   });
 
-  test('returns undefined when no version matches', async () => {
+  test.each([
+    { resolver: JavaVersionResolver, tool: 'java' },
+    { resolver: JavaJreVersionResolver, tool: 'java-jre' },
+  ])('$tool throws when no version matches', async ({ resolver, tool }) => {
     scope(baseUrl)
       .get('/v3/info/release_versions')
       .query((q) => q.version === '[99,100)')
-      .reply(200, { versions: [] });
-    const { svc } = await toolContext(JavaVersionResolver);
+      .reply(404);
+    const { svc } = await toolContext(resolver);
 
-    expect(await svc.resolve('99')).toBeUndefined();
+    await expect(svc.resolve('99')).rejects.toThrow(
+      `No ${tool} release found for version 99`,
+    );
   });
 
   test.each(['17.0.12+7', '21.0.1+12.0.LTS'])(
