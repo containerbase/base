@@ -8,7 +8,7 @@ import {
   createGradleSettings,
   createMavenSettings,
   resolveJavaDownloadUrl,
-  resolveLatestJavaLtsVersion,
+  resolveLatestJavaVersion,
 } from './utils.ts';
 import { testContainer } from '~test/di.ts';
 import { scope } from '~test/http-mock.ts';
@@ -29,15 +29,72 @@ describe('cli/tools/java/utils', () => {
   test.each([
     { arch: 'amd64' as const, expected: 'x64' },
     { arch: 'arm64' as const, expected: 'aarch64' },
-  ])('resolveLatestJavaLtsVersion: $arch', async ({ arch, expected }) => {
+  ])('resolveLatestJavaVersion: lts $arch', async ({ arch, expected }) => {
     scope(baseUrl)
       .get('/v3/info/release_versions')
-      .query((q) => q.architecture === expected && q.image_type === 'jre')
+      .query(
+        (q) =>
+          q.architecture === expected &&
+          q.image_type === 'jre' &&
+          q.lts === 'true' &&
+          q.semver === 'true' &&
+          !('version' in q),
+      )
       .reply(200, { versions: [{ semver: '21.0.4+7' }] });
 
-    expect(await resolveLatestJavaLtsVersion(http, 'jre', arch)).toBe(
-      '21.0.4+7',
-    );
+    expect(await resolveLatestJavaVersion(http, 'jre', arch)).toBe('21.0.4+7');
+  });
+
+  test('resolveLatestJavaVersion: range', async () => {
+    scope(baseUrl)
+      .get('/v3/info/release_versions')
+      .query(
+        (q) =>
+          q.architecture === 'x64' &&
+          q.image_type === 'jdk' &&
+          q.version === '[11,12)' &&
+          !('lts' in q) &&
+          !('semver' in q),
+      )
+      .reply(200, { versions: [{ semver: '11.0.32+101' }] });
+
+    expect(
+      await resolveLatestJavaVersion(http, 'jdk', 'amd64', '[11,12)'),
+    ).toBe('11.0.32+101');
+  });
+
+  test('resolveLatestJavaVersion: empty versions', async () => {
+    scope(baseUrl)
+      .get('/v3/info/release_versions')
+      .query(true)
+      .reply(200, { versions: [] });
+
+    expect(
+      await resolveLatestJavaVersion(http, 'jdk', 'amd64', '[99,100)'),
+    ).toBeUndefined();
+  });
+
+  test('resolveLatestJavaVersion: 404 is no version', async () => {
+    scope(baseUrl)
+      .get('/v3/info/release_versions')
+      .query((q) => q.version === '[99,100)')
+      .reply(404);
+
+    expect(
+      await resolveLatestJavaVersion(http, 'jdk', 'amd64', '[99,100)'),
+    ).toBeUndefined();
+  });
+
+  test('resolveLatestJavaVersion: rethrows other errors', async () => {
+    scope(baseUrl)
+      .get('/v3/info/release_versions')
+      .query(true)
+      .times(3)
+      .reply(501);
+
+    await expect(
+      resolveLatestJavaVersion(http, 'jdk', 'amd64', '[11,12)'),
+    ).rejects.toThrow('download failed');
   });
 
   test('resolveJavaDownloadUrl', async () => {

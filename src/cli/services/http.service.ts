@@ -185,6 +185,25 @@ export class HttpService {
   }
 
   /**
+   * Like {@link getJson}, but returns `undefined` for a 404.
+   *
+   * @throws like {@link getJson} for any other error
+   */
+  async getJsonOrUndefined<T = unknown>(
+    url: string,
+    opts: OptionsOfJSONResponseBody = {},
+  ): Promise<T | undefined> {
+    try {
+      return await this.getJson<T>(url, opts);
+    } catch (err) {
+      if (err instanceof HTTPError && err.response.statusCode === 404) {
+        return undefined;
+      }
+      throw err;
+    }
+  }
+
+  /**
    * Runs a `GET` request and reads its body, trying up to three times.
    *
    * A 4xx status other than 408 and 429 is permanent: it is logged once and

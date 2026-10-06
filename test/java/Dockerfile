@@ -253,6 +253,18 @@ RUN install-tool maven
 
 
 #--------------------------------------
+# test: Resolve partial versions
+#--------------------------------------
+FROM base AS test-partial-version
+
+RUN install-tool java 21
+RUN install-tool java-jre 11.0
+
+RUN set -ex; \
+  java -version 2>&1 | grep '"11\.0\.'; \
+  true
+
+#--------------------------------------
 # test: readonly
 #--------------------------------------
 FROM base AS test-readonly
@@ -300,5 +312,6 @@ COPY --from=test-gradle-e /.dummy /.dummy
 COPY --from=test-maven-a /.dummy /.dummy
 COPY --from=test-others /.dummy /.dummy
 COPY --from=test-latest-version /.dummy /.dummy
+COPY --from=test-partial-version /.dummy /.dummy
 COPY --from=test-readonly /.dummy /.dummy
 COPY --from=test-android-sdk /.dummy /.dummy

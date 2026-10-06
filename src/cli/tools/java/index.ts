@@ -9,7 +9,7 @@ import {
   createGradleSettings,
   createMavenSettings,
   resolveJavaDownloadUrl,
-  resolveLatestJavaLtsVersion,
+  resolveLatestJavaVersion,
 } from './utils.ts';
 
 @injectable()
@@ -57,7 +57,7 @@ export class JavaPrepareService extends BasePrepareService {
       path.join(this.envSvc.userHome, '.android-sdk'),
     );
 
-    const version = await resolveLatestJavaLtsVersion(
+    const version = await resolveLatestJavaVersion(
       this.httpSvc,
       'jre',
       this.envSvc.arch,
