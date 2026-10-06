@@ -1,3 +1,4 @@
+import { HTTPError } from 'got';
 import type { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils/index.ts';
@@ -122,7 +123,32 @@ describe('cli/services/http.service', () => {
       ).toBe('test');
       await expect(
         http.get(`${baseUrl}/test.txt`, { headers: { 'x-test': 'test' } }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('download failed');
+    },
+    10 * 1000,
+  );
+
+  test.each([403, 404])('get: does not retry a %i', async (status) => {
+    scope(baseUrl).get('/test.txt').once().reply(status);
+
+    const err = await http.get(`${baseUrl}/test.txt`).catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(HTTPError);
+    expect((err as HTTPError).response.statusCode).toBe(status);
+  });
+
+  test.each([429, 501])(
+    'get: retries a %i and keeps the cause',
+    async (status) => {
+      scope(baseUrl).get('/test.txt').times(3).reply(status);
+
+      const err = await http
+        .get(`${baseUrl}/test.txt`, { retry: { limit: 0 } })
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toBe('download failed');
+      expect((err as Error).cause).toBeInstanceOf(HTTPError);
     },
     10 * 1000,
   );
@@ -142,7 +168,49 @@ describe('cli/services/http.service', () => {
     ).toEqual({ test: true });
     await expect(
       http.getJson(`${baseUrl}/test.json`, { headers: { 'x-test': 'test' } }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('download failed');
+  });
+
+  test.each([403, 404])('getJson: does not retry a %i', async (status) => {
+    scope(baseUrl).get('/test.json').once().reply(status);
+
+    const err = await http
+      .getJson(`${baseUrl}/test.json`)
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(HTTPError);
+    expect((err as HTTPError).response.statusCode).toBe(status);
+  });
+
+  test.each([429, 501])(
+    'getJson: retries a %i and keeps the cause',
+    async (status) => {
+      scope(baseUrl).get('/test.json').times(3).reply(status);
+
+      const err = await http
+        .getJson(`${baseUrl}/test.json`, { retry: { limit: 0 } })
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toBe('download failed');
+      expect((err as Error).cause).toBeInstanceOf(HTTPError);
+    },
+    10 * 1000,
+  );
+
+  test('getJson: retries a network error and keeps the cause', async () => {
+    scope(baseUrl)
+      .get('/test.json')
+      .times(3)
+      .replyWithError('connection reset');
+
+    const err = await http
+      .getJson(`${baseUrl}/test.json`, { retry: { limit: 0 } })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(Error);
+    expect((err as Error).message).toBe('download failed');
+    expect((err as Error).cause).not.toBeInstanceOf(HTTPError);
   });
 
   test('replaces url', async () => {
