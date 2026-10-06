@@ -154,66 +154,69 @@ export class HttpService {
   }
 
   /**
-   * Fetches the body as text, trying up to three times.
+   * Fetches the body as text, trying up to three times. A permanent client
+   * error is not retried.
    *
-   * @throws when all attempts failed
+   * @throws the original HTTP error for a permanent 4xx status, without
+   * retrying
+   * @throws `download failed` after three failed attempts otherwise
    */
   async get(
     url: string,
     opts: OptionsOfTextResponseBody = {},
   ): Promise<string> {
-    const nUrl = this.envSvc.replaceUrl(url);
-    for (const run of [1, 2, 3]) {
-      try {
-        return await got
-          .get(
-            nUrl,
-            merge.all([
-              this._opts,
-              opts,
-              {
-                resolveBodyOnly: false,
-              },
-            ]),
-          )
-          .text();
-      } catch (err) {
-        if (run === 3) {
-          logger.error({ err, run }, 'download failed');
-        } else {
-          logger.debug({ err, run }, 'download failed');
-        }
-      }
-    }
-    throw new Error('download failed');
+    return await this._request(url, opts, (req) => req.text());
   }
 
   /**
-   * Fetches and parses a json body, trying up to three times. The result is
-   * not validated, parse it with a schema.
+   * Fetches and parses a json body, trying up to three times. A permanent
+   * client error is not retried. The result is not validated, parse it with a
+   * schema.
    *
-   * @throws when all attempts failed
+   * @throws the original HTTP error for a permanent 4xx status, without
+   * retrying
+   * @throws `download failed` after three failed attempts otherwise
    */
   async getJson<T = unknown>(
     url: string,
     opts: OptionsOfJSONResponseBody = {},
   ): Promise<T> {
+    return await this._request(url, opts, (req) => req.json<T>());
+  }
+
+  /**
+   * Runs a `GET` request and reads its body, trying up to three times.
+   *
+   * A 4xx status other than 408 and 429 is permanent: it is logged once and
+   * the original error is rethrown. Any other failure is retried.
+   *
+   * @throws the original HTTP error for a permanent 4xx status
+   * @throws `download failed`, with the last error as cause, after three
+   * failed attempts
+   */
+  private async _request<T>(
+    url: string,
+    opts: OptionsOfTextResponseBody | OptionsOfJSONResponseBody,
+    read: (req: ReturnType<typeof got.get>) => Promise<T>,
+  ): Promise<T> {
     const nUrl = this.envSvc.replaceUrl(url);
+    let lastError: unknown;
     for (const run of [1, 2, 3]) {
       try {
-        return await got
-          .get(
+        return await read(
+          got.get(
             nUrl,
-            merge.all([
-              this._opts,
-              opts,
-              {
-                resolveBodyOnly: false,
-              },
-            ]),
-          )
-          .json();
+            merge.all([this._opts, opts, { resolveBodyOnly: false }]),
+          ),
+        );
       } catch (err) {
+        lastError = err;
+        const status = err instanceof HTTPError ? err.response.statusCode : 0;
+        // client errors won't change on retry, except timeouts and rate limits
+        if (status >= 400 && status < 500 && status !== 408 && status !== 429) {
+          logger.error({ err, url }, 'download failed');
+          throw err;
+        }
         if (run === 3) {
           logger.error({ err, run }, 'download failed');
         } else {
@@ -221,6 +224,6 @@ export class HttpService {
         }
       }
     }
-    throw new Error('download failed');
+    throw new Error('download failed', { cause: lastError });
   }
 }
