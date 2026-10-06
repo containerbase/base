@@ -421,14 +421,16 @@ https://github.com/helmfile/helmfile/releases/download/v0.161.0/helmfile_0.161.0
 
 Java releases are downloaded from:
 
+- `https://api.adoptium.net/v3/info/release_versions`
 - `https://api.adoptium.net/v3/assets/version/`
 - `https://github.com/adoptium/temurin<major>-binaries/releases`
 
-Each major version has it's own GitHub repository.
+Each major version has its own GitHub repository.
 
 Samples:
 
 ```txt
+https://api.adoptium.net/v3/info/release_versions?architecture=x64&heap_size=normal&image_type=jdk&os=linux&page=0&page_size=1&project=jdk&release_type=ga&sort_order=DESC&version=%5B11%2C12%29
 https://api.adoptium.net/v3/assets/version/21.0.1+12.0.LTS?architecture=x86_64&image_type=jre&heap_size=normal&os=linux&page=0&page_size=1&project=jdk&semver=true
 https://api.adoptium.net/v3/assets/version/11.0.22+7?architecture=x86_64&image_type=jdk&heap_size=normal&os=linux&page=0&page_size=1&project=jdk&semver=true
 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jre_x64_linux_hotspot_21.0.1_12.tar.gz

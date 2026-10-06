@@ -30,6 +30,6 @@ install-tool java
 
 The following urls will be called:
 
-- `https://cdn.example.test/api.adoptium.net/v3/info/release_versions?...` (fetch latest Java LTS)
+- `https://cdn.example.test/api.adoptium.net/v3/info/release_versions?...` (fetch latest Java LTS, or the newest release of a partial version like `11`)
 - `https://cdn.example.test/api.adoptium.net/v3/assets/version/{version}?...` (resolve download url)
 - `https://cdn.example.test/github.com/adoptium/temurin{major}-binaries/releases/...` (download the binary)
