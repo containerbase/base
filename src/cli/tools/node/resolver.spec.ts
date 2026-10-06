@@ -38,6 +38,38 @@ describe('cli/tools/node/resolver', () => {
 
       expect(await svc.resolve('22.11.0')).toBe('22.11.0');
     });
+
+    describe('partial versions', () => {
+      const index = [
+        { version: 'v23.3.0', lts: false },
+        { version: 'v22.11.0', lts: 'Jod' },
+        { version: 'v20.18.1', lts: 'Iron' },
+        { version: 'v22.10.0', lts: false },
+        { version: 'v20.11.1', lts: 'Iron' },
+        { version: 'v20.11.0', lts: 'Iron' },
+      ];
+
+      test.each([
+        { version: '20', expected: '20.18.1' },
+        { version: '20.11', expected: '20.11.1' },
+        { version: '22', expected: '22.11.0' },
+        { version: '23', expected: '23.3.0' },
+      ])('resolves $version to $expected', async ({ version, expected }) => {
+        scope('https://nodejs.org').get('/dist/index.json').reply(200, index);
+        const { svc } = await toolContext(NodeVersionResolver);
+
+        expect(await svc.resolve(version)).toBe(expected);
+      });
+
+      test.each(['2', '20.1', '24'])('throws for %s', async (version) => {
+        scope('https://nodejs.org').get('/dist/index.json').reply(200, index);
+        const { svc } = await toolContext(NodeVersionResolver);
+
+        await expect(svc.resolve(version)).rejects.toThrow(
+          `No node release found for version ${version}`,
+        );
+      });
+    });
   });
 
   describe('NpmVersionResolver', () => {

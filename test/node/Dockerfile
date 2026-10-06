@@ -196,6 +196,21 @@ RUN install-npm del-cli 7.0.0
 RUN del -d test/a/**
 
 #--------------------------------------
+# test: node partial version
+#--------------------------------------
+
+FROM base AS test-partial
+
+RUN prepare-tool node
+
+USER 12021
+
+RUN install-tool node 22
+
+RUN set -ex; \
+  node --version | grep '^v22\.';
+
+#--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------
 FROM build AS teste
@@ -614,3 +629,4 @@ COPY --from=testq /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
+COPY --from=test-partial /.dummy /.dummy
