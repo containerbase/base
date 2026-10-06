@@ -96,8 +96,16 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
 
   describe('prepare', () => {
     test('dry run', async () => {
+      // the folders aren't checked for a dry run
+      const access = vi
+        .spyOn(fs, 'access')
+        .mockRejectedValue(
+          Object.assign(new Error('EROFS'), { code: 'EROFS' }),
+        );
+
       expect(await svc.prepare(['dummy'], true)).toBeUndefined();
 
+      expect(access).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         'Dry run: preparing tools dummy ...',
       );

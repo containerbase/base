@@ -217,7 +217,6 @@ export class InstallToolService {
    *
    * @returns an exit code when the tool could not be uninstalled, eg. because
    * another tool depends on the version
-   * @throws when the containerbase folders are not writable
    */
   async uninstall(
     tool: string,
@@ -230,7 +229,6 @@ export class InstallToolService {
       'InstallToolService.uninstall: supported tools',
     );
 
-    await this.pathSvc.ensureWritable();
     await this.pathSvc.ensureBasePaths();
 
     if (!isNonEmptyStringAndNotWhitespace(version)) {

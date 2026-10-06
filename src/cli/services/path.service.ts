@@ -236,13 +236,24 @@ export class PathService {
    * can't write it
    */
   async ensureWritable(...paths: string[]): Promise<void> {
-    for (const path of [
+    await this.ensureWritableDirs(
       this.dataPath,
       this.toolsPath,
       this.binDir,
       this.versionPath,
       ...paths,
-    ]) {
+    );
+  }
+
+  /**
+   * Checks that exactly the given folders are writable. Missing folders are
+   * skipped.
+   *
+   * @throws when a folder is on a read-only file system or the current user
+   * can't write it
+   */
+  async ensureWritableDirs(...paths: string[]): Promise<void> {
+    for (const path of paths) {
       const err = await fs.access(path, fs.constants.W_OK).then(
         () => null,
         (err: NodeJS.ErrnoException) => err,

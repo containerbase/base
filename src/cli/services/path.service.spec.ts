@@ -114,6 +114,14 @@ describe('cli/services/path.service', () => {
       );
     });
 
+    test('checks only the given folders', async () => {
+      failAccess(pathSvc.toolsPath, 'EROFS');
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.binDir),
+      ).resolves.toBeUndefined();
+    });
+
     test('throws when the current user may not write', async () => {
       failAccess(pathSvc.varPath, 'EACCES');
 

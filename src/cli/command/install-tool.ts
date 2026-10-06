@@ -35,7 +35,8 @@ export class InstallToolCommand extends Command {
   /**
    * Resolves the version to install, from the argument, the `<TOOL>_VERSION`
    * environment variable or the latest release, then installs the tool.
-   * Fails first when the containerbase folders are not writable.
+   * Fails first when the containerbase folders are not writable, except for a
+   * dry run.
    */
   override async execute(): Promise<number | void> {
     const start = Date.now();
@@ -63,8 +64,10 @@ export class InstallToolCommand extends Command {
 
     let error = false;
     try {
-      // fail before anything is resolved or downloaded
-      await ensureWritable();
+      if (!this.dryRun) {
+        // fail before anything is resolved or downloaded
+        await ensureWritable();
+      }
 
       logger.debug(
         `Try resolving version for ${this.name}@${version ?? 'latest'} ...`,

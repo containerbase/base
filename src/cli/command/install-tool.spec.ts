@@ -87,6 +87,24 @@ describe('cli/command/install-tool', () => {
     expect(mocks.installTool).not.toHaveBeenCalled();
   });
 
+  test('skips the writable check for a dry run', async () => {
+    const cli = new Cli({ binaryName: 'containerbase-cli' });
+    registerCommands(cli, null);
+    const access = vi
+      .spyOn(fs, 'access')
+      .mockRejectedValue(Object.assign(new Error('EROFS'), { code: 'EROFS' }));
+
+    expect(await cli.run(['install', 'tool', 'flux', '0.27.2', '-d'])).toBe(0);
+
+    expect(access).not.toHaveBeenCalled();
+    expect(mocks.installTool).toHaveBeenCalledExactlyOnceWith(
+      'flux',
+      '0.27.2',
+      true,
+      undefined,
+    );
+  });
+
   test('containerbase-cli install tool', async () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
     registerCommands(cli, null);

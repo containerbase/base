@@ -36,6 +36,15 @@ vi.mock('../utils/index.ts', async (importActual) => ({
   isDockerBuild: vi.fn(),
 }));
 
+/** Lets `fs.access` fail with the error code for the path only. */
+function failAccess(path: string, code: string): void {
+  vi.spyOn(fs, 'access').mockImplementation((p) =>
+    p === path
+      ? Promise.reject(Object.assign(new Error(code), { code }))
+      : Promise.resolve(),
+  );
+}
+
 describe('cli/install-tool/index', () => {
   beforeAll(async () => {
     await ensurePaths([
@@ -234,13 +243,9 @@ describe('cli/install-tool/index', () => {
       );
     });
 
-    test('fails when the folders are not writable', async () => {
+    test('fails when the bin folder is not writable', async () => {
       const pathSvc = await createContainer().getAsync(PathService);
-      vi.spyOn(fs, 'access').mockImplementation((path) =>
-        path === pathSvc.binDir
-          ? Promise.reject(Object.assign(new Error('EROFS'), { code: 'EROFS' }))
-          : Promise.resolve(),
-      );
+      failAccess(pathSvc.binDir, 'EROFS');
       const spy = vi.spyOn(fs, 'writeFile');
 
       await expect(linkTool('node', { srcDir: '/bin/bash' })).rejects.toThrow(
@@ -248,6 +253,13 @@ describe('cli/install-tool/index', () => {
       );
 
       expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('checks only the bin folder', async () => {
+      const pathSvc = await createContainer().getAsync(PathService);
+      failAccess(pathSvc.dataPath, 'EROFS');
+
+      expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
     });
 
     test('with ipc server', async () => {
@@ -258,8 +270,15 @@ describe('cli/install-tool/index', () => {
       );
       try {
         const spy = vi.spyOn(fs, 'writeFile');
+        // the running install has checked the folders already
+        const access = vi.spyOn(fs, 'access');
+        const pathSvc = await createContainer().getAsync(PathService);
         expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
         expect(spy).toHaveBeenCalledOnce();
+        expect(access).not.toHaveBeenCalledWith(
+          pathSvc.binDir,
+          fs.constants.W_OK,
+        );
         expect(logger.debug).toHaveBeenCalledWith(
           'ipc server found, linking tool via ipc',
         );
@@ -273,6 +292,29 @@ describe('cli/install-tool/index', () => {
   });
 
   describe('uninstallTool', () => {
+    test('fails first when the folders are not writable', async () => {
+      const pathSvc = await createContainer().getAsync(PathService);
+      failAccess(pathSvc.binDir, 'EACCES');
+      const spy = vi.spyOn(VersionService.prototype, 'getTypes');
+
+      await expect(
+        uninstallTool({ tool: 'node', version: '1.0.0' }),
+      ).rejects.toThrow(
+        `EACCES: can't write to ${pathSvc.binDir}, the current user has no write permission. Run as root or as the user owning the folder.`,
+      );
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('skips the writable check for a dry run', async () => {
+      const pathSvc = await createContainer().getAsync(PathService);
+      failAccess(pathSvc.binDir, 'EROFS');
+
+      expect(
+        await uninstallTool({ tool: 'bun', version: '9.9.9', dryRun: true }),
+      ).toBeUndefined();
+    });
+
     test('works', async () => {
       // not installed
       expect(

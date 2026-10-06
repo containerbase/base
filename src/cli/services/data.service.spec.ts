@@ -1,9 +1,10 @@
-import fs, { chmod, readFile, stat } from 'node:fs/promises';
+import fs, { chmod, readFile, rm, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import type Nedb from '@seald-io/nedb';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fileRights, logger } from '../utils/index.ts';
+import { fileRights, logger, pathExists } from '../utils/index.ts';
 import { DataService } from './data.service.ts';
 import { PathService } from './path.service.ts';
 import { testContainer } from '~test/di.ts';
@@ -141,6 +142,30 @@ describe('cli/services/data.service', () => {
       { file: roDb.filename },
       'opening database read-only',
     );
+  });
+
+  test('keeps a read-only database without a file in memory', async () => {
+    await rm(dataDir, { recursive: true });
+    const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
+    svc.readOnly();
+
+    const db = await svc.load<{ name: string }>('memory');
+    await db.ensureIndexAsync({ fieldName: 'name', unique: true });
+
+    expect(await db.findAsync({})).toEqual([]);
+    expect(db.filename).toBe(join(dataDir, 'memory.nedb'));
+    expect(await pathExists(dataDir)).toBe(false);
+    expect(setOwner).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      { file: db.filename },
+      'opening database read-only',
+    );
+
+    // also when only the file is missing
+    await ensurePaths('opt/containerbase/data');
+    await chmod(dataDir, 0o775);
+    const other = await svc.load('other-memory');
+    expect(await pathExists(other.filename)).toBe(false);
   });
 
   test('loads writable when the data folder check fails otherwise', async () => {

@@ -34,16 +34,18 @@ class DatabaseWrapper extends Datastore {
   };
 
   /**
-   * Opens the `<name>.nedb` database in the containerbase data folder.
-   * A read-only database is loaded without writing to its file.
+   * Opens the database file. A read-only database is loaded without writing
+   * to its file, an `inMemoryOnly` one never touches the disk.
    */
   constructor(
     private readonly _pathSvc: PathService,
-    name: string,
+    filename: string,
     private readonly _readOnly: boolean,
+    inMemoryOnly: boolean,
   ) {
     super({
-      filename: join(_pathSvc.dataPath, `${name}.nedb`),
+      filename,
+      inMemoryOnly,
       timestampData: true,
       modes: {
         dirMode: 0o775,
@@ -138,14 +140,19 @@ export class DataService {
   }
 
   /**
-   * Opens and loads the named database, read-only when requested with
-   * `readOnly()` or when the data folder is not writable.
+   * Opens and loads the `<name>.nedb` database in the containerbase data
+   * folder, read-only when requested with `readOnly()` or when the data folder
+   * is not writable. A read-only database without a file is kept in memory
+   * only, so neither the data folder nor the file are created.
    */
   private async _load<T>(name: string): Promise<Database<T>> {
+    const readOnly = await this._isReadOnly();
+    const filename = join(this.pathSvc.dataPath, `${name}.nedb`);
     const db = new DatabaseWrapper(
       this.pathSvc,
-      name,
-      await this._isReadOnly(),
+      filename,
+      readOnly,
+      readOnly && !(await this.pathSvc.fileExists(filename)),
     );
 
     await db.loadDatabaseAsync();

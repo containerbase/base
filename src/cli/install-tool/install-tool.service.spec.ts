@@ -6,7 +6,6 @@ import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
   EnvService,
   LinkToolService,
-  PathService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -257,24 +256,6 @@ describe('cli/install-tool/install-tool.service', () => {
   });
 
   describe('uninstall', () => {
-    test('fails when the folders are not writable', async () => {
-      const pathSvc = await child.getAsync(PathService);
-      vi.spyOn(fs, 'access').mockImplementation((path) =>
-        path === pathSvc.binDir
-          ? Promise.reject(
-              Object.assign(new Error('EACCES'), { code: 'EACCES' }),
-            )
-          : Promise.resolve(),
-      );
-      const spy = vi.spyOn(BunInstallService.prototype, 'uninstall');
-
-      await expect(install.uninstall('bun', '1.0.0')).rejects.toThrow(
-        `EACCES: can't write to ${pathSvc.binDir}, the current user has no write permission. Run as root or as the user owning the folder.`,
-      );
-
-      expect(spy).not.toHaveBeenCalled();
-    });
-
     test('not installed', async () => {
       expect(await install.uninstall('bun', '9.9.9')).toBeUndefined();
 
