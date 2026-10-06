@@ -94,10 +94,17 @@ Installs a tool into the container.
 
 #### Tool-specific versions <a name="Versions-install-tool"></a>
 
-Some tools accept partial versions:
+Some tools accept partial versions and install the newest matching release:
 
-- `java`, `java-jre`, `java-jdk`: A major, major.minor or major.minor.patch version, like `21` or `11.0`, installs the newest matching release.
-- `node`, `yarn`, `corepack`, `npm`, `pnpm`: A major or major.minor version installs the newest matching release.
+- `java`, `java-jre`, `java-jdk`: A major (`21`), major.minor (`11.0`) or major.minor.patch (`11.0.24`) version installs the newest matching GA release.
+  A full version with a build, like `17.0.12+7`, is used as is.
+  Without a version, or with `latest`, the newest LTS is installed.
+- `node`: A major (`22`) or major.minor (`22.11`) version installs the newest matching release.
+  Without a version, or with `latest`, the newest LTS is installed.
+- `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the newest matching release, prereleases are skipped.
+  Without a version, or with `latest`, the `latest` release is installed.
+
+Any other version is used as is.
 
 <br>
 
@@ -185,7 +192,7 @@ Note: requires node to be installed.
 
 #### Tool-specific versions <a name="Versions-install-npm"></a>
 
-A major or major.minor version installs the newest matching release.
+A major or major.minor version installs the newest matching release, see the [install-tool versions](#Versions-install-tool).
 
 <br>
 
