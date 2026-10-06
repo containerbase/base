@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { getVersionHelp } from '../install-tool/version-resolvers.ts';
 import { PathService, createContainer } from '../services/index.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
 import { registerCommands } from './index.ts';
+import { InstallToolCommand, InstallToolShortCommand } from './install-tool.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -19,6 +21,11 @@ describe('cli/command/install-tool', () => {
   beforeEach(() => {
     vi.stubEnv('NODE_VERSION', undefined);
     vi.stubEnv('IGNORED_TOOLS', 'pnpm,php');
+  });
+
+  test('shows the tool-specific version help', () => {
+    expect(InstallToolCommand.usage?.details).toBe(getVersionHelp());
+    expect(InstallToolShortCommand.usage?.details).toBe(getVersionHelp());
   });
 
   test('install-tool', async () => {

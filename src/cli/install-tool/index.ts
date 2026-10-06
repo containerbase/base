@@ -20,10 +20,7 @@ import { DockerComposeInstallService } from '../tools/docker/compose.ts';
 import { DockerInstallService } from '../tools/docker/index.ts';
 import { DotnetInstallService } from '../tools/dotnet/index.ts';
 import { MonoInstallService } from '../tools/dotnet/mono.ts';
-import {
-  NugetInstallService,
-  NugetVersionResolver,
-} from '../tools/dotnet/nuget.ts';
+import { NugetInstallService } from '../tools/dotnet/nuget.ts';
 import { PaketInstallService } from '../tools/dotnet/paket.ts';
 import { PowershellInstallService } from '../tools/dotnet/powershell.ts';
 import { ElixirInstallService } from '../tools/erlang/elixir.ts';
@@ -40,34 +37,20 @@ import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
 import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
-import {
-  AndroidSdkCmdlineToolsInstallService,
-  AndroidSdkCmdlineToolsVersionResolver,
-} from '../tools/java/android.ts';
-import {
-  GradleInstallService,
-  GradleVersionResolver,
-} from '../tools/java/gradle.ts';
+import { AndroidSdkCmdlineToolsInstallService } from '../tools/java/android.ts';
+import { GradleInstallService } from '../tools/java/gradle.ts';
 import {
   JavaInstallService,
   JavaJdkInstallService,
   JavaJreInstallService,
 } from '../tools/java/index.ts';
-import {
-  MavenInstallService,
-  MavenVersionResolver,
-} from '../tools/java/maven.ts';
-import {
-  JavaJdkVersionResolver,
-  JavaJreVersionResolver,
-  JavaVersionResolver,
-} from '../tools/java/resolver.ts';
+import { MavenInstallService } from '../tools/java/maven.ts';
 import { SbtInstallService } from '../tools/java/sbt.ts';
 import { ScalaInstallService } from '../tools/java/scala.ts';
 import { JsonnetBundlerInstallService } from '../tools/jb.ts';
 import { KubectlInstallService } from '../tools/kubectl.ts';
 import { KustomizeInstallService } from '../tools/kustomize.ts';
-import { MiseInstallService, MiseVersionResolver } from '../tools/mise.ts';
+import { MiseInstallService } from '../tools/mise.ts';
 import { NixInstallService } from '../tools/nix.ts';
 import { NodeInstallService } from '../tools/node/index.ts';
 import {
@@ -75,32 +58,18 @@ import {
   YarnInstallService,
   YarnSlimInstallService,
 } from '../tools/node/npm.ts';
-import {
-  NodeVersionResolver,
-  NpmVersionResolver,
-  YarnVersionResolver,
-} from '../tools/node/resolver.ts';
+import { NpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { NubInstallService } from '../tools/nub.ts';
-import {
-  ComposerInstallService,
-  ComposerVersionResolver,
-} from '../tools/php/composer.ts';
-import { PhpInstallService, PhpVersionResolver } from '../tools/php/index.ts';
+import { ComposerInstallService } from '../tools/php/composer.ts';
+import { PhpInstallService } from '../tools/php/index.ts';
 import { PixiInstallService } from '../tools/pixi.ts';
 import { ProtocInstallService } from '../tools/protoc.ts';
-import {
-  ConanInstallService,
-  ConanVersionResolver,
-} from '../tools/python/conan.ts';
+import { ConanInstallService } from '../tools/python/conan.ts';
 import { PythonInstallService } from '../tools/python/index.ts';
 import { PipVersionResolver } from '../tools/python/pip.ts';
-import { PoetryVersionResolver } from '../tools/python/poetry.ts';
 import { PipBaseInstallService } from '../tools/python/utils.ts';
-import {
-  CocoapodsInstallService,
-  CocoapodsVersionResolver,
-} from '../tools/ruby/cocoapods.ts';
+import { CocoapodsInstallService } from '../tools/ruby/cocoapods.ts';
 import { RubyInstallService } from '../tools/ruby/index.ts';
 import {
   RubyBaseInstallService,
@@ -126,6 +95,7 @@ import {
 } from './install-tool.service.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
+import { versionResolvers } from './version-resolvers.ts';
 
 /**
  * Creates a container with all install services, including a generic one for
@@ -230,23 +200,9 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
-  container
-    .bind(TOOL_VERSION_RESOLVER)
-    .to(AndroidSdkCmdlineToolsVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(CocoapodsVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(MiseVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(NugetVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(PoetryVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
+  for (const resolver of versionResolvers) {
+    container.bind(TOOL_VERSION_RESOLVER).to(resolver);
+  }
 
   logger.trace('preparing container done');
   return container;

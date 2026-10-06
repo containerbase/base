@@ -12,6 +12,12 @@ export abstract class ToolVersionResolver {
   protected readonly env!: EnvService;
 
   /**
+   * A short markdown-ish note on the versions the tool accepts, shown in the
+   * install-tool help.
+   */
+  readonly versionHelp: string | undefined = undefined;
+
+  /**
    * Resolves the requested version, eg. a missing version or `latest` to the
    * latest release.
    */

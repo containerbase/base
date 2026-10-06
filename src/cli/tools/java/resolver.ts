@@ -27,6 +27,9 @@ export function toVersionRange(version: string): string | undefined {
 export class JavaVersionResolver extends ToolVersionResolver {
   readonly tool: string = 'java';
 
+  override readonly versionHelp =
+    'A major, major.minor or major.minor.patch version, like `21` or `11.0`, installs the newest matching release.';
+
   /**
    * Resolves a missing version or `latest` to the newest adoptium lts and a
    * partial version (`11`, `11.0` or `11.0.24`) to its newest ga release.

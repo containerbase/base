@@ -2,6 +2,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { installTool, resolveVersion } from '../install-tool/index.ts';
+import { getVersionHelp } from '../install-tool/version-resolvers.ts';
 import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
@@ -21,7 +22,9 @@ export class InstallToolCommand extends Command {
         'NODE_VERSION=14.17.0 $0 install tool node',
       ],
       ['Installs latest pnpm version', '$0 install tool pnpm'],
+      ['Installs the newest node 22 release', '$0 install tool node 22'],
     ],
+    details: getVersionHelp(),
   });
 
   name = Option.String();
@@ -122,6 +125,8 @@ export class InstallToolShortCommand extends InstallToolCommand {
         'NODE_VERSION=14.17.0 $0 node',
       ],
       ['Installs latest pnpm version', '$0 pnpm'],
+      ['Installs the newest node 22 release', '$0 node 22'],
     ],
+    details: getVersionHelp(),
   });
 }

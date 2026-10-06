@@ -87,6 +87,17 @@ Installs a tool into the container.
   ```bash
   install-tool pnpm
   ```
+- Installs the newest node 22 release
+  ```bash
+  install-tool node 22
+  ```
+
+#### Tool-specific versions <a name="Versions-install-tool"></a>
+
+Some tools accept partial versions:
+
+- `java`, `java-jre`, `java-jdk`: A major, major.minor or major.minor.patch version, like `21` or `11.0`, installs the newest matching release.
+- `node`: A major or major.minor version, like `22` or `22.11`, installs the newest matching release.
 
 <br>
 
