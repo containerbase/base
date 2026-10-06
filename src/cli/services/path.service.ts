@@ -32,6 +32,17 @@ function writeError(
   );
 }
 
+/**
+ * The error of a write check of the folder, `null` when files can be created
+ * in it, which needs write and search permission.
+ */
+function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
+  return fs.access(path, fs.constants.W_OK | fs.constants.X_OK).then(
+    () => null,
+    (err: NodeJS.ErrnoException) => err,
+  );
+}
+
 @injectable(bindingScopeValues.Singleton)
 export class PathService {
   @inject(EnvService)
@@ -229,8 +240,8 @@ export class PathService {
   /**
    * Checks that the containerbase data, tools, bin and versions folders and
    * the extra `paths` are writable, so a command fails before resolving or
-   * downloading anything. Missing folders are skipped, `ensureBasePaths`
-   * creates them.
+   * downloading anything. For a missing folder, which `ensureBasePaths`
+   * creates, its nearest existing parent is checked.
    *
    * @throws when a folder is on a read-only file system or the current user
    * can't write it
@@ -246,18 +257,20 @@ export class PathService {
   }
 
   /**
-   * Checks that exactly the given folders are writable. Missing folders are
-   * skipped.
+   * Checks that exactly the given folders are writable. For a missing folder
+   * its nearest existing parent is checked, where it would be created.
    *
    * @throws when a folder is on a read-only file system or the current user
    * can't write it
    */
   async ensureWritableDirs(...paths: string[]): Promise<void> {
     for (const path of paths) {
-      const err = await fs.access(path, fs.constants.W_OK).then(
-        () => null,
-        (err: NodeJS.ErrnoException) => err,
-      );
+      let dir = path;
+      let err = await accessError(dir);
+      while (err?.code === 'ENOENT' && dirname(dir) !== dir) {
+        dir = dirname(dir);
+        err = await accessError(dir);
+      }
       switch (err?.code) {
         case 'EROFS':
           throw writeError(

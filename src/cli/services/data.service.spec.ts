@@ -168,6 +168,18 @@ describe('cli/services/data.service', () => {
     expect(await pathExists(other.filename)).toBe(false);
   });
 
+  test('fails a read-only load when the file can not be checked', async () => {
+    svc.readOnly();
+    vi.spyOn(fs, 'stat').mockRejectedValueOnce(
+      Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }),
+    );
+
+    // an unreadable database must not look like an empty one
+    await expect(svc.load('unreadable')).rejects.toThrow(
+      'EACCES: permission denied',
+    );
+  });
+
   test('loads writable when the data folder check fails otherwise', async () => {
     const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
     vi.spyOn(fs, 'access').mockRejectedValueOnce(

@@ -19,6 +19,22 @@ export type Database<T = unknown> = Pick<
   get filename(): string;
 };
 
+/**
+ * Whether the file does not exist. Other errors, like missing permissions,
+ * are thrown, so an unreadable database is not mistaken for an empty one.
+ */
+async function isMissing(file: string): Promise<boolean> {
+  try {
+    await fs.stat(file);
+    return false;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      return true;
+    }
+    throw err;
+  }
+}
+
 class DatabaseWrapper extends Datastore {
   declare public readonly filename: string;
 
@@ -152,7 +168,7 @@ export class DataService {
       this.pathSvc,
       filename,
       readOnly,
-      readOnly && !(await this.pathSvc.fileExists(filename)),
+      readOnly && (await isMissing(filename)),
     );
 
     await db.loadDatabaseAsync();

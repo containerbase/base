@@ -52,6 +52,9 @@ for user in root 12021; do
   fi
   echo "${output}"
   grep "EROFS: can't write to" > /dev/null <<< "${output}"
+
+  # a dry run writes nothing, so it works on a read-only file system
+  run --user "${user}" "${image}" install-tool --dry-run flux 0.27.2
 done
 
 echo "--- read-only tests passed"

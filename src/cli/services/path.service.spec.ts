@@ -1,6 +1,6 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
@@ -114,12 +114,44 @@ describe('cli/services/path.service', () => {
       );
     });
 
+    test('checks the nearest existing parent of a missing folder', async () => {
+      const parent = dirname(pathSvc.toolsPath);
+      vi.spyOn(fs, 'access').mockImplementation((p) => {
+        const code =
+          p === pathSvc.toolsPath ? 'ENOENT' : p === parent ? 'EROFS' : null;
+        return code
+          ? Promise.reject(Object.assign(new Error(code), { code }))
+          : Promise.resolve();
+      });
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.toolsPath),
+      ).rejects.toThrow(
+        `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only.`,
+      );
+    });
+
+    test('passes when no parent of a missing folder exists', async () => {
+      vi.spyOn(fs, 'access').mockRejectedValue(
+        Object.assign(new Error('ENOENT'), { code: 'ENOENT' }),
+      );
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.toolsPath),
+      ).resolves.toBeUndefined();
+    });
+
     test('checks only the given folders', async () => {
       failAccess(pathSvc.toolsPath, 'EROFS');
 
       await expect(
         pathSvc.ensureWritableDirs(pathSvc.binDir),
       ).resolves.toBeUndefined();
+      // files can only be created with write and search permission
+      expect(fs.access).toHaveBeenCalledExactlyOnceWith(
+        pathSvc.binDir,
+        fs.constants.W_OK | fs.constants.X_OK,
+      );
     });
 
     test('throws when the current user may not write', async () => {
