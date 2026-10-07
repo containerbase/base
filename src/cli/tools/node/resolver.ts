@@ -13,6 +13,9 @@ import {
 export class NodeVersionResolver extends ToolVersionResolver {
   readonly tool = 'node';
 
+  override readonly versionHelp =
+    'A major or major.minor version, like `22` or `22.11`, installs the newest matching release.';
+
   /**
    * Resolves a version from nodejs.org.
    *
