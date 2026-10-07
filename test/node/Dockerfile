@@ -210,6 +210,16 @@ RUN install-tool node 22
 RUN set -ex; \
   node --version | grep '^v22\.';
 
+RUN install-tool pnpm 10
+
+RUN set -ex; \
+  pnpm --version | grep '^10\.';
+
+RUN install-tool yarn 4
+
+RUN set -ex; \
+  yarn --version | grep '^4\.';
+
 #--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------

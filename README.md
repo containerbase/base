@@ -139,15 +139,10 @@ RUN install-tool node 20.9.0
 RUN install-tool docker 20.10.7
 ```
 
-### Java versions
+### Tool versions
 
-`java`, `java-jre` and `java-jdk` accept a major (`install-tool java 21`), major.minor or major.minor.patch version and install the newest matching GA release.
-Without a version, or with `latest`, the newest LTS is installed.
-
-### Node versions
-
-`node` accepts a major (`install-tool node 22`) or major.minor version and installs the newest matching release.
-Without a version, or with `latest`, the newest LTS is installed.
+Some tools, like `java`, `node` and `pnpm`, accept a partial version (`install-tool node 22`) and install the newest matching release.
+Read the [tool-specific versions](./docs/tools.md#Versions-install-tool) docs for more details.
 
 ### Custom registries
 
