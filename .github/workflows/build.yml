@@ -43,7 +43,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
-          git diff --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
+          git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
           if grep -vE '(\.md$|^docs/)' "${RUNNER_TEMP}/changed-files"; then
             echo "docs-only=false" >> "${GITHUB_OUTPUT}"
           else
