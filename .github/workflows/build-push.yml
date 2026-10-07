@@ -31,6 +31,7 @@ jobs:
       contents: read
       checks: write
       id-token: write
+      security-events: write
 
   release:
     needs: [build]
@@ -65,8 +66,8 @@ jobs:
 
       - name: init
         run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "CACHE_WEEK=$(date +%U)" >> $GITHUB_ENV
+          echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
+          echo "CACHE_WEEK=$(date +%U)" >> "${GITHUB_ENV}"
 
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53

@@ -31,7 +31,7 @@ jobs:
 
       - name: ⚙️ Init
         id: init
-        run: echo "uid=$(uuidgen)" >> ${GITHUB_OUTPUT}
+        run: echo "uid=$(uuidgen)" >> "${GITHUB_OUTPUT}"
 
   lint:
     runs-on: ubuntu-24.04
@@ -69,6 +69,33 @@ jobs:
             *.sh
             *.bats
           check_all_files_with_shebangs: 'true'
+
+  lint-actions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+          # include the local composite actions, so that actionlint validates
+          # their metadata, and zizmor audits them
+          sparse-checkout: .github/
+
+      - name: Check workflow files
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          version: 1.30.1
 
   bats:
     runs-on: ubuntu-24.04
@@ -166,7 +193,7 @@ jobs:
 
       - name: ⚙️ Init
         run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+          echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
 
       - name: build base
         uses: ./.github/actions/bake
@@ -212,7 +239,7 @@ jobs:
 
       - name: ⚙️  Init
         run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+          echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
 
       - name: test distro
         uses: ./.github/actions/bake
@@ -252,7 +279,7 @@ jobs:
 
       - name: ⚙️  Init
         run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
+          echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
 
       - name: test distro
         uses: ./.github/actions/bake
@@ -324,8 +351,8 @@ jobs:
 
       - name: ⚙️ Init
         run: |
-          echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
-          echo "BASE_IMAGE=containerbase/test" >> ${GITHUB_ENV}
+          echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
+          echo "BASE_IMAGE=containerbase/test" >> "${GITHUB_ENV}"
 
       - name: build base
         # rebuilds the base image from the GHA cache the `base` job filled,
