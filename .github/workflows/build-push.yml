@@ -48,9 +48,9 @@ jobs:
       id-token: write
 
     steps:
-      # full checkout for semantic-release
+      # full checkout for semantic-release, which pushes the release tag
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
+        with: # zizmor: ignore[artipacked]
           fetch-depth: 0
           show-progress: false
           filter: blob:none # we don't need all blobs
@@ -82,7 +82,8 @@ jobs:
 
       - name: semantic-release
         if: github.event_name == 'push'
-        run: pnpm semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+        run: pnpm semantic-release --dry-run "${DRY_RUN}" --ci "${CI_MODE}"
         env:
+          CI_MODE: ${{ env.DRY_RUN != 'true' }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEBUG: semantic-release:github

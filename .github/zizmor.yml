@@ -1,0 +1,4 @@
+rules:
+  # keep the `./` paths for local actions and reusable workflows
+  self-repository:
+    disable: true
