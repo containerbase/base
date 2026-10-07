@@ -5,12 +5,18 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import {
+  ToolVersionResolver,
+  isPartialVersion,
+  newestVersion,
+  partialVersionHelp,
+} from '../../install-tool/tool-version-resolver.ts';
 import { VersionService } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
-import { RubyGemJson } from './schema.ts';
+import { RubyGemJson, RubyGemVersionsJson } from './schema.ts';
 
 const defaultRegistry = 'https://rubygems.org/';
+const gemVersionPattern = /^\d+(?:\.[0-9a-z]+)*$/i;
 
 @injectable()
 export abstract class RubyBaseInstallService extends BaseInstallService {
@@ -131,6 +137,15 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     await this._spawn(this.name, ['--version']);
   }
 
+  /**
+   * Accepts RubyGems version strings: a numeric first segment followed by
+   * dot-separated segments of digits and letters, eg. `2`, `5.2`, `6.1.7.10`
+   * or `7.0.0.rc2`.
+   */
+  override validate(version: string): Promise<boolean> {
+    return Promise.resolve(gemVersionPattern.test(version));
+  }
+
   /** Runs tool specific steps after the gem install, none by default. */
   protected _postInstall(
     _gem: string,
@@ -175,7 +190,22 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 
 @injectable()
 export abstract class RubyGemVersionResolver extends ToolVersionResolver {
-  /** Resolves a missing version or `latest` to the latest rubygems release. */
+  override readonly versionHelp = partialVersionHelp;
+
+  /**
+   * Resolves a version from rubygems.org, a configured gem registry is not
+   * used for the lookup. Like other lookups, the request goes through the
+   * configured CDN and URL replacements.
+   *
+   * - A missing version or `latest` resolves to the latest release.
+   * - A major (`1`) or major.minor (`1.16`) version which is no existing
+   *   release resolves to the newest matching release, prereleases are
+   *   skipped. An existing release, like `1.2`, is kept.
+   * - Any other version, like a full `X.Y.Z`, is returned unchanged.
+   *
+   * @throws if a partial version can't be looked up on rubygems.org, since
+   * gem can't install it as given, or if it matches no release.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (version === undefined || version === 'latest') {
       const meta = RubyGemJson.parse(
@@ -184,6 +214,35 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
         ),
       );
       return meta.version;
+    }
+    if (isPartialVersion(version)) {
+      let releases: RubyGemVersionsJson;
+      try {
+        releases = RubyGemVersionsJson.parse(
+          await this.http.getJson(
+            `https://rubygems.org/api/v1/versions/${this.tool}.json`,
+          ),
+        );
+      } catch (err) {
+        // gem would install `= X.Y` and the install then misses its gemspec,
+        // so fail early like before partial versions were accepted
+        throw new Error(
+          `Could not resolve ${this.tool} version ${version} on rubygems.org, use a full version`,
+          { cause: err },
+        );
+      }
+      if (releases.some((r) => r.number === version)) {
+        return version;
+      }
+      const release = newestVersion(
+        releases
+          .filter((r) => !r.prerelease && r.number.startsWith(`${version}.`))
+          .map((r) => r.number),
+      );
+      if (!release) {
+        throw new Error(`No ${this.tool} release found for version ${version}`);
+      }
+      return release;
     }
     return version;
   }

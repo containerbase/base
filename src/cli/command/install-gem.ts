@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
 import { InstallToolCommand } from './install-tool.ts';
 import { command } from './utils.ts';
 
@@ -14,7 +15,9 @@ export class InstallGemCommand extends InstallToolCommand {
         'RAKE_VERSION=13.0.6 $0 install gem rake',
       ],
       // ['Installs latest rake version', '$0 install gem rake'], // not yet supported
+      ['Installs the newest rake 13 release', '$0 install gem rake 13'],
     ],
+    details: partialVersionHelp,
   });
 
   protected override type = 'gem' as const;
@@ -33,6 +36,8 @@ export class InstallGemShortCommand extends InstallGemCommand {
         'RAKE_VERSION=13.0.6 $0 rake',
       ],
       // ['Installs latest rake version', '$0 rake'], // not yet supported
+      ['Installs the newest rake 13 release', '$0 rake 13'],
     ],
+    details: partialVersionHelp,
   });
 }

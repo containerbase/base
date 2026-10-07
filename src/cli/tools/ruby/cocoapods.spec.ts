@@ -99,6 +99,21 @@ describe('cli/tools/ruby/cocoapods', () => {
     );
   });
 
+  test.each(['1', '1.16', '1.16.2', '1.17.0.beta'])(
+    'validates %s',
+    async (version) => {
+      const { svc } = await toolContext(CocoapodsInstallService);
+
+      expect(await svc.validate(version)).toBe(true);
+    },
+  );
+
+  test('rejects an invalid version', async () => {
+    const { svc } = await toolContext(CocoapodsInstallService);
+
+    expect(await svc.validate('latest')).toBe(false);
+  });
+
   test('runs the tool test', async () => {
     const { svc } = await toolContext(CocoapodsInstallService);
 
@@ -119,6 +134,19 @@ describe('cli/tools/ruby/cocoapods', () => {
       const { svc } = await toolContext(CocoapodsVersionResolver);
 
       expect(await svc.resolve('latest')).toBe('1.15.2');
+    });
+
+    test('resolves a partial version', async () => {
+      scope('https://rubygems.org')
+        .get('/api/v1/versions/cocoapods.json')
+        .reply(200, [
+          { number: '1.17.0.beta', prerelease: true },
+          { number: '1.16.2', prerelease: false },
+          { number: '1.15.2', prerelease: false },
+        ]);
+      const { svc } = await toolContext(CocoapodsVersionResolver);
+
+      expect(await svc.resolve('1')).toBe('1.16.2');
     });
 
     test('keeps a pinned version', async () => {

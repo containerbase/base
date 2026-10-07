@@ -299,6 +299,15 @@ RUN set -ex; \
   sdkmanager "platforms;android-35"; \
   true
 
+# partial version, installing needs root
+USER root
+
+# `16.0` is listed as `16` in the repository
+RUN install-tool android-sdk-cmdline-tools 16.0
+
+RUN set -ex; \
+  sdkmanager --version | grep '^16\.';
+
 #--------------------------------------
 # final
 #--------------------------------------

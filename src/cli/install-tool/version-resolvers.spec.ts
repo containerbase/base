@@ -11,7 +11,7 @@ describe('cli/install-tool/version-resolvers', () => {
     expect(getVersionHelp()).toBe(codeBlock`
       Some tools accept partial versions:
 
-      - \`checkov\`, \`conan\`, \`copier\`, \`hashin\`, \`kas\`, \`node\`, \`nuget\`, \`pdm\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
+      - \`android-sdk-cmdline-tools\`, \`bundler\`, \`checkov\`, \`cocoapods\`, \`conan\`, \`copier\`, \`hashin\`, \`kas\`, \`node\`, \`nuget\`, \`pdm\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
       - \`corepack\`, \`npm\`, \`pnpm\`, \`yarn\`: A major or major.minor version installs the matching \`latest\` release, else the newest matching one.
       - \`java\`, \`java-jdk\`, \`java-jre\`: A major, major.minor or major.minor.patch version, like \`21\` or \`11.0\`, installs the newest matching release.
     `);

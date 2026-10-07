@@ -200,6 +200,41 @@ describe('cli/tools/ruby/utils', () => {
       );
     });
 
+    test.each([
+      '2',
+      '2.5',
+      '5.2',
+      '2.5.0',
+      '6.1.7.10',
+      '1.0.0.beta1',
+      '7.0.0.rc2',
+      '1.17.0.beta',
+    ])('validates %s', async (version) => {
+      const svc = await child.getAsync(BundlerInstallService);
+
+      expect(await svc.validate(version)).toBe(true);
+    });
+
+    test.each([
+      '',
+      ' ',
+      '2 ',
+      'latest',
+      'v2.5',
+      '1a',
+      '1a.2',
+      '.2',
+      '2.',
+      '2..5',
+      '2.5-beta',
+      '2.5 && ls',
+      '>= 2',
+    ])('rejects %j', async (version) => {
+      const svc = await child.getAsync(BundlerInstallService);
+
+      expect(await svc.validate(version)).toBe(false);
+    });
+
     test('runs the tool test', async () => {
       const svc = await child.getAsync(BundlerInstallService);
 
@@ -246,6 +281,79 @@ describe('cli/tools/ruby/utils', () => {
       const resolver = await child.getAsync(BundlerVersionResolver);
 
       expect(await resolver.resolve('2.5.0')).toBe('2.5.0');
+    });
+
+    describe('partial versions', () => {
+      const versions = [
+        { number: '3.0.0.rc1', prerelease: true },
+        { number: '2.10.0', prerelease: false },
+        { number: '2.9.1', prerelease: false },
+        { number: '2.10.0.beta1', prerelease: true },
+        { number: '2.9', prerelease: false },
+        { number: '2.5.11', prerelease: false },
+        { number: '2.5.9', prerelease: false },
+        { number: '2.5.10', prerelease: false },
+        { number: '1.17.3.1', prerelease: false },
+        { number: '1.17.3', prerelease: false },
+        { number: '20.1.0', prerelease: false },
+        { number: '4.0.0.pre', prerelease: true },
+        { number: '5.0', prerelease: true },
+      ];
+
+      test.each([
+        { version: '2', expected: '2.10.0' },
+        { version: '2.5', expected: '2.5.11' },
+        { version: '2.10', expected: '2.10.0' },
+        { version: '1', expected: '1.17.3.1' },
+        { version: '20', expected: '20.1.0' },
+        // an existing release is kept
+        { version: '2.9', expected: '2.9' },
+        { version: '5.0', expected: '5.0' },
+      ])('resolves $version to $expected', async ({ version, expected }) => {
+        scope('https://rubygems.org')
+          .get('/api/v1/versions/bundler.json')
+          .reply(200, versions);
+        const resolver = await child.getAsync(BundlerVersionResolver);
+
+        expect(await resolver.resolve(version)).toBe(expected);
+      });
+
+      test.each(['3', '4', '2.6', '6'])(
+        'throws for %s without a matching release',
+        async (version) => {
+          scope('https://rubygems.org')
+            .get('/api/v1/versions/bundler.json')
+            .reply(200, versions);
+          const resolver = await child.getAsync(BundlerVersionResolver);
+
+          await expect(resolver.resolve(version)).rejects.toThrow(
+            `No bundler release found for version ${version}`,
+          );
+        },
+      );
+
+      test('throws for a partial version when rubygems.org is missing the gem', async () => {
+        scope('https://rubygems.org')
+          .get('/api/v1/versions/bundler.json')
+          .reply(404);
+        const resolver = await child.getAsync(BundlerVersionResolver);
+
+        await expect(resolver.resolve('2')).rejects.toThrow(
+          'Could not resolve bundler version 2 on rubygems.org, use a full version',
+        );
+      });
+
+      test('throws for a partial version when rubygems.org is not reachable', async () => {
+        scope('https://rubygems.org')
+          .get('/api/v1/versions/bundler.json')
+          .times(3)
+          .replyWithError('connection reset');
+        const resolver = await child.getAsync(BundlerVersionResolver);
+
+        await expect(resolver.resolve('2.5')).rejects.toThrow(
+          'Could not resolve bundler version 2.5 on rubygems.org, use a full version',
+        );
+      });
     });
 
     test('createGemVersionResolver', async () => {

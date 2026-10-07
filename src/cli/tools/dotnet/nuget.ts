@@ -7,24 +7,10 @@ import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import {
   ToolVersionResolver,
   isPartialVersion,
+  newestVersion,
   partialVersionHelp,
 } from '../../install-tool/tool-version-resolver.ts';
-import { logger, semverCoerce, semverGte } from '../../utils/index.ts';
-
-/**
- * The newest of the versions, compared coerced, so entries like `4.9` count
- * as `4.9.0`.
- * @returns the newest version as listed, or `undefined` without any
- */
-function newest(versions: string[]): string | undefined {
-  let result: string | undefined;
-  for (const version of versions) {
-    if (!result || semverGte(semverCoerce(version)!, semverCoerce(result)!)) {
-      result = version;
-    }
-  }
-  return result;
-}
+import { logger } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -123,7 +109,7 @@ export class NugetVersionResolver extends ToolVersionResolver {
       if (meta.some((v) => v.version === version)) {
         return version;
       }
-      const release = newest(
+      const release = newestVersion(
         meta
           .filter(
             (v) =>
