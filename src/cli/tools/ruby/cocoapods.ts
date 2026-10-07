@@ -15,7 +15,8 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
 
   /**
    * Pins activesupport below 7.1 for cocoapods 1.12.0 to 1.13.0, which break
-   * with newer versions.
+   * with newer versions. It is installed from the same gem registry as
+   * cocoapods.
    */
   protected override async _postInstall(
     gem: string,
@@ -39,6 +40,7 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
         join(prefix, 'bin'),
         '--version',
         '<7.1.0',
+        ...this.registryArgs(),
       ],
       { env },
     );

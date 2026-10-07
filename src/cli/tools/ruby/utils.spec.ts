@@ -113,6 +113,30 @@ describe('cli/tools/ruby/utils', () => {
       );
     });
 
+    test.each([
+      {
+        cdnGem: 'true',
+        extra: [
+          '--clear-sources',
+          '--source',
+          'https://cdn.example.com/rubygems.org/',
+        ],
+      },
+      { cdnGem: undefined, extra: [] },
+    ])(
+      'install: with a cdn and CONTAINERBASE_CDN_GEM=$cdnGem',
+      async ({ cdnGem, extra }) => {
+        vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+        vi.stubEnv('CONTAINERBASE_CDN_GEM', cdnGem);
+        const svc = await child.getAsync(BundlerInstallService);
+
+        await expect(svc.install('2.5.3')).resolves.toBeUndefined();
+
+        const [, args] = execaMock.mock.calls[0]!;
+        expect(args?.slice(args.indexOf('--verbose') + 1)).toEqual(extra);
+      },
+    );
+
     test('install: throws and cleans up on failure', async () => {
       execaMock.mockResolvedValue({ failed: true, all: 'boom' });
       const svc = await child.getAsync(BundlerInstallService);
