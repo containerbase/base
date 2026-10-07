@@ -64,7 +64,7 @@ jobs:
 
       - name: lint
         run: |
-          pnpm eslint -f gha
+          pnpm oxlint --format github
           pnpm prettier
           pnpm lint:docs
           pnpm lint:markdown

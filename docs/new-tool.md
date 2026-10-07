@@ -304,7 +304,7 @@ docker buildx bake --set *.cache-from=
 Before opening a PR:
 
 ```sh
-pnpm lint          # prettier, eslint, tsc, markdownlint
+pnpm lint          # prettier, oxlint, tsc, markdownlint
 pnpm test:vitest
 pnpm test:bats
 ```

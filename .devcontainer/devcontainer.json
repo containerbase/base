@@ -14,7 +14,7 @@
         },
         "terminal.integrated.defaultProfile.linux": "bash"
       },
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+      "extensions": ["oxc.oxc-vscode", "esbenp.prettier-vscode"]
     }
   },
   "postCreateCommand": "pnpm install",

@@ -10,7 +10,7 @@ import {
 } from './utils/index.ts';
 
 declare global {
-  // needs to be this to make eslint happy
+  // only `var` adds the property to `globalThis`
   var CONTAINERBASE_VERSION: string | undefined;
 }
 

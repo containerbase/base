@@ -1,0 +1,17 @@
+{
+  "name": "fixture-package",
+  "private": true,
+  "dependencies": {
+    "@scope/runtime": "1.0.0",
+    "runtime-dep": "1.0.0"
+  },
+  "devDependencies": {
+    "dev-dep": "1.0.0"
+  },
+  "peerDependencies": {
+    "peer-dep": "*"
+  },
+  "optionalDependencies": {
+    "optional-dep": "1.0.0"
+  }
+}

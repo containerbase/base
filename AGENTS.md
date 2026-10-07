@@ -25,7 +25,7 @@ All tooling runs through `pnpm`:
 - `pnpm install --frozen-lockfile`: install dependencies
 - `pnpm vitest run`: run the unit tests
 - `pnpm tsc --noEmit`: type check
-- `pnpm eslint`: lint
+- `pnpm oxlint` and `pnpm oxlint-fix`: lint and fix lint findings
 - `pnpm prettier` and `pnpm prettier-fix`: check and fix formatting
 - `pnpm lint:markdown`: lint markdown
 - `pnpm lint:schema`: check the committed json schemas are up to date
