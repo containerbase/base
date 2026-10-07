@@ -249,6 +249,31 @@ RUN install-pip poetry
 RUN install-pip uv
 
 #--------------------------------------
+# test: partial versions
+#--------------------------------------
+FROM build-rootless AS test-partial
+
+RUN install-tool poetry 2
+
+RUN set -ex; \
+  poetry --version | grep 'version 2\.';
+
+RUN install-tool conan 2
+
+RUN set -ex; \
+  conan --version | grep 'version 2\.';
+
+RUN install-tool pip-tools 7
+
+RUN set -ex; \
+  pip-compile --version | grep 'version 7\.';
+
+RUN install-pip pipenv 2026
+
+RUN set -ex; \
+  pipenv --version | grep 'version 2026\.';
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -264,3 +289,4 @@ COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=test-other /.dummy /.dummy
+COPY --from=test-partial /.dummy /.dummy

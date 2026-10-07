@@ -8,10 +8,15 @@ import {
   VersionService,
 } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
-import { RubyBaseInstallService, RubyGemVersionResolver } from './utils.ts';
+import {
+  RubyBaseInstallService,
+  RubyGemVersionResolver,
+  createGemVersionResolver,
+} from './utils.ts';
 import { testContainer } from '~test/di.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
+import { toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -217,6 +222,16 @@ describe('cli/tools/ruby/utils', () => {
       const resolver = await child.getAsync(BundlerVersionResolver);
 
       expect(await resolver.resolve('2.5.0')).toBe('2.5.0');
+    });
+
+    test('createGemVersionResolver', async () => {
+      scope('https://rubygems.org')
+        .get('/api/v1/gems/cocoapods.json')
+        .reply(200, { version: '1.16.2' });
+      const { svc } = await toolContext(createGemVersionResolver('cocoapods'));
+
+      expect(svc.tool).toBe('cocoapods');
+      expect(await svc.resolve('latest')).toBe('1.16.2');
     });
   });
 });

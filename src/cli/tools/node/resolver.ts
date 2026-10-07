@@ -1,6 +1,10 @@
 import { isNonEmptyStringAndNotWhitespace, isObject } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import {
+  ToolVersionResolver,
+  isPartialVersion,
+  partialVersionHelp,
+} from '../../install-tool/tool-version-resolver.ts';
 import { semverMaxSatisfying, semverSatisfies } from '../../utils/index.ts';
 import { yarnPackage } from './npm.ts';
 import {
@@ -8,10 +12,6 @@ import {
   NpmPackageMeta,
   NpmPackageMetaList,
 } from './schema.ts';
-
-/** The version note of the node tool. */
-export const partialVersionHelp =
-  'A major or major.minor version installs the newest matching release.';
 
 /** The version note shared by the npm based tools. */
 export const npmPartialVersionHelp =
@@ -48,7 +48,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
       // we know that the latest version is the first entry, so search for first lts
       return meta.find((v) => v.lts)?.version.replace(/^v/, '');
     }
-    if (/^\d+(\.\d+)?$/.test(version)) {
+    if (isPartialVersion(version)) {
       const prefix = `v${version}.`;
       const meta = await this.getReleases();
       // newer releases come first, so the first match is the newest of that line
@@ -90,7 +90,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
       const meta = await this.getMeta(this.packageName(version));
       return meta['dist-tags'].latest;
     }
-    if (/^\d+(\.\d+)?$/.test(version)) {
+    if (isPartialVersion(version)) {
       const meta = await this.getMeta(this.packageName(version));
       const latest = meta['dist-tags'].latest;
       // like npm, prefer the `latest` dist tag if it matches and is not deprecated

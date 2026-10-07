@@ -10,7 +10,8 @@ export class PoetryVersionResolver extends PipVersionResolver {
 
   /**
    * Resolves a missing version or `latest` to the newest poetry release
-   * supported by `poetry-plugin-pypi-mirror`.
+   * supported by `poetry-plugin-pypi-mirror`. A partial version resolves to
+   * the newest matching release, regardless of the plugin.
    *
    * @throws when the plugin has no poetry requirement
    */
@@ -29,12 +30,15 @@ export class PoetryVersionResolver extends PipVersionResolver {
 
       const meta = await this.fetchMeta(this.tool);
       const version = maxSatisfying(
-        Object.keys(meta.releases).filter((v) => !meta.releases[v]!.yanked),
+        Object.entries(meta.releases)
+          // a release without files has no entry, a yanked one is not installable
+          .filter(([, release]) => release && !release.yanked)
+          .map(([v]) => v),
         poetryVersion,
       );
       logger.debug({ version }, 'Resolved poetry version');
       return version ?? meta.info.version;
     }
-    return version;
+    return super.resolve(version);
   }
 }
