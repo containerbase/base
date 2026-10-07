@@ -19,10 +19,12 @@ jobs:
     steps:
       - name: Get Merge Queue Commit SHA
         id: get-sha
+        env:
+          REASON: ${{ github.event.reason }}
         run: |
           echo "Repository: ${{ github.repository }}"
           echo "Head SHA: ${{ github.sha }}"
-          echo "Merge Group Reason: ${{ github.event.reason }}"
+          echo "Merge Group Reason: ${REASON}"
 
       - name: Cancel Workflow Runs by SHA
         run: |
