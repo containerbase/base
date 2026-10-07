@@ -1,31 +1,43 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { env as penv } from 'node:process';
 import { major, minor, satisfies, valid } from '@renovatebot/pep440';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { VersionService } from '../../services/index.ts';
+import { type EnvService, VersionService } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
+
+const defaultPipRegistry = 'https://pypi.org/simple/';
+
+/**
+ * The env for the configured pip index: `PIP_INDEX_URL` when the cdn or a url
+ * replacement changes the default index, otherwise empty.
+ */
+export function pipIndexEnv(envSvc: EnvService): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+
+  const pipIndex = envSvc.replaceUrl(
+    defaultPipRegistry,
+    isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_PIP),
+  );
+  if (pipIndex !== defaultPipRegistry) {
+    env.PIP_INDEX_URL = pipIndex;
+  }
+
+  return env;
+}
 
 @injectable()
 export abstract class PythonBaseInstallService extends BaseInstallService {
   @inject(VersionService)
   protected readonly versionSvc!: VersionService;
 
-  /** The env for pip commands, currently empty. */
+  /** The env for pip commands: the configured pip index. */
   protected prepareEnv(_version: string): NodeJS.ProcessEnv {
-    const env: NodeJS.ProcessEnv = {};
-
-    // const registry = this.envSvc.replaceUrl(
-    //   defaultRegistry,
-    //   isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_NPM),
-    // );
-    // if (registry !== defaultRegistry) {
-    //   env.npm_config_registry = registry;
-    // }
-
-    return env;
+    return pipIndexEnv(this.envSvc);
   }
 }
 
