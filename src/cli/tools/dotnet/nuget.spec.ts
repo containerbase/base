@@ -178,6 +178,23 @@ describe('cli/tools/dotnet/nuget', () => {
       );
     });
 
+    test('keeps a partial version when tools.json is missing', async () => {
+      scope(baseUrl).get('/tools.json').reply(404);
+      const { svc } = await toolContext(NugetVersionResolver);
+
+      expect(await svc.resolve('6.11')).toBe('6.11');
+    });
+
+    test('keeps a partial version when tools.json is not reachable', async () => {
+      scope(baseUrl)
+        .get('/tools.json')
+        .times(3)
+        .replyWithError('connection reset');
+      const { svc } = await toolContext(NugetVersionResolver);
+
+      expect(await svc.resolve('6')).toBe('6');
+    });
+
     test('keeps a pinned version', async () => {
       const { svc } = await toolContext(NugetVersionResolver);
 

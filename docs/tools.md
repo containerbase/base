@@ -106,10 +106,12 @@ Some tools accept partial versions and install a matching release:
 - `conan`, `poetry` and any package installed with [`install-pip`](#install-pip-command): A major (`2`) or major.minor (`2.1`) version installs the newest matching release, prereleases and yanked releases are skipped.
   A version which exists as a release, like `5.2`, is kept, even a yanked one, which pip installs when pinned.
   Without access to pypi.org, eg. for a package from a private index, the version is kept too.
+  The lookup uses pypi.org, so a package from a private index whose name also exists on pypi.org should be pinned with a full version.
+  A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
 - `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
-  A version which exists in the nuget feed is kept.
+  A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
 
 Any other version is used as is.

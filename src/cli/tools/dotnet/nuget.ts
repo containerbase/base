@@ -9,7 +9,7 @@ import {
   isPartialVersion,
   partialVersionHelp,
 } from '../../install-tool/tool-version-resolver.ts';
-import { semverCoerce, semverGte } from '../../utils/index.ts';
+import { logger, semverCoerce, semverGte } from '../../utils/index.ts';
 
 /**
  * The newest of the versions, compared coerced, so entries like `4.9` count
@@ -96,7 +96,8 @@ export class NugetVersionResolver extends ToolVersionResolver {
    *   blessed version.
    * - A major (`6`) or major.minor (`6.11`) version which is no existing
    *   version resolves to the newest matching released and blessed one, in
-   *   any feed order. An existing version, like `6.1`, is kept.
+   *   any feed order. An existing version, like `6.1`, is kept, and so is the
+   *   version when `tools.json` can't be loaded.
    * - Any other version, like a full `X.Y.Z`, is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -108,7 +109,16 @@ export class NugetVersionResolver extends ToolVersionResolver {
       return meta.find((v) => v.stage === 'ReleasedAndBlessed')?.version;
     }
     if (isPartialVersion(version)) {
-      const meta = await this.getReleases();
+      let meta: z.infer<typeof NugetVersion>[];
+      try {
+        meta = await this.getReleases();
+      } catch (err) {
+        logger.debug(
+          { err, version },
+          'nuget lookup failed, keeping the version',
+        );
+        return version;
+      }
       // an existing release of any stage is kept
       if (meta.some((v) => v.version === version)) {
         return version;
