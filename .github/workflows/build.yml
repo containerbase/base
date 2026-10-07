@@ -66,6 +66,7 @@ jobs:
         run: |
           pnpm oxlint --format github
           pnpm prettier
+          pnpm lint:docs
           pnpm lint:markdown
           pnpm lint:types
           pnpm lint:schema

@@ -713,12 +713,14 @@ Known tools:
 
 - `checkov`
 - `conan`
+- `copier`
 - `hashin`
 - `kas`
 - `pdm`
 - `pip-tools`
 - `pipenv`
 - `poetry`
+- `uv`
 
 ## `ruby`
 
