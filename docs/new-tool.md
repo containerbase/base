@@ -2,7 +2,7 @@
 
 ## How tools work
 
-Tools can be installed at image build time, or during the runtime of a given image, using `install-tool <name> [version]`, which is shorthand for `containerbase-cli install tool`.
+Tools can be installed at image build time or during the runtime of a given image, using `install-tool <name> [version]`, which is shorthand for `containerbase-cli install tool`.
 
 See [tools.md](./tools.md) for the full command reference.
 
