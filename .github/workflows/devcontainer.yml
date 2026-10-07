@@ -8,6 +8,10 @@ on:
       - synchronize
       - reopened
       - ready_for_review
+    # not a required check, so docs-only pull requests can skip it entirely
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
 
 permissions:
   contents: read
