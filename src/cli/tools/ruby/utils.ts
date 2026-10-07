@@ -1,5 +1,6 @@
 import { chmod, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { env as penv } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
@@ -30,7 +31,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 
     const registry = this.envSvc.replaceUrl(
       defaultRegistry,
-      isNonEmptyStringAndNotWhitespace(env.CONTAINERBASE_CDN_GEM),
+      isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_GEM),
     );
     if (registry !== defaultRegistry) {
       args.push('--clear-sources', '--source', registry);
