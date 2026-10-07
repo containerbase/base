@@ -126,8 +126,141 @@ describe('cli/tools/node/resolver', () => {
         const { svc } = await toolContext(PnpmVersionResolver);
 
         await expect(svc.resolve(version)).rejects.toThrow(
-          `No pnpm release found for version ${version}`,
+          new Error(`No pnpm release found for version ${version}`),
         );
+      });
+
+      test('mentions skipped prereleases when only those match', async () => {
+        scope(registryUrl).get('/pnpm').reply(200, meta);
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        await expect(svc.resolve('9.16')).rejects.toThrow(
+          new Error(
+            'No pnpm release found for version 9.16 (prereleases are skipped)',
+          ),
+        );
+      });
+
+      test('prefers the latest dist tag if it matches', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '10.4.1', next: '10.5.0' },
+            versions: { '10.4.1': {}, '10.5.0': {} },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('10')).toBe('10.4.1');
+      });
+
+      test('ignores the latest dist tag outside the range', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '10.4.1' },
+            versions: { '9.1.0': {}, '9.2.0': {}, '10.4.1': {} },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.2.0');
+      });
+
+      test('works without a latest dist tag', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': {},
+            versions: { '9.1.0': {} },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.1.0');
+      });
+
+      test('skips deprecated versions', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '10.0.0' },
+            versions: {
+              '9.1.0': {},
+              '9.2.0': { deprecated: 'broken release' },
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.1.0');
+      });
+
+      test('falls back to the newest version if all matching versions are deprecated', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '10.0.0' },
+            versions: {
+              '9.1.0': { deprecated: 'broken release' },
+              '9.2.0': { deprecated: 'broken release' },
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.2.0');
+      });
+
+      test('skips a deprecated latest dist tag', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '9.3.0' },
+            versions: {
+              '9.1.0': {},
+              '9.2.0': {},
+              '9.3.0': { deprecated: 'broken release' },
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.2.0');
+      });
+
+      test('ignores a latest dist tag without a version entry', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '9.3.0' },
+            versions: { '9.1.0': {} },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('9')).toBe('9.1.0');
+      });
+
+      test('tolerates odd version entries', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .times(2)
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '9.4.0' },
+            versions: {
+              '9.1.0': {},
+              '9.2.0': 'odd',
+              '9.3.0': null,
+              '9.4.0': { deprecated: true },
+              '9.5.0': { deprecated: 'broken release' },
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('latest')).toBe('9.4.0');
+        expect(await svc.resolve('9')).toBe('9.3.0');
       });
     });
 
@@ -154,6 +287,7 @@ describe('cli/tools/node/resolver', () => {
           version: '1',
           pkg: 'yarn',
           versions: ['1.21.0', '1.22.22', '2.0.0'],
+          latest: '2.0.0',
           expected: '1.22.22',
         },
         {
@@ -161,6 +295,15 @@ describe('cli/tools/node/resolver', () => {
           version: '4.5',
           pkg: '@yarnpkg/cli-dist',
           versions: ['4.5.0', '4.5.3', '4.6.0'],
+          latest: '4.6.0',
+          expected: '4.5.3',
+        },
+        {
+          hostArch: 'x64',
+          version: '4',
+          pkg: '@yarnpkg/cli-dist',
+          versions: ['4.5.0', '4.5.3', '4.6.0'],
+          latest: '4.5.3',
           expected: '4.5.3',
         },
         {
@@ -168,6 +311,7 @@ describe('cli/tools/node/resolver', () => {
           version: '6',
           pkg: '@yarnpkg/yarn-x86_64-unknown-linux-musl',
           versions: ['6.0.0', '6.1.0', '7.0.0'],
+          latest: '7.0.0',
           expected: '6.1.0',
         },
         {
@@ -175,17 +319,18 @@ describe('cli/tools/node/resolver', () => {
           version: '6',
           pkg: '@yarnpkg/yarn-aarch64-unknown-linux-musl',
           versions: ['6.0.0', '6.1.0', '7.0.0'],
+          latest: '7.0.0',
           expected: '6.1.0',
         },
       ] as const)(
-        'resolves $version on $hostArch from $pkg',
-        async ({ hostArch, version, pkg, versions, expected }) => {
+        'resolves $version on $hostArch from $pkg (latest $latest)',
+        async ({ hostArch, version, pkg, versions, latest, expected }) => {
           vi.mocked(arch).mockReturnValue(hostArch);
           scope(registryUrl)
             .get(`/${pkg}`)
             .reply(200, {
               name: pkg,
-              'dist-tags': { latest: expected },
+              'dist-tags': { latest },
               versions: Object.fromEntries(versions.map((v) => [v, {}])),
             });
           const { svc } = await toolContext(YarnVersionResolver);
@@ -205,7 +350,7 @@ describe('cli/tools/node/resolver', () => {
         const { svc } = await toolContext(YarnVersionResolver);
 
         await expect(svc.resolve('4.9')).rejects.toThrow(
-          'No yarn release found for version 4.9',
+          new Error('No yarn release found for version 4.9'),
         );
       });
     });

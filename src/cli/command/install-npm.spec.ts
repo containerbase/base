@@ -1,7 +1,9 @@
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { npmPartialVersionHelp } from '../tools/node/resolver.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { registerCommands } from './index.ts';
+import { InstallNpmCommand, InstallNpmShortCommand } from './install-npm.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -15,6 +17,11 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 describe('cli/command/install-npm', () => {
   beforeEach(() => {
     vi.stubEnv('DEL_CLI_VERSION', undefined);
+  });
+
+  test('describes partial versions', () => {
+    expect(InstallNpmCommand.usage?.details).toBe(npmPartialVersionHelp);
+    expect(InstallNpmShortCommand.usage?.details).toBe(npmPartialVersionHelp);
   });
 
   test('install-npm', async () => {

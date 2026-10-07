@@ -1,7 +1,7 @@
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isObject } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
-import { semverMaxSatisfying } from '../../utils/index.ts';
+import { semverMaxSatisfying, semverSatisfies } from '../../utils/index.ts';
 import { yarnPackage } from './npm.ts';
 import {
   type NodeVersionMeta,
@@ -9,9 +9,21 @@ import {
   NpmPackageMetaList,
 } from './schema.ts';
 
-/** The version note shared by the node and npm based tools. */
+/** The version note of the node tool. */
 export const partialVersionHelp =
   'A major or major.minor version installs the newest matching release.';
+
+/** The version note shared by the npm based tools. */
+export const npmPartialVersionHelp =
+  'A major or major.minor version installs the matching `latest` release, else the newest matching one.';
+
+/**
+ * Checks if a package version entry of the registry is deprecated.
+ * @param entry - the unvalidated entry, anything truthy in `deprecated` counts
+ */
+function isDeprecated(entry: unknown): boolean {
+  return isObject(entry) && 'deprecated' in entry && !!entry.deprecated;
+}
 
 @injectable()
 @injectFromHierarchy()
@@ -59,14 +71,16 @@ export class NodeVersionResolver extends ToolVersionResolver {
 
 @injectable()
 export abstract class NpmVersionResolver extends ToolVersionResolver {
-  override readonly versionHelp = partialVersionHelp;
+  override readonly versionHelp = npmPartialVersionHelp;
 
   /**
    * Resolves a version from the npm registry.
    *
    * - A missing version or `latest` resolves to the npm `latest` dist tag.
-   * - A major (`9`) or major.minor (`9.15`) version resolves to the newest
-   *   matching release, prereleases are skipped.
+   * - A major (`9`) or major.minor (`9.15`) version resolves to the `latest`
+   *   dist tag if it matches and is not deprecated, otherwise to the newest
+   *   matching release which is not deprecated, or the newest deprecated one
+   *   if there is no other. Prereleases are skipped.
    * - Any other version, like a full `X.Y.Z`, is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -78,9 +92,31 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
     }
     if (/^\d+(\.\d+)?$/.test(version)) {
       const meta = await this.getMeta(this.packageName(version));
-      const release = semverMaxSatisfying(Object.keys(meta.versions), version);
+      const latest = meta['dist-tags'].latest;
+      // like npm, prefer the `latest` dist tag if it matches and is not deprecated
+      if (
+        latest &&
+        latest in meta.versions &&
+        !isDeprecated(meta.versions[latest]) &&
+        semverSatisfies(latest, version)
+      ) {
+        return latest;
+      }
+      const all = Object.keys(meta.versions);
+      // like npm, fall back to deprecated versions if nothing else matches
+      const release =
+        semverMaxSatisfying(
+          all.filter((v) => !isDeprecated(meta.versions[v])),
+          version,
+        ) ?? semverMaxSatisfying(all, version);
       if (!release) {
-        throw new Error(`No ${this.tool} release found for version ${version}`);
+        // only mention prereleases when one would have matched
+        const prerelease = all.some((v) =>
+          semverSatisfies(v, version, { includePrerelease: true }),
+        );
+        throw new Error(
+          `No ${this.tool} release found for version ${version}${prerelease ? ' (prereleases are skipped)' : ''}`,
+        );
       }
       return release;
     }

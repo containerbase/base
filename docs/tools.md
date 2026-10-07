@@ -94,14 +94,14 @@ Installs a tool into the container.
 
 #### Tool-specific versions <a name="Versions-install-tool"></a>
 
-Some tools accept partial versions and install the newest matching release:
+Some tools accept partial versions and install a matching release:
 
 - `java`, `java-jre`, `java-jdk`: A major (`21`), major.minor (`11.0`) or major.minor.patch (`11.0.24`) version installs the newest matching GA release.
   A full version with a build, like `17.0.12+7`, is used as is.
   Without a version, or with `latest`, the newest LTS is installed.
 - `node`: A major (`22`) or major.minor (`22.11`) version installs the newest matching release.
   Without a version, or with `latest`, the newest LTS is installed.
-- `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the newest matching release, prereleases are skipped.
+- `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the `latest` dist tag if it matches and is not deprecated, otherwise the newest matching release, prereleases are skipped and deprecated versions are used only if there is no other.
   Without a version, or with `latest`, the `latest` release is installed.
 
 Any other version is used as is.
@@ -185,14 +185,14 @@ Note: requires node to be installed.
   ```bash
   install-npm del-cli
   ```
-- Installs the newest del-cli 5 release
+- Installs a del-cli 5 release
   ```bash
   install-npm del-cli 5
   ```
 
 #### Tool-specific versions <a name="Versions-install-npm"></a>
 
-A major or major.minor version installs the newest matching release, see the [install-tool versions](#Versions-install-tool).
+A major or major.minor version installs the matching `latest` release, else the newest matching one, see the [install-tool versions](#Versions-install-tool).
 
 <br>
 
