@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
 import { InstallToolCommand } from './install-tool.ts';
 import { command } from './utils.ts';
 
@@ -13,9 +14,10 @@ export class InstallPipCommand extends InstallToolCommand {
         'Installs checkov with version via environment variable',
         'DEL_CLI_VERSION=2.4.7 $0 install pip checkov',
       ],
-      // TODO: add version resolver
-      // ['Installs latest checkov version', '$0 install pip checkov'],
+      ['Installs latest checkov version', '$0 install pip checkov'],
+      ['Installs the newest checkov 2 release', '$0 install pip checkov 2'],
     ],
+    details: partialVersionHelp,
   });
 
   protected override type = 'pip' as const;
@@ -33,8 +35,9 @@ export class InstallPipShortCommand extends InstallPipCommand {
         'Installs checkov with version via environment variable',
         'DEL_CLI_VERSION=2.4.7 $0 checkov',
       ],
-      // TODO: add version resolver
-      // ['Installs latest checkov version', '$0 checkov'],
+      ['Installs latest checkov version', '$0 checkov'],
+      ['Installs the newest checkov 2 release', '$0 checkov 2'],
     ],
+    details: partialVersionHelp,
   });
 }

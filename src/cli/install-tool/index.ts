@@ -58,7 +58,6 @@ import {
   YarnInstallService,
   YarnSlimInstallService,
 } from '../tools/node/npm.ts';
-import { createNpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { NubInstallService } from '../tools/nub.ts';
 import { ComposerInstallService } from '../tools/php/composer.ts';
@@ -67,14 +66,10 @@ import { PixiInstallService } from '../tools/pixi.ts';
 import { ProtocInstallService } from '../tools/protoc.ts';
 import { ConanInstallService } from '../tools/python/conan.ts';
 import { PythonInstallService } from '../tools/python/index.ts';
-import { PipVersionResolver } from '../tools/python/pip.ts';
 import { PipBaseInstallService } from '../tools/python/utils.ts';
 import { CocoapodsInstallService } from '../tools/ruby/cocoapods.ts';
 import { RubyInstallService } from '../tools/ruby/index.ts';
-import {
-  RubyBaseInstallService,
-  RubyGemVersionResolver,
-} from '../tools/ruby/utils.ts';
+import { RubyBaseInstallService } from '../tools/ruby/utils.ts';
 import { RustInstallService } from '../tools/rust.ts';
 import { SkopeoInstallService } from '../tools/skopeo.ts';
 import { SopsInstallService } from '../tools/sops.ts';
@@ -95,7 +90,10 @@ import {
 } from './install-tool.service.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
-import { versionResolvers } from './version-resolvers.ts';
+import {
+  createGenericVersionResolver,
+  versionResolvers,
+} from './version-resolvers.ts';
 
 /**
  * Creates a container with all install services, including a generic one for
@@ -440,32 +438,9 @@ export async function resolveVersion(
   const container = prepareResolveContainer();
 
   if (type) {
-    switch (type) {
-      case 'gem': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends RubyGemVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
-        break;
-      }
-      case 'npm': {
-        container
-          .bind(TOOL_VERSION_RESOLVER)
-          .to(createNpmVersionResolver(tool));
-        break;
-      }
-      case 'pip': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends PipVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
-        break;
-      }
-    }
+    container
+      .bind(TOOL_VERSION_RESOLVER)
+      .to(createGenericVersionResolver(type, tool));
   }
   const svc = await container.getAsync(ToolVersionResolverService);
   return svc.resolve(tool, version);

@@ -1,7 +1,9 @@
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { registerCommands } from './index.ts';
+import { InstallPipCommand, InstallPipShortCommand } from './install-pip.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -15,6 +17,11 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 describe('cli/command/install-pip', () => {
   beforeEach(() => {
     vi.stubEnv('POETRY_VERSION', undefined);
+  });
+
+  test('describes partial versions', () => {
+    expect(InstallPipCommand.usage?.details).toBe(partialVersionHelp);
+    expect(InstallPipShortCommand.usage?.details).toBe(partialVersionHelp);
   });
 
   test('install-pip', async () => {

@@ -2,7 +2,7 @@ import { chmod, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { inject, injectable } from 'inversify';
+import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
 import { VersionService } from '../../services/index.ts';
@@ -179,4 +179,19 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
     }
     return version;
   }
+}
+
+/**
+ * Creates a version resolver for a tool which is a plain gem.
+ * @param tool - the tool and gem name
+ */
+export function createGemVersionResolver(
+  tool: string,
+): new () => RubyGemVersionResolver {
+  @injectable()
+  @injectFromHierarchy()
+  class GenericVersionResolver extends RubyGemVersionResolver {
+    override readonly tool: string = tool;
+  }
+  return GenericVersionResolver;
 }
