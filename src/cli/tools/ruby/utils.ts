@@ -27,15 +27,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
    */
   override async install(version: string): Promise<void> {
     const env: NodeJS.ProcessEnv = {};
-    const args: string[] = [];
-
-    const registry = this.envSvc.replaceUrl(
-      defaultRegistry,
-      isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_GEM),
-    );
-    if (registry !== defaultRegistry) {
-      args.push('--clear-sources', '--source', registry);
-    }
+    const args = this.registryArgs();
 
     const gem = await this.getRubyGem();
     const ruby = await this.getRubyVersion();
@@ -78,6 +70,21 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
     }
 
     await this._postInstall(gem, version, prefix, env);
+  }
+
+  /**
+   * The `gem install` args for the configured gem registry: the CDN when
+   * `CONTAINERBASE_CDN_GEM` is set, and the URL replacements.
+   * @returns the source args, or none for the default registry
+   */
+  protected registryArgs(): string[] {
+    const registry = this.envSvc.replaceUrl(
+      defaultRegistry,
+      isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_GEM),
+    );
+    return registry === defaultRegistry
+      ? []
+      : ['--clear-sources', '--source', registry];
   }
 
   /** Whether the version is installed for the current ruby version. */
