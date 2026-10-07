@@ -124,6 +124,58 @@ describe('cli/tools/python/utils', () => {
     );
   });
 
+  test.each([
+    { cdnPip: 'true', index: 'https://cdn.example.com/pypi.org/simple/' },
+    { cdnPip: undefined, index: undefined },
+  ])(
+    'install: with a cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
+    async ({ cdnPip, index }) => {
+      vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+      vi.stubEnv('CONTAINERBASE_CDN_PIP', cdnPip);
+      const svc = await child.getAsync(HashinInstallService);
+
+      await expect(svc.install('1.0.2')).resolves.toBeUndefined();
+
+      const env = index ? { PIP_INDEX_URL: index } : {};
+      expect(execaMock).toHaveBeenCalledTimes(2);
+      expect(execaMock).toHaveBeenNthCalledWith(
+        1,
+        'python',
+        expect.any(Array),
+        expect.objectContaining({ env }),
+      );
+      expect(execaMock).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('bin/python'),
+        expect.any(Array),
+        expect.objectContaining({ env }),
+      );
+    },
+  );
+
+  test('install: with a url replacement', async () => {
+    vi.stubEnv('URL_REPLACE_0_FROM', 'https://pypi.org/simple/');
+    vi.stubEnv('URL_REPLACE_0_TO', 'https://pypi.example.com/simple/');
+    const svc = await child.getAsync(HashinInstallService);
+    const env = { PIP_INDEX_URL: 'https://pypi.example.com/simple/' };
+
+    await expect(svc.install('1.0.3')).resolves.toBeUndefined();
+
+    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock).toHaveBeenNthCalledWith(
+      1,
+      'python',
+      expect.any(Array),
+      expect.objectContaining({ env }),
+    );
+    expect(execaMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('bin/python'),
+      expect.any(Array),
+      expect.objectContaining({ env }),
+    );
+  });
+
   test('install: reuses an existing tool path', async () => {
     const svc = await child.getAsync(HashinInstallService);
 

@@ -1,14 +1,11 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { env as penv } from 'node:process';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService } from '../../services/index.ts';
 import { getDistro, parse } from '../../utils/index.ts';
 import { PrebuildInstallService } from '../utils/prebuild.ts';
-
-const defaultPipRegistry = 'https://pypi.org/simple/';
+import { pipIndexEnv } from './utils.ts';
 
 /** The ubuntu releases python can be installed on. */
 const supportedDistros = ['jammy', 'noble', 'resolute'];
@@ -150,19 +147,10 @@ export class PythonInstallService extends PrebuildInstallService {
    * configured pip index.
    */
   private pipEnv(): NodeJS.ProcessEnv {
-    const env: NodeJS.ProcessEnv = {
+    return {
       PIP_ROOT_USER_ACTION: 'ignore',
       PIP_USE_PEP517: 'true',
+      ...pipIndexEnv(this.envSvc),
     };
-
-    const pipIndex = this.envSvc.replaceUrl(
-      defaultPipRegistry,
-      isNonEmptyStringAndNotWhitespace(penv.CONTAINERBASE_CDN_PIP),
-    );
-    if (pipIndex !== defaultPipRegistry) {
-      env.PIP_INDEX_URL = pipIndex;
-    }
-
-    return env;
   }
 }
