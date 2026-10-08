@@ -768,7 +768,7 @@ describe('cli/install-tool/index', () => {
       const setup = vi
         .spyOn(InstallToolService.prototype, 'setupVolume')
         .mockResolvedValue();
-      const load = vi.spyOn(DataService.prototype, 'load');
+      const load = vi.spyOn(DataService.prototype, 'db');
 
       await expect(setupVolume()).resolves.toBeUndefined();
 

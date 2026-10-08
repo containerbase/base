@@ -512,8 +512,8 @@ export async function setupVolume(): Promise<void> {
       return;
     }
     logger.debug('setting up the volume from the build-time list');
-    // before the databases load, which would create `data` with the owner and
-    // mode of the running process
+    // the base folders of the empty volume first, with the owner and mode
+    // containerbase sets, before the databases load or the setup writes
     await (await base.getAsync(PathService)).ensureBasePaths();
     const container = await prepareInstallContainer();
     await (await container.getAsync(InstallToolService)).setupVolume();
