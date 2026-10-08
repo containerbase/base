@@ -37,6 +37,44 @@ export const GradleVersionData = z.object({
   version: z.string(),
 });
 
+const GradleRelease = z.object({
+  version: z.string(),
+  snapshot: z.boolean().default(false),
+  nightly: z.boolean().default(false),
+  releaseNightly: z.boolean().default(false),
+  broken: z.boolean().default(false),
+  rcFor: z.string().default(''),
+  milestoneFor: z.string().default(''),
+});
+
+/**
+ * The versions of `services.gradle.org/versions/all`: `all` lists every
+ * entry, `stable` drops snapshots, nightlies, release candidates, milestones
+ * and broken releases. Entries in an unexpected shape are skipped one by one,
+ * so they don't fail the whole list.
+ */
+export const GradleReleases = z.array(z.unknown()).transform((entries) => {
+  const releases = entries.flatMap((entry) => {
+    const res = GradleRelease.safeParse(entry);
+    return res.success ? [res.data] : [];
+  });
+  return {
+    all: releases.map((e) => e.version),
+    stable: releases
+      .filter(
+        (e) =>
+          !e.snapshot &&
+          !e.nightly &&
+          !e.releaseNightly &&
+          !e.broken &&
+          !e.rcFor &&
+          !e.milestoneFor &&
+          /^\d+(\.\d+)*$/.test(e.version),
+      )
+      .map((e) => e.version),
+  };
+});
+
 const AndroidSdkChannel = z
   .object({
     '@': z.object({ id: z.string() }),
