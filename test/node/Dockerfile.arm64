@@ -90,6 +90,9 @@ COPY test/node/vp/sync-versions.mjs /test/vp/
 USER 12021
 SHELL ["/bin/sh", "-c"]
 
+RUN set -ex; \
+  vp --version | grep "${VP_VERSION}";
+
 RUN node /test/vp/sync-versions.mjs "${VP_VERSION}"
 
 #--------------------------------------

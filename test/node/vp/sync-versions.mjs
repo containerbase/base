@@ -70,20 +70,22 @@ try {
   assert.equal(replacement.kind, 'packageJson');
   assert.equal(replacement.before, contents);
 
+  // Only check what Renovate relies on, so upstream changes to which other
+  // dependencies the planner syncs don't fail the test.
   const updated = JSON.parse(replacement.after);
-  const vitestVersion = updated.devDependencies.vitest;
-  assert.match(vitestVersion, /^\d+\.\d+\.\d+/);
-  assert.notEqual(vitestVersion, '0.0.0');
-  assert.deepEqual(updated, {
-    ...manifest,
-    devDependencies: {
-      ...manifest.devDependencies,
-      'vite-plus': version,
-      vite: `npm:@voidzero-dev/vite-plus-core@${version}`,
-      vitest: vitestVersion,
-      '@vitest/coverage-v8': vitestVersion,
-    },
-  });
+  const { devDependencies, ...rest } = updated;
+  const { devDependencies: _, ...manifestRest } = manifest;
+  assert.deepEqual(rest, manifestRest);
+  assert.equal(devDependencies['vite-plus'], version);
+  assert.equal(
+    devDependencies.vite,
+    `npm:@voidzero-dev/vite-plus-core@${version}`,
+  );
+  for (const name of Object.keys(manifest.devDependencies)) {
+    assert.ok(name in devDependencies, `${name} was removed`);
+  }
+  assert.match(devDependencies.vitest, /^\d+\.\d+\.\d+/);
+  assert.notEqual(devDependencies.vitest, '0.0.0');
 
   assert.deepEqual(await plan(replacement.after), {
     schemaVersion: 1,

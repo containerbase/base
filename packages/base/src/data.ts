@@ -80,6 +80,7 @@ export const tools = {
   tofu: {},
   uv: { type: 'pip', parent: 'python' },
   vendir: {},
+  vp: { parent: 'node' },
   wally: {},
   yarn: { parent: 'node' },
   'yarn-slim': { parent: 'node' },
