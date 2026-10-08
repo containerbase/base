@@ -4,7 +4,7 @@
     "github>containerbase/.github",
     "github>containerbase/.github//merge-queue.json"
   ],
-  "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/*/test/**"],
   "enabledManagers": [
     "dockerfile",
     "github-actions",
