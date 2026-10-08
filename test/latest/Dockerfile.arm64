@@ -102,7 +102,7 @@ RUN install-tool gh v2.102.0
 FROM base AS test-gleam
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.19.0
+RUN install-tool gleam 1.19.1
 
 #--------------------------------------
 # Image: docker
