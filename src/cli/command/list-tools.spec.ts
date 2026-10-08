@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { z } from 'zod';
 import {
+  DataService,
   InstalledTools,
   VersionService,
   createContainer,
@@ -19,9 +20,12 @@ describe('cli/command/list-tools', () => {
 
   test('handles an empty tool list', async () => {
     const stdout = new StdoutMock();
+    const readOnly = vi.spyOn(DataService.prototype, 'readOnly');
 
     expect(await cli.run(['list', 'tools'], { stdout })).toBe(0);
     expect(stdout.output).toBe('No tools installed.\n');
+    // the database is opened read-only
+    expect(readOnly).toHaveBeenCalledOnce();
   });
 
   test('fails when something other than an error is thrown', async () => {
