@@ -276,6 +276,10 @@ jobs:
         if: failure()
         run: .github/actions/download-proxy/errors.sh
 
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
+
   # test old distros on arm64
   base-arm64:
     runs-on: ubuntu-24.04-arm
@@ -322,6 +326,10 @@ jobs:
       - name: Download proxy errors
         if: failure()
         run: .github/actions/download-proxy/errors.sh
+
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
 
   lang:
     runs-on: ${{ matrix.arch.os }}
@@ -414,6 +422,10 @@ jobs:
       - name: Download proxy errors
         if: failure()
         run: .github/actions/download-proxy/errors.sh
+
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
 
   # Catch-all required check for the test matrix, `base` is listed too because
   # `lang` is skipped when it fails
