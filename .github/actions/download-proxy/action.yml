@@ -1,0 +1,29 @@
+name: 'Download proxy'
+description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Start download proxy
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        echo "::group::Preparing download proxy"
+        set -ex
+        if ! command -v nginx; then
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y nginx
+        fi
+        sudo mkdir -p /etc/containerbase-cdn /var/cache/containerbase-cdn /var/log/containerbase-cdn
+        sudo cp "${ACTION_PATH}/nginx.conf" "${ACTION_PATH}/allowed-hosts.map" /etc/containerbase-cdn/
+        sudo nginx -t -c /etc/containerbase-cdn/nginx.conf
+        sudo nginx -c /etc/containerbase-cdn/nginx.conf
+        echo "CONTAINERBASE_CDN=http://host.docker.internal:8099" >> "${GITHUB_ENV}"
+        echo "::endgroup::"
+
+    - name: Check download proxy
+      shell: bash
+      run: |
+        curl -sSf -o /dev/null http://127.0.0.1:8099/nodejs.org/dist/index.json
