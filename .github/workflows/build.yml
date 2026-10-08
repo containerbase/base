@@ -22,7 +22,7 @@ jobs:
 
     outputs:
       uid: ${{ steps.init.outputs.uid }}
-      docs-only: ${{ steps.docs.outputs.docs-only }}
+      skip-build: ${{ steps.changes.outputs.skip-build }}
 
     steps:
       - name: ⚙️ Setup
@@ -34,20 +34,45 @@ jobs:
         id: init
         run: echo "uid=$(uuidgen)" >> "${GITHUB_OUTPUT}"
 
-      # pull requests which only change docs skip the build and docker tests,
-      # pushes and the merge queue always run everything
-      - name: ⚙️ Check for docs-only changes
-        id: docs
+      # pull requests which only change files that feed neither the images nor
+      # the bats tests skip the build and docker tests: docs, the dev container
+      # (it has its own workflow), editor and repo settings, and lint and
+      # vitest configs (those jobs still run); pushes and the merge queue
+      # always run everything
+      - name: ⚙️ Check for changes that don't need the build
+        id: changes
         if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
-          if grep -vE '(\.md$|^docs/)' "${RUNNER_TEMP}/changed-files"; then
-            echo "docs-only=false" >> "${GITHUB_OUTPUT}"
+          if grep -vE \
+            -e '\.md$' \
+            -e '^docs/' \
+            -e '^\.devcontainer/' \
+            -e '^\.github/workflows/devcontainer\.yml$' \
+            -e '^\.github/renovate\.json$' \
+            -e '^\.github/ISSUE_TEMPLATE/' \
+            -e '^\.vscode/' \
+            -e '^\.editorconfig$' \
+            -e '^\.husky/' \
+            -e '^\.lintstagedrc\.json$' \
+            -e '^\.gitignore$' \
+            -e '^LICENSE$' \
+            -e '^\.oxlintrc\.json$' \
+            -e '^\.prettierrc\.json$' \
+            -e '^\.prettierignore$' \
+            -e '^\.markdownlint-cli2\.jsonc$' \
+            -e '^\.github/zizmor\.yml$' \
+            -e '^tools/lint-(docs|versions)\.ts$' \
+            -e '^vitest\.config\.ts$' \
+            -e '^__mocks__/' \
+            -e '^codecov\.yml$' \
+            "${RUNNER_TEMP}/changed-files"; then
+            echo "skip-build=false" >> "${GITHUB_OUTPUT}"
           else
-            echo "docs-only=true" >> "${GITHUB_OUTPUT}"
+            echo "skip-build=true" >> "${GITHUB_OUTPUT}"
           fi
 
   lint:
@@ -118,8 +143,8 @@ jobs:
   bats:
     runs-on: ubuntu-24.04
     needs: setup
-    # skipped for docs-only pull requests, like the jobs depending on it
-    if: needs.setup.outputs.docs-only != 'true'
+    # skipped for docs or dev container only pull requests, like the build
+    if: needs.setup.outputs.skip-build != 'true'
     timeout-minutes: 15
 
     steps:
@@ -167,9 +192,9 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     needs: setup
-    # skipped for docs-only pull requests, so `base`, `distro`, `base-arm64`
-    # and `lang` are skipped too
-    if: needs.setup.outputs.docs-only != 'true'
+    # skipped for docs or dev container only pull requests, so `base`,
+    # `distro`, `base-arm64` and `lang` are skipped too
+    if: needs.setup.outputs.skip-build != 'true'
     timeout-minutes: 15
 
     steps:
