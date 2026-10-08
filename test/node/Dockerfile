@@ -625,7 +625,7 @@ FROM build AS test-vp
 USER root
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=1.0.0
+ARG VP_VERSION=1.1.0
 RUN install-tool vp "${VP_VERSION}"
 
 COPY test/node/vp/sync-versions.mjs /test/vp/
