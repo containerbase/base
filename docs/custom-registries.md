@@ -836,6 +836,9 @@ Vite+ releases are downloaded from:
 
 - `https://github.com/voidzero-dev/vite-plus/releases`
 
+Only releases since v0.3.1 are supported, the first ones that publish `vp-checksums.txt`.
+The download is always verified against it, so a mirror needs to provide both files.
+
 Samples:
 
 ```txt
