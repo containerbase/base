@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Adds how many requests the download proxy served from its cache to the job
-# summary.
+# Prints how many requests the download proxy served from its cache, to the
+# job log and the job summary.
 
 set -e
 
@@ -21,4 +21,4 @@ fi
     status="${status#cache=}"
     echo "| ${status:-none} | ${count} |"
   done
-} >> "${GITHUB_STEP_SUMMARY}"
+} | tee -a "${GITHUB_STEP_SUMMARY}"
