@@ -285,6 +285,9 @@ jobs:
       - name: Check system
         uses: ./.github/actions/check
 
+      - name: ⚙️ Download proxy
+        uses: ./.github/actions/download-proxy
+
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
@@ -293,6 +296,14 @@ jobs:
         uses: ./.github/actions/bake
         with:
           args: test-distro
+
+      - name: Download proxy errors
+        if: failure()
+        run: .github/actions/download-proxy/errors.sh
+
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
 
   # test old distros on arm64
   base-arm64:
@@ -325,6 +336,9 @@ jobs:
       - name: Check system
         uses: ./.github/actions/check
 
+      - name: ⚙️ Download proxy
+        uses: ./.github/actions/download-proxy
+
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
@@ -333,6 +347,14 @@ jobs:
         uses: ./.github/actions/bake
         with:
           args: test-base
+
+      - name: Download proxy errors
+        if: failure()
+        run: .github/actions/download-proxy/errors.sh
+
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
 
   lang:
     runs-on: ${{ matrix.arch.os }}
@@ -412,10 +434,23 @@ jobs:
             --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
             build-docker
 
+      # only after the base image, so it builds with the same args as in the
+      # `base` job and is taken from the GHA cache
+      - name: ⚙️ Download proxy
+        uses: ./.github/actions/download-proxy
+
       - name: test distro
         uses: ./.github/actions/bake
         with:
           args: test-${{ matrix.arch.name }}
+
+      - name: Download proxy errors
+        if: failure()
+        run: .github/actions/download-proxy/errors.sh
+
+      - name: Download proxy cache stats
+        if: always()
+        run: .github/actions/download-proxy/stats.sh
 
   # Catch-all required check for the test matrix, `base` is listed too because
   # `lang` is skipped when it fails

@@ -518,6 +518,8 @@ ARG YARN_SLIM_VERSION=1.22.5
 
 ENV URL_REPLACE_0_FROM=https://registry.npmjs.org/
 ENV URL_REPLACE_0_TO=https://registry.yarnpkg.com/
+# no cdn, it is applied before the url replacements and would bypass them
+ENV CONTAINERBASE_CDN=
 
 RUN install-tool pnpm
 RUN install-tool yarn

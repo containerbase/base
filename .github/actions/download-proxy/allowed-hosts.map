@@ -1,0 +1,29 @@
+# Hosts the download proxy may fetch from: the tool download and lookup hosts
+# from docs/custom-registries.md, plus the hosts their downloads redirect to.
+api.adoptium.net 1;
+api.nuget.org 1;
+builds.dotnet.microsoft.com 1;
+cdn.dl.k8s.io 1;
+dist.nuget.org 1;
+dl.google.com 1;
+dl.k8s.io 1;
+download.docker.com 1;
+download.swift.org 1;
+downloads.gradle.org 1;
+downloads.haskell.org 1;
+downloads.lightbend.com 1;
+get.helm.sh 1;
+github.com 1;
+go.dev 1;
+mise.jdx.dev 1;
+nodejs.org 1;
+objects.githubusercontent.com 1;
+pypi.org 1;
+registry.npmjs.org 1;
+release-assets.githubusercontent.com 1;
+releases.hashicorp.com 1;
+repo.maven.apache.org 1;
+rubygems.org 1;
+services.gradle.org 1;
+static.rust-lang.org 1;
+storage.googleapis.com 1;
