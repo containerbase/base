@@ -15,6 +15,10 @@ git fetch origin
 git merge origin/main
 ```
 
+The merge queue also sets the merge strategy, so don't pass one when merging:
+enable auto merge with `gh pr merge <number> --auto`, without `--squash`,
+`--merge` or `--rebase`.
+
 Do not rebase a pushed branch onto `main` and force-push it.
 A force push rewrites history that reviewers and CI have already seen.
 
