@@ -20,10 +20,7 @@ import { DockerComposeInstallService } from '../tools/docker/compose.ts';
 import { DockerInstallService } from '../tools/docker/index.ts';
 import { DotnetInstallService } from '../tools/dotnet/index.ts';
 import { MonoInstallService } from '../tools/dotnet/mono.ts';
-import {
-  NugetInstallService,
-  NugetVersionResolver,
-} from '../tools/dotnet/nuget.ts';
+import { NugetInstallService } from '../tools/dotnet/nuget.ts';
 import { PaketInstallService } from '../tools/dotnet/paket.ts';
 import { PowershellInstallService } from '../tools/dotnet/powershell.ts';
 import { ElixirInstallService } from '../tools/erlang/elixir.ts';
@@ -40,34 +37,20 @@ import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
 import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
-import {
-  AndroidSdkCmdlineToolsInstallService,
-  AndroidSdkCmdlineToolsVersionResolver,
-} from '../tools/java/android.ts';
-import {
-  GradleInstallService,
-  GradleVersionResolver,
-} from '../tools/java/gradle.ts';
+import { AndroidSdkCmdlineToolsInstallService } from '../tools/java/android.ts';
+import { GradleInstallService } from '../tools/java/gradle.ts';
 import {
   JavaInstallService,
   JavaJdkInstallService,
   JavaJreInstallService,
 } from '../tools/java/index.ts';
-import {
-  MavenInstallService,
-  MavenVersionResolver,
-} from '../tools/java/maven.ts';
-import {
-  JavaJdkVersionResolver,
-  JavaJreVersionResolver,
-  JavaVersionResolver,
-} from '../tools/java/resolver.ts';
+import { MavenInstallService } from '../tools/java/maven.ts';
 import { SbtInstallService } from '../tools/java/sbt.ts';
 import { ScalaInstallService } from '../tools/java/scala.ts';
 import { JsonnetBundlerInstallService } from '../tools/jb.ts';
 import { KubectlInstallService } from '../tools/kubectl.ts';
 import { KustomizeInstallService } from '../tools/kustomize.ts';
-import { MiseInstallService, MiseVersionResolver } from '../tools/mise.ts';
+import { MiseInstallService } from '../tools/mise.ts';
 import { NixInstallService } from '../tools/nix.ts';
 import { NodeInstallService } from '../tools/node/index.ts';
 import {
@@ -75,38 +58,19 @@ import {
   YarnInstallService,
   YarnSlimInstallService,
 } from '../tools/node/npm.ts';
-import {
-  NodeVersionResolver,
-  NpmVersionResolver,
-  YarnVersionResolver,
-} from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { VpInstallService } from '../tools/node/vp.ts';
 import { NubInstallService } from '../tools/nub.ts';
-import {
-  ComposerInstallService,
-  ComposerVersionResolver,
-} from '../tools/php/composer.ts';
-import { PhpInstallService, PhpVersionResolver } from '../tools/php/index.ts';
+import { ComposerInstallService } from '../tools/php/composer.ts';
+import { PhpInstallService } from '../tools/php/index.ts';
 import { PixiInstallService } from '../tools/pixi.ts';
 import { ProtocInstallService } from '../tools/protoc.ts';
-import {
-  ConanInstallService,
-  ConanVersionResolver,
-} from '../tools/python/conan.ts';
+import { ConanInstallService } from '../tools/python/conan.ts';
 import { PythonInstallService } from '../tools/python/index.ts';
-import { PipVersionResolver } from '../tools/python/pip.ts';
-import { PoetryVersionResolver } from '../tools/python/poetry.ts';
 import { PipBaseInstallService } from '../tools/python/utils.ts';
-import {
-  CocoapodsInstallService,
-  CocoapodsVersionResolver,
-} from '../tools/ruby/cocoapods.ts';
+import { CocoapodsInstallService } from '../tools/ruby/cocoapods.ts';
 import { RubyInstallService } from '../tools/ruby/index.ts';
-import {
-  RubyBaseInstallService,
-  RubyGemVersionResolver,
-} from '../tools/ruby/utils.ts';
+import { RubyBaseInstallService } from '../tools/ruby/utils.ts';
 import { RustInstallService } from '../tools/rust.ts';
 import { SkopeoInstallService } from '../tools/skopeo.ts';
 import { SopsInstallService } from '../tools/sops.ts';
@@ -127,6 +91,10 @@ import {
 } from './install-tool.service.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
+import {
+  createGenericVersionResolver,
+  versionResolvers,
+} from './version-resolvers.ts';
 
 /**
  * Creates a container with all install services, including a generic one for
@@ -232,23 +200,9 @@ function prepareResolveContainer(): Container {
   container.bind(ToolVersionResolverService).toSelf();
 
   // tool version resolver
-  container
-    .bind(TOOL_VERSION_RESOLVER)
-    .to(AndroidSdkCmdlineToolsVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(CocoapodsVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(ConanVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(ComposerVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(GradleVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaJreVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(JavaJdkVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(MavenVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(MiseVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(NodeVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(NugetVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(PhpVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(PoetryVersionResolver);
-  container.bind(TOOL_VERSION_RESOLVER).to(YarnVersionResolver);
+  for (const resolver of versionResolvers) {
+    container.bind(TOOL_VERSION_RESOLVER).to(resolver);
+  }
 
   logger.trace('preparing container done');
   return container;
@@ -444,7 +398,10 @@ export async function installTool(
 
 /**
  * Creates a shell wrapper for a tool binary, through the ipc server of the
- * running install when there is one, else directly.
+ * running install when there is one, else directly. The running install has
+ * already checked the folders, so only a direct link checks the bin folder.
+ *
+ * @throws when the bin folder is not writable
  */
 export async function linkTool(
   tool: string,
@@ -455,6 +412,8 @@ export async function linkTool(
   const svc = await container.getAsync(IpcClient);
   if (!(await svc.hasServer())) {
     logger.debug('ipc server not running, linking tool directly');
+    const pathSvc = await container.getAsync(PathService);
+    await pathSvc.ensureWritableDirs(pathSvc.binDir);
     const ltSvc = await container.getAsync(LinkToolService);
     await ltSvc.shellwrapper(tool, options);
     return 0;
@@ -481,35 +440,9 @@ export async function resolveVersion(
   const container = prepareResolveContainer();
 
   if (type) {
-    switch (type) {
-      case 'gem': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends RubyGemVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
-        break;
-      }
-      case 'npm': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends NpmVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
-        break;
-      }
-      case 'pip': {
-        @injectable()
-        @injectFromHierarchy()
-        class GenericVersionResolver extends PipVersionResolver {
-          override readonly tool: string = tool;
-        }
-        container.bind(TOOL_VERSION_RESOLVER).to(GenericVersionResolver);
-        break;
-      }
-    }
+    container
+      .bind(TOOL_VERSION_RESOLVER)
+      .to(createGenericVersionResolver(type, tool));
   }
   const svc = await container.getAsync(ToolVersionResolverService);
   return svc.resolve(tool, version);
@@ -526,6 +459,9 @@ interface UninstallToolConfig {
 /**
  * Uninstalls a tool version, or all versions without one. Generic install
  * services are registered for every installed `gem`, `npm` or `pip` package.
+ *
+ * @throws when the containerbase folders are not writable, except for a dry
+ * run
  */
 export async function uninstallTool({
   tool,
@@ -534,6 +470,9 @@ export async function uninstallTool({
   recursive = false,
 }: UninstallToolConfig): Promise<number | void> {
   const container = await prepareInstallContainer();
+  if (!dryRun) {
+    await (await container.getAsync(PathService)).ensureWritable();
+  }
   const verSvc = await container.getAsync(VersionService);
   for (const { name: tool, type } of await verSvc.getTypes()) {
     switch (type) {

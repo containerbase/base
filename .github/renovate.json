@@ -4,7 +4,7 @@
     "github>containerbase/.github",
     "github>containerbase/.github//merge-queue.json"
   ],
-  "ignorePaths": ["**/node_modules/**", "test/*/test/**"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/*/test/**"],
   "enabledManagers": [
     "dockerfile",
     "github-actions",
@@ -178,6 +178,16 @@
       "minimumReleaseAge": "5 days"
     },
     {
+      "description": "Wait for cabal binaries, which are uploaded after the GitHub release",
+      "matchPackageNames": ["haskell/cabal"],
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "Corepack can't run pnpm 11+, keep the corepack test on pnpm 10",
+      "matchDepNames": ["pnpm-corepack"],
+      "allowedVersions": "<11"
+    },
+    {
       "description": "Trigger fix release for ubuntu digest updates",
       "matchDepNames": ["ubuntu", "ghcr.io/containerbase/ubuntu"],
       "matchUpdateTypes": ["digest"],
@@ -231,6 +241,15 @@
       "matchFileNames": ["test/**"],
       "matchDepNames": ["!git"],
       "enabled": false
+    },
+    {
+      "description": "Zizmor's GitHub Action doesn't immediately support the latest Zizmor container image until there's an explicit update",
+      "groupName": "zizmor",
+      "matchPackageNames": [
+        "ghcr.io/zizmorcore/zizmor",
+        "zizmorcore/zizmor-action"
+      ],
+      "minimumGroupSize": 2
     },
     {
       "description": "Group java test deps",

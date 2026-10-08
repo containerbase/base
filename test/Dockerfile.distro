@@ -26,7 +26,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.55.0
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: build
@@ -66,7 +66,7 @@ RUN install-tool devbox 0.18.4
 RUN install-tool dotnet 10.0.401
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.5
+RUN install-tool flutter 3.47.6
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.9.6
@@ -75,7 +75,7 @@ RUN install-tool flux v2.9.6
 RUN install-tool git-lfs v3.8.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.18.1
+RUN install-tool gleam 1.19.1
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
 RUN install-tool golang 1.27.1
@@ -90,10 +90,10 @@ RUN install-tool helmfile v1.8.1
 RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.2
+RUN install-tool kustomize 5.8.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.18
+RUN install-tool mise 2026.10.4
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
@@ -105,7 +105,7 @@ RUN install-tool pixi v0.81.0
 RUN install-tool powershell v7.6.6
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.98.1
+RUN install-tool rust 1.99.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -115,7 +115,7 @@ RUN install-tool sops v3.13.3
 
 # not yet supported on resolute https://github.com/swiftlang/swift-docker/issues/524
 # renovate: datasource=docker depName=swift
-ARG SWIFT_VERSION=6.3.3
+ARG SWIFT_VERSION=6.4.0
 RUN set -ex; \
   if [ "$(. /etc/os-release && echo "${VERSION_CODENAME}")" = "resolute" ]; then \
     echo "Skipping Swift installation on resolute."; \
@@ -125,10 +125,10 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.4
+RUN install-tool terraform 1.16.5
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.0
+RUN install-tool tofu 1.13.1
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -172,7 +172,7 @@ RUN install-tool elixir 1.20.4
 FROM build AS test-haskell
 
 # renovate: datasource=github-releases packageName=haskell/cabal versioning=docker
-RUN install-tool cabal 3.18.1.0
+RUN install-tool cabal 3.18.2.0
 # renovate: datasource=docker packageName=haskell
 RUN install-tool ghc 9.14.1
 
@@ -186,7 +186,7 @@ RUN install-tool java 25.0.4+101.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
 RUN install-tool gradle 9.8.0
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.9.16
+RUN install-tool maven 3.10.0
 
 #--------------------------------------
 # test: test-mono
@@ -195,6 +195,12 @@ FROM build AS test-mono
 
 # renovate: datasource=github-releases packageName=containerbase/mono-prebuild
 RUN install-tool mono 6.14.1
+
+# partial version
+RUN install-tool nuget 6
+
+RUN set -ex; \
+  nuget help | grep 'NuGet Version: 6\.';
 
 # renovate: datasource=nuget packageName=NuGet.CommandLine
 RUN install-tool nuget 7.9.0
@@ -207,7 +213,7 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 24.21.0
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.9.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.1
 
@@ -230,7 +236,7 @@ RUN install-tool composer 2.10.3
 FROM build AS test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.7
+RUN install-tool python 3.14.8
 
 # renovate: datasource=pypi
 RUN install-tool checkov 3.3.20
@@ -249,7 +255,7 @@ RUN install-tool pdm 2.29.2
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool uv 0.12.21
+RUN install-tool uv 0.12.23
 
 #--------------------------------------
 # Image: test-ruby

@@ -87,6 +87,34 @@ Installs a tool into the container.
   ```bash
   install-tool pnpm
   ```
+- Installs the newest node 22 release
+  ```bash
+  install-tool node 22
+  ```
+
+#### Tool-specific versions <a name="Versions-install-tool"></a>
+
+Some tools accept partial versions and install a matching release:
+
+- `java`, `java-jre`, `java-jdk`: A major (`21`), major.minor (`11.0`) or major.minor.patch (`11.0.24`) version installs the newest matching GA release.
+  A full version with a build, like `17.0.12+7`, is used as is.
+  Without a version, or with `latest`, the newest LTS is installed.
+- `node`: A major (`22`) or major.minor (`22.11`) version installs the newest matching release.
+  Without a version, or with `latest`, the newest LTS is installed.
+- `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the `latest` dist tag if it matches and is not deprecated, otherwise the newest matching release, prereleases are skipped and deprecated versions are used only if there is no other.
+  Without a version, or with `latest`, the `latest` release is installed.
+- `conan`, `poetry` and any package installed with [`install-pip`](#install-pip-command): A major (`2`) or major.minor (`2.1`) version installs the newest matching release, prereleases and yanked releases are skipped.
+  A version which exists as a release, like `5.2`, is kept, even a yanked one, which pip installs when pinned.
+  Without access to pypi.org, eg. for a package from a private index, the version is kept too.
+  The lookup uses pypi.org, so a package from a private index whose name also exists on pypi.org should be pinned with a full version.
+  A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
+  Without a version, or with `latest`, the latest release is installed.
+  For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
+- `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
+  A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
+  Without a version, or with `latest`, the newest released and blessed release is installed.
+
+Any other version is used as is.
 
 <br>
 
@@ -167,6 +195,14 @@ Note: requires node to be installed.
   ```bash
   install-npm del-cli
   ```
+- Installs a del-cli 5 release
+  ```bash
+  install-npm del-cli 5
+  ```
+
+#### Tool-specific versions <a name="Versions-install-npm"></a>
+
+A major or major.minor version installs the matching `latest` release, else the newest matching one, see the [install-tool versions](#Versions-install-tool).
 
 <br>
 
@@ -203,10 +239,18 @@ Note: requires python to be installed.
   export CHECKOV_VERSION=2.4.7
   install-pip checkov
   ```
-- Installs latest pnpm version
+- Installs latest checkov version
   ```bash
   install-pip checkov
   ```
+- Installs the newest checkov 2 release
+  ```bash
+  install-pip checkov 2
+  ```
+
+#### Tool-specific versions <a name="Versions-install-pip"></a>
+
+A major or major.minor version installs the newest matching release, see the [install-tool versions](#Versions-install-tool).
 
 <br>
 

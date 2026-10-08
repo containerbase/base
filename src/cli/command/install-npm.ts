@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import { npmPartialVersionHelp } from '../tools/node/resolver.ts';
 import { InstallToolCommand } from './install-tool.ts';
 import { command } from './utils.ts';
 
@@ -14,7 +15,9 @@ export class InstallNpmCommand extends InstallToolCommand {
         'DEL_CLI_VERSION=5.0.0 $0 install npm del-cli',
       ],
       ['Installs latest del-cli version', '$0 install npm del-cli'],
+      ['Installs a del-cli 5 release', '$0 install npm del-cli 5'],
     ],
+    details: npmPartialVersionHelp,
   });
 
   protected override type = 'npm' as const;
@@ -33,6 +36,8 @@ export class InstallNpmShortCommand extends InstallNpmCommand {
         'DEL_CLI_VERSION=5.0.0 $0 del-cli',
       ],
       ['Installs latest del-cli version', '$0 del-cli'],
+      ['Installs a del-cli 5 release', '$0 del-cli 5'],
     ],
+    details: npmPartialVersionHelp,
   });
 }

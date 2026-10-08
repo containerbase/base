@@ -109,14 +109,17 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.9.0
 
 RUN set -ex; \
   pnpm --version;
 
 SHELL [ "/bin/sh", "-c" ]
 
-RUN set -ex; cd a; pnpm i
+# pnpm 11+ fails on unreviewed build scripts, skip them like older versions did
+RUN set -ex; cd a; \
+  printf 'allowBuilds:\n  re2: false\n' > pnpm-workspace.yaml; \
+  pnpm i
 
 #--------------------------------------
 # test: node 20
@@ -191,6 +194,31 @@ RUN set -ex; cd test/a; npm i
 # renovate: datasource=npm
 RUN install-npm del-cli 7.0.0
 RUN del -d test/a/**
+
+#--------------------------------------
+# test: node partial version
+#--------------------------------------
+
+FROM base AS test-partial
+
+RUN prepare-tool node
+
+USER 12021
+
+RUN install-tool node 22
+
+RUN set -ex; \
+  node --version | grep '^v22\.';
+
+RUN install-tool pnpm 10
+
+RUN set -ex; \
+  pnpm --version | grep '^10\.';
+
+RUN install-tool yarn 4
+
+RUN set -ex; \
+  yarn --version | grep '^4\.';
 
 #--------------------------------------
 # test: npm (install-tool npm)
@@ -465,13 +493,14 @@ RUN install-tool corepack 0.36.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.5
+RUN install-tool pnpm 12.9.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.36.0
 
-# renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=10.34.5
+# corepack can't run pnpm 11+, which no longer ships `bin/pnpm.cjs`
+# renovate: datasource=npm depName=pnpm-corepack packageName=pnpm
+ARG PNPM_VERSION=10.34.6
 
 RUN set -ex; cd a; \
   npm pkg set packageManager=pnpm@${PNPM_VERSION}; \
@@ -629,3 +658,4 @@ COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
+COPY --from=test-partial /.dummy /.dummy

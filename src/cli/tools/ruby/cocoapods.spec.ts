@@ -67,6 +67,26 @@ describe('cli/tools/ruby/cocoapods', () => {
     );
   });
 
+  test('install: pins activesupport from the replaced gem source', async () => {
+    vi.stubEnv('URL_REPLACE_0_FROM', 'https://rubygems.org/');
+    vi.stubEnv('URL_REPLACE_0_TO', 'https://gems.example.com/');
+    const { svc } = await toolContext(CocoapodsInstallService);
+
+    await expect(svc.install('1.12.1')).resolves.toBeUndefined();
+
+    expect(execaMock).toHaveBeenCalledWith(
+      expect.stringContaining('bin/gem'),
+      expect.arrayContaining([
+        'install',
+        'activesupport',
+        '--clear-sources',
+        '--source',
+        'https://gems.example.com/',
+      ]),
+      expect.any(Object),
+    );
+  });
+
   test('install: leaves other versions alone', async () => {
     const { svc } = await toolContext(CocoapodsInstallService);
 

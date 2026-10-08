@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import {
+  DataService,
   type InstalledTool,
   VersionService,
   createContainer,
@@ -79,6 +80,8 @@ export class ListToolsCommand extends Command {
     logger.debug('Listing tools...');
     try {
       const container = createContainer();
+      // only reads, so the databases are never written
+      (await container.getAsync(DataService)).readOnly();
       const versionSvc = await container.getAsync(VersionService);
       const tools = await versionSvc.listInstalled();
 

@@ -1,9 +1,10 @@
-import fs, { chmod, readFile, stat } from 'node:fs/promises';
+import fs, { chmod, readFile, rm, stat } from 'node:fs/promises';
 import { platform } from 'node:os';
+import { join } from 'node:path';
 import type Nedb from '@seald-io/nedb';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fileRights, logger } from '../utils/index.ts';
+import { fileRights, logger, pathExists } from '../utils/index.ts';
 import { DataService } from './data.service.ts';
 import { PathService } from './path.service.ts';
 import { testContainer } from '~test/di.ts';
@@ -110,6 +111,73 @@ describe('cli/services/data.service', () => {
     expect(
       (await readFile(rwDb.filename, 'utf8')).trim().split('\n'),
     ).toHaveLength(1);
+  });
+
+  test('loads read-only on request when the data folder is writable', async () => {
+    const db = await svc.load<{ name: string }>('forced');
+    await db.insertAsync({ name: 'node' });
+    const content = await readFile(db.filename, 'utf8');
+    // the file holds no index yet, nedb would append it on index creation
+    expect(content.trim().split('\n')).toHaveLength(1);
+
+    const roChild = await testContainer();
+    const roSvc = await roChild.getAsync(DataService);
+    const roSetOwner = vi.spyOn(
+      await roChild.getAsync(PathService),
+      'setOwner',
+    );
+    const access = vi.spyOn(fs, 'access');
+    roSvc.readOnly();
+
+    const roDb = await roSvc.load<{ name: string }>('forced');
+    await roDb.ensureIndexAsync({ fieldName: 'name', unique: true });
+    expect(await roDb.findAsync({ name: 'node' })).toMatchObject([
+      { name: 'node' },
+    ]);
+    expect(await readFile(roDb.filename, 'utf8')).toBe(content);
+    expect(roSetOwner).not.toHaveBeenCalled();
+    // the data folder isn't checked
+    expect(access).not.toHaveBeenCalledWith(dataDir, fs.constants.W_OK);
+    expect(logger.debug).toHaveBeenCalledWith(
+      { file: roDb.filename },
+      'opening database read-only',
+    );
+  });
+
+  test('keeps a read-only database without a file in memory', async () => {
+    await rm(dataDir, { recursive: true });
+    const setOwner = vi.spyOn(await child.getAsync(PathService), 'setOwner');
+    svc.readOnly();
+
+    const db = await svc.load<{ name: string }>('memory');
+    await db.ensureIndexAsync({ fieldName: 'name', unique: true });
+
+    expect(await db.findAsync({})).toEqual([]);
+    expect(db.filename).toBe(join(dataDir, 'memory.nedb'));
+    expect(await pathExists(dataDir)).toBe(false);
+    expect(setOwner).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      { file: db.filename },
+      'opening database read-only',
+    );
+
+    // also when only the file is missing
+    await ensurePaths('opt/containerbase/data');
+    await chmod(dataDir, 0o775);
+    const other = await svc.load('other-memory');
+    expect(await pathExists(other.filename)).toBe(false);
+  });
+
+  test('fails a read-only load when the file can not be checked', async () => {
+    svc.readOnly();
+    vi.spyOn(fs, 'stat').mockRejectedValueOnce(
+      Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }),
+    );
+
+    // an unreadable database must not look like an empty one
+    await expect(svc.load('unreadable')).rejects.toThrow(
+      'EACCES: permission denied',
+    );
   });
 
   test('loads writable when the data folder check fails otherwise', async () => {

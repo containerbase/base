@@ -1,21 +1,24 @@
 name: auto-pr
 
 on:
-  pull_request_target:
+  # needed to assign reviewers and backport fork pull requests, no job checks
+  # out or runs code from the pull request
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types:
       - opened
       - closed
       - labeled
+
+permissions: {}
 
 jobs:
   debug:
     runs-on: ubuntu-slim
     steps:
       - name: event info
-        run: |
-          cat <<'EOF'
-          ${{ toJSON(github) }}
-          EOF
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: printf '%s\n' "${GITHUB_CONTEXT}"
 
   review:
     if: github.event.action == 'opened' && !endsWith(github.event.pull_request.user.login, '[bot]')

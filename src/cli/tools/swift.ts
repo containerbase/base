@@ -117,8 +117,10 @@ export class SwiftInstallService extends BaseInstallService {
     const arch = this.envSvc.arch === 'arm64' ? '-aarch64' : '';
     const platform = `ubuntu${versionId}${arch}`;
 
+    // releases before 6.4 drop a `.0` patch from their name, eg. `swift-6.3-RELEASE`
     const { major, minor, patch } = parse(version);
-    const releaseVersion = patch === 0 ? `${major}.${minor}` : version;
+    const shortName = patch === 0 && (major < 6 || (major === 6 && minor < 4));
+    const releaseVersion = shortName ? `${major}.${minor}` : version;
     const release = `swift-${releaseVersion}-RELEASE`;
     const webDir = `https://download.swift.org/swift-${releaseVersion}-release/${platform.replace(/\./g, '')}`;
 

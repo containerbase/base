@@ -1,6 +1,6 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
@@ -80,6 +80,91 @@ describe('cli/services/path.service', () => {
     await expect(pathSvc.ensureBasePaths()).rejects.toThrow(
       'System not initialized for containerbase',
     );
+  });
+
+  describe('ensureWritable', () => {
+    /** Lets `fs.access` fail with the error code for the path only. */
+    function failAccess(path: string, code: string): void {
+      vi.spyOn(fs, 'access').mockImplementation((p) =>
+        p === path
+          ? Promise.reject(Object.assign(new Error(code), { code }))
+          : Promise.resolve(),
+      );
+    }
+
+    test('passes for writable and missing folders', async () => {
+      // nothing below `/opt/containerbase` exists yet
+      await expect(pathSvc.ensureWritable()).resolves.toBeUndefined();
+
+      await pathSvc.ensureBasePaths();
+      await expect(
+        pathSvc.ensureWritable(pathSvc.varPath),
+      ).resolves.toBeUndefined();
+    });
+
+    test('throws on a read-only file system', async () => {
+      failAccess(pathSvc.toolsPath, 'EROFS');
+
+      await expect(pathSvc.ensureWritable()).rejects.toThrow(
+        expect.objectContaining({
+          message: `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only. Install tools at image build time or mount the containerbase folders writable.`,
+          code: 'EROFS',
+          cause: expect.objectContaining({ code: 'EROFS' }),
+        }),
+      );
+    });
+
+    test('checks the nearest existing parent of a missing folder', async () => {
+      const parent = dirname(pathSvc.toolsPath);
+      vi.spyOn(fs, 'access').mockImplementation((p) => {
+        const code =
+          p === pathSvc.toolsPath ? 'ENOENT' : p === parent ? 'EROFS' : null;
+        return code
+          ? Promise.reject(Object.assign(new Error(code), { code }))
+          : Promise.resolve();
+      });
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.toolsPath),
+      ).rejects.toThrow(
+        `EROFS: can't write to ${pathSvc.toolsPath}, the file system is read-only.`,
+      );
+    });
+
+    test('passes when no parent of a missing folder exists', async () => {
+      vi.spyOn(fs, 'access').mockRejectedValue(
+        Object.assign(new Error('ENOENT'), { code: 'ENOENT' }),
+      );
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.toolsPath),
+      ).resolves.toBeUndefined();
+    });
+
+    test('checks only the given folders', async () => {
+      failAccess(pathSvc.toolsPath, 'EROFS');
+
+      await expect(
+        pathSvc.ensureWritableDirs(pathSvc.binDir),
+      ).resolves.toBeUndefined();
+      // files can only be created with write and search permission
+      expect(fs.access).toHaveBeenCalledExactlyOnceWith(
+        pathSvc.binDir,
+        fs.constants.W_OK | fs.constants.X_OK,
+      );
+    });
+
+    test('throws when the current user may not write', async () => {
+      failAccess(pathSvc.varPath, 'EACCES');
+
+      await expect(pathSvc.ensureWritable(pathSvc.varPath)).rejects.toThrow(
+        expect.objectContaining({
+          message: `EACCES: can't write to ${pathSvc.varPath}, the current user has no write permission. Run as root or as the user owning the folder.`,
+          code: 'EACCES',
+          cause: expect.objectContaining({ code: 'EACCES' }),
+        }),
+      );
+    });
   });
 
   test('findPreparedTools', async () => {

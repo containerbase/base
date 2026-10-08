@@ -75,7 +75,7 @@ RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 RUN install-tool powershell v7.6.6
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.14.7
+ARG PYTHON_VERSION=3.14.8
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -162,7 +162,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.4
+RUN install-tool terraform 1.16.5
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -176,7 +176,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.55.0
+RUN install-tool git v2.56.0
 
 USER 12021
 
@@ -226,16 +226,16 @@ RUN install-tool buf v1.73.0
 RUN install-tool bun 1.4.2
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.3
+RUN install-tool nub 0.9.6
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.7
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.6
+RUN install-tool apko 1.4.8
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.32.0
+RUN install-tool apm 0.33.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.18.4
@@ -246,13 +246,13 @@ ENV GH_DASH_EXTENSION_VERSION=v4.26.0
 RUN install-tool gh v2.102.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.18.1
+RUN install-tool gleam 1.19.1
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.18
+RUN install-tool mise 2026.10.4
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -261,7 +261,7 @@ RUN install-tool skopeo 1.24.1
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.0
+RUN install-tool tofu 1.13.1
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2
@@ -273,7 +273,7 @@ ARG VENDIR_VERSION=v0.46.2
 ARG HELMFILE_VERSION=v1.8.1
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
-ARG KUSTOMIZE_VERSION=5.8.2
+ARG KUSTOMIZE_VERSION=5.8.3
 
 RUN install-tool vendir "${VENDIR_VERSION}"
 

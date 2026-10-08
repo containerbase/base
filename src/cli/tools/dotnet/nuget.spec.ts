@@ -80,6 +80,121 @@ describe('cli/tools/dotnet/nuget', () => {
       },
     );
 
+    describe('partial versions', () => {
+      const tools = {
+        'nuget.exe': [
+          { version: '7.0.0', stage: 'EarlyAccessPreview' },
+          { version: '6.12.0', stage: 'EarlyAccessPreview' },
+          { version: '6.11.1', stage: 'ReleasedAndBlessed' },
+          { version: '6.11.0', stage: 'ReleasedAndBlessed' },
+          { version: '6.1.0', stage: 'ReleasedAndBlessed' },
+          { version: '6.1', stage: 'ReleasedAndBlessed' },
+          { version: '5.9.1', stage: 'ReleasedAndBlessed' },
+          { version: '5.11.0' },
+        ],
+      };
+
+      test.each([
+        { version: '6', expected: '6.11.1' },
+        { version: '6.11', expected: '6.11.1' },
+        { version: '6.1', expected: '6.1' },
+        { version: '5', expected: '5.9.1' },
+      ])('resolves $version to $expected', async ({ version, expected }) => {
+        scope(baseUrl).get('/tools.json').reply(200, tools);
+        const { svc } = await toolContext(NugetVersionResolver);
+
+        expect(await svc.resolve(version)).toBe(expected);
+      });
+
+      test.each([
+        { version: '6', expected: '6.11.1' },
+        { version: '6.11', expected: '6.11.1' },
+      ])(
+        'resolves $version to $expected in an unordered feed',
+        async ({ version, expected }) => {
+          scope(baseUrl)
+            .get('/tools.json')
+            .reply(200, {
+              'nuget.exe': [
+                { version: '6.1.0', stage: 'ReleasedAndBlessed' },
+                { version: '6.11.1', stage: 'ReleasedAndBlessed' },
+                { version: '6.2.0', stage: 'ReleasedAndBlessed' },
+                { version: '6.11.0', stage: 'ReleasedAndBlessed' },
+              ],
+            });
+          const { svc } = await toolContext(NugetVersionResolver);
+
+          expect(await svc.resolve(version)).toBe(expected);
+        },
+      );
+
+      test('matches a version equal to the partial one', async () => {
+        scope(baseUrl)
+          .get('/tools.json')
+          .reply(200, {
+            'nuget.exe': [{ version: '4.9', stage: 'ReleasedAndBlessed' }],
+          });
+        const { svc } = await toolContext(NugetVersionResolver);
+
+        expect(await svc.resolve('4.9')).toBe('4.9');
+      });
+
+      test('keeps an existing version of any stage', async () => {
+        scope(baseUrl)
+          .get('/tools.json')
+          .reply(200, {
+            'nuget.exe': [{ version: '7.0', stage: 'EarlyAccessPreview' }],
+          });
+        const { svc } = await toolContext(NugetVersionResolver);
+
+        expect(await svc.resolve('7.0')).toBe('7.0');
+      });
+
+      test('resolves a major to a major.minor release', async () => {
+        scope(baseUrl)
+          .get('/tools.json')
+          .reply(200, {
+            'nuget.exe': [
+              { version: '4.8', stage: 'ReleasedAndBlessed' },
+              { version: '4.9', stage: 'ReleasedAndBlessed' },
+            ],
+          });
+        const { svc } = await toolContext(NugetVersionResolver);
+
+        // `4.9` isn't semver, it's compared as `4.9.0`
+        expect(await svc.resolve('4')).toBe('4.9');
+      });
+
+      test.each(['7', '6.12', '4'])(
+        'throws for %s without a matching release',
+        async (version) => {
+          scope(baseUrl).get('/tools.json').reply(200, tools);
+          const { svc } = await toolContext(NugetVersionResolver);
+
+          await expect(svc.resolve(version)).rejects.toThrow(
+            `No nuget release found for version ${version}`,
+          );
+        },
+      );
+    });
+
+    test('keeps a partial version when tools.json is missing', async () => {
+      scope(baseUrl).get('/tools.json').reply(404);
+      const { svc } = await toolContext(NugetVersionResolver);
+
+      expect(await svc.resolve('6.11')).toBe('6.11');
+    });
+
+    test('keeps a partial version when tools.json is not reachable', async () => {
+      scope(baseUrl)
+        .get('/tools.json')
+        .times(3)
+        .replyWithError('connection reset');
+      const { svc } = await toolContext(NugetVersionResolver);
+
+      expect(await svc.resolve('6')).toBe('6');
+    });
+
     test('keeps a pinned version', async () => {
       const { svc } = await toolContext(NugetVersionResolver);
 

@@ -8,10 +8,15 @@ import {
   VersionService,
 } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
-import { RubyBaseInstallService, RubyGemVersionResolver } from './utils.ts';
+import {
+  RubyBaseInstallService,
+  RubyGemVersionResolver,
+  createGemVersionResolver,
+} from './utils.ts';
 import { testContainer } from '~test/di.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
+import { toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -107,6 +112,30 @@ describe('cli/tools/ruby/utils', () => {
         expect.any(Object),
       );
     });
+
+    test.each([
+      {
+        cdnGem: 'true',
+        extra: [
+          '--clear-sources',
+          '--source',
+          'https://cdn.example.com/rubygems.org/',
+        ],
+      },
+      { cdnGem: undefined, extra: [] },
+    ])(
+      'install: with a cdn and CONTAINERBASE_CDN_GEM=$cdnGem',
+      async ({ cdnGem, extra }) => {
+        vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+        vi.stubEnv('CONTAINERBASE_CDN_GEM', cdnGem);
+        const svc = await child.getAsync(BundlerInstallService);
+
+        await expect(svc.install('2.5.3')).resolves.toBeUndefined();
+
+        const [, args] = execaMock.mock.calls[0]!;
+        expect(args?.slice(args.indexOf('--verbose') + 1)).toEqual(extra);
+      },
+    );
 
     test('install: throws and cleans up on failure', async () => {
       execaMock.mockResolvedValue({ failed: true, all: 'boom' });
@@ -217,6 +246,16 @@ describe('cli/tools/ruby/utils', () => {
       const resolver = await child.getAsync(BundlerVersionResolver);
 
       expect(await resolver.resolve('2.5.0')).toBe('2.5.0');
+    });
+
+    test('createGemVersionResolver', async () => {
+      scope('https://rubygems.org')
+        .get('/api/v1/gems/cocoapods.json')
+        .reply(200, { version: '1.16.2' });
+      const { svc } = await toolContext(createGemVersionResolver('cocoapods'));
+
+      expect(svc.tool).toBe('cocoapods');
+      expect(await svc.resolve('latest')).toBe('1.16.2');
     });
   });
 });

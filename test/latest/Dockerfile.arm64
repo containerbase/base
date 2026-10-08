@@ -54,7 +54,7 @@ RUN install-tool bun 1.4.2
 FROM base AS test-nub
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.3
+RUN install-tool nub 0.9.6
 
 #--------------------------------------
 # Image: deno
@@ -70,7 +70,7 @@ RUN install-tool deno 2.9.7
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.6
+RUN install-tool apko 1.4.8
 
 #--------------------------------------
 # Image: apm
@@ -78,7 +78,7 @@ RUN install-tool apko 1.4.6
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.32.0
+RUN install-tool apm 0.33.0
 
 #--------------------------------------
 # Image: devbox
@@ -102,7 +102,7 @@ RUN install-tool gh v2.102.0
 FROM base AS test-gleam
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
-RUN install-tool gleam 1.18.1
+RUN install-tool gleam 1.19.1
 
 #--------------------------------------
 # Image: docker
@@ -129,7 +129,7 @@ RUN set -ex; \
 FROM base AS test-git
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.55.0
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: git-lfs
@@ -153,7 +153,7 @@ RUN install-tool helmfile v1.8.1
 FROM base AS test-kustomize
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
-RUN install-tool kustomize 5.8.2
+RUN install-tool kustomize 5.8.3
 
 #--------------------------------------
 # test: mono
@@ -174,7 +174,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.4
+RUN install-tool terraform 1.16.5
 
 #--------------------------------------
 # Image: tofu
@@ -182,7 +182,7 @@ RUN install-tool terraform 1.16.4
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.0
+RUN install-tool tofu 1.13.1
 
 #--------------------------------------
 # Image: vendir
@@ -204,7 +204,7 @@ RUN install-tool buf v1.73.0
 RUN install-tool kubectl v1.37.1
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.9.18
+RUN install-tool mise 2026.10.4
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1

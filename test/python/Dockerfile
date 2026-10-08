@@ -41,7 +41,7 @@ FROM base AS build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.7
+RUN install-tool python 3.14.8
 
 #--------------------------------------
 # build-rootless
@@ -53,7 +53,7 @@ RUN prepare-tool python conan
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.7
+RUN install-tool python 3.14.8
 
 #--------------------------------------
 # build: pipenv
@@ -86,7 +86,7 @@ USER 12021
 FROM build AS test-pip-tools-a
 
 # renovate: datasource=pypi
-RUN install-tool pip-tools 7.6.1
+RUN install-tool pip-tools 7.6.2
 
 #--------------------------------------
 # test pip-tools-b: pip-tools (older python)
@@ -107,7 +107,7 @@ FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.7
+RUN install-tool python 3.14.8
 
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
@@ -204,7 +204,7 @@ RUN install-tool python 3.10.17
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.7
+RUN install-tool python 3.14.8
 
 # renovate: datasource=pypi
 RUN install-tool pipenv 2026.8.0
@@ -249,6 +249,31 @@ RUN install-pip poetry
 RUN install-pip uv
 
 #--------------------------------------
+# test: partial versions
+#--------------------------------------
+FROM build-rootless AS test-partial
+
+RUN install-tool poetry 2
+
+RUN set -ex; \
+  poetry --version | grep 'version 2\.';
+
+RUN install-tool conan 2
+
+RUN set -ex; \
+  conan --version | grep 'version 2\.';
+
+RUN install-tool pip-tools 7
+
+RUN set -ex; \
+  pip-compile --version | grep 'version 7\.';
+
+RUN install-pip pipenv 2026
+
+RUN set -ex; \
+  pipenv --version | grep 'version 2026\.';
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -264,3 +289,4 @@ COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=test-other /.dummy /.dummy
+COPY --from=test-partial /.dummy /.dummy

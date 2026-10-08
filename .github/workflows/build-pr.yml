@@ -2,6 +2,14 @@ name: build-pr
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      # runs the docker tests skipped for drafts
+      - ready_for_review
+      # cancels a running full test run
+      - converted_to_draft
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -12,9 +20,9 @@ permissions:
 
 jobs:
   build:
-    if: ${{ github.event_name != 'pull_request' || github.repository_owner != github.event.pull_request.head.repo.owner.login }}
     uses: ./.github/workflows/build.yml
     permissions:
       contents: read
       checks: write
       id-token: write
+      security-events: write

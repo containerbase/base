@@ -1,5 +1,10 @@
 import { injectFromHierarchy, injectable } from 'inversify';
-import { logger, parse, semverSatisfies } from '../../utils/index.ts';
+import {
+  type Arch,
+  logger,
+  parse,
+  semverSatisfies,
+} from '../../utils/index.ts';
 import { NpmBaseInstallService } from './utils.ts';
 
 @injectable()
@@ -24,27 +29,33 @@ export class RenovateInstallService extends NpmBaseInstallService {
   }
 }
 
+/**
+ * The npm package a yarn major version is published as: the native musl build
+ * from v6, the cli dist from v2, else `yarn`.
+ * @param major - the yarn major version
+ * @param arch - the architecture of the native build
+ * @returns the npm package name
+ */
+export function yarnPackage(major: number, arch: Arch): string {
+  if (major >= 6) {
+    return `@yarnpkg/yarn-${arch === 'arm64' ? 'aarch64' : 'x86_64'}-unknown-linux-musl`;
+  }
+  if (major >= 2) {
+    return '@yarnpkg/cli-dist';
+  }
+  return 'yarn';
+}
+
 @injectable()
 @injectFromHierarchy()
 export class YarnInstallService extends NpmBaseInstallService {
   override readonly name: string = 'yarn';
 
-  /**
-   * The npm package to install: the native musl build from v6, the cli dist
-   * from v2, else `yarn`.
-   */
+  /** The npm package to install, see {@link yarnPackage}. */
   protected override tool(version: string): string {
-    const ver = parse(version);
-    if (ver.major >= 6) {
-      const arch = this.envSvc.arch === 'arm64' ? 'aarch64' : 'x86_64';
-      logger.debug({ version, arch }, 'Using native yarn package');
-      return `@yarnpkg/yarn-${arch}-unknown-linux-musl`;
-    }
-    if (ver.major >= 2) {
-      logger.debug({ version }, 'Using yarnpkg/cli-dist');
-      return '@yarnpkg/cli-dist';
-    }
-    return this.name;
+    const tool = yarnPackage(parse(version).major, this.envSvc.arch);
+    logger.debug({ version, tool }, 'Using yarn package');
+    return tool;
   }
 
   /** Checks that `yarn --version` runs. */

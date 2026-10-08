@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.55.0
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -208,7 +208,7 @@ USER 1001
 RUN install-tool maven 3.5.4
 
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.9.16
+RUN install-tool maven 3.10.0
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
@@ -251,6 +251,18 @@ RUN install-tool java-jre
 RUN install-tool gradle
 RUN install-tool maven
 
+
+#--------------------------------------
+# test: Resolve partial versions
+#--------------------------------------
+FROM base AS test-partial-version
+
+RUN install-tool java 21
+RUN install-tool java-jre 11.0
+
+RUN set -ex; \
+  java -version 2>&1 | grep '"11\.0\.'; \
+  true
 
 #--------------------------------------
 # test: readonly
@@ -300,5 +312,6 @@ COPY --from=test-gradle-e /.dummy /.dummy
 COPY --from=test-maven-a /.dummy /.dummy
 COPY --from=test-others /.dummy /.dummy
 COPY --from=test-latest-version /.dummy /.dummy
+COPY --from=test-partial-version /.dummy /.dummy
 COPY --from=test-readonly /.dummy /.dummy
 COPY --from=test-android-sdk /.dummy /.dummy

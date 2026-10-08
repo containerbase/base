@@ -4,9 +4,10 @@ import {
   CompressionService,
   EnvService,
   HttpService,
+  LinkToolService,
   PathService,
+  type ShellWrapperConfig,
 } from '../services/index.ts';
-import { LinkToolService, type ShellWrapperConfig } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
   type InstallToolType,
