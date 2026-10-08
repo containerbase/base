@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
         with:
           save-cache: true
 
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
 
       - name: lint
         run: |
@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
 
       - name: Install ubuntu dependencies
         run: |
@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
 
       - name: vitest
         run: pnpm test:vitest
@@ -174,7 +174,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
 
       - name: build
         run: pnpm build
@@ -206,7 +206,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
         with:
           node: false
           apt-proxy: true
@@ -252,7 +252,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
         with:
           node: false
           apt-proxy: true
@@ -292,7 +292,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
         with:
           node: false
           apt-proxy: true
@@ -364,7 +364,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@c95c822aba29f2d1929e012fcc5728476671a549 # v5.0.53
+        uses: containerbase/internal-tools/setup@d7fbd383dbf6cddf7e6bb2d787342a7f1cb92620 # v5.0.54
         with:
           node: false
           apt-proxy: true
