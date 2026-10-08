@@ -65,8 +65,8 @@
   },
   "devDependencies": {
     "@containerbase/istanbul-reports-html": "2.0.20",
+    "@containerbase/oxlint-plugin": "1.0.0",
     "@containerbase/semantic-release-pnpm": "1.4.3",
-    "@oxlint/plugins": "1.86.0",
     "@semantic-release/exec": "7.1.0",
     "@tsconfig/node24": "24.0.5",
     "@tsconfig/strictest": "2.0.8",

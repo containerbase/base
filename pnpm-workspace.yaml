@@ -30,4 +30,5 @@ minimumReleaseAgeExclude:
   - '@renovatebot/pgp'
   - '@renovatebot/ruby-semver'
   - '@containerbase/istanbul-reports-html'
+  - '@containerbase/oxlint-plugin'
   - '@containerbase/semantic-release-pnpm'

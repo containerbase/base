@@ -88,12 +88,12 @@ importers:
       '@containerbase/istanbul-reports-html':
         specifier: 2.0.20
         version: 2.0.20
+      '@containerbase/oxlint-plugin':
+        specifier: 1.0.0
+        version: 1.0.0(oxlint@1.86.0(oxlint-tsgolint@7.0.2003))
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.3
         version: 1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))
-      '@oxlint/plugins':
-        specifier: 1.86.0
-        version: 1.86.0
       '@semantic-release/exec':
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))(supports-color@7.2.0)
@@ -265,6 +265,12 @@ packages:
   '@containerbase/istanbul-reports-html@2.0.20':
     resolution: {integrity: sha512-48k2Gk5zmGEOoWGsYI76tmqn83OpCEkhMUlg+BYhYi7CMvnUt2KWuWcF8WJnKmb3ckk8ByigIQ1zmxVAdu84Lg==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
+
+  '@containerbase/oxlint-plugin@1.0.0':
+    resolution: {integrity: sha512-dmg6SUKve4iuuaJII3I5w0ktwUqu1WCBp4sZaClmEC9dk1EUMM+rtrM2hx9aB0TI8/Vf6vBv0WWv4nrhlG2yOg==}
+    engines: {node: '>=24.10.0', pnpm: '>=11.0.0'}
+    peerDependencies:
+      oxlint: '>=1.86.0'
 
   '@containerbase/semantic-release-pnpm@1.4.3':
     resolution: {integrity: sha512-dOMyBw+mzcKHt6OqYyRj6arFeszoINlNRq1eIR7oEE0TB0i0lhj8BsJ/2IFISJUPwf9lUxKbV8ES6vjqqMIQYg==}
@@ -3559,6 +3565,11 @@ snapshots:
   '@containerbase/istanbul-reports-html@2.0.20':
     dependencies:
       istanbul-reports: 3.2.0
+
+  '@containerbase/oxlint-plugin@1.0.0(oxlint@1.86.0(oxlint-tsgolint@7.0.2003))':
+    dependencies:
+      '@oxlint/plugins': 1.86.0
+      oxlint: 1.86.0(oxlint-tsgolint@7.0.2003)
 
   '@containerbase/semantic-release-pnpm@1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))':
     dependencies:
