@@ -78,7 +78,7 @@ RUN install-tool apko 1.4.8
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.32.0
+RUN install-tool apm 0.33.0
 
 #--------------------------------------
 # Image: devbox
