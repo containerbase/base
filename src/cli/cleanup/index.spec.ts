@@ -70,7 +70,7 @@ describe('cli/cleanup/index', () => {
     test('a dry run does not write the databases', async () => {
       const { dataPath } = await createContainer().getAsync(PathService);
       const files = (await fs.readdir(dataPath))
-        .filter((file) => file.endsWith('.nedb'))
+        .filter((file) => file.endsWith('.db'))
         .map((file) => join(dataPath, file));
       /** The modification times of the database files. */
       const mtimes = (): Promise<number[]> =>
