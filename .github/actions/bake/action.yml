@@ -34,5 +34,8 @@ runs:
         retry_wait_seconds: 60
         polling_interval_seconds: 5
         command: docker buildx bake --set settings.secrets=type=env,id=GITHUB_TOKEN ${{ inputs.args }}
+        # an aborted build can leave a broken snapshot in the builder cache, which
+        # fails every retry with "failed to commit ... snapshot ... not found"
+        on_retry_command: docker buildx prune --force
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
