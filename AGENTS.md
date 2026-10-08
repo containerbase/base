@@ -18,6 +18,11 @@ git merge origin/main
 Do not rebase a pushed branch onto `main` and force-push it.
 A force push rewrites history that reviewers and CI have already seen.
 
+Stacked pull requests managed with `gh stack` are the exception: keep one
+commit per layer, update the stack with `gh stack rebase` once a layer below
+is merged or `main` is needed, and force-push it with `gh stack push` or
+`gh stack submit`.
+
 ## Commands
 
 All tooling runs through `pnpm`:
