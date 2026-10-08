@@ -336,9 +336,6 @@ jobs:
       - name: Check system
         uses: ./.github/actions/check
 
-      - name: ⚙️ Download proxy
-        uses: ./.github/actions/download-proxy
-
       - name: ⚙️  Init
         run: |
           echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
@@ -347,14 +344,6 @@ jobs:
         uses: ./.github/actions/bake
         with:
           args: test-base
-
-      - name: Download proxy errors
-        if: failure()
-        run: .github/actions/download-proxy/errors.sh
-
-      - name: Download proxy cache stats
-        if: always()
-        run: .github/actions/download-proxy/stats.sh
 
   lang:
     runs-on: ${{ matrix.arch.os }}
