@@ -52,6 +52,7 @@ export const NoPrepareTools = [
   'tofu',
   'uv',
   'vendir',
+  'vp',
   'wally',
   'yarn',
   'yarn-slim',

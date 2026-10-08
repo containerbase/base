@@ -830,6 +830,23 @@ https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-l
 https://github.com/vmware-tanzu/carvel-vendir/releases/download/v0.46.2/vendir-linux-arm64
 ```
 
+## `vp`
+
+Vite+ releases are downloaded from:
+
+- `https://github.com/voidzero-dev/vite-plus/releases`
+
+Only releases since v0.3.1 are supported, the first ones that publish `vp-checksums.txt`.
+The download is always verified against it, so a mirror needs to provide both files.
+
+Samples:
+
+```txt
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/voidzero-dev/vite-plus/releases/download/v1.0.0/vp-checksums.txt
+```
+
 ## `wally`
 
 Wally releases are downloaded from:
