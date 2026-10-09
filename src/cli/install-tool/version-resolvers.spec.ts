@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, test } from 'vitest';
-import { GradleVersionResolver } from '../tools/java/gradle.ts';
+import { ComposerVersionResolver } from '../tools/php/composer.ts';
 import {
   createGenericVersionResolver,
   getVersionHelp,
@@ -11,7 +11,7 @@ describe('cli/install-tool/version-resolvers', () => {
     expect(getVersionHelp()).toBe(codeBlock`
       Some tools accept partial versions:
 
-      - \`android-sdk-cmdline-tools\`, \`bundler\`, \`checkov\`, \`cocoapods\`, \`conan\`, \`copier\`, \`hashin\`, \`kas\`, \`maven\`, \`node\`, \`nuget\`, \`pdm\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
+      - \`android-sdk-cmdline-tools\`, \`bundler\`, \`checkov\`, \`cocoapods\`, \`conan\`, \`copier\`, \`gradle\`, \`hashin\`, \`kas\`, \`maven\`, \`node\`, \`nuget\`, \`pdm\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
       - \`corepack\`, \`npm\`, \`pnpm\`, \`yarn\`: A major or major.minor version installs the matching \`latest\` release, else the newest matching one.
       - \`java\`, \`java-jdk\`, \`java-jre\`: A major, major.minor or major.minor.patch version, like \`21\` or \`11.0\`, installs the newest matching release.
     `);
@@ -28,15 +28,15 @@ describe('cli/install-tool/version-resolvers', () => {
   });
 
   test('getVersionHelp without version notes', () => {
-    expect(getVersionHelp([GradleVersionResolver])).toBe('');
+    expect(getVersionHelp([ComposerVersionResolver])).toBe('');
   });
 
   test('getVersionHelp lets a dedicated resolver without a note win', () => {
     // at runtime the dedicated resolver is used, so the generic note must not show
     expect(
       getVersionHelp([
-        GradleVersionResolver,
-        createGenericVersionResolver('pip', 'gradle'),
+        ComposerVersionResolver,
+        createGenericVersionResolver('pip', 'composer'),
       ]),
     ).toBe('');
   });

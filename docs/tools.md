@@ -119,6 +119,11 @@ Some tools accept partial versions and install a matching release:
   Other major or major.minor versions resolve to the newest matching release even when RubyGems would read them as `X.Y.0`, eg. `bundler 2.0` installs the newest `2.0.x`, not `2.0.0`; pin the full version for an exact one.
   The lookup goes to rubygems.org, through the CDN and URL replacements like other lookups, and a configured gem registry is only used for the install, so a gem from a private registry needs a full version, and a partial version fails when rubygems.org can't be reached.
   Without a version, or with `latest`, the latest release is installed.
+- `gradle`: A major (`8`) or major.minor (`9.0`) version installs the newest matching stable release, prereleases, milestones, snapshots, nightlies and broken releases are skipped.
+  A version which exists as a release, like `8.10` or `6.9`, is kept as given, and so is the version when the release list can't be loaded.
+  Other major.minor versions resolve to the newest matching release, eg. `9.0` installs the newest `9.0.x`; pin the full version for an exact one.
+  The release list comes from `services.gradle.org/versions/all`, through the CDN and URL replacements like other lookups.
+  Without a version, or with `latest`, the current release is installed.
 - `maven`: A major (`3`) or major.minor (`3.9`) version installs the newest matching stable release, prereleases like `4.0.0-rc-1` are skipped.
   A version which exists as a release, like `3.0`, is kept, and so is the version when the release list can't be loaded.
   Other major.minor versions resolve to the newest matching release, eg. `3.9` installs the newest `3.9.x`; pin the full version for an exact one.

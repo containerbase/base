@@ -265,6 +265,12 @@ RUN set -ex; \
   mvn --version | grep '^Apache Maven 3\.'; \
   true
 
+RUN install-tool gradle 8
+
+RUN set -ex; \
+  gradle --version | grep '^Gradle 8\.'; \
+  true
+
 RUN install-tool java-jre 11.0
 
 RUN set -ex; \
