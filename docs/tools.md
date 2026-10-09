@@ -110,6 +110,15 @@ Some tools accept partial versions and install a matching release:
   A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
+- `android-sdk-cmdline-tools`: A major (`14`) or major.minor (`14.1`) version installs the newest matching stable release, compared numerically.
+  A version which exists as a release, like `13`, is kept; the repository lists versions without zero segments, so `13.0` installs the release listed as `13`.
+  The lookup needs the android repository, which the install needs too, so it fails when the repository can't be loaded.
+  Without a version, or with `latest`, the `latest` package is installed.
+- `cocoapods`, `bundler` and any package installed with [`install-gem`](#install-gem-command): A major (`1`) or major.minor (`1.16`) version installs the newest matching release, prereleases are skipped.
+  A version which exists as a release, like `5.2`, is kept.
+  Other major or major.minor versions resolve to the newest matching release even when RubyGems would read them as `X.Y.0`, eg. `bundler 2.0` installs the newest `2.0.x`, not `2.0.0`; pin the full version for an exact one.
+  The lookup goes to rubygems.org, through the CDN and URL replacements like other lookups, and a configured gem registry is only used for the install, so a gem from a private registry needs a full version, and a partial version fails when rubygems.org can't be reached.
+  Without a version, or with `latest`, the latest release is installed.
 - `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
   A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
@@ -155,6 +164,14 @@ Note: requires ruby to be installed.
   ```bash
   install-gem rake
   ```
+- Installs the newest rake 13 release
+  ```bash
+  install-gem rake 13
+  ```
+
+#### Tool-specific versions <a name="Versions-install-gem"></a>
+
+A major or major.minor version installs the newest matching release, see the [install-tool versions](#Versions-install-tool).
 
 <br>
 

@@ -4,7 +4,12 @@ import { XMLParser } from '@nodable/flexible-xml-parser';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import {
+  ToolVersionResolver,
+  isPartialVersion,
+  newestVersion,
+  partialVersionHelp,
+} from '../../install-tool/tool-version-resolver.ts';
 import type { HttpService } from '../../services/http.service.ts';
 import { semverCoerce } from '../../utils/index.ts';
 import { AndroidSdkRepo } from './schema.ts';
@@ -81,14 +86,53 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
   }
 }
 
+/**
+ * Checks if a repository version starts with the segments of a partial
+ * version, compared numerically with missing segments counting as `0`.
+ */
+function matchesPartial(repoVersion: string, partial: string): boolean {
+  const segments = repoVersion.split('.');
+  return partial
+    .split('.')
+    .every((segment, i) => Number(segment) === Number(segments[i] ?? '0'));
+}
+
+/**
+ * Checks if a repository version is the same release as a requested version,
+ * compared numerically with missing segments counting as `0`, so `16.0`
+ * equals the listed `16`.
+ */
+function isSameRelease(repoVersion: string, version: string): boolean {
+  return (
+    matchesPartial(repoVersion, version) && matchesPartial(version, repoVersion)
+  );
+}
+
 @injectable()
 @injectFromHierarchy()
 export class AndroidSdkCmdlineToolsVersionResolver extends ToolVersionResolver {
   readonly tool = 'android-sdk-cmdline-tools';
 
+  override readonly versionHelp = partialVersionHelp;
+
   /**
-   * Resolves a missing version or `latest` to the `cmdline-tools;latest`
-   * package of the android sdk repository.
+   * Resolves a version from the android sdk repository.
+   *
+   * - A missing version or `latest` resolves to the `cmdline-tools;latest`
+   *   package.
+   * - A major (`13`) or major.minor (`13.1`) version which is an existing
+   *   release is kept, in the form the repository lists it: versions are
+   *   listed without zero segments, so `13.0` becomes `13`.
+   * - Any other major or major.minor version resolves to the newest matching
+   *   stable package, compared numerically with missing segments counting as
+   *   `0`, so `14` matches `14.1` but not `140`.
+   * - Any other version is returned unchanged.
+   *
+   * Partial versions need the repository, which the install needs too, so a
+   * failed lookup is an error.
+   *
+   * @throws if the repository can't be loaded or a partial version matches no
+   * stable package.
    */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
@@ -97,6 +141,29 @@ export class AndroidSdkCmdlineToolsVersionResolver extends ToolVersionResolver {
       if (pkg) {
         return pkg.version;
       }
+    }
+    if (version && isPartialVersion(version)) {
+      const res = await fetchRepo(this.http);
+      const packages = res.packages.filter(
+        (p) =>
+          p.path.startsWith('cmdline-tools;') &&
+          p.path !== 'cmdline-tools;latest',
+      );
+      const existing = packages.find((p) => isSameRelease(p.version, version));
+      if (existing) {
+        return existing.version;
+      }
+      const release = newestVersion(
+        packages
+          .filter(
+            (p) => p.channel === 'stable' && matchesPartial(p.version, version),
+          )
+          .map((p) => p.version),
+      );
+      if (!release) {
+        throw new Error(`No ${this.tool} release found for version ${version}`);
+      }
+      return release;
     }
     return version;
   }

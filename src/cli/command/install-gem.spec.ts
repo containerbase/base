@@ -1,7 +1,9 @@
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { registerCommands } from './index.ts';
+import { InstallGemCommand, InstallGemShortCommand } from './install-gem.ts';
 
 const mocks = vi.hoisted(() => ({
   installTool: vi.fn(),
@@ -15,6 +17,11 @@ vi.mock('../prepare-tool/index.ts', () => mocks);
 describe('cli/command/install-gem', () => {
   beforeEach(() => {
     vi.stubEnv('RAKE_VERSION', undefined);
+  });
+
+  test('describes partial versions', () => {
+    expect(InstallGemCommand.usage?.details).toBe(partialVersionHelp);
+    expect(InstallGemShortCommand.usage?.details).toBe(partialVersionHelp);
   });
 
   test('install-gem', async () => {

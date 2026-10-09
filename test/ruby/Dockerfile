@@ -151,6 +151,22 @@ RUN install-gem rake
 
 RUN rake --version
 
+#--------------------------------------
+# test: partial versions
+#--------------------------------------
+FROM build AS test-partial
+
+USER 12021
+
+RUN install-tool cocoapods 1
+
+RUN set -ex; \
+  pod --version | grep '^1\.';
+
+RUN install-gem rake 13
+
+RUN set -ex; \
+  rake --version | grep 'rake, version 13\.';
 
 #--------------------------------------
 # final
@@ -162,3 +178,4 @@ COPY --from=test-bundler-c /.dummy /.dummy
 COPY --from=test-bundler-d /.dummy /.dummy
 COPY --from=test-cocoapods-a /.dummy /.dummy
 COPY --from=test-gem /.dummy /.dummy
+COPY --from=test-partial /.dummy /.dummy
