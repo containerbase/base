@@ -37,13 +37,14 @@ All tooling runs through `pnpm`:
 - `pnpm oxlint` and `pnpm oxlint-fix`: lint and fix lint findings
 - `pnpm prettier` and `pnpm prettier-fix`: check and fix formatting
 - `pnpm lint:markdown`: lint markdown
-- `mise exec -- jactionlint`: lint the GitHub workflows and local actions
 - `pnpm lint:schema`: check the committed json schemas are up to date
 - `pnpm schema`: regenerate the committed json schemas
 - `pnpm test:docker -b -t test-x86_64 node`: run the container test in `test/node`
 - `pnpm test:docker -b -t test-distro noble`: run the distro test from `test/Dockerfile.distro` on noble (omit the distro to run all)
 
 The container tests build the whole image, so they take several minutes.
+
+`jactionlint` lints the GitHub workflows and local actions, install it with `mise install`.
 
 ## Tool installers
 
