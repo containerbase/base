@@ -34,16 +34,16 @@ jobs:
         id: init
         run: echo "uid=$(uuidgen)" >> "${GITHUB_OUTPUT}"
 
-      # pull requests which only change files that feed neither the images nor
-      # the bats tests skip the build and docker tests: docs, the dev container
-      # (it has its own workflow), editor and repo settings, and lint and
-      # vitest configs (those jobs still run); pushes and the merge queue
-      # always run everything
+      # pull requests and merge queue groups which only change files that feed
+      # neither the images nor the bats tests skip the build and docker tests:
+      # docs, the dev container (it has its own workflow), editor and repo
+      # settings, and lint and vitest configs (those jobs still run); pushes
+      # always run everything, as they release
       - name: ⚙️ Check for changes that don't need the build
         id: changes
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
