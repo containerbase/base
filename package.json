@@ -100,7 +100,7 @@
     "tsx": "4.23.15",
     "type-fest": "5.10.0",
     "typescript": "6.0.3",
-    "vite": "8.3.2",
+    "vite": "8.3.3",
     "vitest": "4.1.11"
   },
   "peerDependencies": {
