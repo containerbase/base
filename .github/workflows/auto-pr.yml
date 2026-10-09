@@ -14,6 +14,7 @@ permissions: {}
 jobs:
   debug:
     runs-on: ubuntu-slim
+    timeout-minutes: 1
     steps:
       - name: event info
         env:
@@ -23,6 +24,7 @@ jobs:
   review:
     if: github.event.action == 'opened' && !endsWith(github.event.pull_request.user.login, '[bot]')
     runs-on: ubuntu-slim
+    timeout-minutes: 5
     permissions:
       pull-requests: write
     steps:
@@ -45,6 +47,7 @@ jobs:
         )
       )
     runs-on: ubuntu-slim
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write

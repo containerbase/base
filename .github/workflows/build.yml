@@ -218,6 +218,7 @@ jobs:
     needs:
       - setup
       - build
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -233,6 +234,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -264,6 +267,7 @@ jobs:
       - lint
       - vitest
       - build
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -279,6 +283,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -330,6 +336,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -356,6 +364,8 @@ jobs:
       - bats
       - lint
       - vitest
+    # two bakes (base from the cache, then the tests) with up to 3 attempts each
+    timeout-minutes: 45
 
     strategy:
       max-parallel: 10
@@ -402,6 +412,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
