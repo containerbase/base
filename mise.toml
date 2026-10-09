@@ -2,3 +2,10 @@
 jactionlint = "1.8.2"
 node = "24.21.0"
 pnpm = "12.10.0"
+
+[hooks]
+postinstall = "pnpm install"
+
+[settings]
+# needed for hooks
+experimental = true
