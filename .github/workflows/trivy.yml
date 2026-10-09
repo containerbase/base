@@ -10,6 +10,7 @@ permissions: {}
 jobs:
   trivy:
     runs-on: ubuntu-slim
+    timeout-minutes: 15
     permissions:
       contents: read
       security-events: write

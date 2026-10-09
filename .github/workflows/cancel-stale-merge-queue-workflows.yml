@@ -13,6 +13,7 @@ jobs:
     name: Cancel Workflow Runs
 
     runs-on: ubuntu-slim
+    timeout-minutes: 5
 
     if: github.event.reason != 'merged'
 
