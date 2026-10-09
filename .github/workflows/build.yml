@@ -234,6 +234,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -281,6 +283,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -332,6 +336,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
@@ -406,6 +412,8 @@ jobs:
     steps:
       - name: ⚙️ Setup
         uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+        # fails fast when preparing the apt proxy hangs
+        timeout-minutes: 10
         with:
           node: false
           apt-proxy: true
