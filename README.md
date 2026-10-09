@@ -16,16 +16,17 @@ Install a recent version of:
 - [Docker](https://www.docker.com)
 - the [`buildx`](https://github.com/docker/buildx) plugin
 
-Node.js and pnpm are pinned in [`mise.toml`](./mise.toml), so [`mise`](https://mise.jdx.dev) users can install them with:
+Node.js and pnpm are pinned in [`mise.toml`](./mise.toml), so [`mise`](https://mise.jdx.dev) users can install them and the dependencies with:
 
 ```console
 > mise install
 ```
 
+Without mise, install the dependencies with `pnpm install`.
+
 You must first build the CLI, before you build the Docker images.
 
 ```console
-> pnpm install
 > pnpm build
 ```
 
