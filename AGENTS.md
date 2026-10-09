@@ -44,6 +44,8 @@ All tooling runs through `pnpm`:
 
 The container tests build the whole image, so they take several minutes.
 
+`jactionlint` lints the GitHub workflows and local actions, install it with `mise install`.
+
 ## Tool installers
 
 When adding or changing a tool installer, follow the [tool installer best practices](./docs/tool-installer-best-practices.md).
