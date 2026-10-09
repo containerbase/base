@@ -232,7 +232,7 @@ RUN install-tool nub 0.9.6
 RUN install-tool deno 2.9.7
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.9
+RUN install-tool apko 1.4.10
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.33.0
