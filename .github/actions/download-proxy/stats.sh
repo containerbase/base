@@ -36,6 +36,8 @@ fi
   echo ""
   echo "### Download proxy hosts"
   echo ""
+  echo "Only the requests the proxy saw in this job: build steps reused from the cache download nothing, so their hosts can be missing."
+  echo ""
   echo "| Host | Requests | Cache hits | Redirects to |"
   echo "| --- | --- | --- | --- |"
   # fields are host=, final= and cache=, see the log_format in nginx.conf
