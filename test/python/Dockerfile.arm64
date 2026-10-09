@@ -62,7 +62,7 @@ RUN install-tool hashin 1.0.5
 FROM test-python AS test-kas
 
 # renovate: datasource=pypi
-RUN install-tool kas 5.2
+RUN install-tool kas 5.5
 
 #--------------------------------------
 # Image: pipenv
