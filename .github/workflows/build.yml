@@ -126,12 +126,12 @@ jobs:
         with:
           persist-credentials: false
           show-progress: false
-          # include the local composite actions, so that actionlint validates
+          # include the local composite actions, so that jactionlint validates
           # their metadata, and zizmor audits them
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        uses: docker://ghcr.io/jdx/jactionlint:1.8.2@sha256:5515b269082f92ee0962ccc236df3300113aedcd4008a2aad5ad0903680b7c67
         with:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
