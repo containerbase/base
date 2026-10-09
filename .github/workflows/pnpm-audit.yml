@@ -1,0 +1,41 @@
+name: pnpm-audit
+
+# reports the advisories of the root lockfile to code scanning, because the
+# dependency graph doesn't read pnpm's two-document lockfile yet
+# https://github.com/dependabot/dependabot-core/issues/15904
+
+on:
+  schedule:
+    - cron: '29 11 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - pnpm-lock.yaml
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  pnpm-audit:
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: ⚙️ Setup
+        uses: containerbase/internal-tools/setup@e16d53d6bd770a44251028540390e0eff801aef5 # v5.0.55
+
+      # `pnpm audit` exits non zero when it finds advisories, the converter
+      # fails instead when the report is missing
+      - name: pnpm audit
+        run: pnpm audit --json > "${RUNNER_TEMP}/pnpm-audit.json" || true
+
+      - name: Convert to SARIF
+        run: node tools/audit-sarif.ts "${RUNNER_TEMP}/pnpm-audit.json" pnpm-audit.sarif
+
+      - uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: pnpm-audit.sarif
+          category: pnpm-audit

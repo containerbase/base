@@ -65,7 +65,8 @@ jobs:
             -e '^\.prettierignore$' \
             -e '^\.markdownlint-cli2\.jsonc$' \
             -e '^\.github/zizmor\.yml$' \
-            -e '^tools/lint-(docs|versions)\.ts$' \
+            -e '^tools/(audit-sarif|lint-docs|lint-versions)\.ts$' \
+            -e '^\.github/workflows/(pnpm-audit|trivy)\.yml$' \
             -e '^vitest\.config\.ts$' \
             -e '^__mocks__/' \
             -e '^codecov\.yml$' \
