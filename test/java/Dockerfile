@@ -258,6 +258,13 @@ RUN install-tool maven
 FROM base AS test-partial-version
 
 RUN install-tool java 21
+
+RUN install-tool maven 3
+
+RUN set -ex; \
+  mvn --version | grep '^Apache Maven 3\.'; \
+  true
+
 RUN install-tool java-jre 11.0
 
 RUN set -ex; \

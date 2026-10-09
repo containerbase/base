@@ -116,6 +116,24 @@ const AdroidSdkRemotePackage = z
     }),
   );
 
+/**
+ * The release versions of the maven-metadata.xml, a single version is not
+ * wrapped in an array by the xml parser.
+ */
+export const MavenMetadata = z
+  .object({
+    metadata: z.object({
+      versioning: z.object({
+        versions: z.object({
+          version: z.union([z.string(), z.array(z.string())]),
+        }),
+      }),
+    }),
+  })
+  .transform(({ metadata }) =>
+    [metadata.versioning.versions.version].flat().map((v) => v.trim()),
+  );
+
 export const AndroidSdkRepo = z
   .object({
     'sdk-repository': z.object({
