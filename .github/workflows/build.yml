@@ -132,7 +132,7 @@ jobs:
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: docker://ghcr.io/jdx/jactionlint:1.8.2@sha256:5515b269082f92ee0962ccc236df3300113aedcd4008a2aad5ad0903680b7c67
+        uses: docker://ghcr.io/jdx/jactionlint:2.1.0@sha256:50503986432f31db3513648af62e05f0a1f88da671c972c0e9bc252731e9300d
         with:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
