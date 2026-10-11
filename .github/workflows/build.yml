@@ -77,7 +77,7 @@ jobs:
           fi
 
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -115,7 +115,7 @@ jobs:
           check_all_files_with_shebangs: 'true'
 
   lint-actions:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 7
     permissions:
       contents: read
@@ -142,7 +142,7 @@ jobs:
           version: 1.30.1
 
   bats:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     # skipped for docs or dev container only pull requests, like the build
     if: needs.setup.outputs.skip-build != 'true'
@@ -164,7 +164,7 @@ jobs:
         run: pnpm test:bats
 
   vitest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -191,7 +191,7 @@ jobs:
           use_oidc: true
 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     # skipped for docs or dev container only pull requests, so `base`,
     # `distro`, `base-arm64` and `lang` are skipped too
@@ -225,10 +225,10 @@ jobs:
       matrix:
         arch:
           - name: x86_64
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
 
     steps:
@@ -259,7 +259,7 @@ jobs:
         run: test/readonly/test.sh
 
   distro:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # docker tests are skipped for draft pull requests
     if: github.event.pull_request.draft != true
     needs:
@@ -314,7 +314,7 @@ jobs:
 
   # test old distros on arm64
   base-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     if: github.event.pull_request.draft != true
     needs:
       - bats
@@ -393,17 +393,17 @@ jobs:
           - latest
         arch:
           - name: x86_64
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
         # include:
         #   # no ubuntu arm64 support for haskell
         #   - lang: haskell
         #     arch:
         #       name: x86_64
-        #       os: ubuntu-24.04
+        #       os: ubuntu-26.04
         #       tag: amd64
 
     env:
