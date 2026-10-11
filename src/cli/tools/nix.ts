@@ -42,7 +42,9 @@ export class NixInstallService extends BaseInstallService {
 
   /**
    * Links the `nix` binary into the global bin folder, with the nix store and
-   * state folders below the containerbase cache.
+   * state folders below the containerbase cache unless they are already set.
+   * Binary caches only serve `/nix/store`, so an image that provides a
+   * writable `/nix` can point nix back at it to make substitution work.
    */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
@@ -51,11 +53,11 @@ export class NixInstallService extends BaseInstallService {
     await this.shellwrapper({
       srcDir: src,
       exports: [
-        `NIX_STORE_DIR=${cache}/store`,
-        `NIX_DATA_DIR=${cache}/data`,
-        `NIX_LOG_DIR=${cache}/log`,
-        `NIX_STATE_DIR=${cache}/state`,
-        `NIX_CONF_DIR=${cache}/conf`,
+        `NIX_STORE_DIR=\${NIX_STORE_DIR:-${cache}/store}`,
+        `NIX_DATA_DIR=\${NIX_DATA_DIR:-${cache}/data}`,
+        `NIX_LOG_DIR=\${NIX_LOG_DIR:-${cache}/log}`,
+        `NIX_STATE_DIR=\${NIX_STATE_DIR:-${cache}/state}`,
+        `NIX_CONF_DIR=\${NIX_CONF_DIR:-${cache}/conf}`,
       ].join(' '),
     });
   }
