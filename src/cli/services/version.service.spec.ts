@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { Container } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { logger } from '../utils/index.ts';
 import { VersionService } from './index.ts';
 import { testContainer } from '~test/di.ts';
@@ -9,14 +9,16 @@ import { ensurePaths, rootPath } from '~test/path.ts';
 describe('cli/services/version.service', () => {
   let child!: Container;
   let svc!: VersionService;
-  const now = new Date('2025-09-16T07:58:26.631Z');
 
   beforeAll(async () => {
     await ensurePaths(['opt/containerbase/data', 'opt/containerbase/versions']);
-    vi.useFakeTimers({ now });
   });
 
   beforeEach(async () => {
+    // every test starts with an empty database
+    await fs.rm(rootPath('opt/containerbase/data/containerbase.db'), {
+      force: true,
+    });
     child = await testContainer();
     svc = await child.getAsync(VersionService);
   });
@@ -44,15 +46,31 @@ describe('cli/services/version.service', () => {
         version: '10.0.1',
         parent: { name: 'node', version: '14.17.1' },
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('UNIQUE constraint failed');
+    await expect(
+      svc.addInstalled({ name: 'node', version: '14.17.0' }),
+    ).rejects.toThrow('UNIQUE constraint failed');
 
-    expect(await svc.findInstalled('node')).toMatchObject([
+    expect(await svc.findInstalled('node')).toEqual([
       { name: 'node', version: '14.17.0' },
+    ]);
+    expect(await svc.findInstalled('pnpm')).toEqual([
+      {
+        name: 'pnpm',
+        version: '10.0.1',
+        parent: { name: 'node', version: '14.17.0' },
+      },
+      {
+        name: 'pnpm',
+        version: '10.0.1',
+        parent: { name: 'node', version: '14.17.1' },
+      },
     ]);
 
     expect(await svc.isInstalled({ name: 'node', version: '14.17.0' })).toBe(
       true,
     );
+    // without a parent any parent matches
     expect(await svc.isInstalled({ name: 'pnpm', version: '10.0.1' })).toBe(
       true,
     );
@@ -77,20 +95,45 @@ describe('cli/services/version.service', () => {
         parent: { name: 'node', version: '14.17.2' },
       }),
     ).toBe(false);
+    // a parent doesn't match a version installed without one
+    expect(
+      await svc.isInstalled({
+        name: 'node',
+        version: '14.17.0',
+        parent: { name: 'node', version: '14.17.0' },
+      }),
+    ).toBe(false);
 
     expect(await svc.getChilds({ name: 'node', version: '14.17.0' })).toEqual([
       {
-        _id: expect.any(String),
-        createdAt: now,
         name: 'pnpm',
         parent: {
           name: 'node',
           version: '14.17.0',
         },
-        updatedAt: now,
         version: '10.0.1',
       },
     ]);
+    expect(await svc.getChilds({ name: 'node', version: '14.17.2' })).toEqual(
+      [],
+    );
+
+    // only the given parent is removed
+    await svc.removeInstalled({
+      name: 'pnpm',
+      parent: { name: 'node', version: '14.17.0' },
+    });
+    expect(await svc.findInstalled('pnpm')).toEqual([
+      {
+        name: 'pnpm',
+        version: '10.0.1',
+        parent: { name: 'node', version: '14.17.1' },
+      },
+    ]);
+
+    // other versions are kept
+    await svc.removeInstalled({ name: 'node', version: '14.17.1' });
+    expect(await svc.findInstalled('node')).toHaveLength(1);
 
     await svc.removeInstalled({ name: 'pnpm' });
     expect(
@@ -100,6 +143,52 @@ describe('cli/services/version.service', () => {
         parent: { name: 'node', version: '14.17.1' },
       }),
     ).toBe(false);
+
+    await svc.removeInstalled({ version: '14.17.0' });
+    expect(await svc.findInstalled('node')).toEqual([]);
+  });
+
+  test('list installed', async () => {
+    expect(await svc.listInstalled()).toEqual([]);
+
+    await svc.addInstalled({ name: 'node', version: '22.11.0' });
+    await svc.addInstalled({ name: 'node', version: '9.11.0' });
+    await svc.addInstalled({
+      name: 'pnpm',
+      version: '10.0.1',
+      parent: { name: 'node', version: '22.11.0' },
+    });
+    await svc.addInstalled({ name: 'java-jdk', version: '21.0.12+7' });
+    await svc.setCurrent({
+      name: 'node',
+      tool: { name: 'node', version: '22.11.0' },
+    });
+    await svc.setCurrent({
+      name: 'java',
+      tool: { name: 'java-jdk', version: '21.0.12+7' },
+    });
+    await svc.setType('pnpm', 'npm');
+
+    expect(await svc.listInstalled()).toEqual([
+      {
+        name: 'java-jdk',
+        version: '21.0.12+7',
+        versions: [{ version: '21.0.12+7' }],
+      },
+      {
+        name: 'node',
+        version: '22.11.0',
+        versions: [{ version: '9.11.0' }, { version: '22.11.0' }],
+      },
+      {
+        name: 'pnpm',
+        version: null,
+        versions: [
+          { version: '10.0.1', parent: { name: 'node', version: '22.11.0' } },
+        ],
+        type: 'npm',
+      },
+    ]);
   });
 
   test('linked', async () => {
@@ -114,6 +203,10 @@ describe('cli/services/version.service', () => {
       name: 'node',
       tool: { name: 'node', version: '14.17.0' },
     });
+    await svc.setLink({
+      name: 'npx',
+      tool: { name: 'node', version: '14.17.0' },
+    });
 
     expect(
       await svc.isLinked({
@@ -121,6 +214,10 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.0' },
       }),
     ).toBe(true);
+    expect(await svc.findLinks({ name: 'node', version: '14.17.0' })).toEqual([
+      { name: 'node', tool: { name: 'node', version: '14.17.0' } },
+      { name: 'npx', tool: { name: 'node', version: '14.17.0' } },
+    ]);
 
     await svc.setLink({
       name: 'node',
@@ -139,10 +236,26 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.0' },
       }),
     ).toBe(false);
+    expect(
+      await svc.isLinked({
+        name: 'node',
+        tool: { name: 'node', version: '14.11.0' },
+      }),
+    ).toBe(true);
+
+    await svc.removeLinks({ name: 'node', version: '14.17.0' });
+    expect(await svc.findLinks({ name: 'node', version: '14.17.0' })).toEqual(
+      [],
+    );
+    expect(await svc.findLinks({ name: 'node', version: '14.11.0' })).toEqual([
+      { name: 'node', tool: { name: 'node', version: '14.11.0' } },
+    ]);
   });
 
   test('current', async () => {
     const versionFile = rootPath('opt/containerbase/versions/node');
+
+    expect(await svc.getCurrent('node')).toBeNull();
 
     await svc.setCurrent({
       name: 'node',
@@ -154,7 +267,13 @@ describe('cli/services/version.service', () => {
         tool: { name: 'node', version: '14.17.0' },
       }),
     ).toBe(true);
-    expect(await svc.getCurrent('node')).toMatchObject({
+    expect(
+      await svc.isCurrent({
+        name: 'node',
+        tool: { name: 'node', version: '14.17.1' },
+      }),
+    ).toBe(false);
+    expect(await svc.getCurrent('node')).toStrictEqual({
       name: 'node',
       tool: { name: 'node', version: '14.17.0' },
     });
@@ -178,13 +297,77 @@ describe('cli/services/version.service', () => {
     );
   });
 
+  test('current with parent', async () => {
+    const parent = { name: 'node', version: '22.11.0' };
+    await svc.setCurrent({
+      name: 'pnpm',
+      tool: { name: 'pnpm', version: '10.0.1' },
+      parent,
+    });
+
+    expect(await svc.getCurrent('pnpm')).toEqual({
+      name: 'pnpm',
+      tool: { name: 'pnpm', version: '10.0.1' },
+      parent,
+    });
+    // without a parent any parent matches
+    expect(
+      await svc.isCurrent({
+        name: 'pnpm',
+        tool: { name: 'pnpm', version: '10.0.1' },
+      }),
+    ).toBe(true);
+    expect(
+      await svc.isCurrent({
+        name: 'pnpm',
+        tool: { name: 'pnpm', version: '10.0.1' },
+        parent,
+      }),
+    ).toBe(true);
+    expect(
+      await svc.isCurrent({
+        name: 'pnpm',
+        tool: { name: 'pnpm', version: '10.0.1' },
+        parent: { name: 'node', version: '20.11.0' },
+      }),
+    ).toBe(false);
+
+    // replacing the current version drops the parent
+    await svc.setCurrent({
+      name: 'pnpm',
+      tool: { name: 'pnpm', version: '10.0.2' },
+    });
+    expect(await svc.getCurrent('pnpm')).toStrictEqual({
+      name: 'pnpm',
+      tool: { name: 'pnpm', version: '10.0.2' },
+    });
+    expect(
+      await svc.isCurrent({
+        name: 'pnpm',
+        tool: { name: 'pnpm', version: '10.0.2' },
+        parent,
+      }),
+    ).toBe(false);
+  });
+
   test('types', async () => {
     expect(await svc.getType('pnpm')).toBeUndefined();
+    expect(await svc.getTypes()).toEqual([]);
 
+    await svc.setType('pnpm', 'pip');
     await svc.setType('pnpm', 'npm');
+    await svc.setType('rake', 'gem');
 
     expect(await svc.getType('pnpm')).toBe('npm');
-    expect(await svc.getTypes()).toMatchObject([{ name: 'pnpm', type: 'npm' }]);
+    expect(await svc.getTypes()).toEqual([
+      { name: 'pnpm', type: 'npm' },
+      { name: 'rake', type: 'gem' },
+    ]);
+
+    // without a type the tool is forgotten
+    await svc.setType('pnpm', undefined);
+    expect(await svc.getType('pnpm')).toBeUndefined();
+    expect(await svc.getTypes()).toEqual([{ name: 'rake', type: 'gem' }]);
   });
 
   test('update only writes a changed version file', async () => {

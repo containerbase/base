@@ -104,6 +104,27 @@ export async function pathExists(
   }
 }
 
+/** Whether the error says the file does not exist. */
+export function isNotFound(err: unknown): boolean {
+  return (err as NodeJS.ErrnoException).code === 'ENOENT';
+}
+
+/**
+ * Whether the file does not exist. Other errors, like missing permissions,
+ * are thrown, so an unreadable file is not mistaken for a missing one.
+ */
+export async function isMissing(file: string): Promise<boolean> {
+  try {
+    await fs.stat(file);
+    return false;
+  } catch (err) {
+    if (isNotFound(err)) {
+      return true;
+    }
+    throw err;
+  }
+}
+
 /** The binary name shown in the cli help, based on how the cli was called. */
 export function parseBinaryName(
   mode: CliMode | null,
