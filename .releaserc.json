@@ -6,7 +6,7 @@
       "@semantic-release/github",
       {
         "releasedLabels": false,
-        "successComment": false,
+        "successCommentCondition": "<% return branch.channel !== 'next' && issue.user.type !== 'Bot'; %>",
         "assets": [
           {
             "path": "bin/containerbase.tar.xz",
