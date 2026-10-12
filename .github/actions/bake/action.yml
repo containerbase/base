@@ -30,7 +30,8 @@ runs:
       uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
       with:
         timeout_minutes: 10
-        max_attempts: 3
+        # one retry for transient failures, a broken build fails fast
+        max_attempts: 2
         retry_wait_seconds: 60
         polling_interval_seconds: 5
         command: docker buildx bake --set settings.secrets=type=env,id=GITHUB_TOKEN ${{ inputs.args }}
