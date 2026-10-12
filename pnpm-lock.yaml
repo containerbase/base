@@ -167,7 +167,7 @@ overrides:
   http-cache-semantics@<=4.2.0: 4.3.0
   katex@>=0.11.0 <0.18.2: 0.19.0
   shell-quote@>=1.8.4 <1.11.0: 1.12.0
-  smol-toml@<=1.8.0: 1.9.0
+  smol-toml@<=1.8.0: 1.9.1
   source-map-js@>=1.0.0 <1.2.2: 1.2.2
   verbose: '-'
 
@@ -3144,8 +3144,8 @@ packages:
     resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
     engines: {node: '>=14.16'}
 
-  smol-toml@1.9.0:
-    resolution: {integrity: sha512-hpd+HLON7HdZXqYchMM/+LaTTbdK0AU3NngIJ4KVyWbY9bfQqdL9cD+4yf6dUoU2Ap4VsU0JkQi6FxAI1B2mXQ==}
+  smol-toml@1.9.1:
+    resolution: {integrity: sha512-j7WyPdf0CJoutMzMoPLF/bVXHtKZIT9Rb4eGeEbWw8X2t5oirjPgpL+OpaENZrILYaXqYwnVH+qgUwVbl+pUJQ==}
     engines: {node: '>= 18'}
 
   sonic-boom@4.2.1:
@@ -5543,7 +5543,7 @@ snapshots:
       markdownlint: 0.41.1(supports-color@7.2.0)
       markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.23.3(supports-color@7.2.0))
       micromatch: 4.0.8
-      smol-toml: 1.9.0
+      smol-toml: 1.9.1
     transitivePeerDependencies:
       - supports-color
 
@@ -6389,7 +6389,7 @@ snapshots:
 
   slash@5.1.0: {}
 
-  smol-toml@1.9.0: {}
+  smol-toml@1.9.1: {}
 
   sonic-boom@4.2.1:
     dependencies:
