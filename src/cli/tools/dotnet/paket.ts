@@ -7,6 +7,7 @@ import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 export class PaketInstallService extends BaseInstallService {
   readonly name = 'paket';
   override readonly parent = 'dotnet';
+  override readonly type = 'dotnet';
 
   /** Installs paket as dotnet tool into the versioned tool path. */
   override async install(version: string): Promise<void> {

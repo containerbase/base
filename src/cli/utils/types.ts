@@ -24,3 +24,10 @@ export type Arch = 'arm64' | 'amd64';
 export const installToolTypes = ['gem', 'npm', 'pip'] as const;
 
 export type InstallToolType = (typeof installToolTypes)[number];
+
+/**
+ * The package manager installing a tool, published as `type` in the base
+ * package metadata. Unlike `InstallToolType` it also covers package managers
+ * without an `install-<type>` command.
+ */
+export type ToolType = InstallToolType | 'dotnet';

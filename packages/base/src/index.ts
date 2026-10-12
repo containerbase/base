@@ -1,6 +1,6 @@
 import { tools } from './data.ts';
 
-export type { InstallToolType, ToolMetadata } from './types.ts';
+export type { InstallToolType, ToolMetadata, ToolType } from './types.ts';
 
 export { tools };
 

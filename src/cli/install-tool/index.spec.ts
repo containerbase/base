@@ -201,6 +201,12 @@ describe('cli/install-tool/index', () => {
           { name: 'maven', parent: 'java' },
           { name: 'kas', type: 'pip', parent: 'python' },
           { name: 'bower', type: 'npm', parent: 'node', deprecated: true },
+          { name: 'cocoapods', type: 'gem', parent: 'ruby' },
+          { name: 'conan', type: 'pip', parent: 'python' },
+          { name: 'renovate', type: 'npm', parent: 'node' },
+          { name: 'yarn', type: 'npm', parent: 'node' },
+          { name: 'yarn-slim', type: 'npm', parent: 'node' },
+          { name: 'paket', type: 'dotnet', parent: 'dotnet' },
         ]),
       );
     });

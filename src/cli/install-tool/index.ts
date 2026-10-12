@@ -79,7 +79,7 @@ import { TerraformInstallService } from '../tools/terraform.ts';
 import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
 import { WallyInstallService } from '../tools/wally.ts';
-import { type InstallToolType, logger } from '../utils/index.ts';
+import { type InstallToolType, type ToolType, logger } from '../utils/index.ts';
 import type { BaseInstallService } from './base-install.service.ts';
 import {
   V1ToolInstallService,
@@ -226,9 +226,9 @@ export interface SupportedTool {
    */
   name: string;
   /**
-   * The installer used for this tool, only set for dynamically installed tools.
+   * The package manager installing the tool.
    */
-  type?: InstallToolType;
+  type?: ToolType;
   /**
    * The tool this tool depends on, eg. composer depends on php.
    */
@@ -284,6 +284,7 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
   for (const svc of toolSvcs) {
     tools.set(svc.name, {
       name: svc.name,
+      ...(svc.type && { type: svc.type }),
       ...(svc.parent && { parent: svc.parent }),
       ...(svc.needsRoot && { root: true }),
     });

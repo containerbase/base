@@ -45,7 +45,7 @@ Each entry may carry the following metadata:
 
 | Field        | Description                                                                                                     |
 | ------------ | --------------------------------------------------------------------------------------------------------------- |
-| `type`       | the installer used for the tool, one of `gem`, `npm` or `pip`                                                   |
+| `type`       | the package manager installing the tool, one of `gem`, `npm`, `pip` or `dotnet`                                 |
 | `parent`     | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer` |
 | `deprecated` | the tool should not be used any more                                                                            |
 | `root`       | the tool can only be installed as root, so at image build time                                                  |
