@@ -219,8 +219,8 @@ jobs:
       - setup
       - build
     # one bake with up to 3 attempts of 10 minutes (32 minutes with the retry
-    # waits), plus the setup
-    timeout-minutes: 45
+    # waits), plus the setup and the other steps
+    timeout-minutes: 50
 
     strategy:
       fail-fast: false
@@ -270,7 +270,7 @@ jobs:
       - vitest
       - build
     # one bake with its retries, like `base`
-    timeout-minutes: 45
+    timeout-minutes: 50
 
     strategy:
       fail-fast: false
@@ -325,7 +325,7 @@ jobs:
       - vitest
       - build
     # one bake with its retries, like `base`
-    timeout-minutes: 45
+    timeout-minutes: 50
 
     strategy:
       fail-fast: false
@@ -369,8 +369,8 @@ jobs:
       - lint
       - vitest
     # two bakes (base from the cache, then the tests) with their retries, 64
-    # minutes at most, plus the setup
-    timeout-minutes: 80
+    # minutes at most, plus the setup and the other steps
+    timeout-minutes: 90
 
     strategy:
       max-parallel: 10
