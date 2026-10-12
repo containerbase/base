@@ -10,8 +10,8 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["gem", "npm", "pip"],
-            "description": "the installer used for this tool, only set for dynamically installed tools"
+            "enum": ["gem", "npm", "pip", "dotnet"],
+            "description": "the package manager installing the tool"
           },
           "parent": {
             "type": "string",

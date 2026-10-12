@@ -49,6 +49,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   override readonly parent = 'python';
+  override readonly type = 'pip';
 
   /**
    * Installs the pip package into a virtualenv per python version below the

@@ -4,6 +4,10 @@ export const InstallToolType = z
   .enum(['gem', 'npm', 'pip'])
   .describe('the installer a dynamically installed tool is installed with');
 
+export const ToolType = z
+  .enum(['gem', 'npm', 'pip', 'dotnet'])
+  .describe('the package manager installing the tool');
+
 /**
  * Schema of a single entry of `tools.json`.
  *
@@ -12,9 +16,7 @@ export const InstallToolType = z
  */
 export const ToolMetadata = z.strictObject({
   // exact optionals, so the inferred type matches the zod free interface
-  type: InstallToolType.describe(
-    'the installer used for this tool, only set for dynamically installed tools',
-  ).exactOptional(),
+  type: ToolType.exactOptional(),
   parent: z
     .string()
     .describe('the tool this tool depends on, eg. composer depends on php')

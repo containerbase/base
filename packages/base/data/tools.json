@@ -11,9 +11,9 @@
     "bundler": { "type": "gem", "parent": "ruby" },
     "cabal": {},
     "checkov": { "type": "pip", "parent": "python" },
-    "cocoapods": { "parent": "ruby" },
+    "cocoapods": { "type": "gem", "parent": "ruby" },
     "composer": { "parent": "php" },
-    "conan": { "parent": "python" },
+    "conan": { "type": "pip", "parent": "python" },
     "copier": { "type": "pip", "parent": "python" },
     "corepack": { "type": "npm", "parent": "node" },
     "dart": {},
@@ -52,7 +52,7 @@
     "npm": { "type": "npm", "parent": "node" },
     "nub": {},
     "nuget": { "parent": "mono" },
-    "paket": { "parent": "dotnet" },
+    "paket": { "type": "dotnet", "parent": "dotnet" },
     "pdm": { "type": "pip", "parent": "python" },
     "php": {},
     "pip-tools": { "type": "pip", "parent": "python" },
@@ -63,7 +63,7 @@
     "powershell": {},
     "protoc": {},
     "python": {},
-    "renovate": { "parent": "node" },
+    "renovate": { "type": "npm", "parent": "node" },
     "ruby": {},
     "rust": {},
     "sbt": { "parent": "java" },
@@ -77,7 +77,7 @@
     "vendir": {},
     "vp": { "parent": "node" },
     "wally": {},
-    "yarn": { "parent": "node" },
-    "yarn-slim": { "parent": "node" }
+    "yarn": { "type": "npm", "parent": "node" },
+    "yarn-slim": { "type": "npm", "parent": "node" }
   }
 }

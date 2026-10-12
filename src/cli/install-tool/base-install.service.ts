@@ -10,9 +10,9 @@ import {
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
-  type InstallToolType,
   type SpawnOptions,
   type SpawnResult,
+  type ToolType,
   isValid,
   spawn,
 } from '../utils/index.ts';
@@ -62,10 +62,10 @@ export abstract class BaseInstallService {
   readonly canUninstall: boolean = true;
 
   /**
-   * Optional tool type for dynamic uninstallation support.
-   * Currently `npm`, `gem` or `pip`.
+   * The package manager installing the tool, published as `type` in the base
+   * package metadata.
    */
-  readonly type?: InstallToolType;
+  readonly type?: ToolType;
 
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;

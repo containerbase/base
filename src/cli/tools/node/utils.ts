@@ -80,6 +80,7 @@ export abstract class NodeBaseInstallService extends BaseInstallService {
 @injectable()
 export abstract class NpmBaseInstallService extends NodeBaseInstallService {
   override readonly parent = 'node';
+  override readonly type = 'npm';
 
   /** The npm package to install, by default the tool name. */
   protected tool(_version: string): string {

@@ -4,13 +4,18 @@
 export type InstallToolType = 'gem' | 'npm' | 'pip';
 
 /**
+ * The package manager installing a tool.
+ */
+export type ToolType = 'gem' | 'npm' | 'pip' | 'dotnet';
+
+/**
  * What containerbase knows about a supported tool.
  */
 export interface ToolMetadata {
   /**
-   * The installer used for this tool, only set for dynamically installed tools.
+   * The package manager installing the tool.
    */
-  type?: InstallToolType;
+  type?: ToolType;
   /**
    * The tool this tool depends on, eg. `composer` depends on `php`.
    */
