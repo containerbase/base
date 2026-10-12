@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
         with:
           save-cache: true
 
@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
 
       - name: lint
         run: |
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
 
       - name: Install ubuntu dependencies
         run: |
@@ -172,7 +172,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
 
       - name: vitest
         run: pnpm test:vitest
@@ -200,7 +200,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
 
       - name: build
         run: pnpm build
@@ -233,7 +233,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -282,7 +282,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -335,7 +335,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -411,7 +411,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@2992b516cb39f9841e834b8b86b2211fd0586442 # v5.0.59
+        uses: containerbase/internal-tools/setup@9fa9a18aecf68b0f74817ce914827bab06277f8e # v5.0.60
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
