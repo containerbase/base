@@ -35,13 +35,15 @@ jobs:
 
   release:
     needs: [build]
+    # release only from pushes to `main` and `maint/**`, the merge queue only builds
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
       # never cancel a release that has already started, as it may have started pushing artifacts
-      cancel-in-progress: ${{ github.event_name != 'push' }}
+      cancel-in-progress: false
 
     permissions:
       contents: write
@@ -85,7 +87,6 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: semantic-release
-        if: github.event_name == 'push'
         run: pnpm semantic-release --dry-run "${DRY_RUN}" --ci "${CI_MODE}"
         env:
           CI_MODE: ${{ env.DRY_RUN != 'true' }}
