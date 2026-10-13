@@ -47,6 +47,9 @@ jobs:
       contents: write
       packages: write
       id-token: write
+      # semantic-release comments on the released issues and pull requests
+      issues: write
+      pull-requests: write
 
     steps:
       # full checkout for semantic-release, which pushes the release tag
