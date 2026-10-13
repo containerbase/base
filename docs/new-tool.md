@@ -313,15 +313,26 @@ CI runs the test images from a matrix in [`.github/workflows/build.yml`](../.git
 The `lang` matrix entries map to directories under [`test/`](../test/), so a brand-new test directory also needs a matrix entry.
 Adding to an existing test image needs no workflow change.
 
-## Downstream: Renovate
+## Downstream: tool-versions and Renovate
 
-Adding a tool here only makes it installable in the `containerbase/base` image.
+[containerbase/tool-versions](https://github.com/containerbase/tool-versions) publishes the installable versions per tool (urls, checksums) on GitHub Pages.
 
-It is likely that you're looking at add a tool so [Renovate](https://docs.renovatebot.com/) can use it.
+After the Containerbase release, in tool-versions:
 
-Once your PR is merged, you will need to [wait for the Containerbase changes to reach Renovate's Docker image](https://docs.renovatebot.com/docker-build-process/#build-process-flow).
+- [`src/tools.ts`](https://github.com/containerbase/tool-versions/blob/main/src/tools.ts): datasource, package, versioning, `sourceUrl`, `homepage`; a file template with the install service's urls and checksums for non-release-asset downloads
+- tools with a `type` (`pip`, `npm`, `gem`, `dotnet`): source only, no files
+- [`renovate.Dockerfile`](https://github.com/containerbase/tool-versions/blob/main/renovate.Dockerfile): one line per maintained release line
 
-After this is available, you will need to add the tool into [`allToolConfig` in `lib/util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/util/exec/containerbase.ts).
+The [`@containerbase/base`](https://www.npmjs.com/package/@containerbase/base) update in tool-versions fails until new typed tools are mapped and removed ones unmapped.
+
+Order:
+
+1. CLI change and release; the CLI falls back to the upstream lookup, never requires tool-versions
+1. tool-versions mapping
+1. next CLI build picks up the published files
+
+Renovate reads these files with its `containerbase` datasource.
+To use the tool in Renovate: [wait for Renovate's Docker image](https://docs.renovatebot.com/docker-build-process/#build-process-flow), then add it to [`allToolConfig` in `lib/util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/util/exec/containerbase.ts).
 
 ## What am I able to do as a Contributor vs what do I need to wait for a maintainer to do?
 
