@@ -534,6 +534,22 @@ Samples:
 https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.5.1/jb-linux-amd64
 ```
 
+## `jq`
+
+jq releases are downloaded from:
+
+- `https://github.com/jqlang/jq/releases`
+
+The download is always verified against `sha256sum.txt`, so a mirror needs to provide both files.
+
+Samples:
+
+```txt
+https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-amd64
+https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-arm64
+https://github.com/jqlang/jq/releases/download/jq-1.8.2/sha256sum.txt
+```
+
 ## `kustomize`
 
 Kustomize releases are downloaded from:
