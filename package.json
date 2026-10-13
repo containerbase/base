@@ -91,7 +91,7 @@
     "nock": "14.0.17",
     "npm-run-all2": "9.0.3",
     "oxlint": "1.87.0",
-    "oxlint-tsgolint": "7.0.2003",
+    "oxlint-tsgolint": "7.0.2004",
     "prettier": "3.9.10",
     "prettier-plugin-packagejson": "3.0.2",
     "rolldown": "1.2.13",
