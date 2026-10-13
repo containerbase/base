@@ -1,7 +1,17 @@
 # Adding a prebuild tool
 
-For maintainers. Tools without a usable upstream Linux release are built in `containerbase/<tool>-prebuild` and published as GitHub releases.
-Templates: [`skopeo-prebuild`](https://github.com/containerbase/skopeo-prebuild) (per arch), [`python-prebuild`](https://github.com/containerbase/python-prebuild) (per distro and arch).
+> [!NOTE]
+> Adding a new prebuild tool requires a maintainer's support, as this requires creating and bootstrapping a new repository.
+
+Tools without a usable upstream Linux release are built in `containerbase/<tool>-prebuild` and published as GitHub releases.
+A usable upstream Linux release is a prebuilt binary or archive for `x86_64` and `aarch64`, which runs on all supported Ubuntu versions without building or extra system packages.
+
+If a project does have a usable upstream Linux release, you can follow ["Adding a new tool"](./new-tool.md).
+
+Repositories to follow the structure from:
+
+- [`skopeo-prebuild`](https://github.com/containerbase/skopeo-prebuild) (builds artifacts per arch)
+- [`python-prebuild`](https://github.com/containerbase/python-prebuild) (builds artifacts per distro and arch)
 
 ## 1. Prebuild repository
 
@@ -29,7 +39,7 @@ Templates: [`skopeo-prebuild`](https://github.com/containerbase/skopeo-prebuild)
 }
 ```
 
-- `image`: tool name, names the archives
+- `image`: tool name, names the archives. Should match the repo name, i.e. `skopeo-prebuild` would have `image: skopeo`
 - `depName`, `datasource`, `versioning`, `extractVersion`: Renovate lookup of the upstream versions
 - `startVersion`: oldest version; `ignoredVersions`: skipped versions
 - optional: `forceUnstable`, `maxVersions`, `reverse`
@@ -71,4 +81,4 @@ Per version on `main`, `binary-builder`:
 
 ## 3. tool-versions
 
-After the Containerbase release: `prebuild('<tool>', '<versioning>')` in tool-versions, see [Downstream](./new-tool.md#downstream-tool-versions-and-renovate).
+After the Containerbase release: `prebuild('<tool>', '<versioning>')` in [`src/tools.ts`](https://github.com/containerbase/tool-versions/blob/main/src/tools.ts) of [containerbase/tool-versions](https://github.com/containerbase/tool-versions).
