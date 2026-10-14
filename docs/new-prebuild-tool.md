@@ -61,7 +61,8 @@ Repositories to follow the structure from:
 
 `build.yml`:
 
-- matrix `ARCH` (`ubuntu-24.04`, `ubuntu-24.04-arm`) and `DISTRO` if distro specific
+- matrix `arch` entries with the archive `name` (`x86_64`, `aarch64`) and the runner `os` (`ubuntu-24.04`, `ubuntu-24.04-arm`), plus `distro` if distro specific
+- `runs-on: ${{ matrix.arch.os }}`, env `ARCH: ${{ matrix.arch.name }}` and `DISTRO: ${{ matrix.distro }}`, the names `binary-builder` reads
 - `containerbase/internal-tools` with `command: binary-builder`, `token`, `permissions: contents: write`
 - `dry-run` on pull requests, builds the newest version only
 
