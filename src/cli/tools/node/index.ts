@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { env as penv } from 'node:process';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { fileContent, getDistro, parse } from '../../utils/index.ts';
+import { fileContent, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
   prepareNpmCache,
@@ -76,53 +76,34 @@ export class NodeInstallService extends NodeBaseInstallService {
   }
 
   /**
-   * Installs the containerbase node prebuild, a distro specific one, or the
-   * nodejs.org archive, each verified against its checksum. Node below 15
-   * gets the latest node-gyp.
+   * Installs the containerbase node prebuild or the nodejs.org archive, each
+   * verified against its checksum. Node below 15 gets the latest node-gyp.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
-    let filename = `${version}/${name}-${version}-${this.ghArch}.tar.xz`;
-    let checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-    let isOnGithub = await this.http.exists(checksumFileUrl);
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${this.ghArch}.tar.xz`;
+    const checksumFileUrl = `${url}.sha512`;
     let file: string;
 
-    if (isOnGithub) {
-      // no distro specific prebuilds
+    if (await this.http.exists(checksumFileUrl)) {
       const expectedChecksum = await this.getChecksum(checksumFileUrl);
       file = await this.http.download({
-        url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
+        url,
         checksumType: 'sha512',
         expectedChecksum,
       });
     } else {
-      const distro = await getDistro();
-      const versionCode = distro.versionCode;
-      // distro specific prebuilds
-      filename = ` ${version}/${name}-${version}-${versionCode}-${this.ghArch}.tar.xz`;
-      checksumFileUrl = `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}.sha512`;
-      isOnGithub = await this.http.exists(checksumFileUrl);
-      if (isOnGithub) {
-        const expectedChecksum = await this.getChecksum(checksumFileUrl);
-        file = await this.http.download({
-          url: `https://github.com/containerbase/${name}-prebuild/releases/download/${filename}`,
-          checksumType: 'sha512',
-          expectedChecksum,
-        });
-      } else {
-        // fallback to nodejs.org
-        checksumFileUrl = `https://nodejs.org/dist/v${version}/SHASUMS256.txt`;
-        filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
-        const expectedChecksum = await this.findChecksum(
-          checksumFileUrl,
-          filename,
-        );
-        file = await this.http.download({
-          url: `https://nodejs.org/dist/v${version}/${filename}`,
-          checksumType: 'sha256',
-          expectedChecksum,
-        });
-      }
+      // fallback to nodejs.org
+      const filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
+      const expectedChecksum = await this.findChecksum(
+        `https://nodejs.org/dist/v${version}/SHASUMS256.txt`,
+        filename,
+      );
+      file = await this.http.download({
+        url: `https://nodejs.org/dist/v${version}/${filename}`,
+        checksumType: 'sha256',
+        expectedChecksum,
+      });
     }
 
     await this.pathSvc.ensureToolPath(this.name);
