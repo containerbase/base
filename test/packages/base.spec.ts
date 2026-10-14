@@ -58,6 +58,7 @@ describe('packages/base', () => {
       ['gleam', '0.23.0'],
       ['helm', '3.1.0'],
       ['jq', '1.7.1'],
+      ['kubectl', '1.13.11'],
       ['kustomize', '3.3.0'],
       ['mise', '2024.1.0'],
       ['nix', '2.10.3'],

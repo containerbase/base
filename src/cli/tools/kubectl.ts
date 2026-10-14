@@ -9,6 +9,12 @@ export class KubectlInstallService extends BaseInstallService {
   readonly name = 'kubectl';
 
   /**
+   * The first release with a `.sha256`, which the install requires; 1.14.0 to
+   * 1.14.6 and 1.15.0 to 1.15.3 have none either.
+   */
+  override readonly minVersion = '1.13.11';
+
+  /**
    * Downloads the kubectl binary from dl.k8s.io, verified against its
    * `.sha256`, into the versioned `bin` folder.
    */
