@@ -26,6 +26,10 @@
             "type": "boolean",
             "const": true,
             "description": "the tool can only be installed as root, so only at image build time"
+          },
+          "minVersion": {
+            "type": "string",
+            "description": "the oldest version containerbase supports for the tool, in the tool's versioning; tools without a known limit have none"
           }
         },
         "additionalProperties": false

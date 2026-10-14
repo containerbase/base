@@ -10,6 +10,7 @@ const minVersion = '2.10.3';
 @injectFromHierarchy()
 export class NixInstallService extends BaseInstallService {
   readonly name = 'nix';
+  override readonly minVersion = minVersion;
 
   /** The architecture name used by the nix prebuilds. */
   private get ghArch(): string {

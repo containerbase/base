@@ -11,6 +11,7 @@ const checksumMinVersion = '0.3.1';
 export class VpInstallService extends BaseInstallService {
   readonly name = 'vp';
   override readonly parent = 'node';
+  override readonly minVersion = checksumMinVersion;
 
   /** The target name used by the Vite+ release assets. */
   private get target(): string {
