@@ -62,8 +62,11 @@ export class GleamInstallService extends BaseInstallService {
     await this._spawn(this.name, ['--version']);
   }
 
-  /** Accepts semver versions from 0.19.0-rc1. */
+  /**
+   * Accepts semver versions from 0.23.0, older releases use other asset names
+   * (`gleam-v<version>-linux-amd64.tar.gz`) which can't be downloaded.
+   */
   override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, '0.19.0-rc1');
+    return (await super.validate(version)) && semverGte(version, '0.23.0');
   }
 }

@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { semverSatisfies } from '../utils/index.ts';
+import { semverGte } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -57,10 +57,8 @@ export class GhInstallService extends BaseInstallService {
     await this._spawn(this.name, ['--version']);
   }
 
-  /** Accepts semver versions of the v2 line, which ship the used assets. */
+  /** Accepts semver versions from 2.0.0, which ship the used assets. */
   override async validate(version: string): Promise<boolean> {
-    return (
-      (await super.validate(version)) && semverSatisfies(version, '^2.0.0')
-    );
+    return (await super.validate(version)) && semverGte(version, '2.0.0');
   }
 }

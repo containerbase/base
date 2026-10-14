@@ -3,7 +3,7 @@ import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { semverGte } from '../utils/index.ts';
 
-/** The oldest version with a prebuild. */
+/** The oldest container tested version, prebuilds exist from 2.5.0. */
 const minVersion = '2.10.3';
 
 @injectable()
@@ -65,7 +65,7 @@ export class NixInstallService extends BaseInstallService {
     await this._spawn(this.name, ['--version']);
   }
 
-  /** Accepts semver versions from 2.10.3, the oldest one with a prebuild. */
+  /** Accepts semver versions from 2.10.3, the oldest container tested one. */
   override async validate(version: string): Promise<boolean> {
     return (await super.validate(version)) && semverGte(version, minVersion);
   }
