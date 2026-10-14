@@ -178,9 +178,10 @@ describe('cli/tools/dotnet/index', () => {
 
   describe('DotnetPrepareService', () => {
     test.each([
-      { code: 'jammy', icu: 'libicu70' },
-      { code: 'noble', icu: 'libicu74' },
-    ])('prepare on $code', async ({ code, icu }) => {
+      { code: 'jammy', icu: 'libicu70', ssl: 'libssl3' },
+      { code: 'noble', icu: 'libicu74', ssl: 'libssl3' },
+      { code: 'resolute', icu: 'libicu78', ssl: 'libssl3t64' },
+    ])('prepare on $code', async ({ code, icu, ssl }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
@@ -206,7 +207,7 @@ describe('cli/tools/dotnet/index', () => {
           'libgcc1',
           'libgssapi-krb5-2',
           icu,
-          'libssl3',
+          ssl,
           'libstdc++6',
           'zlib1g',
         ],
