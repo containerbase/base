@@ -7,6 +7,9 @@ You can also use our containerbase from GitHub container registry as `ghcr.io/co
 `containerbase/base` and `ghcr.io/containerbase/base` are exchangeble.
 You should always use a specific version which can be found at [docker hub](https://hub.docker.com/r/containerbase/base/tags) or at [GitHub container registry](ghcr.io/containerbase/base)
 
+`install-containerbase` installs `jq` from its GitHub releases, like the tools you install afterwards.
+If your build can't reach GitHub, use a mirror as described in [custom registries](./custom-registries.md#jq).
+
 ## Default user name and id
 
 Use this template for using a custom base image with our default user named `ubuntu` and userid `12021`.
