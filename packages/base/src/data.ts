@@ -21,7 +21,7 @@ export const tools = {
   conan: { type: 'pip', parent: 'python' },
   copier: { type: 'pip', parent: 'python' },
   corepack: { type: 'npm', parent: 'node' },
-  dart: {},
+  dart: { minVersion: '2.0.0' },
   deno: { minVersion: '2.0.1' },
   devbox: {},
   docker: { minVersion: '18.09.0' },
