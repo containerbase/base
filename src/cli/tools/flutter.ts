@@ -69,6 +69,9 @@ export class FlutterPrepareService extends BasePrepareService {
 export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 
+  /** The oldest prebuild. */
+  override readonly minVersion = '1.22.6';
+
   /** The architecture name used by the flutter prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

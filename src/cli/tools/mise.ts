@@ -9,6 +9,9 @@ import { ToolVersionResolver } from '../install-tool/tool-version-resolver.ts';
 export class MiseInstallService extends BaseInstallService {
   readonly name = 'mise';
 
+  /** The assets were named `rtx-…` before. */
+  override readonly minVersion = '2024.1.0';
+
   /** The architecture name used by the mise release assets. */
   private get arch(): string {
     switch (this.envSvc.arch) {

@@ -8,6 +8,9 @@ import { semverGte } from '../utils/index.ts';
 export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 
+  /** Older releases use other asset names. */
+  override readonly minVersion = '0.23.0';
+
   /** The architecture name used by the gleam release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

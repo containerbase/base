@@ -79,6 +79,9 @@ export class RubyPrepareService extends BasePrepareService {
 export class RubyInstallService extends PrebuildInstallService {
   override readonly name = 'ruby';
 
+  /** 2.7.5 and 2.7.6 have no jammy prebuild. */
+  override readonly minVersion = '2.7.7';
+
   /** Installs the ruby prebuild and writes its system wide `gemrc`. */
   override async install(version: string): Promise<void> {
     await super.install(version);

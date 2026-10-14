@@ -30,6 +30,9 @@ export class SbtPrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class SbtInstallService extends BaseInstallService {
   override readonly name = 'sbt';
+
+  /** Older releases have no assets. */
+  override readonly minVersion = '0.13.17';
   override readonly parent = 'java';
 
   /**

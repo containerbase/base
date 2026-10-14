@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class FluxInstallService extends BaseInstallService {
   readonly name = 'flux';
 
+  /** The checksum file was named `flux2_…` before. */
+  override readonly minVersion = '0.6.0';
+
   /** The architecture name used by the flux release assets. */
   private get arch(): string {
     return this.envSvc.arch;

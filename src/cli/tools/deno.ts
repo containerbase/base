@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class DenoInstallService extends BaseInstallService {
   readonly name = 'deno';
 
+  /** 2.0.0's checksum file has another name, 1.x has none. */
+  override readonly minVersion = '2.0.1';
+
   /** The architecture name used by the deno release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
