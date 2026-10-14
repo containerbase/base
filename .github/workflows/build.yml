@@ -83,6 +83,10 @@ jobs:
     permissions:
       contents: read
       checks: write
+    env:
+      # node and pnpm come from the setup action, so `mise exec` must not
+      # install them again
+      MISE_EXEC_AUTO_INSTALL: 'false'
 
     steps:
       - name: ⚙️ Setup
@@ -114,32 +118,20 @@ jobs:
             *.bats
           check_all_files_with_shebangs: 'true'
 
-  lint-actions:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 7
-    permissions:
-      contents: read
-      security-events: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install the workflow linters
+        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
-          persist-credentials: false
-          show-progress: false
-          # include the local composite actions, so that jactionlint validates
-          # their metadata, and zizmor audits them
-          sparse-checkout: .github/
+          install_args: jactionlint shellcheck zizmor
 
+      # the full checkout includes the local composite actions, so jactionlint
+      # validates their metadata and zizmor audits them
       - name: Check workflow files
-        uses: docker://ghcr.io/jdx/jactionlint:1.8.2@sha256:5515b269082f92ee0962ccc236df3300113aedcd4008a2aad5ad0903680b7c67
-        with:
-          args: --color --ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+        run: mise exec -- jactionlint --color --ignore 'invalid activity type "destroyed" for "merge_group" Webhook event. available types are "checks_requested"'
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
-        with:
-          version: 1.30.1
+        run: mise exec -- zizmor --format github .github/
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   bats:
     runs-on: ubuntu-24.04
