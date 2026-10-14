@@ -43,12 +43,13 @@ import { SupportedTools, ToolName } from '@containerbase/base/zod';
 
 Each entry may carry the following metadata:
 
-| Field        | Description                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------------- |
-| `type`       | the package manager installing the tool, one of `gem`, `npm`, `pip` or `dotnet`                                 |
-| `parent`     | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer` |
-| `deprecated` | the tool should not be used any more                                                                            |
-| `root`       | the tool can only be installed as root, so at image build time                                                  |
+| Field        | Description                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `type`       | the package manager installing the tool, one of `gem`, `npm`, `pip` or `dotnet`                                         |
+| `parent`     | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer`         |
+| `deprecated` | the tool should not be used any more                                                                                    |
+| `root`       | the tool can only be installed as root, so at image build time                                                          |
+| `minVersion` | the oldest version containerbase supports for the tool, in the tool's versioning; tools without a known limit have none |
 
 Only the names `install-tool` accepts are listed.
 Packages installed with an arbitrary name via `install-gem`, `install-npm` or `install-pip` are not, as that list is unbounded.

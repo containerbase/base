@@ -31,6 +31,12 @@ export const ToolMetadata = z.strictObject({
       'the tool can only be installed as root, so only at image build time',
     )
     .exactOptional(),
+  minVersion: z
+    .string()
+    .describe(
+      "the oldest version containerbase supports for the tool, in the tool's versioning; tools without a known limit have none",
+    )
+    .exactOptional(),
 });
 
 /**

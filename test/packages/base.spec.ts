@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, test } from 'vitest';
 import type { z } from 'zod';
+import { tools } from '../../packages/base/src/data.ts';
 import { toolNames } from '../../packages/base/src/index.ts';
 import {
   type InstallToolType,
@@ -26,6 +27,25 @@ describe('packages/base', () => {
       expect(ToolMetadata.safeParse({ type }).success).toBe(true);
     }
     expect(ToolMetadata.safeParse({ type: 'apt' }).success).toBe(false);
+  });
+
+  test('ToolMetadata accepts a minimum version only as string', () => {
+    expect(ToolMetadata.safeParse({ minVersion: '2.33.0' }).success).toBe(true);
+    expect(ToolMetadata.safeParse({ minVersion: 2 }).success).toBe(false);
+  });
+
+  test('tools have the minimum versions of their install services', () => {
+    // the values are defined in the install services, see `listSupportedTools`
+    const entries: [string, types.ToolMetadata][] = Object.entries(tools);
+    expect(
+      entries.flatMap(([name, { minVersion }]) =>
+        minVersion ? [[name, minVersion]] : [],
+      ),
+    ).toEqual([
+      ['git', '2.33.0'],
+      ['nix', '2.10.3'],
+      ['vp', '0.3.1'],
+    ]);
   });
 
   test('ToolMetadata matches the zod free interface', () => {

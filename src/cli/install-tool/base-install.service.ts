@@ -67,6 +67,13 @@ export abstract class BaseInstallService {
    */
   readonly type?: ToolType;
 
+  /**
+   * The oldest version containerbase supports for the tool, in the tool's
+   * versioning, published as `minVersion` in the base package metadata.
+   * Tools without a known limit have none.
+   */
+  readonly minVersion?: string;
+
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;
 

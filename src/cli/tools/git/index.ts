@@ -67,6 +67,8 @@ export class GitInstallService extends BaseInstallService {
 
   override readonly needsRoot = true;
 
+  override readonly minVersion = minVersion;
+
   /** git is installed system wide by apt, other tools depend on it */
   override readonly canUninstall = false;
 
