@@ -106,6 +106,9 @@ export class SwiftPrepareService extends BasePrepareService {
 export class SwiftInstallService extends BaseInstallService {
   override readonly name = 'swift';
 
+  /** The first release with Ubuntu 22.04 builds, which jammy and noble use. */
+  override readonly minVersion = '5.7';
+
   /**
    * Downloads the swift archive from download.swift.org and extracts it into
    * the versioned tool path. Swift only publishes a PGP `.sig` file, not a

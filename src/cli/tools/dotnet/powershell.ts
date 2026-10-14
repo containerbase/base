@@ -55,6 +55,12 @@ export class PowershellPrepareService extends BasePrepareService {
 export class PowershellInstallService extends BaseInstallService {
   override readonly name = 'powershell';
 
+  /**
+   * Older versions run on .NET before 6, which can't load OpenSSL 3, so any
+   * HTTPS call aborts; before 7.1 they don't start at all.
+   */
+  override readonly minVersion = '7.2.0';
+
   /** The architecture name used by the powershell release assets. */
   private get ghArch(): string {
     return this.envSvc.arch === 'arm64' ? 'arm64' : 'x64';

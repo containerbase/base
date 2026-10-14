@@ -14,6 +14,9 @@ export class GhcPrepareService extends BasePrepareService {
 export class GhcInstallService extends BaseInstallService {
   readonly name = 'ghc';
 
+  /** The first release with the `x86_64-deb10-linux` bindist. */
+  override readonly minVersion = '8.10.1';
+
   /** The architecture name used by the ghc release archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
