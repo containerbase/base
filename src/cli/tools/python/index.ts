@@ -50,6 +50,9 @@ export class PythonPrepareService extends BasePrepareService {
 export class PythonInstallService extends PrebuildInstallService {
   override readonly name = 'python';
 
+  /** The first 2.7 release with jammy prebuilds for both archs. */
+  override readonly minVersion = '2.7.18';
+
   /**
    * Installs the python prebuild, points the python shebangs in its `bin`
    * folder to the installed python, and updates `pip` and `virtualenv`.

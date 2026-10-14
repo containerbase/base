@@ -61,6 +61,9 @@ export class PhpPrepareService extends BasePrepareService {
 export class PhpInstallService extends BaseInstallService {
   readonly name = 'php';
 
+  /** The first jammy prebuild. */
+  override readonly minVersion = '7.4.0';
+
   /** The architecture name used by the php prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

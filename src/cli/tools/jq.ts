@@ -8,6 +8,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class JqInstallService extends BaseInstallService {
   readonly name = 'jq';
 
+  /** Assets and checksums exist from 1.7, which isn't semver. */
+  override readonly minVersion = '1.7.1';
+
   /**
    * Downloads the jq binary from GitHub, verified against the release's
    * `sha256sum.txt`, into the versioned `bin` folder.

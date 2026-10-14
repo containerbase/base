@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class KustomizeInstallService extends BaseInstallService {
   readonly name = 'kustomize';
 
+  /** Releases up to 3.2.3 are raw binaries. */
+  override readonly minVersion = '3.3.0';
+
   /**
    * Downloads the kustomize archive from GitHub, verified against the
    * release's `checksums.txt`, and extracts it into the versioned `bin`

@@ -8,6 +8,9 @@ import { semverGte } from '../../utils/index.ts';
 @injectFromHierarchy()
 export class GitLfsInstallService extends BaseInstallService {
   override readonly name = 'git-lfs';
+
+  /** arm64 builds and sha256sums exist from 2.6.0. */
+  override readonly minVersion = '2.6.0';
   override readonly parent = 'git';
 
   /**

@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class TofuInstallService extends BaseInstallService {
   readonly name = 'tofu';
 
+  /** 1.6.0 to 1.6.2 are published as zip only. */
+  override readonly minVersion = '1.6.3';
+
   /** The architecture name used by the tofu release assets. */
   private get ghArch(): string {
     return this.envSvc.arch;

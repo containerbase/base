@@ -38,6 +38,9 @@ export class ErlangPrepareService extends BasePrepareService {
 export class ErlangInstallService extends BaseInstallService {
   override readonly name = 'erlang';
 
+  /** The first prebuild with jammy assets. */
+  override readonly minVersion = '24.2.0.0';
+
   /** The architecture name used by the erlang prebuild archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {

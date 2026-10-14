@@ -8,6 +8,9 @@ import { semverSatisfies } from '../utils/index.ts';
 export class GhInstallService extends BaseInstallService {
   readonly name = 'gh';
 
+  /** The oldest version `validate` accepts. */
+  override readonly minVersion = '2.0.0';
+
   /**
    * Downloads the gh archive from GitHub, verified against the release's
    * checksums file, and extracts only the `gh` binary into the versioned

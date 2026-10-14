@@ -8,6 +8,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class BunInstallService extends BaseInstallService {
   readonly name = 'bun';
 
+  /** Older releases have no `SHASUMS256.txt`. */
+  override readonly minVersion = '0.5.3';
+
   /** The architecture name used by the bun release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

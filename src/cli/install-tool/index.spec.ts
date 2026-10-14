@@ -199,7 +199,7 @@ describe('cli/install-tool/index', () => {
           { name: 'git', root: true, minVersion: '2.33.0' },
           { name: 'nix', minVersion: '2.10.3' },
           { name: 'vp', parent: 'node', minVersion: '0.3.1' },
-          { name: 'git-lfs', parent: 'git' },
+          { name: 'git-lfs', parent: 'git', minVersion: '2.6.0' },
           { name: 'maven', parent: 'java' },
           { name: 'kas', type: 'pip', parent: 'python' },
           { name: 'bower', type: 'npm', parent: 'node', deprecated: true },

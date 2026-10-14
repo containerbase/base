@@ -8,6 +8,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class SopsInstallService extends BaseInstallService {
   readonly name = 'sops';
 
+  /** The `checksums.txt` file exists from 3.8.0. */
+  override readonly minVersion = '3.8.0';
+
   /**
    * Downloads the sops binary from GitHub, verified against the release's
    * checksums file, into the versioned `bin` folder.

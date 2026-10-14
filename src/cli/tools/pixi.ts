@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class PixiInstallService extends BaseInstallService {
   readonly name = 'pixi';
 
+  /** The `.sha256` files exist from 0.39.2. */
+  override readonly minVersion = '0.39.2';
+
   /** The architecture name used by the pixi release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class SkopeoInstallService extends BaseInstallService {
   readonly name = 'skopeo';
 
+  /** Older prebuilds exist for focal only. */
+  override readonly minVersion = '1.14.0';
+
   /** The architecture name used by the skopeo prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

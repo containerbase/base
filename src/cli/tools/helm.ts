@@ -7,6 +7,9 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 export class HelmInstallService extends BaseInstallService {
   readonly name = 'helm';
 
+  /** The `.sha256sum` files exist from 3.1.0. */
+  override readonly minVersion = '3.1.0';
+
   /**
    * Downloads the helm archive from get.helm.sh, verified against its
    * `.sha256sum`, and extracts it into the versioned `bin` folder.
