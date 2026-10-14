@@ -8,7 +8,6 @@ import {
   LinkToolService,
   PathService,
 } from '../../services/index.ts';
-import { getDistro } from '../../utils/index.ts';
 import { NodeInstallService, NodePrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
@@ -19,10 +18,6 @@ vi.mock('execa', () => ({ execa: execaMock }));
 vi.mock('node:os', async (importOriginal) => ({
   ...(await importOriginal<typeof import('node:os')>()),
   arch: vi.fn(() => 'x64'),
-}));
-vi.mock('../../utils/index.ts', async (importActual) => ({
-  ...(await importActual<typeof import('../../utils/index.ts')>()),
-  getDistro: vi.fn(),
 }));
 
 const ghUrl = 'https://github.com';
@@ -44,11 +39,6 @@ describe('cli/tools/node/index', () => {
     // the npm install cleans up `$HOME/.npm/_logs`
     vi.stubEnv('HOME', rootPath('home/ubuntu'));
     vi.mocked(arch).mockReturnValue('x64');
-    vi.mocked(getDistro).mockResolvedValue({
-      name: 'Ubuntu',
-      versionCode: 'noble',
-      versionId: '24.04',
-    });
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -81,39 +71,12 @@ describe('cli/tools/node/index', () => {
       },
     );
 
-    test('install from the distro specific prebuild', async () => {
-      const { svc } = await toolContext(NodeInstallService);
-      const version = '22.12.0';
-      const filename = `${version}/node-${version}-x86_64.tar.xz`;
-      // the distro specific url is built with a leading space in the path
-      const distroFile = `%20${version}/node-${version}-noble-x86_64.tar.xz`;
-      scope(ghUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
-        .head(`${prebuild}/${distroFile}.sha512`)
-        .reply(200)
-        .get(`${prebuild}/${distroFile}.sha512`)
-        .reply(200, `${checksum(tarball, 'sha512')}\n`)
-        .get(`${prebuild}/${distroFile}`)
-        .reply(200, tarball);
-      const extract = vi.spyOn(CompressionService.prototype, 'extract');
-
-      await expect(svc.install(version)).resolves.toBeUndefined();
-
-      expect(extract).toHaveBeenCalledOnce();
-    });
-
     test('install: removes the temp folder when node-gyp update fails', async () => {
       const { svc } = await toolContext(NodeInstallService);
       const version = '14.21.9';
       const filename = `${version}/node-${version}-x86_64.tar.xz`;
-      const distroFile = `%20${version}/node-${version}-noble-x86_64.tar.xz`;
       const distFile = `node-v${version}-linux-x64.tar.xz`;
-      scope(ghUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
-        .head(`${prebuild}/${distroFile}.sha512`)
-        .reply(404);
+      scope(ghUrl).head(`${prebuild}/${filename}.sha512`).reply(404);
       scope(nodeUrl)
         .get(`/dist/v${version}/SHASUMS256.txt`)
         .reply(200, `${checksum(tarball)}  ${distFile}\n`)
@@ -136,13 +99,8 @@ describe('cli/tools/node/index', () => {
       const { svc, pathSvc } = await toolContext(NodeInstallService);
       const version = '14.21.3';
       const filename = `${version}/node-${version}-x86_64.tar.xz`;
-      const distroFile = `%20${version}/node-${version}-noble-x86_64.tar.xz`;
       const distFile = `node-v${version}-linux-x64.tar.xz`;
-      scope(ghUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
-        .head(`${prebuild}/${distroFile}.sha512`)
-        .reply(404);
+      scope(ghUrl).head(`${prebuild}/${filename}.sha512`).reply(404);
       scope(nodeUrl)
         .get(`/dist/v${version}/SHASUMS256.txt`)
         .reply(200, `${checksum(tarball)}  ${distFile}\n`)
@@ -163,13 +121,8 @@ describe('cli/tools/node/index', () => {
       const { svc } = await toolContext(NodeInstallService);
       const version = '22.14.0';
       const filename = `${version}/node-${version}-aarch64.tar.xz`;
-      const distroFile = `%20${version}/node-${version}-noble-aarch64.tar.xz`;
       const distFile = `node-v${version}-linux-arm64.tar.xz`;
-      scope(ghUrl)
-        .head(`${prebuild}/${filename}.sha512`)
-        .reply(404)
-        .head(`${prebuild}/${distroFile}.sha512`)
-        .reply(404);
+      scope(ghUrl).head(`${prebuild}/${filename}.sha512`).reply(404);
       scope(nodeUrl)
         .get(`/dist/v${version}/SHASUMS256.txt`)
         .reply(200, `${checksum(tarball)}  ${distFile}\n`)
