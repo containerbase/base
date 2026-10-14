@@ -44,7 +44,8 @@ All tooling runs through `pnpm`:
 
 The container tests build the whole image, so they take several minutes.
 
-`jactionlint` lints the GitHub workflows and local actions, install it with `mise install`.
+`jactionlint` and `zizmor` lint the GitHub workflows and local actions, install them with `mise install`.
+CI runs them through mise in the `lint` job.
 
 ## Tool installers
 
