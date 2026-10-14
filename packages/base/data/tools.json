@@ -42,7 +42,7 @@
     "jb": {},
     "jq": { "minVersion": "1.7.1" },
     "kas": { "type": "pip", "parent": "python" },
-    "kubectl": {},
+    "kubectl": { "minVersion": "1.13.11" },
     "kustomize": { "minVersion": "3.3.0" },
     "lerna": { "type": "npm", "parent": "node", "deprecated": true },
     "maven": { "parent": "java" },

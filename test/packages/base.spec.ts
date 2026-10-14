@@ -95,6 +95,7 @@ describe('packages/base', () => {
       ['java-jdk', '8.0.302+8'],
       ['java-jre', '8.0.302+8'],
       ['jq', '1.7.1'],
+      ['kubectl', '1.13.11'],
       ['kustomize', '3.3.0'],
       ['mise', '2024.1.0'],
       ['nix', '2.10.3'],
