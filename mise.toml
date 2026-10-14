@@ -1,7 +1,7 @@
 [tools]
 # the github backend, so Renovate can update it
 "github:jdx/jactionlint" = "1.8.2"
-node = "24.21.0"
+node = "24.22.0"
 pnpm = "12.12.1"
 
 [hooks]
