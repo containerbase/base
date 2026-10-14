@@ -142,6 +142,9 @@ export class JavaJrePrepareService extends JavaPrepareService {
 export class JavaInstallService extends BaseInstallService {
   override name = 'java';
 
+  /** The oldest Temurin release adoptium serves. */
+  override readonly minVersion = '8.0.302+8';
+
   /**
    * Downloads the adoptium jdk or jre, verified against its checksum, into the
    * versioned tool path and replaces its cacerts with the shared ones.

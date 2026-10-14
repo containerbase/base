@@ -10,6 +10,7 @@ import {
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
+  type DistroCode,
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
@@ -73,6 +74,13 @@ export abstract class BaseInstallService {
    * Tools without a known limit have none.
    */
   readonly minVersion?: string;
+
+  /**
+   * The oldest version supported on an Ubuntu release, for the releases whose
+   * floor differs from `minVersion`, published as `distroMinVersion` in the
+   * base package metadata.
+   */
+  readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
 
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;

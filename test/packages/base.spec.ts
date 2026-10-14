@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
 import { toolNames } from '../../packages/base/src/index.ts';
 import {
+  DistroCode,
   type InstallToolType,
   ToolMetadata,
   type ToolType,
@@ -34,6 +35,38 @@ describe('packages/base', () => {
     expect(ToolMetadata.safeParse({ minVersion: 2 }).success).toBe(false);
   });
 
+  test('DistroCode matches the zod free type', () => {
+    expectTypeOf<
+      z.infer<typeof DistroCode>
+    >().toEqualTypeOf<types.DistroCode>();
+  });
+
+  test('ToolMetadata accepts a minimum version per Ubuntu release', () => {
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { resolute: '8.1.31' } })
+        .success,
+    ).toBe(true);
+    expect(ToolMetadata.safeParse({ distroMinVersion: {} }).success).toBe(true);
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { focal: '1.0.0' } }).success,
+    ).toBe(false);
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { noble: 1 } }).success,
+    ).toBe(false);
+  });
+
+  test('tools have the minimum versions per Ubuntu release of their install services', () => {
+    const entries: [string, types.ToolMetadata][] = Object.entries(tools);
+    expect(
+      entries.flatMap(([name, { distroMinVersion }]) =>
+        distroMinVersion ? [[name, distroMinVersion]] : [],
+      ),
+    ).toEqual([
+      ['php', { resolute: '8.1.31' }],
+      ['swift', { resolute: '6.4.0' }],
+    ]);
+  });
+
   test('tools have the minimum versions of their install services', () => {
     // the values are defined in the install services, see `listSupportedTools`
     const entries: [string, types.ToolMetadata][] = Object.entries(tools);
@@ -44,8 +77,9 @@ describe('packages/base', () => {
     ).toEqual([
       ['bun', '0.5.3'],
       ['cabal', '3.4.1.0'],
+      ['dart', '2.0.0'],
       ['deno', '2.0.1'],
-      ['docker', '18.09.0'],
+      ['docker', '20.10.0'],
       ['docker-compose', '2.0.1'],
       ['dotnet', '6.0.100'],
       ['erlang', '24.2.0.0'],
@@ -57,6 +91,9 @@ describe('packages/base', () => {
       ['git-lfs', '2.6.0'],
       ['gleam', '0.23.0'],
       ['helm', '3.1.0'],
+      ['java', '8.0.302+8'],
+      ['java-jdk', '8.0.302+8'],
+      ['java-jre', '8.0.302+8'],
       ['jq', '1.7.1'],
       ['kubectl', '1.13.11'],
       ['kustomize', '3.3.0'],

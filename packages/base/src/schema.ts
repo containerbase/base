@@ -8,6 +8,10 @@ export const ToolType = z
   .enum(['gem', 'npm', 'pip', 'dotnet'])
   .describe('the package manager installing the tool');
 
+export const DistroCode = z
+  .enum(['jammy', 'noble', 'resolute'])
+  .describe('an Ubuntu release supported by containerbase, by codename');
+
 /**
  * Schema of a single entry of `tools.json`.
  *
@@ -35,6 +39,12 @@ export const ToolMetadata = z.strictObject({
     .string()
     .describe(
       "the oldest version containerbase supports for the tool, in the tool's versioning; tools without a known limit have none",
+    )
+    .exactOptional(),
+  distroMinVersion: z
+    .partialRecord(DistroCode, z.string())
+    .describe(
+      "the oldest version containerbase supports on an Ubuntu release, in the tool's versioning, keyed by codename; only for releases whose floor differs from minVersion, which is the floor on noble",
     )
     .exactOptional(),
 });
