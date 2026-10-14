@@ -27,6 +27,7 @@ export const NoPrepareTools = [
   'helm',
   'helmfile',
   'jb',
+  'jq',
   'kubectl',
   'kustomize',
   'lerna',

@@ -45,6 +45,7 @@ export const tools = {
   'java-jdk': {},
   'java-jre': {},
   jb: {},
+  jq: {},
   kas: { type: 'pip', parent: 'python' },
   kubectl: {},
   kustomize: {},

@@ -212,7 +212,7 @@ RUN prepare-tool all
 RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 
 #--------------------------------------
-# test: apm, bazelisk, buf, bun, deno, devbox, gh, helmfile, kustomize, nub, skopeo, tofu, vendir
+# test: apm, bazelisk, buf, bun, deno, devbox, gh, helmfile, jq, kustomize, nub, skopeo, tofu, vendir
 #--------------------------------------
 FROM base AS teste
 
@@ -247,6 +247,13 @@ RUN install-tool gh v2.102.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
+
+# renovate: datasource=github-releases packageName=jqlang/jq extractVersion=^jq-(?<version>.+)$
+RUN install-tool jq 1.8.2
+
+RUN jq --version
+
+RUN echo '{"a":1}' | jq -e '.a == 1'
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.37.1
