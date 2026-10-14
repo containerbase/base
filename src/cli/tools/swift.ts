@@ -109,6 +109,9 @@ export class SwiftInstallService extends BaseInstallService {
   /** The first release with Ubuntu 22.04 builds, which jammy and noble use. */
   override readonly minVersion = '5.7';
 
+  /** The first release with Ubuntu 26.04 builds. */
+  override readonly distroMinVersion = { resolute: '6.4.0' };
+
   /**
    * Downloads the swift archive from download.swift.org and extracts it into
    * the versioned tool path. Swift only publishes a PGP `.sig` file, not a

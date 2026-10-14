@@ -9,6 +9,11 @@ export type InstallToolType = 'gem' | 'npm' | 'pip';
 export type ToolType = 'gem' | 'npm' | 'pip' | 'dotnet';
 
 /**
+ * The Ubuntu releases containerbase supports, by codename.
+ */
+export type DistroCode = 'jammy' | 'noble' | 'resolute';
+
+/**
  * What containerbase knows about a supported tool.
  */
 export interface ToolMetadata {
@@ -33,4 +38,9 @@ export interface ToolMetadata {
    * versioning. Tools without a known limit have none.
    */
   minVersion?: string;
+  /**
+   * The oldest version containerbase supports on an Ubuntu release, only for
+   * the releases whose floor differs from `minVersion`.
+   */
+  distroMinVersion?: Partial<Record<DistroCode, string>>;
 }

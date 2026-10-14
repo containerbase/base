@@ -80,7 +80,12 @@ import { TerraformInstallService } from '../tools/terraform.ts';
 import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
 import { WallyInstallService } from '../tools/wally.ts';
-import { type InstallToolType, type ToolType, logger } from '../utils/index.ts';
+import {
+  type DistroCode,
+  type InstallToolType,
+  type ToolType,
+  logger,
+} from '../utils/index.ts';
 import type { BaseInstallService } from './base-install.service.ts';
 import {
   V1ToolInstallService,
@@ -247,6 +252,11 @@ export interface SupportedTool {
    * The oldest version containerbase supports for the tool.
    */
   minVersion?: string;
+  /**
+   * The oldest version supported on an Ubuntu release, for the releases whose
+   * floor differs from `minVersion`.
+   */
+  distroMinVersion?: Partial<Record<DistroCode, string>>;
 }
 
 /**
@@ -294,6 +304,9 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
       ...(svc.parent && { parent: svc.parent }),
       ...(svc.needsRoot && { root: true }),
       ...(svc.minVersion && { minVersion: svc.minVersion }),
+      ...(svc.distroMinVersion && {
+        distroMinVersion: svc.distroMinVersion,
+      }),
     });
   }
 

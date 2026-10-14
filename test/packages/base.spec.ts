@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
 import { toolNames } from '../../packages/base/src/index.ts';
 import {
+  DistroCode,
   type InstallToolType,
   ToolMetadata,
   type ToolType,
@@ -32,6 +33,38 @@ describe('packages/base', () => {
   test('ToolMetadata accepts a minimum version only as string', () => {
     expect(ToolMetadata.safeParse({ minVersion: '2.33.0' }).success).toBe(true);
     expect(ToolMetadata.safeParse({ minVersion: 2 }).success).toBe(false);
+  });
+
+  test('DistroCode matches the zod free type', () => {
+    expectTypeOf<
+      z.infer<typeof DistroCode>
+    >().toEqualTypeOf<types.DistroCode>();
+  });
+
+  test('ToolMetadata accepts a minimum version per Ubuntu release', () => {
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { resolute: '8.1.31' } })
+        .success,
+    ).toBe(true);
+    expect(ToolMetadata.safeParse({ distroMinVersion: {} }).success).toBe(true);
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { focal: '1.0.0' } }).success,
+    ).toBe(false);
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { noble: 1 } }).success,
+    ).toBe(false);
+  });
+
+  test('tools have the minimum versions per Ubuntu release of their install services', () => {
+    const entries: [string, types.ToolMetadata][] = Object.entries(tools);
+    expect(
+      entries.flatMap(([name, { distroMinVersion }]) =>
+        distroMinVersion ? [[name, distroMinVersion]] : [],
+      ),
+    ).toEqual([
+      ['php', { resolute: '8.1.31' }],
+      ['swift', { resolute: '6.4.0' }],
+    ]);
   });
 
   test('tools have the minimum versions of their install services', () => {
