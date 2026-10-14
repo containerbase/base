@@ -106,7 +106,10 @@ export class SwiftPrepareService extends BasePrepareService {
 export class SwiftInstallService extends BaseInstallService {
   override readonly name = 'swift';
 
-  /** The first release with Ubuntu 22.04 builds, which jammy and noble use. */
+  /**
+   * The first release with Ubuntu 22.04 builds, which jammy uses and noble
+   * before the 24.04 builds of 5.10.1.
+   */
   override readonly minVersion = '5.7';
 
   /**
@@ -116,12 +119,19 @@ export class SwiftInstallService extends BaseInstallService {
    */
   override async install(version: string): Promise<void> {
     const distro = await getDistro();
-    const versionId = distro.versionId === '24.04' ? '22.04' : distro.versionId;
+    const { major, minor, patch } = parse(version);
+    // Ubuntu 24.04 builds exist from 5.10.1, older releases use the 22.04 ones
+    const hasNobleBuild =
+      major > 5 ||
+      (major === 5 && (minor > 10 || (minor === 10 && patch >= 1)));
+    const versionId =
+      distro.versionId === '24.04' && !hasNobleBuild
+        ? '22.04'
+        : distro.versionId;
     const arch = this.envSvc.arch === 'arm64' ? '-aarch64' : '';
     const platform = `ubuntu${versionId}${arch}`;
 
     // releases before 6.4 drop a `.0` patch from their name, eg. `swift-6.3-RELEASE`
-    const { major, minor, patch } = parse(version);
     const shortName = patch === 0 && (major < 6 || (major === 6 && minor < 4));
     const releaseVersion = shortName ? `${major}.${minor}` : version;
     const release = `swift-${releaseVersion}-RELEASE`;

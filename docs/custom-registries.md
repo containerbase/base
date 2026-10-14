@@ -795,12 +795,16 @@ Swift releases are downloaded from:
 
 - `https://download.swift.org`
 
+The build matches the Ubuntu release: jammy uses the Ubuntu 22.04 builds, noble the Ubuntu 24.04 builds from v5.10.1 (older releases fall back to the 22.04 builds) and resolute the Ubuntu 26.04 builds.
+
 Samples:
 
 ```txt
 https://download.swift.org/swift-5.7-release/ubuntu2204/swift-5.7-RELEASE/swift-5.7-RELEASE-ubuntu22.04.tar.gz
 https://download.swift.org/swift-5.7.3-release/ubuntu2204/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04.tar.gz
 https://download.swift.org/swift-5.7.3-release/ubuntu2204-aarch64/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-ubuntu22.04-aarch64.tar.gz
+https://download.swift.org/swift-6.4.1-release/ubuntu2404/swift-6.4.1-RELEASE/swift-6.4.1-RELEASE-ubuntu24.04.tar.gz
+https://download.swift.org/swift-6.4.1-release/ubuntu2604-aarch64/swift-6.4.1-RELEASE/swift-6.4.1-RELEASE-ubuntu26.04-aarch64.tar.gz
 ```
 
 ## `terraform`
