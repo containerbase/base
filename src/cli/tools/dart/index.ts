@@ -41,6 +41,9 @@ export class DartPrepareService extends BasePrepareService {
 export class DartInstallService extends BaseInstallService {
   readonly name = 'dart';
 
+  /** The install rejects older majors, 2.0.0 is container tested. */
+  override readonly minVersion = '2.0.0';
+
   /** The architecture name used by the dart sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {

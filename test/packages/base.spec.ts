@@ -44,6 +44,7 @@ describe('packages/base', () => {
     ).toEqual([
       ['bun', '0.5.3'],
       ['cabal', '3.4.1.0'],
+      ['dart', '2.0.0'],
       ['deno', '2.0.1'],
       ['docker', '18.09.0'],
       ['docker-compose', '2.0.1'],
