@@ -152,7 +152,7 @@ RUN install-tool helmfile v1.8.1
 #--------------------------------------
 FROM base AS test-jq
 
-# renovate: datasource=github-releases packageName=jqlang/jq extractVersion=^jq-(?<version>.+)$
+# renovate: datasource=github-releases packageName=jqlang/jq
 RUN install-tool jq 1.8.2
 
 RUN jq --version

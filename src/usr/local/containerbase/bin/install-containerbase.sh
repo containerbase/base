@@ -75,7 +75,6 @@ apt_install \
   curl \
   dumb-init \
   gnupg \
-  jq \
   libarchive-tools \
   openssh-client \
   rsync \
@@ -125,6 +124,11 @@ function prepare_v2_tools () {
   ln -sf /usr/local/sbin/install-containerbase /usr/local/bin/install-containerbase
 }
 prepare_v2_tools
+
+# jq from the official releases instead of the older Ubuntu package
+# renovate: datasource=github-releases depName=jq packageName=jqlang/jq
+JQ_VERSION=1.8.2
+install-tool jq "${JQ_VERSION}"
 
 # cleanup
 rm -rf /var/lib/apt/lists/* /var/log/dpkg.* /var/log/apt

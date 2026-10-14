@@ -248,7 +248,7 @@ RUN install-tool gh v2.102.0
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
 
-# renovate: datasource=github-releases packageName=jqlang/jq extractVersion=^jq-(?<version>.+)$
+# renovate: datasource=github-releases packageName=jqlang/jq
 RUN install-tool jq 1.8.2
 
 RUN jq --version

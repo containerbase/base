@@ -176,10 +176,15 @@
       "automerge": true
     },
     {
-      "description": "Trigger fix release for git updates",
-      "matchDepNames": ["git"],
+      "description": "Trigger fix release for git and jq updates",
+      "matchDepNames": ["git", "jq"],
       "semanticCommitType": "fix",
       "minimumReleaseAge": "5 days"
+    },
+    {
+      "description": "Handle the tag prefix of jq releases",
+      "matchPackageNames": ["jqlang/jq"],
+      "extractVersion": "^jq-(?<version>.*)$"
     },
     {
       "description": "Wait for cabal binaries, which are uploaded after the GitHub release",
