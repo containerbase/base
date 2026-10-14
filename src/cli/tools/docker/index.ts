@@ -42,6 +42,9 @@ export class DockerPrepareService extends BasePrepareService {
 export class DockerInstallService extends BaseInstallService {
   readonly name = 'docker';
 
+  /** Older static builds are named like `17.03.0-ce`, which isn't semver. */
+  override readonly minVersion = '18.09.0';
+
   /** The architecture name used by the docker static builds. */
   private get arch(): string {
     switch (this.envSvc.arch) {

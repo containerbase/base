@@ -19,6 +19,9 @@ export class CabalPrepareService extends BasePrepareService {
 export class CabalInstallService extends BaseInstallService {
   readonly name = 'cabal';
 
+  /** The first release with the `linux-deb10` bindist. */
+  override readonly minVersion = '3.4.1.0';
+
   /** The architecture name used by the cabal release archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {

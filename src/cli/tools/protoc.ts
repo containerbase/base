@@ -8,6 +8,9 @@ import { semverCoerce } from '../utils/index.ts';
 export class ProtocInstallService extends BaseInstallService {
   readonly name = 'protoc';
 
+  /** The first release with a `protoc-<version>-linux-x86_64.zip`. */
+  override readonly minVersion = '3.0.0';
+
   /** The architecture name used by the protoc release assets. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {

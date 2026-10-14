@@ -77,6 +77,12 @@ export class DotnetPrepareService extends BasePrepareService {
 export class DotnetInstallService extends BaseInstallService {
   readonly name = 'dotnet';
 
+  /**
+   * Older SDKs abort on the supported Ubuntu releases: before 6.0 they need
+   * OpenSSL 1.x, before 5.0 also an older ICU.
+   */
+  override readonly minVersion = '6.0.100';
+
   /** The architecture name used by the dotnet sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
