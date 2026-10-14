@@ -79,7 +79,7 @@ describe('packages/base', () => {
       ['cabal', '3.4.1.0'],
       ['dart', '2.0.0'],
       ['deno', '2.0.1'],
-      ['docker', '18.09.0'],
+      ['docker', '20.10.0'],
       ['docker-compose', '2.0.1'],
       ['dotnet', '6.0.100'],
       ['erlang', '24.2.0.0'],

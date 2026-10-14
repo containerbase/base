@@ -24,7 +24,7 @@ export const tools = {
   dart: { minVersion: '2.0.0' },
   deno: { minVersion: '2.0.1' },
   devbox: {},
-  docker: { minVersion: '18.09.0' },
+  docker: { minVersion: '20.10.0' },
   'docker-compose': { parent: 'docker', minVersion: '2.0.1' },
   dotnet: { minVersion: '6.0.100' },
   elixir: { parent: 'erlang' },
