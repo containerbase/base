@@ -61,7 +61,7 @@
     "pretty-ms": "9.3.1",
     "reflect-metadata": "0.2.2",
     "semver": "7.8.5",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@containerbase/istanbul-reports-html": "2.0.22",
@@ -107,7 +107,7 @@
     "markdownlint": "*",
     "thread-stream": "*"
   },
-  "packageManager": "pnpm@12.12.0",
+  "packageManager": "pnpm@12.12.1",
   "engines": {
     "node": ">=24.10.0",
     "pnpm": "^12.0.0"

@@ -64,6 +64,9 @@ export class PhpInstallService extends BaseInstallService {
   /** The first jammy prebuild. */
   override readonly minVersion = '7.4.0';
 
+  /** The resolute prebuilds start with 8.1.31, there are none for 7.x and 8.0. */
+  override readonly distroMinVersion = { resolute: '8.1.31' };
+
   /** The architecture name used by the php prebuilds. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
