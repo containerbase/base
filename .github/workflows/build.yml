@@ -121,7 +121,7 @@ jobs:
       - name: Install the workflow linters
         uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
-          install_args: github:jdx/jactionlint shellcheck zizmor
+          install_args: jactionlint shellcheck zizmor
 
       # the full checkout includes the local composite actions, so jactionlint
       # validates their metadata and zizmor audits them
