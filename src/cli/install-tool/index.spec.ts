@@ -198,6 +198,11 @@ describe('cli/install-tool/index', () => {
           { name: 'apko' },
           { name: 'git', root: true, minVersion: '2.33.0' },
           { name: 'nix', minVersion: '2.10.3' },
+          {
+            name: 'swift',
+            minVersion: '5.7',
+            distroMinVersion: { resolute: '6.4.0' },
+          },
           { name: 'vp', parent: 'node', minVersion: '0.3.1' },
           { name: 'git-lfs', parent: 'git', minVersion: '2.6.0' },
           { name: 'maven', parent: 'java' },
