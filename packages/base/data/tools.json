@@ -28,7 +28,7 @@
     "flux": { "minVersion": "0.6.0" },
     "gh": { "minVersion": "2.0.0" },
     "ghc": { "minVersion": "8.10.1" },
-    "git": { "root": true, "minVersion": "2.33.0" },
+    "git": { "root": true, "minVersion": "2.48.0" },
     "git-lfs": { "parent": "git", "minVersion": "2.6.0" },
     "gleam": { "minVersion": "0.23.0" },
     "golang": {},

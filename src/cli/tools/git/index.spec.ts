@@ -86,6 +86,17 @@ describe('cli/tools/git/index', () => {
       await expect(svc.install('2.55.0')).resolves.toBeUndefined();
     });
 
+    test('install: accepts ubuntu git below the published minimum', async () => {
+      const { svc } = await toolContext(GitInstallService);
+      execaMock.mockResolvedValue({
+        failed: false,
+        stdout: 'git version 2.34.1',
+      });
+
+      await expect(svc.install('2.40.0')).resolves.toBeUndefined();
+      expect(svc.minVersion).toBe('2.48.0');
+    });
+
     test('install: throws on an unparsable version', async () => {
       const { svc } = await toolContext(GitInstallService);
       execaMock.mockResolvedValue({ failed: false, stdout: 'git version foo' });
