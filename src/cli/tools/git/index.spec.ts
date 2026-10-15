@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { resolveVersion } from '../../install-tool/index.ts';
 import { CompressionService, LinkToolService } from '../../services/index.ts';
-import { getDistro, logger } from '../../utils/index.ts';
+import { fileContent, getDistro, logger } from '../../utils/index.ts';
 import {
   GitInstallService,
   GitPrepareService,
@@ -214,8 +214,22 @@ describe('cli/tools/git/index', () => {
       await fs.rm(usrBinGit);
     });
 
-    test('allows all safe directories', async () => {
+    test('allows all safe directories and provides git to apt', async () => {
       const { svc } = await toolContext(GitInstallService);
+      let root = '';
+      let control = '';
+      let modes: number[] = [];
+      execaMock.mockImplementation(async (cmd: string, args: string[]) => {
+        if (cmd === 'dpkg-deb') {
+          root = args[2]!;
+          control = await fs.readFile(join(root, 'DEBIAN/control'), 'utf8');
+          modes = [
+            (await fs.stat(root)).mode & 0o777,
+            (await fs.stat(join(root, 'DEBIAN'))).mode & 0o777,
+          ];
+        }
+        return { failed: false };
+      });
 
       await expect(svc.postInstall('2.56.0')).resolves.toBeUndefined();
 
@@ -224,6 +238,28 @@ describe('cli/tools/git/index', () => {
         ['config', '--system', 'safe.directory', '*'],
         expect.objectContaining({ stdio: ['inherit', 'inherit', 1] }),
       );
+      expect(control).toBe(fileContent`
+        Package: containerbase-git
+        Version: 2.56.0
+        Architecture: all
+        Maintainer: containerbase <https://github.com/containerbase/base>
+        Provides: git (= 1:2.56.0)
+        Description: git installed by containerbase
+         Provides the git package for the git containerbase installed.
+      `);
+      expect(modes).toEqual([0o755, 0o755]);
+      expect(execaMock).toHaveBeenCalledWith(
+        'dpkg-deb',
+        ['--build', '--root-owner-group', root, `${root}.deb`],
+        expect.any(Object),
+      );
+      expect(execaMock).toHaveBeenCalledWith(
+        'dpkg',
+        ['--install', `${root}.deb`],
+        expect.any(Object),
+      );
+      // the build folder is removed again
+      await expect(fs.stat(root)).rejects.toThrow();
     });
 
     test('prints the version', async () => {
