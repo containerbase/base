@@ -28,6 +28,13 @@ class DummyInstallService extends BaseInstallService {
     });
   }
 
+  /** Exposes the protected `symlink` to the tests. */
+  linkBinary(version: string): Promise<void> {
+    return this.symlink({
+      srcDir: this.pathSvc.versionedToolPath(this.name, version),
+    });
+  }
+
   /** Exposes the protected `_spawn` to the tests. */
   run(command: string, args: string[]): Promise<unknown> {
     return this._spawn(command, args);
@@ -141,6 +148,18 @@ describe('cli/install-tool/base-install.service', () => {
     });
     expect(await fs.readFile(join(pathSvc.binDir, 'dummy'), 'utf8')).toContain(
       'containerbase-cli init tool "dummy"',
+    );
+  });
+
+  test('symlink links with the tool name', async () => {
+    const spy = vi.spyOn(LinkToolService.prototype, 'symlink');
+    const src = pathSvc.versionedToolPath('dummy', '3.0.0');
+
+    await expect(svc.linkBinary('3.0.0')).resolves.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith('dummy', { srcDir: src });
+    expect(await fs.readlink(join(pathSvc.binDir, 'dummy'))).toBe(
+      join(src, 'dummy'),
     );
   });
 

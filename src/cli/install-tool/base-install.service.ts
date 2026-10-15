@@ -202,6 +202,16 @@ export abstract class BaseInstallService {
     return this._link.shellwrapper(this.name, options);
   }
 
+  /**
+   * Links a tool binary into the global bin folder with a plain symlink, for
+   * binaries which need no containerbase env, see `LinkToolService.symlink`.
+   */
+  protected symlink(
+    options: Pick<ShellWrapperConfig, 'name' | 'srcDir'>,
+  ): Promise<void> {
+    return this._link.symlink(this.name, options);
+  }
+
   /** Runs a command, by default in the temp folder. */
   protected _spawn(
     command: string,
