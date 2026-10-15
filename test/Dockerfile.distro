@@ -86,6 +86,27 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# Image: test-git-apt
+#--------------------------------------
+FROM base AS test-git-apt
+
+RUN touch /.dummy
+
+# apt packages depending on git use the prebuild instead of ubuntu's git
+RUN set -ex; \
+  version="$(git --version | sed -n 's/^git version //p')"; \
+  [ -n "${version}" ]; \
+  dpkg -s containerbase-git | grep -Fx "Version: ${version}"; \
+  install-apt git-lfs tig; \
+  if dpkg -s git; then exit 1; fi; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  readlink -f /usr/bin/git | grep -Fx "/opt/containerbase/tools/git/${version}/bin/git"; \
+  git --version | grep -Fx "git version ${version}"; \
+  git lfs version; \
+  tig --version; \
+  true
+
+#--------------------------------------
 # Image: build
 #--------------------------------------
 FROM base AS build
@@ -339,6 +360,7 @@ FROM base
 COPY --from=test /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-erlang /.dummy /.dummy
+COPY --from=test-git-apt /.dummy /.dummy
 COPY --from=test-git-min /.dummy /.dummy
 COPY --from=test-haskell /.dummy /.dummy
 COPY --from=test-java /.dummy /.dummy
