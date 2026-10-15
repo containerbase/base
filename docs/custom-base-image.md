@@ -40,8 +40,8 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -86,8 +86,8 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -130,8 +130,18 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 
 USER $USER_NAME
 ```
+
+## git
+
+`install-tool git` installs git from the containerbase prebuild into `/usr/local/bin`, not from Ubuntu.
+To stay compatible with images built on Ubuntu's git, it also:
+
+- installs the apt packages Ubuntu's git pulled in: `git-man`, `perl`, `liberror-perl` and `libcurl3-gnutls` (`libcurl3t64-gnutls` on noble and newer)
+- links `git`, `git-receive-pack`, `git-shell`, `git-upload-archive`, `git-upload-pack` and `scalar` into `/usr/bin`, where Ubuntu's git put them, unless a file already exists there
+
+Both go away in the next major release, see [#7821](https://github.com/containerbase/base/issues/7821) and [#7822](https://github.com/containerbase/base/issues/7822).
