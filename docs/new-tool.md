@@ -304,7 +304,7 @@ docker buildx bake --set *.cache-from=
 Before opening a PR:
 
 ```sh
-pnpm lint          # prettier, oxlint, tsc, markdownlint
+pnpm lint          # formatting, lint, types, docs, markdown, schema and tool list checks
 pnpm test:vitest
 pnpm test:bats
 ```
@@ -312,6 +312,7 @@ pnpm test:bats
 CI runs the test images from a matrix in [`.github/workflows/build.yml`](../.github/workflows/build.yml).
 The `lang` matrix entries map to directories under [`test/`](../test/), so a brand-new test directory also needs a matrix entry.
 Adding to an existing test image needs no workflow change.
+If you change a workflow, for example to add that matrix entry, run `mise install` once and check it with `jactionlint` and `zizmor`, like CI's `lint` job does.
 
 ## Downstream: tool-versions and Renovate
 
