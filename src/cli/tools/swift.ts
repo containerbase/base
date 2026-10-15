@@ -1,8 +1,7 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../services/index.ts';
 import { getDistro, parse } from '../utils/index.ts';
 
 /** The distro specific dependencies. */
@@ -65,9 +64,6 @@ const distroPackages: Record<string, string[] | undefined> = {
 @injectable()
 @injectFromHierarchy()
 export class SwiftPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'swift';
 
   /**
@@ -77,15 +73,7 @@ export class SwiftPrepareService extends BasePrepareService {
    * @throws on an unsupported distro
    */
   override async prepare(): Promise<void> {
-    const distro = await getDistro();
-    const packages = distroPackages[distro.versionCode];
-    if (!packages) {
-      throw new Error(
-        `Tool '${this.name}' not supported on: ${distro.versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
-      );
-    }
-
-    await this.aptSvc.install(...packages);
+    await this.installDistroPackages(distroPackages);
 
     await this.initialize();
 
