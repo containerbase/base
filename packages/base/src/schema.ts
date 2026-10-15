@@ -38,13 +38,13 @@ export const ToolMetadata = z.strictObject({
   minVersion: z
     .string()
     .describe(
-      "the oldest version containerbase supports for the tool, in the tool's versioning; tools without a known limit have none",
+      "the oldest version containerbase supports for the tool on the default distro, in the tool's versioning; tools without a known limit have none",
     )
     .exactOptional(),
   distroMinVersion: z
     .partialRecord(DistroCode, z.string())
     .describe(
-      "the oldest version containerbase supports on an Ubuntu release, in the tool's versioning, keyed by codename; only for releases whose floor differs from minVersion, which is the floor on noble",
+      "the oldest version containerbase supports on an Ubuntu release, in the tool's versioning, keyed by codename; only for releases whose floor differs from minVersion, which is the floor on the default distro",
     )
     .exactOptional(),
 });

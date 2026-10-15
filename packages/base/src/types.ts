@@ -35,12 +35,14 @@ export interface ToolMetadata {
   root?: true;
   /**
    * The oldest version containerbase supports for the tool, in the tool's
-   * versioning. Tools without a known limit have none.
+   * versioning, on the default distro (`defaultDistro`). Tools without a known
+   * limit have none.
    */
   minVersion?: string;
   /**
    * The oldest version containerbase supports on an Ubuntu release, only for
-   * the releases whose floor differs from `minVersion`.
+   * the releases whose floor differs from `minVersion`, the floor on the
+   * default distro.
    */
   distroMinVersion?: Partial<Record<DistroCode, string>>;
 }

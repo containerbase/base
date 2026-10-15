@@ -249,12 +249,13 @@ export interface SupportedTool {
    */
   root?: true;
   /**
-   * The oldest version containerbase supports for the tool.
+   * The oldest version containerbase supports for the tool, on the default
+   * distro.
    */
   minVersion?: string;
   /**
    * The oldest version supported on an Ubuntu release, for the releases whose
-   * floor differs from `minVersion`.
+   * floor differs from `minVersion`, the floor on the default distro.
    */
   distroMinVersion?: Partial<Record<DistroCode, string>>;
 }
