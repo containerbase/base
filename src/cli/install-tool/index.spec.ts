@@ -196,7 +196,7 @@ describe('cli/install-tool/index', () => {
       expect(tools).toEqual(
         expect.arrayContaining([
           { name: 'apko' },
-          { name: 'git', root: true, minVersion: '2.33.0' },
+          { name: 'git', root: true, minVersion: '2.48.0' },
           { name: 'nix', minVersion: '2.10.3' },
           {
             name: 'swift',

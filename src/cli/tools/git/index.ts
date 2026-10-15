@@ -13,10 +13,18 @@ import {
 } from '../../utils/index.ts';
 
 /**
- * Keep in sync with the minimum git version renovate needs.
+ * The oldest git minor that still gets security fixes and the first version
+ * of the containerbase git prebuilds, published as the minimum version.
+ */
+const minVersion = '2.48.0';
+
+/**
+ * The oldest git the installed version is checked against: the minimum git
+ * version renovate needs, which ubuntu's own git also meets when apt can't
+ * use the ppa.
  * https://github.com/renovatebot/renovate/blob/main/lib/util/git/index.ts#L180
  */
-const minVersion = '2.33.0';
+const installedMinVersion = '2.33.0';
 
 const keyUrl =
   'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF911AB184317630C59970973E363C90F8F1B6217';
@@ -80,9 +88,9 @@ export class GitInstallService extends BaseInstallService {
     await this.aptSvc.install(this.name);
 
     const version = await this.installedVersion();
-    if (!semverGte(version, minVersion)) {
+    if (!semverGte(version, installedMinVersion)) {
       throw new Error(
-        `Git version mismatch! Expected: ${minVersion}, got: ${version}`,
+        `Git version mismatch! Expected: ${installedMinVersion}, got: ${version}`,
       );
     }
   }
