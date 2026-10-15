@@ -1,7 +1,8 @@
+import { readFile } from 'node:fs/promises';
 import { describe, expect, expectTypeOf, test } from 'vitest';
 import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
-import { toolNames } from '../../packages/base/src/index.ts';
+import { defaultDistro, toolNames } from '../../packages/base/src/index.ts';
 import {
   DistroCode,
   type InstallToolType,
@@ -10,9 +11,29 @@ import {
 } from '../../packages/base/src/schema.ts';
 import type * as types from '../../packages/base/src/types.ts';
 
+/** The codenames of the Ubuntu versions the default image can be built from. */
+const ubuntuCodenames: Record<string, types.DistroCode> = {
+  '22.04': 'jammy',
+  '24.04': 'noble',
+  '26.04': 'resolute',
+};
+
 // type-only checks, `tsc` fails when the zod schemas of the base package and
 // its zod free types drift apart
 describe('packages/base', () => {
+  test('defaultDistro is the Ubuntu release of the default image', async () => {
+    const dockerfile = await readFile(
+      new URL('../../Dockerfile', import.meta.url),
+      'utf8',
+    );
+    const version = /^FROM ghcr\.io\/containerbase\/ubuntu:(\d+\.\d+)/m.exec(
+      dockerfile,
+    )?.[1];
+
+    expect(version).toBeDefined();
+    expect(ubuntuCodenames[version!]).toBe(defaultDistro);
+  });
+
   test('InstallToolType matches the zod free type', () => {
     expectTypeOf<
       z.infer<typeof InstallToolType>

@@ -70,15 +70,15 @@ export abstract class BaseInstallService {
 
   /**
    * The oldest version containerbase supports for the tool, in the tool's
-   * versioning, published as `minVersion` in the base package metadata.
-   * Tools without a known limit have none.
+   * versioning, on the default distro, published as `minVersion` in the base
+   * package metadata. Tools without a known limit have none.
    */
   readonly minVersion?: string;
 
   /**
    * The oldest version supported on an Ubuntu release, for the releases whose
-   * floor differs from `minVersion`, published as `distroMinVersion` in the
-   * base package metadata.
+   * floor differs from `minVersion`, the floor on the default distro,
+   * published as `distroMinVersion` in the base package metadata.
    */
   readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
 
