@@ -1,4 +1,5 @@
 import { NugetVersionResolver } from '../tools/dotnet/nuget.ts';
+import { GitVersionResolver } from '../tools/git/index.ts';
 import { ResolverMap } from '../tools/index.ts';
 import { AndroidSdkCmdlineToolsVersionResolver } from '../tools/java/android.ts';
 import { GradleVersionResolver } from '../tools/java/gradle.ts';
@@ -32,6 +33,7 @@ export const versionResolvers: readonly VersionResolverClass[] = [
   CocoapodsVersionResolver,
   ConanVersionResolver,
   ComposerVersionResolver,
+  GitVersionResolver,
   GradleVersionResolver,
   JavaVersionResolver,
   JavaJreVersionResolver,
