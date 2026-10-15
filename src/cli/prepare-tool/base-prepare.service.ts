@@ -1,7 +1,12 @@
 import { inject, injectable } from 'inversify';
-import { EnvService, PathService } from '../services/index.ts';
+import { AptService, EnvService, PathService } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
-import { type SpawnOptions, type SpawnResult, spawn } from '../utils/index.ts';
+import {
+  type SpawnOptions,
+  type SpawnResult,
+  getDistro,
+  spawn,
+} from '../utils/index.ts';
 
 /**
  * The setup a tool needs before it can be installed, split in two steps:
@@ -17,6 +22,8 @@ export abstract class BasePrepareService {
   protected readonly pathSvc!: PathService;
   @inject(EnvService)
   protected readonly envSvc!: EnvService;
+  @inject(AptService)
+  private readonly _aptSvc!: AptService;
 
   abstract readonly name: string;
 
@@ -43,6 +50,27 @@ export abstract class BasePrepareService {
   /** The tool name, for logging. */
   toString(): string {
     return this.name;
+  }
+
+  /**
+   * Installs the apt packages the tool needs on the current ubuntu release:
+   * the `common` ones and those listed for the release in `distroPackages`.
+   *
+   * @throws on a release without an entry in `distroPackages`
+   */
+  protected async installDistroPackages(
+    distroPackages: Record<string, string[] | undefined>,
+    ...common: string[]
+  ): Promise<void> {
+    const { versionCode } = await getDistro();
+    const packages = distroPackages[versionCode];
+    if (!packages) {
+      throw new Error(
+        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+      );
+    }
+
+    await this._aptSvc.install(...common, ...packages);
   }
 
   /** Runs a command, by default in the temp folder. */
