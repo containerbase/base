@@ -173,15 +173,19 @@ export class HttpService {
    * client error is not retried. The result is not validated, parse it with a
    * schema.
    *
+   * @param opts - the got options, eg. a `timeout`
+   * @param attempts - how often to try, one disables the retries, also pass
+   * `retry: { limit: 0 }` in the options for got's own ones
    * @throws the original HTTP error for a permanent 4xx status, without
    * retrying
-   * @throws `download failed` after three failed attempts otherwise
+   * @throws `download failed` after the failed attempts otherwise
    */
   async getJson<T = unknown>(
     url: string,
     opts: OptionsOfJSONResponseBody = {},
+    attempts = 3,
   ): Promise<T> {
-    return await this._request(url, opts, (req) => req.json<T>());
+    return await this._request(url, opts, (req) => req.json<T>(), attempts);
   }
 
   /**
@@ -204,23 +208,25 @@ export class HttpService {
   }
 
   /**
-   * Runs a `GET` request and reads its body, trying up to three times.
+   * Runs a `GET` request and reads its body, trying up to `attempts` times,
+   * three by default.
    *
    * A 4xx status other than 408 and 429 is permanent: it is logged once and
    * the original error is rethrown. Any other failure is retried.
    *
    * @throws the original HTTP error for a permanent 4xx status
-   * @throws `download failed`, with the last error as cause, after three
-   * failed attempts
+   * @throws `download failed`, with the last error as cause, after the failed
+   * attempts
    */
   private async _request<T>(
     url: string,
     opts: OptionsOfTextResponseBody | OptionsOfJSONResponseBody,
     read: (req: ReturnType<typeof got.get>) => Promise<T>,
+    attempts = 3,
   ): Promise<T> {
     const nUrl = this.envSvc.replaceUrl(url);
     let lastError: unknown;
-    for (const run of [1, 2, 3]) {
+    for (let run = 1; run <= attempts; run++) {
       try {
         return await read(
           got.get(
@@ -236,7 +242,7 @@ export class HttpService {
           logger.error({ err, url }, 'download failed');
           throw err;
         }
-        if (run === 3) {
+        if (run === attempts) {
           logger.error({ err, run }, 'download failed');
         } else {
           logger.debug({ err, run }, 'download failed');
