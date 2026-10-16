@@ -133,7 +133,11 @@ Some tools accept partial versions and install a matching release:
   A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
 
-Any other version is used as is.
+Any other version is used as is, except for a major or major.minor version of a tool without a specific resolver above: it installs the newest release of that line from the online [tool-versions](https://github.com/containerbase/tool-versions) data, eg. `install-tool python 3.12`.
+The online lookup has a timeout of 30 seconds for the whole request and is not retried, so a stalled lookup delays the install by 30 seconds at most.
+The embedded data of the image is only used, with a warning, when the online data can't be reached, times out or is invalid, as it may be outdated.
+Prereleases are skipped, and a version which is a release itself, like `8.10`, is kept.
+Without data for the tool, or without a matching release in the online data, the version is used as is.
 
 #### Offline fallback <a name="Offline-fallback-install-tool"></a>
 

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ToolVersionsService, createContainer } from '../services/index.ts';
 import { JavaVersionResolver } from '../tools/java/resolver.ts';
 import { MiseVersionResolver } from '../tools/mise.ts';
+import { logger } from '../utils/index.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import {
   TOOL_VERSION_RESOLVER,
@@ -37,27 +38,64 @@ class FailingVersionResolver extends ToolVersionResolver {
 /** The embedded `v1` folder, set before each test as the root dir comes from the test setup. */
 let dir!: string;
 
+/** Versions of a tool, newest first, a `-rc` one is a prerelease. */
+const versions = [
+  '21.0.0-rc1',
+  '20.10.0',
+  '20.9.0',
+  '8.10',
+  '8.10.1',
+  '3.12.4',
+  '3.12.3',
+  '3.11.9',
+];
+
 /**
- * Writes the embedded versions of a tool, newest first.
+ * The content of a `<tool>.json` file.
  * @param tool - the tool name
- * @param versions - the versions, a `-rc` one is a prerelease, a `-lts` one
- * is an LTS release, the suffix is not part of the version
+ * @param list - the versions, a `-rc` one is a prerelease, a `-lts` one is an
+ * LTS release, the suffix is not part of the version
  */
-async function embed(tool: string, versions: string[]): Promise<void> {
-  await writeFile(
-    `${dir}/${tool}.json`,
-    JSON.stringify({
-      tool,
-      updatedAt: '2026-10-16T00:00:00Z',
-      versions: versions.map((entry) => {
-        const version = entry.replace(/-lts$/, '');
-        if (entry.includes('-rc')) {
-          return { version, prerelease: true };
-        }
-        return entry.endsWith('-lts') ? { version, lts: true } : { version };
-      }),
+function toolFile(tool: string, list: string[]): object {
+  return {
+    tool,
+    updatedAt: '2026-10-16T00:00:00Z',
+    versions: list.map((entry) => {
+      const version = entry.replace(/-lts$/, '');
+      if (entry.includes('-rc')) {
+        return { version, prerelease: true };
+      }
+      return entry.endsWith('-lts') ? { version, lts: true } : { version };
     }),
-  );
+  };
+}
+
+/**
+ * Writes the embedded versions of a tool.
+ * @param tool - the tool name
+ * @param list - the versions, newest first
+ */
+async function embed(tool: string, list: string[]): Promise<void> {
+  await writeFile(`${dir}/${tool}.json`, JSON.stringify(toolFile(tool, list)));
+}
+
+/**
+ * Mocks the online file of a tool.
+ * @param tool - the tool name
+ * @param status - the http status to reply with
+ * @param body - a list of versions for a tool file, or the raw reply
+ * @param times - how often the file is requested
+ */
+function serve(
+  tool: string,
+  status: number,
+  body?: string[] | string | object,
+  times = 1,
+): void {
+  scope('https://containerbase.github.io')
+    .get(`/tool-versions/v1/${tool}.json`)
+    .times(times)
+    .reply(status, Array.isArray(body) ? toolFile(tool, body) : body);
 }
 
 describe('cli/install-tool/tool-version-resolver.service', () => {
@@ -190,6 +228,110 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     scope('https://mise.jdx.dev').get('/VERSION').reply(404);
 
     expect(await svc.resolve('mise', 'latest')).toBe('2026.2.13');
+  });
+
+  test.each([
+    { version: '20', resolved: '20.10.0' },
+    { version: '3.12', resolved: '3.12.4' },
+    // a release itself stays as it is
+    { version: '8.10', resolved: '8.10' },
+    // no release of that line
+    { version: '21', resolved: '21' },
+  ])(
+    'resolves the partial version $version of a tool without a resolver',
+    async ({ version, resolved }) => {
+      serve('other', 200, versions);
+
+      expect(await svc.resolve('other', version)).toBe(resolved);
+    },
+  );
+
+  test('prefers the online data to an older embedded one', async () => {
+    await embed('other', ['20.1.0']);
+    serve('other', 200, versions);
+    const spy = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+    expect(await svc.resolve('other', '20')).toBe('20.10.0');
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  test('uses the embedded data and warns when the online data is not available', async () => {
+    await embed('other', versions);
+    serve('other', 404);
+
+    expect(await svc.resolve('other', '20')).toBe('20.10.0');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      { tool: 'other', version: '20', resolved: '20.10.0' },
+      expect.stringContaining('embedded'),
+    );
+  });
+
+  test('uses the embedded data at once when the network is down', async () => {
+    await embed('other', versions);
+    // no retry, a second request would find no interceptor
+    scope('https://containerbase.github.io')
+      .get('/tool-versions/v1/other.json')
+      .once()
+      .replyWithError('connection reset');
+
+    expect(await svc.resolve('other', '20')).toBe('20.10.0');
+  });
+
+  test('uses the embedded data when the online data is not valid json', async () => {
+    await embed('other', versions);
+    serve('other', 200, '{ not json');
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('uses the embedded data when the online data is invalid', async () => {
+    await embed('other', versions);
+    serve('other', 200, { versions: [] });
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('keeps the version when the online data has no match, without the embedded data', async () => {
+    await embed('other', ['20.1.0']);
+    serve('other', 200, ['19.0.0']);
+    const spy = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+    expect(await svc.resolve('other', '20')).toBe('20');
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  test('keeps a partial version without any data', async () => {
+    serve('other', 404);
+
+    expect(await svc.resolve('other', '20')).toBe('20');
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test.each(['latest', '1.2.3', undefined])(
+    'makes no request and reads no data for %s of a tool without a resolver',
+    async (version) => {
+      const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+      const online = vi.spyOn(
+        ToolVersionsService.prototype,
+        'getOnlineVersions',
+      );
+
+      expect(await svc.resolve('other', version)).toBe(version);
+
+      expect(embedded).not.toHaveBeenCalled();
+      expect(online).not.toHaveBeenCalled();
+    },
+  );
+
+  test('keeps the partial version of a tool with a working resolver', async () => {
+    const spy = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+    expect(await svc.resolve('dummy', '1')).toBe('1');
+
+    expect(spy).not.toHaveBeenCalled();
   });
 
   test('throws when the embedded data does not list the version', async () => {

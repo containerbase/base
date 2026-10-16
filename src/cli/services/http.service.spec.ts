@@ -198,6 +198,17 @@ describe('cli/services/http.service', () => {
     10 * 1000,
   );
 
+  test('getJson: tries only once with one attempt', async () => {
+    scope(baseUrl).get('/test.json').once().replyWithError('connection reset');
+
+    const err = await http
+      .getJson(`${baseUrl}/test.json`, { retry: { limit: 0 } }, 1)
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(Error);
+    expect((err as Error).message).toBe('download failed');
+  });
+
   test('getJson: retries a network error and keeps the cause', async () => {
     scope(baseUrl)
       .get('/test.json')

@@ -34,10 +34,11 @@ export class ToolVersionResolverService {
   ) {}
 
   /**
-   * Resolves the version with the tool's resolver, or returns it unchanged
-   * when the tool has none. An exact version the embedded tool-versions data
-   * lists is returned without the resolver, which keeps an exact version. When
-   * the resolver fails, the embedded data is used if it can answer, else the
+   * Resolves the version with the tool's resolver. A tool without a resolver
+   * keeps its version, except for a partial one, which resolves from the
+   * tool-versions data. An exact version the embedded data lists is
+   * returned without the resolver, which keeps an exact version. When the
+   * resolver fails, the embedded data is used too if it can answer, else the
    * error is thrown.
    */
   async resolve(
@@ -46,7 +47,7 @@ export class ToolVersionResolverService {
   ): Promise<string | undefined> {
     const resolver = this.resolver.find((r) => r.tool === tool);
     if (!resolver) {
-      return version;
+      return (await this.resolvePartial(tool, version)) ?? version;
     }
 
     if (
@@ -77,6 +78,37 @@ export class ToolVersionResolverService {
       );
       return resolved;
     }
+  }
+
+  /**
+   * Resolves a partial version of a tool without a resolver from the online
+   * tool-versions data. The embedded data is only used when the online data
+   * can't be loaded, as it may be outdated. Online data without a match is
+   * final, the embedded data is older and can't know more.
+   * @returns `undefined` for any other version, or when no data has a match
+   */
+  private async resolvePartial(
+    tool: string,
+    version: string | undefined,
+  ): Promise<string | undefined> {
+    if (version === undefined || !isPartialVersion(version)) {
+      return undefined;
+    }
+
+    const online = await this.embedded.getOnlineVersions(tool);
+    if (online) {
+      return matchPartial(online, version);
+    }
+
+    const data = await this.embedded.getVersions(tool);
+    const resolved = data && matchPartial(data, version);
+    if (resolved !== undefined) {
+      logger.warn(
+        { tool, version, resolved },
+        'online tool-versions data not available, using the embedded, possibly outdated data',
+      );
+    }
+    return resolved;
   }
 
   /**
