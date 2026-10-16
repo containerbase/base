@@ -4,6 +4,7 @@ import {
   cleanTmpFiles,
   getDistro,
   isDockerBuild,
+  isMissing,
   parseBinaryName,
   pathExists,
   reset,
@@ -97,6 +98,23 @@ UBUNTU_CODENAME=jammy`);
     fsMocks.stat.mockResolvedValueOnce({ isSymbolicLink: () => true });
     expect(await pathExists('/etc/os-release', 'symlink')).toBe(true);
     expect(await pathExists('/etc/os-release', 'symlink')).toBe(false);
+  });
+
+  test('isMissing', async () => {
+    fsMocks.stat.mockResolvedValueOnce({});
+    expect(await isMissing('/etc/os-release')).toBe(false);
+
+    fsMocks.stat.mockRejectedValueOnce(
+      Object.assign(new Error('ENOENT: no such file'), { code: 'ENOENT' }),
+    );
+    expect(await isMissing('/etc/os-release')).toBe(true);
+
+    fsMocks.stat.mockRejectedValueOnce(
+      Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }),
+    );
+    await expect(isMissing('/etc/os-release')).rejects.toThrow(
+      'EACCES: permission denied',
+    );
   });
 
   test('parseBinaryName', () => {
