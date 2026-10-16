@@ -9,7 +9,25 @@ import {
   ToolMetadata,
   type ToolType,
 } from '../../packages/base/src/schema.ts';
+import * as schemas from '../../packages/base/src/tool-versions-schema.ts';
+import type * as tvTypes from '../../packages/base/src/tool-versions-types.ts';
 import type * as types from '../../packages/base/src/types.ts';
+
+const checksum = `sha256:${'a'.repeat(64)}`;
+const integrity = `sha256-${'A'.repeat(43)}=`;
+const file = {
+  name: 'tool-1.0.0.tar.gz',
+  url: 'https://example.com/tool-1.0.0.tar.gz',
+  checksum,
+  arch: 'amd64',
+};
+const source = {
+  datasource: 'github-releases',
+  packageName: 'example/tool',
+  versioning: 'semver',
+};
+const schema = 'https://example.com/v1/tool.schema.json';
+const updatedAt = '2026-10-16T00:00:00Z';
 
 /** The codenames of the Ubuntu versions the default image can be built from. */
 const ubuntuCodenames: Record<string, types.DistroCode> = {
@@ -146,5 +164,146 @@ describe('packages/base', () => {
     expect(toolNames).toEqual(
       toolNames.toSorted((a, b) => a.localeCompare(b, 'en', { numeric: true })),
     );
+  });
+
+  test('the tool-versions schemas match the zod free types', () => {
+    expectTypeOf<
+      z.infer<typeof schemas.ToolFile>
+    >().toEqualTypeOf<tvTypes.ToolFile>();
+    expectTypeOf<
+      z.infer<typeof schemas.FileIntegrity>
+    >().toEqualTypeOf<tvTypes.FileIntegrity>();
+    expectTypeOf<
+      z.infer<typeof schemas.ToolVersion>
+    >().toEqualTypeOf<tvTypes.ToolVersion>();
+    expectTypeOf<
+      z.infer<typeof schemas.ToolVersions>
+    >().toEqualTypeOf<tvTypes.ToolVersions>();
+    expectTypeOf<
+      z.infer<typeof schemas.VersionFiles>
+    >().toEqualTypeOf<tvTypes.VersionFiles>();
+    expectTypeOf<
+      z.infer<typeof schemas.VersionIntegrity>
+    >().toEqualTypeOf<tvTypes.VersionIntegrity>();
+    expectTypeOf<
+      z.infer<typeof schemas.FileReference>
+    >().toEqualTypeOf<tvTypes.FileReference>();
+    expectTypeOf<
+      z.infer<typeof schemas.ToolIndex>
+    >().toEqualTypeOf<tvTypes.ToolIndex>();
+    expectTypeOf<
+      z.infer<typeof schemas.FormatIndex>
+    >().toEqualTypeOf<tvTypes.FormatIndex>();
+  });
+
+  test('ToolVersions parses a <tool>.json file', () => {
+    const parsed = schemas.ToolVersions.parse({
+      $schema: schema,
+      tool: 'tool',
+      minVersion: '1.0.0',
+      distroMinVersion: { resolute: '2.0.0' },
+      source,
+      updatedAt,
+      versions: [{ version: '1.0.0', lts: true }, { version: '0.9.0' }],
+    });
+
+    expect(parsed.versions.map((v) => v.version)).toEqual(['1.0.0', '0.9.0']);
+    expect(parsed.distroMinVersion).toEqual({ resolute: '2.0.0' });
+  });
+
+  test('VersionFiles parses a <tool>/<version>.json file', () => {
+    expect(
+      schemas.VersionFiles.safeParse({
+        $schema: schema,
+        tool: 'tool',
+        version: '1.0.0',
+        files: [file],
+      }).success,
+    ).toBe(true);
+  });
+
+  test('VersionIntegrity parses a <tool>.integrity.json file', () => {
+    expect(
+      schemas.VersionIntegrity.safeParse({
+        tool: 'tool',
+        versions: { '1.0.0': integrity },
+      }).success,
+    ).toBe(true);
+  });
+
+  test('ToolIndex parses the v1 index', () => {
+    const reference = { file: 'tool.json', integrity };
+    expect(
+      schemas.ToolIndex.safeParse({
+        updatedAt,
+        tools: [
+          { tool: 'tool', versionCount: 2, slim: reference },
+          {
+            tool: 'other',
+            versionCount: 1,
+            slim: reference,
+            versionFiles: { file: 'other.integrity.json', integrity },
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  test('FormatIndex parses the root index', () => {
+    expect(
+      schemas.FormatIndex.safeParse({
+        defaultDistro: 'noble',
+        formats: [
+          { version: 2, path: 'v2', status: 'preview' },
+          {
+            version: 1,
+            path: 'v1',
+            status: 'deprecated',
+            removalDate: '2027-01-01',
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  test('unknown keys and archs still parse', () => {
+    const parsed = schemas.ToolVersions.parse({
+      tool: 'tool',
+      source,
+      updatedAt,
+      versions: [],
+      added: true,
+    });
+
+    // published files carry a `source` which is not read
+    expect(parsed).not.toHaveProperty('source');
+    expect(parsed).not.toHaveProperty('added');
+    expect(schemas.ToolFile.parse({ ...file, arch: 'riscv64' }).arch).toBe(
+      'riscv64',
+    );
+  });
+
+  test.each([
+    {
+      name: 'a bad checksum',
+      value: { ...file, checksum: 'sha256:abc' },
+    },
+    {
+      name: 'an http url',
+      value: { ...file, url: 'http://example.com/tool-1.0.0.tar.gz' },
+    },
+  ])('ToolFile rejects $name', ({ value }) => {
+    expect(schemas.ToolFile.safeParse(value).success).toBe(false);
+  });
+
+  test('FileIntegrity rejects a bad integrity', () => {
+    expect(schemas.FileIntegrity.safeParse(integrity).success).toBe(true);
+    expect(schemas.FileIntegrity.safeParse('sha256-abc').success).toBe(false);
+    expect(
+      schemas.VersionIntegrity.safeParse({
+        tool: 'tool',
+        versions: { '1.0.0': 'md5-abc' },
+      }).success,
+    ).toBe(false);
   });
 });

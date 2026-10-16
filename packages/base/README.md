@@ -47,6 +47,16 @@ import { defaultDistro } from '@containerbase/base';
 defaultDistro; // 'noble'
 ```
 
+The format of the published [tool-versions](https://github.com/containerbase/tool-versions/blob/main/docs/format.md) data is exported too, so its readers share one definition.
+The zod schemas (`ToolVersions`, `VersionFiles`, `VersionIntegrity`, `ToolIndex`, `FormatIndex` and their parts) live behind the `zod` entry point, the zod free types behind the main one:
+
+```ts
+import { ToolVersions } from '@containerbase/base/zod';
+import type { ToolVersions as ToolVersionsType } from '@containerbase/base';
+```
+
+The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
+
 ## Contents
 
 Each entry may carry the following metadata:
