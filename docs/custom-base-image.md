@@ -145,3 +145,8 @@ To stay compatible with images built on Ubuntu's git, it also:
 - links `git`, `git-receive-pack`, `git-shell`, `git-upload-archive`, `git-upload-pack` and `scalar` into `/usr/bin`, where Ubuntu's git put them, unless a file already exists there
 
 Both go away in the next major release, see [#7821](https://github.com/containerbase/base/issues/7821) and [#7822](https://github.com/containerbase/base/issues/7822).
+
+It also installs an empty `containerbase-git` package, which provides `git` in the installed version to apt.
+So apt packages depending on git, like Ubuntu's `git-lfs` or `tig`, use the prebuild and don't pull in Ubuntu's git.
+An explicit `install-apt git` and git add-ons like `git-svn` still install Ubuntu's git like before, the containerbase git stays first on the `PATH`.
+Blocking Ubuntu's git follows in the next major release, see [#7779](https://github.com/containerbase/base/issues/7779).

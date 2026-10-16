@@ -1,13 +1,22 @@
+import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { AptService } from '../../services/index.ts';
-import { logger, semverGte } from '../../utils/index.ts';
+import { fileContent, logger, semverGte } from '../../utils/index.ts';
 import {
   PrebuildInstallService,
   PrebuildVersionResolver,
 } from '../utils/prebuild.ts';
+
+/**
+ * The deb registered for the installed git.
+ */
+const packageName = 'containerbase-git';
+
+/** The epoch of ubuntu's git versions, eg. `1:2.43.0-1ubuntu7`. */
+const gitEpoch = '1:';
 
 /**
  * The oldest git minor that still gets security fixes and the first version
@@ -131,11 +140,12 @@ export class GitInstallService extends PrebuildInstallService {
 
   /**
    * Marks every repository as safe, whoever owns it, in the system wide
-   * `/etc/gitconfig`.
+   * `/etc/gitconfig`, and provides the installed git to apt.
    */
-  override async postInstall(_version: string): Promise<void> {
+  override async postInstall(version: string): Promise<void> {
     // flutter workaround
     await this._spawn(this.name, ['config', '--system', 'safe.directory', '*']);
+    await this.registerPackage(version);
   }
 
   /**
@@ -144,6 +154,41 @@ export class GitInstallService extends PrebuildInstallService {
    */
   override async validate(version: string): Promise<boolean> {
     return (await super.validate(version)) && semverGte(version, minVersion);
+  }
+
+  /**
+   * Builds and installs an empty deb which provides the `git` package in the
+   * installed version, so apt packages depending on git use the prebuild.
+   */
+  private async registerPackage(version: string): Promise<void> {
+    await this.pathSvc.withTempDir(`${packageName}-`, async (tmp) => {
+      const root = join(tmp, packageName);
+      const control = join(root, 'DEBIAN');
+      await fs.mkdir(control, { recursive: true });
+      // dpkg-deb rejects control folders outside 0755-0775, whatever the umask
+      await fs.chmod(root, 0o755);
+      await fs.chmod(control, 0o755);
+      await fs.writeFile(
+        join(control, 'control'),
+        fileContent`
+          Package: ${packageName}
+          Version: ${version}
+          Architecture: all
+          Maintainer: containerbase <https://github.com/containerbase/base>
+          Provides: git (= ${gitEpoch}${version})
+          Description: git installed by containerbase
+           Provides the git package for the git containerbase installed.
+        `,
+      );
+      const deb = `${root}.deb`;
+      await this._spawn('dpkg-deb', [
+        '--build',
+        '--root-owner-group',
+        root,
+        deb,
+      ]);
+      await this._spawn('dpkg', ['--install', deb]);
+    });
   }
 }
 
