@@ -135,6 +135,13 @@ Some tools accept partial versions and install a matching release:
 
 Any other version is used as is.
 
+#### Offline fallback <a name="Offline-fallback-install-tool"></a>
+
+An exact version the embedded data lists is resolved from it without the lookup.
+When the lookup of a tool's resolver fails, eg. because the upstream can't be reached, `install-tool` uses the [tool-versions](https://github.com/containerbase/tool-versions) data embedded in the image and logs a warning.
+A missing version or `latest` installs the newest embedded release, any other version is only used if the embedded data lists it, else the lookup error is reported.
+The data is read lazily, only for the requested tool, and the file is checked against the format schema, a missing, unreadable or invalid file means there is no embedded data.
+
 <br>
 
 ### `containerbase-cli install gem` <a name="install-gem-command"></a>
