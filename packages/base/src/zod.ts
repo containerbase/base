@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { toolNames } from './index.ts';
 
 export * from './schema.ts';
+export * from './tool-versions-schema.ts';
 
 /**
  * Enum of all tool names supported by the containerbase version this package

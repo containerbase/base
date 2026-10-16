@@ -7,6 +7,17 @@ export type {
   ToolMetadata,
   ToolType,
 } from './types.ts';
+export type {
+  FileIntegrity,
+  FileReference,
+  FormatIndex,
+  ToolFile,
+  ToolIndex,
+  ToolVersion,
+  ToolVersions,
+  VersionFiles,
+  VersionIntegrity,
+} from './tool-versions-types.ts';
 
 export { tools };
 
