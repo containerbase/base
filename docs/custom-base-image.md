@@ -10,6 +10,9 @@ You should always use a specific version which can be found at [docker hub](http
 `install-containerbase` installs `jq` from its GitHub releases, like the tools you install afterwards.
 If your build can't reach GitHub, use a mirror as described in [custom registries](./custom-registries.md#jq).
 
+The image embeds the [tool-versions](https://github.com/containerbase/tool-versions) data of the tools in `/usr/local/containerbase/tool-versions/`, it comes with the `COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/` line of the samples.
+The build downloads the release pinned in `tools/tool-versions.ts` and verifies its checksum, Renovate updates the pin weekly.
+
 ## Default user name and id
 
 Use this template for using a custom base image with our default user named `ubuntu` and userid `12021`.

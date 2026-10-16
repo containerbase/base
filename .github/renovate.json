@@ -182,6 +182,13 @@
       "minimumReleaseAge": "5 days"
     },
     {
+      "description": "Update the embedded tool-versions data weekly with a fix release",
+      "matchDepNames": ["tool-versions"],
+      "extends": ["schedule:weekly"],
+      "semanticCommitType": "fix",
+      "minimumReleaseAge": "1 day"
+    },
+    {
       "description": "Handle the tag prefix of jq releases",
       "matchPackageNames": ["jqlang/jq"],
       "extractVersion": "^jq-(?<version>.*)$"
@@ -266,6 +273,18 @@
         "\"(?<depName>@yao-pkg/pkg|clipanion)@(?<currentValue>\\d+\\.\\d+\\.\\d+)\":"
       ],
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "Update the embedded tool-versions release",
+      "managerFilePatterns": ["tools/tool-versions.ts"],
+      "matchStrings": [
+        "toolVersionsVersion = '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+      ],
+      "depNameTemplate": "tool-versions",
+      "packageNameTemplate": "containerbase/tool-versions",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ]
 }

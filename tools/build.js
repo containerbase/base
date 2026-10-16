@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import { exec } from '@yao-pkg/pkg';
 import { rolldown } from 'rolldown';
 import shell from 'shelljs';
+import { installToolVersions, toolVersionsDir } from './tool-versions.ts';
 
 const __require = createRequire(import.meta.url);
 
@@ -16,6 +17,9 @@ shell.mkdir('-p', 'dist/docker');
 shell.cp('-r', 'src/usr', 'dist/docker/');
 
 await fs.writeFile('dist/docker/usr/local/containerbase/version', version);
+
+shell.echo('Embedding tool-versions ...');
+await installToolVersions(toolVersionsDir);
 
 shell.echo('Bundling containerbase-cli ...');
 const bundle = await rolldown({

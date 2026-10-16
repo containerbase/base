@@ -38,6 +38,7 @@
     "test:bats": "node tools/bats.js --timing --verbose-run test/bash/ test/bash/v2",
     "test:docker": "node tools/test.js",
     "test:vitest": "vitest run --coverage",
+    "tool-versions": "node tools/download-tool-versions.ts",
     "tools": "tsx tools/tools.ts"
   },
   "dependencies": {
