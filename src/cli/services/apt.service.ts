@@ -2,7 +2,7 @@ import { rm, writeFile } from 'fs/promises';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { inject, injectable } from 'inversify';
-import { logger } from '../utils/index.ts';
+import { getDistro, logger } from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
 
 @injectable()
@@ -60,6 +60,28 @@ export class AptService {
         );
       }
     }
+  }
+
+  /**
+   * Installs the apt packages a tool needs on the current ubuntu release: the
+   * `common` ones and those listed for the release in `distroPackages`.
+   *
+   * @throws on a release without an entry in `distroPackages`
+   */
+  async installDistroPackages(
+    tool: string,
+    distroPackages: Record<string, string[] | undefined>,
+    ...common: string[]
+  ): Promise<void> {
+    const { versionCode } = await getDistro();
+    const packages = distroPackages[versionCode];
+    if (!packages) {
+      throw new Error(
+        `Tool '${tool}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+      );
+    }
+
+    await this.install(...common, ...packages);
   }
 
   /**

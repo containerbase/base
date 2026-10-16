@@ -1,12 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { AptService, EnvService, PathService } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
-import {
-  type SpawnOptions,
-  type SpawnResult,
-  getDistro,
-  spawn,
-} from '../utils/index.ts';
+import { type SpawnOptions, type SpawnResult, spawn } from '../utils/index.ts';
 
 /**
  * The setup a tool needs before it can be installed, split in two steps:
@@ -62,15 +57,11 @@ export abstract class BasePrepareService {
     distroPackages: Record<string, string[] | undefined>,
     ...common: string[]
   ): Promise<void> {
-    const { versionCode } = await getDistro();
-    const packages = distroPackages[versionCode];
-    if (!packages) {
-      throw new Error(
-        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
-      );
-    }
-
-    await this._aptSvc.install(...common, ...packages);
+    await this._aptSvc.installDistroPackages(
+      this.name,
+      distroPackages,
+      ...common,
+    );
   }
 
   /** Runs a command, by default in the temp folder. */

@@ -69,10 +69,15 @@ export abstract class PrebuildVersionResolver extends ToolVersionResolver {
   /** Resolves a missing version or `latest` to the latest prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.http.get(
-        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
-      );
+      return await this.latestVersion();
     }
     return version;
+  }
+
+  /** The version of the latest prebuild release. */
+  protected async latestVersion(): Promise<string> {
+    return await this.http.get(
+      `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
+    );
   }
 }

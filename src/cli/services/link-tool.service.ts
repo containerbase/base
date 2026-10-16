@@ -50,7 +50,8 @@ export class LinkToolService {
   /**
    * Writes the shell wrapper which puts a tool on the path. It loads the
    * containerbase env, initializes the tool on first use, sources the tool envs
-   * and finally executes the tool.
+   * and finally executes the tool. An existing wrapper or symlink is replaced,
+   * never written through.
    */
   async shellwrapper(
     tool: string,
@@ -102,14 +103,36 @@ export class LinkToolService {
     }
     content += ` "$@"\n`;
 
+    // a symlink left by `symlink()` would be followed and its target replaced
+    await fs.rm(tgt, { force: true });
     await fs.writeFile(tgt, content, { encoding: 'utf8' });
     await this.pathSvc.setOwner({ path: tgt });
   }
 
-  /** Removes a shell wrapper, if it exists. */
+  /**
+   * Links a tool binary into the global bin folder with a plain symlink
+   * instead of a shell wrapper, for binaries which need no containerbase env.
+   * An existing wrapper or link is replaced.
+   */
+  async symlink(
+    tool: string,
+    { name, srcDir }: Pick<ShellWrapperConfig, 'name' | 'srcDir'>,
+  ): Promise<void> {
+    const file = name ?? tool;
+    this._links.push(file);
+    const tgt = join(this.pathSvc.binDir, file);
+    await fs.rm(tgt, { force: true });
+    await fs.symlink(join(srcDir, file), tgt);
+  }
+
+  /**
+   * Removes a shell wrapper or symlink, if it exists, also a symlink whose
+   * target is already gone.
+   */
   async rm(name: string): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name);
-    if (await pathExists(tgt, 'file')) {
+    const stats = await fs.lstat(tgt).catch(() => null);
+    if (stats?.isFile() || stats?.isSymbolicLink()) {
       await fs.rm(tgt);
     }
   }
