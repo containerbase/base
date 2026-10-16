@@ -32,6 +32,7 @@ is merged or `main` is needed, and force-push it with `gh stack push` or
 All tooling runs through `pnpm`:
 
 - `pnpm install --frozen-lockfile`: install dependencies
+- `pnpm tool-versions`: download the embedded tool-versions data, the unit tests validate it and fail without it (`pnpm build` downloads it too)
 - `pnpm vitest run`: run the unit tests
 - `pnpm tsc --noEmit`: type check
 - `pnpm oxlint` and `pnpm oxlint-fix`: lint and fix lint findings
