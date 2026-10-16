@@ -74,6 +74,45 @@ describe('cli/services/path.service', () => {
     expect(await pathExists(rootPath('tmp/containerbase'), 'dir')).toBe(true);
   });
 
+  describe('with CONTAINERBASE_TMP_DIR', () => {
+    beforeEach(() => {
+      vi.stubEnv('CONTAINERBASE_TMP_DIR', rootPath('var/cache/containerbase'));
+    });
+
+    test('tmpDir uses the configured folder, cachePath the default one', () => {
+      expect(pathSvc.tmpDir).toBe(rootPath('var/cache/containerbase'));
+      expect(pathSvc.defaultTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(pathSvc.cachePath).toBe(rootPath('tmp/containerbase/cache'));
+    });
+
+    test('ensureBasePaths links the default folder', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+
+      await pathSvc.ensureBasePaths();
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+      expect(
+        await pathExists(
+          rootPath('var/cache/containerbase/tool.init.d'),
+          'dir',
+        ),
+      ).toBe(true);
+      expect(await pathExists(join(pathSvc.cachePath, '.config'), 'dir')).toBe(
+        true,
+      );
+    });
+
+    test('ensureBasePaths keeps an existing default folder', async () => {
+      await pathSvc.ensureBasePaths();
+
+      expect(
+        (await fs.lstat(rootPath('tmp/containerbase'))).isDirectory(),
+      ).toBe(true);
+    });
+  });
+
   test('ensureBasePaths: throws when the system is not initialized', async () => {
     await deleteAsync('var', { force: true, dot: true, cwd: rootPath() });
 

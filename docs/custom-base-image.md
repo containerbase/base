@@ -138,3 +138,25 @@ RUN install-tool git v2.30.0
 
 USER $USER_NAME
 ```
+
+## Custom temp directory
+
+Containerbase keeps the tool init state and the tool caches in `/tmp/containerbase`.
+The home folders link into it, eg. `~/.npm` to `/tmp/containerbase/cache/.npm`.
+The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing.
+
+You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.
+The home links keep pointing to `/tmp/containerbase`, which is then a symlink to the configured folder.
+The `docker-entrypoint.sh` and `containerbase-cli init tool all` create that symlink when it is missing.
+The entrypoint skips `init tool all` when the configured folder already exists.
+
+This helps when the rootfs persists but `/tmp` is empty on every boot, eg. in microVMs.
+Initialize the tools at image build time, so a boot only needs to create the symlink:
+
+```dockerfile
+ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
+RUN containerbase-cli init tool all
+```
+
+When the rootfs isn't reset between jobs, the tool caches and configs (`.npm`, `.m2`, `.npmrc`, …) in that folder carry over to the next job.
+Reset the rootfs per job or clean the folder yourself.

@@ -136,6 +136,21 @@ teardown() {
   assert [ "$(stat --format '%a' "${tmp_dir}/cache")" -eq 775 ]
   assert [ -d "${var_dir}/tool.prep.d" ]
   assert [ "$(stat --format '%a' "${var_dir}/tool.prep.d")" -eq 755 ]
+  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
+  assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
+}
+
+@test "setup directories with a custom tmp dir" {
+  local TEST_ROOT_USER=0 # root
+  local CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/var-cache"
+
+  run setup_directories
+  assert_success
+
+  assert [ -d "${CONTAINERBASE_TMP_DIR}/cache/.cache" ]
+  assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${CONTAINERBASE_TMP_DIR}" ]
+  assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
+  assert [ -d "${USER_HOME}/.cache" ]
 }
 
 @test "creates a folder with correct permissions" {

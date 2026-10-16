@@ -30,7 +30,10 @@ export TEMP_DIR=/tmp
 export CONTAINERBASE_DIR=/usr/local/containerbase
 
 export CONTAINERBASE_VAR_DIR=/var/lib/containerbase
-export CONTAINERBASE_TMP_DIR=/tmp/containerbase
+# defines the default containerbase temp directory, the home symlinks point to it
+export CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
+# defines the containerbase temp directory, the default one links to it when changed
+export CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR:-${CONTAINERBASE_DEFAULT_TMP_DIR}}
 
 # Used to find matching tool downloads.
 # `arch` is preinstalled on ubuntu.

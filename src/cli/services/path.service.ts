@@ -69,10 +69,19 @@ export class PathService {
   }
 
   /**
-   * Path to `/tmp/containerbase/cache`.
+   * Path to `/tmp/containerbase/cache`. It always uses the default temp
+   * folder, which links to a configured `CONTAINERBASE_TMP_DIR`, so the home
+   * symlinks pointing to it stay valid.
    */
   get cachePath(): string {
-    return join(this.tmpDir, 'cache');
+    return join(this.defaultTmpDir, 'cache');
+  }
+
+  /**
+   * Path to `/tmp/containerbase`, the default containerbase temp folder.
+   */
+  get defaultTmpDir(): string {
+    return join(this.envSvc.tmpDir, 'containerbase');
   }
 
   /**
@@ -104,10 +113,11 @@ export class PathService {
   }
 
   /**
-   * Path to `/tmp/containerbase`.
+   * Path to the containerbase temp folder, `CONTAINERBASE_TMP_DIR` or
+   * `/tmp/containerbase`.
    */
   get tmpDir(): string {
-    return join(this.envSvc.tmpDir, 'containerbase');
+    return this.envSvc.containerbaseTmpDir;
   }
 
   /**
@@ -218,6 +228,8 @@ export class PathService {
 
   /**
    * Creates the containerbase folders below the install, var and temp paths.
+   * A configured `CONTAINERBASE_TMP_DIR` gets linked from
+   * `/tmp/containerbase`, unless that path already exists.
    *
    * @throws when the image was not set up for containerbase
    */
@@ -235,6 +247,9 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.cache'));
     await this.createDir(join(this.tmpDir, 'cache', '.config'));
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
+    if (this.tmpDir !== this.defaultTmpDir) {
+      await this.createSymlink(this.tmpDir, this.defaultTmpDir);
+    }
   }
 
   /**

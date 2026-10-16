@@ -10,7 +10,13 @@ if [[ -n "${CONTAINERBASE_CLEANUP_PATH}" ]]; then
   containerbase-cli cleanup path "${CONTAINERBASE_CLEANUP_PATH}"
 fi
 
-if [[ ! -d "/tmp/containerbase" ]]; then
+tmp_dir="${CONTAINERBASE_TMP_DIR:-/tmp/containerbase}"
+if [[ "${tmp_dir}" != "/tmp/containerbase" && ! -e "/tmp/containerbase" && ! -L "/tmp/containerbase" ]]; then
+  # the home symlinks point to the default path, so link it to the configured one
+  ln -s "${tmp_dir}" /tmp/containerbase
+fi
+
+if [[ ! -d "${tmp_dir}" ]]; then
   # initialize all prepared tools
   containerbase-cli init tool all
 fi

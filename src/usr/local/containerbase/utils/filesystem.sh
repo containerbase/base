@@ -47,9 +47,9 @@ function create_versioned_tool_path () {
 # Will set up the general folder structure for the whole containerbase installation
 function setup_directories () {
   local install_dir
-  local cache_path
   install_dir=$(get_install_dir)
-  cache_path=$(get_cache_path)
+  # creates the cache folders in the configured tmp folder
+  get_cache_path > /dev/null
 
   # shellcheck disable=SC2174
   mkdir -p -m 775 "${install_dir}"
@@ -80,16 +80,25 @@ function setup_directories () {
   create_folder "$(get_tool_prep_path)" 755
 
   create_folder "$(get_containerbase_tmp_path)" 775
+  link_containerbase_tmp_path
 
   # symlink v2 tools bin and lib
   rm -rf "${BIN_DIR}" "${LIB_DIR}"
   ln -sf "${ROOT_DIR}/bin" "${BIN_DIR}"
   ln -sf "${ROOT_DIR}/lib" "${LIB_DIR}"
 
-  # symlink known user folders
-  ln -sf "${cache_path}/.config" "${USER_HOME}/.config"
-  ln -sf "${cache_path}/.local" "${USER_HOME}/.local"
-  ln -sf "${cache_path}/.cache" "${USER_HOME}/.cache"
+  # symlink known user folders to the default path, which links to a configured one
+  ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.config" "${USER_HOME}/.config"
+  ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.local" "${USER_HOME}/.local"
+  ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" "${USER_HOME}/.cache"
+}
+
+# Links the default tmp folder to a configured `CONTAINERBASE_TMP_DIR`,
+# unless the default path already exists
+function link_containerbase_tmp_path () {
+  if [[ "${CONTAINERBASE_TMP_DIR}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" && ! -e "${CONTAINERBASE_DEFAULT_TMP_DIR}" && ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
+    ln -s "${CONTAINERBASE_TMP_DIR}" "${CONTAINERBASE_DEFAULT_TMP_DIR}"
+  fi
 }
 
 # Creates the given folder path with root and user umask depending on the caller

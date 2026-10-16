@@ -1,6 +1,7 @@
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { env, geteuid } from 'node:process';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
 import { type Arch, logger } from '../utils/index.ts';
 
@@ -50,6 +51,15 @@ export class EnvService {
   /** The download cache folder from `CONTAINERBASE_CACHE_DIR`. */
   get cacheDir(): string | null {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
+  }
+
+  /**
+   * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
+   * `/tmp/containerbase` when unset or empty.
+   */
+  get containerbaseTmpDir(): string {
+    const dir = env.CONTAINERBASE_TMP_DIR;
+    return isNonEmptyString(dir) ? dir : join(this.tmpDir, 'containerbase');
   }
 
   /** The home folder of the current user, from `HOME`. */

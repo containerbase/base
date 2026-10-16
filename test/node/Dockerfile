@@ -618,6 +618,29 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: custom tmp dir
+#--------------------------------------
+FROM build AS testr
+
+USER root
+ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
+
+# init at build time into the configured folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  containerbase-cli init tool all; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  rm /var/cache/containerbase/tool.init.d/node
+
+# a boot with an empty /tmp only links the configured folder and skips init
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ ! -e /var/cache/containerbase/tool.init.d/node ]]; \
+  [[ -d $USER_HOME/.npm ]]
+
+#--------------------------------------
 # test: vp
 #--------------------------------------
 FROM build AS test-vp
@@ -659,6 +682,7 @@ COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
+COPY --from=testr /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy

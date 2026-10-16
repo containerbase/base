@@ -84,6 +84,25 @@ describe('cli/services/env.service', () => {
     expect(svc.cacheDir).toBeNull();
   });
 
+  describe('containerbaseTmpDir', () => {
+    test('defaults to tmp/containerbase', () => {
+      delete env.CONTAINERBASE_TMP_DIR;
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+    });
+
+    test('uses the default for an empty CONTAINERBASE_TMP_DIR', () => {
+      env.CONTAINERBASE_TMP_DIR = '';
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test('uses CONTAINERBASE_TMP_DIR', () => {
+      env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase';
+      expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+  });
+
   describe('rootDir', () => {
     test('uses test root', () => {
       expect(svc.rootDir).toBe(rootPath());
