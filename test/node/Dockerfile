@@ -628,7 +628,7 @@ ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
 # init at build time into the configured folder
 RUN set -ex; \
   rm -rf /tmp/containerbase; \
-  containerbase-cli init tool all; \
+  containerbase-cli init tool node; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
   rm /var/cache/containerbase/tool.init.d/node
 
