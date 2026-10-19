@@ -270,8 +270,7 @@ Creating a new `containerbase/<tool>-prebuild` repository needs a maintainer - i
 **Open an issue before doing any work on a tool in this category.**
 Once the prebuild repository exists and publishes releases, the install service is written exactly as in [Kind 2](#kind-2-an-upstream-prebuilt-binary), pointing at `https://github.com/containerbase/<tool>-prebuild/releases`.
 
-> [!IMPORTANT]
-> This will be further documented in the future for maintainers to follow.
+Maintainers find how to create the prebuild repository in [`new-prebuild-tool.md`](./new-prebuild-tool.md).
 
 ## Testing your change
 
