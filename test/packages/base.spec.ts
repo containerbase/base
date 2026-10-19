@@ -362,6 +362,32 @@ describe('packages/base', () => {
       url: 'https://containerbase.github.io/tool-versions/v1/tool.json',
       expected: false,
     },
+    {
+      name: 'a v1 path with a query',
+      url: 'https://example.com/v1/tool.schema.json?x=1',
+      expected: true,
+    },
+    {
+      name: 'a v1 path with a fragment',
+      url: 'https://example.com/v1/tool.schema.json#/definitions',
+      expected: true,
+    },
+    {
+      name: 'a plain http mirror',
+      url: 'http://localhost:8080/v1/tool.schema.json',
+      expected: true,
+    },
+    {
+      name: 'a v2 path with a v1 fragment',
+      url: 'https://example.com/v2/tool.schema.json#/v1/tool.schema.json',
+      expected: false,
+    },
+    {
+      name: 'a v2 path with a v1 query',
+      url: 'https://example.com/v2/tool.schema.json?x=/v1/tool.schema.json',
+      expected: false,
+    },
+    { name: 'an invalid url', url: 'not a url', expected: false },
     { name: 'no value', url: undefined, expected: false },
   ])('isToolVersionsFormat handles $name', ({ url, expected }) => {
     expect(isToolVersionsFormat(url)).toBe(expected);
