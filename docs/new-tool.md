@@ -329,10 +329,9 @@ The [`@containerbase/base`](https://www.npmjs.com/package/@containerbase/base) u
 Order:
 
 1. CLI change and release; the CLI falls back to the upstream lookup, never requires tool-versions
-1. tool-versions mapping
-1. next CLI build picks up the published files
+1. tool-versions mapping, the next tool-versions release contains the tool
+1. Renovate's weekly update of the pinned tool-versions release embeds it in the next Containerbase image
 
-Renovate reads these files with its `containerbase` datasource.
 To use the tool in Renovate: [wait for Renovate's Docker image](https://docs.renovatebot.com/docker-build-process/#build-process-flow), then add it to [`allToolConfig` in `lib/util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/util/exec/containerbase.ts).
 
 ## What am I able to do as a Contributor vs what do I need to wait for a maintainer to do?
