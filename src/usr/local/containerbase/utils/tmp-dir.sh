@@ -30,6 +30,11 @@ function containerbase_tmp_dir () {
   echo "${dir}"
 }
 
+# Whether the current user is root, a function so tests can override it.
+function is_containerbase_tmp_dir_root () {
+  [[ "${EUID}" -eq 0 ]]
+}
+
 # Creates the given temp directory and its parents, when it's missing. The
 # directory gets mode 775 and, when running as root, is owned by `USER_ID`,
 # like `set_file_owner` does. A link to a directory is accepted.
@@ -44,7 +49,7 @@ function create_containerbase_tmp_dir () {
     mkdir -p "${parent}" || return 1
   fi
   mkdir -m 775 "${dir}" || return 1
-  if [[ "${EUID}" -eq 0 && -n "${USER_ID}" ]]; then
+  if is_containerbase_tmp_dir_root && [[ -n "${USER_ID}" ]]; then
     chown "${USER_ID}" "${dir}" || return 1
   fi
 }
@@ -56,27 +61,28 @@ function merge_containerbase_tmp_dir () {
   local src=${1}
   local dst=${2}
   local entry
-  local name
+  local to
 
   for entry in "${src}"/* "${src}"/.[!.]* "${src}"/..?*; do
     if [[ ! -e "${entry}" && ! -L "${entry}" ]]; then
       continue
     fi
-    name=${entry##*/}
-    if [[ ! -e "${dst}/${name}" && ! -L "${dst}/${name}" ]]; then
-      mv "${entry}" "${dst}/${name}" || return 1
-    elif [[ -d "${entry}" && ! -L "${entry}" && -d "${dst}/${name}" && ! -L "${dst}/${name}" ]]; then
-      merge_containerbase_tmp_dir "${entry}" "${dst}/${name}" || return 1
+    to="${dst}/${entry##*/}"
+    if [[ ! -e "${to}" && ! -L "${to}" ]]; then
+      mv "${entry}" "${to}" || return 1
+    elif [[ -d "${entry}" && ! -L "${entry}" && -d "${to}" && ! -L "${to}" ]]; then
+      merge_containerbase_tmp_dir "${entry}" "${to}" || return 1
     fi
   done
 }
 
 # Links the default temp directory to the given one, `CONTAINERBASE_TMP_DIR` by
-# default. A link to another target is replaced. A folder, eg. from the base
-# image, is moved into the given one first, keeping entries which exist there,
-# and only removed when the whole move succeeded. An existing file is kept.
-# When the current user can't replace the link or folder, or the move fails,
-# warns and returns 1, so the caller keeps using the default directory.
+# default. A link to another target is replaced. As root, a folder, eg. from the
+# base image, is moved into the given one first, keeping entries which exist
+# there, and only removed when the whole move succeeded.
+# When the link can't be replaced, a folder exists as non-root, or the move
+# fails, warns and returns 1, so the caller keeps using the default directory.
+# Prints an error and returns 2 when the default path is a file.
 function link_containerbase_tmp_path () {
   local dir=${1:-${CONTAINERBASE_TMP_DIR}}
   local link=${CONTAINERBASE_DEFAULT_TMP_DIR}
@@ -98,8 +104,8 @@ function link_containerbase_tmp_path () {
     return 0
   fi
   if [[ -d "${link}" ]]; then
-    # removing it from the sticky `/tmp` would fail after moving its content
-    if [[ "${EUID}" -ne 0 && ! -O "${link}" ]] \
+    # removing it from the sticky `/tmp` needs root
+    if ! is_containerbase_tmp_dir_root \
       || ! create_containerbase_tmp_dir "${dir}" \
       || ! merge_containerbase_tmp_dir "${link}" "${dir}" \
       || ! rm -rf "${link}"; then
@@ -107,7 +113,8 @@ function link_containerbase_tmp_path () {
       return 1
     fi
   elif [[ -e "${link}" ]]; then
-    return 0
+    echo "${link} is a file, remove it" >&2
+    return 2
   fi
   ln -s "${dir}" "${link}"
 }

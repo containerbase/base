@@ -64,6 +64,13 @@ export class LinkToolService {
       : `${srcDir}/${name ?? tool}`;
 
     const envs = [...(extraToolEnvs ?? []), tool].map(tool2path);
+    // goes through the default temp folder, so a missing link to a configured
+    // `CONTAINERBASE_TMP_DIR` also triggers the init, which recreates the link
+    const initMarker = join(
+      this.pathSvc.defaultTmpDir,
+      'tool.init.d',
+      tool2path(tool),
+    );
     let content = fileContent`
         #!/bin/bash
 
@@ -71,7 +78,7 @@ export class LinkToolService {
           . ${this.pathSvc.envFile}
         fi
 
-        if [[ ! -f "${this.pathSvc.toolInitPath(tool)}" ]]; then
+        if [[ ! -f "${initMarker}" ]]; then
           # set logging to only warn and above to not interfere with tool output
           CONTAINERBASE_LOG_LEVEL=warn containerbase-cli init tool "${tool}"
         fi

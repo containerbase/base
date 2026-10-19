@@ -659,10 +659,17 @@ RUN set -ex; \
   docker-entrypoint.sh true; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
 
-# a non-root boot on a root owned default folder keeps using that folder
+# a tool wrapper without the entrypoint recreates a missing link
 RUN set -ex; \
   rm -rf /tmp/containerbase; \
-  mkdir -m 775 /tmp/containerbase
+  node --version; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
+# a non-root boot on a root owned default folder keeps using that folder without moving it
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 775 /tmp/containerbase; \
+  touch /tmp/containerbase/marker
 
 USER 12021
 
@@ -673,6 +680,8 @@ RUN set -ex; \
   [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
   containerbase-cli init tool node; \
   [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  [[ -f /tmp/containerbase/marker ]]; \
+  [[ ! -e /var/cache/containerbase/marker ]]; \
   [[ -f /tmp/containerbase/tool.init.d/node ]]
 
 #--------------------------------------

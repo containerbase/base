@@ -49,6 +49,12 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
   );
 }
 
+/** Whether the error is a missing permission, `EPERM` or `EACCES`. */
+function isPermissionError(err: unknown): boolean {
+  const { code } = err as NodeJS.ErrnoException;
+  return code === 'EPERM' || code === 'EACCES';
+}
+
 /**
  * Moves the entries of `src` into `dst`, merging folders and keeping the
  * entries which already exist in `dst`. Uses `mv` when renaming fails across
@@ -76,9 +82,6 @@ async function moveDirContents(src: string, dst: string): Promise<void> {
 export class PathService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
-
-  /** Set when `ensureTmpLink` couldn't switch to the configured folder. */
-  private _useDefaultTmpDir = false;
 
   /**
    * Path to `/tmp/containerbase/tool.init.d`.
@@ -154,13 +157,10 @@ export class PathService {
 
   /**
    * Path to the containerbase temp folder, `CONTAINERBASE_TMP_DIR` or
-   * `/tmp/containerbase`. The default one when `ensureTmpLink` couldn't switch
-   * to the configured one.
+   * `/tmp/containerbase`.
    */
   get tmpDir(): string {
-    return this._useDefaultTmpDir
-      ? this.defaultTmpDir
-      : this.envSvc.containerbaseTmpDir;
+    return this.envSvc.containerbaseTmpDir;
   }
 
   /**
@@ -295,52 +295,49 @@ export class PathService {
   /**
    * Creates a configured `CONTAINERBASE_TMP_DIR` and links
    * `/tmp/containerbase` to it, so writes to `cachePath` land there. A link
-   * to another target is replaced. A folder, eg. from the base image, is
-   * moved into the configured one first, keeping entries which exist there.
-   * An existing file is left as is. The configured folder may be a link to a
-   * folder.
+   * to another target is replaced. As root, a folder, eg. from the base image,
+   * is moved into the configured one first, keeping entries which exist there.
+   * The configured folder may be a link to a folder.
    *
-   * When the current user can't replace the link or folder, this run keeps
-   * using the default folder, see `tmpDir`.
+   * When the switch isn't possible, eg. as non-root with a folder at
+   * `/tmp/containerbase` or without write access to the configured folder,
+   * this run keeps using the default folder, see `keepDefaultTmpDir`.
    *
-   * @returns whether the configured folder is used
+   * @throws when `/tmp/containerbase` is a file
    */
-  async ensureTmpLink(): Promise<boolean> {
-    const tmpDir = this.envSvc.containerbaseTmpDir;
+  async ensureTmpLink(): Promise<void> {
+    const tmpDir = this.tmpDir;
     const link = this.defaultTmpDir;
-    if (this._useDefaultTmpDir) {
-      return false;
-    }
     if (tmpDir === link) {
-      return true;
+      return;
     }
     const stats = await fs.lstat(link).catch(() => null);
-    if (
-      stats?.isDirectory() &&
-      !this.envSvc.isRoot &&
-      stats.uid !== this.envSvc.uid
-    ) {
-      // removing it from the sticky `/tmp` would fail after moving its content
-      return this.keepDefaultTmpDir(tmpDir);
+    if (stats && !stats.isDirectory() && !stats.isSymbolicLink()) {
+      throw new Error(`${link} is a file, remove it`);
     }
-    if (!(await fs.stat(tmpDir).catch(() => null))?.isDirectory()) {
-      await fs.mkdir(dirname(tmpDir), { recursive: true });
-      await this.createDir(tmpDir);
+    if (stats?.isDirectory() && !this.envSvc.isRoot) {
+      // removing it from the sticky `/tmp` needs root
+      this.keepDefaultTmpDir(tmpDir);
+      return;
+    }
+    if (!(await this.prepareTmpDir(tmpDir))) {
+      this.keepDefaultTmpDir(tmpDir);
+      return;
     }
     if (stats?.isSymbolicLink()) {
       const target = await fs.readlink(link);
       if (target === tmpDir) {
-        return true;
+        return;
       }
       logger.debug({ link, target, tmpDir }, 'replacing stale tmp dir link');
       try {
         await fs.rm(link);
       } catch (err) {
-        const { code } = err as NodeJS.ErrnoException;
-        if (code === 'EPERM' || code === 'EACCES') {
-          return this.keepDefaultTmpDir(tmpDir);
+        if (!isPermissionError(err)) {
+          throw err;
         }
-        throw err;
+        this.keepDefaultTmpDir(tmpDir);
+        return;
       }
     } else if (stats?.isDirectory()) {
       logger.debug({ link, tmpDir }, 'moving tmp dir folder');
@@ -348,21 +345,40 @@ export class PathService {
       await fs.rm(link, { recursive: true, force: true });
     }
     await this.createSymlink(tmpDir, link);
-    return true;
+  }
+
+  /**
+   * Creates the configured temp folder when it's missing and checks that the
+   * current user can write it.
+   *
+   * @returns `false` when the current user may not create or write it
+   */
+  private async prepareTmpDir(tmpDir: string): Promise<boolean> {
+    try {
+      if (!(await fs.stat(tmpDir).catch(() => null))?.isDirectory()) {
+        await fs.mkdir(dirname(tmpDir), { recursive: true });
+        await this.createDir(tmpDir);
+      }
+      await fs.access(tmpDir, fs.constants.W_OK | fs.constants.X_OK);
+      return true;
+    } catch (err) {
+      if (!isPermissionError(err)) {
+        throw err;
+      }
+      return false;
+    }
   }
 
   /**
    * Warns that the default folder can't be switched to the configured one and
-   * keeps using the default folder for this run.
-   *
-   * @returns `false`, the configured folder isn't used
+   * keeps using the default folder for this run, also in child processes, by
+   * setting `CONTAINERBASE_TMP_DIR` to it.
    */
-  private keepDefaultTmpDir(tmpDir: string): false {
+  private keepDefaultTmpDir(tmpDir: string): void {
     logger.warn(
       `cannot switch ${this.defaultTmpDir} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
     );
-    this._useDefaultTmpDir = true;
-    return false;
+    env.CONTAINERBASE_TMP_DIR = this.defaultTmpDir;
   }
 
   /**

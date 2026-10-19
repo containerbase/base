@@ -18,14 +18,23 @@ tmp_dir=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}") || export CONTAINERB
 init_check="${CONTAINERBASE_DEFAULT_TMP_DIR}"
 if [[ "${tmp_dir}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
   # the home symlinks point to the default path, so link it to the configured one
-  if link_containerbase_tmp_path "${tmp_dir}"; then
-    # init creates `tool.init.d`, so an empty mounted folder still gets initialized
-    init_check="${tmp_dir}/tool.init.d"
-  else
-    # keep the default folder for this run, also in the commands started below
-    export CONTAINERBASE_TMP_DIR="${CONTAINERBASE_DEFAULT_TMP_DIR}"
-  fi
+  link_containerbase_tmp_path "${tmp_dir}"
+  case $? in
+    0)
+      # init creates `tool.init.d`, so an empty mounted folder still gets initialized
+      init_check="${tmp_dir}/tool.init.d"
+      ;;
+    1)
+      # keep the default folder for this run
+      tmp_dir="${CONTAINERBASE_DEFAULT_TMP_DIR}"
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
 fi
+# the normalized value for the commands started below, so they don't warn again
+export CONTAINERBASE_TMP_DIR="${tmp_dir}"
 
 if [[ ! -d "${init_check}" ]]; then
   # initialize all prepared tools

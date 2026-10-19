@@ -1,4 +1,4 @@
-# shellcheck disable=SC2034,SC2148,SC2155
+# shellcheck disable=SC2034,SC2148,SC2155,SC2329
 
 setup() {
   load "$BATS_SUPPORT_LOAD_PATH"
@@ -94,7 +94,19 @@ teardown() {
   assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${TEST_ROOT_DIR}/other" ]
 }
 
-@test "link_containerbase_tmp_path moves a default folder" {
+@test "link_containerbase_tmp_path keeps a default folder as non-root without moving it" {
+  is_containerbase_tmp_dir_root () { return 1; }
+  mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d"
+
+  run link_containerbase_tmp_path
+  assert_failure 1
+  assert_output "cannot switch ${CONTAINERBASE_DEFAULT_TMP_DIR} to ${CONTAINERBASE_TMP_DIR}, keeping the default folder; switch it at image build time as root"
+  assert [ -d "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d" ]
+  assert [ ! -e "${CONTAINERBASE_TMP_DIR}" ]
+}
+
+@test "link_containerbase_tmp_path moves a default folder as root" {
+  is_containerbase_tmp_dir_root () { return 0; }
   mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.npm" "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d" "${CONTAINERBASE_TMP_DIR}/cache"
   touch "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d/node"
   echo old > "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.npmrc"
@@ -109,6 +121,7 @@ teardown() {
 }
 
 @test "link_containerbase_tmp_path creates the configured folder with mode 775" {
+  is_containerbase_tmp_dir_root () { return 0; }
   mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d"
 
   run link_containerbase_tmp_path
@@ -121,6 +134,7 @@ teardown() {
   if [[ "${EUID}" -eq 0 ]]; then
     skip "root can always move the entries"
   fi
+  is_containerbase_tmp_dir_root () { return 0; }
   mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d" "${CONTAINERBASE_TMP_DIR}"
   chmod 555 "${CONTAINERBASE_TMP_DIR}"
 
@@ -132,11 +146,11 @@ teardown() {
   assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
 }
 
-@test "link_containerbase_tmp_path keeps a default file" {
+@test "link_containerbase_tmp_path fails for a default file" {
   touch "${CONTAINERBASE_DEFAULT_TMP_DIR}"
 
   run link_containerbase_tmp_path
-  assert_success
+  assert_failure 2
+  assert_output "${CONTAINERBASE_DEFAULT_TMP_DIR} is a file, remove it"
   assert [ -f "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
-  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
 }
