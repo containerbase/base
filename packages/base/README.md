@@ -55,6 +55,25 @@ import { ToolVersions } from '@containerbase/base/zod';
 import type { ToolVersions as ToolVersionsType } from '@containerbase/base';
 ```
 
+The format version the schemas describe is exported by both entry points, so a reader doesn't hardcode it:
+
+```ts
+import {
+  isToolVersionsFormat,
+  toolVersionsFormat,
+  toolVersionsFormatPath,
+} from '@containerbase/base';
+
+toolVersionsFormat; // 1
+toolVersionsFormatPath; // 'v1', the folder of the format relative to the site root
+isToolVersionsFormat(
+  'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+); // true
+isToolVersionsFormat(
+  'https://containerbase.github.io/tool-versions/v2/tool.schema.json',
+); // false
+```
+
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
 
 ## Contents
