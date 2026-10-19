@@ -158,12 +158,16 @@ teardown() {
   assert_output --partial "deprecated"
   assert_failure
 
-  FOO=1.2.3 check_version FOO
+  # set before the call: newer bash drops a variable assigned only for the
+  # function call, even when the function exports it
+  FOO=1.2.3
+  check_version FOO
   assert [ "${FOO}" = "1.2.3" ]
 
   unset FOO
 
-  FOO=v1.2.3 check_version FOO
+  FOO=v1.2.3
+  check_version FOO
   assert [ "${FOO}" = "1.2.3" ]
 }
 
