@@ -193,6 +193,21 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       );
     });
 
+    test('links a configured CONTAINERBASE_TMP_DIR before preparing', async () => {
+      vi.stubEnv('CONTAINERBASE_TMP_DIR', rootPath('var/cache/containerbase'));
+      await fs.rm(rootPath('tmp/containerbase'), { recursive: true });
+
+      try {
+        expect(await svc.prepare(['bun'])).toBeUndefined();
+        expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+          rootPath('var/cache/containerbase'),
+        );
+      } finally {
+        await fs.rm(rootPath('tmp/containerbase'));
+        await ensurePaths('tmp/containerbase/tool.init.d');
+      }
+    });
+
     test('prepares all tools', async () => {
       const spy = vi.spyOn(LegacyPrepareService.prototype, 'prepare');
 

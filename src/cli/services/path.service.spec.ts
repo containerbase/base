@@ -111,6 +111,28 @@ describe('cli/services/path.service', () => {
         (await fs.lstat(rootPath('tmp/containerbase'))).isDirectory(),
       ).toBe(true);
     });
+
+    test('ensureTmpLink creates the configured folder and the link', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+
+      await pathSvc.ensureTmpLink();
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+      await pathSvc.createDir(join(pathSvc.cachePath, '.npm'));
+      expect(
+        await pathExists(rootPath('var/cache/containerbase/cache/.npm'), 'dir'),
+      ).toBe(true);
+    });
+  });
+
+  test('ensureTmpLink does nothing for the default folder', async () => {
+    await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+
+    await pathSvc.ensureTmpLink();
+
+    expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
   });
 
   test('ensureBasePaths: throws when the system is not initialized', async () => {

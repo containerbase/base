@@ -2,6 +2,7 @@ import { sep } from 'node:path';
 import { env } from 'node:process';
 import { Container } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { logger } from '../utils/index.ts';
 import { EnvService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { rootPath } from '~test/path.ts';
@@ -99,6 +100,17 @@ describe('cli/services/env.service', () => {
     test('uses CONTAINERBASE_TMP_DIR', () => {
       env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase';
       expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test('ignores a relative CONTAINERBASE_TMP_DIR with a single warning', () => {
+      env.CONTAINERBASE_TMP_DIR = 'var/cache/containerbase';
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { dir: 'var/cache/containerbase' },
+        'Ignoring relative CONTAINERBASE_TMP_DIR, using the default',
+      );
       delete env.CONTAINERBASE_TMP_DIR;
     });
   });

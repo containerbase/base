@@ -146,15 +146,25 @@ The home folders link into it, eg. `~/.npm` to `/tmp/containerbase/cache/.npm`.
 The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing.
 
 You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.
+The path must be absolute, a relative path is ignored with a warning.
 The home links keep pointing to `/tmp/containerbase`, which is then a symlink to the configured folder.
-The `docker-entrypoint.sh` and `containerbase-cli init tool all` create that symlink when it is missing.
-The entrypoint skips `init tool all` when the configured folder already exists.
+The `docker-entrypoint.sh` and `containerbase-cli` create that symlink when it is missing.
+An existing `/tmp/containerbase` folder is kept and not moved.
+The entrypoint skips `init tool all` when the configured folder already has a `tool.init.d` folder.
+
+Set `CONTAINERBASE_TMP_DIR` before the first tool is prepared or installed, eg. right after `FROM`.
 
 This helps when the rootfs persists but `/tmp` is empty on every boot, eg. in microVMs.
 Initialize the tools at image build time, so a boot only needs to create the symlink:
 
 ```dockerfile
+FROM containerbase/base
+
 ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
+
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 24.22.0
+
 RUN containerbase-cli init tool all
 ```
 

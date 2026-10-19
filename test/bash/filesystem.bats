@@ -140,6 +140,14 @@ teardown() {
   assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
 }
 
+@test "ignores a relative tmp dir" {
+  CONTAINERBASE_TMP_DIR=relative/tmp \
+  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
+  assert_success
+  assert_line "Ignoring relative CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
+  assert_line "tmp=/tmp/containerbase"
+}
+
 @test "setup directories with a custom tmp dir" {
   local TEST_ROOT_USER=0 # root
   local CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/var-cache"

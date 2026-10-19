@@ -11,12 +11,22 @@ if [[ -n "${CONTAINERBASE_CLEANUP_PATH}" ]]; then
 fi
 
 tmp_dir="${CONTAINERBASE_TMP_DIR:-/tmp/containerbase}"
-if [[ "${tmp_dir}" != "/tmp/containerbase" && ! -e "/tmp/containerbase" && ! -L "/tmp/containerbase" ]]; then
-  # the home symlinks point to the default path, so link it to the configured one
-  ln -s "${tmp_dir}" /tmp/containerbase
+if [[ "${tmp_dir}" != /* ]]; then
+  echo "Ignoring relative CONTAINERBASE_TMP_DIR=${tmp_dir}, using /tmp/containerbase" >&2
+  tmp_dir=/tmp/containerbase
 fi
 
-if [[ ! -d "${tmp_dir}" ]]; then
+init_check=/tmp/containerbase
+if [[ "${tmp_dir}" != "/tmp/containerbase" ]]; then
+  if [[ ! -e "/tmp/containerbase" && ! -L "/tmp/containerbase" ]]; then
+    # the home symlinks point to the default path, so link it to the configured one
+    ln -s "${tmp_dir}" /tmp/containerbase
+  fi
+  # init creates `tool.init.d`, so an empty mounted folder still gets initialized
+  init_check="${tmp_dir}/tool.init.d"
+fi
+
+if [[ ! -d "${init_check}" ]]; then
   # initialize all prepared tools
   containerbase-cli init tool all
 fi

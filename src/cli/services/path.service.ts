@@ -227,9 +227,8 @@ export class PathService {
   }
 
   /**
-   * Creates the containerbase folders below the install, var and temp paths.
-   * A configured `CONTAINERBASE_TMP_DIR` gets linked from
-   * `/tmp/containerbase`, unless that path already exists.
+   * Creates the containerbase folders below the install, var and temp paths,
+   * and the link to a configured `CONTAINERBASE_TMP_DIR`, see `ensureTmpLink`.
    *
    * @throws when the image was not set up for containerbase
    */
@@ -247,9 +246,20 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.cache'));
     await this.createDir(join(this.tmpDir, 'cache', '.config'));
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
-    if (this.tmpDir !== this.defaultTmpDir) {
-      await this.createSymlink(this.tmpDir, this.defaultTmpDir);
+    await this.ensureTmpLink();
+  }
+
+  /**
+   * Creates a configured `CONTAINERBASE_TMP_DIR` and links
+   * `/tmp/containerbase` to it, so writes to `cachePath` land there. An
+   * existing `/tmp/containerbase` is left as is.
+   */
+  async ensureTmpLink(): Promise<void> {
+    if (this.tmpDir === this.defaultTmpDir) {
+      return;
     }
+    await this.createDir(this.tmpDir);
+    await this.createSymlink(this.tmpDir, this.defaultTmpDir);
   }
 
   /**

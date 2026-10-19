@@ -33,6 +33,11 @@ export CONTAINERBASE_VAR_DIR=/var/lib/containerbase
 # defines the default containerbase temp directory, the home symlinks point to it
 export CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
 # defines the containerbase temp directory, the default one links to it when changed
+# a relative path is ignored
+if [[ -n "${CONTAINERBASE_TMP_DIR}" && "${CONTAINERBASE_TMP_DIR}" != /* ]]; then
+  echo "Ignoring relative CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using ${CONTAINERBASE_DEFAULT_TMP_DIR}" >&2
+  CONTAINERBASE_TMP_DIR=
+fi
 export CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR:-${CONTAINERBASE_DEFAULT_TMP_DIR}}
 
 # Used to find matching tool downloads.
