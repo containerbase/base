@@ -272,6 +272,51 @@ describe('cli/services/path.service', () => {
       expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
     });
 
+    test.each(['EACCES', 'EEXIST'])(
+      'ensureTmpLink keeps the default folder on %s from creating the configured folder itself',
+      async (code) => {
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        await ensurePaths('var/cache');
+        const { mkdir } = fs;
+        vi.spyOn(fs, 'mkdir').mockImplementation(async (path, options) => {
+          if (path === rootPath('var/cache/containerbase')) {
+            throw Object.assign(new Error(code), { code });
+          }
+          return await mkdir(path, options);
+        });
+
+        await pathSvc.ensureTmpLink();
+
+        expectDefaultTmpDir();
+        expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
+      },
+    );
+
+    test('ensureTmpLink rejects a configured folder resolving to the default one', async () => {
+      asRoot();
+      await ensurePaths('var/cache');
+      await writeFile(rootPath('tmp/containerbase/tool.init.d/node'), '');
+      await fs.symlink(
+        rootPath('tmp/containerbase'),
+        rootPath('var/cache/containerbase'),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expectDefaultTmpDir();
+      const stats = await fs.lstat(rootPath('tmp/containerbase'));
+      expect(stats.isDirectory()).toBe(true);
+      expect(
+        await pathExists(
+          rootPath('tmp/containerbase/tool.init.d/node'),
+          'file',
+        ),
+      ).toBe(true);
+    });
+
     test('ensureTmpLink keeps the default folder when the configured one is not writable', async () => {
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
       await ensurePaths('var/cache/containerbase');

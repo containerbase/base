@@ -643,6 +643,15 @@ RUN set -ex; \
   [[ ! -e /var/cache/containerbase/tool.init.d/node ]]; \
   [[ -d $USER_HOME/.npm ]]
 
+# the fast path also takes a value with a trailing slash and keeps it
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/containerbase/ docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == "tmp=/var/cache/containerbase/" ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ ! -e /var/cache/containerbase/tool.init.d/node ]]
+
 # a boot with an empty mounted folder links and initializes it
 RUN set -ex; \
   find /var/cache/containerbase -mindepth 1 -delete; \

@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
@@ -335,7 +335,10 @@ export class PathService {
       await this.keepDefaultTmpDir(tmpDir);
       return;
     }
-    if (!(await this.prepareTmpDir(tmpDir))) {
+    if (
+      !(await this.prepareTmpDir(tmpDir)) ||
+      (await this.resolvesIntoTmp(tmpDir))
+    ) {
       await this.keepDefaultTmpDir(tmpDir);
       return;
     }
@@ -394,6 +397,19 @@ export class PathService {
       logger.debug({ err, tmpDir }, 'configured tmp dir is not usable');
       return false;
     }
+  }
+
+  /**
+   * Whether the configured temp folder resolves to `/tmp` or below it, eg. a
+   * link to `/tmp/containerbase`. Moving the default folder into it or linking
+   * it would lose the content or create a link cycle.
+   */
+  private async resolvesIntoTmp(tmpDir: string): Promise<boolean> {
+    const rel = relative(
+      await fs.realpath(this.envSvc.tmpDir),
+      await fs.realpath(tmpDir),
+    );
+    return rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
   }
 
   /**
