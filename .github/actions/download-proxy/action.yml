@@ -18,17 +18,8 @@ runs:
         fi
         sudo mkdir -p /etc/containerbase-cdn /var/cache/containerbase-cdn /var/log/containerbase-cdn
         sudo cp "${ACTION_PATH}/nginx.conf" "${ACTION_PATH}/allowed-hosts.map" /etc/containerbase-cdn/
-        # the upstream groups resolve the registries on start, so retry a
-        # short DNS failure instead of running the job without the proxy
-        for attempt in 1 2 3; do
-          if sudo nginx -t -c /etc/containerbase-cdn/nginx.conf && sudo nginx -c /etc/containerbase-cdn/nginx.conf; then
-            break
-          fi
-          if [[ "${attempt}" == 3 ]]; then
-            exit 1
-          fi
-          sleep 5
-        done
+        sudo nginx -t -c /etc/containerbase-cdn/nginx.conf
+        sudo nginx -c /etc/containerbase-cdn/nginx.conf
         {
           echo "CONTAINERBASE_CDN=http://host.docker.internal:8099"
           echo "CONTAINERBASE_CDN_NPM=true"
