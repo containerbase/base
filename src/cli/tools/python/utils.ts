@@ -2,7 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { env as penv } from 'node:process';
 import { major, minor, satisfies, valid } from '@renovatebot/pep440';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+} from '@sindresorhus/is';
 import { execa } from 'execa';
 import { parse as parseIni } from 'ini';
 import { inject, injectable } from 'inversify';
@@ -14,7 +17,8 @@ const defaultPipRegistry = 'https://pypi.org/simple/';
 
 /**
  * The env for the configured pip index: `PIP_INDEX_URL` when the cdn or a url
- * replacement changes the default index, otherwise empty.
+ * replacement changes the default index, otherwise empty. A plain http index
+ * also adds its host to `PIP_TRUSTED_HOST`, as pip refuses it otherwise.
  */
 export function pipIndexEnv(envSvc: EnvService): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
@@ -25,6 +29,17 @@ export function pipIndexEnv(envSvc: EnvService): NodeJS.ProcessEnv {
   );
   if (pipIndex !== defaultPipRegistry) {
     env.PIP_INDEX_URL = pipIndex;
+    const url = URL.parse(pipIndex);
+    if (url?.protocol === 'http:') {
+      // pip takes a space separated list, keep the configured hosts
+      const hosts: string[] = (penv.PIP_TRUSTED_HOST ?? '')
+        .split(/\s+/)
+        .filter(isNonEmptyString);
+      if (!hosts.includes(url.host)) {
+        hosts.push(url.host);
+      }
+      env.PIP_TRUSTED_HOST = hosts.join(' ');
+    }
   }
 
   return env;

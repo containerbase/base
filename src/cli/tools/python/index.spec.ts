@@ -279,19 +279,42 @@ describe('cli/tools/python/index', () => {
       );
     });
 
-    test.each([
-      { cdnPip: 'true', index: 'https://cdn.example.com/pypi.org/simple/' },
-      { cdnPip: undefined, index: undefined },
+    test.each<{
+      cdn: string;
+      cdnPip: string | undefined;
+      version: string;
+      pipEnv: NodeJS.ProcessEnv;
+    }>([
+      {
+        cdn: 'https://cdn.example.com',
+        cdnPip: 'true',
+        version: '3.13.1',
+        pipEnv: { PIP_INDEX_URL: 'https://cdn.example.com/pypi.org/simple/' },
+      },
+      {
+        cdn: 'http://cdn.example.com:8099',
+        cdnPip: 'true',
+        version: '3.13.3',
+        pipEnv: {
+          PIP_INDEX_URL: 'http://cdn.example.com:8099/pypi.org/simple/',
+          PIP_TRUSTED_HOST: 'cdn.example.com:8099',
+        },
+      },
+      {
+        cdn: 'https://cdn.example.com',
+        cdnPip: undefined,
+        version: '3.13.2',
+        pipEnv: {},
+      },
     ])(
-      'install: with a cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
-      async ({ cdnPip, index }) => {
-        vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+      'install: with cdn $cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
+      async ({ cdn, cdnPip, version, pipEnv }) => {
+        vi.stubEnv('CONTAINERBASE_CDN', `${cdn}/`);
         vi.stubEnv('CONTAINERBASE_CDN_PIP', cdnPip);
-        const version = cdnPip ? '3.13.1' : '3.13.2';
         const { svc, pathSvc } = await toolContext(PythonInstallService);
         // the prebuild is downloaded through the cdn too
         const path = `/github.com${prebuildPath(version, 'jammy', 'x86_64')}`;
-        scope('https://cdn.example.com')
+        scope(cdn)
           .get(`${path}.sha512`)
           .reply(200, `${checksum(archive, 'sha512')}\n`)
           .get(path)
@@ -312,7 +335,7 @@ describe('cli/tools/python/index', () => {
             env: {
               PIP_ROOT_USER_ACTION: 'ignore',
               PIP_USE_PEP517: 'true',
-              ...(index && { PIP_INDEX_URL: index }),
+              ...pipEnv,
             },
           }),
         );
