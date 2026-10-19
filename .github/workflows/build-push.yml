@@ -8,9 +8,8 @@ on:
       - maint/**
   merge_group:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref_name || github.run_number }}
-  cancel-in-progress: true
+# no workflow concurrency: it would also cancel a release that already started,
+# the `cancel-older` job cancels the older runs of a branch instead
 
 permissions:
   contents: read
@@ -25,6 +24,40 @@ env:
   APT_HTTP_PROXY: http://host.docker.internal:8000
 
 jobs:
+  # semantic-release refuses to release a commit that isn't the branch head, so
+  # the newest push cancels the older runs of its branch whose release can't
+  # have started yet; a release that is already running is never interrupted
+  cancel-older:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel older runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          runs=$(gh run list --workflow build-push.yml --branch "${BRANCH}" --event push \
+            --json databaseId,status \
+            --jq ".[] | select(.status != \"completed\" and .databaseId < ${RUN_ID}) | .databaseId")
+          for id in ${runs}; do
+            # the release needs the whole build, so it can only have started once
+            # `test-success` completed; the release takes minutes before it
+            # publishes anything, so cancelling right before that is harmless
+            done_jobs=$(gh run view "${id}" --json jobs \
+              --jq '.jobs[] | select(.name == "build / test-success" and .status == "completed") | .name')
+            if [[ -n "${done_jobs}" ]]; then
+              echo "Keeping run ${id}, its release may have started"
+              continue
+            fi
+            echo "Cancelling older run ${id}"
+            gh run cancel "${id}" || echo "Run ${id} already finished"
+          done
+
   build:
     uses: ./.github/workflows/build.yml
     permissions:
