@@ -9,24 +9,35 @@
 set -e
 
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-logs="$(mktemp -d)"
+# nginx takes over the cache folder, so it lives in a folder of ours to be
+# removable
+tmp="$(mktemp -d)"
+logs="${tmp}/logs"
+cache="${tmp}/cache"
 name=containerbase-cdn-test
 proxy=http://127.0.0.1:8099
 failed=0
 
-# removes the container and the log folder
+# makes the cache files of the nginx workers readable and removable here
+open_cache() {
+  docker exec "${name}" chmod -R a+rwX /var/cache/containerbase-cdn > /dev/null 2>&1 || true
+}
+
+# removes the container, the log and the cache folder
 # shellcheck disable=SC2329 # called by the EXIT trap
 cleanup() {
+  open_cache
   docker rm -f "${name}" > /dev/null 2>&1 || true
-  rm -rf "${logs}"
+  rm -rf "${tmp}"
 }
 trap cleanup EXIT
 
-# the nginx image runs as root, so the log folder must be writable for it
-chmod 777 "${logs}"
+# the nginx image runs as root, so the folders must be writable for it
+mkdir "${logs}" "${cache}"
+chmod 777 "${logs}" "${cache}"
 
 docker run -d --name "${name}" --network host \
-  --tmpfs /var/cache/containerbase-cdn \
+  -v "${cache}:/var/cache/containerbase-cdn" \
   -v "${logs}:/var/log/containerbase-cdn" \
   -v "${dir}:/etc/containerbase-cdn:ro" \
   nginx:stable nginx -c /etc/containerbase-cdn/nginx.conf -g "daemon off;" > /dev/null
@@ -112,6 +123,7 @@ check github.com/nubjs/nub/releases/download/v0.0.0-missing/nub-linux-x64.tar.gz
 check example.com/ 403
 
 echo ""
-"${dir}/stats.sh" "${logs}/access.log"
+open_cache
+"${dir}/stats.sh" "${logs}/access.log" "${cache}"
 
 exit "${failed}"
