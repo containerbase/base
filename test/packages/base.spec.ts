@@ -211,6 +211,23 @@ describe('packages/base', () => {
     expect(parsed.distroMinVersion).toEqual({ resolute: '2.0.0' });
   });
 
+  test('ToolVersion keeps the constraints', () => {
+    const constraints = { node: '>=20.17.0' };
+
+    expect(
+      schemas.ToolVersion.parse({ version: '1.0.0', constraints }),
+    ).toEqual({ version: '1.0.0', constraints });
+  });
+
+  test.each([
+    { name: 'an empty key', constraints: { '': '>=20.17.0' } },
+    { name: 'an empty value', constraints: { node: '' } },
+  ])('ToolVersion rejects $name in the constraints', ({ constraints }) => {
+    expect(
+      schemas.ToolVersion.safeParse({ version: '1.0.0', constraints }).success,
+    ).toBe(false);
+  });
+
   test('VersionFiles parses a <tool>/<version>.json file', () => {
     expect(
       schemas.VersionFiles.safeParse({
