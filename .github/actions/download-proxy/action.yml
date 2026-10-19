@@ -1,5 +1,5 @@
 name: 'Download proxy'
-description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN'
+description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN, also for npm and gem installs'
 
 runs:
   using: 'composite'
@@ -20,7 +20,11 @@ runs:
         sudo cp "${ACTION_PATH}/nginx.conf" "${ACTION_PATH}/allowed-hosts.map" /etc/containerbase-cdn/
         sudo nginx -t -c /etc/containerbase-cdn/nginx.conf
         sudo nginx -c /etc/containerbase-cdn/nginx.conf
-        echo "CONTAINERBASE_CDN=http://host.docker.internal:8099" >> "${GITHUB_ENV}"
+        {
+          echo "CONTAINERBASE_CDN=http://host.docker.internal:8099"
+          echo "CONTAINERBASE_CDN_NPM=true"
+          echo "CONTAINERBASE_CDN_GEM=true"
+        } >> "${GITHUB_ENV}"
         echo "::endgroup::"
 
     - name: Check download proxy

@@ -14,6 +14,8 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_CDN_GEM
+ARG CONTAINERBASE_CDN_NPM
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
@@ -28,6 +30,8 @@ RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_CDN_GEM
+ARG CONTAINERBASE_CDN_NPM
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
@@ -520,6 +524,7 @@ ENV URL_REPLACE_0_FROM=https://registry.npmjs.org/
 ENV URL_REPLACE_0_TO=https://registry.yarnpkg.com/
 # no cdn, it is applied before the url replacements and would bypass them
 ENV CONTAINERBASE_CDN=
+ENV CONTAINERBASE_CDN_NPM=
 
 RUN install-tool pnpm
 RUN install-tool yarn
