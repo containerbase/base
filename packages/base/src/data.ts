@@ -8,6 +8,7 @@ export const tools = {
   'android-sdk-cmdline-tools': { parent: 'java' },
   apko: {},
   apm: {},
+  aube: {},
   bazelisk: {},
   bower: { type: 'npm', parent: 'node', deprecated: true },
   buf: {},

@@ -62,6 +62,7 @@
       "matchDepNames": [
         "apko",
         "apm",
+        "aube",
         "bazelisk",
         "buf",
         "buildx",
@@ -121,6 +122,7 @@
       "matchDepNames": [
         "apko",
         "apm",
+        "aube",
         "bazelisk",
         "buf",
         "buildx",
