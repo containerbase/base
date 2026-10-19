@@ -1,6 +1,9 @@
 {
   "name": "containerbase-aube-test",
   "private": true,
+  "scripts": {
+    "postinstall": "touch postinstall-ran"
+  },
   "dependencies": {
     "is-number": "7.0.0"
   }

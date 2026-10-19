@@ -80,9 +80,16 @@ COPY --chown=12021:0 test/node/test/aube /tmp/aube
 
 USER 12021
 
-RUN set -ex; cd /tmp/aube; aube install; test -f node_modules/is-number/index.js
+RUN set -ex; cd /tmp/aube; \
+  aube install; \
+  test -f node_modules/is-number/index.js; \
+  test -f postinstall-ran
 
-RUN set -ex; cd /tmp/aube; rm -rf node_modules; aube install --ignore-scripts; test -f node_modules/is-number/index.js
+RUN set -ex; cd /tmp/aube; \
+  rm -rf node_modules postinstall-ran; \
+  aube install --ignore-scripts; \
+  test -f node_modules/is-number/index.js; \
+  test ! -e postinstall-ran
 
 #--------------------------------------
 # Image: renovate

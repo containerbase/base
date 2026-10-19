@@ -133,9 +133,16 @@ FROM build AS test-aube
 # renovate: datasource=github-releases packageName=jdx/aube
 RUN install-tool aube 1.41.0
 
-RUN set -ex; cd aube; aube install; test -f node_modules/is-number/index.js
+RUN set -ex; cd aube; \
+  aube install; \
+  test -f node_modules/is-number/index.js; \
+  test -f postinstall-ran
 
-RUN set -ex; cd aube; rm -rf node_modules; aube install --ignore-scripts; test -f node_modules/is-number/index.js
+RUN set -ex; cd aube; \
+  rm -rf node_modules postinstall-ran; \
+  aube install --ignore-scripts; \
+  test -f node_modules/is-number/index.js; \
+  test ! -e postinstall-ran
 
 #--------------------------------------
 # test: node 20
