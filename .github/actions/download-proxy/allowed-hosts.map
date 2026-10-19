@@ -1,5 +1,6 @@
 # Hosts the download proxy may fetch from: the tool download and lookup hosts
-# from docs/custom-registries.md, plus the hosts their downloads redirect to.
+# from docs/custom-registries.md, plus the hosts their downloads redirect to
+# and the file host the pypi index links to.
 api.adoptium.net 1;
 api.nuget.org 1;
 builds.dotnet.microsoft.com 1;
@@ -12,6 +13,7 @@ download.swift.org 1;
 downloads.gradle.org 1;
 downloads.haskell.org 1;
 downloads.lightbend.com 1;
+files.pythonhosted.org 1;
 get.helm.sh 1;
 github.com 1;
 go.dev 1;
