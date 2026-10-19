@@ -55,6 +55,12 @@ export interface ToolVersion {
    * `<tool>/<version>.json` ones.
    */
   files?: ToolFile[];
+  /**
+   * The runtime constraint of this version per parent tool, like
+   * `{ node: '>=20.17.0' }`, as the raw string in the registry's syntax, only
+   * present when the registry has one.
+   */
+  constraints?: Record<string, string>;
 }
 
 /**
