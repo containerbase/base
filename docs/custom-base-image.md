@@ -149,3 +149,8 @@ To stay compatible with images built on Ubuntu's git, it also:
 
 Both go away in the next major release, see [#7821](https://github.com/containerbase/base/issues/7821) and [#7822](https://github.com/containerbase/base/issues/7822).
 If your image needs any of these packages, install them yourself, e.g. `install-apt perl git-man libcurl3-gnutls` on jammy or `install-apt perl git-man libcurl3t64-gnutls` on noble and newer.
+
+It also installs an empty `containerbase-git` package, which provides `git` in the installed version to apt.
+So apt packages depending on git, like Ubuntu's `git-lfs` or `tig`, use the prebuild and don't pull in Ubuntu's git.
+An explicit `install-apt git` and git add-ons like `git-svn` still install Ubuntu's git like before, the containerbase git stays first on the `PATH`.
+Blocking Ubuntu's git follows in the next major release, see [#7779](https://github.com/containerbase/base/issues/7779).
