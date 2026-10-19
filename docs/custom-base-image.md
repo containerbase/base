@@ -146,7 +146,7 @@ The home folders link into it, eg. `~/.npm` to `/tmp/containerbase/cache/.npm`.
 The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing.
 
 You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.
-The path must be absolute, a relative path is ignored with a warning.
+The path must be absolute, a relative path or `/` is ignored with a warning, trailing slashes are dropped.
 The home links keep pointing to `/tmp/containerbase`, which is then a symlink to the configured folder.
 The `docker-entrypoint.sh` and `containerbase-cli` create that symlink when it is missing.
 An existing `/tmp/containerbase` folder is kept and not moved.

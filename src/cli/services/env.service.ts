@@ -1,5 +1,5 @@
 import { arch } from 'node:os';
-import { isAbsolute, join } from 'node:path';
+import { isAbsolute, join, resolve, sep } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
@@ -21,7 +21,7 @@ export class EnvService {
   private uid: number;
   private replacements: Replacements | undefined;
   private ignoredTools: Set<string> | undefined;
-  private relativeTmpDirWarned = false;
+  private invalidTmpDirWarned = false;
 
   /**
    * Reads the effective user id and maps the node architecture to `amd64` or
@@ -56,21 +56,23 @@ export class EnvService {
 
   /**
    * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
-   * `/tmp/containerbase` when unset or empty. A relative path is ignored with
-   * a warning, which is logged once.
+   * `/tmp/containerbase` when unset or empty. The path is normalized, eg.
+   * without trailing slashes. A relative path or `/` is ignored with a
+   * warning, which is logged once.
    */
   get containerbaseTmpDir(): string {
     const dir = env.CONTAINERBASE_TMP_DIR;
     if (isNonEmptyString(dir)) {
-      if (isAbsolute(dir)) {
-        return dir;
+      const resolved = resolve(dir);
+      if (isAbsolute(dir) && resolved !== sep) {
+        return resolved;
       }
-      if (!this.relativeTmpDirWarned) {
+      if (!this.invalidTmpDirWarned) {
         logger.warn(
           { dir },
-          'Ignoring relative CONTAINERBASE_TMP_DIR, using the default',
+          'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
         );
-        this.relativeTmpDirWarned = true;
+        this.invalidTmpDirWarned = true;
       }
     }
     return join(this.tmpDir, 'containerbase');

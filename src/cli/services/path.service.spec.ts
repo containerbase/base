@@ -127,6 +127,17 @@ describe('cli/services/path.service', () => {
     });
   });
 
+  test('ensureTmpLink does nothing for the default folder with a trailing slash', async () => {
+    vi.stubEnv('CONTAINERBASE_TMP_DIR', `${rootPath('tmp/containerbase')}/`);
+
+    await pathSvc.ensureTmpLink();
+
+    expect(pathSvc.tmpDir).toBe(pathSvc.defaultTmpDir);
+    expect((await fs.lstat(rootPath('tmp/containerbase'))).isDirectory()).toBe(
+      true,
+    );
+  });
+
   test('ensureTmpLink does nothing for the default folder', async () => {
     await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
 

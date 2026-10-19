@@ -109,7 +109,23 @@ describe('cli/services/env.service', () => {
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
         { dir: 'var/cache/containerbase' },
-        'Ignoring relative CONTAINERBASE_TMP_DIR, using the default',
+        'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
+      );
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test('drops trailing slashes', () => {
+      env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase//';
+      expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test('ignores / with a warning', () => {
+      env.CONTAINERBASE_TMP_DIR = '//';
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { dir: '//' },
+        'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
       delete env.CONTAINERBASE_TMP_DIR;
     });

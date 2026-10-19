@@ -144,8 +144,23 @@ teardown() {
   CONTAINERBASE_TMP_DIR=relative/tmp \
   run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
   assert_success
-  assert_line "Ignoring relative CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
+  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
   assert_line "tmp=/tmp/containerbase"
+}
+
+@test "ignores / as tmp dir" {
+  CONTAINERBASE_TMP_DIR=// \
+  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
+  assert_success
+  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=//, using /tmp/containerbase"
+  assert_line "tmp=/tmp/containerbase"
+}
+
+@test "drops trailing slashes from the tmp dir" {
+  CONTAINERBASE_TMP_DIR=/var/cache/containerbase// \
+  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
+  assert_success
+  assert_output "tmp=/var/cache/containerbase"
 }
 
 @test "setup directories with a custom tmp dir" {

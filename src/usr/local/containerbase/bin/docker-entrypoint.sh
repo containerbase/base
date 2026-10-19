@@ -10,9 +10,12 @@ if [[ -n "${CONTAINERBASE_CLEANUP_PATH}" ]]; then
   containerbase-cli cleanup path "${CONTAINERBASE_CLEANUP_PATH}"
 fi
 
-tmp_dir="${CONTAINERBASE_TMP_DIR:-/tmp/containerbase}"
+# trailing slashes are dropped, a relative path or `/` is ignored
+tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
+if [[ -n "${CONTAINERBASE_TMP_DIR}" && "${tmp_dir}" != /* ]]; then
+  echo "Ignoring invalid CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using /tmp/containerbase" >&2
+fi
 if [[ "${tmp_dir}" != /* ]]; then
-  echo "Ignoring relative CONTAINERBASE_TMP_DIR=${tmp_dir}, using /tmp/containerbase" >&2
   tmp_dir=/tmp/containerbase
 fi
 
