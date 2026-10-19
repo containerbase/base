@@ -156,6 +156,24 @@ teardown() {
   assert_line "tmp=/tmp/containerbase"
 }
 
+@test "ignores a tmp dir inside the default one" {
+  CONTAINERBASE_TMP_DIR=/tmp/containerbase/persist \
+  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
+  assert_success
+  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=/tmp/containerbase/persist, using /tmp/containerbase"
+  assert_line "tmp=/tmp/containerbase"
+}
+
+@test "replaces a stale tmp dir link" {
+  local CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/var-cache"
+  mkdir -p "${TEST_ROOT_DIR}/other"
+  ln -s "${TEST_ROOT_DIR}/other" "${CONTAINERBASE_DEFAULT_TMP_DIR}"
+
+  run link_containerbase_tmp_path
+  assert_success
+  assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${CONTAINERBASE_TMP_DIR}" ]
+}
+
 @test "drops trailing slashes from the tmp dir" {
   CONTAINERBASE_TMP_DIR=/var/cache/containerbase// \
   run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""

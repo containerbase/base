@@ -1,5 +1,5 @@
 import { arch } from 'node:os';
-import { isAbsolute, join, resolve, sep } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
@@ -57,14 +57,21 @@ export class EnvService {
   /**
    * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
    * `/tmp/containerbase` when unset or empty. The path is normalized, eg.
-   * without trailing slashes. A relative path or `/` is ignored with a
-   * warning, which is logged once.
+   * without trailing slashes. A relative path, `/` or a folder inside
+   * `/tmp/containerbase` is ignored with a warning, which is logged once.
    */
   get containerbaseTmpDir(): string {
+    const defaultDir = join(this.tmpDir, 'containerbase');
     const dir = env.CONTAINERBASE_TMP_DIR;
     if (isNonEmptyString(dir)) {
       const resolved = resolve(dir);
-      if (isAbsolute(dir) && resolved !== sep) {
+      const rel = relative(defaultDir, resolved);
+      const inside =
+        rel !== '' &&
+        rel !== '..' &&
+        !rel.startsWith(`..${sep}`) &&
+        !isAbsolute(rel);
+      if (isAbsolute(dir) && resolved !== sep && !inside) {
         return resolved;
       }
       if (!this.invalidTmpDirWarned) {
@@ -75,7 +82,7 @@ export class EnvService {
         this.invalidTmpDirWarned = true;
       }
     }
-    return join(this.tmpDir, 'containerbase');
+    return defaultDir;
   }
 
   /** The home folder of the current user, from `HOME`. */

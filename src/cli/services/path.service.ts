@@ -251,15 +251,25 @@ export class PathService {
 
   /**
    * Creates a configured `CONTAINERBASE_TMP_DIR` and links
-   * `/tmp/containerbase` to it, so writes to `cachePath` land there. An
-   * existing `/tmp/containerbase` is left as is.
+   * `/tmp/containerbase` to it, so writes to `cachePath` land there. A link
+   * to another target is replaced, an existing folder or file is left as is.
    */
   async ensureTmpLink(): Promise<void> {
-    if (this.tmpDir === this.defaultTmpDir) {
+    const tmpDir = this.tmpDir;
+    const link = this.defaultTmpDir;
+    if (tmpDir === link) {
       return;
     }
-    await this.createDir(this.tmpDir);
-    await this.createSymlink(this.tmpDir, this.defaultTmpDir);
+    await this.createDir(tmpDir);
+    const stats = await fs.lstat(link).catch(() => null);
+    if (stats?.isSymbolicLink()) {
+      if ((await fs.readlink(link)) === tmpDir) {
+        return;
+      }
+      logger.debug({ link, tmpDir }, 'replacing stale tmp dir link');
+      await fs.rm(link);
+    }
+    await this.createSymlink(tmpDir, link);
   }
 
   /**

@@ -93,11 +93,21 @@ function setup_directories () {
   ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" "${USER_HOME}/.cache"
 }
 
-# Links the default tmp folder to a configured `CONTAINERBASE_TMP_DIR`,
-# unless the default path already exists
+# Links the default tmp folder to a configured `CONTAINERBASE_TMP_DIR`.
+# A link to another target is replaced, an existing folder or file is kept.
 function link_containerbase_tmp_path () {
-  if [[ "${CONTAINERBASE_TMP_DIR}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" && ! -e "${CONTAINERBASE_DEFAULT_TMP_DIR}" && ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
-    ln -s "${CONTAINERBASE_TMP_DIR}" "${CONTAINERBASE_DEFAULT_TMP_DIR}"
+  local link="${CONTAINERBASE_DEFAULT_TMP_DIR}"
+  local dir="${CONTAINERBASE_TMP_DIR}"
+
+  if [[ "${dir}" == "${link}" ]]; then
+    return
+  fi
+  if [[ -L "${link}" ]]; then
+    if [[ "$(readlink "${link}")" != "${dir}" ]]; then
+      ln -sfn "${dir}" "${link}"
+    fi
+  elif [[ ! -e "${link}" ]]; then
+    ln -s "${dir}" "${link}"
   fi
 }
 

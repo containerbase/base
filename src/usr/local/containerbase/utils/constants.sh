@@ -33,12 +33,12 @@ export CONTAINERBASE_VAR_DIR=/var/lib/containerbase
 # defines the default containerbase temp directory, the home symlinks point to it
 export CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
 # defines the containerbase temp directory, the default one links to it when changed
-# trailing slashes are dropped, a relative path or `/` is ignored
+# trailing slashes are dropped, a relative path, `/` or a folder inside the default one is ignored
 _cb_tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
-if [[ -n "${CONTAINERBASE_TMP_DIR}" && "${_cb_tmp_dir}" != /* ]]; then
-  echo "Ignoring invalid CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using ${CONTAINERBASE_DEFAULT_TMP_DIR}" >&2
-fi
-if [[ "${_cb_tmp_dir}" != /* ]]; then
+if [[ "${_cb_tmp_dir}" != /* || "${_cb_tmp_dir}" == "${CONTAINERBASE_DEFAULT_TMP_DIR}"/* ]]; then
+  if [[ -n "${CONTAINERBASE_TMP_DIR}" ]]; then
+    echo "Ignoring invalid CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using ${CONTAINERBASE_DEFAULT_TMP_DIR}" >&2
+  fi
   _cb_tmp_dir="${CONTAINERBASE_DEFAULT_TMP_DIR}"
 fi
 export CONTAINERBASE_TMP_DIR="${_cb_tmp_dir}"

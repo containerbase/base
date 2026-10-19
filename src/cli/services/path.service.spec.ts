@@ -125,6 +125,41 @@ describe('cli/services/path.service', () => {
         await pathExists(rootPath('var/cache/containerbase/cache/.npm'), 'dir'),
       ).toBe(true);
     });
+
+    test('ensureTmpLink replaces a stale link', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(rootPath('var/other'), rootPath('tmp/containerbase'));
+
+      await pathSvc.ensureTmpLink();
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+    });
+
+    test('ensureTmpLink keeps a correct link', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(
+        rootPath('var/cache/containerbase'),
+        rootPath('tmp/containerbase'),
+      );
+      const rm = vi.spyOn(fs, 'rm');
+
+      await pathSvc.ensureTmpLink();
+
+      expect(rm).not.toHaveBeenCalled();
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+    });
+
+    test('ensureTmpLink keeps a real default folder', async () => {
+      await pathSvc.ensureTmpLink();
+
+      expect(
+        (await fs.lstat(rootPath('tmp/containerbase'))).isDirectory(),
+      ).toBe(true);
+    });
   });
 
   test('ensureTmpLink does nothing for the default folder with a trailing slash', async () => {

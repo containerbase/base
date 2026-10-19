@@ -649,6 +649,13 @@ RUN set -ex; \
   [[ -d /var/cache/containerbase/tool.init.d ]]; \
   [[ -d $USER_HOME/.npm ]]
 
+# a boot replaces a link to another folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  ln -s /var/tmp /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
 #--------------------------------------
 # test: vp
 #--------------------------------------
