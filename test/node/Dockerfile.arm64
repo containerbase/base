@@ -69,6 +69,22 @@ RUN install-tool yarn "${YARN_VERSION}"
 RUN test "$(yarn --version)" = "${YARN_VERSION}"
 
 #--------------------------------------
+# Image: aube
+#--------------------------------------
+FROM test-node AS test-aube
+
+# renovate: datasource=github-releases packageName=jdx/aube
+RUN install-tool aube 1.41.0
+
+COPY --chown=12021:0 test/node/test/aube /tmp/aube
+
+USER 12021
+
+RUN set -ex; cd /tmp/aube; aube install; test -f node_modules/is-number/index.js
+
+RUN set -ex; cd /tmp/aube; rm -rf node_modules; aube install --ignore-scripts; test -f node_modules/is-number/index.js
+
+#--------------------------------------
 # Image: renovate
 #--------------------------------------
 FROM test-node AS test-renovate
@@ -107,5 +123,6 @@ FROM base
 COPY --from=test-node /.dummy /.dummy
 COPY --from=test-pnpm /.dummy /.dummy
 COPY --from=test-yarn /.dummy /.dummy
+COPY --from=test-aube /.dummy /.dummy
 COPY --from=test-renovate /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
