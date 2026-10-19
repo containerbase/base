@@ -1,9 +1,15 @@
 import fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { env } from 'node:process';
+import { env, geteuid } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { fileRights, logger, pathExists, tool2path } from '../utils/index.ts';
+import {
+  fileRights,
+  logger,
+  pathExists,
+  spawn,
+  tool2path,
+} from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
 
 export interface FileOwnerConfig {
@@ -41,6 +47,40 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
     () => null,
     (err: NodeJS.ErrnoException) => err,
   );
+}
+
+/**
+ * The error for a `/tmp/containerbase` which the current user can't replace
+ * with the link to the configured `CONTAINERBASE_TMP_DIR`.
+ */
+function tmpLinkError(found: string, expected: string, cause?: unknown): Error {
+  return new Error(
+    `${found}, expected ${expected}; recreate the container or run as root`,
+    { cause },
+  );
+}
+
+/**
+ * Moves the entries of `src` into `dst`, merging folders and keeping the
+ * entries which already exist in `dst`. Uses `mv` when renaming fails across
+ * devices, eg. for folders of a lower overlay layer, as it keeps the owner.
+ */
+async function moveDirContents(src: string, dst: string): Promise<void> {
+  for (const entry of await fs.readdir(src, { withFileTypes: true })) {
+    const from = join(src, entry.name);
+    const to = join(dst, entry.name);
+    const existing = await fs.lstat(to).catch(() => null);
+    if (!existing) {
+      await fs.rename(from, to).catch(async (err: NodeJS.ErrnoException) => {
+        if (err.code !== 'EXDEV') {
+          throw err;
+        }
+        await spawn('mv', [from, to]);
+      });
+    } else if (entry.isDirectory() && existing.isDirectory()) {
+      await moveDirContents(from, to);
+    }
+  }
 }
 
 @injectable(bindingScopeValues.Singleton)
@@ -96,6 +136,14 @@ export class PathService {
    */
   get envFile(): string {
     return join(this.envSvc.rootDir, 'usr/local/etc/env');
+  }
+
+  /**
+   * Path to `/tmp/containerbase/ipc.sock`, always below the default temp
+   * folder.
+   */
+  get ipcSocketPath(): string {
+    return join(this.defaultTmpDir, 'ipc.sock');
   }
 
   /**
@@ -236,6 +284,7 @@ export class PathService {
     if (!(await pathExists(this.varPath, 'dir'))) {
       throw new Error('System not initialized for containerbase');
     }
+    await this.ensureTmpLink();
     await this.createDir(this._toolPrepPath);
     await this.createDir(this.dataPath);
     await this.createDir(this.toolsPath);
@@ -246,13 +295,16 @@ export class PathService {
     await this.createDir(join(this.tmpDir, 'cache', '.cache'));
     await this.createDir(join(this.tmpDir, 'cache', '.config'));
     await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
-    await this.ensureTmpLink();
   }
 
   /**
    * Creates a configured `CONTAINERBASE_TMP_DIR` and links
    * `/tmp/containerbase` to it, so writes to `cachePath` land there. A link
-   * to another target is replaced, an existing folder or file is left as is.
+   * to another target is replaced. A folder, eg. from the base image, is
+   * moved into the configured one first, keeping entries which exist there.
+   * An existing file is left as is.
+   *
+   * @throws when the link or folder can't be replaced by the current user
    */
   async ensureTmpLink(): Promise<void> {
     const tmpDir = this.tmpDir;
@@ -260,14 +312,29 @@ export class PathService {
     if (tmpDir === link) {
       return;
     }
+    await fs.mkdir(dirname(tmpDir), { recursive: true });
     await this.createDir(tmpDir);
     const stats = await fs.lstat(link).catch(() => null);
     if (stats?.isSymbolicLink()) {
-      if ((await fs.readlink(link)) === tmpDir) {
+      const target = await fs.readlink(link);
+      if (target === tmpDir) {
         return;
       }
-      logger.debug({ link, tmpDir }, 'replacing stale tmp dir link');
-      await fs.rm(link);
+      logger.debug({ link, target, tmpDir }, 'replacing stale tmp dir link');
+      await fs.rm(link).catch((err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+          throw tmpLinkError(`${link} links to ${target}`, tmpDir, err);
+        }
+        throw err;
+      });
+    } else if (stats?.isDirectory()) {
+      if (!this.envSvc.isRoot && stats.uid !== geteuid?.()) {
+        // removing it from the sticky `/tmp` fails after moving its content
+        throw tmpLinkError(`${link} is a folder owned by another user`, tmpDir);
+      }
+      logger.debug({ link, tmpDir }, 'moving tmp dir folder');
+      await moveDirContents(link, tmpDir);
+      await fs.rm(link, { recursive: true, force: true });
     }
     await this.createSymlink(tmpDir, link);
   }

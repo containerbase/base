@@ -10,26 +10,15 @@ if [[ -n "${CONTAINERBASE_CLEANUP_PATH}" ]]; then
   containerbase-cli cleanup path "${CONTAINERBASE_CLEANUP_PATH}"
 fi
 
-# trailing slashes are dropped, a relative path, `/` or a folder inside the default one is ignored
-tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
-if [[ "${tmp_dir}" != /* || "${tmp_dir}" == /tmp/containerbase/* ]]; then
-  if [[ -n "${CONTAINERBASE_TMP_DIR}" ]]; then
-    echo "Ignoring invalid CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using /tmp/containerbase" >&2
-  fi
-  tmp_dir=/tmp/containerbase
-fi
+CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
+# shellcheck source=/dev/null
+. /usr/local/containerbase/utils/tmp-dir.sh
 
-init_check=/tmp/containerbase
-if [[ "${tmp_dir}" != "/tmp/containerbase" ]]; then
-  # the home symlinks point to the default path, so link it to the configured one,
-  # replace a link to another target and keep an existing folder
-  if [[ -L "/tmp/containerbase" ]]; then
-    if [[ "$(readlink /tmp/containerbase)" != "${tmp_dir}" ]]; then
-      ln -sfn "${tmp_dir}" /tmp/containerbase
-    fi
-  elif [[ ! -e "/tmp/containerbase" ]]; then
-    ln -s "${tmp_dir}" /tmp/containerbase
-  fi
+tmp_dir=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}")
+init_check="${CONTAINERBASE_DEFAULT_TMP_DIR}"
+if [[ "${tmp_dir}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
+  # the home symlinks point to the default path, so link it to the configured one
+  link_containerbase_tmp_path "${tmp_dir}" || exit 1
   # init creates `tool.init.d`, so an empty mounted folder still gets initialized
   init_check="${tmp_dir}/tool.init.d"
 fi

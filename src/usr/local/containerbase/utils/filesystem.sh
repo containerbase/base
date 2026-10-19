@@ -80,6 +80,7 @@ function setup_directories () {
   create_folder "$(get_tool_prep_path)" 755
 
   create_folder "$(get_containerbase_tmp_path)" 775
+  # from tmp-dir.sh, sourced by constants.sh
   link_containerbase_tmp_path
 
   # symlink v2 tools bin and lib
@@ -91,24 +92,6 @@ function setup_directories () {
   ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.config" "${USER_HOME}/.config"
   ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.local" "${USER_HOME}/.local"
   ln -sf "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" "${USER_HOME}/.cache"
-}
-
-# Links the default tmp folder to a configured `CONTAINERBASE_TMP_DIR`.
-# A link to another target is replaced, an existing folder or file is kept.
-function link_containerbase_tmp_path () {
-  local link="${CONTAINERBASE_DEFAULT_TMP_DIR}"
-  local dir="${CONTAINERBASE_TMP_DIR}"
-
-  if [[ "${dir}" == "${link}" ]]; then
-    return
-  fi
-  if [[ -L "${link}" ]]; then
-    if [[ "$(readlink "${link}")" != "${dir}" ]]; then
-      ln -sfn "${dir}" "${link}"
-    fi
-  elif [[ ! -e "${link}" ]]; then
-    ln -s "${dir}" "${link}"
-  fi
 }
 
 # Creates the given folder path with root and user umask depending on the caller

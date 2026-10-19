@@ -625,11 +625,14 @@ FROM build AS test-tmp-dir
 USER root
 ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
 
-# init at build time into the configured folder
+# init at build time moves the folder of the base image into the configured one
 RUN set -ex; \
-  rm -rf /tmp/containerbase; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
   containerbase-cli init tool node; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ -d /var/cache/containerbase/cache/.npm ]]; \
+  [[ -f /var/cache/containerbase/cache/.npmrc ]]; \
+  [[ -d /var/cache/containerbase/cache/.cache ]]; \
   rm /var/cache/containerbase/tool.init.d/node
 
 # a boot with an empty /tmp only links the configured folder and skips init

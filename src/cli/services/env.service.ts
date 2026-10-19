@@ -56,27 +56,27 @@ export class EnvService {
 
   /**
    * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
-   * `/tmp/containerbase` when unset or empty. The path is normalized, eg.
-   * without trailing slashes. A relative path, `/` or a folder inside
-   * `/tmp/containerbase` is ignored with a warning, which is logged once.
+   * `/tmp/containerbase` when unset or empty. Trailing slashes are dropped.
+   * A path that is not absolute and normalized, or that is `/tmp` or below it,
+   * is ignored with a warning, which is logged once.
    */
   get containerbaseTmpDir(): string {
     const defaultDir = join(this.tmpDir, 'containerbase');
-    const dir = env.CONTAINERBASE_TMP_DIR;
-    if (isNonEmptyString(dir)) {
-      const resolved = resolve(dir);
-      const rel = relative(defaultDir, resolved);
-      const inside =
-        rel !== '' &&
-        rel !== '..' &&
-        !rel.startsWith(`..${sep}`) &&
-        !isAbsolute(rel);
-      if (isAbsolute(dir) && resolved !== sep && !inside) {
-        return resolved;
+    const value = env.CONTAINERBASE_TMP_DIR;
+    if (isNonEmptyString(value)) {
+      const dir = value.replace(/\/+$/, '');
+      if (dir === defaultDir) {
+        return defaultDir;
+      }
+      const rel = relative(this.tmpDir, dir);
+      const inTmp =
+        rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+      if (resolve(dir) === dir && !inTmp) {
+        return dir;
       }
       if (!this.invalidTmpDirWarned) {
         logger.warn(
-          { dir },
+          { dir: value },
           'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
         );
         this.invalidTmpDirWarned = true;

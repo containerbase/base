@@ -104,12 +104,119 @@ describe('cli/services/path.service', () => {
       );
     });
 
-    test('ensureBasePaths keeps an existing default folder', async () => {
+    test('ensureBasePaths moves an existing default folder', async () => {
+      await ensurePaths([
+        'tmp/containerbase/cache/.npm',
+        'var/cache/containerbase/cache',
+      ]);
+      await writeFile(rootPath('tmp/containerbase/tool.init.d/node'), '');
+      await writeFile(rootPath('tmp/containerbase/cache/.npmrc'), 'old');
+      await writeFile(rootPath('var/cache/containerbase/cache/.npmrc'), 'keep');
+
       await pathSvc.ensureBasePaths();
 
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
       expect(
-        (await fs.lstat(rootPath('tmp/containerbase'))).isDirectory(),
+        await pathExists(
+          rootPath('var/cache/containerbase/tool.init.d/node'),
+          'file',
+        ),
       ).toBe(true);
+      expect(
+        await pathExists(rootPath('var/cache/containerbase/cache/.npm'), 'dir'),
+      ).toBe(true);
+      expect(
+        await readFile(
+          rootPath('var/cache/containerbase/cache/.npmrc'),
+          'utf8',
+        ),
+      ).toBe('keep');
+    });
+
+    test('ensureTmpLink moves across devices with mv', async () => {
+      await writeFile(rootPath('tmp/containerbase/tool.init.d/node'), '');
+      vi.spyOn(fs, 'rename').mockRejectedValueOnce(
+        Object.assign(new Error('EXDEV'), { code: 'EXDEV' }),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expect(
+        await pathExists(
+          rootPath('var/cache/containerbase/tool.init.d/node'),
+          'file',
+        ),
+      ).toBe(true);
+    });
+
+    test('ensureTmpLink rethrows other errors moving the default folder', async () => {
+      vi.spyOn(fs, 'rename').mockRejectedValueOnce(
+        Object.assign(new Error('EBUSY'), { code: 'EBUSY' }),
+      );
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EBUSY');
+    });
+
+    test('ensureTmpLink fails for a default folder of another user', async () => {
+      Object.assign(child.get(EnvService), { uid: 1000 });
+      const { lstat } = fs;
+      vi.spyOn(fs, 'lstat').mockImplementation(async (path) => {
+        const stats = await lstat(path);
+        return path === rootPath('tmp/containerbase')
+          ? Object.assign(stats, { uid: 65534 })
+          : stats;
+      });
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow(
+        `${rootPath('tmp/containerbase')} is a folder owned by another user, expected ${rootPath('var/cache/containerbase')}; recreate the container or run as root`,
+      );
+      expect((await lstat(rootPath('tmp/containerbase'))).isDirectory()).toBe(
+        true,
+      );
+    });
+
+    test('ensureTmpLink fails when a stale link can not be removed', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(rootPath('var/other'), rootPath('tmp/containerbase'));
+      vi.spyOn(fs, 'rm').mockRejectedValueOnce(
+        Object.assign(new Error('EPERM'), { code: 'EPERM' }),
+      );
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow(
+        `${rootPath('tmp/containerbase')} links to ${rootPath('var/other')}, expected ${rootPath('var/cache/containerbase')}; recreate the container or run as root`,
+      );
+    });
+
+    test('ensureTmpLink rethrows other errors removing a stale link', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(rootPath('var/other'), rootPath('tmp/containerbase'));
+      vi.spyOn(fs, 'rm').mockRejectedValueOnce(
+        Object.assign(new Error('EBUSY'), { code: 'EBUSY' }),
+      );
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EBUSY');
+    });
+
+    test('ensureTmpLink creates missing parents of the configured folder', async () => {
+      vi.stubEnv('CONTAINERBASE_TMP_DIR', rootPath('var/a/b/containerbase'));
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+
+      await pathSvc.ensureTmpLink();
+
+      expect(await pathExists(rootPath('var/a/b/containerbase'), 'dir')).toBe(
+        true,
+      );
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/a/b/containerbase'),
+      );
+    });
+
+    test('ipcSocketPath stays below the default folder', () => {
+      expect(pathSvc.ipcSocketPath).toBe(
+        rootPath('tmp/containerbase/ipc.sock'),
+      );
     });
 
     test('ensureTmpLink creates the configured folder and the link', async () => {
@@ -153,12 +260,15 @@ describe('cli/services/path.service', () => {
       );
     });
 
-    test('ensureTmpLink keeps a real default folder', async () => {
+    test('ensureTmpLink keeps a default file', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await writeFile(rootPath('tmp/containerbase'), '');
+
       await pathSvc.ensureTmpLink();
 
-      expect(
-        (await fs.lstat(rootPath('tmp/containerbase'))).isDirectory(),
-      ).toBe(true);
+      expect((await fs.lstat(rootPath('tmp/containerbase'))).isFile()).toBe(
+        true,
+      );
     });
   });
 

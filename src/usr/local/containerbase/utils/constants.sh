@@ -32,17 +32,11 @@ export CONTAINERBASE_DIR=/usr/local/containerbase
 export CONTAINERBASE_VAR_DIR=/var/lib/containerbase
 # defines the default containerbase temp directory, the home symlinks point to it
 export CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
+# shellcheck source=/dev/null
+. "${BASH_SOURCE%/*}/tmp-dir.sh"
 # defines the containerbase temp directory, the default one links to it when changed
-# trailing slashes are dropped, a relative path, `/` or a folder inside the default one is ignored
-_cb_tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
-if [[ "${_cb_tmp_dir}" != /* || "${_cb_tmp_dir}" == "${CONTAINERBASE_DEFAULT_TMP_DIR}"/* ]]; then
-  if [[ -n "${CONTAINERBASE_TMP_DIR}" ]]; then
-    echo "Ignoring invalid CONTAINERBASE_TMP_DIR=${CONTAINERBASE_TMP_DIR}, using ${CONTAINERBASE_DEFAULT_TMP_DIR}" >&2
-  fi
-  _cb_tmp_dir="${CONTAINERBASE_DEFAULT_TMP_DIR}"
-fi
-export CONTAINERBASE_TMP_DIR="${_cb_tmp_dir}"
-unset _cb_tmp_dir
+CONTAINERBASE_TMP_DIR=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}")
+export CONTAINERBASE_TMP_DIR
 
 # Used to find matching tool downloads.
 # `arch` is preinstalled on ubuntu.

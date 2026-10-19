@@ -130,8 +130,20 @@ describe('cli/services/env.service', () => {
       delete env.CONTAINERBASE_TMP_DIR;
     });
 
-    test('ignores a folder inside the default folder with a warning', () => {
-      const dir = rootPath('tmp/containerbase/persist');
+    test('uses the default folder without a warning', () => {
+      env.CONTAINERBASE_TMP_DIR = rootPath('tmp/containerbase');
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(logger.warn).not.toHaveBeenCalled();
+      delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test.each([
+      'tmp',
+      'tmp/containerbase/persist',
+      'tmp/containerbase-persist',
+      'tmp/other',
+    ])('ignores %s below the temp folder with a warning', (path) => {
+      const dir = rootPath(path);
       env.CONTAINERBASE_TMP_DIR = dir;
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
@@ -141,10 +153,19 @@ describe('cli/services/env.service', () => {
       delete env.CONTAINERBASE_TMP_DIR;
     });
 
-    test('uses a sibling of the default folder', () => {
-      const dir = rootPath('tmp/containerbase-persist');
+    test.each([
+      '/var//cache',
+      '/var/./cache',
+      '/var/../cache',
+      '/var/cache/.',
+      '/var/cache/..',
+    ])('ignores the not normalized %s with a warning', (dir) => {
       env.CONTAINERBASE_TMP_DIR = dir;
-      expect(svc.containerbaseTmpDir).toBe(dir);
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { dir },
+        'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
+      );
       delete env.CONTAINERBASE_TMP_DIR;
     });
   });
