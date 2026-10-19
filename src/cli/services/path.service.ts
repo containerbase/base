@@ -1,10 +1,12 @@
+import type { Dirent } from 'node:fs';
 import fs from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, sep } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import {
   fileRights,
+  isInside,
   logger,
   pathExists,
   spawn,
@@ -49,11 +51,6 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
   );
 }
 
-/** Whether the path is a folder or a link to one. */
-async function isDir(path: string): Promise<boolean> {
-  return (await fs.stat(path).catch(() => null))?.isDirectory() ?? false;
-}
-
 /** The target of the link, `null` when the path is no link. */
 async function readLink(path: string): Promise<string | null> {
   return await fs.readlink(path).catch(() => null);
@@ -64,31 +61,79 @@ function isExistsError(err: unknown): boolean {
   return (err as NodeJS.ErrnoException).code === 'EEXIST';
 }
 
-/** Whether the error is a missing permission, `EPERM` or `EACCES`. */
+/** Whether the error is `ENOENT`, eg. a path removed by another process. */
+function isMissingError(err: unknown): boolean {
+  return (err as NodeJS.ErrnoException).code === 'ENOENT';
+}
+
+/**
+ * Whether the error is a missing permission or a read-only file system,
+ * `EPERM`, `EACCES` or `EROFS`.
+ */
 function isPermissionError(err: unknown): boolean {
   const { code } = err as NodeJS.ErrnoException;
-  return code === 'EPERM' || code === 'EACCES';
+  return code === 'EPERM' || code === 'EACCES' || code === 'EROFS';
+}
+
+/**
+ * The real path of `path`. For a missing path, its nearest existing parent is
+ * resolved and the missing part appended, eg. the target a folder created at
+ * `path` would get.
+ *
+ * @throws when the path can't be resolved, eg. a link cycle
+ */
+async function resolvePath(path: string): Promise<string> {
+  try {
+    return await fs.realpath(path);
+  } catch (err) {
+    if (!isMissingError(err)) {
+      throw err;
+    }
+    // the root always resolves, which ends the recursion
+    return join(await resolvePath(dirname(path)), basename(path));
+  }
 }
 
 /**
  * Moves the entries of `src` into `dst`, merging folders and keeping the
  * entries which already exist in `dst`. Uses `mv` when renaming fails across
  * devices, eg. for folders of a lower overlay layer, as it keeps the owner.
+ * Entries removed by another process meanwhile are skipped. Calls `onMove`
+ * after each moved entry.
  */
-async function moveDirContents(src: string, dst: string): Promise<void> {
-  for (const entry of await fs.readdir(src, { withFileTypes: true })) {
+async function moveDirContents(
+  src: string,
+  dst: string,
+  onMove: () => void,
+): Promise<void> {
+  let entries: Dirent[];
+  try {
+    entries = await fs.readdir(src, { withFileTypes: true });
+  } catch (err) {
+    if (isMissingError(err)) {
+      return;
+    }
+    throw err;
+  }
+  for (const entry of entries) {
     const from = join(src, entry.name);
     const to = join(dst, entry.name);
     const existing = await fs.lstat(to).catch(() => null);
     if (!existing) {
-      await fs.rename(from, to).catch(async (err: NodeJS.ErrnoException) => {
-        if (err.code !== 'EXDEV') {
+      try {
+        await fs.rename(from, to);
+      } catch (err) {
+        if (isMissingError(err)) {
+          continue;
+        }
+        if ((err as NodeJS.ErrnoException).code !== 'EXDEV') {
           throw err;
         }
         await spawn('mv', [from, to]);
-      });
+      }
+      onMove();
     } else if (entry.isDirectory() && existing.isDirectory()) {
-      await moveDirContents(from, to);
+      await moveDirContents(from, to, onMove);
     }
   }
 }
@@ -99,7 +144,9 @@ export class PathService {
   private readonly envSvc!: EnvService;
 
   /**
-   * Path to `/tmp/containerbase/tool.init.d`.
+   * Path to `tool.init.d` in the containerbase temp folder, below a configured
+   * `CONTAINERBASE_TMP_DIR` or `/tmp/containerbase`. The tool wrappers check
+   * the marker through `/tmp/containerbase` instead, see `LinkToolService`.
    */
   private get _toolInitPath(): string {
     return join(this.tmpDir, 'tool.init.d');
@@ -131,7 +178,7 @@ export class PathService {
    * Path to `/tmp/containerbase`, the default containerbase temp folder.
    */
   get defaultTmpDir(): string {
-    return join(this.envSvc.tmpDir, 'containerbase');
+    return this.envSvc.defaultContainerbaseTmpDir;
   }
 
   /**
@@ -149,8 +196,7 @@ export class PathService {
   }
 
   /**
-   * Path to `/tmp/containerbase/ipc.sock`, always below the default temp
-   * folder.
+   * Path to `/tmp/containerbase/ipc.sock`, below the default temp folder.
    */
   get ipcSocketPath(): string {
     return join(this.defaultTmpDir, 'ipc.sock');
@@ -302,9 +348,9 @@ export class PathService {
     await this.createDir(this.binDir);
     await this.createDir(this.sslPath);
     await this.createDir(this._toolInitPath);
-    await this.createDir(join(this.tmpDir, 'cache', '.cache'));
-    await this.createDir(join(this.tmpDir, 'cache', '.config'));
-    await this.createDir(join(this.tmpDir, 'cache', '.local', 'share'));
+    await this.createDir(join(this.cachePath, '.cache'));
+    await this.createDir(join(this.cachePath, '.config'));
+    await this.createDir(join(this.cachePath, '.local', 'share'));
   }
 
   /**
@@ -312,18 +358,22 @@ export class PathService {
    * `/tmp/containerbase` to it, so writes to `cachePath` land there. A link
    * to another target is replaced. As root, a folder, eg. from the base image,
    * is moved into the configured one first, keeping entries which exist there.
-   * The configured folder may be a link to a folder.
+   * The configured folder may be a link to a folder. Without a configured
+   * folder, a leftover link at `/tmp/containerbase` is repaired, see
+   * `repairDefaultLink`.
    *
    * When the switch isn't possible, eg. as non-root with a folder at
    * `/tmp/containerbase` or without write access to the configured folder,
    * this run keeps using the default folder, see `keepDefaultTmpDir`.
    *
-   * @throws when `/tmp/containerbase` is a file
+   * @throws when `/tmp/containerbase` is a file, or when moving its entries
+   * started and a later step fails
    */
   async ensureTmpLink(): Promise<void> {
     const tmpDir = this.tmpDir;
     const link = this.defaultTmpDir;
     if (tmpDir === link) {
+      await this.repairDefaultLink();
       return;
     }
     const stats = await fs.lstat(link).catch(() => null);
@@ -332,101 +382,153 @@ export class PathService {
     }
     if (stats?.isDirectory() && !this.envSvc.isRoot) {
       // removing it from the sticky `/tmp` needs root
-      await this.keepDefaultTmpDir(tmpDir);
+      await this.keepDefaultTmpDir(
+        tmpDir,
+        `${link} is a folder, switch it at image build time as root`,
+      );
       return;
     }
-    if (
-      !(await this.prepareTmpDir(tmpDir)) ||
-      (await this.resolvesIntoTmp(tmpDir))
-    ) {
-      await this.keepDefaultTmpDir(tmpDir);
+    // checked first, so nothing below `/tmp` is created or owned
+    const problem =
+      (await this.tmpResolveProblem(tmpDir)) ??
+      (await this.prepareTmpDir(tmpDir));
+    if (problem) {
+      await this.keepDefaultTmpDir(tmpDir, problem);
       return;
     }
-    if (stats?.isSymbolicLink()) {
-      const target = await fs.readlink(link);
-      if (target === tmpDir) {
-        return;
-      }
-      logger.debug({ link, target, tmpDir }, 'replacing stale tmp dir link');
-      try {
-        await fs.rm(link);
-      } catch (err) {
-        if (!isPermissionError(err)) {
-          throw err;
-        }
-        await this.keepDefaultTmpDir(tmpDir);
-        return;
-      }
-    } else if (stats?.isDirectory()) {
-      logger.debug({ link, tmpDir }, 'moving tmp dir folder');
-      await moveDirContents(link, tmpDir);
-      await fs.rm(link, { recursive: true, force: true });
+    if (stats?.isSymbolicLink() && (await readLink(link)) === tmpDir) {
+      return;
     }
+    // falling back is only safe while nothing was moved yet
+    const move = { started: false };
     try {
+      if (stats?.isSymbolicLink()) {
+        logger.debug({ link, tmpDir }, 'replacing stale tmp dir link');
+        // a link removed by another process meanwhile is fine
+        await fs.rm(link, { force: true });
+      } else if (stats?.isDirectory()) {
+        logger.debug({ link, tmpDir }, 'moving tmp dir folder');
+        await moveDirContents(link, tmpDir, () => {
+          move.started = true;
+        });
+        // removing it may already have deleted entries
+        move.started = true;
+        await fs.rm(link, { recursive: true, force: true });
+      }
       await fs.symlink(tmpDir, link);
     } catch (err) {
       // another process may have created the same link meanwhile
-      if (!isExistsError(err) || (await readLink(link)) !== tmpDir) {
+      if (isExistsError(err) && (await readLink(link)) === tmpDir) {
+        return;
+      }
+      if (move.started || !isPermissionError(err)) {
         throw err;
       }
+      await this.keepDefaultTmpDir(tmpDir, `${link} can't be linked to it`);
     }
   }
 
   /**
    * Creates the configured temp folder when it's missing and checks that the
    * current user can write it. Another process creating it meanwhile is fine.
+   * As root, an existing root owned folder, eg. created by `mkdir` or a
+   * volume, is given to the configured user, keeping its mode.
    *
-   * @returns `false` when it can't be created or written, for any reason, eg.
-   * a missing permission, a read-only file system or a dangling link
+   * @returns why the folder is not usable, `null` when it is
    */
-  private async prepareTmpDir(tmpDir: string): Promise<boolean> {
-    try {
-      if (!(await isDir(tmpDir))) {
+  private async prepareTmpDir(tmpDir: string): Promise<string | null> {
+    const stats = await fs.stat(tmpDir).catch(() => null);
+    if (stats && !stats.isDirectory()) {
+      return `${tmpDir} is not a directory`;
+    }
+    if (stats) {
+      if (this.envSvc.isRoot && stats.uid === 0) {
+        await fs
+          .chown(tmpDir, this.envSvc.userId, 0)
+          .catch((err: unknown) =>
+            logger.debug({ err, tmpDir }, 'can not own the tmp dir'),
+          );
+      }
+    } else {
+      try {
         await fs.mkdir(dirname(tmpDir), { recursive: true });
-        try {
-          await this.createDir(tmpDir);
-        } catch (err) {
-          if (!isExistsError(err) || !(await isDir(tmpDir))) {
-            throw err;
-          }
+        await this.createDir(tmpDir);
+      } catch (err) {
+        if (!isExistsError(err) || !(await pathExists(tmpDir, 'dir'))) {
+          logger.debug({ err, tmpDir }, 'can not create the tmp dir');
+          return `${tmpDir} can't be created`;
         }
       }
-      await fs.access(tmpDir, fs.constants.W_OK | fs.constants.X_OK);
-      return true;
-    } catch (err) {
-      logger.debug({ err, tmpDir }, 'configured tmp dir is not usable');
-      return false;
     }
+    const err = await accessError(tmpDir);
+    if (err) {
+      logger.debug({ err, tmpDir }, 'configured tmp dir is not writable');
+      return `${tmpDir} is not writable`;
+    }
+    return null;
   }
 
   /**
-   * Whether the configured temp folder resolves to `/tmp` or below it, eg. a
-   * link to `/tmp/containerbase`. Moving the default folder into it or linking
-   * it would lose the content or create a link cycle.
+   * Why the configured temp folder can't be used when it resolves to `/tmp` or
+   * below it, eg. a link to `/tmp/containerbase`. Moving the default folder
+   * into it or linking it would lose the content or create a link cycle. A
+   * missing folder counts when it would be created there, eg. below a link to
+   * `/tmp`. A folder which can't be resolved, eg. a link cycle, can't be used
+   * either.
+   *
+   * @returns the reason, `null` when the folder is outside of `/tmp`
    */
-  private async resolvesIntoTmp(tmpDir: string): Promise<boolean> {
-    const rel = relative(
-      await fs.realpath(this.envSvc.tmpDir),
-      await fs.realpath(tmpDir),
-    );
-    return rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+  private async tmpResolveProblem(tmpDir: string): Promise<string | null> {
+    let inside: boolean;
+    try {
+      inside = isInside(
+        await fs.realpath(this.envSvc.tmpDir),
+        await resolvePath(tmpDir),
+      );
+    } catch (err) {
+      logger.debug({ err, tmpDir }, 'can not resolve the tmp dir');
+      return `${tmpDir} can't be resolved`;
+    }
+    return inside ? `${tmpDir} resolves into ${this.envSvc.tmpDir}` : null;
   }
 
   /**
-   * Warns that the default folder can't be switched to the configured one and
-   * keeps using the default folder for this run, also in child processes, by
-   * setting `CONTAINERBASE_TMP_DIR` to it. A link from the default folder to
-   * the unusable configured one is replaced by a real folder.
+   * Warns with the `reason` that the default folder can't be switched to the
+   * configured one and keeps using the default folder for this run, also in
+   * child processes, by setting `CONTAINERBASE_TMP_DIR` to it. A link from the
+   * default folder to the unusable configured one is replaced, see
+   * `repairDefaultLink`.
    *
    * @throws when that link can't be removed
    */
-  private async keepDefaultTmpDir(tmpDir: string): Promise<void> {
+  private async keepDefaultTmpDir(
+    tmpDir: string,
+    reason: string,
+  ): Promise<void> {
     const link = this.defaultTmpDir;
     logger.warn(
-      `cannot switch ${link} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
+      `cannot switch ${link} to ${tmpDir}, keeping the default folder: ${reason}`,
     );
     env.CONTAINERBASE_TMP_DIR = link;
-    if ((await readLink(link)) !== tmpDir) {
+    await this.repairDefaultLink(tmpDir);
+  }
+
+  /**
+   * Replaces a link at `/tmp/containerbase` by a real folder, unless it links
+   * to a writable folder other than `unusable`. This repairs eg. a link left
+   * from an older `CONTAINERBASE_TMP_DIR` whose target is missing.
+   *
+   * @throws when the link can't be removed
+   */
+  private async repairDefaultLink(unusable?: string): Promise<void> {
+    const link = this.defaultTmpDir;
+    const target = await readLink(link);
+    if (
+      target === null ||
+      (target !== unusable &&
+        (await pathExists(link, 'dir')) &&
+        (await accessError(link)) === null)
+    ) {
       return;
     }
     try {
@@ -436,7 +538,7 @@ export class PathService {
         throw err;
       }
       throw new Error(
-        `${link} links to ${tmpDir} which is not usable; remove the link or fix the permissions`,
+        `${link} links to ${target} which is not usable; remove the link or fix the permissions`,
         { cause: err },
       );
     }

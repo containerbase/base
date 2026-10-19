@@ -159,7 +159,7 @@ Blocking Ubuntu's git follows in the next major release, see [#7779](https://git
 
 Containerbase keeps the tool init state and the tool caches in `/tmp/containerbase`.
 The home folders link into it, eg. `~/.npm` to `/tmp/containerbase/cache/.npm`.
-The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing.
+The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing, or when it is a symlink to a folder which isn't writable.
 
 You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.
 The path must be absolute, normalized and outside of `/tmp`, trailing slashes are dropped.
@@ -168,14 +168,17 @@ The home links keep pointing to `/tmp/containerbase`, which is then a symlink to
 `install-containerbase` always sets up `/tmp/containerbase`, the switch happens on the first `containerbase-cli` prepare, install or init.
 `containerbase-cli` checks the value and passes the checked value, or the default, on to the tools it runs.
 It creates the symlink when it is missing and replaces a symlink to another folder, the tool wrappers run it when the symlink is missing.
-The configured folder may itself be a symlink to a folder.
+The configured folder may itself be a symlink to a folder, as root an existing root owned folder is given to the configured user.
 
 Switch the folder at image build time as root.
 Only root moves an existing `/tmp/containerbase` folder, eg. from the base image, into the configured folder, entries which already exist there are kept.
-For a non-root user with a `/tmp/containerbase` folder, or when the symlink can't be replaced or the configured folder can't be created or written, a warning is shown and that run keeps using `/tmp/containerbase`.
+For a non-root user with a `/tmp/containerbase` folder, or when the symlink can't be replaced or the configured folder can't be created or written, a warning with the reason is shown and that run keeps using `/tmp/containerbase`.
+A symlink at `/tmp/containerbase` to a folder which is missing or not writable is then replaced by a real folder, also when `CONTAINERBASE_TMP_DIR` isn't set.
+The folder must always be writable, eg. with a read-only root file system mount a tmpfs on `/tmp` or the configured folder.
+When a move has started, including removing the moved folder, and a later step fails, `containerbase-cli` fails instead of falling back.
 A file at `/tmp/containerbase` is an error, remove it.
 
-The `docker-entrypoint.sh` only creates a missing symlink and skips `init tool all`, when the configured folder already has a `tool.init.d` folder and is writable.
+The `docker-entrypoint.sh` only creates a missing symlink and skips `init tool all`, when the configured folder is a valid value, already has a `tool.init.d` folder and is writable.
 In all other cases it runs `containerbase-cli init tool all`, which handles them as described above.
 The ipc socket of `containerbase-cli` is `/tmp/containerbase/ipc.sock`, through the symlink it lives in the configured folder.
 

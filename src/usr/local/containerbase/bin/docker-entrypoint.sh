@@ -16,11 +16,15 @@ tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
 run_init=true
 # the resolved path, a link into `/tmp` goes through `containerbase-cli`, which rejects it
 real_tmp_dir=$(readlink -f "${tmp_dir:-/}")
-if [[ -z "${tmp_dir}" || "${tmp_dir}" == "${default_tmp_dir}" ]]; then
-  if [[ -d "${default_tmp_dir}" ]]; then
+# a value which is empty without trailing slashes, eg. `/`, is invalid and goes through `containerbase-cli`
+if [[ -z "${CONTAINERBASE_TMP_DIR}" || "${tmp_dir}" == "${default_tmp_dir}" ]]; then
+  # a leftover link needs a writable target, else `containerbase-cli` repairs it
+  if [[ -d "${default_tmp_dir}" && ( ! -L "${default_tmp_dir}" || ( -w "${default_tmp_dir}" && -x "${default_tmp_dir}" ) ) ]]; then
     run_init=false
   fi
-elif [[ "${tmp_dir}" == /* && "${real_tmp_dir}" != /tmp && "${real_tmp_dir}" != /tmp/* \
+elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "${tmp_dir}" != */../* \
+  && "${tmp_dir}" != */. && "${tmp_dir}" != */.. \
+  && "${real_tmp_dir}" != /tmp && "${real_tmp_dir}" != /tmp/* \
   && -d "${tmp_dir}/tool.init.d" && -w "${tmp_dir}" && -x "${tmp_dir}" ]]; then
   # fast path: an initialized configured folder only needs the link, which the
   # home symlinks go through; `containerbase-cli` handles all other cases
@@ -35,7 +39,8 @@ fi
 if [[ "${run_init}" == true ]]; then
   # initialize all prepared tools, also checks and links a configured tmp dir
   containerbase-cli init tool all
-  if [[ -n "${tmp_dir}" && "${tmp_dir}" != "${default_tmp_dir}" && "$(readlink "${default_tmp_dir}")" != "${tmp_dir}" ]]; then
+  if [[ -n "${CONTAINERBASE_TMP_DIR}" && "${tmp_dir}" != "${default_tmp_dir}" \
+    && ( -z "${tmp_dir}" || "$(readlink "${default_tmp_dir}")" != "${tmp_dir}" ) ]]; then
     # the cli kept the default folder for this run
     export CONTAINERBASE_TMP_DIR="${default_tmp_dir}"
   fi

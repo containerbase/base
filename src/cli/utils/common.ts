@@ -1,5 +1,6 @@
 import fs, { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
+import { isAbsolute, relative, sep } from 'node:path';
 import process from 'node:process';
 import { deleteAsync } from 'del';
 import { logger } from './logger.ts';
@@ -117,6 +118,18 @@ export function parseBinaryName(
   return process.argv0.endsWith('/node') || process.argv0 === 'node'
     ? `${node} ${app}`
     : process.argv0;
+}
+
+/**
+ * Whether the absolute `child` path is the `parent` path or below it,
+ * comparing the paths only. A relative `child` is never inside.
+ */
+export function isInside(parent: string, child: string): boolean {
+  if (!isAbsolute(child)) {
+    return false;
+  }
+  const rel = relative(parent, child);
+  return rel !== '..' && !rel.startsWith(`..${sep}`);
 }
 
 /** Removes the apt lists and logs left behind by package installs. */

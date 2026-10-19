@@ -1,9 +1,9 @@
 import { arch } from 'node:os';
-import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { join, resolve } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
-import { type Arch, logger } from '../utils/index.ts';
+import { type Arch, isInside, logger } from '../utils/index.ts';
 
 export type Replacements = [string, string][];
 
@@ -64,15 +64,15 @@ export class EnvService {
    * reported once.
    */
   get containerbaseTmpDir(): string {
-    const defaultDir = join(this.tmpDir, 'containerbase');
+    const defaultDir = this.defaultContainerbaseTmpDir;
     const value = env.CONTAINERBASE_TMP_DIR;
     let dir = defaultDir;
     if (isNonEmptyString(value)) {
       const trimmed = value.replace(/\/+$/, '');
-      const rel = relative(this.tmpDir, trimmed);
-      const inTmp =
-        rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
-      if (trimmed === defaultDir || (resolve(trimmed) === trimmed && !inTmp)) {
+      if (
+        trimmed === defaultDir ||
+        (resolve(trimmed) === trimmed && !isInside(this.tmpDir, trimmed))
+      ) {
         dir = trimmed;
       } else {
         logger.warn(
@@ -83,6 +83,11 @@ export class EnvService {
     }
     env.CONTAINERBASE_TMP_DIR = dir;
     return dir;
+  }
+
+  /** The default containerbase temp folder, `/tmp/containerbase`. */
+  get defaultContainerbaseTmpDir(): string {
+    return join(this.tmpDir, 'containerbase');
   }
 
   /** The home folder of the current user, from `HOME`. */

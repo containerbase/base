@@ -101,6 +101,9 @@ describe('cli/services/env.service', () => {
 
     test('defaults to tmp/containerbase', () => {
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(svc.defaultContainerbaseTmpDir).toBe(
+        rootPath('tmp/containerbase'),
+      );
     });
 
     test('uses the default for an empty CONTAINERBASE_TMP_DIR', () => {
@@ -141,13 +144,15 @@ describe('cli/services/env.service', () => {
       expect(env.CONTAINERBASE_TMP_DIR).toBe(expected);
     });
 
-    test('ignores / with a warning', () => {
-      env.CONTAINERBASE_TMP_DIR = '//';
+    test.each(['/', '//'])('ignores %s with a warning', (dir) => {
+      env.CONTAINERBASE_TMP_DIR = dir;
+      expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { dir: '//' },
+        { dir },
         'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
+      expect(env.CONTAINERBASE_TMP_DIR).toBe(rootPath('tmp/containerbase'));
     });
 
     test('uses the default folder without a warning', () => {

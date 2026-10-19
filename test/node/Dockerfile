@@ -679,6 +679,10 @@ RUN set -ex; \
   out=$(CONTAINERBASE_TMP_DIR=relative/tmp docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
   echo "${out}"; \
   [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  out=$(CONTAINERBASE_TMP_DIR=// docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
   [[ "${out}" == *"tmp=/tmp/containerbase"* ]]
 
 # a configured link into /tmp skips the fast path, the cli warns and keeps the default
@@ -746,6 +750,37 @@ RUN set -ex; \
   [[ -f /tmp/containerbase/marker ]]; \
   [[ ! -e /var/cache/containerbase/marker ]]; \
   [[ -f /tmp/containerbase/tool.init.d/node ]]
+
+USER root
+
+# a root owned configured folder created before the switch is given to the user
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/pre; \
+  CONTAINERBASE_TMP_DIR=/var/cache/pre containerbase-cli init tool node; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/pre ]]; \
+  [[ "$(stat --format '%u' /var/cache/pre)" -eq 12021 ]]
+
+USER 12021
+
+RUN set -ex; \
+  touch "${USER_HOME}/.npm/user-write"; \
+  [[ -f /var/cache/pre/cache/.npm/user-write ]]
+
+USER root
+
+# without a configured folder a non-root boot replaces a leftover link to a folder it can't write
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/root-ro
+
+USER 12021
+
+RUN set -ex; \
+  ln -s /var/cache/root-ro /tmp/containerbase; \
+  env -u CONTAINERBASE_TMP_DIR docker-entrypoint.sh true; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  [[ -d /tmp/containerbase/tool.init.d ]]
 
 #--------------------------------------
 # test: vp

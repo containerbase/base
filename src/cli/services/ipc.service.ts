@@ -34,7 +34,7 @@ export class IpcServer {
   private pathSvc!: PathService;
 
   /**
-   * Starts the ipc server on `ipc.sock` in the default temp folder, which links tools
+   * Starts the ipc server on `ipc.sock` in the temp folder, which links tools
    * for the legacy shell installers.
    *
    * @throws when the server already runs
