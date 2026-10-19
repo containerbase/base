@@ -1,7 +1,7 @@
 import fs, { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import { dirname, join } from 'node:path';
-import { env } from 'node:process';
+import { env, getuid } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -104,9 +104,13 @@ describe('cli/services/path.service', () => {
       );
     });
 
-    /** Lets the env service report root, only root moves a default folder. */
+    /**
+     * Lets the env service report root, only root moves a default folder. The
+     * configured user is the test user, who owns the test folders.
+     */
     function asRoot(): void {
       vi.spyOn(child.get(EnvService), 'isRoot', 'get').mockReturnValue(true);
+      vi.stubEnv('USER_ID', `${getuid!()}`);
     }
 
     /**
@@ -348,30 +352,46 @@ describe('cli/services/path.service', () => {
       expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
     });
 
-    /** Lets `stat` report the configured folder as root owned. */
-    function rootOwnedTmpDir(): void {
+    /**
+     * Lets `stat` report the configured folder as owned by root and another
+     * group with `mode`, and `chown` give it to the user or fail with `error`.
+     */
+    function rootOwnedTmpDir(
+      mode = 0o755,
+      error?: Error,
+    ): ReturnType<typeof vi.spyOn> {
       const { stat } = fs;
       vi.spyOn(fs, 'stat').mockImplementation(async (path) => {
         const stats = await stat(path);
         return path === rootPath('var/cache/containerbase')
-          ? Object.assign(stats, { uid: 0 })
+          ? Object.assign(stats, {
+              uid: 0,
+              gid: 4242,
+              mode: (stats.mode & ~0o7777) | mode,
+            })
           : stats;
       });
+      const chown = vi.spyOn(fs, 'chown');
+      if (error) {
+        chown.mockRejectedValue(error);
+      } else {
+        chown.mockResolvedValue();
+      }
+      return chown;
     }
 
-    test('ensureTmpLink gives a root owned configured folder to the user as root', async () => {
+    test('ensureTmpLink gives an empty root owned configured folder to the user as root', async () => {
       asRoot();
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
       await ensurePaths('var/cache/containerbase');
       await fs.chmod(rootPath('var/cache/containerbase'), 0o755);
-      rootOwnedTmpDir();
-      const chown = vi.spyOn(fs, 'chown').mockResolvedValue();
+      const chown = rootOwnedTmpDir();
 
       await pathSvc.ensureTmpLink();
 
       expect(chown).toHaveBeenCalledExactlyOnceWith(
         rootPath('var/cache/containerbase'),
-        12021,
+        Number(env.USER_ID),
         0,
       );
       // the mode is kept
@@ -383,22 +403,144 @@ describe('cli/services/path.service', () => {
       );
     });
 
-    test('ensureTmpLink lets the access check decide when the configured folder can not be owned', async () => {
+    test.each([
+      // a new ext4 file system
+      [['lost+found']],
+      [['tool.init.d', 'cache', 'ipc.sock']],
+    ])(
+      'ensureTmpLink gives a root owned configured folder with %j to the user as root',
+      async (entries) => {
+        asRoot();
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        await ensurePaths(
+          entries.map((entry) => `var/cache/containerbase/${entry}`),
+        );
+        const chown = rootOwnedTmpDir();
+
+        await pathSvc.ensureTmpLink();
+
+        expect(chown).toHaveBeenCalledOnce();
+        expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+          rootPath('var/cache/containerbase'),
+        );
+      },
+    );
+
+    test.each([
+      // like `/var/lib/someapp`
+      [['cache', 'data', 'config']],
+      [['apt']],
+    ])(
+      'ensureTmpLink does not own a root owned configured folder with %j as root',
+      async (entries) => {
+        asRoot();
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        await ensurePaths(
+          entries.map((entry) => `var/cache/containerbase/${entry}`),
+        );
+        const chown = rootOwnedTmpDir();
+
+        await pathSvc.ensureTmpLink();
+
+        expect(chown).not.toHaveBeenCalled();
+        expectDefaultTmpDir('is not writable for the user');
+      },
+    );
+
+    test.each([true, false])(
+      'ensureTmpLink does not use a shared configured folder, root %s',
+      async (root) => {
+        if (root) {
+          asRoot();
+        }
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        await ensurePaths('var/cache/containerbase');
+        // like `/var/tmp`
+        const chown = rootOwnedTmpDir(0o1777);
+
+        await pathSvc.ensureTmpLink();
+
+        expect(chown).not.toHaveBeenCalled();
+        expectDefaultTmpDir('is a shared folder');
+      },
+    );
+
+    test('ensureTmpLink keeps the default folder when the configured folder can not be checked', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await ensurePaths('var/cache/containerbase');
+      const { stat } = fs;
+      vi.spyOn(fs, 'stat').mockImplementation(async (path) => {
+        if (path === rootPath('var/cache/containerbase')) {
+          throw Object.assign(new Error('EACCES'), { code: 'EACCES' });
+        }
+        return await stat(path);
+      });
+
+      await pathSvc.ensureTmpLink();
+
+      expectDefaultTmpDir("can't be resolved");
+      expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
+    });
+
+    test('ensureTmpLink keeps the default folder when the configured folder can not be owned as root', async () => {
       asRoot();
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
       await ensurePaths('var/cache/containerbase');
-      rootOwnedTmpDir();
-      vi.spyOn(fs, 'chown').mockRejectedValue(
+      const chown = rootOwnedTmpDir(
+        0o755,
         Object.assign(new Error('EPERM'), { code: 'EPERM' }),
       );
 
       await pathSvc.ensureTmpLink();
 
-      expect(logger.warn).not.toHaveBeenCalled();
-      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
-        rootPath('var/cache/containerbase'),
-      );
+      expect(chown).toHaveBeenCalledOnce();
+      expectDefaultTmpDir('is not writable for the user');
     });
+
+    test.each([
+      [0o775, 0, undefined, true],
+      [0o755, 0, undefined, false],
+      [0o775, 4242, undefined, false],
+      [0o777, 4242, undefined, true],
+      // not 1000, which is often the test user's own group
+      [0o775, 33333, undefined, false],
+      [0o775, 33333, '33333', true],
+    ])(
+      'ensureTmpLink checks mode %o with group %i and primary group %s for the user as root',
+      async (mode, gid, primaryGroupId, usable) => {
+        asRoot();
+        vi.stubEnv('PRIMARY_GROUP_ID', primaryGroupId);
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        await ensurePaths('var/cache/containerbase/apt');
+        const { stat } = fs;
+        vi.spyOn(fs, 'stat').mockImplementation(async (path) => {
+          const stats = await stat(path);
+          return path === rootPath('var/cache/containerbase')
+            ? Object.assign(stats, {
+                uid: 0,
+                gid,
+                mode: (stats.mode & ~0o7777) | mode,
+              })
+            : stats;
+        });
+
+        await pathSvc.ensureTmpLink();
+
+        expect(logger.warn).toHaveBeenCalledTimes(usable ? 0 : 1);
+      },
+    );
 
     test('ensureTmpLink keeps the owner of a configured folder which is not root owned', async () => {
       asRoot();
@@ -423,6 +565,40 @@ describe('cli/services/path.service', () => {
 
       expectDefaultTmpDir('is not a directory');
       expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
+    });
+
+    test('ensureTmpLink keeps the default folder when the configured one is a dangling link', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await ensurePaths('var/cache');
+      await fs.symlink(
+        rootPath('missing'),
+        rootPath('var/cache/containerbase'),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expectDefaultTmpDir('is a dangling link');
+      expect(await pathExists(rootPath('missing'))).toBe(false);
+      expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
+    });
+
+    test('ensureTmpLink replaces a relative link to the unusable configured folder', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await ensurePaths('var/cache/containerbase');
+      await fs.symlink(
+        '../var/cache/containerbase',
+        rootPath('tmp/containerbase'),
+      );
+      vi.spyOn(fs, 'access').mockRejectedValueOnce(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expectDefaultTmpDir('is not writable');
+      const stats = await fs.lstat(rootPath('tmp/containerbase'));
+      expect(stats.isDirectory()).toBe(true);
+      expect(stats.isSymbolicLink()).toBe(false);
     });
 
     test('ensureTmpLink keeps a stale link to a usable folder which can not be removed', async () => {
@@ -502,8 +678,7 @@ describe('cli/services/path.service', () => {
         rootPath('tmp/other'),
         rootPath('var/cache/containerbase'),
       );
-      rootOwnedTmpDir();
-      const chown = vi.spyOn(fs, 'chown');
+      const chown = rootOwnedTmpDir();
 
       await pathSvc.ensureTmpLink();
 

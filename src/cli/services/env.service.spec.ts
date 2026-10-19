@@ -78,6 +78,19 @@ describe('cli/services/env.service', () => {
     expect(svc.userId).toBe(12021);
   });
 
+  test.each([
+    [undefined, 0],
+    ['1000', 1000],
+  ])('primaryGroupId from %j', (value, expected) => {
+    // `node:process` is mocked with a plain `env` object
+    env.PRIMARY_GROUP_ID = value;
+    try {
+      expect(svc.primaryGroupId).toBe(expected);
+    } finally {
+      delete env.PRIMARY_GROUP_ID;
+    }
+  });
+
   test('umask', () => {
     expect(svc.umask).toBe(0o755);
     Object.assign(svc, { uid: 12021 });

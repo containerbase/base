@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { getuid } from 'node:process';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { PathService } from '../services/index.ts';
@@ -195,6 +196,8 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
 
     test('links a configured CONTAINERBASE_TMP_DIR before preparing', async () => {
       vi.stubEnv('CONTAINERBASE_TMP_DIR', rootPath('var/cache/containerbase'));
+      // the configured user must be able to write the folder, which the test user owns
+      vi.stubEnv('USER_ID', `${getuid!()}`);
       await fs.rm(rootPath('tmp/containerbase'), { recursive: true });
 
       try {

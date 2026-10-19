@@ -1,6 +1,6 @@
-import type { Dirent } from 'node:fs';
+import type { Dirent, Stats } from 'node:fs';
 import fs from 'node:fs/promises';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
@@ -49,6 +49,43 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
     () => null,
     (err: NodeJS.ErrnoException) => err,
   );
+}
+
+/** The entries a folder dedicated to containerbase may hold. */
+const dedicatedEntries = new Set([
+  'tool.init.d',
+  'cache',
+  'ipc.sock',
+  'lost+found',
+]);
+
+/**
+ * Whether the folder is dedicated to containerbase, so it may be taken over:
+ * every entry is one of a containerbase temp folder or `lost+found` of a new
+ * file system. An empty folder counts as well.
+ */
+async function isDedicated(path: string): Promise<boolean> {
+  const entries = await fs.readdir(path);
+  return entries.every((entry) => dedicatedEntries.has(entry));
+}
+
+/**
+ * Whether the containerbase user can create files in the folder, from its
+ * owner, group and mode. The user is in the root group, its own group and
+ * its primary group.
+ */
+function canUserWrite(
+  { uid, gid, mode }: Pick<Stats, 'uid' | 'gid' | 'mode'>,
+  userId: number,
+  primaryGroupId: number,
+): boolean {
+  let wx = 0o003;
+  if (uid === userId) {
+    wx = 0o300;
+  } else if (gid === 0 || gid === userId || gid === primaryGroupId) {
+    wx = 0o030;
+  }
+  return (mode & wx) === wx;
 }
 
 /** The target of the link, `null` when the path is no link. */
@@ -430,24 +467,51 @@ export class PathService {
 
   /**
    * Creates the configured temp folder when it's missing and checks that the
-   * current user can write it. Another process creating it meanwhile is fine.
-   * As root, an existing root owned folder, eg. created by `mkdir` or a
-   * volume, is given to the configured user, keeping its mode.
+   * current user can write it, as root also the configured user. Another
+   * process creating it meanwhile is fine. As root, an existing root owned
+   * folder dedicated to containerbase, see `isDedicated`, is given to the
+   * configured user, keeping its mode. A shared folder with the sticky bit,
+   * eg. `/var/tmp`, is never used.
    *
    * @returns why the folder is not usable, `null` when it is
    */
   private async prepareTmpDir(tmpDir: string): Promise<string | null> {
-    const stats = await fs.stat(tmpDir).catch(() => null);
-    if (stats && !stats.isDirectory()) {
-      return `${tmpDir} is not a directory`;
+    let stats: Stats | null = null;
+    try {
+      stats = await fs.stat(tmpDir);
+    } catch (err) {
+      if (!isMissingError(err)) {
+        logger.debug({ err, tmpDir }, 'can not stat the tmp dir');
+        return `${tmpDir} can't be resolved`;
+      }
+      if (await fs.lstat(tmpDir).catch(() => null)) {
+        // `stat` misses the path while `lstat` finds it, so the link target is missing
+        return `${tmpDir} is a dangling link`;
+      }
     }
+    // the owner the configured user's write check uses, a created folder is
+    // already given to the user by `createDir`
+    let owner: Pick<Stats, 'uid' | 'gid' | 'mode'> | null = null;
     if (stats) {
-      if (this.envSvc.isRoot && stats.uid === 0) {
-        await fs
-          .chown(tmpDir, this.envSvc.userId, 0)
-          .catch((err: unknown) =>
-            logger.debug({ err, tmpDir }, 'can not own the tmp dir'),
-          );
+      if (!stats.isDirectory()) {
+        return `${tmpDir} is not a directory`;
+      }
+      // the sticky bit
+      if (stats.mode & 0o1000) {
+        return `${tmpDir} is a shared folder`;
+      }
+      owner = stats;
+      if (
+        this.envSvc.isRoot &&
+        stats.uid === 0 &&
+        (await isDedicated(tmpDir))
+      ) {
+        try {
+          await fs.chown(tmpDir, this.envSvc.userId, 0);
+          owner = { uid: this.envSvc.userId, gid: 0, mode: stats.mode };
+        } catch (err) {
+          logger.debug({ err, tmpDir }, 'can not own the tmp dir');
+        }
       }
     } else {
       try {
@@ -464,6 +528,13 @@ export class PathService {
     if (err) {
       logger.debug({ err, tmpDir }, 'configured tmp dir is not writable');
       return `${tmpDir} is not writable`;
+    }
+    if (
+      this.envSvc.isRoot &&
+      owner &&
+      !canUserWrite(owner, this.envSvc.userId, this.envSvc.primaryGroupId)
+    ) {
+      return `${tmpDir} is not writable for the user`;
     }
     return null;
   }
@@ -525,7 +596,8 @@ export class PathService {
     const target = await readLink(link);
     if (
       target === null ||
-      (target !== unusable &&
+      // a relative target is relative to the folder of the link
+      (resolve(dirname(link), target) !== unusable &&
         (await pathExists(link, 'dir')) &&
         (await accessError(link)) === null)
     ) {

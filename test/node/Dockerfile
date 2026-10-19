@@ -782,6 +782,19 @@ RUN set -ex; \
   [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
   [[ -d /tmp/containerbase/tool.init.d ]]
 
+USER root
+
+# a root boot skips the fast path for a shared folder, the cli warns and keeps the default
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 1777 /var/cache/shared; \
+  mkdir /var/cache/shared/tool.init.d; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/shared docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"is a shared folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]
+
 #--------------------------------------
 # test: vp
 #--------------------------------------

@@ -136,6 +136,11 @@ export class EnvService {
     return parseInt(env.USER_ID ?? '12021', 10);
   }
 
+  /** The primary group id of the containerbase user, from `PRIMARY_GROUP_ID`. */
+  get primaryGroupId(): number {
+    return parseInt(env.PRIMARY_GROUP_ID ?? '0', 10);
+  }
+
   /** The mode for created folders and binaries, group writable unless root. */
   get umask(): number {
     return this.isRoot ? 0o755 : 0o775;
