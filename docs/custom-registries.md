@@ -298,11 +298,27 @@ https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_checksums.txt
 
 ## `git`
 
-Git is downloaded from:
+Git releases are downloaded from:
 
-- `http://ppa.launchpad.net/git-core/ppa/ubuntu`
+- `https://github.com/containerbase/git-prebuild/releases`
 
-Git is installed via `apt` package manager.
+The last url is used to find the latest version, if no version or no exact `X.Y.Z` version was provided.
+
+Samples:
+
+```txt
+https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-x86_64.tar.xz.sha512
+https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-x86_64.tar.xz
+https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-aarch64.tar.xz.sha512
+https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-aarch64.tar.xz
+https://github.com/containerbase/git-prebuild/releases/latest/download/version
+```
+
+The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
+An exact `X.Y.Z` version from `2.48.0` on is downloaded as is, a release without a prebuild fails the download.
+Any other version, like a partial `2.50`, a version before `2.48.0` or a vendor version like `2.43.0-1ubuntu1`, falls back to the newest prebuild with a warning.
+The runtime libraries git needs are installed via `apt` package manager, see [custom base image](./custom-base-image.md#git) for the compatibility packages.
+Images prepared by an older containerbase keep the git-core PPA apt source it added, they get the runtime libraries on the next `install-tool git`.
 
 ### `git-lfs`
 

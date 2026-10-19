@@ -175,8 +175,8 @@ FROM base AS testc
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 
 USER 12021
 
@@ -397,6 +397,30 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: git and git-lfs
+#--------------------------------------
+FROM base AS test-git
+
+# git comes with the base image
+# renovate: datasource=github-releases packageName=git-lfs/git-lfs
+RUN install-tool git-lfs v3.8.0
+
+USER 12021
+
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  readlink -f /usr/local/bin/git | grep '^/opt/containerbase/tools/git/[0-9.]*/bin/git$'; \
+  git --exec-path | grep '^/opt/containerbase/tools/git/[0-9.]*/libexec/git-core$'; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git lfs version | grep '^git-lfs/3\.8\.0 '; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
+
+#--------------------------------------
 # test: v1 and v2 shell tools of custom images
 #--------------------------------------
 FROM base AS test-legacy
@@ -441,4 +465,5 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-git /.dummy /.dummy
 COPY --link --from=test-legacy /.dummy /.dummy

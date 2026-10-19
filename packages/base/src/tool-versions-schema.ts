@@ -50,6 +50,12 @@ export const ToolVersion = z.object({
    * `<tool>/<version>.json` ones
    */
   files: z.array(ToolFile).min(1).exactOptional(),
+  /**
+   * the runtime constraint of this version per parent tool, like
+   * `{ node: '>=20.17.0' }`, as the raw string in the registry's syntax, only
+   * present when the registry has one
+   */
+  constraints: z.record(z.string().min(1), z.string().min(1)).exactOptional(),
 });
 
 /**

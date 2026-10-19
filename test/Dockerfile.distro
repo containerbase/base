@@ -25,8 +25,86 @@ ARG CONTAINERBASE_LOG_LEVEL
 
 RUN install-containerbase
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
+
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  for bin in git git-receive-pack git-shell git-upload-archive git-upload-pack scalar; do \
+    readlink -f "/usr/local/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.56\.0/bin/'; \
+    [ -x "/usr/local/bin/${bin}" ]; \
+    readlink -f "/usr/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.56\.0/bin/'; \
+  done; \
+  git --version | grep '^git version 2\.56\.0$'; \
+  /usr/bin/git --version | grep '^git version 2\.56\.0$'; \
+  perl -v; \
+  git --exec-path | grep '^/opt/containerbase/tools/git/2\.56\.0/libexec/git-core$'; \
+  su ubuntu -s /bin/sh -c 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version' | grep '^git version 2\.56\.0$'; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  rm -rf /tmp/git-prebuild; \
+  true
+
+#--------------------------------------
+# Image: test-git-min
+#--------------------------------------
+FROM base AS test-git-min
+
+RUN touch /.dummy
+
+# versions before the first prebuild fall back to the newest one
+RUN set -ex; \
+  install-tool git 2.40.0 > /git-fallback.log 2>&1 || { cat /git-fallback.log; exit 1; }; \
+  cat /git-fallback.log; \
+  grep -F 'No git 2.40.0 prebuild, installing the newest git ' /git-fallback.log; \
+  newest="$(sed -n 's/.*No git 2\.40\.0 prebuild, installing the newest git \([0-9.]*\) instead.*/\1/p' /git-fallback.log)"; \
+  [ -n "${newest}" ]; \
+  [ ! -e /opt/containerbase/tools/git/2.40.0 ]; \
+  git --version | grep -Fx "git version ${newest}"; \
+  readlink -f /usr/local/bin/git | grep -Fx "/opt/containerbase/tools/git/${newest}/bin/git"; \
+  rm /git-fallback.log; \
+  true
+
+# the oldest supported git, keep it in sync with `minVersion` in
+# `src/cli/tools/git/index.ts`, no renovate updates
+RUN install-tool git 2.48.0
+
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  for bin in git git-receive-pack git-shell git-upload-archive git-upload-pack scalar; do \
+    readlink -f "/usr/local/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.48\.0/bin/'; \
+    [ -x "/usr/local/bin/${bin}" ]; \
+  done; \
+  git --version | grep '^git version 2\.48\.0$'; \
+  /usr/bin/git --version | grep '^git version 2\.48\.0$'; \
+  git --exec-path | grep '^/opt/containerbase/tools/git/2\.48\.0/libexec/git-core$'; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git init -q /tmp/git-min; \
+  git -C /tmp/git-min status; \
+  git ls-remote https://github.com/containerbase/git-prebuild.git HEAD; \
+  rm -rf /tmp/git-min; \
+  true
+
+#--------------------------------------
+# Image: test-git-apt
+#--------------------------------------
+FROM base AS test-git-apt
+
+RUN touch /.dummy
+
+# apt packages depending on git use the prebuild instead of ubuntu's git
+RUN set -ex; \
+  version="$(git --version | sed -n 's/^git version //p')"; \
+  [ -n "${version}" ]; \
+  dpkg -s containerbase-git | grep -Fx "Version: ${version}"; \
+  install-apt git-lfs tig; \
+  if dpkg -s git; then exit 1; fi; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  readlink -f /usr/bin/git | grep -Fx "/opt/containerbase/tools/git/${version}/bin/git"; \
+  git --version | grep -Fx "git version ${version}"; \
+  git lfs version; \
+  tig --version; \
+  true
 
 #--------------------------------------
 # Image: build
@@ -73,6 +151,11 @@ RUN install-tool flux v2.9.6
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.0
+
+RUN set -ex; \
+  git lfs version | grep '^git-lfs/3\.8\.0 '; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  true
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
@@ -277,6 +360,8 @@ FROM base
 COPY --from=test /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-erlang /.dummy /.dummy
+COPY --from=test-git-apt /.dummy /.dummy
+COPY --from=test-git-min /.dummy /.dummy
 COPY --from=test-haskell /.dummy /.dummy
 COPY --from=test-java /.dummy /.dummy
 COPY --from=test-mono /.dummy /.dummy
