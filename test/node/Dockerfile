@@ -640,6 +640,15 @@ RUN set -ex; \
   [[ ! -e /var/cache/containerbase/tool.init.d/node ]]; \
   [[ -d $USER_HOME/.npm ]]
 
+# a boot with an empty mounted folder links and initializes it
+RUN set -ex; \
+  find /var/cache/containerbase -mindepth 1 -delete; \
+  rm -rf /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ -d /var/cache/containerbase/tool.init.d ]]; \
+  [[ -d $USER_HOME/.npm ]]
+
 #--------------------------------------
 # test: vp
 #--------------------------------------
