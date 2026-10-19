@@ -10,35 +10,33 @@ if [[ -n "${CONTAINERBASE_CLEANUP_PATH}" ]]; then
   containerbase-cli cleanup path "${CONTAINERBASE_CLEANUP_PATH}"
 fi
 
-CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
-# shellcheck source=/dev/null
-. /usr/local/containerbase/utils/tmp-dir.sh
-
-tmp_dir=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}") || export CONTAINERBASE_TMP_DIR_WARNED=1
-init_check="${CONTAINERBASE_DEFAULT_TMP_DIR}"
-if [[ "${tmp_dir}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
-  # the home symlinks point to the default path, so link it to the configured one
-  link_containerbase_tmp_path "${tmp_dir}"
-  case $? in
-    0)
-      # init creates `tool.init.d`, so an empty mounted folder still gets initialized
-      init_check="${tmp_dir}/tool.init.d"
-      ;;
-    1)
-      # keep the default folder for this run
-      tmp_dir="${CONTAINERBASE_DEFAULT_TMP_DIR}"
-      ;;
-    *)
-      exit 1
-      ;;
-  esac
+default_tmp_dir=/tmp/containerbase
+tmp_dir="${CONTAINERBASE_TMP_DIR}"
+run_init=true
+if [[ -z "${tmp_dir}" || "${tmp_dir}" == "${default_tmp_dir}" ]]; then
+  if [[ -d "${default_tmp_dir}" ]]; then
+    run_init=false
+  fi
+elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != */ && "${tmp_dir}" != /tmp/* \
+  && -d "${tmp_dir}/tool.init.d" && -w "${tmp_dir}" && -x "${tmp_dir}" ]]; then
+  # fast path: an initialized configured folder only needs the link, which the
+  # home symlinks go through; `containerbase-cli` handles all other cases
+  if [[ ! -e "${default_tmp_dir}" && ! -L "${default_tmp_dir}" ]]; then
+    ln -s "${tmp_dir}" "${default_tmp_dir}" 2> /dev/null
+  fi
+  if [[ "$(readlink "${default_tmp_dir}")" == "${tmp_dir}" ]]; then
+    run_init=false
+  fi
 fi
-# the normalized value for the commands started below, so they don't warn again
-export CONTAINERBASE_TMP_DIR="${tmp_dir}"
 
-if [[ ! -d "${init_check}" ]]; then
-  # initialize all prepared tools
+if [[ "${run_init}" == true ]]; then
+  # initialize all prepared tools, also checks and links a configured tmp dir
   containerbase-cli init tool all
+  if [[ -n "${tmp_dir}" && "${tmp_dir}" != "${default_tmp_dir}" && "$(readlink "${default_tmp_dir}")" != "${tmp_dir}" ]]; then
+    # the cli kept the default folder or normalized the value, the default
+    # folder works for both, directly or through the link
+    export CONTAINERBASE_TMP_DIR="${default_tmp_dir}"
+  fi
 fi
 
 exec dumb-init -- "$@"

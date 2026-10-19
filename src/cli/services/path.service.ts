@@ -49,6 +49,21 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
   );
 }
 
+/** Whether the path is a folder or a link to one. */
+async function isDir(path: string): Promise<boolean> {
+  return (await fs.stat(path).catch(() => null))?.isDirectory() ?? false;
+}
+
+/** The target of the link, `null` when the path is no link. */
+async function readLink(path: string): Promise<string | null> {
+  return await fs.readlink(path).catch(() => null);
+}
+
+/** Whether the error is `EEXIST`, eg. from another process. */
+function isExistsError(err: unknown): boolean {
+  return (err as NodeJS.ErrnoException).code === 'EEXIST';
+}
+
 /** Whether the error is a missing permission, `EPERM` or `EACCES`. */
 function isPermissionError(err: unknown): boolean {
   const { code } = err as NodeJS.ErrnoException;
@@ -344,27 +359,39 @@ export class PathService {
       await moveDirContents(link, tmpDir);
       await fs.rm(link, { recursive: true, force: true });
     }
-    await this.createSymlink(tmpDir, link);
+    try {
+      await fs.symlink(tmpDir, link);
+    } catch (err) {
+      // another process may have created the same link meanwhile
+      if (!isExistsError(err) || (await readLink(link)) !== tmpDir) {
+        throw err;
+      }
+    }
   }
 
   /**
    * Creates the configured temp folder when it's missing and checks that the
-   * current user can write it.
+   * current user can write it. Another process creating it meanwhile is fine.
    *
-   * @returns `false` when the current user may not create or write it
+   * @returns `false` when it can't be created or written, for any reason, eg.
+   * a missing permission, a read-only file system or a dangling link
    */
   private async prepareTmpDir(tmpDir: string): Promise<boolean> {
     try {
-      if (!(await fs.stat(tmpDir).catch(() => null))?.isDirectory()) {
+      if (!(await isDir(tmpDir))) {
         await fs.mkdir(dirname(tmpDir), { recursive: true });
-        await this.createDir(tmpDir);
+        try {
+          await this.createDir(tmpDir);
+        } catch (err) {
+          if (!isExistsError(err) || !(await isDir(tmpDir))) {
+            throw err;
+          }
+        }
       }
       await fs.access(tmpDir, fs.constants.W_OK | fs.constants.X_OK);
       return true;
     } catch (err) {
-      if (!isPermissionError(err)) {
-        throw err;
-      }
+      logger.debug({ err, tmpDir }, 'configured tmp dir is not usable');
       return false;
     }
   }
@@ -383,7 +410,7 @@ export class PathService {
       `cannot switch ${link} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
     );
     env.CONTAINERBASE_TMP_DIR = link;
-    if ((await fs.readlink(link).catch(() => null)) !== tmpDir) {
+    if ((await readLink(link)) !== tmpDir) {
       return;
     }
     try {

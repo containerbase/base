@@ -665,6 +665,13 @@ RUN set -ex; \
   node --version; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
 
+# an invalid value at boot goes through the cli, which warns once and uses the default
+RUN set -ex; \
+  out=$(CONTAINERBASE_TMP_DIR=relative/tmp docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]
+
 # a non-root boot with a configured folder it can't create keeps a real default folder
 RUN set -ex; \
   rm -rf /tmp/containerbase; \
@@ -681,6 +688,24 @@ RUN set -ex; \
   [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
   containerbase-cli init tool node; \
   [[ -f /tmp/containerbase/tool.init.d/node ]]
+
+USER root
+
+# a non-root boot with a root owned link to another folder keeps that link
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 777 /var/tmp/other; \
+  ln -s /var/tmp/other /tmp/containerbase
+
+USER 12021
+
+RUN set -ex; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/tmp/other ]]; \
+  [[ -f /var/tmp/other/tool.init.d/node ]]
 
 USER root
 

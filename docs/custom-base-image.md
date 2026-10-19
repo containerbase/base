@@ -165,14 +165,18 @@ You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.
 The path must be absolute, normalized and outside of `/tmp`, trailing slashes are dropped.
 Other values, eg. a relative path, `/`, `/var/../cache` or `/tmp/cache`, are ignored with a warning.
 The home links keep pointing to `/tmp/containerbase`, which is then a symlink to the configured folder.
-The `docker-entrypoint.sh`, `containerbase-cli` and the tool wrappers create that symlink when it is missing and replace a symlink to another folder.
+`install-containerbase` always sets up `/tmp/containerbase`, the switch happens on the first `containerbase-cli` prepare, install or init.
+`containerbase-cli` checks the value and passes the checked value, or the default, on to the tools it runs.
+It creates the symlink when it is missing and replaces a symlink to another folder, the tool wrappers run it when the symlink is missing.
 The configured folder may itself be a symlink to a folder.
 
 Switch the folder at image build time as root.
 Only root moves an existing `/tmp/containerbase` folder, eg. from the base image, into the configured folder, entries which already exist there are kept.
 For a non-root user with a `/tmp/containerbase` folder, or when the symlink can't be replaced or the configured folder can't be created or written, a warning is shown and that run keeps using `/tmp/containerbase`.
 A file at `/tmp/containerbase` is an error, remove it.
-The entrypoint skips `init tool all` when the configured folder already has a `tool.init.d` folder.
+
+The `docker-entrypoint.sh` only creates a missing symlink and skips `init tool all`, when the configured folder already has a `tool.init.d` folder and is writable.
+In all other cases it runs `containerbase-cli init tool all`, which handles them as described above.
 The ipc socket of `containerbase-cli` is `/tmp/containerbase/ipc.sock`, through the symlink it lives in the configured folder.
 
 Set `CONTAINERBASE_TMP_DIR` before the first tool is prepared or installed, eg. right after `FROM`.

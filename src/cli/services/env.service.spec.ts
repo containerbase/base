@@ -62,10 +62,6 @@ describe('cli/services/env.service', () => {
     expect(svc.isRoot).toBe(true);
   });
 
-  test('uid', () => {
-    expect(svc.uid).toBe(0);
-  });
-
   test('home', () => {
     expect(svc.home).toBeUndefined();
   });
@@ -84,7 +80,7 @@ describe('cli/services/env.service', () => {
 
   test('umask', () => {
     expect(svc.umask).toBe(0o755);
-    vi.spyOn(svc, 'uid', 'get').mockReturnValue(12021);
+    Object.assign(svc, { uid: 12021 });
     expect(svc.umask).toBe(0o775);
   });
 
@@ -130,6 +126,19 @@ describe('cli/services/env.service', () => {
     test('drops trailing slashes', () => {
       env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase//';
       expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
+    });
+
+    test.each([
+      ['/var/cache/containerbase//', '/var/cache/containerbase'],
+      ['var/cache/containerbase', undefined],
+      [undefined, undefined],
+    ])('exports %s for child processes', (value, normalized) => {
+      const expected = normalized ?? rootPath('tmp/containerbase');
+      if (value) {
+        env.CONTAINERBASE_TMP_DIR = value;
+      }
+      expect(svc.containerbaseTmpDir).toBe(expected);
+      expect(env.CONTAINERBASE_TMP_DIR).toBe(expected);
     });
 
     test('ignores / with a warning', () => {

@@ -18,10 +18,9 @@ const compare = (() => {
 @injectable(bindingScopeValues.Singleton)
 export class EnvService {
   readonly arch: Arch;
-  private readonly _uid: number;
+  private uid: number;
   private replacements: Replacements | undefined;
   private ignoredTools: Set<string> | undefined;
-  private invalidTmpDirWarned = false;
 
   /**
    * Reads the effective user id and maps the node architecture to `amd64` or
@@ -30,7 +29,7 @@ export class EnvService {
    * @throws on an unsupported architecture
    */
   constructor() {
-    this._uid = geteuid?.() ?? 0; // fallback should never happen on linux
+    this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
     switch (arch()) {
       case 'arm64':
         this.arch = 'arm64';
@@ -58,31 +57,32 @@ export class EnvService {
    * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
    * `/tmp/containerbase` when unset or empty. Trailing slashes are dropped.
    * A path that is not absolute and normalized, or that is `/tmp` or below it,
-   * is ignored with a warning, which is logged once.
+   * is ignored with a warning.
+   *
+   * The checked value is written back to `CONTAINERBASE_TMP_DIR`, so child
+   * processes, eg. the v2 shell tools, use it and an invalid value is only
+   * reported once.
    */
   get containerbaseTmpDir(): string {
     const defaultDir = join(this.tmpDir, 'containerbase');
     const value = env.CONTAINERBASE_TMP_DIR;
+    let dir = defaultDir;
     if (isNonEmptyString(value)) {
-      const dir = value.replace(/\/+$/, '');
-      if (dir === defaultDir) {
-        return defaultDir;
-      }
-      const rel = relative(this.tmpDir, dir);
+      const trimmed = value.replace(/\/+$/, '');
+      const rel = relative(this.tmpDir, trimmed);
       const inTmp =
         rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
-      if (resolve(dir) === dir && !inTmp) {
-        return dir;
-      }
-      if (!this.invalidTmpDirWarned) {
+      if (trimmed === defaultDir || (resolve(trimmed) === trimmed && !inTmp)) {
+        dir = trimmed;
+      } else {
         logger.warn(
           { dir: value },
           'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
         );
-        this.invalidTmpDirWarned = true;
       }
     }
-    return defaultDir;
+    env.CONTAINERBASE_TMP_DIR = dir;
+    return dir;
   }
 
   /** The home folder of the current user, from `HOME`. */
@@ -94,11 +94,6 @@ export class EnvService {
   /** Whether the process runs as root. */
   get isRoot(): boolean {
     return this.uid === 0;
-  }
-
-  /** The effective user id of the process. */
-  get uid(): number {
-    return this._uid;
   }
 
   /**

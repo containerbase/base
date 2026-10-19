@@ -136,45 +136,19 @@ teardown() {
   assert [ "$(stat --format '%a' "${tmp_dir}/cache")" -eq 775 ]
   assert [ -d "${var_dir}/tool.prep.d" ]
   assert [ "$(stat --format '%a' "${var_dir}/tool.prep.d")" -eq 755 ]
-  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
-  assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
 }
 
-@test "ignores a relative tmp dir" {
-  CONTAINERBASE_TMP_DIR=relative/tmp \
-  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
-  assert_success
-  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
-  assert_line "tmp=/tmp/containerbase"
-}
-
-@test "warns about an invalid tmp dir only once" {
-  CONTAINERBASE_TMP_DIR=relative/tmp \
-  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && CONTAINERBASE_TMP_DIR=other/tmp && . \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
-  assert_success
-  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
-  refute_line --partial "other/tmp"
-  assert_line "tmp=/tmp/containerbase"
-}
-
-@test "drops trailing slashes from the tmp dir" {
-  CONTAINERBASE_TMP_DIR=/var/cache/containerbase// \
-  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
-  assert_success
-  assert_output "tmp=/var/cache/containerbase"
-}
-
-@test "setup directories with a custom tmp dir" {
+@test "setup directories always uses the default tmp dir" {
   local TEST_ROOT_USER=0 # root
   local CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/var-cache"
 
   run setup_directories
   assert_success
 
-  assert [ -d "${CONTAINERBASE_TMP_DIR}/cache/.cache" ]
-  assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${CONTAINERBASE_TMP_DIR}" ]
+  assert [ -d "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
+  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
+  assert [ ! -e "${CONTAINERBASE_TMP_DIR}" ]
   assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
-  assert [ -d "${USER_HOME}/.cache" ]
 }
 
 @test "creates a folder with correct permissions" {

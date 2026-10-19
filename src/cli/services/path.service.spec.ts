@@ -285,13 +285,66 @@ describe('cli/services/path.service', () => {
       expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
     });
 
-    test('ensureTmpLink rethrows other errors creating the configured folder', async () => {
-      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
-      vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(
-        Object.assign(new Error('EIO'), { code: 'EIO' }),
-      );
+    test.each(['EROFS', 'ENOTDIR', 'ENOENT', 'EIO'])(
+      'ensureTmpLink keeps the default folder on %s creating the configured folder',
+      async (code) => {
+        await deleteAsync('tmp/containerbase', {
+          force: true,
+          cwd: rootPath(),
+        });
+        vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(
+          Object.assign(new Error(code), { code }),
+        );
 
-      await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EIO');
+        await pathSvc.ensureTmpLink();
+
+        expectDefaultTmpDir();
+        expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
+      },
+    );
+
+    test('ensureTmpLink accepts a configured folder created by another process meanwhile', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await ensurePaths('var/cache');
+      const { mkdir } = fs;
+      vi.spyOn(fs, 'mkdir').mockImplementation(async (path, options) => {
+        if (path === rootPath('var/cache/containerbase')) {
+          await mkdir(path);
+          throw Object.assign(new Error('EEXIST'), { code: 'EEXIST' });
+        }
+        return mkdir(path, options);
+      });
+
+      await pathSvc.ensureTmpLink();
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+    });
+
+    test('ensureTmpLink accepts the same link created by another process meanwhile', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      const { symlink } = fs;
+      vi.spyOn(fs, 'symlink').mockImplementationOnce(async (target, path) => {
+        await symlink(target, path);
+        throw Object.assign(new Error('EEXIST'), { code: 'EEXIST' });
+      });
+
+      await pathSvc.ensureTmpLink();
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
+      );
+    });
+
+    test('ensureTmpLink fails when another process created something else meanwhile', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      vi.spyOn(fs, 'symlink').mockImplementationOnce(async (_target, path) => {
+        await fs.mkdir(path);
+        throw Object.assign(new Error('EEXIST'), { code: 'EEXIST' });
+      });
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EEXIST');
     });
 
     test('ensureTmpLink accepts a configured folder which links to a folder', async () => {
