@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { env, geteuid } from 'node:process';
+import { env } from 'node:process';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import {
@@ -50,17 +50,6 @@ function accessError(path: string): Promise<NodeJS.ErrnoException | null> {
 }
 
 /**
- * The error for a `/tmp/containerbase` which the current user can't replace
- * with the link to the configured `CONTAINERBASE_TMP_DIR`.
- */
-function tmpLinkError(found: string, expected: string, cause?: unknown): Error {
-  return new Error(
-    `${found}, expected ${expected}; recreate the container or run as root`,
-    { cause },
-  );
-}
-
-/**
  * Moves the entries of `src` into `dst`, merging folders and keeping the
  * entries which already exist in `dst`. Uses `mv` when renaming fails across
  * devices, eg. for folders of a lower overlay layer, as it keeps the owner.
@@ -87,6 +76,9 @@ async function moveDirContents(src: string, dst: string): Promise<void> {
 export class PathService {
   @inject(EnvService)
   private readonly envSvc!: EnvService;
+
+  /** Set when `ensureTmpLink` couldn't switch to the configured folder. */
+  private _useDefaultTmpDir = false;
 
   /**
    * Path to `/tmp/containerbase/tool.init.d`.
@@ -162,10 +154,13 @@ export class PathService {
 
   /**
    * Path to the containerbase temp folder, `CONTAINERBASE_TMP_DIR` or
-   * `/tmp/containerbase`.
+   * `/tmp/containerbase`. The default one when `ensureTmpLink` couldn't switch
+   * to the configured one.
    */
   get tmpDir(): string {
-    return this.envSvc.containerbaseTmpDir;
+    return this._useDefaultTmpDir
+      ? this.defaultTmpDir
+      : this.envSvc.containerbaseTmpDir;
   }
 
   /**
@@ -302,41 +297,72 @@ export class PathService {
    * `/tmp/containerbase` to it, so writes to `cachePath` land there. A link
    * to another target is replaced. A folder, eg. from the base image, is
    * moved into the configured one first, keeping entries which exist there.
-   * An existing file is left as is.
+   * An existing file is left as is. The configured folder may be a link to a
+   * folder.
    *
-   * @throws when the link or folder can't be replaced by the current user
+   * When the current user can't replace the link or folder, this run keeps
+   * using the default folder, see `tmpDir`.
+   *
+   * @returns whether the configured folder is used
    */
-  async ensureTmpLink(): Promise<void> {
-    const tmpDir = this.tmpDir;
+  async ensureTmpLink(): Promise<boolean> {
+    const tmpDir = this.envSvc.containerbaseTmpDir;
     const link = this.defaultTmpDir;
-    if (tmpDir === link) {
-      return;
+    if (this._useDefaultTmpDir) {
+      return false;
     }
-    await fs.mkdir(dirname(tmpDir), { recursive: true });
-    await this.createDir(tmpDir);
+    if (tmpDir === link) {
+      return true;
+    }
     const stats = await fs.lstat(link).catch(() => null);
+    if (
+      stats?.isDirectory() &&
+      !this.envSvc.isRoot &&
+      stats.uid !== this.envSvc.uid
+    ) {
+      // removing it from the sticky `/tmp` would fail after moving its content
+      return this.keepDefaultTmpDir(tmpDir);
+    }
+    if (!(await fs.stat(tmpDir).catch(() => null))?.isDirectory()) {
+      await fs.mkdir(dirname(tmpDir), { recursive: true });
+      await this.createDir(tmpDir);
+    }
     if (stats?.isSymbolicLink()) {
       const target = await fs.readlink(link);
       if (target === tmpDir) {
-        return;
+        return true;
       }
       logger.debug({ link, target, tmpDir }, 'replacing stale tmp dir link');
-      await fs.rm(link).catch((err: NodeJS.ErrnoException) => {
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-          throw tmpLinkError(`${link} links to ${target}`, tmpDir, err);
+      try {
+        await fs.rm(link);
+      } catch (err) {
+        const { code } = err as NodeJS.ErrnoException;
+        if (code === 'EPERM' || code === 'EACCES') {
+          return this.keepDefaultTmpDir(tmpDir);
         }
         throw err;
-      });
-    } else if (stats?.isDirectory()) {
-      if (!this.envSvc.isRoot && stats.uid !== geteuid?.()) {
-        // removing it from the sticky `/tmp` fails after moving its content
-        throw tmpLinkError(`${link} is a folder owned by another user`, tmpDir);
       }
+    } else if (stats?.isDirectory()) {
       logger.debug({ link, tmpDir }, 'moving tmp dir folder');
       await moveDirContents(link, tmpDir);
       await fs.rm(link, { recursive: true, force: true });
     }
     await this.createSymlink(tmpDir, link);
+    return true;
+  }
+
+  /**
+   * Warns that the default folder can't be switched to the configured one and
+   * keeps using the default folder for this run.
+   *
+   * @returns `false`, the configured folder isn't used
+   */
+  private keepDefaultTmpDir(tmpDir: string): false {
+    logger.warn(
+      `cannot switch ${this.defaultTmpDir} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
+    );
+    this._useDefaultTmpDir = true;
+    return false;
   }
 
   /**

@@ -18,7 +18,7 @@ const compare = (() => {
 @injectable(bindingScopeValues.Singleton)
 export class EnvService {
   readonly arch: Arch;
-  private uid: number;
+  private readonly _uid: number;
   private replacements: Replacements | undefined;
   private ignoredTools: Set<string> | undefined;
   private invalidTmpDirWarned = false;
@@ -30,7 +30,7 @@ export class EnvService {
    * @throws on an unsupported architecture
    */
   constructor() {
-    this.uid = geteuid?.() ?? 0; // fallback should never happen on linux
+    this._uid = geteuid?.() ?? 0; // fallback should never happen on linux
     switch (arch()) {
       case 'arm64':
         this.arch = 'arm64';
@@ -94,6 +94,11 @@ export class EnvService {
   /** Whether the process runs as root. */
   get isRoot(): boolean {
     return this.uid === 0;
+  }
+
+  /** The effective user id of the process. */
+  get uid(): number {
+    return this._uid;
   }
 
   /**

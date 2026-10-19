@@ -14,13 +14,17 @@ CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
 # shellcheck source=/dev/null
 . /usr/local/containerbase/utils/tmp-dir.sh
 
-tmp_dir=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}")
+tmp_dir=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}") || export CONTAINERBASE_TMP_DIR_WARNED=1
 init_check="${CONTAINERBASE_DEFAULT_TMP_DIR}"
 if [[ "${tmp_dir}" != "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]]; then
   # the home symlinks point to the default path, so link it to the configured one
-  link_containerbase_tmp_path "${tmp_dir}" || exit 1
-  # init creates `tool.init.d`, so an empty mounted folder still gets initialized
-  init_check="${tmp_dir}/tool.init.d"
+  if link_containerbase_tmp_path "${tmp_dir}"; then
+    # init creates `tool.init.d`, so an empty mounted folder still gets initialized
+    init_check="${tmp_dir}/tool.init.d"
+  else
+    # keep the default folder for this run, also in the commands started below
+    export CONTAINERBASE_TMP_DIR="${CONTAINERBASE_DEFAULT_TMP_DIR}"
+  fi
 fi
 
 if [[ ! -d "${init_check}" ]]; then

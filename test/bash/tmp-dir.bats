@@ -38,10 +38,16 @@ teardown() {
   local value
   for value in relative/tmp / // /var//cache /var/./cache /var/../cache /var/cache/. /var/cache/.. /tmp /tmp/ /tmp/other /tmp/containerbase/persist; do
     CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase run containerbase_tmp_dir "${value}"
-    assert_success
+    assert_failure
     assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=${value}, using /tmp/containerbase"
     assert_line "/tmp/containerbase"
   done
+}
+
+@test "containerbase_tmp_dir skips the warning when already warned" {
+  CONTAINERBASE_TMP_DIR_WARNED=1 CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase run containerbase_tmp_dir relative/tmp
+  assert_failure
+  assert_output "/tmp/containerbase"
 }
 
 @test "link_containerbase_tmp_path does nothing for the default dir" {
@@ -73,7 +79,7 @@ teardown() {
   assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${CONTAINERBASE_TMP_DIR}" ]
 }
 
-@test "link_containerbase_tmp_path fails when a stale link can't be replaced" {
+@test "link_containerbase_tmp_path warns when a stale link can't be replaced" {
   if [[ "${EUID}" -eq 0 ]]; then
     skip "root can always replace the link"
   fi
@@ -84,7 +90,8 @@ teardown() {
   run link_containerbase_tmp_path
   chmod 755 "${TEST_ROOT_DIR}/tmp"
   assert_failure
-  assert_output "${CONTAINERBASE_DEFAULT_TMP_DIR} links to ${TEST_ROOT_DIR}/other, expected ${CONTAINERBASE_TMP_DIR}; recreate the container or run as root"
+  assert_output "cannot switch ${CONTAINERBASE_DEFAULT_TMP_DIR} to ${CONTAINERBASE_TMP_DIR}, keeping the default folder; switch it at image build time as root"
+  assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${TEST_ROOT_DIR}/other" ]
 }
 
 @test "link_containerbase_tmp_path moves a default folder" {
@@ -99,6 +106,30 @@ teardown() {
   assert [ -f "${CONTAINERBASE_TMP_DIR}/tool.init.d/node" ]
   assert [ -d "${CONTAINERBASE_TMP_DIR}/cache/.npm" ]
   assert [ "$(cat "${CONTAINERBASE_TMP_DIR}/cache/.npmrc")" = keep ]
+}
+
+@test "link_containerbase_tmp_path creates the configured folder with mode 775" {
+  mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d"
+
+  run link_containerbase_tmp_path
+  assert_success
+  assert [ "$(stat --format '%a' "${CONTAINERBASE_TMP_DIR}")" -eq 775 ]
+  assert [ -d "${CONTAINERBASE_TMP_DIR}/tool.init.d" ]
+}
+
+@test "link_containerbase_tmp_path keeps the default folder when the move fails" {
+  if [[ "${EUID}" -eq 0 ]]; then
+    skip "root can always move the entries"
+  fi
+  mkdir -p "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d" "${CONTAINERBASE_TMP_DIR}"
+  chmod 555 "${CONTAINERBASE_TMP_DIR}"
+
+  run link_containerbase_tmp_path
+  chmod 755 "${CONTAINERBASE_TMP_DIR}"
+  assert_failure
+  assert_line "cannot switch ${CONTAINERBASE_DEFAULT_TMP_DIR} to ${CONTAINERBASE_TMP_DIR}, keeping the default folder; switch it at image build time as root"
+  assert [ -d "${CONTAINERBASE_DEFAULT_TMP_DIR}/tool.init.d" ]
+  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
 }
 
 @test "link_containerbase_tmp_path keeps a default file" {

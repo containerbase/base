@@ -35,7 +35,8 @@ export CONTAINERBASE_DEFAULT_TMP_DIR=/tmp/containerbase
 # shellcheck source=/dev/null
 . "${BASH_SOURCE%/*}/tmp-dir.sh"
 # defines the containerbase temp directory, the default one links to it when changed
-CONTAINERBASE_TMP_DIR=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}")
+# an invalid value is only reported once per environment
+CONTAINERBASE_TMP_DIR=$(containerbase_tmp_dir "${CONTAINERBASE_TMP_DIR}") || export CONTAINERBASE_TMP_DIR_WARNED=1
 export CONTAINERBASE_TMP_DIR
 
 # Used to find matching tool downloads.

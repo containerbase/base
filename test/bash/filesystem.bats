@@ -148,6 +148,15 @@ teardown() {
   assert_line "tmp=/tmp/containerbase"
 }
 
+@test "warns about an invalid tmp dir only once" {
+  CONTAINERBASE_TMP_DIR=relative/tmp \
+  run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && CONTAINERBASE_TMP_DIR=other/tmp && . \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""
+  assert_success
+  assert_line "Ignoring invalid CONTAINERBASE_TMP_DIR=relative/tmp, using /tmp/containerbase"
+  refute_line --partial "other/tmp"
+  assert_line "tmp=/tmp/containerbase"
+}
+
 @test "drops trailing slashes from the tmp dir" {
   CONTAINERBASE_TMP_DIR=/var/cache/containerbase// \
   run bash -c ". \"${CONTAINERBASE_DIR}/utils/constants.sh\" && echo \"tmp=\${CONTAINERBASE_TMP_DIR}\""

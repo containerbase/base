@@ -167,9 +167,11 @@ Other values, eg. a relative path, `/`, `/var/../cache` or `/tmp/cache`, are ign
 The home links keep pointing to `/tmp/containerbase`, which is then a symlink to the configured folder.
 The `docker-entrypoint.sh` and `containerbase-cli` create that symlink when it is missing and replace a symlink to another folder.
 An existing `/tmp/containerbase` folder, eg. from the base image, is moved into the configured folder, entries which already exist there are kept.
-Replacing a symlink or folder owned by root needs root, else the command fails.
+The configured folder may itself be a symlink to a folder.
+A non-root user can't replace a symlink or folder owned by root, eg. the `/tmp/containerbase` folder of the base image.
+Then a warning is shown and that run keeps using `/tmp/containerbase`, so switch the folder at image build time as root.
 The entrypoint skips `init tool all` when the configured folder already has a `tool.init.d` folder.
-The ipc socket of `containerbase-cli` stays at `/tmp/containerbase/ipc.sock`.
+The ipc socket of `containerbase-cli` is `/tmp/containerbase/ipc.sock`, through the symlink it lives in the configured folder.
 
 Set `CONTAINERBASE_TMP_DIR` before the first tool is prepared or installed, eg. right after `FROM`.
 

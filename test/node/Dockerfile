@@ -659,6 +659,22 @@ RUN set -ex; \
   docker-entrypoint.sh true; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
 
+# a non-root boot on a root owned default folder keeps using that folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 775 /tmp/containerbase
+
+USER 12021
+
+RUN set -ex; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  containerbase-cli init tool node; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  [[ -f /tmp/containerbase/tool.init.d/node ]]
+
 #--------------------------------------
 # test: vp
 #--------------------------------------

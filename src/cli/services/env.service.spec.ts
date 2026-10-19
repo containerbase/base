@@ -1,7 +1,15 @@
 import { sep } from 'node:path';
 import { env } from 'node:process';
 import { Container } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { logger } from '../utils/index.ts';
 import { EnvService } from './index.ts';
 import { testContainer } from '~test/di.ts';
@@ -54,6 +62,10 @@ describe('cli/services/env.service', () => {
     expect(svc.isRoot).toBe(true);
   });
 
+  test('uid', () => {
+    expect(svc.uid).toBe(0);
+  });
+
   test('home', () => {
     expect(svc.home).toBeUndefined();
   });
@@ -72,7 +84,7 @@ describe('cli/services/env.service', () => {
 
   test('umask', () => {
     expect(svc.umask).toBe(0o755);
-    Object.assign(svc, { uid: 12021 });
+    vi.spyOn(svc, 'uid', 'get').mockReturnValue(12021);
     expect(svc.umask).toBe(0o775);
   });
 
@@ -86,21 +98,23 @@ describe('cli/services/env.service', () => {
   });
 
   describe('containerbaseTmpDir', () => {
-    test('defaults to tmp/containerbase', () => {
+    // `node:process` is mocked with a plain `env` object, which `vi.stubEnv` doesn't reach
+    afterEach(() => {
       delete env.CONTAINERBASE_TMP_DIR;
+    });
+
+    test('defaults to tmp/containerbase', () => {
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
     });
 
     test('uses the default for an empty CONTAINERBASE_TMP_DIR', () => {
       env.CONTAINERBASE_TMP_DIR = '';
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test('uses CONTAINERBASE_TMP_DIR', () => {
       env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase';
       expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test('ignores a relative CONTAINERBASE_TMP_DIR with a single warning', () => {
@@ -111,13 +125,11 @@ describe('cli/services/env.service', () => {
         { dir: 'var/cache/containerbase' },
         'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test('drops trailing slashes', () => {
       env.CONTAINERBASE_TMP_DIR = '/var/cache/containerbase//';
       expect(svc.containerbaseTmpDir).toBe('/var/cache/containerbase');
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test('ignores / with a warning', () => {
@@ -127,14 +139,12 @@ describe('cli/services/env.service', () => {
         { dir: '//' },
         'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test('uses the default folder without a warning', () => {
       env.CONTAINERBASE_TMP_DIR = rootPath('tmp/containerbase');
       expect(svc.containerbaseTmpDir).toBe(rootPath('tmp/containerbase'));
       expect(logger.warn).not.toHaveBeenCalled();
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test.each([
@@ -150,7 +160,6 @@ describe('cli/services/env.service', () => {
         { dir },
         'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
-      delete env.CONTAINERBASE_TMP_DIR;
     });
 
     test.each([
@@ -166,7 +175,6 @@ describe('cli/services/env.service', () => {
         { dir },
         'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
       );
-      delete env.CONTAINERBASE_TMP_DIR;
     });
   });
 

@@ -5,7 +5,7 @@ import { env } from 'node:process';
 import { deleteAsync } from 'del';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { fileRights, pathExists } from '../utils/index.ts';
+import { fileRights, logger, pathExists } from '../utils/index.ts';
 import { EnvService, PathService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
@@ -159,8 +159,8 @@ describe('cli/services/path.service', () => {
       await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EBUSY');
     });
 
-    test('ensureTmpLink fails for a default folder of another user', async () => {
-      Object.assign(child.get(EnvService), { uid: 1000 });
+    test('ensureTmpLink keeps a default folder of another user', async () => {
+      vi.spyOn(child.get(EnvService), 'uid', 'get').mockReturnValue(1000);
       const { lstat } = fs;
       vi.spyOn(fs, 'lstat').mockImplementation(async (path) => {
         const stats = await lstat(path);
@@ -169,23 +169,47 @@ describe('cli/services/path.service', () => {
           : stats;
       });
 
-      await expect(pathSvc.ensureTmpLink()).rejects.toThrow(
-        `${rootPath('tmp/containerbase')} is a folder owned by another user, expected ${rootPath('var/cache/containerbase')}; recreate the container or run as root`,
+      expect(await pathSvc.ensureTmpLink()).toBe(false);
+
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        `cannot switch ${rootPath('tmp/containerbase')} to ${rootPath('var/cache/containerbase')}, keeping the default folder; switch it at image build time as root`,
       );
+      expect(pathSvc.tmpDir).toBe(rootPath('tmp/containerbase'));
       expect((await lstat(rootPath('tmp/containerbase'))).isDirectory()).toBe(
         true,
       );
+      // later calls keep the default folder without checking again
+      expect(await pathSvc.ensureTmpLink()).toBe(false);
+      expect(logger.warn).toHaveBeenCalledOnce();
     });
 
-    test('ensureTmpLink fails when a stale link can not be removed', async () => {
+    test('ensureTmpLink keeps the default folder when a stale link can not be removed', async () => {
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
       await fs.symlink(rootPath('var/other'), rootPath('tmp/containerbase'));
       vi.spyOn(fs, 'rm').mockRejectedValueOnce(
         Object.assign(new Error('EPERM'), { code: 'EPERM' }),
       );
 
-      await expect(pathSvc.ensureTmpLink()).rejects.toThrow(
-        `${rootPath('tmp/containerbase')} links to ${rootPath('var/other')}, expected ${rootPath('var/cache/containerbase')}; recreate the container or run as root`,
+      expect(await pathSvc.ensureTmpLink()).toBe(false);
+
+      expect(pathSvc.tmpDir).toBe(rootPath('tmp/containerbase'));
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/other'),
+      );
+    });
+
+    test('ensureTmpLink accepts a configured folder which links to a folder', async () => {
+      await ensurePaths(['var/real', 'var/cache']);
+      await fs.symlink(
+        rootPath('var/real'),
+        rootPath('var/cache/containerbase'),
+      );
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+
+      expect(await pathSvc.ensureTmpLink()).toBe(true);
+
+      expect(await fs.readlink(rootPath('tmp/containerbase'))).toBe(
+        rootPath('var/cache/containerbase'),
       );
     });
 
