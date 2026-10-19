@@ -620,7 +620,7 @@ RUN set -ex; \
 #--------------------------------------
 # test: custom tmp dir
 #--------------------------------------
-FROM build AS testr
+FROM build AS test-tmp-dir
 
 USER root
 ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
@@ -682,7 +682,7 @@ COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
-COPY --from=testr /.dummy /.dummy
+COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy
