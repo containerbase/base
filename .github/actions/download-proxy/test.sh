@@ -75,6 +75,7 @@ check registry.npmjs.org/is-number 200 HIT 'application/vnd.npm.install-v1+json;
 # npm tarballs, npm drops the registry path prefix
 check is-number/-/is-number-7.0.0.tgz 200 MISS
 check is-number/-/is-number-7.0.0.tgz 200 HIT
+check 'is-number/-/is-number-7.0.0.tgz?foo=bar' 200
 check @types/node/-/node-24.0.0.tgz 200
 # rubygems compact index and gem file
 check rubygems.org/info/rake 200
