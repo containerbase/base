@@ -19,6 +19,12 @@ export type {
   VersionIntegrity,
 } from './tool-versions-types.ts';
 
+export {
+  isToolVersionsFormat,
+  toolVersionsFormat,
+  toolVersionsFormatPath,
+} from './tool-versions-format.ts';
+
 export { tools };
 
 /**

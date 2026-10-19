@@ -2,7 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, expectTypeOf, test } from 'vitest';
 import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
-import { defaultDistro, toolNames } from '../../packages/base/src/index.ts';
+import * as main from '../../packages/base/src/index.ts';
+import {
+  defaultDistro,
+  isToolVersionsFormat,
+  toolNames,
+  toolVersionsFormat,
+  toolVersionsFormatPath,
+} from '../../packages/base/src/index.ts';
 import {
   DistroCode,
   type InstallToolType,
@@ -12,6 +19,7 @@ import {
 import * as schemas from '../../packages/base/src/tool-versions-schema.ts';
 import type * as tvTypes from '../../packages/base/src/tool-versions-types.ts';
 import type * as types from '../../packages/base/src/types.ts';
+import * as zodEntry from '../../packages/base/src/zod.ts';
 
 const checksum = `sha256:${'a'.repeat(64)}`;
 const integrity = `sha256-${'A'.repeat(43)}=`;
@@ -311,6 +319,86 @@ describe('packages/base', () => {
     },
   ])('ToolFile rejects $name', ({ value }) => {
     expect(schemas.ToolFile.safeParse(value).success).toBe(false);
+  });
+
+  test('the format is version 1 in the v1 folder', () => {
+    expect(toolVersionsFormat).toBe(1);
+    expect(toolVersionsFormatPath).toBe('v1');
+  });
+
+  test.each([
+    {
+      name: 'a tool schema',
+      url: 'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+      expected: true,
+    },
+    {
+      name: 'an index schema',
+      url: 'https://containerbase.github.io/tool-versions/v1/index.schema.json',
+      expected: true,
+    },
+    {
+      name: 'a version schema',
+      url: 'https://containerbase.github.io/tool-versions/v1/version.schema.json',
+      expected: true,
+    },
+    {
+      name: 'a mirror host',
+      url: 'https://mirror.example.com/v1/tool.schema.json',
+      expected: true,
+    },
+    {
+      name: 'another format',
+      url: 'https://containerbase.github.io/tool-versions/v2/tool.schema.json',
+      expected: false,
+    },
+    {
+      name: 'a format with the same suffix',
+      url: 'https://containerbase.github.io/tool-versions/xv1/tool.schema.json',
+      expected: false,
+    },
+    {
+      name: 'a url which is no schema',
+      url: 'https://containerbase.github.io/tool-versions/v1/tool.json',
+      expected: false,
+    },
+    {
+      name: 'a v1 path with a query',
+      url: 'https://example.com/v1/tool.schema.json?x=1',
+      expected: true,
+    },
+    {
+      name: 'a v1 path with a fragment',
+      url: 'https://example.com/v1/tool.schema.json#/definitions',
+      expected: true,
+    },
+    {
+      name: 'a plain http mirror',
+      url: 'http://localhost:8080/v1/tool.schema.json',
+      expected: true,
+    },
+    {
+      name: 'a v2 path with a v1 fragment',
+      url: 'https://example.com/v2/tool.schema.json#/v1/tool.schema.json',
+      expected: false,
+    },
+    {
+      name: 'a v2 path with a v1 query',
+      url: 'https://example.com/v2/tool.schema.json?x=/v1/tool.schema.json',
+      expected: false,
+    },
+    { name: 'an invalid url', url: 'not a url', expected: false },
+    { name: 'no value', url: undefined, expected: false },
+  ])('isToolVersionsFormat handles $name', ({ url, expected }) => {
+    expect(isToolVersionsFormat(url)).toBe(expected);
+  });
+
+  test('both entries export the format', () => {
+    for (const entry of [main, zodEntry]) {
+      expect(entry.toolVersionsFormat).toBe(toolVersionsFormat);
+      expect(entry.toolVersionsFormatPath).toBe(toolVersionsFormatPath);
+      expect(entry.isToolVersionsFormat).toBe(isToolVersionsFormat);
+    }
   });
 
   test('FileIntegrity rejects a bad integrity', () => {

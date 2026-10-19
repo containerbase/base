@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { toolNames } from './index.ts';
 
 export * from './schema.ts';
+export * from './tool-versions-format.ts';
 export * from './tool-versions-schema.ts';
 
 /**
