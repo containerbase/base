@@ -317,11 +317,11 @@ export class PathService {
     }
     if (stats?.isDirectory() && !this.envSvc.isRoot) {
       // removing it from the sticky `/tmp` needs root
-      this.keepDefaultTmpDir(tmpDir);
+      await this.keepDefaultTmpDir(tmpDir);
       return;
     }
     if (!(await this.prepareTmpDir(tmpDir))) {
-      this.keepDefaultTmpDir(tmpDir);
+      await this.keepDefaultTmpDir(tmpDir);
       return;
     }
     if (stats?.isSymbolicLink()) {
@@ -336,7 +336,7 @@ export class PathService {
         if (!isPermissionError(err)) {
           throw err;
         }
-        this.keepDefaultTmpDir(tmpDir);
+        await this.keepDefaultTmpDir(tmpDir);
         return;
       }
     } else if (stats?.isDirectory()) {
@@ -372,13 +372,32 @@ export class PathService {
   /**
    * Warns that the default folder can't be switched to the configured one and
    * keeps using the default folder for this run, also in child processes, by
-   * setting `CONTAINERBASE_TMP_DIR` to it.
+   * setting `CONTAINERBASE_TMP_DIR` to it. A link from the default folder to
+   * the unusable configured one is replaced by a real folder.
+   *
+   * @throws when that link can't be removed
    */
-  private keepDefaultTmpDir(tmpDir: string): void {
+  private async keepDefaultTmpDir(tmpDir: string): Promise<void> {
+    const link = this.defaultTmpDir;
     logger.warn(
-      `cannot switch ${this.defaultTmpDir} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
+      `cannot switch ${link} to ${tmpDir}, keeping the default folder; switch it at image build time as root`,
     );
-    env.CONTAINERBASE_TMP_DIR = this.defaultTmpDir;
+    env.CONTAINERBASE_TMP_DIR = link;
+    if ((await fs.readlink(link).catch(() => null)) !== tmpDir) {
+      return;
+    }
+    try {
+      await fs.rm(link);
+    } catch (err) {
+      if (!isPermissionError(err)) {
+        throw err;
+      }
+      throw new Error(
+        `${link} links to ${tmpDir} which is not usable; remove the link or fix the permissions`,
+        { cause: err },
+      );
+    }
+    await this.createDir(link);
   }
 
   /**

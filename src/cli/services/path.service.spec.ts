@@ -208,6 +208,58 @@ describe('cli/services/path.service', () => {
       );
     });
 
+    test('ensureTmpLink replaces a link to the unusable configured folder with a real folder', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(
+        rootPath('var/cache/containerbase'),
+        rootPath('tmp/containerbase'),
+      );
+      vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expectDefaultTmpDir();
+      const stats = await fs.lstat(rootPath('tmp/containerbase'));
+      expect(stats.isDirectory()).toBe(true);
+      expect(stats.isSymbolicLink()).toBe(false);
+    });
+
+    test('ensureTmpLink fails when a link to the unusable configured folder can not be removed', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(
+        rootPath('var/cache/containerbase'),
+        rootPath('tmp/containerbase'),
+      );
+      vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+      vi.spyOn(fs, 'rm').mockRejectedValueOnce(
+        Object.assign(new Error('EPERM'), { code: 'EPERM' }),
+      );
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow(
+        `${rootPath('tmp/containerbase')} links to ${rootPath('var/cache/containerbase')} which is not usable; remove the link or fix the permissions`,
+      );
+    });
+
+    test('ensureTmpLink rethrows other errors removing a link to the unusable configured folder', async () => {
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await fs.symlink(
+        rootPath('var/cache/containerbase'),
+        rootPath('tmp/containerbase'),
+      );
+      vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+      vi.spyOn(fs, 'rm').mockRejectedValueOnce(
+        Object.assign(new Error('EBUSY'), { code: 'EBUSY' }),
+      );
+
+      await expect(pathSvc.ensureTmpLink()).rejects.toThrow('EBUSY');
+    });
+
     test('ensureTmpLink keeps the default folder when the configured one can not be created', async () => {
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
       vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(

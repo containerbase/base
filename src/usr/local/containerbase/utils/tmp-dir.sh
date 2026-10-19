@@ -54,6 +54,15 @@ function create_containerbase_tmp_dir () {
   fi
 }
 
+# Creates the given temp directory when it's missing, see
+# `create_containerbase_tmp_dir`, and returns 1 when that fails or the current
+# user can't write it.
+function usable_containerbase_tmp_dir () {
+  local dir=${1}
+
+  create_containerbase_tmp_dir "${dir}" && [[ -w "${dir}" && -x "${dir}" ]]
+}
+
 # Moves the entries of the first folder into the second one, merging folders and
 # keeping the entries which already exist in the second one.
 # Returns 1 on the first failed move.
@@ -80,8 +89,11 @@ function merge_containerbase_tmp_dir () {
 # default. A link to another target is replaced. As root, a folder, eg. from the
 # base image, is moved into the given one first, keeping entries which exist
 # there, and only removed when the whole move succeeded.
-# When the link can't be replaced, a folder exists as non-root, or the move
-# fails, warns and returns 1, so the caller keeps using the default directory.
+# The given directory is created first and has to be writable, else no link is
+# created or replaced.
+# When the given directory isn't usable, the link can't be replaced, a folder
+# exists as non-root, or the move fails, warns and returns 1, so the caller
+# keeps using the default directory.
 # Prints an error and returns 2 when the default path is a file.
 function link_containerbase_tmp_path () {
   local dir=${1:-${CONTAINERBASE_TMP_DIR}}
@@ -97,7 +109,7 @@ function link_containerbase_tmp_path () {
     if [[ "${target}" == "${dir}" ]]; then
       return 0
     fi
-    if ! ln -sfn "${dir}" "${link}" 2> /dev/null; then
+    if ! usable_containerbase_tmp_dir "${dir}" || ! ln -sfn "${dir}" "${link}" 2> /dev/null; then
       echo "${warning}" >&2
       return 1
     fi
@@ -106,7 +118,7 @@ function link_containerbase_tmp_path () {
   if [[ -d "${link}" ]]; then
     # removing it from the sticky `/tmp` needs root
     if ! is_containerbase_tmp_dir_root \
-      || ! create_containerbase_tmp_dir "${dir}" \
+      || ! usable_containerbase_tmp_dir "${dir}" \
       || ! merge_containerbase_tmp_dir "${link}" "${dir}" \
       || ! rm -rf "${link}"; then
       echo "${warning}" >&2
@@ -115,6 +127,9 @@ function link_containerbase_tmp_path () {
   elif [[ -e "${link}" ]]; then
     echo "${link} is a file, remove it" >&2
     return 2
+  elif ! usable_containerbase_tmp_dir "${dir}"; then
+    echo "${warning}" >&2
+    return 1
   fi
   ln -s "${dir}" "${link}"
 }

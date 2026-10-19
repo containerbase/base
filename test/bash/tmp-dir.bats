@@ -62,6 +62,37 @@ teardown() {
   assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${CONTAINERBASE_TMP_DIR}" ]
 }
 
+@test "link_containerbase_tmp_path warns and creates no link for a not writable folder" {
+  if [[ "${EUID}" -eq 0 ]]; then
+    skip "root can always write the folder"
+  fi
+  mkdir -p "${CONTAINERBASE_TMP_DIR}"
+  chmod 555 "${CONTAINERBASE_TMP_DIR}"
+
+  run link_containerbase_tmp_path
+  chmod 755 "${CONTAINERBASE_TMP_DIR}"
+  assert_failure 1
+  assert_output "cannot switch ${CONTAINERBASE_DEFAULT_TMP_DIR} to ${CONTAINERBASE_TMP_DIR}, keeping the default folder; switch it at image build time as root"
+  assert [ ! -e "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
+  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
+}
+
+@test "link_containerbase_tmp_path warns and keeps a stale link for a not creatable folder" {
+  if [[ "${EUID}" -eq 0 ]]; then
+    skip "root can always create the folder"
+  fi
+  mkdir -p "${TEST_ROOT_DIR}/other" "${TEST_ROOT_DIR}/var/cache"
+  ln -s "${TEST_ROOT_DIR}/other" "${CONTAINERBASE_DEFAULT_TMP_DIR}"
+  chmod 555 "${TEST_ROOT_DIR}/var/cache"
+
+  run link_containerbase_tmp_path
+  chmod 755 "${TEST_ROOT_DIR}/var/cache"
+  assert_failure 1
+  assert_line "cannot switch ${CONTAINERBASE_DEFAULT_TMP_DIR} to ${CONTAINERBASE_TMP_DIR}, keeping the default folder; switch it at image build time as root"
+  assert [ "$(readlink "${CONTAINERBASE_DEFAULT_TMP_DIR}")" = "${TEST_ROOT_DIR}/other" ]
+  assert [ ! -e "${CONTAINERBASE_TMP_DIR}" ]
+}
+
 @test "link_containerbase_tmp_path keeps a correct link" {
   ln -s "${CONTAINERBASE_TMP_DIR}" "${CONTAINERBASE_DEFAULT_TMP_DIR}"
 

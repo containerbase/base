@@ -665,6 +665,25 @@ RUN set -ex; \
   node --version; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
 
+# a non-root boot with a configured folder it can't create keeps a real default folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/root-only
+
+USER 12021
+
+RUN set -ex; \
+  export CONTAINERBASE_TMP_DIR=/var/cache/root-only/containerbase; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  containerbase-cli init tool node; \
+  [[ -f /tmp/containerbase/tool.init.d/node ]]
+
+USER root
+
 # a non-root boot on a root owned default folder keeps using that folder without moving it
 RUN set -ex; \
   rm -rf /tmp/containerbase; \
