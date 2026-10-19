@@ -19,6 +19,14 @@ variable "CONTAINERBASE_CDN" {
   default = ""
 }
 
+variable "CONTAINERBASE_CDN_GEM" {
+  default = ""
+}
+
+variable "CONTAINERBASE_CDN_NPM" {
+  default = ""
+}
+
 variable "CONTAINERBASE_VERSION" {
   default = "unknown"
 }
@@ -78,6 +86,8 @@ target "settings" {
   args = {
     APT_HTTP_PROXY          = "${APT_HTTP_PROXY}"
     CONTAINERBASE_CDN       = "${CONTAINERBASE_CDN}"
+    CONTAINERBASE_CDN_GEM   = "${CONTAINERBASE_CDN_GEM}"
+    CONTAINERBASE_CDN_NPM   = "${CONTAINERBASE_CDN_NPM}"
     CONTAINERBASE_DEBUG     = "${CONTAINERBASE_DEBUG}"
     CONTAINERBASE_LOG_LEVEL = "${CONTAINERBASE_LOG_LEVEL}"
     CONTAINERBASE_VERSION   = "${CONTAINERBASE_VERSION}"
