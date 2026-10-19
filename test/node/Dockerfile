@@ -681,6 +681,16 @@ RUN set -ex; \
   [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
   [[ "${out}" == *"tmp=/tmp/containerbase"* ]]
 
+# a configured link into /tmp skips the fast path, the cli warns and keeps the default
+RUN set -ex; \
+  mkdir -p /tmp/somewhere/tool.init.d; \
+  ln -s /tmp/somewhere /var/cache/cb-link; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/cb-link docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
 # a non-root boot with a configured folder it can't create keeps a real default folder
 RUN set -ex; \
   rm -rf /tmp/containerbase; \

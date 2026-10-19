@@ -14,11 +14,13 @@ default_tmp_dir=/tmp/containerbase
 # without trailing slashes, like `containerbase-cli` normalizes it
 tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
 run_init=true
+# the resolved path, a link into `/tmp` goes through `containerbase-cli`, which rejects it
+real_tmp_dir=$(readlink -f "${tmp_dir:-/}")
 if [[ -z "${tmp_dir}" || "${tmp_dir}" == "${default_tmp_dir}" ]]; then
   if [[ -d "${default_tmp_dir}" ]]; then
     run_init=false
   fi
-elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != /tmp/* \
+elif [[ "${tmp_dir}" == /* && "${real_tmp_dir}" != /tmp && "${real_tmp_dir}" != /tmp/* \
   && -d "${tmp_dir}/tool.init.d" && -w "${tmp_dir}" && -x "${tmp_dir}" ]]; then
   # fast path: an initialized configured folder only needs the link, which the
   # home symlinks go through; `containerbase-cli` handles all other cases
