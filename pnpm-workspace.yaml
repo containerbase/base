@@ -10,7 +10,6 @@ strictPeerDependencies: true
 
 allowBuilds:
   esbuild: false
-  unrs-resolver: false
 
 overrides:
   handlebars@>=4.0.0 <=4.7.9: 4.7.10
