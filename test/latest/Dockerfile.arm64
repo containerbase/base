@@ -174,7 +174,7 @@ RUN set -ex; \
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.1
+RUN install-tool helmfile v1.8.2
 
 #--------------------------------------
 # Image: jq
