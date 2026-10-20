@@ -62,11 +62,15 @@ const dedicatedEntries = new Set([
 /**
  * Whether the folder is dedicated to containerbase, so it may be taken over:
  * every entry is one of a containerbase temp folder or `lost+found` of a new
- * file system. An empty folder counts as well.
+ * file system. An empty folder counts as well, a folder which can't be read
+ * doesn't.
  */
 async function isDedicated(path: string): Promise<boolean> {
-  const entries = await fs.readdir(path);
-  return entries.every((entry) => dedicatedEntries.has(entry));
+  const entries = await fs.readdir(path).catch((err: unknown) => {
+    logger.debug({ err, tmpDir: path }, 'can not read the tmp dir');
+    return null;
+  });
+  return entries?.every((entry) => dedicatedEntries.has(entry)) ?? false;
 }
 
 /**

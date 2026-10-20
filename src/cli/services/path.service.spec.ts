@@ -491,6 +491,28 @@ describe('cli/services/path.service', () => {
       expect(await pathExists(rootPath('tmp/containerbase'))).toBe(false);
     });
 
+    test('ensureTmpLink does not own a root owned configured folder which can not be read as root', async () => {
+      asRoot();
+      await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });
+      await ensurePaths('var/cache/containerbase');
+      const chown = rootOwnedTmpDir();
+      vi.spyOn(fs, 'readdir').mockRejectedValueOnce(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+
+      await pathSvc.ensureTmpLink();
+
+      expect(chown).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          err: expect.objectContaining({ code: 'EACCES' }),
+          tmpDir: rootPath('var/cache/containerbase'),
+        },
+        'can not read the tmp dir',
+      );
+      expectDefaultTmpDir('is not writable for the user');
+    });
+
     test('ensureTmpLink keeps the default folder when the configured folder can not be owned as root', async () => {
       asRoot();
       await deleteAsync('tmp/containerbase', { force: true, cwd: rootPath() });

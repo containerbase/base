@@ -26,10 +26,10 @@ elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "
   && "${tmp_dir}" != */. && "${tmp_dir}" != */.. \
   && "${real_tmp_dir}" != /tmp && "${real_tmp_dir}" != /tmp/* \
   && -d "${tmp_dir}/tool.init.d" && -w "${tmp_dir}" && -x "${tmp_dir}" && ! -k "${tmp_dir}" \
-  && ( "${EUID}" -ne 0 || "$(stat -c %u "${tmp_dir}")" == "${USER_ID}" ) ]]; then
+  && ( "${EUID}" -ne 0 || "$(stat -L -c '%u %a' "${tmp_dir}")" =~ ^"${USER_ID}"\ [0-7]*[37][0-7][0-7]$ ) ]]; then
   # fast path: an initialized configured folder, not shared and as root owned
-  # by the user, only needs the link, which the home symlinks go through;
-  # `containerbase-cli` handles all other cases
+  # by the user with owner write and search bits, only needs the link, which
+  # the home symlinks go through; `containerbase-cli` handles all other cases
   if [[ ! -e "${default_tmp_dir}" && ! -L "${default_tmp_dir}" ]]; then
     ln -s "${tmp_dir}" "${default_tmp_dir}" 2> /dev/null
   fi

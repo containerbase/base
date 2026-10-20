@@ -652,6 +652,25 @@ RUN set -ex; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
   [[ ! -e /var/cache/containerbase/tool.init.d/node ]]
 
+# a root boot takes the fast path through a link to a folder the user owns and can write,
+# a folder the user can't write goes through the cli, which warns and keeps the default
+RUN set -ex; \
+  mkdir -p /var/cache/cb-target/tool.init.d; \
+  chown -R 12021 /var/cache/cb-target; \
+  chmod 2755 /var/cache/cb-target; \
+  ln -s /var/cache/cb-target /var/cache/cb-via-link; \
+  rm -rf /tmp/containerbase; \
+  CONTAINERBASE_TMP_DIR=/var/cache/cb-via-link docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/cb-via-link ]]; \
+  [[ ! -e /var/cache/cb-target/tool.init.d/node ]]; \
+  chmod 0555 /var/cache/cb-target; \
+  rm -rf /tmp/containerbase; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/cb-via-link docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"is not writable for the user"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]
+
 # a boot with an empty mounted folder links and initializes it
 RUN set -ex; \
   find /var/cache/containerbase -mindepth 1 -delete; \
