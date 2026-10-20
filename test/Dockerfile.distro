@@ -304,7 +304,7 @@ RUN install-tool pnpm 12.14.0
 RUN install-tool yarn 4.18.1
 
 # renovate: datasource=github-releases packageName=voidzero-dev/vite-plus
-RUN install-tool vp 1.2.0
+RUN install-tool vp 1.3.0
 
 #--------------------------------------
 # Image: test-php
