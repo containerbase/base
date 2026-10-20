@@ -1,5 +1,5 @@
 name: 'Download proxy'
-description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN, also for npm and gem installs'
+description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN, also for npm, gem and pip installs'
 
 runs:
   using: 'composite'
@@ -33,6 +33,7 @@ runs:
           echo "CONTAINERBASE_CDN=http://host.docker.internal:8099"
           echo "CONTAINERBASE_CDN_NPM=true"
           echo "CONTAINERBASE_CDN_GEM=true"
+          echo "CONTAINERBASE_CDN_PIP=true"
         } >> "${GITHUB_ENV}"
         echo "::endgroup::"
 

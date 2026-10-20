@@ -2,8 +2,8 @@
 
 # Tests the download proxy config locally: starts nginx with nginx.conf in a
 # docker container on port 8099, checks downloads, redirects, encoded paths,
-# npm and gem registry requests, the cache and the host allowlist, then prints
-# the stats.
+# npm, gem and pip registry requests, the cache and the host allowlist, then
+# prints the stats.
 # Usage: .github/actions/download-proxy/test.sh (needs docker and curl)
 
 set -e
@@ -56,6 +56,27 @@ check() {
   fi
 }
 
+# requests a pypi index page through the proxy and checks that its file links
+# point at the proxy, then downloads the first linked file through the proxy
+# usage: check_pypi <path> [accept header]
+check_pypi() {
+  local path="$1" accept="${2:-}"
+  local body file
+  local args=(-s)
+  if [ -n "${accept}" ]; then
+    args+=(-H "Accept: ${accept}")
+  fi
+  body="$(curl "${args[@]}" "${proxy}/${path}")"
+  file="$(grep -o "${proxy}/files\.pythonhosted\.org/[^\"#]*" <<< "${body}" | head -n 1 || true)"
+  if [ -n "${file}" ] && ! grep -q 'https://files\.pythonhosted\.org/' <<< "${body}"; then
+    echo "ok   links ${path} ${accept}"
+    check "${file#"${proxy}/"}" 200
+  else
+    echo "FAIL links ${path} ${accept} (expected links to ${proxy}/files.pythonhosted.org/)"
+    failed=1
+  fi
+}
+
 # GitHub release asset, redirects to release-assets.githubusercontent.com
 check github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-x64.tar.gz.sha256 200 MISS
 check github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-x64.tar.gz.sha256 200 HIT
@@ -80,6 +101,11 @@ check @types/node/-/node-24.0.0.tgz 200
 # rubygems compact index and gem file
 check rubygems.org/info/rake 200
 check rubygems.org/gems/rake-13.0.0.gem 200
+# pypi index, the json pip asks for and html, with the file links rewritten,
+# also when served from the cache
+check pypi.org/simple/six/ 200 MISS 'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01'
+check_pypi pypi.org/simple/six/ 'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01'
+check_pypi pypi.org/simple/six/
 # missing file is passed through
 check github.com/nubjs/nub/releases/download/v0.0.0-missing/nub-linux-x64.tar.gz 404
 # host not in allowed-hosts.map
