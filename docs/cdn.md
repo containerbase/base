@@ -19,6 +19,8 @@ The package managers `gem`, `npm`, `pip` need to be configured to use the CDN ex
 - `CONTAINERBASE_CDN_NPM=true`
 - `CONTAINERBASE_CDN_PIP=true`
 
+With a plain `http://` CDN, pip also trusts the CDN host through `PIP_TRUSTED_HOST`.
+
 ## Sample
 
 With the following sample the `java` tool will be installed from the CDN.
