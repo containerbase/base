@@ -14,17 +14,16 @@ default_tmp_dir=/tmp/containerbase
 # without trailing slashes, like `containerbase-cli` normalizes it
 tmp_dir="${CONTAINERBASE_TMP_DIR%"${CONTAINERBASE_TMP_DIR##*[!/]}"}"
 run_init=true
-# the resolved path, a link into `/tmp` goes through `containerbase-cli`, which rejects it
-real_tmp_dir=$(readlink -f "${tmp_dir:-/}")
 # a value which is empty without trailing slashes, eg. `/`, is invalid and goes through `containerbase-cli`
 if [[ -z "${CONTAINERBASE_TMP_DIR}" || "${tmp_dir}" == "${default_tmp_dir}" ]]; then
   # a leftover link needs a writable target, else `containerbase-cli` repairs it
   if [[ -d "${default_tmp_dir}" && ( ! -L "${default_tmp_dir}" || ( -w "${default_tmp_dir}" && -x "${default_tmp_dir}" ) ) ]]; then
     run_init=false
   fi
+# a configured value is only resolved here, a link into `/tmp` goes through `containerbase-cli`, which rejects it
 elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "${tmp_dir}" != */../* \
   && "${tmp_dir}" != */. && "${tmp_dir}" != */.. \
-  && "${real_tmp_dir}" != /tmp && "${real_tmp_dir}" != /tmp/* \
+  && "$(readlink -f "${tmp_dir}")/" != /tmp/* \
   && -d "${tmp_dir}/tool.init.d" && -w "${tmp_dir}" && -x "${tmp_dir}" && ! -k "${tmp_dir}" \
   && ( "${EUID}" -ne 0 || "$(stat -L -c '%u %a' "${tmp_dir}")" =~ ^"${USER_ID}"\ [0-7]*[37][0-7][0-7]$ ) ]]; then
   # fast path: an initialized configured folder, not shared and as root owned
