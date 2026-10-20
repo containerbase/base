@@ -25,7 +25,7 @@ jobs:
       security-events: write
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@c0edd0d701889647e47d726641bcba2a6d92eabe # v5.3.6
 
       # `pnpm audit` exits non zero when it finds advisories, the converter
       # fails instead when the report is missing
