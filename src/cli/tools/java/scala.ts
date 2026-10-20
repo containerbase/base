@@ -37,8 +37,8 @@ export class ScalaInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir: src });
   }
 
-  /** Checks that `scala --version` runs. */
+  /** Checks that `scala -version` runs. */
   override async test(_version: string): Promise<void> {
-    await this._spawn(this.name, ['--version']);
+    await this._spawn(this.name, ['-version']);
   }
 }

@@ -61,14 +61,14 @@ describe('cli/tools/java/scala', () => {
     });
   });
 
-  test('runs the tool test', async () => {
+  test('runs the tool test for Scala 2.12', async () => {
     const { svc } = await toolContext(ScalaInstallService);
 
-    await expect(svc.test('2.13.16')).resolves.toBeUndefined();
+    await expect(svc.test('2.12.21')).resolves.toBeUndefined();
 
     expect(execaMock).toHaveBeenCalledWith(
       'scala',
-      ['--version'],
+      ['-version'],
       expect.any(Object),
     );
   });
