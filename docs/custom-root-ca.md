@@ -36,15 +36,27 @@ RUN install-tool java <version>
 
 ## Runtime install
 
-Most OpenSSL base tools (and maybe BoringSSL) support `SSL_CERT_FILE` environment for additional custom root ca files.
-If you're using Bun, then you need to set `NODE_EXTRA_CA_CERTS` environment variable[^2].
+Most OpenSSL based tools (and maybe BoringSSL) support `SSL_CERT_FILE` environment for additional custom root ca files.
+Some tools ignore `SSL_CERT_FILE` and need their own environment variable:
+
+| Tool           | Environment variable      |
+| -------------- | ------------------------- |
+| git            | `GIT_SSL_CAINFO`          |
+| Node.js or Bun | `NODE_EXTRA_CA_CERTS`[^2] |
+
+git uses libcurl, which always loads `/etc/ssl/certs/ca-certificates.crt` and doesn't read `SSL_CERT_FILE`.
+`GIT_SSL_CAINFO` replaces that file, the other certificates in `/etc/ssl/certs` are still used.
 
 ```bash
 docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
   -e SSL_CERT_FILE=/my-root-ca.crt \
+  -e GIT_SSL_CAINFO=/my-root-ca.crt \
+  -e NODE_EXTRA_CA_CERTS=/my-root-ca.crt \
   containerbase/base bash
 ```
+
+Don't mount your certificates over `/etc/ssl/certs`, this hides the default certificates and git fails with `error setting certificate file: /etc/ssl/certs/ca-certificates.crt`.
 
 ### Runtime Java install
 
