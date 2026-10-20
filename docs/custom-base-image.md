@@ -173,6 +173,7 @@ Shared folders with the sticky bit, eg. `/var/tmp`, are never used.
 As root, an existing root owned folder is only given to the configured user when it is dedicated to containerbase: empty, or holding nothing but `tool.init.d`, `cache`, `ipc.sock` or `lost+found`.
 Its mode is kept.
 As root, the folder must then be writable for the configured user, through its owner, the root group, the user's own group or `PRIMARY_GROUP_ID`, else that run keeps using `/tmp/containerbase`.
+Its parent folders must be searchable for the configured user too, eg. not below `/root`, `containerbase-cli` doesn't check them.
 
 Switch the folder at image build time as root.
 Only root moves an existing `/tmp/containerbase` folder, eg. from the base image, into the configured folder, entries which already exist there are kept.
@@ -183,7 +184,7 @@ When a move has started, including removing the moved folder, and a later step f
 A file at `/tmp/containerbase` is an error, remove it.
 
 The `docker-entrypoint.sh` only creates a missing symlink and skips `init tool all`, when the configured folder is a valid value, already has a `tool.init.d` folder, is writable and has no sticky bit.
-When it runs as root, the folder must also be owned by `USER_ID`.
+When it runs as root, the folder must also be owned by `USER_ID` with owner write and search permission.
 In all other cases it runs `containerbase-cli init tool all`, which handles them as described above.
 The ipc socket of `containerbase-cli` is `/tmp/containerbase/ipc.sock`, through the symlink it lives in the configured folder.
 
