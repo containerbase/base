@@ -10,6 +10,8 @@
 set -euo pipefail
 
 image=containerbase/test-readonly
+# configured `CONTAINERBASE_TMP_DIR`, on the read-only root file system
+tmp_dir=/var/cache/containerbase
 
 build_args=()
 run_args=()
@@ -55,6 +57,26 @@ for user in root 12021; do
 
   # a dry run writes nothing, so it works on a read-only file system
   run --user "${user}" "${image}" install-tool --dry-run flux 0.27.2
+
+  # a configured tmp dir on the read-only root file system can't be created,
+  # so the tools keep using a real `/tmp/containerbase` folder with a warning
+  output=$(run --user "${user}" -e CONTAINERBASE_TMP_DIR="${tmp_dir}" "${image}" \
+    bash -c 'node --version && containerbase-cli list tools && test ! -L /tmp/containerbase && test -d /tmp/containerbase' 2>&1)
+  echo "${output}"
+  grep '^node ' > /dev/null <<< "${output}"
+  grep "keeping the default folder: ${tmp_dir} can't be created" > /dev/null <<< "${output}"
+
+  # a writable tmpfs on the configured tmp dir, owned by the user and without
+  # the sticky bit, is used through a `/tmp/containerbase` link
+  output=$(run --user "${user}" -e CONTAINERBASE_TMP_DIR="${tmp_dir}" \
+    --tmpfs "${tmp_dir}:uid=12021,mode=0755" "${image}" \
+    bash -c 'node --version && npm --version && readlink /tmp/containerbase' 2>&1)
+  echo "${output}"
+  grep "^${tmp_dir}$" > /dev/null <<< "${output}"
+  if grep 'keeping the default folder' > /dev/null <<< "${output}"; then
+    echo "the configured tmp dir should be used"
+    exit 1
+  fi
 done
 
 echo "--- read-only tests passed"
