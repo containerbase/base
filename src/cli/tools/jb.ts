@@ -7,6 +7,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class JsonnetBundlerInstallService extends BaseInstallService {
   readonly name = 'jb';
+  override readonly minVersion = '0.2.0';
 
   /**
    * Downloads the jb binary from GitHub into the versioned `bin` folder.

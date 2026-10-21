@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class ApkoInstallService extends BaseInstallService {
   readonly name = 'apko';
+  override readonly minVersion = '0.1.1';
 
   /** The architecture name used by the apko release assets. */
   private get ghArch(): string {

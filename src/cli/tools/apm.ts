@@ -5,6 +5,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class ApmInstallService extends BaseInstallService {
   readonly name = 'apm';
+  override readonly minVersion = '0.4.0';
 
   /** The architecture name used by the apm release assets. */
   private get ghArch(): string {

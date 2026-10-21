@@ -7,6 +7,7 @@ import { getDistro, logger } from '../utils/index.ts';
 @injectFromHierarchy()
 export class WallyInstallService extends BaseInstallService {
   readonly name = 'wally';
+  override readonly minVersion = '0.3.0';
 
   /** The architecture name used by the wally prebuilds. */
   private get ghArch(): string {

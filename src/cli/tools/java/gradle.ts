@@ -15,6 +15,7 @@ import { GradleReleases, GradleVersionData } from './schema.ts';
 @injectFromHierarchy()
 export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
+  override readonly minVersion = '1.0';
   override readonly parent = 'java';
 
   /**

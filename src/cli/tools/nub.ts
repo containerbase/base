@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class NubInstallService extends BaseInstallService {
   readonly name = 'nub';
+  override readonly minVersion = '0.0.34';
 
   /** The architecture name used by the nub release assets. */
   private get ghArch(): string {

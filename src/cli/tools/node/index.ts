@@ -54,6 +54,7 @@ export class NodePrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
+  override readonly minVersion = '8.7.0';
 
   /** The architecture name used by the nodejs.org archives. */
   private get nodeArch(): string {

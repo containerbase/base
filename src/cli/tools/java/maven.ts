@@ -31,6 +31,7 @@ const parser = new XMLParser({
 @injectFromHierarchy()
 export class MavenInstallService extends BaseInstallService {
   readonly name = 'maven';
+  override readonly minVersion = '3.0.4';
 
   override readonly parent = 'java';
 

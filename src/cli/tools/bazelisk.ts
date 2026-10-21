@@ -7,6 +7,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class BazeliskInstallService extends BaseInstallService {
   readonly name = 'bazelisk';
+  override readonly minVersion = '0.0.1';
 
   /**
    * Downloads the bazelisk binary from GitHub into the versioned `bin`

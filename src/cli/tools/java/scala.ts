@@ -7,6 +7,7 @@ import { semverGte } from '../../utils/index.ts';
 @injectFromHierarchy()
 export class ScalaInstallService extends BaseInstallService {
   readonly name = 'scala';
+  override readonly minVersion = '2.11.2';
 
   override readonly parent = 'java';
 

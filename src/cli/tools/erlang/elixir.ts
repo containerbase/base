@@ -35,6 +35,7 @@ export class ElixirPrepareService extends BasePrepareService {
 export class ElixirInstallService extends BaseInstallService {
   override readonly name = 'elixir';
   override readonly parent = 'erlang';
+  override readonly minVersion = '1.4.3';
 
   /**
    * Downloads the elixir archive from GitHub, verified against its

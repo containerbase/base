@@ -11,6 +11,7 @@ const checksumsSince = '0.25.0';
 @injectFromHierarchy()
 export class VendirInstallService extends BaseInstallService {
   readonly name = 'vendir';
+  override readonly minVersion = '0.4.0';
 
   /**
    * Downloads the vendir binary from GitHub into the versioned `bin` folder,

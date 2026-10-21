@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class TerraformInstallService extends BaseInstallService {
   readonly name = 'terraform';
+  override readonly minVersion = '0.1.0';
 
   /**
    * Downloads the terraform zip from releases.hashicorp.com, verified against

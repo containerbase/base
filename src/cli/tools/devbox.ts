@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class DevboxInstallService extends BaseInstallService {
   readonly name = 'devbox';
+  override readonly minVersion = '0.0.6';
 
   /**
    * Downloads the devbox archive from GitHub, verified against the release's

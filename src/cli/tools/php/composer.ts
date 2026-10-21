@@ -8,6 +8,7 @@ import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts
 @injectFromHierarchy()
 export class ComposerInstallService extends BaseInstallService {
   readonly name = 'composer';
+  override readonly minVersion = '1.0.0';
   override readonly parent = 'php';
 
   /**
