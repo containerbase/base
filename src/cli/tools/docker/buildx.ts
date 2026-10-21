@@ -8,6 +8,7 @@ import { pathExists, semverGte } from '../../utils/index.ts';
 @injectFromHierarchy()
 export class BuildxInstallService extends BaseInstallService {
   readonly name = 'buildx';
+  override readonly minVersion = '0.2.0';
 
   override readonly parent = 'docker';
 

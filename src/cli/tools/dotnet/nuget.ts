@@ -16,6 +16,7 @@ import { logger } from '../../utils/index.ts';
 @injectFromHierarchy()
 export class NugetInstallService extends BaseInstallService {
   readonly name = 'nuget';
+  override readonly minVersion = '3.4.4';
   override parent = 'mono';
 
   /**

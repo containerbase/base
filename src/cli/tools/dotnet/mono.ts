@@ -78,6 +78,7 @@ export class MonoPrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class MonoInstallService extends PrebuildInstallService {
   readonly name = 'mono';
+  override readonly minVersion = '6.14.1';
 
   /**
    * Installs the mono prebuild, adds a `cert-sync` wrapper and fills the mono

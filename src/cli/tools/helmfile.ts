@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class HelmfileInstallService extends BaseInstallService {
   readonly name = 'helmfile';
+  override readonly minVersion = '0.145.0';
 
   /**
    * Downloads the helmfile archive from GitHub, verified against the

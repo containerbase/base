@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class BufInstallService extends BaseInstallService {
   readonly name = 'buf';
+  override readonly minVersion = '0.1.0';
 
   /** The architecture name used by the buf release assets. */
   private get ghArch(): string {

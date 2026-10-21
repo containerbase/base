@@ -58,6 +58,7 @@ const GoDevReleases = z.array(GoDevRelease);
 @injectFromHierarchy()
 export class GolangInstallService extends BaseInstallService {
   override readonly name = 'golang';
+  override readonly minVersion = '1.9.0';
 
   /** The architecture name used by the containerbase prebuild. */
   private get prebuildArch(): string {

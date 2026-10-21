@@ -32,6 +32,7 @@ export class RustPrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class RustInstallService extends BaseInstallService {
   override readonly name = 'rust';
+  override readonly minVersion = '1.7.0';
 
   /** The architecture name used by the rust release archives. */
   private get rustArch(): string {
