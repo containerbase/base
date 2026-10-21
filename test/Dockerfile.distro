@@ -297,7 +297,7 @@ RUN install-tool nuget 7.9.0
 FROM build AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.0
+RUN install-tool node 24.22.1
 # renovate: datasource=npm
 RUN install-tool pnpm 12.14.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
