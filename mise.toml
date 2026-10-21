@@ -4,10 +4,3 @@ node = "24.22.0"
 pnpm = "12.14.0"
 shellcheck = "0.11.0"
 zizmor = "1.31.1"
-
-[hooks]
-postinstall = "pnpm install"
-
-[settings]
-# needed for hooks
-experimental = true

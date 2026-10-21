@@ -31,7 +31,8 @@ is merged or `main` is needed, and force-push it with `gh stack push` or
 
 All tooling runs through `pnpm`:
 
-- `pnpm install --frozen-lockfile`: install dependencies
+- `mise install`: install Node.js, pnpm and the workflow linters pinned in `mise.toml`
+- `pnpm install --frozen-lockfile`: install dependencies, also after `mise install`
 - `pnpm tool-versions`: download the embedded tool-versions data, the unit tests validate it and fail without it (`pnpm build` downloads it too)
 - `pnpm vitest run`: run the unit tests
 - `pnpm tsc --noEmit`: type check

@@ -16,13 +16,14 @@ Install a recent version of:
 - [Docker](https://www.docker.com)
 - the [`buildx`](https://github.com/docker/buildx) plugin
 
-Node.js and pnpm are pinned in [`mise.toml`](./mise.toml), so [`mise`](https://mise.jdx.dev) users can install them and the dependencies with:
+Node.js, pnpm and the workflow linters are pinned in [`mise.toml`](./mise.toml), so [`mise`](https://mise.jdx.dev) users can install them and then the dependencies with:
 
 ```console
 > mise install
+> pnpm install --frozen-lockfile
 ```
 
-Without mise, install the dependencies with `pnpm install`.
+Without mise, install Node.js and pnpm yourself and run only `pnpm install --frozen-lockfile`.
 
 You must first build the CLI, before you build the Docker images.
 
