@@ -23,6 +23,10 @@ jobs:
     outputs:
       uid: ${{ steps.init.outputs.uid }}
       skip-build: ${{ steps.changes.outputs.skip-build }}
+      lang-matrix: ${{ steps.matrix.outputs.lang-matrix }}
+      run-lang: ${{ steps.matrix.outputs.run-lang }}
+      run-distro: ${{ steps.matrix.outputs.run-distro }}
+      run-base-arm64: ${{ steps.matrix.outputs.run-base-arm64 }}
 
     steps:
       - name: ⚙️ Setup
@@ -75,6 +79,65 @@ jobs:
           else
             echo "skip-build=true" >> "${GITHUB_OUTPUT}"
           fi
+
+      # the `lang` matrix has an entry for each `test/<lang>/Dockerfile`
+      # (x86_64) and `test/<lang>/Dockerfile.arm64` (aarch64). Pull requests
+      # and merge queue groups which only change test Dockerfiles, like most
+      # `test(deps)` updates, only run the docker tests of those files; any
+      # other change runs all of them
+      - name: ⚙️ Compute docker test matrix
+        id: matrix
+        run: |
+          changed="${RUNNER_TEMP}/changed-files"
+          docker_only=false
+          if [[ -s "${changed}" ]] && ! grep -qvE '^test/([^/]+/Dockerfile(\.arm64)?|Dockerfile\.(base|distro))$' "${changed}"; then
+            docker_only=true
+          fi
+
+          # whether a test Dockerfile is part of this run
+          function selected () {
+            [[ "${docker_only}" != "true" ]] || grep -qxF "${1}" "${changed}"
+          }
+
+          x86_64='{"name":"x86_64","os":"ubuntu-26.04","tag":"amd64"}'
+          aarch64='{"name":"aarch64","os":"ubuntu-26.04-arm","tag":"arm64"}'
+          entries=()
+          for dir in test/*/; do
+            lang=$(basename "${dir}")
+            # used by the `base` job
+            if [[ "${lang}" == "readonly" ]]; then
+              continue
+            fi
+            if [[ -f "${dir}Dockerfile" ]] && selected "${dir}Dockerfile"; then
+              entries+=("{\"lang\":\"${lang}\",\"arch\":${x86_64}}")
+            fi
+            if [[ -f "${dir}Dockerfile.arm64" ]] && selected "${dir}Dockerfile.arm64"; then
+              entries+=("{\"lang\":\"${lang}\",\"arch\":${aarch64}}")
+            fi
+          done
+
+          run_lang=false
+          if [[ ${#entries[@]} -gt 0 ]]; then
+            run_lang=true
+          fi
+          run_distro=false
+          if selected test/Dockerfile.distro; then
+            run_distro=true
+          fi
+          run_base_arm64=false
+          if selected test/Dockerfile.base; then
+            run_base_arm64=true
+          fi
+
+          matrix="{\"include\":[$(IFS=,; echo "${entries[*]}")]}"
+          echo "docker only: ${docker_only}, distro: ${run_distro}, base-arm64: ${run_base_arm64}"
+          echo "lang matrix: ${matrix}"
+          {
+            echo "lang-matrix=${matrix}"
+            echo "run-lang=${run_lang}"
+            echo "run-distro=${run_distro}"
+            echo "run-base-arm64=${run_base_arm64}"
+          } >> "${GITHUB_OUTPUT}"
 
   lint:
     runs-on: ubuntu-26.04
@@ -260,9 +323,11 @@ jobs:
 
   distro:
     runs-on: ubuntu-26.04
-    # docker tests are skipped for draft pull requests
-    if: github.event.pull_request.draft != true
+    # docker tests are skipped for draft pull requests, and when only other
+    # test Dockerfiles changed
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-distro == 'true'
     needs:
+      - setup
       - bats
       - lint
       - vitest
@@ -317,8 +382,9 @@ jobs:
   # test old distros on arm64
   base-arm64:
     runs-on: ubuntu-26.04-arm
-    if: github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-base-arm64 == 'true'
     needs:
+      - setup
       - bats
       - lint
       - vitest
@@ -361,7 +427,7 @@ jobs:
   lang:
     runs-on: ${{ matrix.arch.os }}
     name: ${{ matrix.lang }} (${{ matrix.arch.name }})
-    if: github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-lang == 'true'
     needs:
       - setup
       - base
@@ -375,41 +441,9 @@ jobs:
     strategy:
       max-parallel: 10
       fail-fast: false
-      matrix:
-        lang:
-          - dart
-          - dotnet
-          - erlang
-          - flutter
-          - flux
-          - golang
-          - haskell
-          - java
-          - jb
-          - helm
-          - nix
-          - node
-          - php
-          - powershell
-          - python
-          - ruby
-          - rust
-          - swift
-          - latest
-        arch:
-          - name: x86_64
-            os: ubuntu-26.04
-            tag: amd64
-          - name: aarch64
-            os: ubuntu-26.04-arm
-            tag: arm64
-        # include:
-        #   # no ubuntu arm64 support for haskell
-        #   - lang: haskell
-        #     arch:
-        #       name: x86_64
-        #       os: ubuntu-26.04
-        #       tag: amd64
+      # computed by `setup` from the test Dockerfiles, a test without
+      # `Dockerfile.arm64` only runs on x86_64
+      matrix: ${{ fromJSON(needs.setup.outputs.lang-matrix) }}
 
     env:
       TAG: ${{ matrix.lang }}

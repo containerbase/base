@@ -309,9 +309,9 @@ pnpm test:bats
 ```
 
 CI runs the test images from a matrix in [`.github/workflows/build.yml`](../.github/workflows/build.yml).
-The `lang` matrix entries map to directories under [`test/`](../test/), so a brand-new test directory also needs a matrix entry.
-Adding to an existing test image needs no workflow change.
-If you change a workflow, for example to add that matrix entry, run `mise install` once and check it with `jactionlint` and `zizmor`, like CI's `lint` job does.
+Its `setup` job computes the `lang` matrix from the test directories: each `test/<lang>/Dockerfile` runs on x86_64 and each `test/<lang>/Dockerfile.arm64` on aarch64, so a new test directory needs no workflow change.
+A pull request which only changes test Dockerfiles only runs the docker tests of those files.
+If you change a workflow, run `mise install` once and check it with `jactionlint` and `zizmor`, like CI's `lint` job does.
 
 ## Downstream: tool-versions and Renovate
 
