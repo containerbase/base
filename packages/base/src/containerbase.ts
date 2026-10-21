@@ -57,9 +57,23 @@ export function isCompatibleVersion(
 }
 
 /**
+ * Checks if an image version comes from a release. Development builds write
+ * the git sha or `0.0.0-PLACEHOLDER` instead.
+ */
+function isReleaseVersion(imageVersion: string): boolean {
+  const image = semverParse(imageVersion);
+  return (
+    !!image && !(image.major === 0 && image.minor === 0 && image.patch === 0)
+  );
+}
+
+/**
  * Reads the version of the containerbase image and throws when it isn't
  * compatible with this package, see `isCompatibleVersion`. Call it only when
  * `isContainerbase()` is true.
+ *
+ * Development images, whose version is a git sha or `0.0.0-…`, aren't checked.
+ * A missing or empty version file still throws.
  *
  * @param file the version file to read, `containerbaseVersionFile` by default
  * @returns the version of the image
@@ -68,7 +82,10 @@ export async function validateContainerbaseVersion(
   file: string = containerbaseVersionFile,
 ): Promise<string> {
   const imageVersion = (await readFile(file, 'utf8')).trim();
-  if (!isCompatibleVersion(imageVersion)) {
+  if (!imageVersion) {
+    throw new Error(`The containerbase image version file ${file} is empty`);
+  }
+  if (isReleaseVersion(imageVersion) && !isCompatibleVersion(imageVersion)) {
     throw new Error(
       `The containerbase image version ${imageVersion} is not compatible with @containerbase/base ${packageVersion}, it needs the same major version and the same or a newer minor or patch version`,
     );

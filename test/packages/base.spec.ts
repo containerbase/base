@@ -479,6 +479,37 @@ describe('packages/base', () => {
     }
   });
 
+  test.each(['a8c820972f2d16ce9fd7eeae9bcfbfc5b9e6f616', '0.0.0-PLACEHOLDER'])(
+    'validateContainerbaseVersion skips the development image version %s',
+    async (version) => {
+      const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+      const file = join(dir, 'version');
+      try {
+        await writeFile(file, `${version}\n`);
+        await expect(validateContainerbaseVersion(file)).resolves.toBe(version);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  test('validateContainerbaseVersion throws for an empty or missing version file', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+    const file = join(dir, 'version');
+    try {
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        'ENOENT',
+      );
+
+      await writeFile(file, '\n');
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        `The containerbase image version file ${file} is empty`,
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   test('containerbaseVersionFile is where the build writes the version', async () => {
     const build = await readFile(
       new URL('../../tools/build.js', import.meta.url),

@@ -92,6 +92,7 @@ if (isContainerbase()) {
 `isContainerbase()` checks the `CONTAINERBASE` variable the image sets, pass another environment to check that one instead of `process.env`.
 
 `validateContainerbaseVersion()` reads the version of the image from `/usr/local/containerbase/version` (`containerbaseVersionFile`) and throws when the image doesn't support everything this package describes: it needs the same major version as this package and the same or a newer minor or patch version.
+Development images, whose version is a git sha or `0.0.0-…`, aren't checked; a missing or empty version file throws.
 Call it on startup when `isContainerbase()` is true; `isCompatibleVersion(imageVersion)` does the comparison without reading the file, and `packageVersion` is the version it compares with:
 
 ```ts
