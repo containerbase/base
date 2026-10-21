@@ -498,8 +498,10 @@ describe('packages/base', () => {
     const file = join(dir, 'version');
     try {
       await expect(validateContainerbaseVersion(file)).rejects.toThrow(
-        'ENOENT',
+        `The containerbase image version file ${file} is missing`,
       );
+      // other read errors are passed on
+      await expect(validateContainerbaseVersion(dir)).rejects.toThrow('EISDIR');
 
       await writeFile(file, '\n');
       await expect(validateContainerbaseVersion(file)).rejects.toThrow(
