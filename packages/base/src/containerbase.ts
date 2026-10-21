@@ -81,7 +81,19 @@ function isReleaseVersion(imageVersion: string): boolean {
 export async function validateContainerbaseVersion(
   file: string = containerbaseVersionFile,
 ): Promise<string> {
-  const imageVersion = (await readFile(file, 'utf8')).trim();
+  let content: string;
+  try {
+    content = await readFile(file, 'utf8');
+  } catch (err) {
+    const { code, message } = err as NodeJS.ErrnoException;
+    throw new Error(
+      code === 'ENOENT'
+        ? `The containerbase image version file ${file} is missing`
+        : `The containerbase image version file ${file} can't be read: ${message}`,
+      { cause: err },
+    );
+  }
+  const imageVersion = content.trim();
   if (!imageVersion) {
     throw new Error(`The containerbase image version file ${file} is empty`);
   }

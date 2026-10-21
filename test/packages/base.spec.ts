@@ -521,7 +521,11 @@ describe('packages/base', () => {
     const file = join(dir, 'version');
     try {
       await expect(validateContainerbaseVersion(file)).rejects.toThrow(
-        'ENOENT',
+        `The containerbase image version file ${file} is missing`,
+      );
+      // other read errors name the file and keep the reason
+      await expect(validateContainerbaseVersion(dir)).rejects.toThrow(
+        `The containerbase image version file ${dir} can't be read: EISDIR`,
       );
 
       await writeFile(file, '\n');
