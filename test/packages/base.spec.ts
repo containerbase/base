@@ -1,14 +1,22 @@
-import { readFile } from 'node:fs/promises';
-import { describe, expect, expectTypeOf, test } from 'vitest';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { describe, expect, expectTypeOf, test, vi } from 'vitest';
 import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
 import * as main from '../../packages/base/src/index.ts';
 import {
+  containerbaseVersionFile,
   defaultDistro,
+  isCompatibleVersion,
+  isContainerbase,
   isToolVersionsFormat,
+  packageVersion,
   toolNames,
   toolVersionsFormat,
   toolVersionsFormatPath,
+  toolVersionsPath,
+  validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
 import {
   DistroCode,
@@ -20,6 +28,7 @@ import * as schemas from '../../packages/base/src/tool-versions-schema.ts';
 import type * as tvTypes from '../../packages/base/src/tool-versions-types.ts';
 import type * as types from '../../packages/base/src/types.ts';
 import * as zodEntry from '../../packages/base/src/zod.ts';
+import { toolVersionsDir } from '../../tools/tool-versions.ts';
 
 const checksum = `sha256:${'a'.repeat(64)}`;
 const integrity = `sha256-${'A'.repeat(43)}=`;
@@ -399,6 +408,115 @@ describe('packages/base', () => {
       expect(entry.toolVersionsFormatPath).toBe(toolVersionsFormatPath);
       expect(entry.isToolVersionsFormat).toBe(isToolVersionsFormat);
     }
+  });
+
+  test('toolVersionsPath is where the build embeds the data', () => {
+    expect(`dist/docker${toolVersionsPath}`).toBe(toolVersionsDir);
+  });
+
+  test.each([
+    { name: 'set', env: { CONTAINERBASE: '1' }, expected: true },
+    { name: 'empty', env: { CONTAINERBASE: '' }, expected: false },
+    { name: 'missing', env: {}, expected: false },
+  ])(
+    'isContainerbase is $expected when CONTAINERBASE is $name',
+    ({ env, expected }) => {
+      expect(isContainerbase(env)).toBe(expected);
+    },
+  );
+
+  test('isContainerbase checks process.env by default', () => {
+    vi.stubEnv('CONTAINERBASE', '1');
+    expect(isContainerbase()).toBe(true);
+    vi.stubEnv('CONTAINERBASE', undefined);
+    expect(isContainerbase()).toBe(false);
+    vi.unstubAllEnvs();
+  });
+
+  test.each([
+    { image: '14.2.0', version: '14.2.0', expected: true },
+    { image: '14.2.1', version: '14.2.0', expected: true },
+    { image: '14.3.0', version: '14.2.5', expected: true },
+    { image: '14.2.0\n', version: '14.2.0', expected: true },
+    { image: '14.1.9', version: '14.2.0', expected: false },
+    { image: '14.2.0', version: '14.2.1', expected: false },
+    { image: '15.0.0', version: '14.2.0', expected: false },
+    { image: '13.9.0', version: '14.2.0', expected: false },
+    { image: 'latest', version: '14.2.0', expected: false },
+    { image: '14.2.0', version: 'invalid', expected: false },
+  ])(
+    'isCompatibleVersion of image $image with $version is $expected',
+    ({ image, version, expected }) => {
+      expect(isCompatibleVersion(image, version)).toBe(expected);
+    },
+  );
+
+  test('packageVersion is the version of the package', async () => {
+    const pkg = JSON.parse(
+      await readFile(
+        new URL('../../packages/base/package.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { version: string };
+
+    expect(packageVersion).toBe(pkg.version);
+  });
+
+  test('validateContainerbaseVersion reads the image version', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+    const file = join(dir, 'version');
+    try {
+      // the package of the repository has the placeholder version 0.0.0
+      await writeFile(file, '0.1.0\n');
+      await expect(validateContainerbaseVersion(file)).resolves.toBe('0.1.0');
+
+      await writeFile(file, '1.0.0\n');
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        'The containerbase image version 1.0.0 is not compatible with @containerbase/base 0.0.0-semantic-release',
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test.each(['a8c820972f2d16ce9fd7eeae9bcfbfc5b9e6f616', '0.0.0-PLACEHOLDER'])(
+    'validateContainerbaseVersion skips the development image version %s',
+    async (version) => {
+      const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+      const file = join(dir, 'version');
+      try {
+        await writeFile(file, `${version}\n`);
+        await expect(validateContainerbaseVersion(file)).resolves.toBe(version);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  test('validateContainerbaseVersion throws for an empty or missing version file', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+    const file = join(dir, 'version');
+    try {
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        'ENOENT',
+      );
+
+      await writeFile(file, '\n');
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        `The containerbase image version file ${file} is empty`,
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('containerbaseVersionFile is where the build writes the version', async () => {
+    const build = await readFile(
+      new URL('../../tools/build.js', import.meta.url),
+      'utf8',
+    );
+
+    expect(build).toContain(`'dist/docker${containerbaseVersionFile}'`);
   });
 
   test('FileIntegrity rejects a bad integrity', () => {

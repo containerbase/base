@@ -33,7 +33,7 @@ The raw data and its json schema are also exported, for consumers which don't us
 import tools from '@containerbase/base/tools.json' with { type: 'json' };
 ```
 
-The zod schemas live behind a separate entry point, so the default export stays dependency free:
+The zod schemas live behind a separate entry point, so the default export only depends on `semver`:
 
 ```ts
 import { SupportedTools, ToolName } from '@containerbase/base/zod';
@@ -72,6 +72,38 @@ isToolVersionsFormat(
 isToolVersionsFormat(
   'https://containerbase.github.io/tool-versions/v2/tool.schema.json',
 ); // false
+```
+
+The containerbase image embeds the tool-versions data, a reader running in the image can use it when the site can't be reached:
+
+```ts
+import {
+  isContainerbase,
+  toolVersionsFormatPath,
+  toolVersionsPath,
+} from '@containerbase/base';
+
+if (isContainerbase()) {
+  // eg. '/usr/local/containerbase/tool-versions/v1/node.json'
+  const file = `${toolVersionsPath}/${toolVersionsFormatPath}/node.json`;
+}
+```
+
+`isContainerbase()` checks the `CONTAINERBASE` variable the image sets, pass another environment to check that one instead of `process.env`.
+
+`validateContainerbaseVersion()` reads the version of the image from `/usr/local/containerbase/version` (`containerbaseVersionFile`) and throws when the image doesn't support everything this package describes: it needs the same major version as this package and the same or a newer minor or patch version.
+Development images, whose version is a git sha or `0.0.0-…`, aren't checked; a missing or empty version file throws.
+Call it on startup when `isContainerbase()` is true; `isCompatibleVersion(imageVersion)` does the comparison without reading the file, and `packageVersion` is the version it compares with:
+
+```ts
+import {
+  isContainerbase,
+  validateContainerbaseVersion,
+} from '@containerbase/base';
+
+if (isContainerbase()) {
+  await validateContainerbaseVersion(); // eg. '14.2.0', or throws
+}
 ```
 
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
