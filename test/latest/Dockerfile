@@ -236,7 +236,7 @@ RUN install-tool bun 1.4.3
 RUN install-tool nub 0.9.7
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.7
+RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
 RUN install-tool apko 1.4.12
