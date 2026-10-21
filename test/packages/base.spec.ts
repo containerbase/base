@@ -245,6 +245,27 @@ describe('packages/base', () => {
     ).toBe(false);
   });
 
+  test('ToolVersion keeps the archs and distros', () => {
+    const version = {
+      version: '1.0.0',
+      archs: ['amd64', 'arm64'],
+      distros: ['jammy', 'noble'],
+    };
+
+    expect(schemas.ToolVersion.parse(version)).toEqual(version);
+  });
+
+  test.each([
+    { name: 'empty archs', value: { archs: [] } },
+    { name: 'an empty arch', value: { archs: [''] } },
+    { name: 'empty distros', value: { distros: [] } },
+    { name: 'an empty distro', value: { distros: [''] } },
+  ])('ToolVersion rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersion.safeParse({ version: '1.0.0', ...value }).success,
+    ).toBe(false);
+  });
+
   test('VersionFiles parses a <tool>/<version>.json file', () => {
     expect(
       schemas.VersionFiles.safeParse({

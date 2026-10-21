@@ -61,6 +61,16 @@ export interface ToolVersion {
    * present when the registry has one.
    */
   constraints?: Record<string, string>;
+  /**
+   * Sorted, the archs which have a file of this version, only in the
+   * `<tool>.json` files and only for versions with arch specific files.
+   */
+  archs?: string[];
+  /**
+   * Sorted, the distro codenames which have a file of this version, only in
+   * the `<tool>.json` files and only for versions with distro specific files.
+   */
+  distros?: string[];
 }
 
 /**
