@@ -19,6 +19,7 @@ import {
   validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
 import {
+  Arch,
   DistroCode,
   type InstallToolType,
   ToolMetadata,
@@ -95,6 +96,14 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof DistroCode>
     >().toEqualTypeOf<types.DistroCode>();
+  });
+
+  test('Arch matches the zod free type', () => {
+    expectTypeOf<z.infer<typeof Arch>>().toEqualTypeOf<types.Arch>();
+  });
+
+  test('Arch accepts the containerbase archs', () => {
+    expect(Arch.options).toEqual(['amd64', 'arm64']);
   });
 
   test('ToolMetadata accepts a minimum version per Ubuntu release', () => {
