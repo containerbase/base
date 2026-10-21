@@ -98,7 +98,7 @@ RUN install-tool devbox 0.18.4
 FROM base AS test-gh
 
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.102.1
+RUN install-tool gh v2.103.0
 
 #--------------------------------------
 # Image: gleam
