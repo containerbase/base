@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils/index.ts';
-import { ToolVersionsService, createContainer } from './index.ts';
+import { HttpService, ToolVersionsService, createContainer } from './index.ts';
+import { onlineToolVersionsTimeout } from './tool-versions.service.ts';
+import { scope } from '~test/http-mock.ts';
 import { rootPath } from '~test/path.ts';
 
 /**
@@ -120,6 +122,84 @@ describe('cli/services/tool-versions.service', () => {
     await writeFile(`${dir}/${tool}.json`, JSON.stringify(file));
 
     expect(await svc.getVersions(tool)).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({ tool, location: `${dir}/${tool}.json` }),
+      'invalid embedded tool-versions data',
+    );
+  });
+
+  describe('getOnlineVersions', () => {
+    const baseUrl = 'https://containerbase.github.io';
+
+    test('fetches the published file once per instance', async () => {
+      const online = data('online');
+      scope(baseUrl).get('/tool-versions/v1/online.json').reply(200, online);
+
+      expect(await svc.getOnlineVersions('online')).toEqual(online);
+      // cached, a second request would fail without an interceptor
+      expect(await svc.getOnlineVersions('online')).toEqual(online);
+    });
+
+    test('uses a timeout and no retries', async () => {
+      const spy = vi.spyOn(HttpService.prototype, 'getJson');
+      scope(baseUrl)
+        .get('/tool-versions/v1/opts.json')
+        .reply(200, data('opts'));
+
+      await svc.getOnlineVersions('opts');
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        'https://containerbase.github.io/tool-versions/v1/opts.json',
+        { timeout: { request: onlineToolVersionsTimeout } },
+        { attempts: 1, quiet: true },
+      );
+      expect(onlineToolVersionsTimeout).toBe(30_000);
+    });
+
+    test('has no versions after a network error, without a retry', async () => {
+      // a retry would find no interceptor and fail the test
+      scope(baseUrl)
+        .get('/tool-versions/v1/down.json')
+        .once()
+        .replyWithError('connection reset');
+
+      expect(await svc.getOnlineVersions('down')).toBeUndefined();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    test('has no versions for an unreachable file', async () => {
+      scope(baseUrl).get('/tool-versions/v1/gone.json').reply(404);
+
+      expect(await svc.getOnlineVersions('gone')).toBeUndefined();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    test('has no versions for a file of another tool', async () => {
+      scope(baseUrl)
+        .get('/tool-versions/v1/mixed.json')
+        .reply(200, data('other'));
+
+      expect(await svc.getOnlineVersions('mixed')).toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ tool: 'mixed', dataTool: 'other' }),
+        'online tool-versions data of another tool',
+      );
+    });
+
+    test('has no versions for an invalid file', async () => {
+      scope(baseUrl)
+        .get('/tool-versions/v1/bad.json')
+        .reply(200, { ...data('bad'), versions: undefined });
+
+      expect(await svc.getOnlineVersions('bad')).toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tool: 'bad',
+          location: 'https://containerbase.github.io/tool-versions/v1/bad.json',
+        }),
+        'invalid online tool-versions data',
+      );
+    });
   });
 
   test('has no versions for a missing file', async () => {

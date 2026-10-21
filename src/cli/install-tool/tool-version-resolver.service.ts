@@ -34,7 +34,7 @@ function pick(
 
 @injectable()
 export class ToolVersionResolverService {
-  /** Takes all registered tool version resolvers and the embedded data. */
+  /** Takes all registered tool version resolvers and the tool-versions data. */
   constructor(
     @multiInject(TOOL_VERSION_RESOLVER) private resolver: ToolVersionResolver[],
     @inject(ToolVersionsService) private toolVersions: ToolVersionsService,
@@ -42,8 +42,8 @@ export class ToolVersionResolverService {
 
   /**
    * Resolves the version with the tool's resolver. A tool without a resolver
-   * is resolved from the embedded tool-versions data, and keeps its version
-   * when the data can't answer.
+   * is resolved from the tool-versions data, and keeps its version when the
+   * data can't answer.
    */
   async resolve(
     tool: string,
@@ -53,33 +53,56 @@ export class ToolVersionResolverService {
     if (resolver) {
       return (await resolver.resolve(version)) ?? version;
     }
-    return (await this.resolveEmbedded(tool, version)) ?? version;
+    return (await this.resolveFromData(tool, version)) ?? version;
   }
 
   /**
-   * Resolves a missing version, `latest` or a partial version from the
-   * embedded data, any other version is not checked. A resolved version is
-   * logged at debug level.
-   * @returns `undefined` when the embedded data can't answer
+   * Resolves a missing version, `latest` or a partial version from the online
+   * tool-versions data, any other version is not checked. A partial version
+   * which the embedded data lists as a release, like `8.10`, is kept without
+   * the online lookup, so it doesn't wait for a timeout when offline. The
+   * embedded data is otherwise only used when the online data can't be loaded,
+   * as it may be outdated. Online data without a match is final, the embedded
+   * data is older and can't know more. A resolved version is logged at debug
+   * level, or with a warning when the embedded data replaces the online data.
+   * @returns `undefined` when no data has a match
    */
-  private async resolveEmbedded(
+  private async resolveFromData(
     tool: string,
     version: string | undefined,
   ): Promise<string | undefined> {
-    if (
-      version !== undefined &&
-      version !== 'latest' &&
-      !isPartialVersion(version)
-    ) {
-      return undefined;
+    if (version !== undefined && version !== 'latest') {
+      if (!isPartialVersion(version)) {
+        return undefined;
+      }
+      const listed = await this.toolVersions.getVersions(tool);
+      if (listed && pick(listed, version) === version) {
+        logger.debug(
+          { tool, version, resolved: version },
+          'version resolved from the embedded tool-versions data',
+        );
+        return version;
+      }
+    }
+
+    const online = await this.toolVersions.getOnlineVersions(tool);
+    if (online) {
+      const resolved = pick(online, version);
+      if (resolved !== undefined) {
+        logger.debug(
+          { tool, version, resolved },
+          'version resolved from the online tool-versions data',
+        );
+      }
+      return resolved;
     }
 
     const data = await this.toolVersions.getVersions(tool);
     const resolved = data && pick(data, version);
     if (resolved !== undefined) {
-      logger.debug(
+      logger.warn(
         { tool, version, resolved },
-        'version resolved from the embedded tool-versions data',
+        'online tool-versions data not available, using the embedded, possibly outdated data',
       );
     }
     return resolved;

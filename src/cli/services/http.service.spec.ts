@@ -198,6 +198,22 @@ describe('cli/services/http.service', () => {
     10 * 1000,
   );
 
+  test.each([1, 0, -1])(
+    'getJson: tries only once, without got retries, for %i attempts',
+    async (attempts) => {
+      // got retries a 503 by default, a retry would find no interceptor and
+      // fail the test
+      scope(baseUrl).get('/test.json').once().reply(503);
+
+      const err = await http
+        .getJson(`${baseUrl}/test.json`, {}, { attempts })
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toBe('download failed');
+    },
+  );
+
   test('getJson: retries a network error and keeps the cause', async () => {
     scope(baseUrl)
       .get('/test.json')
