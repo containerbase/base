@@ -1,6 +1,7 @@
 name: build-push
 
-on:
+# see below why there is no workflow concurrency
+on: # jactionlint ignore=concurrency-limits
   push:
     # other branches are built by their pull request
     branches:
