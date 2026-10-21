@@ -20,6 +20,15 @@ export type {
 } from './tool-versions-types.ts';
 
 export {
+  containerbaseVersionFile,
+  isCompatibleVersion,
+  isContainerbase,
+  packageVersion,
+  toolVersionsPath,
+  validateContainerbaseVersion,
+} from './containerbase.ts';
+
+export {
   isToolVersionsFormat,
   toolVersionsFormat,
   toolVersionsFormatPath,
