@@ -66,7 +66,7 @@ RUN install-tool nub 0.9.7
 FROM base AS test-deno
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.7
+RUN install-tool deno 2.9.8
 
 #--------------------------------------
 # Image: apko
