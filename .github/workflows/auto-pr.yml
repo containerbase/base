@@ -1,6 +1,8 @@
 name: auto-pr
 
-on:
+# every event does its own work (reviewers, one backport per label), so runs must
+# not cancel or replace each other
+on: # jactionlint ignore=concurrency-limits
   # needed to assign reviewers and backport fork pull requests, no job checks
   # out or runs code from the pull request
   pull_request_target: # zizmor: ignore[dangerous-triggers]

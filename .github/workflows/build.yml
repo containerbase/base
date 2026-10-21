@@ -240,7 +240,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Init
         run: |
@@ -290,7 +291,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
@@ -344,7 +346,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️  Init
         run: |
@@ -421,7 +424,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Init
         run: |
