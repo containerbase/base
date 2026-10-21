@@ -500,8 +500,10 @@ describe('packages/base', () => {
       await expect(validateContainerbaseVersion(file)).rejects.toThrow(
         `The containerbase image version file ${file} is missing`,
       );
-      // other read errors are passed on
-      await expect(validateContainerbaseVersion(dir)).rejects.toThrow('EISDIR');
+      // other read errors name the file and keep the reason
+      await expect(validateContainerbaseVersion(dir)).rejects.toThrow(
+        `The containerbase image version file ${dir} can't be read: EISDIR`,
+      );
 
       await writeFile(file, '\n');
       await expect(validateContainerbaseVersion(file)).rejects.toThrow(

@@ -85,13 +85,13 @@ export async function validateContainerbaseVersion(
   try {
     content = await readFile(file, 'utf8');
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new Error(
-        `The containerbase image version file ${file} is missing`,
-        { cause: err },
-      );
-    }
-    throw err;
+    const { code, message } = err as NodeJS.ErrnoException;
+    throw new Error(
+      code === 'ENOENT'
+        ? `The containerbase image version file ${file} is missing`
+        : `The containerbase image version file ${file} can't be read: ${message}`,
+      { cause: err },
+    );
   }
   const imageVersion = content.trim();
   if (!imageVersion) {
