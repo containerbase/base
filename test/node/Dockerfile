@@ -623,6 +623,203 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: custom tmp dir
+#--------------------------------------
+FROM build AS test-tmp-dir
+
+USER root
+ENV CONTAINERBASE_TMP_DIR=/var/cache/containerbase
+
+# init at build time moves the folder of the base image into the configured one
+RUN set -ex; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  containerbase-cli init tool node; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ -d /var/cache/containerbase/cache/.npm ]]; \
+  [[ -f /var/cache/containerbase/cache/.npmrc ]]; \
+  [[ -d /var/cache/containerbase/cache/.cache ]]; \
+  rm /var/cache/containerbase/tool.init.d/node
+
+# a boot with an empty /tmp only links the configured folder and skips init
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ ! -e /var/cache/containerbase/tool.init.d/node ]]; \
+  [[ -d $USER_HOME/.npm ]]
+
+# the fast path also takes a value with a trailing slash and keeps it
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/containerbase/ docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == "tmp=/var/cache/containerbase/" ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ ! -e /var/cache/containerbase/tool.init.d/node ]]
+
+# a root boot takes the fast path through a link to a folder the user owns and can write,
+# a folder the user can't write goes through the cli, which warns and keeps the default
+RUN set -ex; \
+  mkdir -p /var/cache/cb-target/tool.init.d; \
+  chown -R 12021 /var/cache/cb-target; \
+  chmod 2755 /var/cache/cb-target; \
+  ln -s /var/cache/cb-target /var/cache/cb-via-link; \
+  rm -rf /tmp/containerbase; \
+  CONTAINERBASE_TMP_DIR=/var/cache/cb-via-link docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/cb-via-link ]]; \
+  [[ ! -e /var/cache/cb-target/tool.init.d/node ]]; \
+  chmod 0555 /var/cache/cb-target; \
+  rm -rf /tmp/containerbase; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/cb-via-link docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"is not writable for the user"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]
+
+# a boot with an empty mounted folder links and initializes it
+RUN set -ex; \
+  find /var/cache/containerbase -mindepth 1 -delete; \
+  rm -rf /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
+  [[ -d /var/cache/containerbase/tool.init.d ]]; \
+  [[ -d $USER_HOME/.npm ]]
+
+# a boot replaces a link to another folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  ln -s /var/tmp /tmp/containerbase; \
+  docker-entrypoint.sh true; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
+# a tool wrapper without the entrypoint recreates a missing link
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  node --version; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
+# an invalid value at boot goes through the cli, which warns once and uses the default
+RUN set -ex; \
+  out=$(CONTAINERBASE_TMP_DIR=relative/tmp docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  out=$(CONTAINERBASE_TMP_DIR=// docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "$(grep -c 'Ignoring invalid CONTAINERBASE_TMP_DIR' <<< "${out}")" -eq 1 ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]
+
+# a configured link into /tmp skips the fast path, the cli warns and keeps the default
+RUN set -ex; \
+  mkdir -p /tmp/somewhere/tool.init.d; \
+  ln -s /tmp/somewhere /var/cache/cb-link; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/cb-link docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]
+
+# a non-root boot with a configured folder it can't create keeps a real default folder
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/root-only
+
+USER 12021
+
+RUN set -ex; \
+  export CONTAINERBASE_TMP_DIR=/var/cache/root-only/containerbase; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  containerbase-cli init tool node; \
+  [[ -f /tmp/containerbase/tool.init.d/node ]]
+
+USER root
+
+# a non-root boot with a root owned link to another folder keeps that link
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 777 /var/tmp/other; \
+  ln -s /var/tmp/other /tmp/containerbase
+
+USER 12021
+
+RUN set -ex; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ "$(readlink /tmp/containerbase)" == /var/tmp/other ]]; \
+  [[ -f /var/tmp/other/tool.init.d/node ]]
+
+USER root
+
+# a non-root boot on a root owned default folder keeps using that folder without moving it
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 775 /tmp/containerbase; \
+  touch /tmp/containerbase/marker
+
+USER 12021
+
+RUN set -ex; \
+  out=$(docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"keeping the default folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  containerbase-cli init tool node; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  [[ -f /tmp/containerbase/marker ]]; \
+  [[ ! -e /var/cache/containerbase/marker ]]; \
+  [[ -f /tmp/containerbase/tool.init.d/node ]]
+
+USER root
+
+# a root owned configured folder created before the switch is given to the user
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/pre; \
+  CONTAINERBASE_TMP_DIR=/var/cache/pre containerbase-cli init tool node; \
+  [[ "$(readlink /tmp/containerbase)" == /var/cache/pre ]]; \
+  [[ "$(stat --format '%u' /var/cache/pre)" -eq 12021 ]]
+
+USER 12021
+
+RUN set -ex; \
+  touch "${USER_HOME}/.npm/user-write"; \
+  [[ -f /var/cache/pre/cache/.npm/user-write ]]
+
+USER root
+
+# without a configured folder a non-root boot replaces a leftover link to a folder it can't write
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 755 /var/cache/root-ro
+
+USER 12021
+
+RUN set -ex; \
+  ln -s /var/cache/root-ro /tmp/containerbase; \
+  env -u CONTAINERBASE_TMP_DIR docker-entrypoint.sh true; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]; \
+  [[ -d /tmp/containerbase/tool.init.d ]]
+
+USER root
+
+# a root boot skips the fast path for a shared folder, the cli warns and keeps the default
+RUN set -ex; \
+  rm -rf /tmp/containerbase; \
+  mkdir -m 1777 /var/cache/shared; \
+  mkdir /var/cache/shared/tool.init.d; \
+  out=$(CONTAINERBASE_TMP_DIR=/var/cache/shared docker-entrypoint.sh bash -c 'echo "tmp=${CONTAINERBASE_TMP_DIR}"' 2>&1); \
+  echo "${out}"; \
+  [[ "${out}" == *"is a shared folder"* ]]; \
+  [[ "${out}" == *"tmp=/tmp/containerbase"* ]]; \
+  [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]
+
+#--------------------------------------
 # test: vp
 #--------------------------------------
 FROM build AS test-vp
@@ -664,6 +861,7 @@ COPY --from=testn /.dummy /.dummy
 COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
+COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy

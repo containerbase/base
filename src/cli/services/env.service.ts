@@ -1,8 +1,9 @@
 import { arch } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { env, geteuid } from 'node:process';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
-import { type Arch, logger } from '../utils/index.ts';
+import { type Arch, isInside, logger } from '../utils/index.ts';
 
 export type Replacements = [string, string][];
 
@@ -52,6 +53,43 @@ export class EnvService {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
   }
 
+  /**
+   * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
+   * `/tmp/containerbase` when unset or empty. Trailing slashes are dropped.
+   * A path that is not absolute and normalized, or that is `/tmp` or below it,
+   * is ignored with a warning.
+   *
+   * The checked value is written back to `CONTAINERBASE_TMP_DIR`, so child
+   * processes, eg. the v2 shell tools, use it and an invalid value is only
+   * reported once.
+   */
+  get containerbaseTmpDir(): string {
+    const defaultDir = this.defaultContainerbaseTmpDir;
+    const value = env.CONTAINERBASE_TMP_DIR;
+    let dir = defaultDir;
+    if (isNonEmptyString(value)) {
+      const trimmed = value.replace(/\/+$/, '');
+      if (
+        trimmed === defaultDir ||
+        (resolve(trimmed) === trimmed && !isInside(this.tmpDir, trimmed))
+      ) {
+        dir = trimmed;
+      } else {
+        logger.warn(
+          { dir: value },
+          'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
+        );
+      }
+    }
+    env.CONTAINERBASE_TMP_DIR = dir;
+    return dir;
+  }
+
+  /** The default containerbase temp folder, `/tmp/containerbase`. */
+  get defaultContainerbaseTmpDir(): string {
+    return join(this.tmpDir, 'containerbase');
+  }
+
   /** The home folder of the current user, from `HOME`. */
   get home(): string {
     // TODO: validate
@@ -96,6 +134,11 @@ export class EnvService {
   /** The id of the containerbase user, from `USER_ID`. */
   get userId(): number {
     return parseInt(env.USER_ID ?? '12021', 10);
+  }
+
+  /** The primary group id of the containerbase user, from `PRIMARY_GROUP_ID`. */
+  get primaryGroupId(): number {
+    return parseInt(env.PRIMARY_GROUP_ID ?? '0', 10);
   }
 
   /** The mode for created folders and binaries, group writable unless root. */

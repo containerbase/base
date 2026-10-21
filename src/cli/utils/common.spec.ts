@@ -4,6 +4,7 @@ import {
   cleanTmpFiles,
   getDistro,
   isDockerBuild,
+  isInside,
   parseBinaryName,
   pathExists,
   reset,
@@ -114,6 +115,19 @@ UBUNTU_CODENAME=jammy`);
 
   test('cleanTmpFiles', async () => {
     await expect(cleanTmpFiles(rootPath('tmp'), true)).resolves.toBeUndefined();
+  });
+
+  test.each([
+    ['/tmp', '/tmp', true],
+    ['/tmp', '/tmp/containerbase', true],
+    ['/tmp', '/tmp/a/b', true],
+    ['/tmp', '/tmpdir', false],
+    ['/tmp', '/var/tmp', false],
+    ['/tmp', '/tmp/../var', false],
+    ['/tmp', 'tmp', false],
+    ['/', 'tmp', false],
+  ])('isInside(%s, %s) is %s', (parent, child, expected) => {
+    expect(isInside(parent, child)).toBe(expected);
   });
 
   describe('isDockerBuild', () => {

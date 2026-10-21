@@ -37,6 +37,20 @@ describe('cli/services/link-tool.service', async () => {
     expect(spy).toHaveBeenCalledOnce();
   });
 
+  test('shell-wrapper checks the init marker below the default temp folder', async () => {
+    vi.stubEnv('CONTAINERBASE_TMP_DIR', rootPath('var/cache/containerbase'));
+
+    await svc.shellwrapper('marker', { srcDir: '/bin/bash' });
+
+    const content = await fs.readFile(
+      rootPath('opt/containerbase/bin/marker'),
+      'utf8',
+    );
+    expect(content).toContain(
+      `if [[ ! -f "${rootPath('tmp/containerbase/tool.init.d/marker')}" ]]; then`,
+    );
+  });
+
   test('rm', async () => {
     // removing a wrapper which was never created is a no-op
     await expect(svc.rm('not-linked')).resolves.toBeUndefined();
