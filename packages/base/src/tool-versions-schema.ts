@@ -56,6 +56,16 @@ export const ToolVersion = z.object({
    * present when the registry has one
    */
   constraints: z.record(z.string().min(1), z.string().min(1)).exactOptional(),
+  /**
+   * sorted, the archs which have a file of this version, only in the
+   * `<tool>.json` files and only for versions with arch specific files
+   */
+  archs: z.array(z.string().min(1)).min(1).exactOptional(),
+  /**
+   * sorted, the distro codenames which have a file of this version, only in
+   * the `<tool>.json` files and only for versions with distro specific files
+   */
+  distros: z.array(z.string().min(1)).min(1).exactOptional(),
 });
 
 /**

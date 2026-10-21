@@ -12,6 +12,10 @@ export const DistroCode = z
   .enum(['jammy', 'noble', 'resolute'])
   .describe('an Ubuntu release supported by containerbase, by codename');
 
+export const Arch = z
+  .enum(['amd64', 'arm64'])
+  .describe('a CPU architecture supported by containerbase');
+
 /**
  * Schema of a single entry of `tools.json`.
  *

@@ -19,6 +19,7 @@ import {
   validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
 import {
+  Arch,
   DistroCode,
   type InstallToolType,
   ToolMetadata,
@@ -95,6 +96,14 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof DistroCode>
     >().toEqualTypeOf<types.DistroCode>();
+  });
+
+  test('Arch matches the zod free type', () => {
+    expectTypeOf<z.infer<typeof Arch>>().toEqualTypeOf<types.Arch>();
+  });
+
+  test('Arch accepts the containerbase archs', () => {
+    expect(Arch.options).toEqual(['amd64', 'arm64']);
   });
 
   test('ToolMetadata accepts a minimum version per Ubuntu release', () => {
@@ -265,6 +274,27 @@ describe('packages/base', () => {
   ])('ToolVersion rejects $name in the constraints', ({ constraints }) => {
     expect(
       schemas.ToolVersion.safeParse({ version: '1.0.0', constraints }).success,
+    ).toBe(false);
+  });
+
+  test('ToolVersion keeps the archs and distros', () => {
+    const version = {
+      version: '1.0.0',
+      archs: ['amd64', 'arm64'],
+      distros: ['jammy', 'noble'],
+    };
+
+    expect(schemas.ToolVersion.parse(version)).toEqual(version);
+  });
+
+  test.each([
+    { name: 'empty archs', value: { archs: [] } },
+    { name: 'an empty arch', value: { archs: [''] } },
+    { name: 'empty distros', value: { distros: [] } },
+    { name: 'an empty distro', value: { distros: [''] } },
+  ])('ToolVersion rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersion.safeParse({ version: '1.0.0', ...value }).success,
     ).toBe(false);
   });
 

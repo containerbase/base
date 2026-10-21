@@ -2,6 +2,7 @@ import { tools } from './data.ts';
 import type { DistroCode } from './types.ts';
 
 export type {
+  Arch,
   DistroCode,
   InstallToolType,
   ToolMetadata,
