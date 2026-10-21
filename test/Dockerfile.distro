@@ -312,7 +312,7 @@ RUN install-tool vp 1.3.0
 FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.11
+RUN install-tool php 8.5.12
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.10.3
 
