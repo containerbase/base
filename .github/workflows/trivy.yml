@@ -25,7 +25,7 @@ jobs:
           image-ref: 'ghcr.io/containerbase/base:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          version: v0.76.0
+          version: v0.76.1
 
       - uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
