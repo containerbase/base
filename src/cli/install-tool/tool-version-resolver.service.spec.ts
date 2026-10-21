@@ -8,6 +8,7 @@ import {
   TOOL_VERSION_RESOLVER,
   ToolVersionResolver,
 } from './tool-version-resolver.ts';
+import { scope } from '~test/http-mock.ts';
 import { rootPath } from '~test/path.ts';
 
 @injectable()
@@ -24,27 +25,61 @@ class DummyVersionResolver extends ToolVersionResolver {
 /** The embedded `v1` folder, set before each test as the root dir comes from the test setup. */
 let dir!: string;
 
+/** Versions of a tool, newest first, a `-rc` one is a prerelease. */
+const versions = [
+  '21.0.0-rc1',
+  '20.10.0',
+  '20.9.0',
+  '8.10.1',
+  '8.10',
+  '3.12.4',
+  '3.12.3',
+  '3.11.9',
+];
+
 /**
- * Writes the embedded versions of a tool, newest first.
+ * The content of a `<tool>.json` file.
  * @param tool - the tool name
- * @param versions - the versions, a `-rc` one is a prerelease, a `-lts` one
- * is an LTS release, the suffix is not part of the version
+ * @param list - the versions, a `-rc` one is a prerelease, a `-lts` one is an
+ * LTS release, the suffix is not part of the version
  */
-async function embed(tool: string, versions: string[]): Promise<void> {
-  await writeFile(
-    `${dir}/${tool}.json`,
-    JSON.stringify({
-      tool,
-      updatedAt: '2026-10-16T00:00:00Z',
-      versions: versions.map((entry) => {
-        const version = entry.replace(/-lts$/, '');
-        if (entry.includes('-rc')) {
-          return { version, prerelease: true };
-        }
-        return entry.endsWith('-lts') ? { version, lts: true } : { version };
-      }),
+function toolFile(tool: string, list: string[]): object {
+  return {
+    tool,
+    updatedAt: '2026-10-16T00:00:00Z',
+    versions: list.map((entry) => {
+      const version = entry.replace(/-lts$/, '');
+      if (entry.includes('-rc')) {
+        return { version, prerelease: true };
+      }
+      return entry.endsWith('-lts') ? { version, lts: true } : { version };
     }),
-  );
+  };
+}
+
+/**
+ * Writes the embedded versions of a tool.
+ * @param tool - the tool name
+ * @param list - the versions, newest first
+ */
+async function embed(tool: string, list: string[]): Promise<void> {
+  await writeFile(`${dir}/${tool}.json`, JSON.stringify(toolFile(tool, list)));
+}
+
+/**
+ * Mocks the online file of a tool.
+ * @param tool - the tool name
+ * @param status - the http status to reply with
+ * @param body - a list of versions for a tool file, or the raw reply
+ */
+function serve(
+  tool: string,
+  status: number,
+  body?: string[] | string | object,
+): void {
+  scope('https://containerbase.github.io')
+    .get(`/tool-versions/v1/${tool}.json`)
+    .reply(status, Array.isArray(body) ? toolFile(tool, body) : body);
 }
 
 describe('cli/install-tool/tool-version-resolver.service', () => {
@@ -72,26 +107,29 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('dummy', undefined)).toBeUndefined();
   });
 
-  test('does not read the embedded data for a tool with a resolver', async () => {
-    await embed('dummy', ['2.0.0', '1.0.0']);
-    const spy = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+  test('reads no data for a tool with a resolver', async () => {
+    const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+    const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
+    // there is data, but no online mock: a request would fail the test
+    await embed('dummy', versions);
 
     expect(await svc.resolve('dummy', '2')).toBe('2');
     expect(await svc.resolve('dummy', undefined)).toBeUndefined();
 
-    expect(spy).not.toHaveBeenCalled();
+    expect(embedded).not.toHaveBeenCalled();
+    expect(online).not.toHaveBeenCalled();
   });
 
   test.each([undefined, 'latest'])(
     'resolves %s of a tool without a resolver to the newest release',
     async (version) => {
-      await embed('other', ['3.0.0-rc1', '2.0.0', '1.0.0']);
+      serve('other', 200, ['3.0.0-rc1', '2.0.0', '1.0.0']);
 
       expect(await svc.resolve('other', version)).toBe('2.0.0');
 
       expect(logger.debug).toHaveBeenCalledWith(
         { tool: 'other', version, resolved: '2.0.0' },
-        'version resolved from the embedded tool-versions data',
+        'version resolved from the online tool-versions data',
       );
     },
   );
@@ -99,7 +137,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
   test.each([undefined, 'latest'])(
     'resolves %s of a tool without a resolver to the newest lts release',
     async (version) => {
-      await embed('other', [
+      serve('other', 200, [
         '26.0.0-rc1',
         '25.0.0',
         '24.11.0-lts',
@@ -112,25 +150,16 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
   );
 
   test.each([
-    { version: '2', resolved: '2.1.0' },
-    { version: '2.0', resolved: '2.0.5' },
+    { version: '20', resolved: '20.10.0' },
+    { version: '3.12', resolved: '3.12.4' },
     // a release itself stays as it is
     { version: '8.10', resolved: '8.10' },
     // no release of that line
-    { version: '9', resolved: '9' },
+    { version: '21', resolved: '21' },
   ])(
     'resolves the partial version $version of a tool without a resolver',
     async ({ version, resolved }) => {
-      await embed('other', [
-        '3.0.0-rc1',
-        '3.0.0',
-        '2.1.0',
-        '2.0.5',
-        '2.0.4',
-        '8.10.1',
-        '8.10',
-        '1.0.0',
-      ]);
+      serve('other', 200, versions);
 
       expect(await svc.resolve('other', version)).toBe(resolved);
     },
@@ -138,25 +167,131 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
   test('takes the newest release of a line in the order of the data', async () => {
     // the data is sorted by the versioning of the tool, which isn't compared
-    await embed('other', ['2.0.9', '2.0.10', '1.0.0']);
+    serve('other', 200, ['2.0.9', '2.0.10', '1.0.0']);
 
     expect(await svc.resolve('other', '2')).toBe('2.0.9');
   });
 
-  test('keeps an exact version of a tool without a resolver, listed or not', async () => {
-    await embed('other', ['2.0.0']);
-    const spy = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+  test('keeps a release the embedded data lists without the online lookup', async () => {
+    await embed('other', versions);
+    // no online mock: a request would fail the test
+    const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
 
-    expect(await svc.resolve('other', '2.0.0')).toBe('2.0.0');
-    expect(await svc.resolve('other', '9.9.9')).toBe('9.9.9');
+    expect(await svc.resolve('other', '8.10')).toBe('8.10');
 
-    expect(spy).not.toHaveBeenCalled();
+    expect(online).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      { tool: 'other', version: '8.10', resolved: '8.10' },
+      'version resolved from the embedded tool-versions data',
+    );
+  });
+
+  test('looks a partial version up online when the embedded data only lists releases of it', async () => {
+    await embed('other', versions);
+    serve('other', 200, ['3.12.9']);
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.9');
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test.each([undefined, 'latest'])(
+    'resolves %s from the newer online data, not the embedded one',
+    async (version) => {
+      await embed('other', ['1.0.0']);
+      serve('other', 200, ['2.0.0']);
+
+      expect(await svc.resolve('other', version)).toBe('2.0.0');
+    },
+  );
+
+  test('prefers the online data to an older embedded one', async () => {
+    await embed('other', ['20.1.0']);
+    serve('other', 200, versions);
+
+    expect(await svc.resolve('other', '20')).toBe('20.10.0');
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test('uses the embedded data and warns when the online data is not available', async () => {
+    await embed('other', versions);
+    serve('other', 404);
+
+    expect(await svc.resolve('other', '20')).toBe('20.10.0');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      { tool: 'other', version: '20', resolved: '20.10.0' },
+      expect.stringContaining('embedded'),
+    );
+    // the warning is the only log of this resolution
+    expect(logger.debug).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining('version resolved'),
+    );
+  });
+
+  test('uses the embedded data at once when the network is down', async () => {
+    await embed('other', versions);
+    // no retry, a second request would find no interceptor
+    scope('https://containerbase.github.io')
+      .get('/tool-versions/v1/other.json')
+      .once()
+      .replyWithError('connection reset');
+
+    expect(await svc.resolve('other', undefined)).toBe('20.10.0');
+  });
+
+  test('uses the embedded data when the online data is not valid json', async () => {
+    await embed('other', versions);
+    serve('other', 200, '{ not json');
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('uses the embedded data when the online data is invalid', async () => {
+    await embed('other', versions);
+    serve('other', 200, { versions: [] });
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('keeps the version when the online data has no match, without the embedded data', async () => {
+    await embed('other', ['20.1.0']);
+    serve('other', 200, ['19.0.0']);
+
+    expect(await svc.resolve('other', '20')).toBe('20');
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test('keeps the version when the embedded data has no match either', async () => {
+    await embed('other', ['19.0.0']);
+    serve('other', 404);
+
+    expect(await svc.resolve('other', '20')).toBe('20');
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   test.each([undefined, 'latest', '2'])(
-    'keeps %s of a tool without embedded data',
+    'keeps %s of a tool without any data',
     async (version) => {
+      serve('other', 404);
+
       expect(await svc.resolve('other', version)).toBe(version);
+      expect(logger.warn).not.toHaveBeenCalled();
     },
   );
+
+  test('makes no request and reads no data for an exact version', async () => {
+    const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+    const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
+
+    expect(await svc.resolve('other', '1.2.3')).toBe('1.2.3');
+
+    expect(embedded).not.toHaveBeenCalled();
+    expect(online).not.toHaveBeenCalled();
+  });
 });

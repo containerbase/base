@@ -33,6 +33,12 @@ export interface HttpDownloadConfig {
   fileName?: string;
 }
 
+/** How a request is run, see {@link HttpService.getJson}. */
+export interface HttpRequestConfig {
+  attempts?: number;
+  quiet?: boolean;
+}
+
 @injectable()
 export class HttpService {
   @inject(EnvService)
@@ -169,19 +175,24 @@ export class HttpService {
   }
 
   /**
-   * Fetches and parses a json body, trying up to three times. A permanent
-   * client error is not retried. The result is not validated, parse it with a
-   * schema.
+   * Fetches and parses a json body, trying up to three times by default. A
+   * permanent client error is not retried. The result is not validated, parse
+   * it with a schema.
    *
+   * @param opts - the got options, eg. a `timeout`
+   * @param request - `attempts` is how often to try, at least once, and one
+   * also disables got's own retries. `quiet` logs a failure at debug level
+   * instead of error, for a request which is allowed to fail.
    * @throws the original HTTP error for a permanent 4xx status, without
    * retrying
-   * @throws `download failed` after three failed attempts otherwise
+   * @throws `download failed` after the failed attempts otherwise
    */
   async getJson<T = unknown>(
     url: string,
     opts: OptionsOfJSONResponseBody = {},
+    request: HttpRequestConfig = {},
   ): Promise<T> {
-    return await this._request(url, opts, (req) => req.json<T>());
+    return await this._request(url, opts, (req) => req.json<T>(), request);
   }
 
   /**
@@ -204,28 +215,36 @@ export class HttpService {
   }
 
   /**
-   * Runs a `GET` request and reads its body, trying up to three times.
+   * Runs a `GET` request and reads its body, trying up to `attempts` times,
+   * three by default and at least once. A single attempt also disables got's
+   * own retries.
    *
    * A 4xx status other than 408 and 429 is permanent: it is logged once and
-   * the original error is rethrown. Any other failure is retried.
+   * the original error is rethrown. Any other failure is retried. A final
+   * failure is logged at error level, at debug level when `quiet`.
    *
    * @throws the original HTTP error for a permanent 4xx status
-   * @throws `download failed`, with the last error as cause, after three
-   * failed attempts
+   * @throws `download failed`, with the last error as cause, after the failed
+   * attempts
    */
   private async _request<T>(
     url: string,
     opts: OptionsOfTextResponseBody | OptionsOfJSONResponseBody,
     read: (req: ReturnType<typeof got.get>) => Promise<T>,
+    { attempts = 3, quiet = false }: HttpRequestConfig = {},
   ): Promise<T> {
+    const tries = Math.max(1, attempts);
+    const finalLevel = quiet ? 'debug' : 'error';
     const nUrl = this.envSvc.replaceUrl(url);
+    // a single attempt must not be retried by got either
+    const single = tries === 1 ? { retry: { limit: 0 } } : {};
     let lastError: unknown;
-    for (const run of [1, 2, 3]) {
+    for (let run = 1; run <= tries; run++) {
       try {
         return await read(
           got.get(
             nUrl,
-            merge.all([this._opts, opts, { resolveBodyOnly: false }]),
+            merge.all([this._opts, opts, single, { resolveBodyOnly: false }]),
           ),
         );
       } catch (err) {
@@ -233,11 +252,11 @@ export class HttpService {
         const status = err instanceof HTTPError ? err.response.statusCode : 0;
         // client errors won't change on retry, except timeouts and rate limits
         if (status >= 400 && status < 500 && status !== 408 && status !== 429) {
-          logger.error({ err, url }, 'download failed');
+          logger[finalLevel]({ err, url }, 'download failed');
           throw err;
         }
-        if (run === 3) {
-          logger.error({ err, run }, 'download failed');
+        if (run === tries) {
+          logger[finalLevel]({ err, run }, 'download failed');
         } else {
           logger.debug({ err, run }, 'download failed');
         }
