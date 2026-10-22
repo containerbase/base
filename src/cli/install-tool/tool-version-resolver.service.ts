@@ -1,18 +1,27 @@
 import { inject, injectable, multiInject } from 'inversify';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
-import { ToolVersionsService } from '../services/index.ts';
-import { logger } from '../utils/index.ts';
+import { EnvService, ToolVersionsService } from '../services/index.ts';
+import { getDistro, logger } from '../utils/index.ts';
 import {
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
 } from './tool-version-resolver.ts';
 
+/** The architecture and the distro codename the tool is installed on. */
+interface Host {
+  arch: string;
+  distro: string;
+}
+
 /**
- * Picks a release from the data, prereleases are skipped. The data lists the
- * newest release first, in the versioning of the tool. A missing version or
- * `latest` is the newest release, or the newest LTS release for a tool whose
- * data has LTS flags. A partial version, a major (`20`) or major.minor (`3.12`)
+ * Picks a release from the data, prereleases and releases which are not
+ * available for the host are skipped. A release is available when it has no
+ * `archs` or `distros` list, or the list has the host arch or distro. The data
+ * lists the newest release first, in the versioning of the tool. A missing
+ * version or `latest` is the newest release, or the newest LTS release for a
+ * tool whose data has LTS flags, even when none is available for the host, then
+ * there is no match. A partial version, a major (`20`) or major.minor (`3.12`)
  * one, is the newest release of that line, unless it is a release itself, like
  * `8.10`.
  * @returns `undefined` when no release matches
@@ -20,10 +29,20 @@ import {
 function pick(
   data: ToolVersions,
   version: string | undefined,
+  host: Host,
 ): string | undefined {
-  const releases = data.versions.filter((v) => !v.prerelease);
+  const stable = data.versions.filter((v) => !v.prerelease);
+  const releases = stable.filter(
+    (v) =>
+      (!v.archs || v.archs.includes(host.arch)) &&
+      (!v.distros || v.distros.includes(host.distro)),
+  );
   if (version === undefined || version === 'latest') {
-    return (releases.find((v) => v.lts) ?? releases[0])?.version;
+    // the LTS flags are read before the host filter, so a tool with LTS
+    // releases never falls back to a release which isn't an LTS one
+    return (
+      stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
+    )?.version;
   }
 
   if (releases.some((v) => v.version === version)) {
@@ -34,10 +53,14 @@ function pick(
 
 @injectable()
 export class ToolVersionResolverService {
-  /** Takes all registered tool version resolvers and the tool-versions data. */
+  /**
+   * Takes all registered tool version resolvers, the tool-versions data and
+   * the env, for the host arch.
+   */
   constructor(
     @multiInject(TOOL_VERSION_RESOLVER) private resolver: ToolVersionResolver[],
     @inject(ToolVersionsService) private toolVersions: ToolVersionsService,
+    @inject(EnvService) private env: EnvService,
   ) {}
 
   /**
@@ -65,18 +88,29 @@ export class ToolVersionResolverService {
    * as it may be outdated. Online data without a match is final, the embedded
    * data is older and can't know more. A resolved version is logged at debug
    * level, or with a warning when the embedded data replaces the online data.
+   * Only releases available for the host arch and distro are considered, also
+   * for the embedded release check.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
     tool: string,
     version: string | undefined,
   ): Promise<string | undefined> {
+    const exact =
+      version !== undefined &&
+      version !== 'latest' &&
+      !isPartialVersion(version);
+    if (exact) {
+      return undefined;
+    }
+
+    const host: Host = {
+      arch: this.env.arch,
+      distro: (await getDistro()).versionCode,
+    };
     if (version !== undefined && version !== 'latest') {
-      if (!isPartialVersion(version)) {
-        return undefined;
-      }
       const listed = await this.toolVersions.getVersions(tool);
-      if (listed && pick(listed, version) === version) {
+      if (listed && pick(listed, version, host) === version) {
         logger.debug(
           { tool, version, resolved: version },
           'version resolved from the embedded tool-versions data',
@@ -87,7 +121,7 @@ export class ToolVersionResolverService {
 
     const online = await this.toolVersions.getOnlineVersions(tool);
     if (online) {
-      const resolved = pick(online, version);
+      const resolved = pick(online, version, host);
       if (resolved !== undefined) {
         logger.debug(
           { tool, version, resolved },
@@ -98,7 +132,7 @@ export class ToolVersionResolverService {
     }
 
     const data = await this.toolVersions.getVersions(tool);
-    const resolved = data && pick(data, version);
+    const resolved = data && pick(data, version, host);
     if (resolved !== undefined) {
       logger.warn(
         { tool, version, resolved },
