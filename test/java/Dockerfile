@@ -59,7 +59,7 @@ RUN set -ex; \
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java 25.0.4+101.0.LTS
+RUN install-tool java 25.0.5+8.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
