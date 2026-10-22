@@ -543,11 +543,19 @@ https://downloads.lightbend.com/scala/2.10.4/scala-2.10.4.tgz
 jsonnet-bundler releases are downloaded from:
 
 - `https://github.com/jsonnet-bundler/jsonnet-bundler/releases`
+- `https://github.com/containerbase/jb-prebuild/releases`
+
+The first url is used for semver versions like `0.5.1`, the second for four part versions like `0.6.0.1`.
+The prebuild download is always verified against its `.sha512` file, so a mirror needs to provide both files.
 
 Samples:
 
 ```txt
 https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.5.1/jb-linux-amd64
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-x86_64.tar.xz.sha512
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-x86_64.tar.xz
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-aarch64.tar.xz.sha512
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-aarch64.tar.xz
 ```
 
 ## `jq`
