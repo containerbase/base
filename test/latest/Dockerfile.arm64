@@ -260,7 +260,7 @@ RUN install-tool wally 0.3.2
 RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.82.1
+RUN install-tool pixi v0.83.0
 
 #--------------------------------------
 # Image: v1 and v2 shell tools of custom images
