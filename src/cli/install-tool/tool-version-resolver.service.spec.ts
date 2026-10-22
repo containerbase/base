@@ -52,7 +52,9 @@ const versions = [
 ];
 
 /** A version entry of a tool file, an object limits the version to archs or distros. */
-type Entry = string | { version: string; archs?: string[]; distros?: string[] };
+type Entry =
+  | string
+  | { version: string; lts?: true; archs?: string[]; distros?: string[] };
 
 /**
  * The content of a `<tool>.json` file.
@@ -416,5 +418,6 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
     expect(embedded).not.toHaveBeenCalled();
     expect(online).not.toHaveBeenCalled();
+    expect(getDistro).not.toHaveBeenCalled();
   });
 });
