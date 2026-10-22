@@ -8,10 +8,12 @@ import * as main from '../../packages/base/src/index.ts';
 import {
   containerbaseVersionFile,
   defaultDistro,
+  getUrlReplacements,
   isCompatibleVersion,
   isContainerbase,
   isToolVersionsFormat,
   packageVersion,
+  replaceUrl,
   toolNames,
   toolVersionsFormat,
   toolVersionsFormatPath,
@@ -585,5 +587,70 @@ describe('packages/base', () => {
         versions: { '1.0.0': 'md5-abc' },
       }).success,
     ).toBe(false);
+  });
+
+  test('getUrlReplacements reads the replacements in numerical order', () => {
+    expect(
+      getUrlReplacements({
+        URL_REPLACE_10_FROM: 'https://example.com/10',
+        URL_REPLACE_10_TO: 'https://example.test/10',
+        URL_REPLACE_2_FROM: 'https://example.com/2',
+        URL_REPLACE_2_TO: 'https://example.test/2',
+        URL_REPLACE_3_FROM: 'https://example.com/3',
+        URL_REPLACE_4_FROM: 'https://example.com/4',
+        URL_REPLACE_4_TO: '',
+        URL_REPLACE_X_FROM: 'https://example.com/x',
+        URL_REPLACE_X_TO: 'https://example.test/x',
+      }),
+    ).toEqual({
+      replacements: [
+        ['https://example.com/2', 'https://example.test/2'],
+        ['https://example.com/10', 'https://example.test/10'],
+      ],
+      invalid: ['URL_REPLACE_3_FROM', 'URL_REPLACE_4_FROM'],
+    });
+  });
+
+  test('getUrlReplacements reads process.env by default', () => {
+    vi.stubEnv('URL_REPLACE_0_FROM', 'https://example.com');
+    vi.stubEnv('URL_REPLACE_0_TO', 'https://example.test');
+    expect(getUrlReplacements().replacements).toEqual([
+      ['https://example.com', 'https://example.test'],
+    ]);
+    vi.unstubAllEnvs();
+  });
+
+  test('replaceUrl applies the cdn first, then the replacements in order', () => {
+    const replacements: [string, string][] = [
+      ['https://example.com', 'https://example.test'],
+      [
+        'https://cdn.example.com/registry.npmjs.org',
+        'https://npm.example.test',
+      ],
+    ];
+
+    expect(replaceUrl('https://example.com/file.txt', replacements)).toBe(
+      'https://example.test/file.txt',
+    );
+    expect(replaceUrl('https://example.org/file.txt', replacements)).toBe(
+      'https://example.org/file.txt',
+    );
+    expect(
+      replaceUrl(
+        'https://example.test/file.txt',
+        [],
+        'https://cdn.example.com/',
+      ),
+    ).toBe('https://cdn.example.com/example.test/file.txt');
+    expect(
+      replaceUrl(
+        'https://registry.npmjs.org',
+        replacements,
+        'https://cdn.example.com',
+      ),
+    ).toBe('https://npm.example.test');
+    expect(replaceUrl('https://registry.npmjs.org', replacements, '')).toBe(
+      'https://registry.npmjs.org',
+    );
   });
 });

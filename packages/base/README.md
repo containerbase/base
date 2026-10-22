@@ -106,6 +106,21 @@ if (isContainerbase()) {
 }
 ```
 
+Containerbase replaces the urls it downloads from with the `CONTAINERBASE_CDN` and `URL_REPLACE_<n>_FROM` / `URL_REPLACE_<n>_TO` variables, see [custom registries](https://github.com/containerbase/base/blob/main/docs/custom-registries.md).
+A reader can replace its urls the same way, so a mirror configured for containerbase works for it too:
+
+```ts
+import { getUrlReplacements, replaceUrl } from '@containerbase/base';
+
+const { replacements, invalid } = getUrlReplacements(); // reads `process.env`
+// `invalid` lists the `URL_REPLACE_<n>_FROM` variables without a value or `_TO` counterpart
+replaceUrl(
+  'https://containerbase.github.io/tool-versions/v1/node.json',
+  replacements,
+  process.env.CONTAINERBASE_CDN,
+);
+```
+
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
 
 ## Contents
