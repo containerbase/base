@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { isFourPartVersion } from '../utils/index.ts';
-import { PrebuildVersionResolver } from './utils/prebuild.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -92,10 +91,4 @@ export class JsonnetBundlerInstallService extends BaseInstallService {
     await fs.copyFile(file, target);
     await fs.chmod(target, this.envSvc.umask);
   }
-}
-
-@injectable()
-@injectFromHierarchy()
-export class JsonnetBundlerVersionResolver extends PrebuildVersionResolver {
-  readonly tool = 'jb';
 }

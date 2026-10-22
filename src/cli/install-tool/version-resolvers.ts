@@ -9,7 +9,6 @@ import {
   JavaJreVersionResolver,
   JavaVersionResolver,
 } from '../tools/java/resolver.ts';
-import { JsonnetBundlerVersionResolver } from '../tools/jb.ts';
 import { MiseVersionResolver } from '../tools/mise.ts';
 import {
   NodeVersionResolver,
@@ -39,7 +38,6 @@ export const versionResolvers: readonly VersionResolverClass[] = [
   JavaVersionResolver,
   JavaJreVersionResolver,
   JavaJdkVersionResolver,
-  JsonnetBundlerVersionResolver,
   MavenVersionResolver,
   MiseVersionResolver,
   NodeVersionResolver,

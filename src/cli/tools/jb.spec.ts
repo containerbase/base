@@ -3,10 +3,7 @@ import { arch } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, LinkToolService } from '../services/index.ts';
-import {
-  JsonnetBundlerInstallService,
-  JsonnetBundlerVersionResolver,
-} from './jb.ts';
+import { JsonnetBundlerInstallService } from './jb.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
 import { checksum, toolContext } from '~test/tool.ts';
@@ -88,29 +85,6 @@ describe('cli/tools/jb', () => {
     const { svc } = await toolContext(JsonnetBundlerInstallService);
 
     expect(await svc.validate(version)).toBe(expected);
-  });
-
-  describe('JsonnetBundlerVersionResolver', () => {
-    test.each([{ version: undefined }, { version: 'latest' }])(
-      'resolves $version to the latest prebuild',
-      async ({ version }) => {
-        scope(baseUrl)
-          .get('/containerbase/jb-prebuild/releases/latest/download/version')
-          .reply(200, '0.6.0.2');
-        const { svc } = await toolContext(JsonnetBundlerVersionResolver);
-
-        expect(await svc.resolve(version)).toBe('0.6.0.2');
-      },
-    );
-
-    test.each([{ version: '0.5.1' }, { version: '0.6.0.1' }])(
-      'keeps $version',
-      async ({ version }) => {
-        const { svc } = await toolContext(JsonnetBundlerVersionResolver);
-
-        expect(await svc.resolve(version)).toBe(version);
-      },
-    );
   });
 
   test('link', async () => {
