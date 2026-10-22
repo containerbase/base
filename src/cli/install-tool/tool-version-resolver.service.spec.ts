@@ -1,8 +1,13 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { arch } from 'node:os';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { ToolVersionsService, createContainer } from '../services/index.ts';
-import { logger } from '../utils/index.ts';
+import {
+  EnvService,
+  ToolVersionsService,
+  createContainer,
+} from '../services/index.ts';
+import { getDistro, logger } from '../utils/index.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import {
   TOOL_VERSION_RESOLVER,
@@ -22,6 +27,15 @@ class DummyVersionResolver extends ToolVersionResolver {
   }
 }
 
+vi.mock('node:os', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:os')>()),
+  arch: vi.fn(() => 'x64'),
+}));
+vi.mock('../utils/index.ts', async (importActual) => ({
+  ...(await importActual<typeof import('../utils/index.ts')>()),
+  getDistro: vi.fn(),
+}));
+
 /** The embedded `v1` folder, set before each test as the root dir comes from the test setup. */
 let dir!: string;
 
@@ -37,17 +51,23 @@ const versions = [
   '3.11.9',
 ];
 
+/** A version entry of a tool file, an object limits the version to archs or distros. */
+type Entry = string | { version: string; archs?: string[]; distros?: string[] };
+
 /**
  * The content of a `<tool>.json` file.
  * @param tool - the tool name
  * @param list - the versions, a `-rc` one is a prerelease, a `-lts` one is an
  * LTS release, the suffix is not part of the version
  */
-function toolFile(tool: string, list: string[]): object {
+function toolFile(tool: string, list: Entry[]): object {
   return {
     tool,
     updatedAt: '2026-10-16T00:00:00Z',
     versions: list.map((entry) => {
+      if (typeof entry !== 'string') {
+        return entry;
+      }
       const version = entry.replace(/-lts$/, '');
       if (entry.includes('-rc')) {
         return { version, prerelease: true };
@@ -62,7 +82,7 @@ function toolFile(tool: string, list: string[]): object {
  * @param tool - the tool name
  * @param list - the versions, newest first
  */
-async function embed(tool: string, list: string[]): Promise<void> {
+async function embed(tool: string, list: Entry[]): Promise<void> {
   await writeFile(`${dir}/${tool}.json`, JSON.stringify(toolFile(tool, list)));
 }
 
@@ -75,7 +95,7 @@ async function embed(tool: string, list: string[]): Promise<void> {
 function serve(
   tool: string,
   status: number,
-  body?: string[] | string | object,
+  body?: Entry[] | string | object,
 ): void {
   scope('https://containerbase.github.io')
     .get(`/tool-versions/v1/${tool}.json`)
@@ -91,6 +111,14 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     // no embedded data unless a test writes it
     await rm(dir, { recursive: true, force: true });
     await mkdir(dir, { recursive: true });
+
+    // the host is amd64 on jammy
+    vi.mocked(arch).mockReturnValue('x64');
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: 'jammy',
+      versionId: '22.04',
+    });
 
     child = createContainer();
     child.bind(ToolVersionResolverService).toSelf();
@@ -284,6 +312,85 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     },
   );
+
+  test('skips a newest release which is only available for another arch', async () => {
+    serve('other', 200, [
+      { version: '3.0.0', archs: ['arm64'] },
+      { version: '2.0.0', archs: ['amd64', 'arm64'] },
+      '1.0.0',
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
+  });
+
+  test('picks a release for the arm64 host', async () => {
+    vi.mocked(arch).mockReturnValue('arm64');
+    child = createContainer();
+    // the shared env service already read the arch
+    child.bind(EnvService).toSelf();
+    child.bind(ToolVersionResolverService).toSelf();
+    child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
+    svc = await child.getAsync(ToolVersionResolverService);
+    serve('other', 200, [
+      { version: '3.0.0', archs: ['amd64'] },
+      { version: '2.0.0', archs: ['arm64'] },
+    ]);
+
+    expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+  });
+
+  test('skips a release which is only available for another distro', async () => {
+    serve('other', 200, [
+      { version: '3.0.0', distros: ['noble', 'resolute'] },
+      { version: '2.0.0', distros: ['jammy', 'noble'] },
+      '1.0.0',
+    ]);
+
+    expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+  });
+
+  test('picks a release without archs and distros lists', async () => {
+    serve('other', 200, [
+      { version: '2.0.0', archs: ['arm64'] },
+      { version: '1.0.0' },
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test('skips an lts release which is not available for the host', async () => {
+    serve('other', 200, [
+      { version: '24.1.0', lts: true, distros: ['noble'] },
+      { version: '22.1.0', lts: true },
+      '25.0.0',
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('22.1.0');
+  });
+
+  test('resolves a partial version to a release available for the host', async () => {
+    serve('other', 200, [
+      { version: '3.12.5', archs: ['arm64'] },
+      { version: '3.12.4', distros: ['noble'] },
+      '3.12.3',
+      '3.11.9',
+    ]);
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.3');
+  });
+
+  test('looks a listed release up online when the embedded data has it not for the host', async () => {
+    await embed('other', [{ version: '8.10', archs: ['arm64'] }]);
+    serve('other', 200, ['8.10.2', '8.9.1']);
+
+    expect(await svc.resolve('other', '8.10')).toBe('8.10.2');
+  });
+
+  test('keeps the version when no release is available for the host', async () => {
+    serve('other', 200, [{ version: '3.0.0', archs: ['arm64'] }]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
 
   test('makes no request and reads no data for an exact version', async () => {
     const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
