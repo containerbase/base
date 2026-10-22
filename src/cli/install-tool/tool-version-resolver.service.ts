@@ -20,9 +20,10 @@ interface Host {
  * `archs` or `distros` list, or the list has the host arch or distro. The data
  * lists the newest release first, in the versioning of the tool. A missing
  * version or `latest` is the newest release, or the newest LTS release for a
- * tool whose data has LTS flags. A partial version, a major (`20`) or
- * major.minor (`3.12`) one, is the newest release of that line, unless it is a
- * release itself, like `8.10`.
+ * tool whose data has LTS flags, even when none is available for the host, then
+ * there is no match. A partial version, a major (`20`) or major.minor (`3.12`)
+ * one, is the newest release of that line, unless it is a release itself, like
+ * `8.10`.
  * @returns `undefined` when no release matches
  */
 function pick(
@@ -30,14 +31,18 @@ function pick(
   version: string | undefined,
   host: Host,
 ): string | undefined {
-  const releases = data.versions.filter(
+  const stable = data.versions.filter((v) => !v.prerelease);
+  const releases = stable.filter(
     (v) =>
-      !v.prerelease &&
       (!v.archs || v.archs.includes(host.arch)) &&
       (!v.distros || v.distros.includes(host.distro)),
   );
   if (version === undefined || version === 'latest') {
-    return (releases.find((v) => v.lts) ?? releases[0])?.version;
+    // the LTS flags are read before the host filter, so a tool with LTS
+    // releases never falls back to a release which isn't an LTS one
+    return (
+      stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
+    )?.version;
   }
 
   if (releases.some((v) => v.version === version)) {

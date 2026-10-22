@@ -368,6 +368,22 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', 'latest')).toBe('22.1.0');
   });
 
+  test.each([
+    { name: 'arch', limit: { archs: ['arm64'] } },
+    { name: 'distro', limit: { distros: ['noble'] } },
+  ])(
+    'keeps latest when no lts release is available for the host $name',
+    async ({ limit }) => {
+      serve('other', 200, [
+        { version: '24.1.0', lts: true, ...limit },
+        '25.0.0',
+        '23.0.0',
+      ]);
+
+      expect(await svc.resolve('other', 'latest')).toBe('latest');
+    },
+  );
+
   test('resolves a partial version to a release available for the host', async () => {
     serve('other', 200, [
       { version: '3.12.5', archs: ['arm64'] },
