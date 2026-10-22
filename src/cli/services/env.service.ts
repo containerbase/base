@@ -3,23 +3,18 @@ import { join, resolve } from 'node:path';
 import { env, geteuid } from 'node:process';
 import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
+import {
+  type UrlReplacement,
+  getUrlReplacements,
+  replaceUrl,
+} from '../../../packages/base/src/url.ts';
 import { type Arch, isInside, logger } from '../utils/index.ts';
-
-export type Replacements = [string, string][];
-
-const compare = (() => {
-  const collator = new Intl.Collator('en', {
-    sensitivity: 'base',
-    numeric: true,
-  });
-  return (a: string, b: string) => collator.compare(a, b);
-})();
 
 @injectable(bindingScopeValues.Singleton)
 export class EnvService {
   readonly arch: Arch;
   private uid: number;
-  private replacements: Replacements | undefined;
+  private replacements: UrlReplacement[] | undefined;
   private ignoredTools: Set<string> | undefined;
 
   /**
@@ -160,25 +155,17 @@ export class EnvService {
    * The url replacements from the `URL_REPLACE_<n>_FROM` and
    * `URL_REPLACE_<n>_TO` environment variables, in numerical order.
    */
-  get urlReplacements(): [string, string][] {
+  get urlReplacements(): UrlReplacement[] {
     if (this.replacements) {
       return this.replacements;
     }
 
-    const replacements: [string, string][] = [];
-    const fromRe = /^URL_REPLACE_\d+_FROM$/;
-
-    for (const from of Object.keys(env)
-      .filter((key) => fromRe.test(key))
-      .sort(compare)) {
+    const { replacements, invalid } = getUrlReplacements(env);
+    for (const from of invalid) {
       const to = from.replace(/_FROM$/, '_TO');
-      if (env[from] && env[to]) {
-        replacements.push([env[from], env[to]]);
-      } else {
-        logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
-        );
-      }
+      logger.warn(
+        `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
+      );
     }
 
     return (this.replacements = replacements);
@@ -200,17 +187,11 @@ export class EnvService {
    * @returns the replaced url
    */
   public replaceUrl(src: string, cdn = true): string {
-    let tgt = src;
-
-    if (env.CONTAINERBASE_CDN && cdn) {
-      tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
-    }
-
-    const replacements = this.urlReplacements;
-
-    for (const [from, to] of replacements) {
-      tgt = tgt.replace(from, to);
-    }
+    const tgt = replaceUrl(
+      src,
+      this.urlReplacements,
+      cdn ? env.CONTAINERBASE_CDN : undefined,
+    );
     if (tgt !== src) {
       logger.debug({ src, tgt }, 'url replaced');
     }

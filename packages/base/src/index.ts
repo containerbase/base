@@ -35,6 +35,9 @@ export {
   toolVersionsFormatPath,
 } from './tool-versions-format.ts';
 
+export type { UrlReplacement, UrlReplacements } from './url.ts';
+export { getUrlReplacements, replaceUrl } from './url.ts';
+
 export { tools };
 
 /**
