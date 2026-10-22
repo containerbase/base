@@ -8,28 +8,67 @@ import {
   isPartialVersion,
 } from './tool-version-resolver.ts';
 
+/** Tells whether the install service of a tool can install a version. */
+export type IsInstallable = (version: string) => boolean | Promise<boolean>;
+
 /**
- * Picks a release from the data, prereleases are skipped. The data lists the
- * newest release first, in the versioning of the tool. A missing version or
- * `latest` is the newest release, or the newest LTS release for a tool whose
- * data has LTS flags. A partial version, a major (`20`) or major.minor (`3.12`)
- * one, is the newest release of that line, unless it is a release itself, like
- * `8.10`.
+ * Looks up the check of a tool for installable versions, lazily as it may need
+ * the install services.
+ * @returns `undefined` for a tool whose versions are not checked
+ */
+export type InstallableLookup = (
+  tool: string,
+) => Promise<IsInstallable | undefined>;
+
+/**
+ * Finds the first release the predicate accepts, in the order of the data.
+ * @returns `undefined` when no release is accepted
+ */
+async function findInstallable(
+  releases: ToolVersions['versions'],
+  isInstallable: IsInstallable,
+  accepts: (release: ToolVersions['versions'][number]) => boolean,
+): Promise<string | undefined> {
+  for (const release of releases) {
+    if (accepts(release) && (await isInstallable(release.version))) {
+      return release.version;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Picks a release from the data, prereleases and releases which are not
+ * installable are skipped. The data lists the newest release first, in the
+ * versioning of the tool. A missing version or `latest` is the newest release,
+ * or the newest LTS release for a tool whose data has LTS flags. A partial
+ * version, a major (`20`) or major.minor (`3.12`) one, is the newest release
+ * of that line, unless it is a release itself, like `8.10`.
  * @returns `undefined` when no release matches
  */
-function pick(
+async function pick(
   data: ToolVersions,
   version: string | undefined,
-): string | undefined {
+  isInstallable: IsInstallable,
+): Promise<string | undefined> {
   const releases = data.versions.filter((v) => !v.prerelease);
   if (version === undefined || version === 'latest') {
-    return (releases.find((v) => v.lts) ?? releases[0])?.version;
+    return (
+      (await findInstallable(releases, isInstallable, (v) => !!v.lts)) ??
+      (await findInstallable(releases, isInstallable, () => true))
+    );
   }
 
-  if (releases.some((v) => v.version === version)) {
-    return version;
-  }
-  return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
+  return (
+    (await findInstallable(
+      releases,
+      isInstallable,
+      (v) => v.version === version,
+    )) ??
+    (await findInstallable(releases, isInstallable, (v) =>
+      v.version.startsWith(`${version}.`),
+    ))
+  );
 }
 
 @injectable()
@@ -44,16 +83,21 @@ export class ToolVersionResolverService {
    * Resolves the version with the tool's resolver. A tool without a resolver
    * is resolved from the tool-versions data, and keeps its version when the
    * data can't answer.
+   * @param findInstallable - looks up the check for installable versions of a
+   * tool resolved from the data, without one all versions are accepted
    */
   async resolve(
     tool: string,
     version: string | undefined,
+    findInstallable?: InstallableLookup,
   ): Promise<string | undefined> {
     const resolver = this.resolver.find((r) => r.tool === tool);
     if (resolver) {
       return (await resolver.resolve(version)) ?? version;
     }
-    return (await this.resolveFromData(tool, version)) ?? version;
+    return (
+      (await this.resolveFromData(tool, version, findInstallable)) ?? version
+    );
   }
 
   /**
@@ -65,18 +109,35 @@ export class ToolVersionResolverService {
    * as it may be outdated. Online data without a match is final, the embedded
    * data is older and can't know more. A resolved version is logged at debug
    * level, or with a warning when the embedded data replaces the online data.
+   * Releases the install service of the tool can't install are skipped, and
+   * logged at debug level.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
     tool: string,
     version: string | undefined,
+    findInstallable: InstallableLookup | undefined,
   ): Promise<string | undefined> {
-    if (version !== undefined && version !== 'latest') {
-      if (!isPartialVersion(version)) {
-        return undefined;
+    const isConcrete = version !== undefined && version !== 'latest';
+    if (isConcrete && !isPartialVersion(version)) {
+      return undefined;
+    }
+
+    const check = await findInstallable?.(tool);
+    const isInstallable: IsInstallable = async (release) => {
+      const installable = !check || (await check(release));
+      if (!installable) {
+        logger.debug(
+          { tool, version: release },
+          'release skipped, not installable',
+        );
       }
+      return installable;
+    };
+
+    if (isConcrete) {
       const listed = await this.toolVersions.getVersions(tool);
-      if (listed && pick(listed, version) === version) {
+      if (listed && (await pick(listed, version, isInstallable)) === version) {
         logger.debug(
           { tool, version, resolved: version },
           'version resolved from the embedded tool-versions data',
@@ -87,7 +148,7 @@ export class ToolVersionResolverService {
 
     const online = await this.toolVersions.getOnlineVersions(tool);
     if (online) {
-      const resolved = pick(online, version);
+      const resolved = await pick(online, version, isInstallable);
       if (resolved !== undefined) {
         logger.debug(
           { tool, version, resolved },
@@ -98,7 +159,7 @@ export class ToolVersionResolverService {
     }
 
     const data = await this.toolVersions.getVersions(tool);
-    const resolved = data && pick(data, version);
+    const resolved = data && (await pick(data, version, isInstallable));
     if (resolved !== undefined) {
       logger.warn(
         { tool, version, resolved },

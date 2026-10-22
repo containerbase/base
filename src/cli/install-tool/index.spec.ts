@@ -25,6 +25,7 @@ import {
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
+import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -222,6 +223,30 @@ describe('cli/install-tool/index', () => {
   describe('resolveVersion', () => {
     test('works', async () => {
       expect(await resolveVersion('composer', '1.0.0')).toBe('1.0.0');
+    });
+
+    test('skips releases the install service does not accept', async () => {
+      scope('https://containerbase.github.io')
+        .get('/tool-versions/v1/buf.json')
+        .reply(200, {
+          tool: 'buf',
+          updatedAt: '2026-10-16T00:00:00Z',
+          versions: [{ version: '1.2.3.4' }, { version: '1.2.3' }],
+        });
+
+      expect(await resolveVersion('buf', 'latest')).toBe('1.2.3');
+    });
+
+    test('does not check a v2 shell tool', async () => {
+      scope('https://containerbase.github.io')
+        .get('/tool-versions/v1/dummy.json')
+        .reply(200, {
+          tool: 'dummy',
+          updatedAt: '2026-10-16T00:00:00Z',
+          versions: [{ version: '1.2.3.4' }, { version: '1.2.3' }],
+        });
+
+      expect(await resolveVersion('dummy', 'latest')).toBe('1.2.3.4');
     });
 
     test.each([

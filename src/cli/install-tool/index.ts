@@ -451,8 +451,28 @@ export async function linkTool(
 }
 
 /**
+ * Looks up the version check of the install service of a tool, so a version
+ * resolved from the tool-versions data is one the service accepts.
+ * @returns `undefined` for a tool without a modern install service, a v1 or v2
+ * shell tool is not checked
+ */
+async function findInstallable(
+  tool: string,
+): Promise<((version: string) => Promise<boolean>) | undefined> {
+  const container = await prepareInstallContainer();
+  const toolSvcs =
+    await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN);
+  const toolSvc = toolSvcs.find((t) => t.name === tool);
+  if (!toolSvc || toolSvc instanceof V2ToolInstallService) {
+    return undefined;
+  }
+  return (version) => toolSvc.validate(version);
+}
+
+/**
  * Resolves the version to install, eg. `latest` to a concrete version. For a
- * `gem`, `npm` or `pip` type, a generic resolver is registered first.
+ * `gem`, `npm` or `pip` type, a generic resolver is registered first. A version
+ * resolved from the tool-versions data is one the install service accepts.
  */
 export async function resolveVersion(
   tool: string,
@@ -467,7 +487,7 @@ export async function resolveVersion(
       .to(createGenericVersionResolver(type, tool));
   }
   const svc = await container.getAsync(ToolVersionResolverService);
-  return svc.resolve(tool, version);
+  return svc.resolve(tool, version, findInstallable);
 }
 
 interface UninstallToolConfig {

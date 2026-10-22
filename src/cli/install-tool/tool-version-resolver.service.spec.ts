@@ -285,6 +285,84 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     },
   );
 
+  describe('installable versions', () => {
+    /** Accepts only versions with three parts. */
+    const threeParts = (version: string): boolean =>
+      version.split('.').length === 3;
+    const lookup = (): Promise<(version: string) => boolean> =>
+      Promise.resolve(threeParts);
+
+    test.each([undefined, 'latest'])(
+      'resolves %s to the newest installable release',
+      async (version) => {
+        serve('other', 200, ['0.6.0.1', '0.6.0', '0.5.0']);
+
+        expect(await svc.resolve('other', version, lookup)).toBe('0.6.0');
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          { tool: 'other', version: '0.6.0.1' },
+          'release skipped, not installable',
+        );
+      },
+    );
+
+    test('resolves latest to the newest installable lts release', async () => {
+      serve('other', 200, ['3.0.0.1', '2.0.0.1-lts', '2.0.0-lts', '1.0.0-lts']);
+
+      expect(await svc.resolve('other', 'latest', lookup)).toBe('2.0.0');
+    });
+
+    test('skips releases which are not installable for a partial version', async () => {
+      serve('other', 200, ['0.6.0.1', '0.6.0', '0.5.0']);
+
+      expect(await svc.resolve('other', '0.6', lookup)).toBe('0.6.0');
+    });
+
+    test('does not return a listed release which is not installable', async () => {
+      await embed('other', ['8.10', '8.9.1']);
+      serve('other', 200, ['8.10.1', '8.10', '8.9.1']);
+
+      expect(await svc.resolve('other', '8.10', lookup)).toBe('8.10.1');
+    });
+
+    test('keeps the version when no release is installable', async () => {
+      serve('other', 200, ['0.6.0.1', '0.5.0.1']);
+
+      expect(await svc.resolve('other', 'latest', lookup)).toBe('latest');
+    });
+
+    test('skips releases of the embedded data which are not installable', async () => {
+      await embed('other', ['0.6.0.1', '0.6.0']);
+      serve('other', 404);
+
+      expect(await svc.resolve('other', undefined, lookup)).toBe('0.6.0');
+    });
+
+    test('does not check a tool without a check', async () => {
+      serve('other', 200, ['0.6.0.1', '0.6.0']);
+
+      expect(
+        await svc.resolve('other', 'latest', () => Promise.resolve(undefined)),
+      ).toBe('0.6.0.1');
+    });
+
+    test('does not look up the check for a tool with a resolver', async () => {
+      const spy = vi.fn(lookup);
+
+      expect(await svc.resolve('dummy', 'latest', spy)).toBe('1.2.3');
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('does not look up the check for an exact version', async () => {
+      const spy = vi.fn(lookup);
+
+      expect(await svc.resolve('other', '0.6.0.1', spy)).toBe('0.6.0.1');
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
   test('makes no request and reads no data for an exact version', async () => {
     const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
     const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
