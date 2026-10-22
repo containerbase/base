@@ -253,8 +253,8 @@ importers:
         specifier: 2.0.22
         version: 2.0.22
       '@containerbase/oxlint-plugin':
-        specifier: 1.0.2
-        version: 1.0.2(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))
+        specifier: 1.0.3
+        version: 1.0.3(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.3
         version: 1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))
@@ -437,8 +437,8 @@ packages:
     resolution: {integrity: sha512-CpZvRfI+wrO8NgTzL9/m4HXNM+KJInKSOg+bPvcNBqXm8n8VEZa+VWral563AKW51LCWdEMZOyFeYezRGPWPIQ==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
-  '@containerbase/oxlint-plugin@1.0.2':
-    resolution: {integrity: sha512-tKgPhj6vWDVi4TdaiWKP9hMcjtY8NSAs/zhKQ5LgYTsysGmaZfiVQdNgZOhqvDRu9akW4IyZlbGyrYRkB+QkNw==}
+  '@containerbase/oxlint-plugin@1.0.3':
+    resolution: {integrity: sha512-eYi0Yh1oN+GkUKVEa7mobsTojitqC51gDfJmkDe07PZxcPfRcSVPoYi+xD4S/rdqvpTyPtwkWiNLT5gUTH21lg==}
     engines: {node: '>=24.10.0', pnpm: '>=11.0.0'}
     peerDependencies:
       oxlint: '>=1.86.0'
@@ -893,8 +893,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxlint/plugins@1.88.0':
-    resolution: {integrity: sha512-G2xbfWTrbqYRhR/vfeKNMQf/sS3/ti0iKJAAkRxHuXWZH/hne/dyIb9QKk5LuR6cJLARxsL6FMoAYmfspd74MQ==}
+  '@oxlint/plugins@1.89.0':
+    resolution: {integrity: sha512-TJBBNl4KIxbxrSk7gsqlz6iM1kxidfyTizEzfWqXvijF2Ou8/Da58GvjemBVmCmaUamwRij+JwsVc0kpBFuqfg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   '@pinojs/redact@0.4.0':
@@ -3740,9 +3740,9 @@ snapshots:
     dependencies:
       istanbul-reports: 3.2.0
 
-  '@containerbase/oxlint-plugin@1.0.2(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))':
+  '@containerbase/oxlint-plugin@1.0.3(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))':
     dependencies:
-      '@oxlint/plugins': 1.88.0
+      '@oxlint/plugins': 1.89.0
       oxlint: 1.89.0(oxlint-tsgolint@7.0.2004)
 
   '@containerbase/semantic-release-pnpm@1.4.3(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))':
@@ -4073,7 +4073,7 @@ snapshots:
   '@oxlint/binding-win32-x64-msvc@1.89.0':
     optional: true
 
-  '@oxlint/plugins@1.88.0': {}
+  '@oxlint/plugins@1.89.0': {}
 
   '@pinojs/redact@0.4.0': {}
 
