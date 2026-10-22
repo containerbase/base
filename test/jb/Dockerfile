@@ -72,9 +72,27 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: jb prebuild
+#--------------------------------------
+
+FROM base AS testc
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=nuget
+RUN install-tool jb 0.6.0.1
+
+RUN set -ex; \
+  jb --version; \
+  jb install; \
+  test -d vendor/github.com/prometheus-operator/prometheus-operator; \
+  test -d vendor/prometheus-operator
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy

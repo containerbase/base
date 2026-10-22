@@ -2,11 +2,14 @@ import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { LinkToolService } from '../services/index.ts';
-import { JsonnetBundlerInstallService } from './jb.ts';
+import { CompressionService, LinkToolService } from '../services/index.ts';
+import {
+  JsonnetBundlerInstallService,
+  JsonnetBundlerVersionResolver,
+} from './jb.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { checksum, toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -17,6 +20,7 @@ vi.mock('node:os', async (importOriginal) => ({
 
 const baseUrl = 'https://github.com';
 const binary = 'jb binary';
+const tarball = 'jb archive';
 
 describe('cli/tools/jb', () => {
   beforeAll(async () => {
@@ -49,6 +53,65 @@ describe('cli/tools/jb', () => {
       expect((await fs.stat(file)).mode & 0o777).toBe(0o775);
     },
   );
+
+  test.each([
+    { hostArch: 'x64', ghArch: 'x86_64', version: '0.6.0.1' },
+    { hostArch: 'arm64', ghArch: 'aarch64', version: '0.6.0.2' },
+  ] as const)(
+    'install prebuild on $ghArch',
+    async ({ hostArch, ghArch, version }) => {
+      vi.mocked(arch).mockReturnValue(hostArch);
+      const { svc, pathSvc } = await toolContext(JsonnetBundlerInstallService);
+      const filename = `jb-${version}-${ghArch}.tar.xz`;
+      const releaseUrl = `/containerbase/jb-prebuild/releases/download/${version}`;
+      scope(baseUrl)
+        .get(`${releaseUrl}/${filename}.sha512`)
+        .reply(200, `${checksum(tarball, 'sha512')}\n`)
+        .get(`${releaseUrl}/${filename}`)
+        .reply(200, tarball);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining(filename),
+        cwd: pathSvc.toolPath('jb'),
+      });
+    },
+  );
+
+  test.each([
+    { version: '0.6.0', expected: true },
+    { version: '0.6.0.1', expected: true },
+    { version: 'not-a-version', expected: false },
+  ])('validate $version', async ({ version, expected }) => {
+    const { svc } = await toolContext(JsonnetBundlerInstallService);
+
+    expect(await svc.validate(version)).toBe(expected);
+  });
+
+  describe('JsonnetBundlerVersionResolver', () => {
+    test.each([{ version: undefined }, { version: 'latest' }])(
+      'resolves $version to the latest prebuild',
+      async ({ version }) => {
+        scope(baseUrl)
+          .get('/containerbase/jb-prebuild/releases/latest/download/version')
+          .reply(200, '0.6.0.2');
+        const { svc } = await toolContext(JsonnetBundlerVersionResolver);
+
+        expect(await svc.resolve(version)).toBe('0.6.0.2');
+      },
+    );
+
+    test.each([{ version: '0.5.1' }, { version: '0.6.0.1' }])(
+      'keeps $version',
+      async ({ version }) => {
+        const { svc } = await toolContext(JsonnetBundlerVersionResolver);
+
+        expect(await svc.resolve(version)).toBe(version);
+      },
+    );
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(JsonnetBundlerInstallService);
