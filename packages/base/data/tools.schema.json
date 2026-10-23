@@ -35,8 +35,8 @@
             "type": "object",
             "propertyNames": {
               "type": "string",
-              "enum": ["jammy", "noble", "resolute"],
-              "description": "an Ubuntu release supported by containerbase, by codename"
+              "enum": ["noble", "resolute"],
+              "description": "an Ubuntu release containerbase runs on, by codename"
             },
             "additionalProperties": { "type": "string" },
             "description": "the oldest version containerbase supports on an Ubuntu release, in the tool's versioning, keyed by codename; only for releases whose floor differs from minVersion, which is the floor on the default distro"

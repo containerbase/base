@@ -91,7 +91,7 @@ import {
 } from '../tools/version-resolvers.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import {
-  type DistroCode,
+  type HostDistroCode,
   type InstallToolType,
   type ToolType,
   logger,
@@ -257,7 +257,7 @@ export interface SupportedTool {
    * The oldest version supported on an Ubuntu release, for the releases whose
    * floor differs from `minVersion`, the floor on the default distro.
    */
-  distroMinVersion?: Partial<Record<DistroCode, string>>;
+  distroMinVersion?: Partial<Record<HostDistroCode, string>>;
 }
 
 /**

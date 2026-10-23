@@ -110,7 +110,7 @@ Some tools accept partial versions and install a matching release:
   Without a version, or with `latest`, the newest LTS is installed.
   These versions are resolved from the [tool-versions data](#tool-versions-data) like for the other tools below, with the newest release the data flags as LTS for `latest`, and from nodejs.org when the data has no LTS flags or no match.
 - `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the `latest` dist tag if it matches and is not deprecated, otherwise the newest matching release which is not deprecated, prereleases are skipped.
-  When only deprecated versions match, the newest of them is installed with a warning, the next major fails then.
+  When only deprecated versions match, the newest of them is installed with a warning, a following major fails then.
   Without a version, or with `latest`, the `latest` release is installed, or the newest release which is not deprecated when the dist tag is deprecated, the deprecated dist tag only with a warning when every release is deprecated.
   With `install-tool`, for `yarn`, `corepack`, `npm` and `pnpm` the dist tag and the deprecated versions come from the [tool-versions data](#tool-versions-data) when it has them, else from the npm registry, eg. for `yarn` 6 and newer.
   The tool-versions data keeps the previous `latest` until a new release is older than its minimum release age of 1 hour, so it can lag behind npm for a short time.
@@ -178,14 +178,14 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
   Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
-  These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
+  These lookups go away in a following major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
   For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.
   When the dist tag is deprecated, isn't available for the host or needs a newer containerbase, it is the newest release which is, and isn't deprecated.
 - A major (`20`) or major.minor (`3.12`) version installs the newest matching release, a version which exists as a release, like `8.10`, is kept, also a deprecated one.
   For a tool installed with npm it is the `latest` dist tag when it matches and isn't deprecated, else the newest matching release which isn't deprecated.
 - Every tool skips the releases the data flags as deprecated for a missing version, `latest` and a major or major.minor version, like an npm deprecated version, a PyPI release whose files are all yanked or a gem gone from rubygems.org.
-  When only deprecated releases match, a tool with its own lookup, like the ones above, uses that lookup, and a tool without one, like `renovate` or `yarn-slim`, installs the newest of them, or the deprecated `latest` dist tag, with a warning, which fails in the next major.
+  When only deprecated releases match, a tool with its own lookup, like the ones above, uses that lookup, and a tool without one, like `renovate` or `yarn-slim`, installs the newest of them, or the deprecated `latest` dist tag, with a warning, which fails in a following major.
 - Only releases available for the host arch and distro, and installable by the running containerbase version (`minCb` of the data), are picked, prereleases are skipped, except the `latest` dist tag of a tool installed with npm for a missing version or `latest`.
   When no release matches, a warning names the reason: a matching release needs a newer containerbase, only prereleases match, the matching releases aren't available for the host arch and distro, or the data has no such release.
   A given version, also `latest`, is then used as is, so the install may fail later; without a version, no version is resolved and the install fails.
@@ -195,7 +195,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   A warning is logged when the data embedded in the image lists it and it needs a newer containerbase, the online data isn't read for it.
 
 A tool without tool-versions data keeps the version as given.
-The next major release fails the install instead of warning, see [#7962](https://github.com/containerbase/base/issues/7962).
+A following major release fails the install instead of warning, see [#7962](https://github.com/containerbase/base/issues/7962).
 
 <br>
 

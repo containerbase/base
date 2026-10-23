@@ -17,7 +17,7 @@ import {
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
-  type DistroCode,
+  type HostDistroCode,
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
@@ -96,7 +96,7 @@ export abstract class BaseInstallService {
    * floor differs from `minVersion`, the floor on the default distro,
    * published as `distroMinVersion` in the base package metadata.
    */
-  readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
+  readonly distroMinVersion?: Partial<Record<HostDistroCode, string>>;
 
   /**
    * Whether the version is installed into a folder per parent tool version

@@ -1,9 +1,10 @@
 import { tools } from './data.ts';
-import type { DistroCode } from './types.ts';
+import type { HostDistroCode } from './types.ts';
 
 export type {
   Arch,
   DistroCode,
+  HostDistroCode,
   InstallToolType,
   ToolMetadata,
   ToolType,
@@ -56,7 +57,7 @@ export { tools };
  * The Ubuntu release the default containerbase image is built from, the
  * distro `minVersion` refers to.
  */
-export const defaultDistro: DistroCode = 'noble';
+export const defaultDistro: HostDistroCode = 'noble';
 
 /**
  * A tool name `install-tool` accepts.

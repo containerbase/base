@@ -8,9 +8,25 @@ export const ToolType = z
   .enum(['gem', 'npm', 'pip', 'dotnet'])
   .describe('the package manager installing the tool');
 
+/**
+ * The Ubuntu releases containerbase artifacts are built for, oldest first,
+ * like the distro of a tool-versions file or a prebuild archive. It keeps
+ * releases which are no longer supported as host, as newer releases still use
+ * their prebuilds, see {@link HostDistroCode}.
+ */
 export const DistroCode = z
   .enum(['jammy', 'noble', 'resolute'])
-  .describe('an Ubuntu release supported by containerbase, by codename');
+  .describe(
+    'an Ubuntu release containerbase artifacts are built for, by codename',
+  );
+
+/**
+ * The Ubuntu releases containerbase runs on, oldest first, a subset of
+ * {@link DistroCode}.
+ */
+export const HostDistroCode = z
+  .enum(['noble', 'resolute'])
+  .describe('an Ubuntu release containerbase runs on, by codename');
 
 export const Arch = z
   .enum(['amd64', 'arm64'])
@@ -46,7 +62,7 @@ export const ToolMetadata = z.strictObject({
     )
     .exactOptional(),
   distroMinVersion: z
-    .partialRecord(DistroCode, z.string())
+    .partialRecord(HostDistroCode, z.string())
     .describe(
       "the oldest version containerbase supports on an Ubuntu release, in the tool's versioning, keyed by codename; only for releases whose floor differs from minVersion, which is the floor on the default distro",
     )

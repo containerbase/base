@@ -25,9 +25,8 @@ export async function validateSystem(): Promise<void> {
     process.exit(1);
   }
   const d = await (distro ??= readDistro());
+  // the host distros, see `HostDistroCode`
   switch (d.versionCode) {
-    /* v8 ignore next -- hard to test */
-    case 'jammy':
     case 'noble':
     case 'resolute':
       break;

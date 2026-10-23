@@ -174,7 +174,7 @@ export class JavaInstallService extends BaseInstallService {
    * @throws when neither has a package for the version
    */
   override async install(version: string): Promise<void> {
-    // TODO: drop the adoptium fallback in the next major (#7962)
+    // TODO: drop the adoptium fallback in a following major (#7962)
     const file =
       (await this.downloadToolFile(version)) ??
       (await this.downloadAdoptium(version));

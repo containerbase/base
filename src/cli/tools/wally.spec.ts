@@ -31,8 +31,8 @@ describe('cli/tools/wally', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // no tool-versions data, the prebuild is verified against its checksum file
     mockToolFiles();
@@ -62,36 +62,33 @@ describe('cli/tools/wally', () => {
     });
   });
 
-  test.each([{ code: 'noble' }, { code: 'resolute' }])(
-    'install: uses the jammy prebuild on $code',
-    async ({ code }) => {
-      vi.mocked(getDistro).mockResolvedValue({
-        name: 'Ubuntu',
-        versionCode: code,
-        versionId: '24.04',
-      });
-      const version = `0.4.0-${code}`;
-      const { svc } = await toolContext(WallyInstallService);
-      const filename = `wally-${version}-jammy-x86_64.tar.xz`;
-      const releaseUrl = `/containerbase/wally-prebuild/releases/download/${version}`;
-      scope(baseUrl)
-        .get(`${releaseUrl}/${filename}.sha512`)
-        .reply(200, `${checksum(tarball, 'sha512')}\n`)
-        .get(`${releaseUrl}/${filename}`)
-        .reply(200, tarball);
-
-      await expect(svc.install(version)).resolves.toBeUndefined();
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Using jammy file for wally on ${code}`,
-      );
-    },
-  );
-
   test.each([
-    { code: 'jammy', lookups: 1 },
-    { code: 'noble', lookups: 2 },
-  ])(
+    { code: 'noble', id: '24.04' },
+    { code: 'resolute', id: '26.04' },
+  ])('install: uses the jammy prebuild on $code', async ({ code, id }) => {
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: code,
+      versionId: id,
+    });
+    const version = `0.4.0-${code}`;
+    const { svc } = await toolContext(WallyInstallService);
+    const filename = `wally-${version}-jammy-x86_64.tar.xz`;
+    const releaseUrl = `/containerbase/wally-prebuild/releases/download/${version}`;
+    scope(baseUrl)
+      .get(`${releaseUrl}/${filename}.sha512`)
+      .reply(200, `${checksum(tarball, 'sha512')}\n`)
+      .get(`${releaseUrl}/${filename}`)
+      .reply(200, tarball);
+
+    await expect(svc.install(version)).resolves.toBeUndefined();
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Using jammy file for wally on ${code}`,
+    );
+  });
+
+  test.each([{ code: 'noble', lookups: 2 }])(
     'install: downloads the jammy tool-versions file on $code without the .sha512',
     async ({ code, lookups }) => {
       vi.mocked(getDistro).mockResolvedValue({

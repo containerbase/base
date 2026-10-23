@@ -94,7 +94,7 @@ export class GradleVersionResolver extends ToolVersionResolver {
         // existing `X.Y` release still installs, while a bare major passes the
         // loose gradle validation and then fails to download; the tool-versions
         // data had no match either
-        // TODO: fail in the next major (#7962)
+        // TODO: fail in a following major (#7962)
         logger.warn(
           { err, tool: this.tool, version },
           'gradle release lookup or parsing failed, keeping the version',
