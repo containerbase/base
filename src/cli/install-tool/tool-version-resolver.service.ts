@@ -1,5 +1,6 @@
 import { inject, injectable, multiInject } from 'inversify';
 import { isReleaseVersion } from '../../../packages/base/src/release-version.ts';
+import { DistroCode } from '../../../packages/base/src/schema.ts';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
 import { EnvService, ToolVersionsService } from '../services/index.ts';
 import { getDistro, isValid, logger, semverGte } from '../utils/index.ts';
@@ -20,9 +21,34 @@ interface Host {
 }
 
 /**
+ * The distros whose files a release needs to run on the host: the host distro
+ * itself, or, when the data has no files for it on the host arch at all, any
+ * older Ubuntu release, as the installers use those builds on newer releases,
+ * like the jammy prebuilds on noble and resolute.
+ * @returns the accepted distro codenames, none for an unknown distro
+ */
+function hostDistros(data: ToolVersions, host: Host): string[] {
+  const { arch, distro } = host;
+  if (
+    data.versions.some(
+      (v) =>
+        v.distros?.includes(distro) && (!v.archs || v.archs.includes(arch)),
+    )
+  ) {
+    return [distro];
+  }
+  // oldest first; Ubuntu only, other distro families like Debian need their own
+  // ordering and builds. An unknown distro, eg. an unreadable os-release, gets
+  // none, so only releases without a `distros` list match.
+  const ubuntu: readonly string[] = DistroCode.options;
+  return ubuntu.slice(0, ubuntu.indexOf(distro) + 1);
+}
+
+/**
  * Picks a release from the data, prereleases and releases which are not
  * available for the host are skipped. A release is available when it has no
- * `archs` or `distros` list, or the list has the host arch or distro, and the
+ * `archs` or `distros` list, or the list has the host arch or a distro which
+ * runs on the host (see {@link hostDistros}), and the
  * running containerbase version is not below the `cb` of the `minCb` ranges
  * which cover it. Unmet ranges are logged at debug level when they change the
  * result. A range covers its `version` and every version above it in the data,
@@ -56,12 +82,13 @@ function pick(
     }
   }
   const stable = data.versions.filter((v) => !v.prerelease);
+  const distros = hostDistros(data, host);
   const forHost = (list: typeof data.versions): typeof data.versions =>
     list.filter(
       (v) =>
         !v.prerelease &&
         (!v.archs || v.archs.includes(host.arch)) &&
-        (!v.distros || v.distros.includes(host.distro)),
+        (!v.distros || v.distros.some((d) => distros.includes(d))),
     );
 
   /** Picks the requested release from the candidates, newest first. */
