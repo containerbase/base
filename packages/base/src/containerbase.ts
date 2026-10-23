@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-// semver has no exports map, native ESM needs the file extension
 import semverGte from 'semver/functions/gte.js';
 import semverParse from 'semver/functions/parse.js';
 import { isReleaseVersion } from './release-version.ts';

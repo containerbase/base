@@ -1,4 +1,3 @@
-// semver has no exports map, native ESM needs the file extension
 import semverParse from 'semver/functions/parse.js';
 
 /**
