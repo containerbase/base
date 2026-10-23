@@ -24,31 +24,61 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the distro specific containerbase prebuild, verified against
-   * its `.sha512`, and extracts it into the tool path.
-   * Newer ubuntu releases use the jammy prebuild.
+   * Downloads the distro specific containerbase prebuild and extracts it into
+   * the tool path. The file and its checksum come from the tool-versions
+   * data, the one of the host distro first. Newer ubuntu releases fall back to
+   * the jammy prebuild, without data it is verified against its `.sha512`.
    */
   override async install(version: string): Promise<void> {
-    const name = this.name;
-    const distro = await getDistro();
-    let code = distro.versionCode;
-
-    if (code === 'noble' || code === 'resolute') {
-      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
-      code = 'jammy';
-    }
-    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    // every jammy prebuild has a checksum
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha512',
-      expectedChecksum,
-    });
+    const file = await this.download(version);
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 
     await this.compress.extract({ file, cwd: path });
+  }
+
+  /**
+   * Downloads the prebuild of the host distro from the tool-versions data,
+   * else the jammy one on newer ubuntu releases, from the data or from its
+   * GitHub release.
+   */
+  private async download(version: string): Promise<string> {
+    const host = (await getDistro()).versionCode;
+    const file = await this.downloadToolFile(version, host);
+    if (file) {
+      return file;
+    }
+
+    let code = host;
+    if (code === 'noble' || code === 'resolute') {
+      logger.debug(`Using jammy prebuild for ${this.name} on ${code}`);
+      code = 'jammy';
+      // the data is cached, a second lookup is cheap
+      const jammy = await this.downloadToolFile(version, code);
+      if (jammy) {
+        return jammy;
+      }
+    }
+    return await this.downloadPrebuild(version, code);
+  }
+
+  /**
+   * Downloads the prebuild of the distro from its GitHub release, verified
+   * against its `.sha512`.
+   */
+  private async downloadPrebuild(
+    version: string,
+    code: string,
+  ): Promise<string> {
+    const name = this.name;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    // every jammy prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    return await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
   }
 
   /** Links the tool binary into the global bin folder. */

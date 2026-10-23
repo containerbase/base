@@ -1,8 +1,18 @@
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
-import { ToolVersions } from '../../../packages/base/src/tool-versions-schema.ts';
-import type { ToolVersions as ToolVersionsData } from '../../../packages/base/src/tool-versions-types.ts';
+import type { z } from 'zod';
+import {
+  ToolVersions,
+  VersionFiles,
+  VersionIntegrity,
+} from '../../../packages/base/src/tool-versions-schema.ts';
+import type {
+  ToolVersions as ToolVersionsData,
+  VersionFiles as VersionFilesData,
+  VersionIntegrity as VersionIntegrityData,
+} from '../../../packages/base/src/tool-versions-types.ts';
 import { logger } from '../utils/index.ts';
 import { HttpService, toolVersionsTimeout } from './http.service.ts';
 import { PathService } from './path.service.ts';
@@ -11,7 +21,13 @@ import { PathService } from './path.service.ts';
 export const onlineToolVersionsUrl =
   'https://containerbase.github.io/tool-versions/v1/';
 
-type Cache = Map<string, Promise<ToolVersionsData | undefined>>;
+/**
+ * The characters of a published version, which is also its file name. Other
+ * versions are not published.
+ */
+const publishedVersion = /^[0-9A-Za-z.+_-]+$/;
+
+type Cache<T> = Map<string, Promise<T | undefined>>;
 
 /**
  * Reads the tool-versions data of a tool, from the image or online.
@@ -19,7 +35,8 @@ type Cache = Map<string, Promise<ToolVersionsData | undefined>>;
  * Only the file of the requested tool is read, lazily, and checked against the
  * schema and its `tool` field. The image build verifies the embedded files, so
  * there is no integrity check and no index lookup at runtime for them. The
- * online data gets only the schema and `tool` field checks.
+ * online data gets only the schema and `tool` field checks, the online files
+ * of a version are also verified against the `<tool>.integrity.json`.
  */
 @injectable()
 export class ToolVersionsService {
@@ -29,8 +46,10 @@ export class ToolVersionsService {
   @inject(HttpService)
   private readonly http!: HttpService;
 
-  private readonly embedded: Cache = new Map();
-  private readonly online: Cache = new Map();
+  private readonly embedded: Cache<ToolVersionsData> = new Map();
+  private readonly online: Cache<ToolVersionsData> = new Map();
+  private readonly files: Cache<VersionFilesData> = new Map();
+  private readonly integrity: Cache<VersionIntegrityData> = new Map();
 
   /**
    * The embedded versions of a tool, read once per instance.
@@ -49,18 +68,40 @@ export class ToolVersionsService {
     return this.cached(this.online, tool, () => this.fetch(tool));
   }
 
-  /** Returns the cached load of a tool, or starts and caches it. */
-  private cached(
-    cache: Cache,
+  /**
+   * The files of a version, read once per instance: the embedded
+   * `<tool>/<version>.json` first, else the published one, verified against
+   * the published `<tool>.integrity.json`.
+   * @returns `undefined` when neither is readable, valid and verified
+   */
+  getVersionFiles(
     tool: string,
-    load: () => Promise<ToolVersionsData | undefined>,
-  ): Promise<ToolVersionsData | undefined> {
-    let versions = cache.get(tool);
-    if (!versions) {
-      versions = load();
-      cache.set(tool, versions);
+    version: string,
+  ): Promise<VersionFilesData | undefined> {
+    return this.cached(this.files, `${tool}/${version}`, async () => {
+      if (!publishedVersion.test(version)) {
+        logger.debug({ tool, version }, 'version without tool-versions files');
+        return undefined;
+      }
+      return (
+        (await this.readFiles(tool, version)) ??
+        (await this.fetchFiles(tool, version))
+      );
+    });
+  }
+
+  /** Returns the cached load of a key, or starts and caches it. */
+  private cached<T>(
+    cache: Cache<T>,
+    key: string,
+    load: () => Promise<T | undefined>,
+  ): Promise<T | undefined> {
+    let value = cache.get(key);
+    if (!value) {
+      value = load();
+      cache.set(key, value);
     }
-    return versions;
+    return value;
   }
 
   /** Reads `v1/<tool>.json` of the image and validates it, never throws. */
@@ -68,6 +109,7 @@ export class ToolVersionsService {
     const file = join(this.pathSvc.usrPath, 'tool-versions/v1', `${tool}.json`);
     try {
       return this.validate(
+        ToolVersions,
         tool,
         JSON.parse(await readFile(file, { encoding: 'utf8' })),
         'embedded',
@@ -84,6 +126,7 @@ export class ToolVersionsService {
     const url = `${onlineToolVersionsUrl}${tool}.json`;
     try {
       return this.validate(
+        ToolVersions,
         tool,
         await this.http.getJson(
           url,
@@ -102,18 +145,146 @@ export class ToolVersionsService {
   }
 
   /**
+   * Reads `v1/<tool>/<version>.json` of the image and validates it, never
+   * throws.
+   */
+  private async readFiles(
+    tool: string,
+    version: string,
+  ): Promise<VersionFilesData | undefined> {
+    const file = join(
+      this.pathSvc.usrPath,
+      'tool-versions/v1',
+      tool,
+      `${version}.json`,
+    );
+    try {
+      return this.validateFiles(
+        tool,
+        version,
+        JSON.parse(await readFile(file, { encoding: 'utf8' })),
+        'embedded',
+        file,
+      );
+    } catch (err) {
+      logger.debug(
+        { tool, version, file, err },
+        'no embedded tool-versions files',
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Fetches the published `<tool>/<version>.json`, verifies its bytes against
+   * the published `<tool>.integrity.json` and validates it, never throws.
+   */
+  private async fetchFiles(
+    tool: string,
+    version: string,
+  ): Promise<VersionFilesData | undefined> {
+    // the version is the file name, a `+` must be url encoded
+    const url = `${onlineToolVersionsUrl}${tool}/${encodeURIComponent(version)}.json`;
+    try {
+      const [text, integrity] = await Promise.all([
+        this.http.get(
+          url,
+          { timeout: toolVersionsTimeout },
+          // a missing file or an unreachable host is expected, the installer
+          // has its own download logic as fallback
+          { attempts: 1, quiet: true },
+        ),
+        this.cached(this.integrity, tool, () => this.fetchIntegrity(tool)),
+      ]);
+      const expected =
+        integrity && Object.hasOwn(integrity.versions, version)
+          ? integrity.versions[version]
+          : undefined;
+      if (!expected) {
+        logger.debug({ tool, version }, 'no online tool-versions integrity');
+        return undefined;
+      }
+      const actual = `sha256-${createHash('sha256').update(text).digest('base64')}`;
+      if (actual !== expected) {
+        logger.warn(
+          { tool, version, url, expected, actual },
+          'online tool-versions files integrity mismatch',
+        );
+        return undefined;
+      }
+      return this.validateFiles(tool, version, JSON.parse(text), 'online', url);
+    } catch (err) {
+      logger.debug({ tool, version, err }, 'no online tool-versions files');
+      return undefined;
+    }
+  }
+
+  /**
+   * Fetches the published `<tool>.integrity.json` and validates it, never
+   * throws.
+   */
+  private async fetchIntegrity(
+    tool: string,
+  ): Promise<VersionIntegrityData | undefined> {
+    const url = `${onlineToolVersionsUrl}${tool}.integrity.json`;
+    try {
+      return this.validate(
+        VersionIntegrity,
+        tool,
+        await this.http.getJson(
+          url,
+          { timeout: toolVersionsTimeout },
+          { attempts: 1, quiet: true },
+        ),
+        'online',
+        url,
+      );
+    } catch (err) {
+      logger.debug({ tool, err }, 'no online tool-versions integrity');
+      return undefined;
+    }
+  }
+
+  /**
+   * Checks the files of a version against the schema, and that they belong to
+   * the tool and version.
+   * @param source - where the data comes from, for the log
+   * @param location - the file path or url of the data, for the log
+   * @returns `undefined` when the data is invalid or of another tool or version
+   */
+  private validateFiles(
+    tool: string,
+    version: string,
+    data: unknown,
+    source: string,
+    location: string,
+  ): VersionFilesData | undefined {
+    const files = this.validate(VersionFiles, tool, data, source, location);
+    if (files && files.version !== version) {
+      logger.debug(
+        { tool, version, location, dataVersion: files.version },
+        `${source} tool-versions files of another version`,
+      );
+      return undefined;
+    }
+    return files;
+  }
+
+  /**
    * Checks the data against the schema, and that it belongs to the tool.
+   * @param schema - the schema of the file
    * @param source - where the data comes from, for the log
    * @param location - the file path or url of the data, for the log
    * @returns `undefined` when the data is invalid or of another tool
    */
-  private validate(
+  private validate<T extends { tool: string }>(
+    schema: z.ZodType<T>,
     tool: string,
     data: unknown,
     source: string,
     location: string,
-  ): ToolVersionsData | undefined {
-    const result = ToolVersions.safeParse(data);
+  ): T | undefined {
+    const result = schema.safeParse(data);
     if (!result.success) {
       logger.debug(
         // the first issue is enough to find the problem
