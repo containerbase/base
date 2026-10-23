@@ -13,8 +13,8 @@ import {
 } from '../../utils/index.ts';
 
 /**
- * The oldest git minor that still gets security fixes and the first version
- * of the containerbase git prebuilds, published as the minimum version.
+ * The oldest git minor that still gets security fixes, published as the
+ * minimum version.
  */
 const minVersion = '2.48.0';
 
