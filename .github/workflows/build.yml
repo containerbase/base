@@ -8,7 +8,7 @@ env:
   FILE: base
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
-  CONTAINERBASE_VERSION: ${{ github.sha }}
+  CONTAINERBASE_VERSION: 0.0.0-PLACEHOLDER+${{ github.sha }}
   APT_HTTP_PROXY: http://host.docker.internal:8000
   HUSKY: 0
 
