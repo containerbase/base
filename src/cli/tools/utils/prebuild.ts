@@ -76,7 +76,7 @@ export abstract class PrebuildVersionResolver extends ToolVersionResolver {
 
   /** The version of the latest prebuild release. */
   protected async latestVersion(): Promise<string> {
-    return await this.http.get(
+    return await this.get(
       `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
     );
   }

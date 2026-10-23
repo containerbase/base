@@ -1,10 +1,23 @@
-import { HTTPError } from 'got';
+import { once } from 'node:events';
+import {
+  type AddressInfo,
+  type Server,
+  type Socket,
+  createServer,
+} from 'node:net';
+import merge from 'deepmerge';
+import got, { HTTPError, type OptionsOfJSONResponseBody } from 'got';
 import type { Container } from 'inversify';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils/index.ts';
-import { HttpService } from './index.ts';
+import {
+  HttpService,
+  lookupOptions,
+  lookupTimeout,
+  toolVersionsTimeout,
+} from './index.ts';
 import { testContainer } from '~test/di.ts';
-import { scope } from '~test/http-mock.ts';
+import { allowNetConnect, scope } from '~test/http-mock.ts';
 import { cachePath, rootPath } from '~test/path.ts';
 
 const baseUrl = 'https://example.com';
@@ -113,7 +126,7 @@ describe('cli/services/http.service', () => {
         .get('/test.txt')
         .reply(200, 'test')
         .get('/test.txt')
-        .times(3)
+        .once()
         .reply(501);
 
       expect(
@@ -123,34 +136,24 @@ describe('cli/services/http.service', () => {
       ).toBe('test');
       await expect(
         http.get(`${baseUrl}/test.txt`, { headers: { 'x-test': 'test' } }),
-      ).rejects.toThrow('download failed');
+      ).rejects.toThrow(HTTPError);
     },
     10 * 1000,
   );
 
-  test.each([403, 404])('get: does not retry a %i', async (status) => {
-    scope(baseUrl).get('/test.txt').once().reply(status);
-
-    const err = await http.get(`${baseUrl}/test.txt`).catch((e: unknown) => e);
-
-    expect(err).toBeInstanceOf(HTTPError);
-    expect((err as HTTPError).response.statusCode).toBe(status);
-  });
-
-  test.each([429, 501])(
-    'get: retries a %i and keeps the cause',
+  test.each([403, 404, 429, 501, 503])(
+    'get: does not repeat a %i',
     async (status) => {
-      scope(baseUrl).get('/test.txt').times(3).reply(status);
+      // without got retries, a repeat would find no interceptor
+      scope(baseUrl).get('/test.txt').once().reply(status);
 
       const err = await http
         .get(`${baseUrl}/test.txt`, { retry: { limit: 0 } })
         .catch((e: unknown) => e);
 
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toBe('download failed');
-      expect((err as Error).cause).toBeInstanceOf(HTTPError);
+      expect(err).toBeInstanceOf(HTTPError);
+      expect((err as HTTPError).response.statusCode).toBe(status);
     },
-    10 * 1000,
   );
 
   test('getJson', async () => {
@@ -158,7 +161,7 @@ describe('cli/services/http.service', () => {
       .get('/test.json')
       .reply(200, { test: true })
       .get('/test.json')
-      .times(3)
+      .once()
       .reply(501);
 
     expect(
@@ -168,34 +171,22 @@ describe('cli/services/http.service', () => {
     ).toEqual({ test: true });
     await expect(
       http.getJson(`${baseUrl}/test.json`, { headers: { 'x-test': 'test' } }),
-    ).rejects.toThrow('download failed');
+    ).rejects.toThrow(HTTPError);
   });
 
-  test.each([403, 404])('getJson: does not retry a %i', async (status) => {
-    scope(baseUrl).get('/test.json').once().reply(status);
-
-    const err = await http
-      .getJson(`${baseUrl}/test.json`)
-      .catch((e: unknown) => e);
-
-    expect(err).toBeInstanceOf(HTTPError);
-    expect((err as HTTPError).response.statusCode).toBe(status);
-  });
-
-  test.each([429, 501])(
-    'getJson: retries a %i and keeps the cause',
+  test.each([403, 404, 429, 501, 503])(
+    'getJson: does not repeat a %i',
     async (status) => {
-      scope(baseUrl).get('/test.json').times(3).reply(status);
+      // without got retries, a repeat would find no interceptor
+      scope(baseUrl).get('/test.json').once().reply(status);
 
       const err = await http
         .getJson(`${baseUrl}/test.json`, { retry: { limit: 0 } })
         .catch((e: unknown) => e);
 
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toBe('download failed');
-      expect((err as Error).cause).toBeInstanceOf(HTTPError);
+      expect(err).toBeInstanceOf(HTTPError);
+      expect((err as HTTPError).response.statusCode).toBe(status);
     },
-    10 * 1000,
   );
 
   test.each([1, 0, -1])(
@@ -209,10 +200,222 @@ describe('cli/services/http.service', () => {
         .getJson(`${baseUrl}/test.json`, {}, { attempts })
         .catch((e: unknown) => e);
 
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toBe('download failed');
+      expect(err).toBeInstanceOf(HTTPError);
     },
   );
+
+  test('getJson: passes the lookup timeouts through to got', async () => {
+    const spy = vi.spyOn(got, 'get');
+    scope(baseUrl).get('/timeout.json').reply(200, { ok: true });
+
+    await expect(
+      http.getJson(`${baseUrl}/timeout.json`, { timeout: lookupTimeout }),
+    ).resolves.toEqual({ ok: true });
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(
+      `${baseUrl}/timeout.json`,
+      expect.objectContaining({ timeout: lookupTimeout }),
+    );
+  });
+
+  describe('lookups', () => {
+    /** The lookup options with other timeouts, short ones for the tests. */
+    function withTimeout(
+      timeout: Record<string, number>,
+    ): OptionsOfJSONResponseBody {
+      return merge<OptionsOfJSONResponseBody>(lookupOptions, { timeout });
+    }
+
+    /** Runs the request and returns its error, fails without one. */
+    async function failure(request: Promise<unknown>): Promise<Error> {
+      const err = await request.catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(Error);
+      return err as Error;
+    }
+
+    let server: Server | undefined;
+    const sockets = new Set<Socket>();
+
+    /**
+     * Starts a local server which accepts connections and never answers.
+     * @returns its base url
+     */
+    async function silentServer(): Promise<string> {
+      server = createServer((socket) => {
+        // never answers
+        sockets.add(socket);
+      });
+      server.listen(0, '127.0.0.1');
+      await once(server, 'listening');
+      allowNetConnect('127.0.0.1');
+      const { port } = server.address() as AddressInfo;
+      return `http://127.0.0.1:${port}`;
+    }
+
+    afterEach(async () => {
+      if (server) {
+        for (const socket of sockets) {
+          socket.destroy();
+        }
+        sockets.clear();
+        server.close();
+        await once(server, 'close');
+        server = undefined;
+      }
+    });
+
+    test('the presets', () => {
+      expect(lookupOptions.retry).toEqual({
+        limit: 2,
+        errorCodes: [],
+        maxRetryAfter: 30_000,
+      });
+      expect(lookupTimeout).not.toHaveProperty('request');
+      expect(toolVersionsTimeout).toEqual({
+        ...lookupTimeout,
+        request: 30_000,
+      });
+    });
+
+    test('times out waiting for the response', async () => {
+      const url = await silentServer();
+
+      const err = await failure(
+        http.getJson(`${url}/silent.json`, withTimeout({ response: 20 }), {
+          attempts: 1,
+          quiet: true,
+        }),
+      );
+
+      expect(err.cause).toMatchObject({
+        code: 'ETIMEDOUT',
+        message: "Timeout awaiting 'response' for 20ms",
+      });
+    });
+
+    test('times out on an idle socket', async () => {
+      const url = await silentServer();
+
+      const err = await failure(
+        http.getJson(`${url}/idle.json`, withTimeout({ socket: 20 }), {
+          attempts: 1,
+          quiet: true,
+        }),
+      );
+
+      expect(err.cause).toMatchObject({
+        code: 'ETIMEDOUT',
+        message: "Timeout awaiting 'socket' for 20ms",
+      });
+    });
+
+    test('times out resolving the host', async () => {
+      allowNetConnect('unresolvable.test');
+
+      const err = await failure(
+        http.getJson(
+          'http://unresolvable.test/version.json',
+          {
+            ...withTimeout({ lookup: 20 }),
+            // a resolver which never answers
+            dnsLookup: () => undefined,
+          },
+          { attempts: 1, quiet: true },
+        ),
+      );
+
+      expect(err.cause).toMatchObject({
+        code: 'ETIMEDOUT',
+        message: "Timeout awaiting 'lookup' for 20ms",
+      });
+    });
+
+    test('does not retry a timeout with got', async () => {
+      // a got retry would find no interceptor and fail the test
+      scope(baseUrl).get('/stalled.json').times(3).delay(500).reply(200);
+      const spy = vi.spyOn(got, 'get');
+
+      const err = await failure(
+        http.getJson(`${baseUrl}/stalled.json`, withTimeout({ request: 20 })),
+      );
+
+      expect(err.message).toBe('download failed');
+      expect(err.cause).toMatchObject({ code: 'ETIMEDOUT' });
+      expect(spy).toHaveBeenCalledTimes(3);
+    });
+
+    test('retries a 503 with got', async () => {
+      scope(baseUrl)
+        .get('/busy.json')
+        .reply(503)
+        .get('/busy.json')
+        .reply(200, { ok: true });
+      const spy = vi.spyOn(got, 'get');
+
+      await expect(
+        http.getJson(
+          `${baseUrl}/busy.json`,
+          merge<OptionsOfJSONResponseBody>(lookupOptions, {
+            retry: { backoffLimit: 10, noise: 0 },
+          }),
+        ),
+      ).resolves.toEqual({ ok: true });
+
+      // got retried, not the http service
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('waits for the Retry-After of a 429', async () => {
+      scope(baseUrl)
+        .get('/limited.json')
+        .reply(429, '', { 'retry-after': '1' })
+        .get('/limited.json')
+        .reply(200, { ok: true });
+      const spy = vi.spyOn(got, 'get');
+      const start = Date.now();
+
+      await expect(
+        http.getJson(`${baseUrl}/limited.json`, lookupOptions),
+      ).resolves.toEqual({ ok: true });
+
+      expect(Date.now() - start).toBeGreaterThanOrEqual(900);
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('gives up on a Retry-After above 30 s', async () => {
+      // neither got nor the http service may try again
+      scope(baseUrl)
+        .get('/later.json')
+        .once()
+        .reply(429, '', { 'retry-after': '60' });
+      const spy = vi.spyOn(got, 'get');
+
+      const err = await failure(
+        http.getJson(`${baseUrl}/later.json`, lookupOptions),
+      );
+
+      expect(err).toBeInstanceOf(HTTPError);
+      expect((err as HTTPError).response.statusCode).toBe(429);
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('the tool-versions timeouts cap the whole request', async () => {
+      scope(baseUrl).get('/slow.json').once().delay(500).reply(200);
+
+      const err = await failure(
+        http.getJson(
+          `${baseUrl}/slow.json`,
+          { timeout: { ...toolVersionsTimeout, request: 20 } },
+          { attempts: 1, quiet: true },
+        ),
+      );
+
+      expect(err.cause).toMatchObject({
+        code: 'ETIMEDOUT',
+        message: "Timeout awaiting 'request' for 20ms",
+      });
+    });
+  });
 
   test('getJson: retries a network error and keeps the cause', async () => {
     scope(baseUrl)
@@ -236,7 +439,7 @@ describe('cli/services/http.service', () => {
       .get('/missing.json')
       .reply(404)
       .get('/fail.json')
-      .times(3)
+      .once()
       .reply(501);
 
     expect(await http.getJsonOrUndefined(`${baseUrl}/test.json`)).toEqual({
@@ -248,7 +451,7 @@ describe('cli/services/http.service', () => {
     );
     await expect(
       http.getJsonOrUndefined(`${baseUrl}/fail.json`),
-    ).rejects.toThrow('download failed');
+    ).rejects.toThrow(HTTPError);
   });
 
   test('replaces url', async () => {

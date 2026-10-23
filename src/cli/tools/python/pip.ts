@@ -63,7 +63,7 @@ export abstract class PipVersionResolver extends ToolVersionResolver {
   /** Fetches the pypi json metadata of the package. */
   protected async fetchMeta(tool: string): Promise<PypiJson> {
     return PypiJson.parse(
-      await this.http.getJson(
+      await this.getJson(
         `https://pypi.org/pypi/${normalizePythonDepName(tool)}/json`,
       ),
     );

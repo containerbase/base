@@ -1,5 +1,7 @@
+import merge from 'deepmerge';
+import type { OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from 'got';
 import { inject, injectable } from 'inversify';
-import { EnvService, HttpService } from '../services/index.ts';
+import { EnvService, HttpService, lookupOptions } from '../services/index.ts';
 
 export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 
@@ -76,4 +78,34 @@ export abstract class ToolVersionResolver {
    * latest release.
    */
   abstract resolve(version: string | undefined): Promise<string | undefined>;
+
+  /**
+   * Fetches a lookup as text like {@link HttpService.get}, with the
+   * {@link lookupOptions} deep merged with `opts`, so `opts` can override
+   * single values like one timeout and keep the others.
+   */
+  protected get(
+    url: string,
+    opts: OptionsOfTextResponseBody = {},
+  ): Promise<string> {
+    return this.http.get(
+      url,
+      merge<OptionsOfTextResponseBody>(lookupOptions, opts),
+    );
+  }
+
+  /**
+   * Fetches a json lookup like {@link HttpService.getJson}, with the
+   * {@link lookupOptions} deep merged with `opts`, so `opts` can override
+   * single values like one timeout and keep the others.
+   */
+  protected getJson(
+    url: string,
+    opts: OptionsOfJSONResponseBody = {},
+  ): Promise<unknown> {
+    return this.http.getJson(
+      url,
+      merge<OptionsOfJSONResponseBody>(lookupOptions, opts),
+    );
+  }
 }

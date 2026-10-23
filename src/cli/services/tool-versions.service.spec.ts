@@ -1,8 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { logger } from '../utils/index.ts';
-import { HttpService, ToolVersionsService, createContainer } from './index.ts';
-import { onlineToolVersionsTimeout } from './tool-versions.service.ts';
+import {
+  HttpService,
+  ToolVersionsService,
+  createContainer,
+  toolVersionsTimeout,
+} from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { rootPath } from '~test/path.ts';
 
@@ -150,10 +154,9 @@ describe('cli/services/tool-versions.service', () => {
 
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'https://containerbase.github.io/tool-versions/v1/opts.json',
-        { timeout: { request: onlineToolVersionsTimeout } },
+        { timeout: toolVersionsTimeout },
         { attempts: 1, quiet: true },
       );
-      expect(onlineToolVersionsTimeout).toBe(30_000);
     });
 
     test('has no versions after a network error, without a retry', async () => {
