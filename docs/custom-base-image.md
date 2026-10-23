@@ -47,7 +47,7 @@ RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+RUN install-tool git v2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -93,7 +93,7 @@ RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+RUN install-tool git v2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -137,7 +137,7 @@ RUN install-containerbase
 
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.30.0
+RUN install-tool git v2.56.0
 
 USER $USER_NAME
 ```

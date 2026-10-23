@@ -300,9 +300,10 @@ https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_checksums.txt
 
 Git is downloaded from:
 
-- `http://ppa.launchpad.net/git-core/ppa/ubuntu`
+- `https://ppa.launchpadcontent.net/git-core/ppa/ubuntu`
 
 Git is installed via `apt` package manager.
+The `URL_REPLACE_*` variables don't apply to this apt source.
 
 ### `git-lfs`
 
