@@ -380,6 +380,43 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', undefined)).toBe('2.0.0');
   });
 
+  test('uses the builds of an older distro when the tool has none for the host distro', async () => {
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: 'noble',
+      versionId: '24.04',
+    });
+    serve('other', 200, [
+      { version: '3.0.0', distros: ['jammy'] },
+      { version: '2.0.0', distros: ['jammy'] },
+    ]);
+
+    expect(await svc.resolve('other', undefined)).toBe('3.0.0');
+  });
+
+  test('skips the builds of a newer distro on an older host', async () => {
+    serve('other', 200, [
+      { version: '3.0.0', distros: ['resolute'] },
+      { version: '2.0.0', distros: ['noble'] },
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
+
+  test('only uses the host distro builds when the tool has some', async () => {
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: 'resolute',
+      versionId: '26.04',
+    });
+    serve('other', 200, [
+      { version: '6.3.0', distros: ['jammy', 'noble'] },
+      { version: '6.4.0', distros: ['jammy', 'noble', 'resolute'] },
+    ]);
+
+    expect(await svc.resolve('other', undefined)).toBe('6.4.0');
+  });
+
   test('picks a release without archs and distros lists', async () => {
     serve('other', 200, [
       { version: '2.0.0', archs: ['arm64'] },
