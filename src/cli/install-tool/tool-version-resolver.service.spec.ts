@@ -587,6 +587,22 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
+  test('does not log an unmet range which does not change the result', async () => {
+    serve(
+      'other',
+      200,
+      ['4.0.0', '3.12.5', '3.12.4'],
+      [{ version: '4.0.0', cb: '14.52.0' }],
+    );
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.5');
+
+    expect(logger.debug).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'skipping the versions which need a newer containerbase',
+    );
+  });
+
   test('looks a listed release up online when the embedded data needs a newer containerbase', async () => {
     await embed('other', ['8.10'], [{ version: '8.10', cb: '14.52.0' }]);
     serve('other', 200, ['8.10.2', '8.9.1']);

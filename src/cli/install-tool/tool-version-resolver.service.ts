@@ -24,9 +24,10 @@ interface Host {
  * available for the host are skipped. A release is available when it has no
  * `archs` or `distros` list, or the list has the host arch or distro, and the
  * running containerbase version is not below the `cb` of the `minCb` ranges
- * which cover it. Unmet ranges are logged at debug level. A range covers its `version` and every version above
- * it in the data, prereleases count for the position, a range whose `version`
- * is not listed is ignored. A `cb` which is not valid semver is never met, a
+ * which cover it. Unmet ranges are logged at debug level when they change the
+ * result. A range covers its `version` and every version above it in the data,
+ * prereleases count for the position, a range whose `version` is not listed is
+ * ignored. A `cb` which is not valid semver is never met, a
  * development build (`cb` is `undefined`) skips none. The data lists the newest
  * release first, in the versioning of the tool. A missing version or `latest`
  * is the newest release, or the newest LTS release for a tool whose data has
@@ -54,33 +55,40 @@ function pick(
       }
     }
   }
-  if (unmetCbs.length) {
+  const stable = data.versions.filter((v) => !v.prerelease);
+  const forHost = (list: typeof data.versions): typeof data.versions =>
+    list.filter(
+      (v) =>
+        !v.prerelease &&
+        (!v.archs || v.archs.includes(host.arch)) &&
+        (!v.distros || v.distros.includes(host.distro)),
+    );
+
+  /** Picks the requested release from the candidates, newest first. */
+  const find = (releases: typeof data.versions): string | undefined => {
+    if (version === undefined || version === 'latest') {
+      // the LTS flags are read before the host filter (arch, distro and
+      // containerbase version), so a tool with LTS releases never falls back
+      // to a release which isn't an LTS one
+      return (
+        stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
+      )?.version;
+    }
+    if (releases.some((v) => v.version === version)) {
+      return version;
+    }
+    return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
+  };
+
+  const picked = find(forHost(data.versions.slice(unmet + 1)));
+  // log only when the unmet ranges change the result of this request
+  if (unmetCbs.length && find(forHost(data.versions)) !== picked) {
     logger.debug(
       { tool, running: host.cb, needed: unmetCbs },
       'skipping the versions which need a newer containerbase',
     );
   }
-  const stable = data.versions.filter((v) => !v.prerelease);
-  const releases = data.versions.filter(
-    (v, i) =>
-      !v.prerelease &&
-      i > unmet &&
-      (!v.archs || v.archs.includes(host.arch)) &&
-      (!v.distros || v.distros.includes(host.distro)),
-  );
-  if (version === undefined || version === 'latest') {
-    // the LTS flags are read before the host filter (arch, distro and
-    // containerbase version), so a tool with LTS releases never falls back to
-    // a release which isn't an LTS one
-    return (
-      stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
-    )?.version;
-  }
-
-  if (releases.some((v) => v.version === version)) {
-    return version;
-  }
-  return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
+  return picked;
 }
 
 @injectable()
