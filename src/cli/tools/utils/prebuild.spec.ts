@@ -120,7 +120,7 @@ describe('cli/tools/utils/prebuild', () => {
         await expect(svc.install(version)).resolves.toBeUndefined();
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `Using jammy prebuild for erlang on ${code}`,
+          `Using jammy file for erlang on ${code}`,
         );
       },
     );
@@ -194,6 +194,11 @@ describe('cli/tools/utils/prebuild', () => {
 
           expect(files).toHaveBeenCalledTimes(lookups);
           expect(files).toHaveBeenCalledWith('erlang', version);
+          // only logged when the jammy fallback is used
+          const log = `Using jammy file for erlang on ${code}`;
+          expect(
+            vi.mocked(logger.debug).mock.calls.some(([msg]) => msg === log),
+          ).toBe(lookups === 2);
           expect(spy).toHaveBeenCalledExactlyOnceWith({
             file: expect.stringContaining(
               `erlang-${version}-${file}-x86_64.tar.xz`,

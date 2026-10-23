@@ -3,7 +3,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
-import { getDistro, logger } from '../../utils/index.ts';
+import { getDistro } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -44,22 +44,11 @@ export abstract class PrebuildInstallService extends BaseInstallService {
    */
   private async download(version: string): Promise<string> {
     const host = (await getDistro()).versionCode;
-    const file = await this.downloadToolFile(version, host);
-    if (file) {
-      return file;
-    }
-
-    let code = host;
-    if (code === 'noble' || code === 'resolute') {
-      logger.debug(`Using jammy prebuild for ${this.name} on ${code}`);
-      code = 'jammy';
-      // the data is cached, a second lookup is cheap
-      const jammy = await this.downloadToolFile(version, code);
-      if (jammy) {
-        return jammy;
-      }
-    }
-    return await this.downloadPrebuild(version, code);
+    const code = host === 'noble' || host === 'resolute' ? 'jammy' : host;
+    return (
+      (await this.downloadDistroToolFile(version, host, code)) ??
+      (await this.downloadPrebuild(version, code))
+    );
   }
 
   /**

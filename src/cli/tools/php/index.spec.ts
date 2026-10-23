@@ -1,7 +1,12 @@
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { CompressionService, LinkToolService } from '../../services/index.ts';
+import type { VersionFiles } from '../../../../packages/base/src/tool-versions-types.ts';
+import {
+  CompressionService,
+  LinkToolService,
+  ToolVersionsService,
+} from '../../services/index.ts';
 import { getDistro, logger } from '../../utils/index.ts';
 import {
   PhpInstallService,
@@ -41,6 +46,11 @@ describe('cli/tools/php/index', () => {
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the prebuild is downloaded from its release
+    vi.spyOn(
+      ToolVersionsService.prototype,
+      'getVersionFiles',
+    ).mockResolvedValue(undefined);
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -84,8 +94,124 @@ describe('cli/tools/php/index', () => {
       await expect(svc.install('8.3.15')).resolves.toBeUndefined();
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Using jammy prebuild for php on noble',
+        'Using jammy file for php on noble',
       );
+    });
+
+    describe('with tool-versions data', () => {
+      /**
+       * The files of a php version as tool-versions publishes them, with the
+       * jammy and resolute builds for both archs.
+       */
+      function versionFiles(version: string): VersionFiles {
+        return {
+          tool: 'php',
+          version,
+          files: ['jammy', 'resolute'].flatMap((distro) =>
+            ['aarch64', 'x86_64'].map((ghArch) => ({
+              name: `php-${version}-${distro}-${ghArch}.tar.xz`,
+              url: `${baseUrl}${prebuild}/${version}/php-${version}-${distro}-${ghArch}.tar.xz`,
+              checksum: `sha512:${checksum(tarball, 'sha512')}`,
+              arch: ghArch === 'x86_64' ? 'amd64' : 'arm64',
+              distro,
+            })),
+          ),
+        };
+      }
+
+      test.each([
+        { code: 'jammy', versionId: '22.04', file: 'jammy', lookups: 1 },
+        { code: 'noble', versionId: '24.04', file: 'jammy', lookups: 2 },
+        { code: 'resolute', versionId: '26.04', file: 'resolute', lookups: 1 },
+      ])(
+        'install: downloads the $file file on $code without the .sha512',
+        async ({ code, versionId, file, lookups }) => {
+          vi.mocked(getDistro).mockResolvedValue({
+            name: 'Ubuntu',
+            versionCode: code,
+            versionId,
+          });
+          const version = `8.4.1-${code}`;
+          const files = vi
+            .spyOn(ToolVersionsService.prototype, 'getVersionFiles')
+            .mockResolvedValue(versionFiles(version));
+          // there is no interceptor for the `.sha512`
+          scope(baseUrl)
+            .get(`${prebuild}/${version}/php-${version}-${file}-x86_64.tar.xz`)
+            .reply(200, tarball);
+          const extract = vi.spyOn(CompressionService.prototype, 'extract');
+          const { svc, pathSvc } = await toolContext(PhpInstallService);
+
+          await expect(svc.install(version)).resolves.toBeUndefined();
+
+          expect(files).toHaveBeenCalledTimes(lookups);
+          // only logged when the jammy fallback is used
+          const log = `Using jammy file for php on ${code}`;
+          expect(
+            vi.mocked(logger.debug).mock.calls.some(([msg]) => msg === log),
+          ).toBe(lookups === 2);
+          expect(files).toHaveBeenCalledWith('php', version);
+          expect(extract).toHaveBeenCalledExactlyOnceWith({
+            file: expect.stringContaining(
+              `php-${version}-${file}-x86_64.tar.xz`,
+            ),
+            cwd: pathSvc.toolPath('php'),
+          });
+        },
+      );
+
+      test('install: falls back to the release without a file for the host', async () => {
+        const version = '8.4.2';
+        const data = versionFiles(version);
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue({
+          ...data,
+          files: data.files.filter((f) => f.arch === 'arm64'),
+        });
+        const filename = `${version}/php-${version}-jammy-x86_64.tar.xz`;
+        scope(baseUrl)
+          .get(`${prebuild}/${filename}.sha512`)
+          .reply(200, `${checksum(tarball, 'sha512')}\n`)
+          .get(`${prebuild}/${filename}`)
+          .reply(200, tarball);
+        const { svc } = await toolContext(PhpInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+      });
+
+      test('install: falls back to the jammy release on noble without a file for the arch', async () => {
+        vi.mocked(getDistro).mockResolvedValue({
+          name: 'Ubuntu',
+          versionCode: 'noble',
+          versionId: '24.04',
+        });
+        const version = '8.4.3';
+        const data = versionFiles(version);
+        const files = vi
+          .spyOn(ToolVersionsService.prototype, 'getVersionFiles')
+          .mockResolvedValue({
+            ...data,
+            files: data.files.filter((f) => f.arch === 'arm64'),
+          });
+        const filename = `${version}/php-${version}-jammy-x86_64.tar.xz`;
+        scope(baseUrl)
+          .get(`${prebuild}/${filename}.sha512`)
+          .reply(200, `${checksum(tarball, 'sha512')}\n`)
+          .get(`${prebuild}/${filename}`)
+          .reply(200, tarball);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(PhpInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(files).toHaveBeenCalledTimes(2);
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(`php-${version}-jammy-x86_64.tar.xz`),
+          cwd: expect.any(String),
+        });
+      });
     });
 
     test('link', async () => {

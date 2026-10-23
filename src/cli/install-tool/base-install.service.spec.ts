@@ -2,7 +2,15 @@ import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  type MockInstance,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
 import {
   LinkToolService,
@@ -82,6 +90,15 @@ class DummyInstallService extends BaseInstallService {
   /** Exposes the protected `downloadToolFile` to the tests. */
   download(version: string, distro?: string): Promise<string | undefined> {
     return this.downloadToolFile(version, distro);
+  }
+
+  /** Exposes the protected `downloadDistroToolFile` to the tests. */
+  downloadDistro(
+    version: string,
+    host: string,
+    fallback: string,
+  ): Promise<string | undefined> {
+    return this.downloadDistroToolFile(version, host, fallback);
   }
 }
 
@@ -359,6 +376,61 @@ describe('cli/install-tool/base-install.service', () => {
         { tool: 'dummy', version: '1.0.0', arch: 'amd64', distro: 'resolute' },
         'no tool-versions file for the host',
       );
+    });
+  });
+
+  describe('downloadDistroToolFile', () => {
+    const baseUrl = 'https://example.test';
+
+    /**
+     * Mocks the files of the dummy version `2.0.0`, one per distro for amd64.
+     * @returns the spy of the lookups
+     */
+    function mockFiles(
+      distros: string[],
+    ): MockInstance<ToolVersionsService['getVersionFiles']> {
+      return vi
+        .spyOn(ToolVersionsService.prototype, 'getVersionFiles')
+        .mockResolvedValue({
+          tool: 'dummy',
+          version: '2.0.0',
+          files: distros.map((distro) =>
+            toolFile(`dummy-2-${distro}.tar.gz`, { arch: 'amd64', distro }),
+          ),
+        });
+    }
+
+    test.each([
+      { distros: ['jammy', 'noble'], host: 'noble', file: 'noble', lookups: 1 },
+      { distros: ['jammy'], host: 'noble', file: 'jammy', lookups: 2 },
+    ])(
+      'downloads the $file file on $host from $distros',
+      async ({ distros, host, file, lookups }) => {
+        const spy = mockFiles(distros);
+        const name = `dummy-2-${file}.tar.gz`;
+        scope(baseUrl).get(`/files/${name}`).reply(200, name);
+
+        expect(await svc.downloadDistro('2.0.0', host, 'jammy')).toMatch(name);
+        expect(spy).toHaveBeenCalledTimes(lookups);
+      },
+    );
+
+    test('looks up a fallback equal to the host only once', async () => {
+      const spy = mockFiles(['noble']);
+
+      expect(
+        await svc.downloadDistro('2.0.0', 'jammy', 'jammy'),
+      ).toBeUndefined();
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('has no file without one for the host or the fallback', async () => {
+      const spy = mockFiles(['focal']);
+
+      expect(
+        await svc.downloadDistro('2.0.0', 'noble', 'jammy'),
+      ).toBeUndefined();
+      expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 
