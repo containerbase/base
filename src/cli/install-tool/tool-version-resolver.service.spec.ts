@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { arch } from 'node:os';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   EnvService,
   ToolVersionsService,
@@ -54,18 +54,31 @@ const versions = [
 /** A version entry of a tool file, an object limits the version to archs or distros. */
 type Entry =
   | string
-  | { version: string; lts?: true; archs?: string[]; distros?: string[] };
+  | {
+      version: string;
+      lts?: true;
+      archs?: string[];
+      distros?: string[];
+    };
+
+/** A range of the top-level `minCb` list of a tool file. */
+interface MinCb {
+  version: string;
+  cb: string;
+}
 
 /**
  * The content of a `<tool>.json` file.
  * @param tool - the tool name
  * @param list - the versions, a `-rc` one is a prerelease, a `-lts` one is an
  * LTS release, the suffix is not part of the version
+ * @param minCb - the minimum containerbase version ranges, if any
  */
-function toolFile(tool: string, list: Entry[]): object {
+function toolFile(tool: string, list: Entry[], minCb?: MinCb[]): object {
   return {
     tool,
     updatedAt: '2026-10-16T00:00:00Z',
+    ...(minCb && { minCb }),
     versions: list.map((entry) => {
       if (typeof entry !== 'string') {
         return entry;
@@ -83,9 +96,17 @@ function toolFile(tool: string, list: Entry[]): object {
  * Writes the embedded versions of a tool.
  * @param tool - the tool name
  * @param list - the versions, newest first
+ * @param minCb - the minimum containerbase version ranges, if any
  */
-async function embed(tool: string, list: Entry[]): Promise<void> {
-  await writeFile(`${dir}/${tool}.json`, JSON.stringify(toolFile(tool, list)));
+async function embed(
+  tool: string,
+  list: Entry[],
+  minCb?: MinCb[],
+): Promise<void> {
+  await writeFile(
+    `${dir}/${tool}.json`,
+    JSON.stringify(toolFile(tool, list, minCb)),
+  );
 }
 
 /**
@@ -93,15 +114,17 @@ async function embed(tool: string, list: Entry[]): Promise<void> {
  * @param tool - the tool name
  * @param status - the http status to reply with
  * @param body - a list of versions for a tool file, or the raw reply
+ * @param minCb - the minimum containerbase version ranges of a tool file, if any
  */
 function serve(
   tool: string,
   status: number,
   body?: Entry[] | string | object,
+  minCb?: MinCb[],
 ): void {
   scope('https://containerbase.github.io')
     .get(`/tool-versions/v1/${tool}.json`)
-    .reply(status, Array.isArray(body) ? toolFile(tool, body) : body);
+    .reply(status, Array.isArray(body) ? toolFile(tool, body, minCb) : body);
 }
 
 describe('cli/install-tool/tool-version-resolver.service', () => {
@@ -114,6 +137,8 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     await rm(dir, { recursive: true, force: true });
     await mkdir(dir, { recursive: true });
 
+    // the host runs containerbase 14.51.0
+    vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
     // the host is amd64 on jammy
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
@@ -126,6 +151,10 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     child.bind(ToolVersionResolverService).toSelf();
     child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
     svc = await child.getAsync(ToolVersionResolverService);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   test('resolves with the matching resolver', async () => {
@@ -408,6 +437,177 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     serve('other', 200, [{ version: '3.0.0', archs: ['arm64'] }]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
+
+  test('skips the versions from the start of a range which needs a newer containerbase', async () => {
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.0.0', '1.0.0'],
+      [{ version: '2.0.0', cb: '14.52.0' }],
+    );
+
+    // the range covers 2.0.0 and the 3.0.0 above it, not 1.0.0
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test.each(['14.51.0', '14.50.0'])(
+    'picks the versions of a range with the cb %s',
+    async (cb) => {
+      serve('other', 200, ['2.0.0', '1.0.0'], [{ version: '1.0.0', cb }]);
+
+      expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+    },
+  );
+
+  test('applies the highest cb of the ranges which cover a version', async () => {
+    serve(
+      'other',
+      200,
+      ['4.0.0', '3.0.0', '2.0.0', '1.0.0'],
+      [
+        { version: '1.0.0', cb: '14.0.0' },
+        { version: '3.0.0', cb: '14.52.0' },
+        { version: '2.0.0', cb: '14.51.1' },
+      ],
+    );
+
+    // 14.51.1 of the range at 2.0.0 is the highest one covering 2.0.0
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test('keeps the versions below a range which needs a newer containerbase', async () => {
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.0.0', '1.0.0'],
+      [
+        { version: '3.0.0', cb: '14.52.0' },
+        { version: '1.0.0', cb: '14.0.0' },
+      ],
+    );
+
+    // 3.0.0 is skipped, 2.0.0 is covered by the met range only
+    expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
+  });
+
+  test('ignores a range whose version is not listed', async () => {
+    serve(
+      'other',
+      200,
+      ['2.0.0', '1.0.0'],
+      [{ version: '9.9.9', cb: '99.0.0' }],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
+  });
+
+  test('counts the position of a prerelease for the coverage of a range', async () => {
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.0.0-rc1', '2.0.0', '1.0.0'],
+      [{ version: '2.0.0-rc1', cb: '14.52.0' }],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
+  });
+
+  test.each([
+    'dev',
+    '0.0.0-PLACEHOLDER',
+    '2fc9e007c5f1d2a3b4c5d6e7f8091a2b3c4d5e6f',
+  ])('skips no release on the development build %s', async (cb) => {
+    vi.stubGlobal('CONTAINERBASE_VERSION', cb);
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.0.0', '1.0.0'],
+      [
+        { version: '3.0.0', cb: '99.0.0' },
+        { version: '2.0.0', cb: 'invalid' },
+      ],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('3.0.0');
+  });
+
+  test('skips the versions of a range with an invalid cb', async () => {
+    serve('other', 200, ['2.0.0', '1.0.0'], [{ version: '2.0.0', cb: 'new' }]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test('resolves a partial version to a release which the running containerbase can install', async () => {
+    serve(
+      'other',
+      200,
+      ['3.12.5', '3.12.4', '3.11.9'],
+      [{ version: '3.12.5', cb: '15.0.0' }],
+    );
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('keeps latest when every lts release needs a newer containerbase', async () => {
+    serve(
+      'other',
+      200,
+      ['25.0.0', { version: '24.1.0', lts: true }],
+      [{ version: '24.1.0', cb: '15.0.0' }],
+    );
+
+    // the range covers its version 24.1.0 and 25.0.0 listed above it
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
+
+  test('skips the versions of a range with an empty cb', async () => {
+    serve('other', 200, ['2.0.0', '1.0.0'], [{ version: '2.0.0', cb: '' }]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test('logs the unmet ranges once at debug level', async () => {
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.0.0', '1.0.0'],
+      [
+        { version: '3.0.0', cb: '14.52.0' },
+        { version: '2.0.0', cb: '14.51.1' },
+      ],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      { tool: 'other', running: '14.51.0', needed: ['14.52.0', '14.51.1'] },
+      'skipping the versions which need a newer containerbase',
+    );
+    expect(logger.debug).toHaveBeenCalledTimes(2);
+  });
+
+  test('does not log an unmet range which does not change the result', async () => {
+    serve(
+      'other',
+      200,
+      ['4.0.0', '3.12.5', '3.12.4'],
+      [{ version: '4.0.0', cb: '14.52.0' }],
+    );
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.5');
+
+    expect(logger.debug).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'skipping the versions which need a newer containerbase',
+    );
+  });
+
+  test('looks a listed release up online when the embedded data needs a newer containerbase', async () => {
+    await embed('other', ['8.10'], [{ version: '8.10', cb: '14.52.0' }]);
+    serve('other', 200, ['8.10.2', '8.9.1']);
+
+    expect(await svc.resolve('other', '8.10')).toBe('8.10.2');
   });
 
   test('makes no request and reads no data for an exact version', async () => {

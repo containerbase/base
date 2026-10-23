@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-// semver has no exports map, native ESM needs the file extension
 import semverGte from 'semver/functions/gte.js';
 import semverParse from 'semver/functions/parse.js';
+import { isReleaseVersion } from './release-version.ts';
 
 /**
  * Where the containerbase image embeds the tool-versions data: the extracted
@@ -54,17 +54,6 @@ export function isCompatibleVersion(
   const image = semverParse(imageVersion.trim());
   const pkg = semverParse(version);
   return !!image && !!pkg && image.major === pkg.major && semverGte(image, pkg);
-}
-
-/**
- * Checks if an image version comes from a release. Development builds write
- * the git sha or `0.0.0-PLACEHOLDER` instead.
- */
-function isReleaseVersion(imageVersion: string): boolean {
-  const image = semverParse(imageVersion);
-  return (
-    !!image && !(image.major === 0 && image.minor === 0 && image.patch === 0)
-  );
 }
 
 /**

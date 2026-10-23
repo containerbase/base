@@ -1,54 +1,94 @@
 import { inject, injectable, multiInject } from 'inversify';
+import { isReleaseVersion } from '../../../packages/base/src/release-version.ts';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
 import { EnvService, ToolVersionsService } from '../services/index.ts';
-import { getDistro, logger } from '../utils/index.ts';
+import { getDistro, isValid, logger, semverGte } from '../utils/index.ts';
 import {
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
 } from './tool-version-resolver.ts';
 
-/** The architecture and the distro codename the tool is installed on. */
+/**
+ * The architecture and the distro codename the tool is installed on, and the
+ * running containerbase release version, `undefined` for a development build.
+ */
 interface Host {
   arch: string;
   distro: string;
+  cb: string | undefined;
 }
 
 /**
  * Picks a release from the data, prereleases and releases which are not
  * available for the host are skipped. A release is available when it has no
- * `archs` or `distros` list, or the list has the host arch or distro. The data
- * lists the newest release first, in the versioning of the tool. A missing
- * version or `latest` is the newest release, or the newest LTS release for a
- * tool whose data has LTS flags, even when none is available for the host, then
- * there is no match. A partial version, a major (`20`) or major.minor (`3.12`)
- * one, is the newest release of that line, unless it is a release itself, like
- * `8.10`.
+ * `archs` or `distros` list, or the list has the host arch or distro, and the
+ * running containerbase version is not below the `cb` of the `minCb` ranges
+ * which cover it. Unmet ranges are logged at debug level when they change the
+ * result. A range covers its `version` and every version above it in the data,
+ * prereleases count for the position, a range whose `version` is not listed is
+ * ignored. A `cb` which is not valid semver is never met, a
+ * development build (`cb` is `undefined`) skips none. The data lists the newest
+ * release first, in the versioning of the tool. A missing version or `latest`
+ * is the newest release, or the newest LTS release for a tool whose data has
+ * LTS flags, even when none is available for the host, then there is no match.
+ * A partial version, a major (`20`) or major.minor (`3.12`) one, is the newest
+ * release of that line, unless it is a release itself, like `8.10`.
  * @returns `undefined` when no release matches
  */
 function pick(
+  tool: string,
   data: ToolVersions,
   version: string | undefined,
   host: Host,
 ): string | undefined {
+  // the versions up to this index need a newer containerbase: a range which
+  // isn't met covers all versions from its start up to the newest one
+  let unmet = -1;
+  const unmetCbs: string[] = [];
+  if (host.cb !== undefined) {
+    for (const range of data.minCb ?? []) {
+      const start = data.versions.findIndex((v) => v.version === range.version);
+      if (start >= 0 && !(isValid(range.cb) && semverGte(host.cb, range.cb))) {
+        unmet = Math.max(unmet, start);
+        unmetCbs.push(range.cb);
+      }
+    }
+  }
   const stable = data.versions.filter((v) => !v.prerelease);
-  const releases = stable.filter(
-    (v) =>
-      (!v.archs || v.archs.includes(host.arch)) &&
-      (!v.distros || v.distros.includes(host.distro)),
-  );
-  if (version === undefined || version === 'latest') {
-    // the LTS flags are read before the host filter, so a tool with LTS
-    // releases never falls back to a release which isn't an LTS one
-    return (
-      stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
-    )?.version;
-  }
+  const forHost = (list: typeof data.versions): typeof data.versions =>
+    list.filter(
+      (v) =>
+        !v.prerelease &&
+        (!v.archs || v.archs.includes(host.arch)) &&
+        (!v.distros || v.distros.includes(host.distro)),
+    );
 
-  if (releases.some((v) => v.version === version)) {
-    return version;
+  /** Picks the requested release from the candidates, newest first. */
+  const find = (releases: typeof data.versions): string | undefined => {
+    if (version === undefined || version === 'latest') {
+      // the LTS flags are read before the host filter (arch, distro and
+      // containerbase version), so a tool with LTS releases never falls back
+      // to a release which isn't an LTS one
+      return (
+        stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
+      )?.version;
+    }
+    if (releases.some((v) => v.version === version)) {
+      return version;
+    }
+    return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
+  };
+
+  const picked = find(forHost(data.versions.slice(unmet + 1)));
+  // log only when the unmet ranges change the result of this request
+  if (unmetCbs.length && find(forHost(data.versions)) !== picked) {
+    logger.debug(
+      { tool, running: host.cb, needed: unmetCbs },
+      'skipping the versions which need a newer containerbase',
+    );
   }
-  return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
+  return picked;
 }
 
 @injectable()
@@ -88,8 +128,11 @@ export class ToolVersionResolverService {
    * as it may be outdated. Online data without a match is final, the embedded
    * data is older and can't know more. A resolved version is logged at debug
    * level, or with a warning when the embedded data replaces the online data.
-   * Only releases available for the host arch and distro are considered, also
-   * for the embedded release check.
+   * Only releases available for the host arch and distro, and installable by
+   * the running containerbase version (`minCb`), are considered, also for the
+   * embedded release check. Only a release version of containerbase filters by
+   * `minCb`, any other version (a commit sha, `0.0.0-*` or `dev`) is a
+   * development build and doesn't.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
@@ -107,10 +150,11 @@ export class ToolVersionResolverService {
     const host: Host = {
       arch: this.env.arch,
       distro: (await getDistro()).versionCode,
+      cb: isReleaseVersion(this.env.version) ? this.env.version : undefined,
     };
     if (version !== undefined && version !== 'latest') {
       const listed = await this.toolVersions.getVersions(tool);
-      if (listed && pick(listed, version, host) === version) {
+      if (listed && pick(tool, listed, version, host) === version) {
         logger.debug(
           { tool, version, resolved: version },
           'version resolved from the embedded tool-versions data',
@@ -121,7 +165,7 @@ export class ToolVersionResolverService {
 
     const online = await this.toolVersions.getOnlineVersions(tool);
     if (online) {
-      const resolved = pick(online, version, host);
+      const resolved = pick(tool, online, version, host);
       if (resolved !== undefined) {
         logger.debug(
           { tool, version, resolved },
@@ -132,7 +176,7 @@ export class ToolVersionResolverService {
     }
 
     const data = await this.toolVersions.getVersions(tool);
-    const resolved = data && pick(data, version, host);
+    const resolved = data && pick(tool, data, version, host);
     if (resolved !== undefined) {
       logger.warn(
         { tool, version, resolved },

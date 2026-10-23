@@ -99,6 +99,23 @@ export const ToolVersions = z.object({
   distroMinVersion: z
     .record(z.string().min(1), z.string().min(1))
     .exactOptional(),
+  /**
+   * the oldest containerbase version, like `14.51.0`, which can install a
+   * version. A range applies to its `version` and every version above it in
+   * `versions`. Omitted for tools without a limit. Lenient, so a slip of the
+   * writer doesn't reject the file: a `cb` which isn't valid semver is never
+   * met by a reader.
+   */
+  minCb: z
+    .array(
+      z.object({
+        /** the version where the range starts, a version of `versions` */
+        version: z.string().min(1),
+        /** the oldest containerbase version, in semver */
+        cb: z.string(),
+      }),
+    )
+    .exactOptional(),
   updatedAt: z.iso.datetime(),
   /** newest first */
   versions: z.array(ToolVersion),
