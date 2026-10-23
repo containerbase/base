@@ -207,7 +207,7 @@ describe('cli/install-tool/index', () => {
           { name: 'git-lfs', parent: 'git', minVersion: '2.6.0' },
           { name: 'maven', parent: 'java', minVersion: '3.0.4' },
           { name: 'kas', type: 'pip', parent: 'python' },
-          { name: 'bower', type: 'npm', parent: 'node', deprecated: true },
+          { name: 'corepack', type: 'npm', parent: 'node' },
           { name: 'cocoapods', type: 'gem', parent: 'ruby' },
           { name: 'conan', type: 'pip', parent: 'python' },
           { name: 'renovate', type: 'npm', parent: 'node' },

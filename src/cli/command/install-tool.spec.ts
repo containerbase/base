@@ -32,10 +32,7 @@ describe('cli/command/install-tool', () => {
     const cli = new Cli({ binaryName: 'install-tool' });
     registerCommands(cli, 'install-tool');
 
-    expect(await cli.run(['bower'])).toBe(MissingVersion);
-    expect(logger.warn).toHaveBeenCalledWith(
-      `The 'install-tool bower' command is deprecated. Please use the 'install-npm bower'.`,
-    );
+    expect(await cli.run(['node'])).toBe(MissingVersion);
     vi.stubEnv('NODE_VERSION', '16.13.0');
     expect(await cli.run(['node'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
@@ -116,10 +113,7 @@ describe('cli/command/install-tool', () => {
     const cli = new Cli({ binaryName: 'containerbase-cli' });
     registerCommands(cli, null);
 
-    expect(await cli.run(['install', 'tool', 'bower'])).toBe(MissingVersion);
-    expect(logger.warn).toHaveBeenCalledWith(
-      `The 'install-tool bower' command is deprecated. Please use the 'install-npm bower'.`,
-    );
+    expect(await cli.run(['install', 'tool', 'node'])).toBe(MissingVersion);
     expect(await cli.run(['install', 'tool', 'node', 'v16.13.0'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
