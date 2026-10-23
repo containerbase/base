@@ -4,19 +4,12 @@ import { inject, injectable } from 'inversify';
 import { ToolVersions } from '../../../packages/base/src/tool-versions-schema.ts';
 import type { ToolVersions as ToolVersionsData } from '../../../packages/base/src/tool-versions-types.ts';
 import { logger } from '../utils/index.ts';
-import { HttpService } from './http.service.ts';
+import { HttpService, toolVersionsTimeout } from './http.service.ts';
 import { PathService } from './path.service.ts';
 
 /** The published tool-versions data of the `v1` format, one file per tool. */
 export const onlineToolVersionsUrl =
   'https://containerbase.github.io/tool-versions/v1/';
-
-/**
- * The timeout of the whole online request in milliseconds, there are no
- * retries: a stalled lookup must not block an install, the embedded data
- * is the fallback.
- */
-export const onlineToolVersionsTimeout = 30_000;
 
 type Cache = Map<string, Promise<ToolVersionsData | undefined>>;
 
@@ -94,9 +87,9 @@ export class ToolVersionsService {
         tool,
         await this.http.getJson(
           url,
-          { timeout: { request: onlineToolVersionsTimeout } },
+          { timeout: toolVersionsTimeout },
           // a missing file or an unreachable host is expected, the embedded
-          // data is the fallback
+          // data is the fallback, so there are no retries
           { attempts: 1, quiet: true },
         ),
         'online',

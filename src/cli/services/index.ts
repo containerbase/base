@@ -3,7 +3,12 @@ import { AptService } from './apt.service.ts';
 import { CompressionService } from './compression.service.ts';
 import { DataService } from './data.service.ts';
 import { EnvService } from './env.service.ts';
-import { HttpService } from './http.service.ts';
+import {
+  HttpService,
+  lookupOptions,
+  lookupTimeout,
+  toolVersionsTimeout,
+} from './http.service.ts';
 import { IpcClient, IpcServer } from './ipc.service.ts';
 import {
   LinkToolService,
@@ -23,6 +28,9 @@ export {
   DataService,
   EnvService,
   HttpService,
+  lookupOptions,
+  lookupTimeout,
+  toolVersionsTimeout,
   PathService,
   ToolVersionsService,
   V2ToolService,

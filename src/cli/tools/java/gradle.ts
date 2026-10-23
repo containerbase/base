@@ -81,14 +81,14 @@ export class GradleVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return GradleVersionData.parse(
-        await this.http.getJson('https://services.gradle.org/versions/current'),
+        await this.getJson('https://services.gradle.org/versions/current'),
       )?.version;
     }
     if (isPartialVersion(version)) {
       let releases: { all: string[]; stable: string[] };
       try {
         releases = GradleReleases.parse(
-          await this.http.getJson('https://services.gradle.org/versions/all'),
+          await this.getJson('https://services.gradle.org/versions/all'),
         );
       } catch (err) {
         // keep the version like before partial versions were resolved: an

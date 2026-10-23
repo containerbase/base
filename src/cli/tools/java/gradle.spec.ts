@@ -164,11 +164,11 @@ describe('cli/tools/java/gradle', () => {
       });
 
       test.each([
-        // an invalid body is retried
-        { name: 'invalid json', body: 'not json', times: 3 },
-        { name: 'an unexpected document', body: { versions: [] }, times: 1 },
-      ])('keeps a partial version for $name', async ({ body, times }) => {
-        scope(baseUrl).get('/versions/all').times(times).reply(200, body);
+        // an invalid body is not tried again
+        { name: 'invalid json', body: 'not json' },
+        { name: 'an unexpected document', body: { versions: [] } },
+      ])('keeps a partial version for $name', async ({ body }) => {
+        scope(baseUrl).get('/versions/all').once().reply(200, body);
         const { svc } = await toolContext(GradleVersionResolver);
 
         expect(await svc.resolve('8')).toBe('8');

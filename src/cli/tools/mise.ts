@@ -78,7 +78,7 @@ export class MiseVersionResolver extends ToolVersionResolver {
   /** Resolves a missing version or `latest` from mise.jdx.dev. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return (await this.http.get('https://mise.jdx.dev/VERSION')).trim();
+      return (await this.get('https://mise.jdx.dev/VERSION')).trim();
     }
     return version;
   }
