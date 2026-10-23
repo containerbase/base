@@ -52,12 +52,13 @@ export abstract class BaseInstallService {
 
   /**
    * Some tools can only be installed as root, so they are only available at
-   * image build time. Eg. git, which writes the system wide `/etc/gitconfig`.
+   * image build time. Eg. git is installed via apt.
    */
   readonly needsRoot: boolean = false;
 
   /**
-   * Some tools can't be uninstalled, eg. git, which other tools depend on.
+   * Tools which are not installed into a versioned tool path can't be
+   * uninstalled, eg. git is installed system wide via apt.
    */
   readonly canUninstall: boolean = true;
 

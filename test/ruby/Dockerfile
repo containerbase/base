@@ -22,8 +22,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
