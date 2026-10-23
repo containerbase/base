@@ -78,14 +78,14 @@ describe('cli/services/apt.service', () => {
     test('throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValueOnce({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
 
       await expect(
         svc.installDistroPackages('dummy', distroPackages),
       ).rejects.toThrow(
-        "Tool 'dummy' not supported on: focal! Please use ubuntu 'jammy', 'noble' or 'resolute'.",
+        "Tool 'dummy' not supported on: jammy! Please use ubuntu 'noble' or 'resolute'.",
       );
       expect(mocks.execa).not.toHaveBeenCalled();
     });

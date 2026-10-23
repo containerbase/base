@@ -24,20 +24,17 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the distro specific containerbase prebuild, verified against
-   * its `.sha512`, and extracts it into the tool path.
-   * Newer ubuntu releases use the jammy prebuild.
+   * Downloads the containerbase prebuild, verified against its `.sha512`, and
+   * extracts it into the tool path.
+   * The prebuilds are built on jammy and used on every supported ubuntu
+   * release.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
-    let code = distro.versionCode;
 
-    if (code === 'noble' || code === 'resolute') {
-      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
-      code = 'jammy';
-    }
-    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    logger.debug(`Using jammy prebuild for ${name} on ${distro.versionCode}`);
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-jammy-${this.ghArch}.tar.xz`;
     // every jammy prebuild has a checksum
     const expectedChecksum = await this.getChecksum(`${url}.sha512`);
     const file = await this.http.download({

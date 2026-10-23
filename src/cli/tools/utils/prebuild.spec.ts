@@ -62,8 +62,8 @@ describe('cli/tools/utils/prebuild', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     child = await testContainer();
     child.bind(ErlangInstallService).toSelf();
@@ -91,30 +91,30 @@ describe('cli/tools/utils/prebuild', () => {
       });
     });
 
-    test.each([{ code: 'noble' }, { code: 'resolute' }])(
-      'install: uses the jammy prebuild on $code',
-      async ({ code }) => {
-        vi.mocked(getDistro).mockResolvedValue({
-          name: 'Ubuntu',
-          versionCode: code,
-          versionId: '24.04',
-        });
-        const version = `27.0.0-${code}`;
-        const path = releasePath(version, 'jammy', 'x86_64');
-        scope(baseUrl)
-          .get(`${path}.sha512`)
-          .reply(200, checksum)
-          .get(path)
-          .reply(200, tarball);
-        const svc = await child.getAsync(ErlangInstallService);
+    test.each([
+      { code: 'noble', id: '24.04' },
+      { code: 'resolute', id: '26.04' },
+    ])('install: uses the jammy prebuild on $code', async ({ code, id }) => {
+      vi.mocked(getDistro).mockResolvedValue({
+        name: 'Ubuntu',
+        versionCode: code,
+        versionId: id,
+      });
+      const version = `27.0.0-${code}`;
+      const path = releasePath(version, 'jammy', 'x86_64');
+      scope(baseUrl)
+        .get(`${path}.sha512`)
+        .reply(200, checksum)
+        .get(path)
+        .reply(200, tarball);
+      const svc = await child.getAsync(ErlangInstallService);
 
-        await expect(svc.install(version)).resolves.toBeUndefined();
+      await expect(svc.install(version)).resolves.toBeUndefined();
 
-        expect(logger.debug).toHaveBeenCalledWith(
-          `Using jammy prebuild for erlang on ${code}`,
-        );
-      },
-    );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Using jammy prebuild for erlang on ${code}`,
+      );
+    });
 
     test('install: on arm64', async () => {
       vi.mocked(arch).mockReturnValue('arm64');

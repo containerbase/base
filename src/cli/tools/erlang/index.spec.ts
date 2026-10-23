@@ -50,8 +50,8 @@ describe('cli/tools/erlang/index', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     execaMock.mockResolvedValue({ failed: false });
   });
@@ -106,16 +106,15 @@ describe('cli/tools/erlang/index', () => {
     });
 
     test.each([
-      { code: 'jammy', version: '25.3.0.1' },
-      { code: 'noble', version: '25.3.0.2' },
-      { code: 'resolute', version: '25.3.0.3' },
+      { code: 'noble', id: '24.04', version: '25.3.0.2' },
+      { code: 'resolute', id: '26.04', version: '25.3.0.3' },
     ])(
       'install on $code uses the jammy prebuild',
-      async ({ code, version }) => {
+      async ({ code, id, version }) => {
         vi.mocked(getDistro).mockResolvedValue({
           name: 'Ubuntu',
           versionCode: code,
-          versionId: '24.04',
+          versionId: id,
         });
         const { svc, pathSvc } = await toolContext(ErlangInstallService);
         const path = prebuildPath(version, 'jammy', 'x86_64');
@@ -187,13 +186,13 @@ describe('cli/tools/erlang/index', () => {
     test('install: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(ErlangInstallService);
 
       await expect(svc.install('25.3.0.0')).rejects.toThrow(
-        "Tool 'erlang' not supported on: focal!",
+        "Tool 'erlang' not supported on: jammy!",
       );
     });
 

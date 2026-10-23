@@ -47,8 +47,8 @@ describe('cli/tools/dotnet/mono', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     execaMock.mockResolvedValue({ failed: false });
   });

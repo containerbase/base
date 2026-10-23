@@ -36,8 +36,8 @@ describe('cli/tools/php/index', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
@@ -68,11 +68,6 @@ describe('cli/tools/php/index', () => {
     });
 
     test('install: uses the jammy prebuild on noble', async () => {
-      vi.mocked(getDistro).mockResolvedValue({
-        name: 'Ubuntu',
-        versionCode: 'noble',
-        versionId: '24.04',
-      });
       const { svc } = await toolContext(PhpInstallService);
       const filename = '8.3.15/php-8.3.15-jammy-x86_64.tar.xz';
       scope(baseUrl)
@@ -86,6 +81,29 @@ describe('cli/tools/php/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'Using jammy prebuild for php on noble',
       );
+    });
+
+    test('install: uses the resolute prebuild on resolute', async () => {
+      vi.mocked(getDistro).mockResolvedValue({
+        name: 'Ubuntu',
+        versionCode: 'resolute',
+        versionId: '26.04',
+      });
+      const { svc, pathSvc } = await toolContext(PhpInstallService);
+      const filename = '8.3.16/php-8.3.16-resolute-x86_64.tar.xz';
+      scope(baseUrl)
+        .get(`${prebuild}/${filename}.sha512`)
+        .reply(200, `${checksum(tarball, 'sha512')}\n`)
+        .get(`${prebuild}/${filename}`)
+        .reply(200, tarball);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+
+      await expect(svc.install('8.3.16')).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining('php-8.3.16-resolute-x86_64.tar.xz'),
+        cwd: pathSvc.toolPath('php'),
+      });
     });
 
     test('link', async () => {
@@ -114,14 +132,13 @@ describe('cli/tools/php/index', () => {
 
   describe('PhpPrepareService', () => {
     test.each([
-      { code: 'jammy', zip: 'libzip4' },
-      { code: 'noble', zip: 'libzip4' },
-      { code: 'resolute', zip: 'libzip5' },
-    ])('prepare on $code', async ({ code, zip }) => {
+      { code: 'noble', id: '24.04', zip: 'libzip4' },
+      { code: 'resolute', id: '26.04', zip: 'libzip5' },
+    ])('prepare on $code', async ({ code, id, zip }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '22.04',
+        versionId: id,
       });
       const { svc } = await toolContext(PhpPrepareService);
 
@@ -137,13 +154,13 @@ describe('cli/tools/php/index', () => {
     test('prepare: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(PhpPrepareService);
 
       await expect(svc.prepare()).rejects.toThrow(
-        'Unsupported distro version: focal',
+        'Unsupported distro version: jammy',
       );
     });
   });

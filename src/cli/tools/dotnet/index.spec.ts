@@ -178,14 +178,13 @@ describe('cli/tools/dotnet/index', () => {
 
   describe('DotnetPrepareService', () => {
     test.each([
-      { code: 'jammy', icu: 'libicu70', ssl: 'libssl3' },
-      { code: 'noble', icu: 'libicu74', ssl: 'libssl3' },
-      { code: 'resolute', icu: 'libicu78', ssl: 'libssl3t64' },
-    ])('prepare on $code', async ({ code, icu, ssl }) => {
+      { code: 'noble', id: '24.04', icu: 'libicu74', ssl: 'libssl3' },
+      { code: 'resolute', id: '26.04', icu: 'libicu78', ssl: 'libssl3t64' },
+    ])('prepare on $code', async ({ code, id, icu, ssl }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '22.04',
+        versionId: id,
       });
       const { svc, child } = await toolContext(DotnetPrepareService);
       const pathSvc = await child.getAsync(PathService);

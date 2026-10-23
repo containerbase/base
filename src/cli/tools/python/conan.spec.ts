@@ -76,17 +76,35 @@ describe('cli/tools/python/conan', () => {
 
   describe('ConanPrepareService', () => {
     test.each([
-      { hostArch: 'x64', code: 'jammy', cpu: 'x86_64', compiler: '11' },
-      { hostArch: 'arm64', code: 'noble', cpu: 'armv8', compiler: '13' },
-      { hostArch: 'x64', code: 'resolute', cpu: 'x86_64', compiler: '15' },
+      {
+        hostArch: 'x64',
+        code: 'noble',
+        id: '24.04',
+        cpu: 'x86_64',
+        compiler: '13',
+      },
+      {
+        hostArch: 'arm64',
+        code: 'noble',
+        id: '24.04',
+        cpu: 'armv8',
+        compiler: '13',
+      },
+      {
+        hostArch: 'x64',
+        code: 'resolute',
+        id: '26.04',
+        cpu: 'x86_64',
+        compiler: '15',
+      },
     ] as const)(
       'prepare on $code/$cpu',
-      async ({ hostArch, code, cpu, compiler }) => {
+      async ({ hostArch, code, id, cpu, compiler }) => {
         vi.mocked(arch).mockReturnValue(hostArch);
         vi.mocked(getDistro).mockResolvedValue({
           name: 'Ubuntu',
           versionCode: code,
-          versionId: '24.04',
+          versionId: id,
         });
         const { svc, child } = await toolContext(ConanPrepareService);
         const pathSvc = await child.getAsync(PathService);
@@ -118,8 +136,8 @@ describe('cli/tools/python/conan', () => {
     test('initialize: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(ConanPrepareService);
 
