@@ -206,10 +206,13 @@ export abstract class BaseInstallService {
 
   /**
    * Downloads the file of a version for the host from the tool-versions data,
-   * verified against its checksum. Url replacements and the cache apply.
+   * verified against its checksum, see {@link findToolFile} and
+   * {@link downloadListedFile}. A missing file is logged.
    *
    * @param distro - the distro codename to pick the file for, by default the
    * host's
+   * @param filter - only picks from the files it accepts, for tools with
+   * several kinds of files per host, by default all
    * @returns the downloaded file, or `undefined` when there is no data, no
    * file for the host or no supported checksum, so the installer can use its
    * own download logic
@@ -218,20 +221,53 @@ export abstract class BaseInstallService {
   protected async downloadToolFile(
     version: string,
     distro?: string,
+    filter?: (file: ToolFile) => boolean,
   ): Promise<string | undefined> {
+    const file = await this.findToolFile(version, distro, filter);
+    if (!file) {
+      logger.debug(
+        { tool: this.name, version, arch: this.envSvc.arch, distro },
+        'no tool-versions file for the host',
+      );
+      return undefined;
+    }
+    return await this.downloadListedFile(version, file);
+  }
+
+  /**
+   * Picks the file of a version for the host from the tool-versions data,
+   * without downloading or logging it.
+   *
+   * @param distro - the distro codename to pick the file for, by default the
+   * host's
+   * @param filter - only picks from the files it accepts, by default all
+   * @returns `undefined` when there is no data or no file for the host
+   */
+  protected async findToolFile(
+    version: string,
+    distro?: string,
+    filter: (file: ToolFile) => boolean = () => true,
+  ): Promise<ToolFile | undefined> {
     const data = await this._toolVersions.getVersionFiles(this.name, version);
     if (!data) {
       return undefined;
     }
     const code = distro ?? (await getDistro()).versionCode;
-    const file = selectToolFile(data.files, this.envSvc.arch, code);
-    if (!file) {
-      logger.debug(
-        { tool: this.name, version, arch: this.envSvc.arch, distro: code },
-        'no tool-versions file for the host',
-      );
-      return undefined;
-    }
+    return selectToolFile(data.files.filter(filter), this.envSvc.arch, code);
+  }
+
+  /**
+   * Downloads a file of the tool-versions data, verified against its
+   * checksum. Url replacements and the cache apply.
+   *
+   * @returns the downloaded file, or `undefined` for an unsupported checksum,
+   * it is never downloaded without verification
+   * @throws when the download fails
+   */
+  protected async downloadListedFile(
+    version: string,
+    file: ToolFile,
+  ): Promise<string | undefined> {
     const [type, expectedChecksum] = file.checksum.split(':');
     const checksumType = HttpChecksumTypes.find((t) => t === type);
     // never download without verification
