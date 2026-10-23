@@ -88,8 +88,12 @@ class DummyInstallService extends BaseInstallService {
   }
 
   /** Exposes the protected `downloadToolFile` to the tests. */
-  download(version: string, distro?: string): Promise<string | undefined> {
-    return this.downloadToolFile(version, distro);
+  download(
+    version: string,
+    distro?: string,
+    filter?: (file: ToolFile) => boolean,
+  ): Promise<string | undefined> {
+    return this.downloadToolFile(version, distro, filter);
   }
 
   /** Exposes the protected `downloadDistroToolFile` to the tests. */
@@ -333,6 +337,27 @@ describe('cli/install-tool/base-install.service', () => {
       expect(await svc.download('1.0.0', 'jammy')).toMatch(
         /dummy-jammy-amd64\.tar\.gz$/,
       );
+    });
+
+    test('picks only from the files the filter accepts', async () => {
+      mockFiles([
+        toolFile('dummy-generic.tar.gz'),
+        toolFile('dummy-other.tar.gz'),
+      ]);
+      scope(baseUrl)
+        .get('/files/dummy-other.tar.gz')
+        .reply(200, 'dummy-other.tar.gz');
+
+      expect(
+        await svc.download(
+          '1.0.0',
+          undefined,
+          (f) => f.name === 'dummy-other.tar.gz',
+        ),
+      ).toMatch(/dummy-other\.tar\.gz$/);
+      expect(
+        await svc.download('1.0.0', undefined, () => false),
+      ).toBeUndefined();
     });
 
     test('throws on a checksum mismatch', async () => {

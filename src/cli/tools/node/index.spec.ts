@@ -2,12 +2,15 @@ import fs from 'node:fs/promises';
 import { arch } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { VersionFiles } from '../../../../packages/base/src/tool-versions-types.ts';
 import {
   CompressionService,
   EnvService,
   LinkToolService,
   PathService,
+  ToolVersionsService,
 } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 import { NodeInstallService, NodePrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
@@ -39,6 +42,11 @@ describe('cli/tools/node/index', () => {
     // the npm install cleans up `$HOME/.npm/_logs`
     vi.stubEnv('HOME', rootPath('home/ubuntu'));
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the release and nodejs.org are checked directly
+    vi.spyOn(
+      ToolVersionsService.prototype,
+      'getVersionFiles',
+    ).mockResolvedValue(undefined);
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -136,6 +144,170 @@ describe('cli/tools/node/index', () => {
         file: expect.stringContaining(distFile),
         cwd: expect.any(String),
         strip: 1,
+      });
+    });
+
+    describe('with tool-versions data', () => {
+      /**
+       * The files of a node version as tool-versions publishes them: the
+       * nodejs.org archives and, optionally, the containerbase prebuilds.
+       */
+      function versionFiles(version: string, prebuilds: boolean): VersionFiles {
+        const archives = [
+          { name: `node-v${version}-linux-arm64.tar.xz`, arch: 'arm64' },
+          { name: `node-v${version}-linux-x64.tar.xz`, arch: 'amd64' },
+        ].map(({ name, arch }) => ({
+          name,
+          url: `${nodeUrl}/dist/v${version}/${name}`,
+          checksum: `sha256:${checksum(tarball)}`,
+          arch,
+        }));
+        const builds = [
+          { name: `node-${version}-aarch64.tar.xz`, arch: 'arm64' },
+          { name: `node-${version}-x86_64.tar.xz`, arch: 'amd64' },
+        ].map(({ name, arch }) => ({
+          name,
+          url: `${ghUrl}${prebuild}/${version}/${name}`,
+          checksum: `sha512:${checksum(tarball, 'sha512')}`,
+          arch,
+        }));
+        return {
+          tool: 'node',
+          version,
+          files: prebuilds ? [...builds, ...archives] : archives,
+        };
+      }
+
+      test('install: downloads the listed prebuild when both are listed', async () => {
+        const version = '24.10.0';
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue(versionFiles(version, true));
+        // no checksum files and no release checks
+        scope(ghUrl)
+          .get(`${prebuild}/${version}/node-${version}-x86_64.tar.xz`)
+          .reply(200, tarball);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc, pathSvc } = await toolContext(NodeInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(`node-${version}-x86_64.tar.xz`),
+          cwd: pathSvc.versionedToolPath('node', version),
+          strip: 1,
+        });
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'no tool-versions file for the host',
+        );
+      });
+
+      test('install: downloads the prebuild release without a listed prebuild', async () => {
+        const version = '24.10.1';
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue(versionFiles(version, false));
+        const filename = `${version}/node-${version}-x86_64.tar.xz`;
+        scope(ghUrl)
+          .head(`${prebuild}/${filename}.sha512`)
+          .reply(200)
+          .get(`${prebuild}/${filename}.sha512`)
+          .reply(200, `${checksum(tarball, 'sha512')}\n`)
+          .get(`${prebuild}/${filename}`)
+          .reply(200, tarball);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(NodeInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(`node-${version}-x86_64.tar.xz`),
+          cwd: expect.any(String),
+          strip: 1,
+        });
+      });
+
+      test('install: downloads the listed archive without any prebuild', async () => {
+        const version = '24.10.3';
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue(versionFiles(version, false));
+        const distFile = `node-v${version}-linux-x64.tar.xz`;
+        scope(ghUrl)
+          .head(`${prebuild}/${version}/node-${version}-x86_64.tar.xz.sha512`)
+          .reply(404);
+        // no `SHASUMS256.txt`
+        scope(nodeUrl).get(`/dist/v${version}/${distFile}`).reply(200, tarball);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(NodeInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(distFile),
+          cwd: expect.any(String),
+          strip: 1,
+        });
+      });
+
+      test('install: downloads the listed archive for a rejected listed prebuild', async () => {
+        const version = '24.10.4';
+        const data = versionFiles(version, true);
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue({
+          ...data,
+          files: data.files.map((f) =>
+            f.name.endsWith('-x86_64.tar.xz')
+              ? { ...f, checksum: `md5:${'a'.repeat(32)}` }
+              : f,
+          ),
+        });
+        const distFile = `node-v${version}-linux-x64.tar.xz`;
+        // no release check
+        scope(nodeUrl).get(`/dist/v${version}/${distFile}`).reply(200, tarball);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(NodeInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(distFile),
+          cwd: expect.any(String),
+          strip: 1,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({ tool: 'node', version }),
+          'unsupported tool-versions file checksum',
+        );
+      });
+
+      test('install: checks the release without a file for the host', async () => {
+        const version = '24.10.2';
+        const data = versionFiles(version, true);
+        vi.spyOn(
+          ToolVersionsService.prototype,
+          'getVersionFiles',
+        ).mockResolvedValue({
+          ...data,
+          files: data.files.filter((f) => f.arch === 'arm64'),
+        });
+        const filename = `${version}/node-${version}-x86_64.tar.xz`;
+        scope(ghUrl)
+          .head(`${prebuild}/${filename}.sha512`)
+          .reply(200)
+          .get(`${prebuild}/${filename}.sha512`)
+          .reply(200, `${checksum(tarball, 'sha512')}\n`)
+          .get(`${prebuild}/${filename}`)
+          .reply(200, tarball);
+        const { svc } = await toolContext(NodeInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
       });
     });
 
