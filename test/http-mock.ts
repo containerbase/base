@@ -4,6 +4,8 @@ import { afterAll, afterEach, beforeAll } from 'vitest';
 
 type BasePath = string | RegExp | Url;
 let missingLog: string[] = [];
+/** The hosts of the current test which may use the real network. */
+const netHosts = new Set<string>();
 
 interface TestRequest {
   method: string;
@@ -11,11 +13,11 @@ interface TestRequest {
 }
 
 function onMissing(req: TestRequest, opts?: TestRequest): void {
-  if (opts) {
-    missingLog.push(`  ${opts.method} ${opts.href}`);
-  } else {
-    missingLog.push(`  ${req.method} ${req.href}`);
+  const { method, href } = opts ?? req;
+  if (netHosts.has(new URL(href).hostname)) {
+    return;
   }
+  missingLog.push(`  ${method} ${href}`);
 }
 
 /**
@@ -41,6 +43,16 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   return nock(basePath, options);
 }
 
+/**
+ * Lets the requests to a host through to the real network until the end of
+ * the test, eg. to a local server.
+ * @param host - the hostname, without a port
+ */
+export function allowNetConnect(host: string): void {
+  netHosts.add(host);
+  nock.enableNetConnect((h) => netHosts.has(h.split(':')[0]!));
+}
+
 // init nock
 beforeAll(() => {
   nock.emitter.on('no match', onMissing);
@@ -55,5 +67,7 @@ afterAll(() => {
 
 // clear nock state
 afterEach(() => {
+  netHosts.clear();
+  nock.disableNetConnect();
   clear();
 });

@@ -64,7 +64,7 @@ export class NodeVersionResolver extends ToolVersionResolver {
   /** Loads the list of node releases from nodejs.org, newest first. */
   private async getReleases(): Promise<NodeVersionMeta[]> {
     return NpmPackageMetaList.parse(
-      await this.http.getJson('https://nodejs.org/dist/index.json'),
+      await this.getJson('https://nodejs.org/dist/index.json'),
     );
   }
 }
@@ -134,7 +134,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
   /** Loads the abbreviated metadata of an npm package from the registry. */
   private async getMeta(name: string): Promise<NpmPackageMeta> {
     return NpmPackageMeta.parse(
-      await this.http.getJson(`https://registry.npmjs.org/${name}`, {
+      await this.getJson(`https://registry.npmjs.org/${name}`, {
         headers: {
           accept:
             'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*',

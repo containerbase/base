@@ -210,7 +210,7 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (version === undefined || version === 'latest') {
       const meta = RubyGemJson.parse(
-        await this.http.getJson(
+        await this.getJson(
           `https://rubygems.org/api/v1/gems/${this.tool}.json`,
         ),
       );
@@ -220,7 +220,7 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
       let releases: RubyGemVersionsJson;
       try {
         releases = RubyGemVersionsJson.parse(
-          await this.http.getJson(
+          await this.getJson(
             `https://rubygems.org/api/v1/versions/${this.tool}.json`,
           ),
         );

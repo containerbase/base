@@ -140,7 +140,7 @@ export class MavenVersionResolver extends ToolVersionResolver {
    */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.http.get(
+      return await this.get(
         `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
       );
     }
@@ -148,7 +148,7 @@ export class MavenVersionResolver extends ToolVersionResolver {
       let versions: string[];
       try {
         versions = MavenMetadata.parse(
-          parser.parse(await this.http.get(metadataUrl)),
+          parser.parse(await this.get(metadataUrl)),
         );
       } catch (err) {
         // keep the version: an `X.Y` release like `3.0` passes `validate` and

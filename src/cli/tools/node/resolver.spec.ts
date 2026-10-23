@@ -1,6 +1,7 @@
 import { arch } from 'node:os';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { HttpService, lookupOptions } from '../../services/index.ts';
 import {
   NodeVersionResolver,
   NpmVersionResolver,
@@ -87,6 +88,21 @@ describe('cli/tools/node/resolver', () => {
       const { svc } = await toolContext(PnpmVersionResolver);
 
       expect(await svc.resolve('latest')).toBe('9.14.2');
+    });
+
+    test('looks up with the lookup timeouts', async () => {
+      const spy = vi.spyOn(HttpService.prototype, 'getJson');
+      scope(registryUrl)
+        .get('/pnpm')
+        .reply(200, { name: 'pnpm', 'dist-tags': { latest: '9.14.2' } });
+      const { svc } = await toolContext(PnpmVersionResolver);
+
+      await svc.resolve(undefined);
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith(`${registryUrl}/pnpm`, {
+        ...lookupOptions,
+        headers: { accept: expect.any(String) },
+      });
     });
 
     test('keeps a pinned version', async () => {

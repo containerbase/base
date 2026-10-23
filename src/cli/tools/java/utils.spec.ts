@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Container } from 'inversify';
-import { beforeEach, describe, expect, test } from 'vitest';
-import { HttpService, PathService } from '../../services/index.ts';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  HttpService,
+  PathService,
+  lookupOptions,
+} from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
 import {
   createGradleSettings,
@@ -43,6 +47,21 @@ describe('cli/tools/java/utils', () => {
       .reply(200, { versions: [{ semver: '21.0.4+7' }] });
 
     expect(await resolveLatestJavaVersion(http, 'jre', arch)).toBe('21.0.4+7');
+  });
+
+  test('resolveLatestJavaVersion: looks up with the lookup options', async () => {
+    const spy = vi.spyOn(http, 'getJsonOrUndefined');
+    scope(baseUrl)
+      .get('/v3/info/release_versions')
+      .query(true)
+      .reply(200, { versions: [{ semver: '21.0.4+7' }] });
+
+    await resolveLatestJavaVersion(http, 'jre', 'amd64');
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining(`${baseUrl}/v3/info/release_versions?`),
+      lookupOptions,
+    );
   });
 
   test('resolveLatestJavaVersion: range', async () => {
@@ -89,12 +108,12 @@ describe('cli/tools/java/utils', () => {
     scope(baseUrl)
       .get('/v3/info/release_versions')
       .query(true)
-      .times(3)
+      .once()
       .reply(501);
 
     await expect(
       resolveLatestJavaVersion(http, 'jdk', 'amd64', '[11,12)'),
-    ).rejects.toThrow('download failed');
+    ).rejects.toThrow('Request failed with status code 501');
   });
 
   test('resolveJavaDownloadUrl', async () => {

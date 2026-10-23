@@ -51,7 +51,7 @@ export class ComposerVersionResolver extends ToolVersionResolver {
   /** Resolves a missing version or `latest` to the latest composer prebuild. */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.http.get(
+      return await this.get(
         `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
       );
     }

@@ -5,8 +5,10 @@ import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   CompressionService,
+  HttpService,
   LinkToolService,
   PathService,
+  lookupOptions,
 } from '../../services/index.ts';
 import { getDistro, logger } from '../../utils/index.ts';
 import { PrebuildInstallService, PrebuildVersionResolver } from './prebuild.ts';
@@ -169,6 +171,21 @@ describe('cli/tools/utils/prebuild', () => {
         expect(await resolver.resolve(version)).toBe('26.2.5');
       },
     );
+
+    test('looks up with the lookup timeouts', async () => {
+      const spy = vi.spyOn(HttpService.prototype, 'get');
+      scope(baseUrl)
+        .get('/containerbase/erlang-prebuild/releases/latest/download/version')
+        .reply(200, '26.2.5');
+      const resolver = await child.getAsync(ErlangVersionResolver);
+
+      await resolver.resolve('latest');
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith(
+        `${baseUrl}/containerbase/erlang-prebuild/releases/latest/download/version`,
+        lookupOptions,
+      );
+    });
 
     test('keeps a pinned version', async () => {
       const resolver = await child.getAsync(ErlangVersionResolver);

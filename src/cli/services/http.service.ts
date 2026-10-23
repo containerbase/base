@@ -26,6 +26,63 @@ export const HttpChecksumTypes = [
 
 export type HttpChecksumType = (typeof HttpChecksumTypes)[number];
 
+/**
+ * The got timeouts of a version lookup of a resolver in milliseconds, per
+ * request. A timeout is not retried by got, see {@link lookupOptions}, so an
+ * unreachable or stalled host fails fast instead of blocking an install: with
+ * the three attempts of {@link HttpService.get} an unresolvable host gives up
+ * after about 18 s, an unreachable one after about 15 s and one which never
+ * answers after about 30 s, plus the TLS handshakes. There is no overall cap,
+ * so large metadata still loads on slow links as long as data flows. Not for
+ * the downloads of tool files.
+ */
+export const lookupTimeout = {
+  /**
+   * resolving the host, above the 5 s glibc waits for a nameserver, so a
+   * dropped AAAA query doesn't fail the lookup
+   */
+  lookup: 6_000,
+  /** opening the connection, short so dropped packets fail fast */
+  connect: 5_000,
+  /** the TLS handshake */
+  secureConnect: 5_000,
+  /** waiting for the response after the request was sent */
+  response: 10_000,
+  /** an idle socket, without any data */
+  socket: 10_000,
+} as const;
+
+/**
+ * The got options of a version lookup: the {@link lookupTimeout}, and got
+ * retries only the retryable status codes like 429 and 503, twice, with its
+ * backoff of 1 s and 2 s or the `Retry-After` of the server, up to 30 s; a
+ * longer `Retry-After` fails the lookup right away. Network errors and
+ * timeouts are not retried by got, the three attempts of
+ * {@link HttpService.get} cover them, while it doesn't repeat a status error.
+ *
+ * So a host which keeps failing with a retryable status gets three requests,
+ * and the lookup waits about 3 s between them, or up to 60 s when the host
+ * asks for the longest `Retry-After`.
+ */
+export const lookupOptions: Readonly<
+  Pick<OptionsOfJSONResponseBody, 'timeout' | 'retry'>
+> = {
+  timeout: lookupTimeout,
+  retry: { limit: 2, errorCodes: [], maxRetryAfter: 30_000 },
+};
+
+/**
+ * The got timeouts of a tool-versions lookup in milliseconds: the phases of
+ * {@link lookupTimeout} and a cap of the whole request, the files are small.
+ * They are fetched with a single attempt, which also disables got's retries,
+ * so a lookup gives up after at most 30 s.
+ */
+export const toolVersionsTimeout = {
+  ...lookupTimeout,
+  /** the whole request */
+  request: 30_000,
+} as const;
+
 export interface HttpDownloadConfig {
   url: string;
   expectedChecksum?: string | undefined;
@@ -160,11 +217,10 @@ export class HttpService {
   }
 
   /**
-   * Fetches the body as text, trying up to three times. A permanent client
-   * error is not retried.
+   * Fetches the body as text, trying up to three times on network errors and
+   * timeouts. An error status is only retried by got.
    *
-   * @throws the original HTTP error for a permanent 4xx status, without
-   * retrying
+   * @throws the original HTTP error for an error status, without trying again
    * @throws `download failed` after three failed attempts otherwise
    */
   async get(
@@ -175,16 +231,15 @@ export class HttpService {
   }
 
   /**
-   * Fetches and parses a json body, trying up to three times by default. A
-   * permanent client error is not retried. The result is not validated, parse
-   * it with a schema.
+   * Fetches and parses a json body, trying up to three times by default on
+   * network errors and timeouts. An error status is only retried by got. The
+   * result is not validated, parse it with a schema.
    *
    * @param opts - the got options, eg. a `timeout`
    * @param request - `attempts` is how often to try, at least once, and one
    * also disables got's own retries. `quiet` logs a failure at debug level
    * instead of error, for a request which is allowed to fail.
-   * @throws the original HTTP error for a permanent 4xx status, without
-   * retrying
+   * @throws the original HTTP error for an error status, without trying again
    * @throws `download failed` after the failed attempts otherwise
    */
   async getJson<T = unknown>(
@@ -219,11 +274,13 @@ export class HttpService {
    * three by default and at least once. A single attempt also disables got's
    * own retries.
    *
-   * A 4xx status other than 408 and 429 is permanent: it is logged once and
-   * the original error is rethrown. Any other failure is retried. A final
-   * failure is logged at error level, at debug level when `quiet`.
+   * An error status is not tried again: got already retried the retryable
+   * ones, with its backoff and the `Retry-After` of the server, so it is
+   * logged once and the original error is rethrown. Only network errors and
+   * timeouts are tried again. A final failure is logged at error level, at
+   * debug level when `quiet`.
    *
-   * @throws the original HTTP error for a permanent 4xx status
+   * @throws the original HTTP error for an error status
    * @throws `download failed`, with the last error as cause, after the failed
    * attempts
    */
@@ -249,9 +306,8 @@ export class HttpService {
         );
       } catch (err) {
         lastError = err;
-        const status = err instanceof HTTPError ? err.response.statusCode : 0;
-        // client errors won't change on retry, except timeouts and rate limits
-        if (status >= 400 && status < 500 && status !== 408 && status !== 429) {
+        // got already retried the retryable statuses
+        if (err instanceof HTTPError) {
           logger[finalLevel]({ err, url }, 'download failed');
           throw err;
         }
