@@ -514,8 +514,8 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
   });
 
   test.each([
-    'dev',
     '0.0.0-PLACEHOLDER',
+    '0.0.0-PLACEHOLDER+2fc9e007c5f1d2a3b4c5d6e7f8091a2b3c4d5e6f',
     '2fc9e007c5f1d2a3b4c5d6e7f8091a2b3c4d5e6f',
   ])('skips no release on the development build %s', async (cb) => {
     vi.stubGlobal('CONTAINERBASE_VERSION', cb);
