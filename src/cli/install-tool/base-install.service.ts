@@ -209,29 +209,68 @@ export abstract class BaseInstallService {
 
   /**
    * Downloads the file of a version for the host from the tool-versions data,
-   * verified against its checksum. Url replacements and the cache apply.
+   * verified against its checksum, see {@link findToolFile} and
+   * {@link downloadListedFile}. A missing file is logged, unless there is no
+   * data at all.
    *
    * @param distro - the distro codename to pick the file for, by default the
    * host's
-   * @returns the downloaded file, or `undefined` when there is no data, no
-   * file for the host or no supported checksum, so the installer can use its
+   * @param filter - only picks from the files it accepts, for tools with
+   * several kinds of files per host, by default all
+   * @returns the downloaded file, or `undefined` when there is no data or no
+   * file for the host with a supported checksum, so the installer can use its
    * own download logic
    * @throws when the download fails
    */
   protected async downloadToolFile(
     version: string,
     distro?: string,
+    filter?: (file: ToolFile) => boolean,
   ): Promise<string | undefined> {
+    const found = await this.findToolFile(version, distro, filter);
+    if (!found) {
+      return undefined;
+    }
+    if (!found.file) {
+      logger.debug(
+        {
+          tool: this.name,
+          version,
+          arch: this.envSvc.arch,
+          distro: found.distro,
+        },
+        'no tool-versions file for the host',
+      );
+      return undefined;
+    }
+    return await this.downloadListedFile(found.file);
+  }
+
+  /**
+   * Picks the file of a version for the host from the tool-versions data,
+   * without downloading it or logging a miss. Never downloads without
+   * verification: the files of the host with an algorithm the http service
+   * doesn't know are skipped with a warning before the pick, so a more
+   * specific one can't hide a usable file.
+   *
+   * @param distro - the distro codename to pick the file for, by default the
+   * host's
+   * @param filter - only picks from the files it accepts, by default all
+   * @returns `undefined` when there is no data, else the file, if any, and
+   * the distro codename it was picked for
+   */
+  protected async findToolFile(
+    version: string,
+    distro?: string,
+    filter: (file: ToolFile) => boolean = () => true,
+  ): Promise<{ file: ToolFile | undefined; distro: string } | undefined> {
     const data = await this._toolVersions.getVersionFiles(this.name, version);
     if (!data) {
       return undefined;
     }
     const code = distro ?? (await getDistro()).versionCode;
-    // never download without verification: the files of the host with an
-    // algorithm the http service doesn't know are skipped before the pick, so
-    // a more specific one can't hide a usable file
     const usable = data.files
-      .filter((f) => fitsHost(f, this.envSvc.arch, code))
+      .filter((f) => filter(f) && fitsHost(f, this.envSvc.arch, code))
       .filter((f) => {
         if (parseChecksum(f.checksum)) {
           return true;
@@ -242,14 +281,20 @@ export abstract class BaseInstallService {
         );
         return false;
       });
-    const file = selectToolFile(usable, this.envSvc.arch, code);
-    if (!file) {
-      logger.debug(
-        { tool: this.name, version, arch: this.envSvc.arch, distro: code },
-        'no tool-versions file for the host',
-      );
-      return undefined;
-    }
+    return {
+      file: selectToolFile(usable, this.envSvc.arch, code),
+      distro: code,
+    };
+  }
+
+  /**
+   * Downloads a file picked by {@link findToolFile}, verified against its
+   * checksum. Url replacements and the cache apply.
+   *
+   * @throws when the download fails
+   */
+  protected async downloadListedFile(file: ToolFile): Promise<string> {
+    // `findToolFile` only picks files with a supported checksum
     const { type, value } = parseChecksum(file.checksum)!;
     return await this.http.download({
       url: file.url,
