@@ -32,7 +32,7 @@ variable "CONTAINERBASE_CDN_PIP" {
 }
 
 variable "CONTAINERBASE_VERSION" {
-  default = "unknown"
+  default = "0.0.0-PLACEHOLDER"
 }
 
 variable "APT_HTTP_PROXY" {
