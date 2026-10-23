@@ -75,7 +75,7 @@ RUN install-tool flutter 3.47.7
 RUN install-tool flux v2.9.6
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.0
+RUN install-tool git-lfs v3.8.1
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
