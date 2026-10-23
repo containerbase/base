@@ -21,18 +21,25 @@ interface Host {
 }
 
 /**
- * The distros whose files a release needs to run on the host distro: the host
- * distro itself, or, when the data has no files for it at all, any older
- * Ubuntu release, as the installers use those builds on newer releases, like
- * the jammy prebuilds on noble and resolute.
- * @returns the accepted distro codenames
+ * The distros whose files a release needs to run on the host: the host distro
+ * itself, or, when the data has no files for it on the host arch at all, any
+ * older Ubuntu release, as the installers use those builds on newer releases,
+ * like the jammy prebuilds on noble and resolute.
+ * @returns the accepted distro codenames, none for an unknown distro
  */
-function hostDistros(data: ToolVersions, distro: string): string[] {
-  if (data.versions.some((v) => v.distros?.includes(distro))) {
+function hostDistros(data: ToolVersions, host: Host): string[] {
+  const { arch, distro } = host;
+  if (
+    data.versions.some(
+      (v) =>
+        v.distros?.includes(distro) && (!v.archs || v.archs.includes(arch)),
+    )
+  ) {
     return [distro];
   }
-  // oldest first, `getDistro()` only returns supported ones; Ubuntu only, other
-  // distro families like Debian need their own ordering and builds
+  // oldest first; Ubuntu only, other distro families like Debian need their own
+  // ordering and builds. An unknown distro, eg. an unreadable os-release, gets
+  // none, so only releases without a `distros` list match.
   const ubuntu: readonly string[] = DistroCode.options;
   return ubuntu.slice(0, ubuntu.indexOf(distro) + 1);
 }
@@ -75,7 +82,7 @@ function pick(
     }
   }
   const stable = data.versions.filter((v) => !v.prerelease);
-  const distros = hostDistros(data, host.distro);
+  const distros = hostDistros(data, host);
   const forHost = (list: typeof data.versions): typeof data.versions =>
     list.filter(
       (v) =>

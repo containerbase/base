@@ -394,6 +394,27 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', undefined)).toBe('3.0.0');
   });
 
+  test('uses older distro builds when the host distro builds are for another arch', async () => {
+    vi.mocked(arch).mockReturnValue('arm64');
+    child = createContainer();
+    // the shared env service already read the arch
+    child.bind(EnvService).toSelf();
+    child.bind(ToolVersionResolverService).toSelf();
+    child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
+    svc = await child.getAsync(ToolVersionResolverService);
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: 'noble',
+      versionId: '24.04',
+    });
+    serve('other', 200, [
+      { version: '3.0.0', archs: ['amd64'], distros: ['jammy', 'noble'] },
+      { version: '2.0.0', archs: ['amd64', 'arm64'], distros: ['jammy'] },
+    ]);
+
+    expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+  });
+
   test('skips the builds of a newer distro on an older host', async () => {
     serve('other', 200, [
       { version: '3.0.0', distros: ['resolute'] },
