@@ -65,6 +65,13 @@ RUN set -ex; \
   ls -la /tmp; \
   true
 
+# the revoked intermediates are appended to the blocked list of the jdk
+RUN set -ex; \
+  blocked=/opt/containerbase/tools/java/25.0.5+8.0.LTS/lib/security/blocked.certs; \
+  head -n 1 "${blocked}" | grep -qx 'Algorithm=SHA-256'; \
+  grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
+  grep -qx 84112972B8E59D14560AE7E7119654474AAD119990CF3722BFC1E3B91615E1FD "${blocked}"
+
 
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
@@ -130,6 +137,12 @@ FROM build AS test-gradle-c
 
 # need to stay old
 RUN install-tool java 8.0.342+7
+
+# java 8 keeps its blocked list as blacklisted.certs under jre
+RUN set -ex; \
+  blocked=/opt/containerbase/tools/java/8.0.342+7/jre/lib/security/blacklisted.certs; \
+  grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
+  [ ! -e /opt/containerbase/tools/java/8.0.342+7/jre/lib/security/blocked.certs ]
 
 # disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.6.1

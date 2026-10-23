@@ -5,6 +5,7 @@ import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { CompressionService, HttpService } from '../../services/index.ts';
 import { logger, parse } from '../../utils/index.ts';
+import { addBlockedCerts } from './blocked-certs.ts';
 import {
   createGradleSettings,
   createMavenSettings,
@@ -147,7 +148,8 @@ export class JavaInstallService extends BaseInstallService {
 
   /**
    * Downloads the adoptium jdk or jre, verified against its checksum, into the
-   * versioned tool path and replaces its cacerts with the shared ones.
+   * versioned tool path, adds the revoked intermediate CAs to its blocked list
+   * and replaces its cacerts with the shared ones.
    *
    * @throws when adoptium has no package for the version
    */
@@ -189,6 +191,7 @@ export class JavaInstallService extends BaseInstallService {
       v.major === 8 && this.name !== 'java-jre'
         ? path.join(cwd, 'jre/lib/security/cacerts')
         : path.join(cwd, 'lib/security/cacerts');
+    await addBlockedCerts(path.dirname(cacerts));
     await fs.rm(cacerts);
     await fs.symlink(path.join(this.pathSvc.sslPath, 'cacerts'), cacerts);
   }
