@@ -36,7 +36,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
+import { ResolverMap, getToolType } from '../tools/index.ts';
 import { AndroidSdkCmdlineToolsInstallService } from '../tools/java/android.ts';
 import { GradleInstallService } from '../tools/java/gradle.ts';
 import {
@@ -267,14 +267,12 @@ export interface SupportedTool {
 function addDynamicTools(
   tools: Map<string, SupportedTool>,
   map: Record<string, InstallToolType>,
-  deprecated?: true,
 ): void {
   for (const [name, type] of Object.entries(map)) {
     tools.set(name, {
       name,
       type,
       parent: dynamicParents[type],
-      ...(deprecated && { deprecated }),
     });
   }
 }
@@ -294,7 +292,6 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
 
   // the implicit mappings first, a tool with an install service overrides them
   addDynamicTools(tools, ResolverMap);
-  addDynamicTools(tools, DeprecatedTools, true);
 
   const toolSvcs =
     await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN);
