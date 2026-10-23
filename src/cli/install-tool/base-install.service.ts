@@ -249,6 +249,32 @@ export abstract class BaseInstallService {
     });
   }
 
+  /**
+   * Downloads the file of a version for the host distro from the tool-versions
+   * data like {@link downloadToolFile}, else the one for `fallback`, eg. the
+   * distro whose prebuild a newer ubuntu release uses. The data is cached, so
+   * the second lookup is cheap. Using the fallback is logged, the caller's own
+   * download for it then follows when there is no file for it either.
+   *
+   * @param host - the codename of the host distro
+   * @param fallback - the codename to try when the host has no file, only
+   * tried when it differs from `host`
+   * @returns the downloaded file, or `undefined` when neither has a file
+   * @throws when the download fails
+   */
+  protected async downloadDistroToolFile(
+    version: string,
+    host: string,
+    fallback: string,
+  ): Promise<string | undefined> {
+    const file = await this.downloadToolFile(version, host);
+    if (file || fallback === host) {
+      return file;
+    }
+    logger.debug(`Using ${fallback} file for ${this.name} on ${host}`);
+    return await this.downloadToolFile(version, fallback);
+  }
+
   /** Creates a shell wrapper in the global bin folder for a tool binary. */
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
