@@ -1,5 +1,10 @@
 import fs from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
+import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
+import {
+  type HttpChecksumType,
+  HttpChecksumTypes,
+} from '../services/http.service.ts';
 import {
   CompressionService,
   EnvService,
@@ -7,6 +12,7 @@ import {
   LinkToolService,
   PathService,
   type ShellWrapperConfig,
+  ToolVersionsService,
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
@@ -14,7 +20,9 @@ import {
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
+  getDistro,
   isValid,
+  logger,
   spawn,
 } from '../utils/index.ts';
 
@@ -31,6 +39,8 @@ export abstract class BaseInstallService {
 
   @inject(LinkToolService)
   private readonly _link!: LinkToolService;
+  @inject(ToolVersionsService)
+  private readonly _toolVersions!: ToolVersionsService;
 
   /**
    * Optional tool alias used to refer to this tool as parent.
@@ -197,6 +207,57 @@ export abstract class BaseInstallService {
     return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
   }
 
+  /**
+   * Downloads the file of a version for the host from the tool-versions data,
+   * verified against its checksum. Url replacements and the cache apply.
+   *
+   * @param distro - the distro codename to pick the file for, by default the
+   * host's
+   * @returns the downloaded file, or `undefined` when there is no data, no
+   * file for the host or no supported checksum, so the installer can use its
+   * own download logic
+   * @throws when the download fails
+   */
+  protected async downloadToolFile(
+    version: string,
+    distro?: string,
+  ): Promise<string | undefined> {
+    const data = await this._toolVersions.getVersionFiles(this.name, version);
+    if (!data) {
+      return undefined;
+    }
+    const code = distro ?? (await getDistro()).versionCode;
+    // never download without verification: the files of the host with an
+    // algorithm the http service doesn't know are skipped before the pick, so
+    // a more specific one can't hide a usable file
+    const usable = data.files
+      .filter((f) => fitsHost(f, this.envSvc.arch, code))
+      .filter((f) => {
+        if (parseChecksum(f.checksum)) {
+          return true;
+        }
+        logger.warn(
+          { tool: this.name, version, checksum: f.checksum },
+          'unsupported tool-versions file checksum',
+        );
+        return false;
+      });
+    const file = selectToolFile(usable, this.envSvc.arch, code);
+    if (!file) {
+      logger.debug(
+        { tool: this.name, version, arch: this.envSvc.arch, distro: code },
+        'no tool-versions file for the host',
+      );
+      return undefined;
+    }
+    const { type, value } = parseChecksum(file.checksum)!;
+    return await this.http.download({
+      url: file.url,
+      checksumType: type,
+      expectedChecksum: value,
+    });
+  }
+
   /** Creates a shell wrapper in the global bin folder for a tool binary. */
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
@@ -220,4 +281,53 @@ export abstract class BaseInstallService {
   ): Promise<SpawnResult> {
     return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
+}
+
+/**
+ * Splits a `<algorithm>:<hex>` checksum of the tool-versions data.
+ * @returns `undefined` for an algorithm the http service can't verify
+ */
+function parseChecksum(
+  checksum: string,
+): { type: HttpChecksumType; value: string } | undefined {
+  const [algorithm, value] = checksum.split(':');
+  const type = HttpChecksumTypes.find((t) => t === algorithm);
+  return type && value ? { type, value } : undefined;
+}
+
+/**
+ * Whether a file fits a host: of its arch or for any arch, and of its distro
+ * or for any distro.
+ */
+function fitsHost(file: ToolFile, arch: string, distro: string): boolean {
+  return (
+    (!file.arch || file.arch === arch) &&
+    (!file.distro || file.distro === distro)
+  );
+}
+
+/**
+ * Picks the file for a host from the files of a version: one of the arch or
+ * for any arch, and of the distro or for any distro. An arch or distro
+ * specific file is preferred over a generic one, the first one wins a tie.
+ * @returns `undefined` when no file fits the host
+ */
+export function selectToolFile(
+  files: readonly ToolFile[],
+  arch: string,
+  distro: string,
+): ToolFile | undefined {
+  let best: ToolFile | undefined;
+  let bestScore = -1;
+  for (const file of files) {
+    if (!fitsHost(file, arch, distro)) {
+      continue;
+    }
+    const score = (file.arch ? 1 : 0) + (file.distro ? 1 : 0);
+    if (score > bestScore) {
+      best = file;
+      bestScore = score;
+    }
+  }
+  return best;
 }

@@ -16,10 +16,18 @@ export const ToolFile = z.object({
   name: z.string().min(1),
   /** the https download url */
   url: z.url({ protocol: /^https$/ }),
-  /** `<algorithm>:<lowercase hex>` */
+  /**
+   * `<algorithm>:<lowercase hex>`, published with `sha1`, `sha256` or
+   * `sha512`. The digests of the sha algorithms readers verify (`sha1`,
+   * `sha224`, `sha256`, `sha384`, `sha512`) must have their exact length.
+   * Lenient for other algorithms, so a new one doesn't reject the whole file:
+   * readers skip a file with an algorithm they don't know.
+   */
   checksum: z
     .string()
-    .regex(/^(sha1:[0-9a-f]{40}|sha256:[0-9a-f]{64}|sha512:[0-9a-f]{128})$/),
+    .regex(
+      /^(?:sha1:[0-9a-f]{40}|sha224:[0-9a-f]{56}|sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96}|sha512:[0-9a-f]{128}|(?!sha(?:1|224|256|384|512):)[a-z0-9-]+:[0-9a-f]+)$/,
+    ),
   /**
    * the containerbase arch, like `amd64`, omitted for arch-independent files;
    * readers ignore files of an arch they don't know

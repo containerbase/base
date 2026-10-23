@@ -7,6 +7,7 @@ import {
   CompressionService,
   EnvService,
   LinkToolService,
+  ToolVersionsService,
 } from '../../services/index.ts';
 import { getDistro } from '../../utils/index.ts';
 import { RubyInstallService, RubyPrepareService } from './index.ts';
@@ -56,6 +57,11 @@ describe('cli/tools/ruby/index', () => {
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the prebuild is downloaded from its release
+    vi.spyOn(
+      ToolVersionsService.prototype,
+      'getVersionFiles',
+    ).mockResolvedValue(undefined);
     execaMock.mockResolvedValue({ failed: false });
   });
 
