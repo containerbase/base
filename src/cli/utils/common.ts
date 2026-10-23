@@ -26,8 +26,6 @@ export async function validateSystem(): Promise<void> {
   }
   const d = await (distro ??= readDistro());
   switch (d.versionCode) {
-    /* v8 ignore next -- hard to test */
-    case 'jammy':
     case 'noble':
     case 'resolute':
       break;

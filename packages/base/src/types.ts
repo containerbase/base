@@ -11,7 +11,7 @@ export type ToolType = 'gem' | 'npm' | 'pip' | 'dotnet';
 /**
  * The Ubuntu releases containerbase supports, by codename.
  */
-export type DistroCode = 'jammy' | 'noble' | 'resolute';
+export type DistroCode = 'noble' | 'resolute';
 
 /**
  * The CPU architectures containerbase supports.

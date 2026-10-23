@@ -106,7 +106,7 @@ export class NugetVersionResolver extends ToolVersionResolver {
         meta = await this.getReleases();
       } catch (err) {
         // the tool-versions data had no match either
-        // TODO: fail in the next major (#7962)
+        // TODO: fail in a following major (#7962)
         logger.warn(
           { err, version },
           'nuget lookup failed, keeping the version',
