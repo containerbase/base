@@ -1,4 +1,5 @@
 import { inject, injectable, multiInject } from 'inversify';
+import { isReleaseVersion } from '../../../packages/base/src/release-version.ts';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
 import { EnvService, ToolVersionsService } from '../services/index.ts';
 import { getDistro, isValid, logger, semverGte } from '../utils/index.ts';
@@ -10,12 +11,12 @@ import {
 
 /**
  * The architecture and the distro codename the tool is installed on, and the
- * running containerbase version, `dev` for a local build.
+ * running containerbase release version, `undefined` for a development build.
  */
 interface Host {
   arch: string;
   distro: string;
-  cb: string;
+  cb: string | undefined;
 }
 
 /**
@@ -23,13 +24,13 @@ interface Host {
  * available for the host are skipped. A release is available when it has no
  * `archs` or `distros` list, or the list has the host arch or distro, and its
  * `minCb` is not above the running containerbase version. A `minCb` which is
- * not valid semver is never available, a `dev` build skips none. The data
- * lists the newest release first, in the versioning of the tool. A missing
- * version or `latest` is the newest release, or the newest LTS release for a
- * tool whose data has LTS flags, even when none is available for the host, then
- * there is no match. A partial version, a major (`20`) or major.minor (`3.12`)
- * one, is the newest release of that line, unless it is a release itself, like
- * `8.10`.
+ * not valid semver is never available, a development build (`cb` is
+ * `undefined`) skips none. The data lists the newest release first, in the
+ * versioning of the tool. A missing version or `latest` is the newest release,
+ * or the newest LTS release for a tool whose data has LTS flags, even when none
+ * is available for the host, then there is no match. A partial version, a major
+ * (`20`) or major.minor (`3.12`) one, is the newest release of that line,
+ * unless it is a release itself, like `8.10`.
  * @returns `undefined` when no release matches
  */
 function pick(
@@ -42,7 +43,7 @@ function pick(
     (v) =>
       (!v.archs || v.archs.includes(host.arch)) &&
       (!v.distros || v.distros.includes(host.distro)) &&
-      (host.cb === 'dev' ||
+      (host.cb === undefined ||
         v.minCb === undefined ||
         (isValid(v.minCb) && semverGte(host.cb, v.minCb))),
   );
@@ -100,7 +101,9 @@ export class ToolVersionResolverService {
    * level, or with a warning when the embedded data replaces the online data.
    * Only releases available for the host arch and distro, and installable by
    * the running containerbase version (`minCb`), are considered, also for the
-   * embedded release check.
+   * embedded release check. Only a release version of containerbase filters by
+   * `minCb`, any other version (a commit sha, `0.0.0-*` or `dev`) is a
+   * development build and doesn't.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
@@ -118,7 +121,7 @@ export class ToolVersionResolverService {
     const host: Host = {
       arch: this.env.arch,
       distro: (await getDistro()).versionCode,
-      cb: this.env.version,
+      cb: isReleaseVersion(this.env.version) ? this.env.version : undefined,
     };
     if (version !== undefined && version !== 'latest') {
       const listed = await this.toolVersions.getVersions(tool);

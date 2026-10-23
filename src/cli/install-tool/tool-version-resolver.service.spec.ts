@@ -441,8 +441,12 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     },
   );
 
-  test('skips no release on a dev build', async () => {
-    vi.stubGlobal('CONTAINERBASE_VERSION', undefined);
+  test.each([
+    'dev',
+    '0.0.0-PLACEHOLDER',
+    '2fc9e007c5f1d2a3b4c5d6e7f8091a2b3c4d5e6f',
+  ])('skips no release on the development build %s', async (cb) => {
+    vi.stubGlobal('CONTAINERBASE_VERSION', cb);
     serve('other', 200, [
       { version: '3.0.0', minCb: '99.0.0' },
       { version: '2.0.0', minCb: 'invalid' },
@@ -468,7 +472,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
   });
 
-  test('keeps latest when no lts release needs no newer containerbase', async () => {
+  test('keeps latest when every lts release needs a newer containerbase', async () => {
     serve('other', 200, [
       { version: '24.1.0', lts: true, minCb: '15.0.0' },
       '25.0.0',

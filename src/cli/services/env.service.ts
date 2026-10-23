@@ -141,7 +141,11 @@ export class EnvService {
     return this.isRoot ? 0o755 : 0o775;
   }
 
-  /** The containerbase version, `dev` for local builds. */
+  /**
+   * The containerbase version: the release version or the commit sha in CI
+   * builds, `0.0.0-PLACEHOLDER` in local builds, `dev` when run from source (unit
+   * tests, `pnpm start`).
+   */
   get version(): string {
     return globalThis.CONTAINERBASE_VERSION ?? 'dev';
   }
