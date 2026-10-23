@@ -804,7 +804,7 @@ Swift releases are downloaded from:
 
 - `https://download.swift.org`
 
-The build matches the Ubuntu release: jammy uses the Ubuntu 22.04 builds, noble the Ubuntu 24.04 builds from v5.10.1 (older releases fall back to the 22.04 builds) and resolute the Ubuntu 26.04 builds.
+The build matches the Ubuntu release: noble uses the Ubuntu 24.04 builds from v5.10.1 (older releases fall back to the 22.04 builds) and resolute the Ubuntu 26.04 builds.
 
 Samples:
 

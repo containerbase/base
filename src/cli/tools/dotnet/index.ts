@@ -14,24 +14,13 @@ export class DotnetPrepareService extends BasePrepareService {
   readonly name = 'dotnet';
 
   /**
-   * Installs the apt packages dotnet needs on jammy, noble and resolute,
+   * Installs the apt packages dotnet needs on noble and resolute,
    * initializes the cache and links `~/.nuget` to it, keeping any existing link.
    */
   override async prepare(): Promise<void> {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
-      case 'jammy':
-        await this.aptSvc.install(
-          'libc6',
-          'libgcc1',
-          'libgssapi-krb5-2',
-          'libicu70',
-          'libssl3',
-          'libstdc++6',
-          'zlib1g',
-        );
-        break;
       case 'noble':
         await this.aptSvc.install(
           'libc6',

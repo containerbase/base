@@ -51,7 +51,6 @@ const updatedAt = '2026-10-16T00:00:00Z';
 
 /** The codenames of the Ubuntu versions the default image can be built from. */
 const ubuntuCodenames: Record<string, types.DistroCode> = {
-  '22.04': 'jammy',
   '24.04': 'noble',
   '26.04': 'resolute',
 };

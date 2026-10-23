@@ -27,7 +27,7 @@ export interface ToolFile {
    */
   arch?: string;
   /**
-   * The distro of a distro specific file, like `jammy`.
+   * The distro of a distro specific file, like `noble`.
    */
   distro?: string;
 }

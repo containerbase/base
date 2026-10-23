@@ -62,8 +62,8 @@ describe('cli/tools/python/index', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
@@ -71,11 +71,14 @@ describe('cli/tools/python/index', () => {
   });
 
   describe('PythonPrepareService', () => {
-    test.each(['jammy', 'noble', 'resolute'])('prepare on %s', async (code) => {
+    test.each([
+      { code: 'noble', id: '24.04' },
+      { code: 'resolute', id: '26.04' },
+    ])('prepare on $code', async ({ code, id }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '24.04',
+        versionId: id,
       });
       vi.stubEnv('PATH', '/usr/bin');
       vi.stubEnv('PIP_DISABLE_PIP_VERSION_CHECK', undefined);
@@ -109,40 +112,48 @@ describe('cli/tools/python/index', () => {
     test('prepare: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(PythonPrepareService);
 
       await expect(svc.prepare()).rejects.toThrow(
-        "Tool 'python' not supported on: focal!",
+        "Tool 'python' not supported on: jammy!",
       );
     });
   });
 
   describe('PythonInstallService', () => {
     test.each([
-      { code: 'jammy', hostArch: 'x64', ghArch: 'x86_64', version: '3.12.1' },
       {
         code: 'noble',
+        id: '24.04',
+        hostArch: 'x64',
+        ghArch: 'x86_64',
+        version: '3.12.1',
+      },
+      {
+        code: 'noble',
+        id: '24.04',
         hostArch: 'arm64',
         ghArch: 'aarch64',
         version: '3.12.2',
       },
       {
         code: 'resolute',
+        id: '26.04',
         hostArch: 'x64',
         ghArch: 'x86_64',
         version: '3.12.3',
       },
     ] as const)(
       'install $version on $code for $ghArch',
-      async ({ code, hostArch, ghArch, version }) => {
+      async ({ code, id, hostArch, ghArch, version }) => {
         vi.mocked(arch).mockReturnValue(hostArch);
         vi.mocked(getDistro).mockResolvedValue({
           name: 'Ubuntu',
           versionCode: code,
-          versionId: '24.04',
+          versionId: id,
         });
         const { svc, pathSvc } = await toolContext(PythonInstallService);
         mockPrebuild(version, ghArch);

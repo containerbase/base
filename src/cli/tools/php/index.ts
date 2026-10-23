@@ -24,7 +24,6 @@ export class PhpPrepareService extends BasePrepareService {
     const distro = await getDistro();
 
     switch (distro.versionCode) {
-      case 'jammy':
       case 'noble':
         await this.aptSvc.install(
           'libjpeg-turbo8',

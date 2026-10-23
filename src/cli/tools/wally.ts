@@ -21,19 +21,15 @@ export class WallyInstallService extends BaseInstallService {
 
   /**
    * Downloads the containerbase wally prebuild, verified against its
-   * `.sha512`, and extracts it into the tool path. Newer ubuntu releases use
-   * the jammy prebuild.
+   * `.sha512`, and extracts it into the tool path. The prebuilds are built on
+   * jammy and used on every supported ubuntu release.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const distro = await getDistro();
-    let code = distro.versionCode;
 
-    if (code === 'noble' || code === 'resolute') {
-      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
-      code = 'jammy';
-    }
-    const filename = `${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    logger.debug(`Using jammy prebuild for ${name} on ${distro.versionCode}`);
+    const filename = `${name}-${version}-jammy-${this.ghArch}.tar.xz`;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
     const checksumFileUrl = `${url}.sha512`;
 
