@@ -389,7 +389,6 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - jammy
           - noble
           - resolute
 
@@ -453,7 +452,7 @@ jobs:
           # a rerun of the job uploads them again
           overwrite: true
 
-  # test old distros on arm64
+  # test the other distros on arm64
   base-arm64:
     runs-on: ubuntu-26.04-arm
     if: github.event.pull_request.draft != true && needs.setup.outputs.run-base-arm64 == 'true'
@@ -472,7 +471,6 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - jammy
           - resolute
 
     env:

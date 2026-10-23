@@ -146,9 +146,9 @@ function require_arch () {
   esac
 }
 
+# Exits unless the host runs a supported ubuntu release (noble or resolute)
 function require_distro () {
   case "$DISTRO_CODENAME" in
-  "jammy") ;; #supported
   "noble") ;; #supported
   "resolute") ;; #supported
   *)

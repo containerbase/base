@@ -192,12 +192,12 @@ describe('cli/services/tool-version-resolver.service', () => {
 
     // the host runs containerbase 14.51.0
     vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
-    // the host is amd64 on jammy
+    // the host is amd64 on noble
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // no files of the versions unless a test mocks them
     mockToolFiles();
@@ -945,7 +945,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('swift', '6.3')).toBe('6.3');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No swift release matches 6.3 for amd64 on jammy, 6.3 is used as is',
+      'No swift release matches 6.3 for amd64 on noble, 6.3 is used as is',
     );
   });
 
@@ -958,7 +958,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('swift', '6.2')).toBe('6.2');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No swift release matches 6.2 for amd64 on jammy, 6.2 is used as is',
+      'No swift release matches 6.2 for amd64 on noble, 6.2 is used as is',
     );
   });
 
@@ -1004,7 +1004,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '21')).toBe('21');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches 21 for amd64 on jammy, 21 is used as is',
+      'No other release matches 21 for amd64 on noble, 21 is used as is',
     );
   });
 
@@ -1143,8 +1143,8 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test('skips a release which is only available for another distro', async () => {
     serve('other', 200, [
-      { version: '3.0.0', distros: ['noble', 'resolute'] },
-      { version: '2.0.0', distros: ['jammy', 'noble'] },
+      { version: '3.0.0', distros: ['resolute'] },
+      { version: '2.0.0', distros: ['noble', 'resolute'] },
       '1.0.0',
     ]);
 
@@ -1189,13 +1189,13 @@ describe('cli/services/tool-version-resolver.service', () => {
   test('skips the builds of a newer distro on an older host', async () => {
     serve('other', 200, [
       { version: '3.0.0', distros: ['resolute'] },
-      { version: '2.0.0', distros: ['noble'] },
+      { version: '2.0.0', distros: ['resolute'] },
     ]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches latest for amd64 on jammy, latest is used as is',
+      'No other release matches latest for amd64 on noble, latest is used as is',
     );
   });
 
@@ -1247,7 +1247,7 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test('skips an lts release which is not available for the host', async () => {
     serve('other', 200, [
-      { version: '24.1.0', lts: true, distros: ['noble'] },
+      { version: '24.1.0', lts: true, distros: ['resolute'] },
       { version: '22.1.0', lts: true },
       '25.0.0',
     ]);
@@ -1257,7 +1257,7 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test.each([
     { name: 'arch', limit: { archs: ['arm64'] } },
-    { name: 'distro', limit: { distros: ['noble'] } },
+    { name: 'distro', limit: { distros: ['resolute'] } },
   ])(
     'keeps latest when no lts release is available for the host $name',
     async ({ limit }) => {
@@ -1270,7 +1270,7 @@ describe('cli/services/tool-version-resolver.service', () => {
       expect(await svc.resolve('other', 'latest')).toBe('latest');
 
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-        'No other release matches latest for amd64 on jammy, latest is used as is',
+        'No other release matches latest for amd64 on noble, latest is used as is',
       );
     },
   );
@@ -1278,7 +1278,7 @@ describe('cli/services/tool-version-resolver.service', () => {
   test('resolves a partial version to a release available for the host', async () => {
     serve('other', 200, [
       { version: '3.12.5', archs: ['arm64'] },
-      { version: '3.12.4', distros: ['noble'] },
+      { version: '3.12.4', distros: ['resolute'] },
       '3.12.3',
       '3.11.9',
     ]);
@@ -1299,7 +1299,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', undefined)).toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches latest for amd64 on jammy, no version is resolved',
+      'No other release matches latest for amd64 on noble, no version is resolved',
     );
   });
 
