@@ -22,30 +22,51 @@ interface Host {
 /**
  * Picks a release from the data, prereleases and releases which are not
  * available for the host are skipped. A release is available when it has no
- * `archs` or `distros` list, or the list has the host arch or distro, and its
- * `minCb` is not above the running containerbase version. A `minCb` which is
- * not valid semver is never available, a development build (`cb` is
- * `undefined`) skips none. The data lists the newest release first, in the
- * versioning of the tool. A missing version or `latest` is the newest release,
- * or the newest LTS release for a tool whose data has LTS flags, even when none
- * is available for the host, then there is no match. A partial version, a major
- * (`20`) or major.minor (`3.12`) one, is the newest release of that line,
- * unless it is a release itself, like `8.10`.
+ * `archs` or `distros` list, or the list has the host arch or distro, and the
+ * running containerbase version is not below the `cb` of the `minCb` ranges
+ * which cover it. Unmet ranges are logged at debug level. A range covers its `version` and every version above
+ * it in the data, prereleases count for the position, a range whose `version`
+ * is not listed is ignored. A `cb` which is not valid semver is never met, a
+ * development build (`cb` is `undefined`) skips none. The data lists the newest
+ * release first, in the versioning of the tool. A missing version or `latest`
+ * is the newest release, or the newest LTS release for a tool whose data has
+ * LTS flags, even when none is available for the host, then there is no match.
+ * A partial version, a major (`20`) or major.minor (`3.12`) one, is the newest
+ * release of that line, unless it is a release itself, like `8.10`.
  * @returns `undefined` when no release matches
  */
 function pick(
+  tool: string,
   data: ToolVersions,
   version: string | undefined,
   host: Host,
 ): string | undefined {
+  // the versions up to this index need a newer containerbase: a range which
+  // isn't met covers all versions from its start up to the newest one
+  let unmet = -1;
+  const unmetCbs: string[] = [];
+  if (host.cb !== undefined) {
+    for (const range of data.minCb ?? []) {
+      const start = data.versions.findIndex((v) => v.version === range.version);
+      if (start >= 0 && !(isValid(range.cb) && semverGte(host.cb, range.cb))) {
+        unmet = Math.max(unmet, start);
+        unmetCbs.push(range.cb);
+      }
+    }
+  }
+  if (unmetCbs.length) {
+    logger.debug(
+      { tool, running: host.cb, needed: unmetCbs },
+      'skipping the versions which need a newer containerbase',
+    );
+  }
   const stable = data.versions.filter((v) => !v.prerelease);
-  const releases = stable.filter(
-    (v) =>
+  const releases = data.versions.filter(
+    (v, i) =>
+      !v.prerelease &&
+      i > unmet &&
       (!v.archs || v.archs.includes(host.arch)) &&
-      (!v.distros || v.distros.includes(host.distro)) &&
-      (host.cb === undefined ||
-        v.minCb === undefined ||
-        (isValid(v.minCb) && semverGte(host.cb, v.minCb))),
+      (!v.distros || v.distros.includes(host.distro)),
   );
   if (version === undefined || version === 'latest') {
     // the LTS flags are read before the host filter (arch, distro and
@@ -125,7 +146,7 @@ export class ToolVersionResolverService {
     };
     if (version !== undefined && version !== 'latest') {
       const listed = await this.toolVersions.getVersions(tool);
-      if (listed && pick(listed, version, host) === version) {
+      if (listed && pick(tool, listed, version, host) === version) {
         logger.debug(
           { tool, version, resolved: version },
           'version resolved from the embedded tool-versions data',
@@ -136,7 +157,7 @@ export class ToolVersionResolverService {
 
     const online = await this.toolVersions.getOnlineVersions(tool);
     if (online) {
-      const resolved = pick(online, version, host);
+      const resolved = pick(tool, online, version, host);
       if (resolved !== undefined) {
         logger.debug(
           { tool, version, resolved },
@@ -147,7 +168,7 @@ export class ToolVersionResolverService {
     }
 
     const data = await this.toolVersions.getVersions(tool);
-    const resolved = data && pick(data, version, host);
+    const resolved = data && pick(tool, data, version, host);
     if (resolved !== undefined) {
       logger.warn(
         { tool, version, resolved },

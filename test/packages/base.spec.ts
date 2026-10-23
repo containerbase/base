@@ -289,12 +289,42 @@ describe('packages/base', () => {
     expect(schemas.ToolVersion.parse(version)).toEqual(version);
   });
 
-  test('ToolVersion keeps the minCb', () => {
-    const version = { version: '1.0.0', minCb: '14.51.0' };
+  test('ToolVersions keeps the minCb ranges', () => {
+    const minCb = [{ version: '0.9.0', cb: '14.51.0' }];
+    const file = {
+      tool: 'tool',
+      updatedAt,
+      versions: [{ version: '1.0.0' }, { version: '0.9.0' }],
+    };
 
-    expect(schemas.ToolVersion.parse(version)).toEqual(version);
+    expect(schemas.ToolVersions.parse({ ...file, minCb }).minCb).toEqual(minCb);
+  });
+
+  test.each([
+    { name: 'no ranges', minCb: [] },
+    { name: 'an empty cb', minCb: [{ version: '1.0.0', cb: '' }] },
+  ])('ToolVersions accepts $name in the minCb', ({ minCb }) => {
     expect(
-      schemas.ToolVersion.safeParse({ version: '1.0.0', minCb: '' }).success,
+      schemas.ToolVersions.parse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        minCb,
+      }).minCb,
+    ).toEqual(minCb);
+  });
+
+  test.each([
+    { name: 'an empty version', minCb: [{ version: '', cb: '14.51.0' }] },
+    { name: 'a range without cb', minCb: [{ version: '1.0.0' }] },
+  ])('ToolVersions rejects $name in the minCb', ({ minCb }) => {
+    expect(
+      schemas.ToolVersions.safeParse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        minCb,
+      }).success,
     ).toBe(false);
   });
 

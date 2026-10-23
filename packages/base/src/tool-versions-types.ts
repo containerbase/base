@@ -71,11 +71,6 @@ export interface ToolVersion {
    * the `<tool>.json` files and only for versions with distro specific files.
    */
   distros?: string[];
-  /**
-   * The oldest containerbase version, like `14.51.0`, which can install this
-   * version, only in the `<tool>.json` files and only when it is known.
-   */
-  minCb?: string;
 }
 
 /**
@@ -111,6 +106,23 @@ export interface ToolVersions {
    * don't break readers.
    */
   distroMinVersion?: Record<string, string>;
+  /**
+   * The oldest containerbase version, like `14.51.0`, which can install a
+   * version. A range applies to its `version` and every version above it in
+   * `versions`. Omitted for tools without a limit. Lenient, so a slip of the
+   * writer doesn't reject the file: a `cb` which isn't valid semver is never
+   * met by a reader.
+   */
+  minCb?: {
+    /**
+     * The version where the range starts, a version of `versions`.
+     */
+    version: string;
+    /**
+     * The oldest containerbase version, in semver.
+     */
+    cb: string;
+  }[];
   updatedAt: string;
   /**
    * Newest first.
