@@ -187,8 +187,7 @@
       "description": "Update the embedded tool-versions data weekly with a fix release",
       "matchDepNames": ["tool-versions"],
       "extends": ["schedule:weekly"],
-      "semanticCommitType": "fix",
-      "minimumReleaseAge": "1 day"
+      "semanticCommitType": "fix"
     },
     {
       "description": "Handle the tag prefix of jq releases",
