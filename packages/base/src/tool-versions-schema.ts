@@ -66,6 +66,11 @@ export const ToolVersion = z.object({
    * the `<tool>.json` files and only for versions with distro specific files
    */
   distros: z.array(z.string().min(1)).min(1).exactOptional(),
+  /**
+   * the oldest containerbase version, like `14.51.0`, which can install this
+   * version, only in the `<tool>.json` files and only when it is known
+   */
+  minCb: z.string().min(1).exactOptional(),
 });
 
 /**

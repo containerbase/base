@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { arch } from 'node:os';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   EnvService,
   ToolVersionsService,
@@ -54,7 +54,13 @@ const versions = [
 /** A version entry of a tool file, an object limits the version to archs or distros. */
 type Entry =
   | string
-  | { version: string; lts?: true; archs?: string[]; distros?: string[] };
+  | {
+      version: string;
+      lts?: true;
+      archs?: string[];
+      distros?: string[];
+      minCb?: string;
+    };
 
 /**
  * The content of a `<tool>.json` file.
@@ -114,6 +120,8 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     await rm(dir, { recursive: true, force: true });
     await mkdir(dir, { recursive: true });
 
+    // the host runs containerbase 14.51.0
+    vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
     // the host is amd64 on jammy
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
@@ -126,6 +134,10 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     child.bind(ToolVersionResolverService).toSelf();
     child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
     svc = await child.getAsync(ToolVersionResolverService);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   test('resolves with the matching resolver', async () => {
@@ -408,6 +420,68 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     serve('other', 200, [{ version: '3.0.0', archs: ['arm64'] }]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
+
+  test('skips a newest release which needs a newer containerbase', async () => {
+    serve('other', 200, [
+      { version: '3.0.0', minCb: '14.52.0' },
+      { version: '2.0.0', minCb: '14.51.1' },
+      '1.0.0',
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test.each(['14.51.0', '14.50.0'])(
+    'picks a release with the minCb %s',
+    async (minCb) => {
+      serve('other', 200, [{ version: '2.0.0', minCb }, '1.0.0']);
+
+      expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+    },
+  );
+
+  test('skips no release on a dev build', async () => {
+    vi.stubGlobal('CONTAINERBASE_VERSION', undefined);
+    serve('other', 200, [
+      { version: '3.0.0', minCb: '99.0.0' },
+      { version: '2.0.0', minCb: 'invalid' },
+      '1.0.0',
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('3.0.0');
+  });
+
+  test('skips a release with an invalid minCb', async () => {
+    serve('other', 200, [{ version: '2.0.0', minCb: 'new' }, '1.0.0']);
+
+    expect(await svc.resolve('other', 'latest')).toBe('1.0.0');
+  });
+
+  test('resolves a partial version to a release which the running containerbase can install', async () => {
+    serve('other', 200, [
+      { version: '3.12.5', minCb: '15.0.0' },
+      { version: '3.12.4', minCb: '14.51.0' },
+      '3.11.9',
+    ]);
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
+  });
+
+  test('keeps latest when no lts release needs no newer containerbase', async () => {
+    serve('other', 200, [
+      { version: '24.1.0', lts: true, minCb: '15.0.0' },
+      '25.0.0',
+    ]);
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+  });
+
+  test('looks a listed release up online when the embedded data needs a newer containerbase', async () => {
+    await embed('other', [{ version: '8.10', minCb: '14.52.0' }]);
+    serve('other', 200, ['8.10.2', '8.9.1']);
+
+    expect(await svc.resolve('other', '8.10')).toBe('8.10.2');
   });
 
   test('makes no request and reads no data for an exact version', async () => {

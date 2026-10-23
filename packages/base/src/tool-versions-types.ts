@@ -71,6 +71,11 @@ export interface ToolVersion {
    * the `<tool>.json` files and only for versions with distro specific files.
    */
   distros?: string[];
+  /**
+   * The oldest containerbase version, like `14.51.0`, which can install this
+   * version, only in the `<tool>.json` files and only when it is known.
+   */
+  minCb?: string;
 }
 
 /**

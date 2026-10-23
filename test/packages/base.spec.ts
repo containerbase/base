@@ -289,6 +289,15 @@ describe('packages/base', () => {
     expect(schemas.ToolVersion.parse(version)).toEqual(version);
   });
 
+  test('ToolVersion keeps the minCb', () => {
+    const version = { version: '1.0.0', minCb: '14.51.0' };
+
+    expect(schemas.ToolVersion.parse(version)).toEqual(version);
+    expect(
+      schemas.ToolVersion.safeParse({ version: '1.0.0', minCb: '' }).success,
+    ).toBe(false);
+  });
+
   test.each([
     { name: 'empty archs', value: { archs: [] } },
     { name: 'an empty arch', value: { archs: [''] } },

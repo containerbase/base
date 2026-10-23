@@ -1,23 +1,29 @@
 import { inject, injectable, multiInject } from 'inversify';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
 import { EnvService, ToolVersionsService } from '../services/index.ts';
-import { getDistro, logger } from '../utils/index.ts';
+import { getDistro, isValid, logger, semverGte } from '../utils/index.ts';
 import {
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
 } from './tool-version-resolver.ts';
 
-/** The architecture and the distro codename the tool is installed on. */
+/**
+ * The architecture and the distro codename the tool is installed on, and the
+ * running containerbase version, `dev` for a local build.
+ */
 interface Host {
   arch: string;
   distro: string;
+  cb: string;
 }
 
 /**
  * Picks a release from the data, prereleases and releases which are not
  * available for the host are skipped. A release is available when it has no
- * `archs` or `distros` list, or the list has the host arch or distro. The data
+ * `archs` or `distros` list, or the list has the host arch or distro, and its
+ * `minCb` is not above the running containerbase version. A `minCb` which is
+ * not valid semver is never available, a `dev` build skips none. The data
  * lists the newest release first, in the versioning of the tool. A missing
  * version or `latest` is the newest release, or the newest LTS release for a
  * tool whose data has LTS flags, even when none is available for the host, then
@@ -35,11 +41,15 @@ function pick(
   const releases = stable.filter(
     (v) =>
       (!v.archs || v.archs.includes(host.arch)) &&
-      (!v.distros || v.distros.includes(host.distro)),
+      (!v.distros || v.distros.includes(host.distro)) &&
+      (host.cb === 'dev' ||
+        v.minCb === undefined ||
+        (isValid(v.minCb) && semverGte(host.cb, v.minCb))),
   );
   if (version === undefined || version === 'latest') {
-    // the LTS flags are read before the host filter, so a tool with LTS
-    // releases never falls back to a release which isn't an LTS one
+    // the LTS flags are read before the host filter (arch, distro and
+    // containerbase version), so a tool with LTS releases never falls back to
+    // a release which isn't an LTS one
     return (
       stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
     )?.version;
@@ -88,8 +98,9 @@ export class ToolVersionResolverService {
    * as it may be outdated. Online data without a match is final, the embedded
    * data is older and can't know more. A resolved version is logged at debug
    * level, or with a warning when the embedded data replaces the online data.
-   * Only releases available for the host arch and distro are considered, also
-   * for the embedded release check.
+   * Only releases available for the host arch and distro, and installable by
+   * the running containerbase version (`minCb`), are considered, also for the
+   * embedded release check.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
@@ -107,6 +118,7 @@ export class ToolVersionResolverService {
     const host: Host = {
       arch: this.env.arch,
       distro: (await getDistro()).versionCode,
+      cb: this.env.version,
     };
     if (version !== undefined && version !== 'latest') {
       const listed = await this.toolVersions.getVersions(tool);
