@@ -70,6 +70,12 @@ describe('cli/tools/java/blocked-certs', () => {
     await expect(fs.stat(path.join(dir, 'blocked.certs'))).rejects.toThrow();
   });
 
+  test('throws when the blocked list can not be read', async () => {
+    await fs.mkdir(path.join(dir, 'blocked.certs'));
+
+    await expect(addBlockedCerts(dir)).rejects.toThrow('EISDIR');
+  });
+
   test('creates blocked.certs when java ships no blocked list', async () => {
     await addBlockedCerts(dir);
 
