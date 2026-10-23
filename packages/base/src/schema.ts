@@ -9,7 +9,7 @@ export const ToolType = z
   .describe('the package manager installing the tool');
 
 export const DistroCode = z
-  .enum(['jammy', 'noble', 'resolute'])
+  .enum(['noble', 'resolute'])
   .describe('an Ubuntu release supported by containerbase, by codename');
 
 export const Arch = z

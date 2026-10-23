@@ -39,15 +39,14 @@ export abstract class PrebuildInstallService extends BaseInstallService {
 
   /**
    * Downloads the prebuild of the host distro from the tool-versions data,
-   * else the jammy one on newer ubuntu releases, from the data or from its
-   * GitHub release.
+   * else the jammy one, which every supported ubuntu release can use, from
+   * the data or from its GitHub release.
    */
   private async download(version: string): Promise<string> {
     const host = (await getDistro()).versionCode;
-    const code = host === 'noble' || host === 'resolute' ? 'jammy' : host;
     return (
-      (await this.downloadDistroToolFile(version, host, code)) ??
-      (await this.downloadPrebuild(version, code))
+      (await this.downloadDistroToolFile(version, host, 'jammy')) ??
+      (await this.downloadPrebuild(version, 'jammy'))
     );
   }
 

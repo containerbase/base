@@ -9,7 +9,7 @@ shell.config.fatal = true;
 const distroTargets = ['test-distro', 'test-base'];
 
 /** The distros tested in CI, which are the stages in the distro Dockerfiles. */
-const distros = ['jammy', 'noble', 'resolute'];
+const distros = ['noble', 'resolute'];
 
 class TestCommand extends Command {
   tests = Option.Rest();
