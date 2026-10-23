@@ -29,8 +29,8 @@ export const blockedCerts: readonly string[] = [
 ];
 
 /**
- * The blocked list files java reads, newest name first: java 16 and newer
- * read `blocked.certs`, older ones `blacklisted.certs`.
+ * The blocked list files java reads, newest name first: java 8 and older
+ * java 11 releases read `blacklisted.certs`, newer ones `blocked.certs`.
  */
 const blockedCertsFiles = ['blocked.certs', 'blacklisted.certs'] as const;
 
@@ -52,11 +52,16 @@ async function readOptional(file: string): Promise<string | undefined> {
 /**
  * Appends the {@link blockedCerts} java doesn't list yet to the blocked list
  * of an installed java, keeping its own entries. Uses the existing
- * `blocked.certs` or else `blacklisted.certs`, and creates `blocked.certs`
- * only when java ships neither.
+ * `blocked.certs` or else `blacklisted.certs`. Only when java ships neither,
+ * it creates the one java reads: `blacklisted.certs` for java 8,
+ * `blocked.certs` otherwise.
  * @param securityDir - the java folder with the cacerts, eg. `lib/security`
+ * @param major - the major version of the java
  */
-export async function addBlockedCerts(securityDir: string): Promise<void> {
+export async function addBlockedCerts(
+  securityDir: string,
+  major: number,
+): Promise<void> {
   for (const name of blockedCertsFiles) {
     const file = path.join(securityDir, name);
     const content = await readOptional(file);
@@ -74,8 +79,9 @@ export async function addBlockedCerts(securityDir: string): Promise<void> {
     return;
   }
 
+  const [blocked, blacklisted] = blockedCertsFiles;
   await fs.writeFile(
-    path.join(securityDir, blockedCertsFiles[0]),
+    path.join(securityDir, major === 8 ? blacklisted : blocked),
     `Algorithm=SHA-256\n${blockedCerts.join('\n')}\n`,
   );
 }

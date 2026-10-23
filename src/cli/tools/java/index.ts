@@ -191,7 +191,7 @@ export class JavaInstallService extends BaseInstallService {
       v.major === 8 && this.name !== 'java-jre'
         ? path.join(cwd, 'jre/lib/security/cacerts')
         : path.join(cwd, 'lib/security/cacerts');
-    await addBlockedCerts(path.dirname(cacerts));
+    await addBlockedCerts(path.dirname(cacerts), v.major);
     await fs.rm(cacerts);
     await fs.symlink(path.join(this.pathSvc.sslPath, 'cacerts'), cacerts);
   }

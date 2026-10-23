@@ -24,7 +24,7 @@ describe('cli/tools/java/blocked-certs', () => {
     const file = path.join(dir, 'blocked.certs');
     await fs.writeFile(file, `${stock}\n`);
 
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(file, 'utf8')).toBe(`${stock}\n${all}\n`);
   });
@@ -33,7 +33,7 @@ describe('cli/tools/java/blocked-certs', () => {
     const file = path.join(dir, 'blocked.certs');
     await fs.writeFile(file, stock);
 
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(file, 'utf8')).toBe(`${stock}\n${all}\n`);
   });
@@ -43,7 +43,7 @@ describe('cli/tools/java/blocked-certs', () => {
     const [first, ...rest] = blockedCerts;
     await fs.writeFile(file, `${stock}\n${first?.toLowerCase()}\n`);
 
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(file, 'utf8')).toBe(
       `${stock}\n${first?.toLowerCase()}\n${rest.join('\n')}\n`,
@@ -55,7 +55,7 @@ describe('cli/tools/java/blocked-certs', () => {
     const content = `${stock}\n${all}\n`;
     await fs.writeFile(file, content);
 
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(file, 'utf8')).toBe(content);
   });
@@ -64,7 +64,7 @@ describe('cli/tools/java/blocked-certs', () => {
     const file = path.join(dir, 'blacklisted.certs');
     await fs.writeFile(file, `${stock}\n`);
 
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(file, 'utf8')).toBe(`${stock}\n${all}\n`);
     await expect(fs.stat(path.join(dir, 'blocked.certs'))).rejects.toThrow();
@@ -73,14 +73,23 @@ describe('cli/tools/java/blocked-certs', () => {
   test('throws when the blocked list can not be read', async () => {
     await fs.mkdir(path.join(dir, 'blocked.certs'));
 
-    await expect(addBlockedCerts(dir)).rejects.toThrow('EISDIR');
+    await expect(addBlockedCerts(dir, 21)).rejects.toThrow('EISDIR');
   });
 
   test('creates blocked.certs when java ships no blocked list', async () => {
-    await addBlockedCerts(dir);
+    await addBlockedCerts(dir, 21);
 
     expect(await fs.readFile(path.join(dir, 'blocked.certs'), 'utf8')).toBe(
       `Algorithm=SHA-256\n${all}\n`,
     );
+  });
+
+  test('creates blacklisted.certs for java 8 without a blocked list', async () => {
+    await addBlockedCerts(dir, 8);
+
+    expect(await fs.readFile(path.join(dir, 'blacklisted.certs'), 'utf8')).toBe(
+      `Algorithm=SHA-256\n${all}\n`,
+    );
+    await expect(fs.stat(path.join(dir, 'blocked.certs'))).rejects.toThrow();
   });
 });
