@@ -573,7 +573,10 @@ describe('packages/base', () => {
     }
   });
 
-  test.each(['a8c820972f2d16ce9fd7eeae9bcfbfc5b9e6f616', '0.0.0-PLACEHOLDER'])(
+  test.each([
+    '0.0.0-PLACEHOLDER+a8c820972f2d16ce9fd7eeae9bcfbfc5b9e6f616',
+    '0.0.0-PLACEHOLDER',
+  ])(
     'validateContainerbaseVersion skips the development image version %s',
     async (version) => {
       const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));

@@ -97,6 +97,14 @@ describe('cli/services/env.service', () => {
     expect(svc.umask).toBe(0o775);
   });
 
+  test('version', () => {
+    vi.stubGlobal('CONTAINERBASE_VERSION', undefined);
+    expect(svc.version).toBe('0.0.0-PLACEHOLDER');
+    vi.stubGlobal('CONTAINERBASE_VERSION', '14.52.0');
+    expect(svc.version).toBe('14.52.0');
+    vi.unstubAllGlobals();
+  });
+
   test('skipTests', () => {
     expect(svc.skipTests).toBe(false);
   });

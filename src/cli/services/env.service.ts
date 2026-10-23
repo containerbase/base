@@ -142,12 +142,11 @@ export class EnvService {
   }
 
   /**
-   * The containerbase version: the release version or the commit sha in CI
-   * builds, `0.0.0-PLACEHOLDER` in local builds, `dev` when run from source (unit
-   * tests, `pnpm start`).
+   * The containerbase version: the release version, `0.0.0-PLACEHOLDER` for
+   * development builds, CI builds add the commit sha as build metadata.
    */
   get version(): string {
-    return globalThis.CONTAINERBASE_VERSION ?? 'dev';
+    return globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
   }
 
   /** Whether tool tests are skipped, set by `SKIP_VERSION`. */

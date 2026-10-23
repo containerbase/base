@@ -131,8 +131,8 @@ export class ToolVersionResolverService {
    * Only releases available for the host arch and distro, and installable by
    * the running containerbase version (`minCb`), are considered, also for the
    * embedded release check. Only a release version of containerbase filters by
-   * `minCb`, any other version (a commit sha, `0.0.0-*` or `dev`) is a
-   * development build and doesn't.
+   * `minCb`, any other version, like `0.0.0-PLACEHOLDER`, is a development
+   * build and doesn't.
    * @returns `undefined` when no data has a match
    */
   private async resolveFromData(
