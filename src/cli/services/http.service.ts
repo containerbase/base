@@ -217,17 +217,19 @@ export class HttpService {
   }
 
   /**
-   * Fetches the body as text, trying up to three times on network errors and
-   * timeouts. An error status is only retried by got.
+   * Fetches the body as text, trying up to three times by default on network
+   * errors and timeouts. An error status is only retried by got.
    *
+   * @param request - how the request is run, like {@link getJson}
    * @throws the original HTTP error for an error status, without trying again
-   * @throws `download failed` after three failed attempts otherwise
+   * @throws `download failed` after the failed attempts otherwise
    */
   async get(
     url: string,
     opts: OptionsOfTextResponseBody = {},
+    request: HttpRequestConfig = {},
   ): Promise<string> {
-    return await this._request(url, opts, (req) => req.text());
+    return await this._request(url, opts, (req) => req.text(), request);
   }
 
   /**
