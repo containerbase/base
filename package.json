@@ -65,7 +65,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@containerbase/istanbul-reports-html": "2.0.22",
+    "@containerbase/istanbul-reports-html": "2.0.23",
     "@containerbase/oxlint-plugin": "1.0.3",
     "@containerbase/semantic-release-pnpm": "1.4.3",
     "@semantic-release/exec": "7.1.0",
