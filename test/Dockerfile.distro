@@ -252,7 +252,7 @@ RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
 RUN install-tool kas 5.5
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.10.2
+RUN install-tool pipenv 2026.10.3
 # renovate: datasource=pypi
 RUN install-tool pdm 2.29.3
 # renovate: datasource=pypi
