@@ -245,7 +245,7 @@ RUN install-tool apko 1.4.13
 RUN install-tool apm 0.35.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.4
+RUN install-tool devbox 0.18.5
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.26.2
