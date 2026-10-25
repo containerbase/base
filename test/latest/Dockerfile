@@ -230,7 +230,7 @@ RUN install-tool bazelisk v1.30.0
 RUN install-tool buf v1.75.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.3
+RUN install-tool bun 1.4.4
 
 # renovate: datasource=github-releases packageName=nubjs/nub
 RUN install-tool nub 0.9.7
