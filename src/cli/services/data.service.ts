@@ -2,12 +2,38 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { bindingScopeValues, inject, injectable } from 'inversify';
-import { isMissing, logger } from '../utils/index.ts';
+import { isMissing, logger, pathExists } from '../utils/index.ts';
 import { hasNedb, insertStores, readNedbStores } from './nedb.ts';
 import { PathService } from './path.service.ts';
+import { RestoreService } from './restore.service.ts';
+import {
+  busyTimeout,
+  columns,
+  hasTable,
+  rollbackJournal,
+  rowKey,
+  userVersion,
+} from './sqlite.ts';
 
 /** The schema version the `schema` creates, stored in `user_version`. */
 const schemaVersion = 1;
+
+/**
+ * The tombstones of rows of the attached build-time database, which a runtime
+ * removal hides, see `views`. A tombstone holds the whole row, its other
+ * columns besides `name` as a json array, see `rowKey`, so it only hides
+ * exactly this row, not a row of a newer image with the same name.
+ */
+function tombstonesTable(schema: string): string {
+  return `
+CREATE TABLE IF NOT EXISTS ${schema}.tombstones (
+  tbl TEXT NOT NULL,
+  name TEXT NOT NULL,
+  row TEXT NOT NULL,
+  UNIQUE (tbl, name, row)
+);
+`;
+}
 
 /**
  * The database schema, a missing parent is stored as `''`, so the unique
@@ -43,17 +69,73 @@ CREATE TABLE IF NOT EXISTS types (
   name TEXT PRIMARY KEY,
   type TEXT NOT NULL
 );
-
+${tombstonesTable('main')}
 PRAGMA user_version = ${schemaVersion};
 `;
 
-/** Waits up to 5 seconds for a lock held by another process. */
-const busyTimeout = 'PRAGMA busy_timeout = 5000;';
-
-/** The schema version of the database, `0` before the schema is created. */
-function userVersion(db: DatabaseSync): number {
-  return Number(db.prepare('PRAGMA user_version').get()?.user_version);
+/**
+ * The rows of the build-time database as `base_<table>` in the temp schema,
+ * with their insertion order as `ord`: views of the attached `base` database
+ * or, without one, empty tables.
+ */
+function baseTables(attached: boolean): string {
+  return Object.entries(columns)
+    .map(([table, cols]) => {
+      const list = ['name', ...cols].join(', ');
+      return attached
+        ? `CREATE TEMP VIEW base_${table} AS SELECT rowid AS ord, ${list} FROM base.${table};`
+        : `CREATE TEMP TABLE base_${table} (ord INTEGER, ${list});`;
+    })
+    .join('\n');
 }
+
+/**
+ * Added to the row ids of `main` in the views, so its rows sort after the
+ * rows of `base`, in insertion order.
+ */
+const mainOrder = 2 ** 40;
+
+/**
+ * Whether the `base` row `b` is hidden by a tombstone of exactly this row,
+ * see `tombstonesTable`.
+ */
+function tombstoned(table: string): string {
+  return `EXISTS (SELECT 1 FROM tombstones t WHERE t.tbl = '${table}' AND t.name = b.name AND t.row = ${rowKey(table, 'b')})`;
+}
+
+/** Joins the rows `m` and `b` of a table on all their columns. */
+function sameRow(table: string): string {
+  return ['name', ...columns[table]!]
+    .map((c) => `m.${c} = b.${c}`)
+    .join(' AND ');
+}
+
+/**
+ * A view of a table over the database and the build-time one, see
+ * `baseTables`, named like the table, so it shadows it for unqualified reads,
+ * while writes go to the `main` table. It has an `ord` column for the
+ * insertion order, `base` rows first. A tombstone hides a `base` row.
+ * `versions` is the union of both databases, the other tables are keyed by
+ * `name`, where a `main` row overrides the `base` row with the same name.
+ */
+function view(table: string, cols: string[]): string {
+  const list = ['name', ...cols].join(', ');
+  const inMain =
+    table === 'versions'
+      ? `EXISTS (SELECT 1 FROM main.versions m WHERE ${sameRow(table)})`
+      : `b.name IN (SELECT name FROM main.${table})`;
+  return `
+CREATE TEMP VIEW ${table} AS
+  SELECT ord, ${list} FROM base_${table} b WHERE NOT ${inMain} AND NOT ${tombstoned(table)}
+  UNION ALL
+  SELECT rowid + ${mainOrder} AS ord, ${list} FROM main.${table};
+`;
+}
+
+/** The views of all tables, see `view`. */
+const views = Object.entries(columns)
+  .map(([table, cols]) => view(table, cols))
+  .join('');
 
 /**
  * Closes the database and throws when it was created by a newer containerbase
@@ -104,26 +186,6 @@ async function openExisting(file: string): Promise<DatabaseSync | null> {
   return null;
 }
 
-/**
- * Opens an existing database writable just for a read, so SQLite rolls back
- * a journal left by an interrupted writer, which a read-only connection can't
- * do. Nothing else is changed. A failure, eg. missing permissions or a lock
- * held by a running writer, is only logged, the read-only open follows anyway.
- */
-function rollbackJournal(file: string): void {
-  try {
-    const db = new DatabaseSync(file);
-    try {
-      db.exec(busyTimeout);
-      userVersion(db);
-    } finally {
-      db.close();
-    }
-  } catch (err) {
-    logger.debug({ file, err }, 'could not roll back the database journal');
-  }
-}
-
 @injectable(bindingScopeValues.Singleton)
 export class DataService {
   private _db: Promise<DatabaseSync> | undefined;
@@ -132,6 +194,8 @@ export class DataService {
 
   @inject(PathService)
   private readonly pathSvc!: PathService;
+  @inject(RestoreService)
+  private readonly restoreSvc!: RestoreService;
 
   /** Returns the database, opening it on first use. */
   db(): Promise<DatabaseSync> {
@@ -153,7 +217,7 @@ export class DataService {
    * when missing, migrating the databases of older containerbase versions.
    * The migration also runs before a forced read-only open when the folder
    * is writable, like the rollback of a journal left by an interrupted
-   * writer.
+   * writer. Then the build-time database is attached, see `_overlay`.
    *
    * @throws when the database was created by a newer containerbase version
    */
@@ -161,14 +225,89 @@ export class DataService {
     const file = join(this.pathSvc.dataPath, 'containerbase.db');
     const notWritable = await this._isReadOnly();
 
-    if (notWritable || this._forceReadOnly) {
+    let db: DatabaseSync;
+    const readOnly = notWritable || this._forceReadOnly;
+    if (readOnly) {
       if (!notWritable) {
         await this._prepareReadOnly(file);
       }
-      return await this._openReadOnly(file);
+      db = await this._openReadOnly(file);
+    } else {
+      db = await this._openWritable(file);
     }
+    try {
+      await this._overlay(db, readOnly);
+    } catch (err) {
+      db.close();
+      throw err;
+    }
+    return db;
+  }
 
-    return await this._openWritable(file);
+  /**
+   * Attaches the database of the build-time snapshot read-only as `base` on
+   * a volume at `/opt/containerbase` which is or needs to be restored, see
+   * `RestoreService`, else empty tables, and creates the `views` the queries
+   * read. So the image's build-time state comes from the snapshot, while the
+   * database on the volume only holds the runtime state: on a writable open,
+   * rows equal to build-time rows are removed from it, see `_dedupe`. A
+   * `tombstones` table missing in an older database is created, in memory for
+   * a read-only one.
+   *
+   * @throws when the build-time database was created by a newer containerbase
+   * version
+   */
+  private async _overlay(db: DatabaseSync, readOnly: boolean): Promise<void> {
+    const base = join(this.pathSvc.snapshotDir, 'data', 'containerbase.db');
+    let attached = false;
+    if (
+      !(await isMissing(base)) &&
+      ((await pathExists(this.pathSvc.restoredFile)) ||
+        (await this.restoreSvc.needsRestore()))
+    ) {
+      logger.debug({ base }, 'attaching the build-time database');
+      db.prepare('ATTACH DATABASE ? AS base').run(`file:${base}?mode=ro`);
+      const version = Number(
+        db.prepare('PRAGMA base.user_version').get()?.user_version,
+      );
+      if (version > schemaVersion) {
+        throw new Error(
+          `The build-time containerbase database was created by a newer containerbase version (schema ${version}), update containerbase.`,
+        );
+      }
+      attached = version !== 0;
+      if (!attached) {
+        logger.debug({ base }, 'build-time database has no schema');
+        db.exec('DETACH DATABASE base');
+      }
+    }
+    db.exec(baseTables(attached));
+    if (!hasTable(db, 'main', 'tombstones')) {
+      db.exec(tombstonesTable(readOnly ? 'temp' : 'main'));
+    }
+    if (attached && !readOnly) {
+      this._dedupe(db);
+    }
+    db.exec(views);
+  }
+
+  /**
+   * Removes the rows of the database which equal a row of the attached
+   * build-time one. They are build-time state, eg. from a volume docker
+   * filled from the image, so after an image update the new build-time rows
+   * are used instead of the copied old ones.
+   */
+  private _dedupe(db: DatabaseSync): void {
+    for (const table of Object.keys(columns)) {
+      const { changes } = db
+        .prepare(
+          `DELETE FROM main.${table} WHERE rowid IN (SELECT m.rowid FROM main.${table} m JOIN base.${table} b ON ${sameRow(table)})`,
+        )
+        .run();
+      if (changes) {
+        logger.debug({ table, changes }, 'removed build-time rows');
+      }
+    }
   }
 
   /**

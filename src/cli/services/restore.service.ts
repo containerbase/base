@@ -1,8 +1,9 @@
 import type { Stats } from 'node:fs';
 import fs from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
-import { inject, injectable } from 'inversify';
-import { logger } from '../utils/index.ts';
+import { DatabaseSync } from 'node:sqlite';
+import { bindingScopeValues, inject, injectable } from 'inversify';
+import { logger, pathExists, tool2path } from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
 import { PathService } from './path.service.ts';
 import {
@@ -15,14 +16,12 @@ import {
   stampFile,
   tmpPath,
 } from './snapshot.service.ts';
+import { hasTable, rollbackJournal, rowKey } from './sqlite.ts';
 
 /**
- * The files a restore copied into `/opt/containerbase`, with their
- * signature, see `signature`.
+ * Restored files by their path relative to `/opt/containerbase`, with their
+ * signature, see `signature`, recorded in `PathService.restoredFile`.
  */
-const manifestFile = '.restored';
-
-/** Restored files by their path relative to `/opt/containerbase`. */
 type Manifest = Record<string, string>;
 
 /** A folder of the snapshot to restore, see `SnapshotService.writeIndex`. */
@@ -71,10 +70,10 @@ async function isMountPoint(path: string): Promise<boolean> {
 /**
  * Restores `/opt/containerbase` from the build-time snapshot, see
  * `SnapshotService`, eg. a volume mounted there, which hides what the image
- * installed. It needs no install services and doesn't open the database, so
- * it runs before anything else.
+ * installed. It needs no install services and only reads an existing
+ * database on the volume, so it runs before anything opens the database.
  */
-@injectable()
+@injectable(bindingScopeValues.Singleton)
 export class RestoreService {
   @inject(PathService)
   private readonly pathSvc!: PathService;
@@ -83,17 +82,31 @@ export class RestoreService {
   @inject(SnapshotService)
   private readonly snapshotSvc!: SnapshotService;
 
+  /** The result of `checkRestore`, kept for the process. */
+  private _needsRestore: Promise<boolean> | undefined;
+
   /**
-   * Whether `/opt/containerbase` needs a restore from the snapshot: when its
-   * stamp differs from the stamp of the snapshot, eg. an empty volume, or
-   * when it's a writable volume where a folder which needs a copy, see
-   * `restoreFolders`, still links to the snapshot, eg. a volume docker filled
-   * from the image. An image without a snapshot, or the image's own
-   * `/opt/containerbase` without a volume, needs none.
+   * Whether `/opt/containerbase` needs a restore from the snapshot, see
+   * `checkRestore`. The result is kept for the process, a `restore` updates
+   * it.
    *
    * @throws when a stamp or the list of folders can't be read
    */
-  async needsRestore(): Promise<boolean> {
+  needsRestore(): Promise<boolean> {
+    return (this._needsRestore ??= this.checkRestore());
+  }
+
+  /**
+   * Whether `/opt/containerbase` needs a restore from the snapshot: when its
+   * stamp differs from the stamp of the snapshot, eg. an empty volume, or
+   * when it's a writable volume which wasn't restored yet or where a folder
+   * which needs a copy, see `restoreFolders`, still links to the snapshot, eg.
+   * a volume docker filled from the image. An image without a snapshot, or
+   * the image's own `/opt/containerbase` without a volume, needs none.
+   *
+   * @throws when a stamp or the list of folders can't be read
+   */
+  private async checkRestore(): Promise<boolean> {
     const { installDir, snapshotDir } = this.pathSvc;
     const stamp = await this.snapshotSvc.readStamp(snapshotDir);
     if (stamp === null) {
@@ -104,9 +117,10 @@ export class RestoreService {
       return true;
     }
     if (
-      !(await this.hasLinkedCopies()) ||
       !(await isWritable(installDir)) ||
-      !(await isMountPoint(installDir))
+      !(await isMountPoint(installDir)) ||
+      ((await pathExists(this.pathSvc.restoredFile)) &&
+        !(await this.hasLinkedCopies()))
     ) {
       logger.debug('restore: /opt/containerbase matches the snapshot');
       return false;
@@ -122,16 +136,20 @@ export class RestoreService {
    *   an older image,
    * - links or copies the version folders, see `restoreFolders`,
    * - copies the files outside of the version folders, see `restoreFiles`,
-   *   and the database when there is none,
    * - writes the stamp of the snapshot.
    *
-   * As root, the created folders and files are given to the user.
+   * The database isn't copied, `DataService` attaches the build-time database
+   * on a restored volume, see `PathService.restoredFile`. Build-time versions
+   * uninstalled at runtime stay uninstalled: their folders, wrappers and
+   * version files aren't restored, see `removedPaths`. As root, the created
+   * folders and files are given to the user.
    *
    * @throws when `/opt/containerbase` isn't writable, before changing
    * anything
    */
   async restore(): Promise<void> {
-    if (!(await this.needsRestore())) {
+    this._needsRestore = this.checkRestore();
+    if (!(await this._needsRestore)) {
       return;
     }
     const { installDir, snapshotDir } = this.pathSvc;
@@ -146,12 +164,77 @@ export class RestoreService {
     if (this.envSvc.isRoot) {
       await this.pathSvc.setOwner({ path: installDir });
     }
+    const removed = await this.removedPaths();
     await this.pruneLinks();
-    await this.restoreFolders();
-    await this.restoreFiles();
-    await this.restoreDatabase();
+    await this.restoreFolders(removed);
+    await this.restoreFiles(removed);
     const stamp = (await this.snapshotSvc.readStamp(snapshotDir))!;
     await this.pathSvc.writeFile(join(installDir, stampFile), stamp);
+    this._needsRestore = Promise.resolve(false);
+  }
+
+  /**
+   * The paths below `/opt/containerbase` of the build-time state removed at
+   * runtime: the rows of the snapshot's database hidden by a tombstone in the
+   * database on the volume, see `DataService`. A tombstone only hides exactly
+   * its row, so a newer image's row of the same name keeps its files. These
+   * are the folders of uninstalled versions, the wrappers of removed links
+   * and the version files of removed current versions. The databases are only
+   * read, after rolling back a journal left by an interrupted writer.
+   *
+   * @throws when a database can't be read
+   */
+  private async removedPaths(): Promise<Set<string>> {
+    const paths = new Set<string>();
+    const file = join(this.pathSvc.dataPath, databaseFile);
+    const base = this.snapshotSvc.snapshotPath(file);
+    if (!(await lstat(file)) || !(await lstat(base))) {
+      return paths;
+    }
+    if (await lstat(`${file}-journal`)) {
+      rollbackJournal(file);
+    }
+    const db = new DatabaseSync(file, { readOnly: true });
+    try {
+      db.prepare('ATTACH DATABASE ? AS base').run(`file:${base}?mode=ro`);
+      if (
+        !hasTable(db, 'main', 'tombstones') ||
+        !hasTable(db, 'base', 'versions')
+      ) {
+        return paths;
+      }
+      for (const table of ['versions', 'links', 'state']) {
+        const rows = db
+          .prepare(
+            `SELECT * FROM base.${table} b WHERE EXISTS (SELECT 1 FROM main.tombstones t WHERE t.tbl = '${table}' AND t.name = b.name AND t.row = ${rowKey(table, 'b')})`,
+          )
+          .all() as Record<string, string>[];
+        for (const row of rows) {
+          paths.add(relative(this.pathSvc.installDir, this.pathOf(table, row)));
+        }
+      }
+    } finally {
+      db.close();
+    }
+    return paths;
+  }
+
+  /**
+   * The path of the build-time state of a row: the version folder of a
+   * `versions` row, below its parent version, if any, the wrapper of a
+   * `links` row or the version file of a `state` row.
+   */
+  private pathOf(table: string, row: Record<string, string>): string {
+    const name = row.name!;
+    if (table === 'versions') {
+      return join(
+        this.pathSvc.versionedToolPath(name, row.version!),
+        row.parent_version!,
+      );
+    }
+    return table === 'links'
+      ? join(this.pathSvc.binDir, name)
+      : join(this.pathSvc.versionPath, tool2path(name));
   }
 
   /**
@@ -206,14 +289,15 @@ export class RestoreService {
    * The folders of tools which write into their install folder at runtime
    * are copied instead, also replacing a link to the snapshot, so their
    * writes persist with the volume, see `copy`. Other existing paths are
-   * kept, eg. a folder installed at runtime.
+   * kept, eg. a folder installed at runtime, the `removed` ones are skipped,
+   * see `removedPaths`.
    */
-  private async restoreFolders(): Promise<void> {
+  private async restoreFolders(removed: Set<string>): Promise<void> {
     const { installDir, snapshotDir } = this.pathSvc;
     for (const { rel, copy } of await this.readFolders()) {
       const target = join(snapshotDir, rel);
       const path = join(installDir, rel);
-      if (!(await lstat(target))?.isDirectory()) {
+      if (removed.has(rel) || !(await lstat(target))?.isDirectory()) {
         continue;
       }
       if ((await lstat(path)) && !(copy && (await this.linksToSnapshot(rel)))) {
@@ -262,11 +346,12 @@ export class RestoreService {
    * `env.sh` of every tool from the snapshot, see `restoreEntry`. Files an
    * earlier restore copied which the snapshot no longer has are removed,
    * unless they changed since. The copied files are recorded in
-   * `.restored`, an unreadable record counts as empty.
+   * `.restored`, an unreadable record counts as empty. The `removed` files,
+   * see `removedPaths`, aren't restored.
    */
-  private async restoreFiles(): Promise<void> {
+  private async restoreFiles(removed: Set<string>): Promise<void> {
     const { installDir } = this.pathSvc;
-    const file = join(installDir, manifestFile);
+    const file = this.pathSvc.restoredFile;
     let previous: Manifest = {};
     try {
       const parsed: unknown = JSON.parse(await fs.readFile(file, 'utf8'));
@@ -280,12 +365,13 @@ export class RestoreService {
       }
     }
     const next: Manifest = {};
+    const record = { previous, next, removed };
     for (const path of this.snapshotSvc.filePaths) {
-      await this.restoreEntry(relative(installDir, path), previous, next);
+      await this.restoreEntry(relative(installDir, path), record);
     }
     const tools = this.snapshotSvc.snapshotPath(this.pathSvc.toolsPath);
     for (const tool of await readdir(tools)) {
-      await this.restoreEntry(join('tools', tool, 'env.sh'), previous, next);
+      await this.restoreEntry(join('tools', tool, 'env.sh'), record);
     }
     for (const [rel, sig] of Object.entries(previous)) {
       const path = join(installDir, rel);
@@ -307,17 +393,17 @@ export class RestoreService {
    * and it didn't change since, so runtime changes, eg. the wrappers of a
    * tool installed at runtime, are kept. An existing file which equals the
    * snapshot copy, eg. copied by docker into a new volume, is recorded as
-   * restored.
+   * restored. A `removed` file isn't restored.
    */
   private async restoreEntry(
     rel: string,
-    previous: Manifest,
-    next: Manifest,
+    record: { previous: Manifest; next: Manifest; removed: Set<string> },
   ): Promise<void> {
+    const { previous, next, removed } = record;
     const src = join(this.pathSvc.snapshotDir, rel);
     const dst = join(this.pathSvc.installDir, rel);
     const srcStats = await lstat(src);
-    if (!srcStats) {
+    if (!srcStats || removed.has(rel)) {
       return;
     }
     const dstStats = await lstat(dst);
@@ -328,7 +414,7 @@ export class RestoreService {
         return;
       }
       for (const entry of await readdir(src)) {
-        await this.restoreEntry(join(rel, entry), previous, next);
+        await this.restoreEntry(join(rel, entry), record);
       }
       return;
     }
@@ -370,20 +456,5 @@ export class RestoreService {
         throw err;
       }
     }
-  }
-
-  /**
-   * Copies the database from the snapshot through a temp file, when there is
-   * none, see `copy`.
-   */
-  private async restoreDatabase(): Promise<void> {
-    const file = join(this.pathSvc.dataPath, databaseFile);
-    const src = this.snapshotSvc.snapshotPath(file);
-    if (!(await lstat(src)) || (await lstat(file))) {
-      return;
-    }
-    logger.debug({ file }, 'restore: copying the database');
-    await this.pathSvc.createDir(this.pathSvc.dataPath);
-    await this.copy(src, file);
   }
 }

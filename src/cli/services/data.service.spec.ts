@@ -11,7 +11,15 @@ import { platform } from 'node:os';
 import { DatabaseSync } from 'node:sqlite';
 import { codeBlock } from 'common-tags';
 import { Container } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { fileRights, logger } from '../utils/index.ts';
 import { DataService } from './data.service.ts';
 import { PathService } from './path.service.ts';
@@ -27,7 +35,7 @@ async function fstat(path: string): Promise<number> {
 /** All rows of a table, in insertion order. */
 function rows(db: DatabaseSync, table: string): unknown[] {
   return db
-    .prepare(`SELECT * FROM ${table} ORDER BY rowid`)
+    .prepare(`SELECT * FROM main.${table} ORDER BY rowid`)
     .all()
     .map((row) => ({ ...row }));
 }
@@ -128,6 +136,7 @@ describe('cli/services/data.service', () => {
       { type: 'table', name: 'links' },
       { type: 'index', name: 'links_tool' },
       { type: 'table', name: 'state' },
+      { type: 'table', name: 'tombstones' },
       { type: 'table', name: 'types' },
       { type: 'table', name: 'versions' },
       { type: 'index', name: 'versions_name' },
@@ -137,7 +146,9 @@ describe('cli/services/data.service', () => {
     expect(logger.info).not.toHaveBeenCalled();
 
     // an existing database is opened as is
-    db.prepare(`INSERT INTO types (name, type) VALUES ('pnpm', 'npm')`).run();
+    db.prepare(
+      `INSERT INTO main.types (name, type) VALUES ('pnpm', 'npm')`,
+    ).run();
     const other = await (await testContainer()).getAsync(DataService);
     expect(rows(await other.db(), 'types')).toEqual([
       { name: 'pnpm', type: 'npm' },
@@ -160,7 +171,9 @@ describe('cli/services/data.service', () => {
 
   test('opens read-only when the data folder is not writable', async () => {
     const rw = await svc.db();
-    rw.prepare(`INSERT INTO types (name, type) VALUES ('pnpm', 'npm')`).run();
+    rw.prepare(
+      `INSERT INTO main.types (name, type) VALUES ('pnpm', 'npm')`,
+    ).run();
 
     const roChild = await testContainer();
     const roSvc = await roChild.getAsync(DataService);
@@ -184,7 +197,9 @@ describe('cli/services/data.service', () => {
       'opening database read-only',
     );
     expect(() =>
-      db.prepare(`INSERT INTO types (name, type) VALUES ('yarn', 'npm')`).run(),
+      db
+        .prepare(`INSERT INTO main.types (name, type) VALUES ('yarn', 'npm')`)
+        .run(),
     ).toThrow('attempt to write a readonly database');
   });
 
@@ -276,7 +291,9 @@ describe('cli/services/data.service', () => {
   describe('readOnly', () => {
     test('opens an existing database read-only', async () => {
       const rw = await svc.db();
-      rw.prepare(`INSERT INTO types (name, type) VALUES ('pnpm', 'npm')`).run();
+      rw.prepare(
+        `INSERT INTO main.types (name, type) VALUES ('pnpm', 'npm')`,
+      ).run();
 
       const roChild = await testContainer();
       const roSvc = await roChild.getAsync(DataService);
@@ -297,7 +314,7 @@ describe('cli/services/data.service', () => {
         { file: dbFile },
         'opening database read-only',
       );
-      expect(() => db.prepare(`DELETE FROM types`).run()).toThrow(
+      expect(() => db.prepare(`DELETE FROM main.types`).run()).toThrow(
         'attempt to write a readonly database',
       );
 
@@ -319,14 +336,16 @@ describe('cli/services/data.service', () => {
         'containerbase.db',
         'versions.nedb',
       ]);
-      expect(() => db.prepare(`DELETE FROM types`).run()).toThrow(
+      expect(() => db.prepare(`DELETE FROM main.types`).run()).toThrow(
         'attempt to write a readonly database',
       );
     });
 
     test('opens the database writable briefly when a journal exists', async () => {
       const rw = await svc.db();
-      rw.prepare(`INSERT INTO types (name, type) VALUES ('pnpm', 'npm')`).run();
+      rw.prepare(
+        `INSERT INTO main.types (name, type) VALUES ('pnpm', 'npm')`,
+      ).run();
       rw.close();
       await writeFile(`${dbFile}-journal`, '');
 
@@ -348,14 +367,16 @@ describe('cli/services/data.service', () => {
       expect(db.isOpen).toBe(true);
       expect(setOwner).not.toHaveBeenCalled();
       expect(rows(db, 'types')).toEqual([{ name: 'pnpm', type: 'npm' }]);
-      expect(() => db.prepare(`DELETE FROM types`).run()).toThrow(
+      expect(() => db.prepare(`DELETE FROM main.types`).run()).toThrow(
         'attempt to write a readonly database',
       );
     });
 
     test('opens read-only when the brief writable open fails', async () => {
       const rw = await svc.db();
-      rw.prepare(`INSERT INTO types (name, type) VALUES ('pnpm', 'npm')`).run();
+      rw.prepare(
+        `INSERT INTO main.types (name, type) VALUES ('pnpm', 'npm')`,
+      ).run();
       rw.close();
       await writeFile(`${dbFile}-journal`, '');
 
@@ -373,7 +394,7 @@ describe('cli/services/data.service', () => {
         'could not roll back the database journal',
       );
       expect(rows(db, 'types')).toEqual([{ name: 'pnpm', type: 'npm' }]);
-      expect(() => db.prepare(`DELETE FROM types`).run()).toThrow(
+      expect(() => db.prepare(`DELETE FROM main.types`).run()).toThrow(
         'attempt to write a readonly database',
       );
     });
@@ -483,7 +504,7 @@ describe('cli/services/data.service', () => {
       // another process migrates and removes a link while the file is read
       const other = await (await testContainer()).getAsync(DataService);
       const otherDb = await other.db();
-      otherDb.prepare(`DELETE FROM links WHERE name = 'npx'`).run();
+      otherDb.prepare(`DELETE FROM main.links WHERE name = 'npx'`).run();
       otherDb.close();
       return links;
     });
@@ -528,7 +549,7 @@ describe('cli/services/data.service', () => {
       { file: dbFile },
       'database was migrated meanwhile',
     );
-    expect(() => db.prepare(`DELETE FROM types`).run()).toThrow(
+    expect(() => db.prepare(`DELETE FROM main.types`).run()).toThrow(
       'attempt to write a readonly database',
     );
   });
@@ -549,6 +570,115 @@ describe('cli/services/data.service', () => {
     const roSvc = await (await testContainer()).getAsync(DataService);
     mockAccess('EROFS');
     await expect(roSvc.db()).rejects.toThrow(error);
+  });
+
+  describe('build-time database on a restored volume', () => {
+    let base!: string;
+
+    beforeAll(() => {
+      base = rootPath('var/lib/containerbase/opt/data/containerbase.db');
+    });
+
+    beforeEach(async () => {
+      await mkdir(rootPath('var/lib/containerbase/opt/data'), {
+        recursive: true,
+      });
+      await writeFile(rootPath('opt/containerbase/.restored'), '{}');
+    });
+
+    afterEach(async () => {
+      await rm(rootPath('opt/containerbase/.restored'), { force: true });
+      await rm(rootPath('var/lib/containerbase/opt'), {
+        recursive: true,
+        force: true,
+      });
+    });
+
+    test('fails on a build-time database of a newer schema', async () => {
+      const newer = new DatabaseSync(base);
+      newer.exec('PRAGMA user_version = 2');
+      newer.close();
+      const close = vi.spyOn(DatabaseSync.prototype, 'close');
+
+      await expect(svc.db()).rejects.toThrow(
+        'The build-time containerbase database was created by a newer containerbase version (schema 2), update containerbase.',
+      );
+      expect(close).toHaveBeenCalledOnce();
+    });
+
+    test('ignores a build-time database without schema', async () => {
+      new DatabaseSync(base).close();
+
+      const db = await svc.db();
+
+      expect(
+        db
+          .prepare('PRAGMA database_list')
+          .all()
+          .map((row) => row.name),
+      ).not.toContain('base');
+      expect(logger.debug).toHaveBeenCalledWith(
+        { base },
+        'build-time database has no schema',
+      );
+    });
+
+    test('works without a build-time database', async () => {
+      await rm(base, { force: true });
+
+      const db = await svc.db();
+
+      expect(rows(db, 'versions')).toEqual([]);
+    });
+  });
+
+  test('adds tombstones to an older database', async () => {
+    const older = new DatabaseSync(dbFile);
+    older.exec(`
+      CREATE TABLE versions (name TEXT, version TEXT, parent_name TEXT, parent_version TEXT);
+      CREATE TABLE links (name TEXT PRIMARY KEY, tool_name TEXT, tool_version TEXT);
+      CREATE TABLE state (name TEXT PRIMARY KEY, tool_name TEXT, tool_version TEXT, parent_name TEXT, parent_version TEXT);
+      CREATE TABLE types (name TEXT PRIMARY KEY, type TEXT);
+      PRAGMA user_version = 1;
+    `);
+    older.close();
+
+    const db = await svc.db();
+
+    expect(
+      db
+        .prepare(
+          "SELECT name FROM main.sqlite_master WHERE name = 'tombstones'",
+        )
+        .all(),
+    ).toHaveLength(1);
+  });
+
+  test('reads an older read-only database without tombstones', async () => {
+    const older = new DatabaseSync(dbFile);
+    older.exec(`
+      CREATE TABLE versions (name TEXT, version TEXT, parent_name TEXT, parent_version TEXT);
+      CREATE TABLE links (name TEXT PRIMARY KEY, tool_name TEXT, tool_version TEXT);
+      CREATE TABLE state (name TEXT PRIMARY KEY, tool_name TEXT, tool_version TEXT, parent_name TEXT, parent_version TEXT);
+      CREATE TABLE types (name TEXT PRIMARY KEY, type TEXT);
+      INSERT INTO versions VALUES ('node', '22.0.0', '', '');
+      PRAGMA user_version = 1;
+    `);
+    older.close();
+    mockAccess('EROFS');
+
+    const db = await svc.db();
+
+    expect(
+      db
+        .prepare(
+          "SELECT name FROM temp.sqlite_master WHERE name = 'tombstones'",
+        )
+        .all(),
+    ).toHaveLength(1);
+    expect(db.prepare('SELECT name, version FROM versions').all()).toEqual([
+      { name: 'node', version: '22.0.0' },
+    ]);
   });
 
   test('keeps the journal mode of a database of a newer schema', async () => {

@@ -1,8 +1,18 @@
 import fs from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { Container } from 'inversify';
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { logger } from '../utils/index.ts';
-import { VersionService } from './index.ts';
+import { DataService, RestoreService, VersionService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -399,5 +409,320 @@ describe('cli/services/version.service', () => {
       { tool: 'node', err: expect.any(Error) },
       'tool version not found',
     );
+  });
+
+  describe('on a restored volume', () => {
+    let base!: string;
+    let dbFile!: string;
+
+    beforeAll(() => {
+      base = rootPath('var/lib/containerbase/opt/data/containerbase.db');
+      dbFile = rootPath('opt/containerbase/data/containerbase.db');
+    });
+
+    afterEach(async () => {
+      await fs.rm(rootPath('opt/containerbase/.restored'), { force: true });
+      await fs.rm(rootPath('var/lib/containerbase/opt'), {
+        recursive: true,
+        force: true,
+      });
+    });
+
+    /**
+     * Records the build-time state with `fill`, moves the database into the
+     * snapshot and returns a service on an empty restored volume.
+     */
+    async function build(
+      fill: (svc: VersionService) => Promise<void>,
+    ): Promise<VersionService> {
+      await fs.rm(rootPath('opt/containerbase/.restored'), { force: true });
+      await fs.rm(dbFile, { force: true });
+      const buildChild = await testContainer();
+      await fill(await buildChild.getAsync(VersionService));
+      (await (await buildChild.getAsync(DataService)).db()).close();
+      await fs.mkdir(dirname(base), { recursive: true });
+      await fs.rename(dbFile, base);
+      // the snapshot is read-only for the volume
+      await fs.chmod(base, 0o444);
+      await fs.writeFile(rootPath('opt/containerbase/.restored'), '{}');
+      return (await testContainer()).getAsync(VersionService);
+    }
+
+    /** Records some tools like an image build. */
+    async function image(svc: VersionService): Promise<void> {
+      await svc.addInstalled({ name: 'node', version: '22.0.0' });
+      await svc.addInstalled({
+        name: 'pnpm',
+        version: '10.0.0',
+        parent: { name: 'node', version: '22.0.0' },
+      });
+      await svc.setCurrent({
+        name: 'node',
+        tool: { name: 'node', version: '22.0.0' },
+      });
+      await svc.setLink({
+        name: 'node',
+        tool: { name: 'node', version: '22.0.0' },
+      });
+      await svc.setType('pnpm', 'npm');
+    }
+
+    test('reads the build-time state, writes only to the volume', async () => {
+      const vol = await build(image);
+
+      await vol.addInstalled({ name: 'node', version: '24.0.0' });
+      await vol.setType('yarn', 'npm');
+
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '22.0.0' },
+        { name: 'node', version: '24.0.0' },
+      ]);
+      expect(await vol.getCurrent('node')).toEqual({
+        name: 'node',
+        tool: { name: 'node', version: '22.0.0' },
+      });
+      expect(
+        await vol.isLinked({
+          name: 'node',
+          tool: { name: 'node', version: '22.0.0' },
+        }),
+      ).toBe(true);
+      expect(await vol.getTypes()).toEqual([
+        { name: 'pnpm', type: 'npm' },
+        { name: 'yarn', type: 'npm' },
+      ]);
+      // only tools with a version are listed
+      expect((await vol.listInstalled()).map((t) => t.name)).toEqual([
+        'node',
+        'pnpm',
+      ]);
+
+      // the volume database only holds the runtime state
+      const db = new DatabaseSync(dbFile, { readOnly: true });
+      try {
+        expect(
+          db.prepare('SELECT name, version FROM main.versions').all(),
+        ).toEqual([{ name: 'node', version: '24.0.0' }]);
+      } finally {
+        db.close();
+      }
+    });
+
+    test('the volume overrides the build-time state by name', async () => {
+      const vol = await build(image);
+
+      await vol.addInstalled({ name: 'node', version: '22.0.0' });
+      await vol.setCurrent({
+        name: 'node',
+        tool: { name: 'node', version: '24.0.0' },
+      });
+      await vol.setLink({
+        name: 'node',
+        tool: { name: 'node', version: '24.0.0' },
+      });
+      await vol.setType('pnpm', 'gem');
+
+      // a version recorded in both is listed once
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '22.0.0' },
+      ]);
+      expect(await vol.getCurrent('node')).toMatchObject({
+        tool: { version: '24.0.0' },
+      });
+      expect(await vol.findLinks({ name: 'node', version: '22.0.0' })).toEqual(
+        [],
+      );
+      expect(await vol.getType('pnpm')).toBe('gem');
+    });
+
+    test('an overridden build-time link stays removed', async () => {
+      const vol = await build(image);
+      const node = { name: 'node', version: '24.0.0' };
+
+      await vol.setLink({ name: 'node', tool: node });
+      await vol.removeLinks(node);
+
+      expect(await vol.findLinks({ name: 'node', version: '22.0.0' })).toEqual(
+        [],
+      );
+      expect(await vol.findLinks(node)).toEqual([]);
+
+      // linking the build-time version again lifts the tombstone
+      await vol.setLink({
+        name: 'node',
+        tool: { name: 'node', version: '22.0.0' },
+      });
+      expect(
+        await vol.findLinks({ name: 'node', version: '22.0.0' }),
+      ).toHaveLength(1);
+    });
+
+    test('tombstones hide build-time rows until they are added again', async () => {
+      const vol = await build(image);
+      const node = { name: 'node', version: '22.0.0' };
+
+      await vol.removeInstalled({ name: 'pnpm' });
+      await vol.removeLinks(node);
+      await vol.removeCurrent('node');
+      await vol.setType('pnpm', undefined);
+      // removing it twice is fine
+      await vol.removeInstalled({ name: 'pnpm' });
+
+      expect(await vol.findInstalled('pnpm')).toEqual([]);
+      expect(await vol.findLinks(node)).toEqual([]);
+      expect(await vol.getCurrent('node')).toBeNull();
+      expect(await vol.getType('pnpm')).toBeUndefined();
+
+      await vol.addInstalled({
+        name: 'pnpm',
+        version: '10.0.0',
+        parent: node,
+      });
+      await vol.setLink({ name: 'node', tool: node });
+      await vol.setCurrent({ name: 'node', tool: node });
+      await vol.setType('pnpm', 'npm');
+
+      expect(await vol.findInstalled('pnpm')).toEqual([
+        { name: 'pnpm', version: '10.0.0', parent: node },
+      ]);
+      expect(await vol.findLinks(node)).toEqual([{ name: 'node', tool: node }]);
+      expect(await vol.getCurrent('node')).toEqual({
+        name: 'node',
+        tool: node,
+      });
+      expect(await vol.getType('pnpm')).toBe('npm');
+
+      // without tombstones, the build-time rows show up again
+      await vol.removeInstalled({ name: 'pnpm' });
+      await vol.removeCurrent('node');
+      await vol.removeLinks(node);
+      await vol.setType('pnpm', undefined);
+      const db = new DatabaseSync(dbFile);
+      db.prepare('DELETE FROM main.tombstones').run();
+      db.close();
+      const again = await (await testContainer()).getAsync(VersionService);
+      expect(await again.findInstalled('pnpm')).toHaveLength(1);
+      expect(await again.getCurrent('node')).not.toBeNull();
+    });
+
+    test('an image update brings its build-time state', async () => {
+      let vol = await build(image);
+      await vol.addInstalled({ name: 'yarn', version: '1.0.0' });
+      const runtime = new DatabaseSync(dbFile, { readOnly: true });
+      const kept = runtime.prepare('SELECT * FROM main.versions').all();
+      runtime.close();
+      await fs.rename(dbFile, `${dbFile}.keep`);
+
+      vol = await build(async (svc) => {
+        await svc.addInstalled({ name: 'node', version: '24.0.0' });
+      });
+      await fs.rm(dbFile, { force: true });
+      await fs.rename(`${dbFile}.keep`, dbFile);
+      vol = await (await testContainer()).getAsync(VersionService);
+
+      expect(kept).toHaveLength(1);
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '24.0.0' },
+      ]);
+      expect(await vol.findInstalled('pnpm')).toEqual([]);
+      expect(await vol.findInstalled('yarn')).toEqual([
+        { name: 'yarn', version: '1.0.0' },
+      ]);
+    });
+
+    /**
+     * Replaces the build-time database by one recorded with `fill`, keeping
+     * the database of the volume, like an image update.
+     */
+    async function update(
+      fill: (svc: VersionService) => Promise<void>,
+    ): Promise<VersionService> {
+      await fs.rename(dbFile, `${dbFile}.keep`);
+      await build(fill);
+      await fs.rename(`${dbFile}.keep`, dbFile);
+      return (await testContainer()).getAsync(VersionService);
+    }
+
+    /** Records node 22 and 24 like a newer image build, 24 is current. */
+    async function newerImage(svc: VersionService): Promise<void> {
+      await svc.addInstalled({ name: 'node', version: '22.0.0' });
+      await svc.addInstalled({ name: 'node', version: '24.0.0' });
+      await svc.setCurrent({
+        name: 'node',
+        tool: { name: 'node', version: '24.0.0' },
+      });
+      await svc.setLink({
+        name: 'node',
+        tool: { name: 'node', version: '24.0.0' },
+      });
+      await svc.setType('pnpm', 'gem');
+    }
+
+    test('a tombstone only hides the exact build-time row', async () => {
+      let vol = await build(image);
+      const node = { name: 'node', version: '22.0.0' };
+      await vol.removeInstalled(node);
+      await vol.removeLinks(node);
+      await vol.removeCurrent('node');
+      await vol.setType('pnpm', undefined);
+
+      vol = await update(newerImage);
+
+      // the uninstalled version stays uninstalled
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '24.0.0' },
+      ]);
+      expect(await vol.getCurrent('node')).toMatchObject({
+        tool: { version: '24.0.0' },
+      });
+      expect(
+        await vol.findLinks({ name: 'node', version: '24.0.0' }),
+      ).toMatchObject([{ name: 'node' }]);
+      expect(await vol.getType('pnpm')).toBe('gem');
+    });
+
+    test('a volume filled from the image keeps no build-time rows', async () => {
+      let vol = await build(image);
+      // docker copied the image's database into the volume
+      await fs.copyFile(base, dbFile);
+      await fs.chmod(dbFile, 0o664);
+      vol = await (await testContainer()).getAsync(VersionService);
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '22.0.0' },
+      ]);
+      const copy = new DatabaseSync(dbFile, { readOnly: true });
+      try {
+        expect(copy.prepare('SELECT * FROM main.versions').all()).toEqual([]);
+        expect(copy.prepare('SELECT * FROM main.state').all()).toEqual([]);
+      } finally {
+        copy.close();
+      }
+
+      // so the state of a newer image wins
+      vol = await update(newerImage);
+      expect(await vol.getCurrent('node')).toMatchObject({
+        tool: { version: '24.0.0' },
+      });
+      expect(await vol.getType('pnpm')).toBe('gem');
+    });
+
+    test('attaches the build-time database to a volume to restore', async () => {
+      await build(image);
+      await fs.rm(rootPath('opt/containerbase/.restored'));
+
+      // without a volume to restore nothing is attached
+      let vol = await (await testContainer()).getAsync(VersionService);
+      expect(await vol.findInstalled('node')).toEqual([]);
+
+      vi.spyOn(RestoreService.prototype, 'needsRestore').mockResolvedValue(
+        true,
+      );
+      const child = await testContainer();
+      (await child.getAsync(DataService)).readOnly();
+      vol = await child.getAsync(VersionService);
+      expect(await vol.isInstalled({ name: 'node', version: '22.0.0' })).toBe(
+        true,
+      );
+    });
   });
 });

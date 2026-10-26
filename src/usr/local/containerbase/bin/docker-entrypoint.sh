@@ -38,14 +38,18 @@ elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "
 fi
 
 # a volume at `/opt/containerbase` hides the image's files, `containerbase-cli init`
-# restores them from the build-time snapshot when the stamps differ, or when a
-# folder to copy (`c` in `.links`) on a writable volume still links to the snapshot
+# restores them from the build-time snapshot when the stamps differ, or on a
+# writable volume which wasn't restored yet (no `.restored`, eg. filled by docker)
+# or where a folder to copy (`c` in `.links`) still links to the snapshot
 snapshot_dir=/var/lib/containerbase/opt
 if [[ -f "${snapshot_dir}/.stamp" ]]; then
   if [[ "$(< "${snapshot_dir}/.stamp")" != "$(cat /opt/containerbase/.stamp 2> /dev/null)" ]]; then
     run_init=true
-  elif [[ -w /opt/containerbase && -f "${snapshot_dir}/.links" \
-    && "$(stat -c %d /opt/containerbase)" != "$(stat -c %d /opt)" ]]; then
+  elif [[ ! -w /opt/containerbase || "$(stat -c %d /opt/containerbase)" == "$(stat -c %d /opt)" ]]; then
+    : # the image's own folder or a read-only volume needs no restore
+  elif [[ ! -f /opt/containerbase/.restored ]]; then
+    run_init=true
+  elif [[ -f "${snapshot_dir}/.links" ]]; then
     while read -r flag folder; do
       if [[ "${flag}" == c && "$(readlink "/opt/containerbase/${folder}")" == "${snapshot_dir}/${folder}" ]]; then
         run_init=true
