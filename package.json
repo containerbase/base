@@ -80,7 +80,7 @@
     "@types/shelljs": "0.10.0",
     "@vitest/coverage-v8": "4.1.12",
     "@vitest/ui": "4.1.12",
-    "@yao-pkg/pkg": "6.23.0",
+    "@yao-pkg/pkg": "6.24.0",
     "bats": "1.13.0",
     "bats-assert": "2.2.4",
     "bats-support": "0.3.0",
