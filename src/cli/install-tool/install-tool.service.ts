@@ -9,6 +9,7 @@ import {
   IpcServer,
   LinkToolService,
   PathService,
+  SnapshotService,
   VersionService,
 } from '../services/index.ts';
 import type { ToolState } from '../services/version.service';
@@ -49,16 +50,24 @@ export class InstallToolService {
 
   @inject(PathService)
   private readonly pathSvc!: PathService;
+  @inject(SnapshotService)
+  private readonly snapshotSvc!: SnapshotService;
   @inject(VersionService)
   private readonly versionSvc!: VersionService;
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test. Afterwards the oldest files are evicted from the
-   * download cache when the disk is too full, see `CacheService.evict`. A
-   * failing eviction is only logged.
+   * install, link and test. At image build time, the install updates the
+   * snapshot, see `SnapshotService`: on success the version folder is moved
+   * there and linked back, then on every exit except a dry run the files
+   * outside of the version folders are updated. A failed install also
+   * removes the snapshot copy of the version, snapshot errors after a failed
+   * install are only logged. The caches are cleaned in any case, and the
+   * oldest files are evicted from the download cache when the disk is too
+   * full, see `CacheService.evict`. A failing eviction is only logged.
    *
    * @returns an exit code when the tool could not be installed
+   * @throws when the install fails, or the snapshot of a successful one
    */
   async install(
     tool: string,
@@ -72,8 +81,12 @@ export class InstallToolService {
 
     await this.pathSvc.ensureBasePaths();
 
+    let failed = false;
+    // whether to move the version folder into the snapshot, `moveAndLink`
+    // skips a folder which is already linked
+    let moveFolder = false;
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     try {
-      const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       await this.ipc.start();
       this._link.clear();
       if (toolSvc) {
@@ -104,12 +117,16 @@ export class InstallToolService {
           logger.info({ tool }, 'tool already installed');
           await this.linkAndTest(toolSvc, version, parent);
           await this.versionSvc.update(tool, version);
+          // a version folder which is still real, eg. installed before the
+          // snapshot existed, is moved too
+          moveFolder = true;
           return;
         }
 
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {
           logger.debug({ tool }, 'tool not prepared');
-          const res = await prepareTools([tool], dryRun);
+          // the install updates the snapshot afterwards, also when it fails
+          const res = await prepareTools([tool], dryRun, false);
           if (res) {
             return res;
           }
@@ -141,6 +158,7 @@ export class InstallToolService {
             ...(parent && { parent: parent.tool }),
           });
           await this.linkAndTest(toolSvc, version, parent);
+          moveFolder = true;
         }
       } else {
         if (dryRun) {
@@ -160,67 +178,129 @@ export class InstallToolService {
           tool: { name: tool, version },
         });
 
+        // v1 shell tools don't install below the tools folder, so only the
+        // files outside of the version folders are snapshotted
         await this._storeLinks(tool, version);
       }
       await this.versionSvc.update(tool, version);
     } catch (e) {
+      failed = true;
       await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
+      if (toolSvc && (await isDockerBuild())) {
+        try {
+          logger.debug({ tool, version }, 'remove snapshot');
+          await toolSvc.removeSnapshot(version);
+        } catch (err) {
+          logger.warn({ err, tool, version }, 'could not remove the snapshot');
+        }
+      }
       await this.versionSvc.removeInstalled({ name: tool, version });
       // TODO check and fix broken links
       throw e;
     } finally {
       this.ipc.stop();
-      if (this.envSvc.isRoot) {
-        logger.debug('cleaning apt caches');
-        await cleanAptFiles(dryRun);
-      }
+      await this.finish(
+        tool,
+        version,
+        dryRun,
+        failed,
+        moveFolder ? toolSvc : undefined,
+      );
+    }
+  }
 
-      if (await isDockerBuild()) {
-        logger.debug('cleaning tmp files');
-        await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
-
-        if (this.envSvc.isRoot) {
-          logger.debug('cleaning root caches');
-          await deleteAsync(
-            [
-              '/root/.{android,android-sdk,cache}',
-              '/root/.local/share/virtualenv',
-            ],
-            {
-              force: true,
-              dryRun,
-              dot: true,
-            },
-          );
-        } else {
-          logger.debug('cleaning user caches');
-          await deleteAsync(
-            [
-              path.join(this.pathSvc.cachePath, '.cache/**'),
-              path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
-            ],
-            {
-              force: true,
-              dryRun,
-              dot: true,
-            },
-          );
+  /**
+   * Ends an install: at image build time, except for a dry run, updates the
+   * snapshot, see `snapshot`, then cleans the caches, also when the snapshot
+   * fails. After a `failed` install the version folder isn't moved and
+   * snapshot errors are only logged, so the install error is kept.
+   *
+   * @param toolSvc the tool whose version folder is moved, if any
+   * @throws when the snapshot of a successful install fails
+   */
+  private async finish(
+    tool: string,
+    version: string,
+    dryRun: boolean,
+    failed: boolean,
+    toolSvc: BaseInstallService | undefined,
+  ): Promise<void> {
+    try {
+      if (!dryRun && (await isDockerBuild())) {
+        logger.debug({ tool, version }, 'snapshot install');
+        if (!failed) {
+          await toolSvc?.snapshot(version);
         }
+        await this.snapshotSvc.snapshotFiles();
       }
+    } catch (err) {
+      if (!failed) {
+        throw err;
+      }
+      logger.warn({ err, tool, version }, 'could not update the snapshot');
+    } finally {
+      await this.cleanup(dryRun);
+    }
+  }
 
-      try {
-        await this.cacheSvc.evict(dryRun);
-      } catch (err) {
-        // best effort, it must not change the result of the install
-        logger.warn({ err }, 'cannot evict the download cache');
+  /**
+   * Removes the apt caches as root, the temp files and the root or user
+   * caches at image build time, and evicts the oldest files from the download
+   * cache when the disk is too full, see `CacheService.evict`.
+   */
+  private async cleanup(dryRun: boolean): Promise<void> {
+    if (this.envSvc.isRoot) {
+      logger.debug('cleaning apt caches');
+      await cleanAptFiles(dryRun);
+    }
+
+    if (await isDockerBuild()) {
+      logger.debug('cleaning tmp files');
+      await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
+
+      if (this.envSvc.isRoot) {
+        logger.debug('cleaning root caches');
+        await deleteAsync(
+          [
+            '/root/.{android,android-sdk,cache}',
+            '/root/.local/share/virtualenv',
+          ],
+          {
+            force: true,
+            dryRun,
+            dot: true,
+          },
+        );
+      } else {
+        logger.debug('cleaning user caches');
+        await deleteAsync(
+          [
+            path.join(this.pathSvc.cachePath, '.cache/**'),
+            path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
+          ],
+          {
+            force: true,
+            dryRun,
+            dot: true,
+          },
+        );
       }
+    }
+
+    try {
+      await this.cacheSvc.evict(dryRun);
+    } catch (err) {
+      // best effort, it must not change the result of the install
+      logger.warn({ err }, 'cannot evict the download cache');
     }
   }
 
   /**
    * Removes a tool version, or every installed version when none is given.
    * A dry run only logs and skips `ensureBasePaths`, so it sets up no tmp
-   * link or base folders.
+   * link or base folders. At image build time the copies of the removed
+   * versions are removed from the snapshot too, and the files outside of the
+   * version folders are updated once afterwards.
    *
    * @returns an exit code when the tool could not be uninstalled, eg. because
    * another tool depends on the version
@@ -241,6 +321,55 @@ export class InstallToolService {
       await this.pathSvc.ensureBasePaths();
     }
 
+    let failed = true;
+    try {
+      const res = await this._uninstall(tool, version, dryRun, recursive);
+      failed = false;
+      return res;
+    } finally {
+      await this.snapshotUninstall(tool, dryRun, failed);
+    }
+  }
+
+  /**
+   * Updates the files outside of the version folders in the snapshot at the
+   * end of a build-time uninstall, except for a dry run, also when it
+   * `failed` part-way. Then snapshot errors are only logged, so the uninstall
+   * error is kept.
+   *
+   * @throws when the snapshot of a successful uninstall fails
+   */
+  private async snapshotUninstall(
+    tool: string,
+    dryRun: boolean,
+    failed: boolean,
+  ): Promise<void> {
+    if (dryRun || !(await isDockerBuild())) {
+      return;
+    }
+    try {
+      await this.snapshotSvc.snapshotFiles();
+    } catch (err) {
+      if (!failed) {
+        throw err;
+      }
+      logger.warn({ err, tool }, 'could not update the snapshot');
+    }
+  }
+
+  /**
+   * Removes a tool version, or every installed version when none is given,
+   * see `uninstall`, and at image build time the snapshot copies of the
+   * removed versions.
+   *
+   * @returns an exit code when the tool could not be uninstalled
+   */
+  private async _uninstall(
+    tool: string,
+    version: string | undefined,
+    dryRun: boolean,
+    recursive: boolean,
+  ): Promise<number | void> {
     if (!isNonEmptyStringAndNotWhitespace(version)) {
       const versions = new Set<string>();
       for (const v of await this.versionSvc.findInstalled(tool)) {
@@ -249,7 +378,7 @@ export class InstallToolService {
         }
         versions.add(v.version);
         logger.info(`Uninstalling ${tool}@${v.version}...`);
-        const res = await this.uninstall(tool, v.version, dryRun, recursive);
+        const res = await this._uninstall(tool, v.version, dryRun, recursive);
         if (res) {
           return res;
         }
@@ -287,7 +416,7 @@ export class InstallToolService {
             logger.info(
               `Uninstalling child tool ${child.name}@${child.version}...`,
             );
-            const res = await this.uninstall(
+            const res = await this._uninstall(
               child.name,
               child.version,
               dryRun,
@@ -332,6 +461,11 @@ export class InstallToolService {
         }
 
         await this.versionSvc.removeLinks(vTool);
+
+        if (await isDockerBuild()) {
+          logger.debug({ tool, version }, 'remove snapshot');
+          await toolSvc.removeSnapshot(version);
+        }
       }
     } else {
       logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');

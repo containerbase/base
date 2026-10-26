@@ -85,14 +85,19 @@ async function prepareContainer(): Promise<Container> {
   return container;
 }
 
-/** Runs the prepare step of the passed tools, or of all tools for `all`. */
+/**
+ * Runs the prepare step of the passed tools, or of all tools for `all`. With
+ * `snapshot` set to `false` the build-time snapshot isn't updated, see
+ * `PrepareToolService.prepare`.
+ */
 export async function prepareTools(
   tools: string[],
   dryRun = false,
+  snapshot = true,
 ): Promise<number | void> {
   const container = await prepareContainer();
   const svc = await container.getAsync(PrepareToolService);
-  return svc.prepare(tools, dryRun);
+  return svc.prepare(tools, dryRun, snapshot);
 }
 
 /**

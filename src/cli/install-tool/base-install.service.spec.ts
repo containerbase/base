@@ -227,6 +227,28 @@ describe('cli/install-tool/base-install.service', () => {
     await expect(svc.uninstall('2.0.0')).resolves.toBeUndefined();
   });
 
+  test('snapshot links the versioned tool path', async () => {
+    const path = await pathSvc.createVersionedToolPath('dummy', '4.0.0', 'bin');
+
+    await expect(svc.snapshot('4.0.0')).resolves.toBeUndefined();
+
+    const versionPath = pathSvc.versionedToolPath('dummy', '4.0.0');
+    const target = join(pathSvc.snapshotDir, 'tools/dummy/4.0.0');
+    expect(await fs.readlink(versionPath)).toBe(target);
+    // a reinstall of the version reuses the linked folder
+    expect(await pathSvc.createVersionedToolPath('dummy', '4.0.0', 'bin')).toBe(
+      path,
+    );
+
+    // uninstall removes the link, but keeps the snapshot
+    await expect(svc.uninstall('4.0.0')).resolves.toBeUndefined();
+    expect(await fs.lstat(versionPath).catch(() => null)).toBeNull();
+    expect((await fs.stat(join(target, 'bin'))).isDirectory()).toBe(true);
+
+    await expect(svc.removeSnapshot('4.0.0')).resolves.toBeUndefined();
+    expect(await fs.lstat(target).catch(() => null)).toBeNull();
+  });
+
   test('validate', async () => {
     expect(await svc.validate('1.0.0')).toBe(true);
     expect(await svc.validate('not-a-version')).toBe(false);

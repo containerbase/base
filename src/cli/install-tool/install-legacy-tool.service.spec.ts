@@ -57,6 +57,17 @@ describe('cli/install-tool/install-legacy-tool.service', () => {
     execaMock.mockResolvedValue({ failed: false });
   });
 
+  test('V2ToolInstallService: snapshot links the versioned tool path', async () => {
+    const svc = await child.getAsync(MinimalInstallService);
+    const path = await pathSvc.createVersionedToolPath('minimal', '1.0.0');
+
+    await expect(svc.snapshot('1.0.0')).resolves.toBeUndefined();
+
+    expect(await fs.readlink(path)).toBe(
+      rootPath('var/lib/containerbase/opt/tools/minimal/1.0.0'),
+    );
+  });
+
   describe('V1ToolInstallService', () => {
     test('execute', async () => {
       const svc = await child.getAsync(V1ToolInstallService);

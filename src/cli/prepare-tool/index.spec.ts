@@ -4,6 +4,7 @@ import { PathService, createContainer } from '../services/index.ts';
 import { RubyPrepareService } from '../tools/ruby/index.ts';
 import { initializeTools, prepareTools } from './index.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
+import { PrepareToolService } from './prepare-tool.service.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -37,6 +38,14 @@ describe('cli/prepare-tool/index', () => {
   test('prepareTools', async () => {
     expect(await prepareTools(['bun', 'dummy'])).toBeUndefined();
     expect(await prepareTools(['not-exist'])).toBe(1);
+  });
+
+  test('prepareTools: passes the snapshot switch', async () => {
+    const spy = vi.spyOn(PrepareToolService.prototype, 'prepare');
+
+    expect(await prepareTools(['bun'], false, false)).toBeUndefined();
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith(['bun'], false, false);
   });
 
   test('prefers a modern service over a v2 shell tool with the same name', async () => {

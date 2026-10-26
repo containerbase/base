@@ -94,6 +94,15 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
       : ['--clear-sources', '--source', registry];
   }
 
+  /**
+   * Moves the folder of the current ruby version below the versioned tool
+   * path into the build-time snapshot and links it back, so the versioned
+   * tool path stays a real folder for other ruby versions.
+   */
+  override async snapshot(version: string): Promise<void> {
+    await this.snapshotParentFolder(version, await this.getRubyVersion());
+  }
+
   /** Whether the version is installed for the current ruby version. */
   override async isInstalled(version: string): Promise<boolean> {
     const ruby = await this.getRubyVersion();
