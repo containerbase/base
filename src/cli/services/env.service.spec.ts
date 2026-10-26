@@ -114,6 +114,25 @@ describe('cli/services/env.service', () => {
     expect(svc.cacheDir).toBeNull();
   });
 
+  test.each([
+    { value: undefined, expected: 100 },
+    { value: '', expected: 100 },
+    { value: 'abc', expected: 100 },
+    { value: '80', expected: 80 },
+    { value: '0', expected: 0 },
+  ])('maxAllocatedDisk: $value', ({ value, expected }) => {
+    if (value === undefined) {
+      delete env.CONTAINERBASE_MAX_ALLOCATED_DISK;
+    } else {
+      env.CONTAINERBASE_MAX_ALLOCATED_DISK = value;
+    }
+    try {
+      expect(svc.maxAllocatedDisk).toBe(expected);
+    } finally {
+      delete env.CONTAINERBASE_MAX_ALLOCATED_DISK;
+    }
+  });
+
   describe('containerbaseTmpDir', () => {
     // `node:process` is mocked with a plain `env` object, which `vi.stubEnv` doesn't reach
     afterEach(() => {

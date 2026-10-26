@@ -18,9 +18,9 @@ export ROOT_UMASK=755
 export USER_UMASK=775
 # defines the cache folder for downloaded tools, if empty no cache will be used
 export CONTAINERBASE_CACHE_DIR=${CONTAINERBASE_CACHE_DIR}
-# defines the max amount of filled space (in percent from 0-100) that is allowed
-# before the installation tries to free space by cleaning the cache folder
-# If empty, then cache cleanup is disabled
+# defines the fill level of the disk holding the cache folder (in percent from 0-100)
+# from which on `containerbase-cli` removes the oldest cached files after each install
+# If empty, then it defaults to 100, so only a full disk is cleaned, set eg. 80 to evict earlier
 export CONTAINERBASE_MAX_ALLOCATED_DISK=${CONTAINERBASE_MAX_ALLOCATED_DISK}
 # defines the temp directory that will be used when the cache is not active
 # it is used for all downloads and will be cleaned up after each install

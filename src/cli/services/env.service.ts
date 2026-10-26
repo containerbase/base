@@ -49,6 +49,20 @@ export class EnvService {
   }
 
   /**
+   * The fill level in percent of the file system holding the download cache,
+   * from which on the oldest cached files are removed, from
+   * `CONTAINERBASE_MAX_ALLOCATED_DISK`. Defaults to `100` when unset or not an
+   * integer.
+   */
+  get maxAllocatedDisk(): number {
+    const value = Number.parseInt(
+      env.CONTAINERBASE_MAX_ALLOCATED_DISK ?? '',
+      10,
+    );
+    return Number.isNaN(value) ? 100 : value;
+  }
+
+  /**
    * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
    * `/tmp/containerbase` when unset or empty. Trailing slashes are dropped.
    * A path that is not absolute and normalized, or that is `/tmp` or below it,
