@@ -16,6 +16,8 @@
   - [uninstall-pip](#uninstall-pip-command)
 - [List](#list)
   - [list-tools](#list-tools-command)
+- [Cleanup](#cleanup)
+  - [cleanup-downloads](#cleanup-downloads-command)
 
 ---
 
@@ -517,4 +519,34 @@ When writing to a file, JSON output is minified.
 - Writes the JSON output to a file
   ```bash
   containerbase-cli list tools --json --out /tmp/tools.json
+  ```
+
+<br>
+
+## Cleanup
+
+### `containerbase-cli cleanup downloads` <a name="cleanup-downloads-command"></a>
+
+#### Description <a name="Description-cleanup-downloads"></a>
+
+Evicts the oldest files from the download cache in `CONTAINERBASE_CACHE_DIR` down to `CONTAINERBASE_MAX_ALLOCATED_DISK`.
+
+It's the same cleanup which runs after each install, see [download cache](../README.md#download-cache): the oldest files are removed while the disk holding the folder is filled to `CONTAINERBASE_MAX_ALLOCATED_DISK` percent or more.
+Nothing is removed when `CONTAINERBASE_CACHE_DIR` isn't set.
+`CONTAINERBASE_MAX_ALLOCATED_DISK` defaults to `100`, so only a full disk is cleaned, set a lower value, eg. `80`, to evict earlier, see [download cache](../README.md#download-cache).
+With `--dry-run` only the oldest file is logged, as nothing is freed to check the fill level again.
+
+#### Usage <a name="Usage-cleanup-downloads"></a>
+
+`$ containerbase-cli cleanup downloads [-d,--dry-run]`
+
+#### Examples <a name="Examples-cleanup-downloads"></a>
+
+- Evicts the oldest downloads
+  ```bash
+  containerbase-cli cleanup downloads
+  ```
+- Logs the oldest download which would be removed
+  ```bash
+  containerbase-cli cleanup downloads --dry-run
   ```
