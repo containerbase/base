@@ -70,6 +70,9 @@ export class FlutterPrepareService extends BasePrepareService {
 export class FlutterInstallService extends BaseInstallService {
   readonly name = 'flutter';
 
+  /** Flutter writes its `bin/cache` and git state into the version folder. */
+  override readonly writesToInstallDir = true;
+
   /** The oldest prebuild. */
   override readonly minVersion = '1.22.6';
 

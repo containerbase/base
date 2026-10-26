@@ -73,6 +73,9 @@ export class DotnetPrepareService extends BasePrepareService {
 export class DotnetInstallService extends BaseInstallService {
   readonly name = 'dotnet';
 
+  /** Runtime sdk and workload installs write into the shared tool path. */
+  override readonly writesToInstallDir = true;
+
   /**
    * Older SDKs abort on the supported Ubuntu releases: before 6.0 they need
    * OpenSSL 1.x, before 5.0 also an older ICU.
@@ -163,10 +166,14 @@ export class DotnetInstallService extends BaseInstallService {
   /**
    * Moves the whole tool path into the build-time snapshot and links it back,
    * as all sdk versions share it. Later sdk installs write through the link,
-   * an already linked tool path is skipped.
+   * an already linked tool path is skipped. A restore copies it from a
+   * read-only snapshot, see `writesToInstallDir`.
    */
   override async snapshot(_version: string): Promise<void> {
-    await this.snapshotSvc.moveAndLink(this.pathSvc.toolPath(this.name));
+    await this.snapshotSvc.moveAndLink(
+      this.pathSvc.toolPath(this.name),
+      this.writesToInstallDir,
+    );
   }
 
   /**

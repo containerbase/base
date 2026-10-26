@@ -37,8 +37,26 @@ elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "
   fi
 fi
 
+# a volume at `/opt/containerbase` hides the image's files, `containerbase-cli init`
+# restores them from the build-time snapshot when the stamps differ, or when a
+# folder to copy (`c` in `.links`) on a writable volume still links to the snapshot
+snapshot_dir=/var/lib/containerbase/opt
+if [[ -f "${snapshot_dir}/.stamp" ]]; then
+  if [[ "$(< "${snapshot_dir}/.stamp")" != "$(cat /opt/containerbase/.stamp 2> /dev/null)" ]]; then
+    run_init=true
+  elif [[ -w /opt/containerbase && -f "${snapshot_dir}/.links" \
+    && "$(stat -c %d /opt/containerbase)" != "$(stat -c %d /opt)" ]]; then
+    while read -r flag folder; do
+      if [[ "${flag}" == c && "$(readlink "/opt/containerbase/${folder}")" == "${snapshot_dir}/${folder}" ]]; then
+        run_init=true
+      fi
+    done < "${snapshot_dir}/.links"
+  fi
+fi
+
 if [[ "${run_init}" == true ]]; then
-  # initialize all prepared tools, also checks and links a configured tmp dir
+  # restores `/opt/containerbase` and initializes all prepared tools, also
+  # checks and links a configured tmp dir
   containerbase-cli init tool all
   if [[ -n "${CONTAINERBASE_TMP_DIR}" && "${tmp_dir}" != "${default_tmp_dir}" \
     && ( -z "${tmp_dir}" || "$(readlink "${default_tmp_dir}")" != "${tmp_dir}" ) ]]; then
