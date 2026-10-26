@@ -130,7 +130,7 @@ export class NugetVersionResolver extends ToolVersionResolver {
   /** Loads the list of nuget.exe releases from dist.nuget.org, newest first. */
   private async getReleases(): Promise<z.infer<typeof NugetVersion>[]> {
     return NugetTools.parse(
-      await this.http.getJson('https://dist.nuget.org/tools.json'),
+      await this.getJson('https://dist.nuget.org/tools.json'),
     )['nuget.exe'];
   }
 }
