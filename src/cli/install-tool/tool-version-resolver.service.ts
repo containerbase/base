@@ -21,20 +21,15 @@ interface Host {
 }
 
 /**
- * The distros whose files a release needs to run on the host: the host distro
- * itself, or, when the data has no files for it on the host arch at all, any
- * older Ubuntu release, as the installers use those builds on newer releases,
- * like the jammy prebuilds on noble and resolute.
+ * The distros whose files a release can use on the host distro: the host
+ * distro and every older Ubuntu release, as the installers use those builds on
+ * newer releases, like the jammy prebuilds on noble and resolute. A tool with a
+ * `distroMinVersion` for the host distro has its own floor there, eg. swift or
+ * php on resolute, so only the host distro builds count.
  * @returns the accepted distro codenames, none for an unknown distro
  */
-function hostDistros(data: ToolVersions, host: Host): string[] {
-  const { arch, distro } = host;
-  if (
-    data.versions.some(
-      (v) =>
-        v.distros?.includes(distro) && (!v.archs || v.archs.includes(arch)),
-    )
-  ) {
+function hostDistros(data: ToolVersions, distro: string): string[] {
+  if (data.distroMinVersion?.[distro] !== undefined) {
     return [distro];
   }
   // oldest first; Ubuntu only, other distro families like Debian need their own
@@ -82,7 +77,7 @@ function pick(
     }
   }
   const stable = data.versions.filter((v) => !v.prerelease);
-  const distros = hostDistros(data, host);
+  const distros = hostDistros(data, host.distro);
   const forHost = (list: typeof data.versions): typeof data.versions =>
     list.filter(
       (v) =>
