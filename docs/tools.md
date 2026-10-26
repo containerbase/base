@@ -17,6 +17,7 @@
 - [List](#list)
   - [list-tools](#list-tools-command)
 - [Cleanup](#cleanup)
+  - [cleanup](#cleanup-command)
   - [cleanup-cache](#cleanup-cache-command)
   - [cleanup-downloads](#cleanup-downloads-command)
   - [cleanup-tool](#cleanup-tool-command)
@@ -526,6 +527,39 @@ When writing to a file, JSON output is minified.
 <br>
 
 ## Cleanup
+
+### `containerbase-cli cleanup` <a name="cleanup-command"></a>
+
+#### Description <a name="Description-cleanup"></a>
+
+Runs all cleanups in this order:
+
+1. [`cleanup tool`](#cleanup-tool-command) removes the unlinked tools
+1. [`cleanup cache`](#cleanup-cache-command) removes the known tool caches
+1. [`cleanup downloads`](#cleanup-downloads-command) evicts the oldest downloads
+
+`CONTAINERBASE_MAX_ALLOCATED_DISK` defaults to `100`, so downloads are only evicted on a full disk, set a lower value, eg. `80`, to evict earlier, see [download cache](../README.md#download-cache).
+
+When a step fails, it's logged and the next step still runs.
+The command fails at the end when any step failed.
+It fails right away, without running any step, when the tools can't be loaded, eg. because the containerbase folders aren't writable.
+
+#### Usage <a name="Usage-cleanup"></a>
+
+`$ containerbase-cli cleanup [-d,--dry-run]`
+
+#### Examples <a name="Examples-cleanup"></a>
+
+- Runs all cleanups
+  ```bash
+  containerbase-cli cleanup
+  ```
+- Logs what all cleanups would remove
+  ```bash
+  containerbase-cli cleanup --dry-run
+  ```
+
+<br>
 
 ### `containerbase-cli cleanup cache` <a name="cleanup-cache-command"></a>
 

@@ -8,8 +8,16 @@ import {
   VersionService,
   createContainer,
 } from '../services/index.ts';
+import { NotSupported } from '../utils/codes.ts';
 import { logger, pathExists } from '../utils/index.ts';
-import { cleanupCache, cleanupDownloads, cleanupTools } from './index.ts';
+import { CleanupCacheService } from './cleanup-cache.service.ts';
+import { CleanupToolService } from './cleanup-tool.service.ts';
+import {
+  cleanupAll,
+  cleanupCache,
+  cleanupDownloads,
+  cleanupTools,
+} from './index.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -135,6 +143,90 @@ describe('cli/cleanup/index', () => {
 
       expect(await cleanupDownloads()).toEqual([]);
       expect(logger.info).toHaveBeenCalledExactlyOnceWith('Nothing to evict');
+    });
+  });
+
+  describe('cleanupAll', () => {
+    test('runs all cleanups in order', async () => {
+      const tools = vi
+        .spyOn(CleanupToolService.prototype, 'cleanupTools')
+        .mockResolvedValue();
+      const cache = vi
+        .spyOn(CleanupCacheService.prototype, 'cleanupCache')
+        .mockResolvedValue([]);
+      const downloads = vi
+        .spyOn(CacheService.prototype, 'evict')
+        .mockResolvedValue([]);
+      // called once per install container
+      const containers = vi.spyOn(PathService.prototype, 'findLegacyTools');
+
+      expect(await cleanupAll(true)).toBe(0);
+
+      expect(containers).toHaveBeenCalledOnce();
+      expect(tools).toHaveBeenCalledExactlyOnceWith(true);
+      expect(cache).toHaveBeenCalledExactlyOnceWith(true);
+      expect(downloads).toHaveBeenCalledExactlyOnceWith(true);
+      // the per step summaries are logged once
+      expect(vi.mocked(logger.info).mock.calls).toEqual([
+        ['Cleanup tool ...'],
+        ['Cleanup cache ...'],
+        ['Dry run: would remove 0 cache paths'],
+        ['Cleanup downloads ...'],
+        ['Nothing to evict'],
+      ]);
+    });
+
+    test('continues after a failed step', async () => {
+      vi.spyOn(CleanupToolService.prototype, 'cleanupTools').mockResolvedValue(
+        NotSupported,
+      );
+      const err = new Error('cache failed');
+      vi.spyOn(CleanupCacheService.prototype, 'cleanupCache').mockRejectedValue(
+        err,
+      );
+      const downloads = vi
+        .spyOn(CacheService.prototype, 'evict')
+        .mockResolvedValue([]);
+
+      expect(await cleanupAll(true)).toBe(NotSupported);
+
+      expect(downloads).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { code: NotSupported },
+        'Cleanup tool failed',
+      );
+      expect(logger.warn).toHaveBeenCalledWith({ err }, 'Cleanup cache failed');
+    });
+
+    test('returns 1 when a step threw', async () => {
+      vi.spyOn(
+        CleanupToolService.prototype,
+        'cleanupTools',
+      ).mockResolvedValue();
+      vi.spyOn(CleanupCacheService.prototype, 'cleanupCache').mockResolvedValue(
+        [],
+      );
+      vi.spyOn(CacheService.prototype, 'evict').mockRejectedValue(
+        new Error('evict failed'),
+      );
+
+      expect(await cleanupAll(true)).toBe(1);
+    });
+
+    test('fails without running a step when the container cannot be created', async () => {
+      vi.spyOn(VersionService.prototype, 'getTypes').mockRejectedValueOnce(
+        new Error('db failed'),
+      );
+      const tools = vi.spyOn(CleanupToolService.prototype, 'cleanupTools');
+      const cache = vi.spyOn(CleanupCacheService.prototype, 'cleanupCache');
+      const downloads = vi.spyOn(CacheService.prototype, 'evict');
+
+      await expect(cleanupAll(true)).rejects.toThrow('db failed');
+
+      expect(tools).not.toHaveBeenCalled();
+      expect(cache).not.toHaveBeenCalled();
+      expect(downloads).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
     });
   });
 });
