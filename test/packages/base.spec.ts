@@ -413,8 +413,36 @@ describe('packages/base', () => {
 
   test.each([
     {
-      name: 'a bad checksum',
+      name: 'a checksum without algorithm',
+      value: { ...file, checksum: 'abc' },
+    },
+    {
+      name: 'an uppercase checksum',
+      value: { ...file, checksum: 'SHA256:ABC' },
+    },
+    {
+      name: 'a checksum which is no hex',
+      value: { ...file, checksum: 'sha256:xyz' },
+    },
+    {
+      name: 'a short sha1 digest',
+      value: { ...file, checksum: `sha1:${'a'.repeat(39)}` },
+    },
+    {
+      name: 'a short sha256 digest',
       value: { ...file, checksum: 'sha256:abc' },
+    },
+    {
+      name: 'a long sha512 digest',
+      value: { ...file, checksum: `sha512:${'a'.repeat(129)}` },
+    },
+    {
+      name: 'a short sha224 digest',
+      value: { ...file, checksum: `sha224:${'a'.repeat(55)}` },
+    },
+    {
+      name: 'a long sha384 digest',
+      value: { ...file, checksum: `sha384:${'a'.repeat(97)}` },
     },
     {
       name: 'an http url',
@@ -422,6 +450,26 @@ describe('packages/base', () => {
     },
   ])('ToolFile rejects $name', ({ value }) => {
     expect(schemas.ToolFile.safeParse(value).success).toBe(false);
+  });
+
+  test('ToolFile accepts an unknown checksum algorithm', () => {
+    // readers skip such a file instead of rejecting the whole version
+    expect(
+      schemas.ToolFile.safeParse({ ...file, checksum: 'blake3-256:abc123' })
+        .success,
+    ).toBe(true);
+  });
+
+  test.each([
+    { algorithm: 'sha224', length: 56 },
+    { algorithm: 'sha384', length: 96 },
+  ])('ToolFile accepts a $algorithm digest', ({ algorithm, length }) => {
+    expect(
+      schemas.ToolFile.safeParse({
+        ...file,
+        checksum: `${algorithm}:${'a'.repeat(length)}`,
+      }).success,
+    ).toBe(true);
   });
 
   test('the format is version 1 in the v1 folder', () => {

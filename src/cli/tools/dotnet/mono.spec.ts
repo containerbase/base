@@ -6,6 +6,7 @@ import {
   EnvService,
   LinkToolService,
   PathService,
+  ToolVersionsService,
 } from '../../services/index.ts';
 import { getDistro, logger } from '../../utils/index.ts';
 import {
@@ -50,6 +51,11 @@ describe('cli/tools/dotnet/mono', () => {
       versionCode: 'jammy',
       versionId: '22.04',
     });
+    // no tool-versions data, the prebuild is downloaded from its release
+    vi.spyOn(
+      ToolVersionsService.prototype,
+      'getVersionFiles',
+    ).mockResolvedValue(undefined);
     execaMock.mockResolvedValue({ failed: false });
   });
 

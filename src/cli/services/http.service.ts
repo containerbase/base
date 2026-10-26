@@ -230,18 +230,20 @@ export class HttpService {
 
   /**
    * Fetches the body as text, see {@link _request}: a network error or
-   * timeout gets up to three attempts, 1 s and 2 s apart, each of them with
-   * got's own retries unless `opts` turns them off like {@link lookupOptions}.
-   * An error status is only retried by got.
+   * timeout gets up to three attempts by default, 1 s and 2 s apart, each of
+   * them with got's own retries unless `opts` turns them off like
+   * {@link lookupOptions}. An error status is only retried by got.
    *
+   * @param request - how the request is run, like {@link getJson}
    * @throws the original HTTP error for an error status, without trying again
-   * @throws `download failed` after three failed attempts otherwise
+   * @throws `download failed` after the failed attempts otherwise
    */
   async get(
     url: string,
     opts: OptionsOfTextResponseBody = {},
+    request: HttpRequestConfig = {},
   ): Promise<string> {
-    return await this._request(url, opts, (req) => req.text());
+    return await this._request(url, opts, (req) => req.text(), request);
   }
 
   /**

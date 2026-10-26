@@ -18,7 +18,10 @@ export interface ToolFile {
    */
   url: string;
   /**
-   * `<algorithm>:<lowercase hex>`
+   * `<algorithm>:<lowercase hex>`, published with `sha1`, `sha256` or
+   * `sha512`. The digests of the sha algorithms readers verify (`sha1`,
+   * `sha224`, `sha256`, `sha384`, `sha512`) have their exact length. Readers
+   * skip a file with an algorithm they don't know.
    */
   checksum: string;
   /**
