@@ -567,7 +567,7 @@ It fails right away, without running any step, when the tools can't be loaded, e
 
 Removes the known tool caches from `/tmp/containerbase/cache`.
 
-These are the cache folders of every supported tool, whether it is installed or not, eg. the npm cache in `.npm/_cacache`, the pnpm store in `.local/share/pnpm/store`, the maven repository in `.m2/repository` or the go module cache in `go/pkg/mod`.
+These are the cache folders of every supported tool, whether it is installed or not, eg. the npm cache in `.npm/_cacache`, the pnpm store in `.local/share/pnpm/store`, the yarn caches in `.yarn/berry/cache` and `.yarn/zpm/cache`, the maven repository in `.m2/repository` or the go module cache in `go/pkg/mod`.
 The contents of the generic `.cache` folder and the virtualenv cache in `.local/share/virtualenv` are removed too.
 Config files, like `.npmrc`, `.m2/settings.xml` or the conan profiles, are kept.
 When a tool's cache folder or `.cache` itself is a link, eg. to a volume, its target is emptied and the link kept, a link to a missing target is skipped.

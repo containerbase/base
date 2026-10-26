@@ -72,6 +72,43 @@ describe('cli/services/path.service', () => {
       true,
     );
     expect(await pathExists(rootPath('tmp/containerbase'), 'dir')).toBe(true);
+    expect(await pathExists(join(pathSvc.cachePath, '.npm'), 'dir')).toBe(true);
+    expect(await pathExists(join(pathSvc.cachePath, '.yarn'), 'dir')).toBe(
+      true,
+    );
+  });
+
+  test('ensureBasePaths keeps a linked npm cache folder', async () => {
+    const npm = join(pathSvc.cachePath, '.npm');
+    await ensurePaths(['var/cache/npm-volume', 'tmp/containerbase/cache']);
+    await deleteAsync(npm, { force: true });
+    await fs.symlink(rootPath('var/cache/npm-volume'), npm);
+
+    try {
+      await pathSvc.ensureBasePaths();
+      expect(await fs.readlink(npm)).toBe(rootPath('var/cache/npm-volume'));
+    } finally {
+      await fs.rm(npm);
+    }
+  });
+
+  test('ensureCacheDir skips a link to a missing folder', async () => {
+    const yarn = join(pathSvc.cachePath, '.yarn');
+    await ensurePaths('tmp/containerbase/cache');
+    await deleteAsync(yarn, { force: true });
+    await fs.symlink(rootPath('var/cache/missing'), yarn);
+
+    try {
+      await expect(pathSvc.ensureCacheDir('.yarn')).resolves.toBeUndefined();
+      expect(await fs.readlink(yarn)).toBe(rootPath('var/cache/missing'));
+      expect(await pathExists(rootPath('var/cache/missing'))).toBe(false);
+      expect(logger.debug).toHaveBeenCalledWith(
+        { path: yarn },
+        'cache link target missing',
+      );
+    } finally {
+      await fs.rm(yarn);
+    }
   });
 
   describe('with CONTAINERBASE_TMP_DIR', () => {
