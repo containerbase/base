@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import { getuid } from 'node:process';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { PathService } from '../services/index.ts';
-import { logger } from '../utils/index.ts';
+import { PathService, SnapshotService } from '../services/index.ts';
+import { isDockerBuild, logger } from '../utils/index.ts';
 import { BasePrepareService } from './base-prepare.service.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
 import {
@@ -16,6 +16,10 @@ import { ensurePaths, rootPath } from '~test/path.ts';
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
 vi.mock('del');
+vi.mock('../utils/index.ts', async (importActual) => ({
+  ...(await importActual<typeof import('../utils/index.ts')>()),
+  isDockerBuild: vi.fn(),
+}));
 
 vi.mock('node:process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('node:process')>()),
@@ -152,6 +156,15 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       );
     });
 
+    test('snapshots the tools prepared before an unknown tool', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const snapshot = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await svc.prepare(['bun', 'not-exist'])).toBe(1);
+
+      expect(snapshot).toHaveBeenCalledOnce();
+    });
+
     test('skips tools which never need preparation', async () => {
       const spy = vi.spyOn(DummyPrepareService.prototype, 'prepare');
 
@@ -166,11 +179,13 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
 
     test('prepares a tool', async () => {
       const spy = vi.spyOn(DummyPrepareService.prototype, 'prepare');
+      const snapshot = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
 
       expect(await svc.prepare(['dummy'])).toBeUndefined();
 
       expect(spy).toHaveBeenCalledOnce();
       expect(await pathSvc.isPrepared('dummy')).toBe(true);
+      expect(snapshot).not.toHaveBeenCalled();
 
       // a second run is skipped
       spy.mockClear();
@@ -180,6 +195,32 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
         { tool: 'dummy' },
         'tool already prepared',
       );
+    });
+
+    test('snapshots the files at image build time', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      await fs.mkdir(rootPath('opt/containerbase/tools/sbt'), {
+        recursive: true,
+      });
+      await fs.writeFile(rootPath('opt/containerbase/tools/sbt/env.sh'), '');
+
+      expect(await svc.prepare(['bun'])).toBeUndefined();
+
+      expect(
+        await fs.readFile(
+          rootPath('var/lib/containerbase/opt/tools/sbt/env.sh'),
+          'utf8',
+        ),
+      ).toBe('');
+    });
+
+    test('skips the snapshot when asked, eg. during an install', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const snapshot = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await svc.prepare(['bun'], false, false)).toBeUndefined();
+
+      expect(snapshot).not.toHaveBeenCalled();
     });
 
     test('skips ignored tools', async () => {

@@ -95,6 +95,19 @@ describe('cli/tools/ruby/utils', () => {
       await expect(svc.install('2.5.1')).resolves.toBeUndefined();
     });
 
+    test('snapshot: links the ruby version folder', async () => {
+      const svc = await child.getAsync(BundlerInstallService);
+      await svc.install('2.5.2');
+      const versionPath = pathSvc.versionedToolPath('bundler', '2.5.2');
+
+      await expect(svc.snapshot('2.5.2')).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(versionPath, rubyVersion))).toBe(
+        join(pathSvc.snapshotDir, 'tools/bundler/2.5.2', rubyVersion),
+      );
+      expect((await fs.lstat(versionPath)).isDirectory()).toBe(true);
+    });
+
     test('install: uses the replaced gem source', async () => {
       vi.stubEnv('URL_REPLACE_0_FROM', 'https://rubygems.org/');
       vi.stubEnv('URL_REPLACE_0_TO', 'https://gems.example.com/');

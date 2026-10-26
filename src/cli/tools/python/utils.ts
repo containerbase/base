@@ -152,6 +152,15 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
   }
 
+  /**
+   * Moves the virtualenv of the current python version below the versioned
+   * tool path into the build-time snapshot and links it back, so the
+   * versioned tool path stays a real folder for other python versions.
+   */
+  override async snapshot(version: string): Promise<void> {
+    await this.snapshotParentFolder(version, await this.getPythonVersion());
+  }
+
   /** Whether the version is installed for the current python version. */
   override async isInstalled(version: string): Promise<boolean> {
     const pythonVersion = await this.getPythonVersion();

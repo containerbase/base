@@ -8,8 +8,8 @@ import {
   fileRights,
   isInside,
   logger,
+  move,
   pathExists,
-  spawn,
   tool2path,
 } from '../utils/index.ts';
 import { EnvService } from './env.service.ts';
@@ -137,9 +137,8 @@ async function resolvePath(path: string): Promise<string> {
 
 /**
  * Moves the entries of `src` into `dst`, merging folders and keeping the
- * entries which already exist in `dst`. Uses `mv` when renaming fails across
- * devices, eg. for folders of a lower overlay layer, as it keeps the owner.
- * Entries removed by another process meanwhile are skipped. Calls `onMove`
+ * entries which already exist in `dst`, see `move`. Entries removed by
+ * another process meanwhile are skipped. Calls `onMove`
  * after each moved entry.
  */
 async function moveDirContents(
@@ -162,15 +161,12 @@ async function moveDirContents(
     const existing = await fs.lstat(to).catch(() => null);
     if (!existing) {
       try {
-        await fs.rename(from, to);
+        await move(from, to);
       } catch (err) {
         if (isMissingError(err)) {
           continue;
         }
-        if ((err as NodeJS.ErrnoException).code !== 'EXDEV') {
-          throw err;
-        }
-        await spawn('mv', [from, to]);
+        throw err;
       }
       onMove();
     } else if (entry.isDirectory() && existing.isDirectory()) {
@@ -258,6 +254,15 @@ export class PathService {
   }
 
   /**
+   * Path to `/var/lib/containerbase/opt`, the snapshot of what image builds
+   * install to `/opt/containerbase`, see `SnapshotService`. Custom images copy
+   * `/usr/local/containerbase` from the base image, but never this folder.
+   */
+  get snapshotDir(): string {
+    return join(this.varPath, 'opt');
+  }
+
+  /**
    * Path to the containerbase temp folder, `CONTAINERBASE_TMP_DIR` or
    * `/tmp/containerbase`.
    */
@@ -295,13 +300,18 @@ export class PathService {
 
   /**
    * Creates a folder and its missing parents, owned by the configured user.
-   * An existing folder is left as is.
+   * An existing folder is left as is, also a link to a folder, eg. a version
+   * folder linked to the snapshot, see `SnapshotService`.
    *
-   * @throws when the path exists but is no folder, eg. a symlink or a file
+   * @throws when the path exists but is no folder, eg. a file or a link to a
+   * file or to a missing path
    */
   async createDir(path: string, mode = 0o775): Promise<void> {
     const stats = await fs.lstat(path).catch(() => null);
-    if (stats?.isDirectory()) {
+    if (
+      stats?.isDirectory() ||
+      (stats?.isSymbolicLink() && (await pathExists(path, 'dir')))
+    ) {
       return;
     }
     if (stats) {

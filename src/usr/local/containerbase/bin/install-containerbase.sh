@@ -117,6 +117,10 @@ function prepare_v2_tools () {
 
   setup_directories
 
+  # contains the snapshot of the build-time root installs, user installs never
+  # write it, `setup_directories` created its parent `/var/lib/containerbase`
+  mkdir -p "${CONTAINERBASE_VAR_DIR}/opt"
+
   # custom images may still add their own v2 tools, and the cli lists this folder
   mkdir -p /usr/local/containerbase/tools/v2
 
