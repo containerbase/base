@@ -19,6 +19,7 @@
 - [Cleanup](#cleanup)
   - [cleanup-cache](#cleanup-cache-command)
   - [cleanup-downloads](#cleanup-downloads-command)
+  - [cleanup-tool](#cleanup-tool-command)
 
 ---
 
@@ -584,4 +585,43 @@ With `--dry-run` only the oldest file is logged, as nothing is freed to check th
 - Logs the oldest download which would be removed
   ```bash
   containerbase-cli cleanup downloads --dry-run
+  ```
+
+<br>
+
+### `containerbase-cli cleanup tool` <a name="cleanup-tool-command"></a>
+
+#### Description <a name="Description-cleanup-tool"></a>
+
+Removes all unlinked tools from `/opt/containerbase/tools`.
+
+Every installed tool version which is not the linked one of its tool is uninstalled, together with all tools installed for it, like [`uninstall-tool --recursive`](#uninstall-tool-command) does.
+A tool without a linked version, eg. a `java-jdk` while `java` is linked to a `java-jre`, has all its versions uninstalled.
+
+A version is kept, together with all tools installed for it, when:
+
+- a tool installed for it, also indirectly, is the linked version of its tool, eg. an older node version with the linked pnpm version installed for it
+- it or a tool installed for it can't be uninstalled, like legacy shell tools, `git`, or tools which need root when not running as root
+- a tool installed for it is kept for another version
+
+#### Usage <a name="Usage-cleanup-tool"></a>
+
+`$ containerbase-cli cleanup tool [-d,--dry-run]`
+
+#### Examples <a name="Examples-cleanup-tool"></a>
+
+- Removes all unlinked tool versions
+
+  ```bash
+  $ install-tool node 22.0.0
+  $ install-tool node 24.0.0
+  $ containerbase-cli cleanup tool
+   INFO (9): Cleanup tool ...
+   INFO (9): Uninstalling unlinked tool node@22.0.0...
+   INFO (9): Cleanup tool succeeded in 120ms.
+  ```
+
+- Logs the tool versions which would be removed
+  ```bash
+  containerbase-cli cleanup tool --dry-run
   ```

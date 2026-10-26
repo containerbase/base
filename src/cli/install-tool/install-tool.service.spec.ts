@@ -6,6 +6,7 @@ import {
   CacheService,
   EnvService,
   LinkToolService,
+  PathService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -313,8 +314,11 @@ describe('cli/install-tool/install-tool.service', () => {
 
     test('dry run', async () => {
       expect(await install.install('bun', '3.0.0')).toBeUndefined();
+      const ensure = vi.spyOn(PathService.prototype, 'ensureBasePaths');
 
       expect(await install.uninstall('bun', '3.0.0', true)).toBeUndefined();
+      // a dry run doesn't create any folders
+      expect(ensure).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         'Dry run: uninstall tool bun ...',
       );

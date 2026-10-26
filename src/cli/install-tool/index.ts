@@ -1,6 +1,7 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
 import type { ShellWrapperConfig } from '../services/index.ts';
 import {
+  DataService,
   IpcClient,
   LinkToolService,
   PathService,
@@ -491,8 +492,27 @@ export async function uninstallTool({
   dryRun = false,
   recursive = false,
 }: UninstallToolConfig): Promise<number | void> {
+  const container = await prepareUninstallContainer(dryRun);
+  const svc = await container.getAsync(InstallToolService);
+  return svc.uninstall(tool, version, dryRun, recursive);
+}
+
+/**
+ * Creates the install container with a generic install service for every
+ * installed `gem`, `npm` or `pip` package, so they can be uninstalled. A dry
+ * run opens the databases read-only, so they are never written.
+ *
+ * @throws when the containerbase folders are not writable, except for a dry
+ * run
+ */
+export async function prepareUninstallContainer(
+  dryRun: boolean,
+): Promise<Container> {
   const container = await prepareInstallContainer();
-  if (!dryRun) {
+  if (dryRun) {
+    // only reads, so the databases are never written
+    (await container.getAsync(DataService)).readOnly();
+  } else {
     await (await container.getAsync(PathService)).ensureWritable();
   }
   const verSvc = await container.getAsync(VersionService);
@@ -527,7 +547,5 @@ export async function uninstallTool({
       }
     }
   }
-
-  const svc = await container.getAsync(InstallToolService);
-  return svc.uninstall(tool, version, dryRun, recursive);
+  return container;
 }
