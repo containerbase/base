@@ -5,6 +5,7 @@ import {
   IpcClient,
   LinkToolService,
   PathService,
+  RestoreService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -316,8 +317,40 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
 }
 
 /**
- * Installs a tool version. For a `gem`, `npm` or `pip` type, a generic
- * install service is registered for the package first.
+ * Restores `/opt/containerbase` from the build-time snapshot when it doesn't
+ * match it, eg. an empty volume, see `RestoreService`. It uses a bare
+ * container without install services, so nothing opens the database before
+ * the restore copied it.
+ *
+ * @throws when `/opt/containerbase` isn't writable
+ */
+export async function restoreInstallDir(): Promise<void> {
+  const svc = await createContainer().getAsync(RestoreService);
+  await svc.restore();
+}
+
+/**
+ * Runs before anything opens the database: restores `/opt/containerbase`,
+ * see `restoreInstallDir`. A dry run changes nothing, so when a restore is
+ * needed the database is only opened read-only, which doesn't create one on
+ * a volume.
+ *
+ * @throws when `/opt/containerbase` isn't writable
+ */
+async function prepareInstallDir(dryRun: boolean): Promise<void> {
+  const container = createContainer();
+  const svc = await container.getAsync(RestoreService);
+  if (!dryRun) {
+    await svc.restore();
+  } else if (await svc.needsRestore()) {
+    (await container.getAsync(DataService)).readOnly();
+  }
+}
+
+/**
+ * Installs a tool version. `/opt/containerbase` is restored from the
+ * build-time snapshot first, see `prepareInstallDir`. For a `gem`, `npm` or
+ * `pip` type, a generic install service is registered for the package.
  */
 export async function installTool(
   tool: string,
@@ -325,10 +358,9 @@ export async function installTool(
   dryRun = false,
   type?: InstallToolType,
 ): Promise<number | void> {
+  await prepareInstallDir(dryRun);
   const container = await prepareInstallContainer();
   if (type) {
-    const verSvc = await container.getAsync(VersionService);
-    await verSvc.setType(tool, type);
     switch (type) {
       case 'gem': {
         @injectable()
@@ -412,6 +444,10 @@ export async function installTool(
     }
   }
 
+  if (type && !dryRun) {
+    const verSvc = await container.getAsync(VersionService);
+    await verSvc.setType(tool, type);
+  }
   const svc = await container.getAsync(InstallToolService);
   return svc.install(tool, version, dryRun);
 }
@@ -477,8 +513,10 @@ interface UninstallToolConfig {
 }
 
 /**
- * Uninstalls a tool version, or all versions without one. Generic install
- * services are registered for every installed `gem`, `npm` or `pip` package.
+ * Uninstalls a tool version, or all versions without one.
+ * `/opt/containerbase` is restored from the build-time snapshot first, see
+ * `prepareInstallDir`. Generic install services are registered for every
+ * installed `gem`, `npm` or `pip` package.
  *
  * @throws when the containerbase folders are not writable, except for a dry
  * run
@@ -496,8 +534,10 @@ export async function uninstallTool({
 
 /**
  * Creates the install container with a generic install service for every
- * installed `gem`, `npm` or `pip` package, so they can be uninstalled. A dry
- * run opens the databases read-only, so they are never written.
+ * installed `gem`, `npm` or `pip` package, so they can be uninstalled.
+ * `/opt/containerbase` is restored from the build-time snapshot first, see
+ * `prepareInstallDir`. A dry run opens the databases read-only, so they are
+ * never written.
  *
  * @throws when the containerbase folders are not writable, except for a dry
  * run
@@ -505,6 +545,7 @@ export async function uninstallTool({
 export async function prepareUninstallContainer(
   dryRun: boolean,
 ): Promise<Container> {
+  await prepareInstallDir(dryRun);
   const container = await prepareInstallContainer();
   if (dryRun) {
     // only reads, so the databases are never written

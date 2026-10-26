@@ -221,3 +221,41 @@ The tools keep working through the symlinks, so the absolute paths written at in
 Uninstalling a tool version removes the symlink.
 At image build time its copy is removed from the snapshot too, at runtime the snapshot is kept.
 A failed install at image build time also removes the copy of the version.
+
+The snapshot also holds `.links`, the list of the linked folders, and `.stamp`, a hash of that list and of the copied files.
+In `.links`, the folders of tools which write into their install folder at runtime (`flutter`, `dotnet` and `php`) are flagged with `c`, the others with `l`.
+A restore copies the flagged folders onto a volume and links the others.
+The same stamp is written to `/opt/containerbase/.stamp`, so an image without a volume matches its snapshot.
+
+### Volume at `/opt/containerbase`
+
+You can mount a writable volume at `/opt/containerbase`, also with a read-only root file system, eg. `docker run --read-only --tmpfs /tmp -v containerbase:/opt/containerbase …`.
+The volume may start empty or hold the state of an earlier container, also of an older image.
+
+`containerbase-cli init tool all`, which `docker-entrypoint.sh` runs, restores the volume from the snapshot when its `.stamp` is missing or differs from the stamp of the snapshot.
+It also restores it when a flagged folder on a writable volume still links to the snapshot, eg. when docker filled a new volume from the image, so the stamps match.
+The entrypoint runs it for these reasons too, independent of `/tmp/containerbase`.
+`install-tool`, `install-npm`, `install-gem`, `install-pip` and the `uninstall-*` commands restore it implicitly before they open the database.
+Their dry runs don't restore it, and don't create a database on a volume which isn't restored yet.
+Without a volume, the stamps match and nothing is done, also not when the root file system is read-only.
+Images with their own entrypoint must run `containerbase-cli init tool all` before using the tools.
+When the restore fails, `init` still initializes the tools and then fails.
+
+The restore:
+
+- removes links to folders of the snapshot which no longer exist, eg. versions an older image had,
+- links the folders listed in `.links` which are missing on the volume,
+  the flagged folders are copied instead, also replacing a link to the snapshot, so the writes of these tools persist with the volume,
+- copies the missing files of the `bin`, `lib`, `env.d`, `versions` and `ssl` folders and the `env.sh` of every tool,
+- copies the database `data/containerbase.db` when the volume has none,
+- writes the stamp of the snapshot to `/opt/containerbase/.stamp`.
+
+Copies go to a temp path next to their target first and are renamed into place, so an interrupted restore never leaves a half copied folder, file or database, and the next restore redoes it.
+Folders and files which exist on the volume are kept, eg. tools installed at runtime, their wrappers and a copied tool folder.
+The files the restore copied are recorded in `/opt/containerbase/.restored`, also existing files which equal the snapshot copy, eg. copied by docker into a new volume.
+On a later restore, eg. after an image update, such a file is replaced by the new copy, or removed when the snapshot no longer has it, unless it changed on the volume since.
+Folders which are empty after removing such files are removed too.
+An unreadable `.restored` counts as empty.
+As root, the restore gives the created folders, the copied files and the copied tool folders to the user and the root group.
+When the current user can't write the volume, it fails before changing anything.
+`docker` plugin links in `/tmp/containerbase` aren't restored.

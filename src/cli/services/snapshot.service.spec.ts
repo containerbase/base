@@ -1,4 +1,11 @@
-import fs, { mkdir, readFile, readlink, rm, writeFile } from 'node:fs/promises';
+import fs, {
+  mkdir,
+  readFile,
+  readdir,
+  readlink,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { deleteAsync } from 'del';
@@ -413,11 +420,85 @@ describe('cli/services/snapshot.service', () => {
     test('skips missing tools and database', async () => {
       await svc.snapshotFiles();
 
-      expect(await pathExists(snapshot)).toBe(false);
+      expect((await readdir(snapshot)).sort()).toEqual(['.links', '.stamp']);
       expect(logger.debug).toHaveBeenCalledWith(
         { file: rootPath('opt/containerbase/data/containerbase.db') },
         'snapshot: no database',
       );
+    });
+  });
+
+  describe('index', () => {
+    let snapshot!: string;
+    let install!: string;
+
+    beforeAll(() => {
+      snapshot = rootPath('var/lib/containerbase/opt');
+      install = rootPath('opt/containerbase');
+    });
+
+    test('lists the linked folders and writes matching stamps', async () => {
+      await write('opt/containerbase/tools/dotnet/sdk/8.0.100/.version');
+      await write('opt/containerbase/tools/node/24.0.0/bin/node');
+      await write('opt/containerbase/tools/yarn/1.0.0/24.0.0/bin/yarn');
+      await write('opt/containerbase/tools/yarn/2.0.0/22.0.0/bin/yarn');
+      await write('opt/containerbase/bin/node', 'wrapper');
+      // a tool writing into its install folder is flagged for a copy
+      await svc.moveAndLink(rootPath('opt/containerbase/tools/dotnet'), true);
+      await svc.moveAndLink(rootPath('opt/containerbase/tools/node/24.0.0'));
+      await svc.moveAndLink(
+        rootPath('opt/containerbase/tools/yarn/1.0.0/24.0.0'),
+      );
+      // a link elsewhere is no snapshot link
+      await fs.symlink('/usr', rootPath('opt/containerbase/tools/usr'));
+
+      await svc.snapshotFiles();
+
+      expect(await readFile(`${snapshot}/.links`, 'utf8')).toBe(
+        'c tools/dotnet\nl tools/node/24.0.0\nl tools/yarn/1.0.0/24.0.0\n',
+      );
+      const stamp = await svc.readStamp(snapshot);
+      expect(stamp).toMatch(/^[0-9a-f]{64}$/);
+      expect(await svc.readStamp(install)).toBe(stamp);
+
+      // an unchanged snapshot keeps its stamp
+      const { mtimeMs } = await fs.stat(`${snapshot}/.stamp`);
+      await svc.snapshotFiles();
+      expect(await svc.readStamp(snapshot)).toBe(stamp);
+      expect((await fs.stat(`${snapshot}/.stamp`)).mtimeMs).toBe(mtimeMs);
+
+      // a changed file changes it
+      await writeFile(rootPath('opt/containerbase/bin/node'), 'changed');
+      await svc.snapshotFiles();
+      expect(await svc.readStamp(snapshot)).not.toBe(stamp);
+      expect(await svc.readStamp(install)).toBe(await svc.readStamp(snapshot));
+    });
+
+    test('readStamp is null without a stamp', async () => {
+      expect(await svc.readStamp(install)).toBeNull();
+    });
+
+    test('copy copies a folder with links', async () => {
+      await write('var/lib/containerbase/opt/tools/php/8.0.0/bin/php', 'php');
+      await fs.symlink(
+        'php',
+        rootPath('var/lib/containerbase/opt/tools/php/8.0.0/bin/php8'),
+      );
+
+      await svc.copy(
+        rootPath('var/lib/containerbase/opt/tools/php/8.0.0'),
+        rootPath('opt/containerbase/tools/php/8.0.0'),
+      );
+
+      expect(
+        await readFile(
+          rootPath('opt/containerbase/tools/php/8.0.0/bin/php'),
+          'utf8',
+        ),
+      ).toBe('php');
+      expect(
+        await readlink(rootPath('opt/containerbase/tools/php/8.0.0/bin/php8')),
+      ).toBe('php');
     });
   });
 });

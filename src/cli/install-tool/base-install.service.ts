@@ -85,6 +85,14 @@ export abstract class BaseInstallService {
   readonly cacheDirs: readonly string[] = [];
 
   /**
+   * Tools which write into their own install folder at runtime, eg. flutter's
+   * `bin/cache`. Restoring a volume at `/opt/containerbase` copies their
+   * folders instead of linking them, so their runtime writes persist with
+   * the volume, see `RestoreService`.
+   */
+  readonly writesToInstallDir: boolean = false;
+
+  /**
    * The package manager installing the tool, published as `type` in the base
    * package metadata.
    */
@@ -155,6 +163,7 @@ export abstract class BaseInstallService {
   async snapshot(version: string): Promise<void> {
     await this.snapshotSvc.moveAndLink(
       this.pathSvc.versionedToolPath(this.name, version),
+      this.writesToInstallDir,
     );
   }
 
