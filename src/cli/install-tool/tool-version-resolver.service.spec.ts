@@ -424,18 +424,37 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', 'latest')).toBe('latest');
   });
 
-  test('only uses the host distro builds when the tool has some', async () => {
+  test('uses the builds of an older distro for the releases without host distro builds', async () => {
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: 'noble',
+      versionId: '24.04',
+    });
+    serve('other', 200, [
+      { version: '5.10.1', distros: ['jammy', 'noble'] },
+      { version: '5.9.2', distros: ['jammy'] },
+    ]);
+
+    expect(await svc.resolve('other', '5.9')).toBe('5.9.2');
+  });
+
+  test('only uses the host distro builds when the tool has a floor there', async () => {
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
       versionCode: 'resolute',
       versionId: '26.04',
     });
-    serve('other', 200, [
-      { version: '6.3.0', distros: ['jammy', 'noble'] },
-      { version: '6.4.0', distros: ['jammy', 'noble', 'resolute'] },
-    ]);
+    serve('other', 200, {
+      tool: 'other',
+      updatedAt: '2026-10-16T00:00:00Z',
+      distroMinVersion: { resolute: '6.4.0' },
+      versions: [
+        { version: '6.4.0', distros: ['jammy', 'noble', 'resolute'] },
+        { version: '6.3.0', distros: ['jammy', 'noble'] },
+      ],
+    });
 
-    expect(await svc.resolve('other', undefined)).toBe('6.4.0');
+    expect(await svc.resolve('other', '6.3')).toBe('6.3');
   });
 
   test('picks a release without archs and distros lists', async () => {
