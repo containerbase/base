@@ -254,6 +254,15 @@ export class PathService {
   }
 
   /**
+   * Path to `/opt/containerbase/.restored`, the files a restore from the
+   * snapshot copied, see `RestoreService`. It only exists on a restored
+   * volume.
+   */
+  get restoredFile(): string {
+    return join(this.installDir, '.restored');
+  }
+
+  /**
    * Path to `/var/lib/containerbase/opt`, the snapshot of what image builds
    * install to `/opt/containerbase`, see `SnapshotService`. Custom images copy
    * `/usr/local/containerbase` from the base image, but never this folder.

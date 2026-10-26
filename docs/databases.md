@@ -18,6 +18,29 @@ Installing tools on a read-only file system isn't supported.
 Without a database, the [databases of an older version](#migration-from-older-versions) are loaded into memory without migrating them, so an image built with an older containerbase version keeps working.
 Without any database an empty one is used, so no tools are found.
 
+## Build-time database on a volume
+
+On a volume at `/opt/containerbase`, see the [volume section](./custom-base-image.md#volume-at-optcontainerbase), the database on the volume only holds the runtime state.
+The state of the image build comes from the database of the [build-time snapshot](./custom-base-image.md#build-time-snapshot), `/var/lib/containerbase/opt/data/containerbase.db`, which is attached read-only as `base`.
+So an image update brings its build-time versions, links, current versions and types, without copying them onto the volume.
+It's attached when the volume was restored from the snapshot, which `/opt/containerbase/.restored` marks, or still needs a restore, eg. for a dry run before the first restore.
+Without a volume, eg. at build time or with the image's own `/opt/containerbase`, nothing is attached.
+A build-time database without a schema is ignored, one with a newer schema version fails with an error asking to update containerbase.
+
+The cli reads through temporary views named like the tables, which combine both databases, writes only go to the database on the volume:
+
+- `versions`: the versions of both databases.
+- `links`, `state` and `types`: keyed by `name`, a row on the volume overrides the build-time row with the same name.
+- A [`tombstones`](#tombstones) row hides exactly one build-time row, eg. after uninstalling a build-time version at runtime.
+  Such a version stays uninstalled after an image update, also its folder, wrappers and version file aren't restored while the build-time database still has that row.
+  Overriding a build-time link with another tool version adds a tombstone for the build-time link, so removing the runtime link doesn't bring it back.
+  Adding the row again removes the tombstone.
+- The restore reads the tombstones of the database on the volume read-only, after rolling back a journal left by an interrupted writer.
+
+On a volume docker filled from the image, the rows equal to a build-time row were copied from the image, so the first restore, before `.restored` exists, removes them.
+Later, such rows are runtime state and are kept, eg. a version installed at runtime which a newer image also installs at build time.
+After an image update the new build-time rows are used instead.
+
 ## Migration from older versions
 
 Older containerbase versions stored the data in [`@seald-io/nedb`](https://github.com/seald/nedb) databases, the files `links.nedb`, `state.nedb`, `types.nedb` and `versions.nedb` in the data folder.
@@ -42,8 +65,11 @@ Processes started by the cli itself, like the tool wrappers or the installers of
 
 - `links`: Stores information about linked tool versions.
 - `state`: Stores information about all the current linked version of installed tools.
+- `tombstones`: Stores the build-time rows removed at runtime.
 - `types`: Stores information about all the installer types of tools.
 - `versions`: Stores information about installed tool versions.
+
+A database of an older schema without `tombstones` gets it on the first writable open, a read-only one uses an empty temporary table.
 
 ## `links`
 
@@ -71,6 +97,19 @@ Stores information about all the current linked version of installed tools.
 - `tool_version`: tool version
 - `parent_name`: the optional parent tool name, `''` without a parent
 - `parent_version`: the optional parent tool version, `''` without a parent
+
+## `tombstones`
+
+Stores the rows of the [build-time database](#build-time-database-on-a-volume) which were removed at runtime, so they are hidden.
+
+**Columns:**
+
+- `tbl`: the table of the hidden row, `versions`, `links`, `state` or `types`
+- `name`: name of the hidden row
+- `row`: the other columns of the hidden row as a json array, eg. `["22.0.0","",""]` for a `versions` row or `["node","22.0.0"]` for a `links` row
+
+The combination of `tbl`, `name` and `row` is `unique`, a name can have several tombstones.
+A tombstone hides exactly this row, so a newer image's row with the same name but other values, eg. another current version, is used.
 
 ## `types`
 
