@@ -73,6 +73,13 @@ export abstract class BaseInstallService {
   readonly canUninstall: boolean = true;
 
   /**
+   * The cache folders of the tool, relative to `PathService.cachePath`, eg.
+   * `.cargo/registry`, which `cleanup cache` removes. Only folders holding
+   * data the tool downloads again, never config files.
+   */
+  readonly cacheDirs: readonly string[] = [];
+
+  /**
    * The package manager installing the tool, published as `type` in the base
    * package metadata.
    */

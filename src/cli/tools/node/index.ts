@@ -56,6 +56,17 @@ export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
   override readonly minVersion = '8.7.0';
 
+  /**
+   * The npm package cache, the packages `npx` downloaded and the pnpm store,
+   * `~/.local` links to the cache. The yarn classic cache is in `~/.cache`,
+   * which is cleaned anyway.
+   */
+  override readonly cacheDirs = [
+    '.local/share/pnpm/store',
+    '.npm/_cacache',
+    '.npm/_npx',
+  ];
+
   /** The architecture name used by the nodejs.org archives. */
   private get nodeArch(): string {
     switch (this.envSvc.arch) {

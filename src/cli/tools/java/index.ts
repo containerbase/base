@@ -147,6 +147,17 @@ export class JavaInstallService extends BaseInstallService {
   override readonly minVersion = '8.0.302+8';
 
   /**
+   * The maven repository, the gradle caches and the distributions the maven
+   * and gradle wrappers downloaded.
+   */
+  override readonly cacheDirs = [
+    '.gradle/caches',
+    '.gradle/wrapper/dists',
+    '.m2/repository',
+    '.m2/wrapper/dists',
+  ];
+
+  /**
    * Downloads the adoptium jdk or jre, verified against its checksum, into the
    * versioned tool path, adds the revoked intermediate CAs to its blocked list
    * and replaces its cacerts with the shared ones.

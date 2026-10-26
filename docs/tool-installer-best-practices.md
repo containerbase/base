@@ -66,6 +66,16 @@ override async prepare(): Promise<void> {
 }
 ```
 
+Declare the folders in the cache which only hold data the tool downloads again, like a package cache, in `cacheDirs` on the install service, relative to the cache path.
+[`containerbase-cli cleanup cache`](./tools.md#cleanup-cache-command) removes them, so never list config files or folders holding them, and list a sub folder where needed:
+
+```ts
+override readonly cacheDirs = ['.cargo/git', '.cargo/registry'];
+```
+
+Caches in the containerbase user's `~/.cache`, the `.cache` folder in the cache path, need no entry, its contents are always removed.
+Root's `/root/.cache` isn't touched.
+
 See [`src/cli/services/path.service.ts`](../src/cli/services/path.service.ts) for the full set of path helpers before reaching for `node:fs` directly.
 
 ## Shared helpers

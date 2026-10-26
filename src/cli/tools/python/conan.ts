@@ -56,6 +56,9 @@ export class ConanPrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class ConanInstallService extends PipBaseInstallService {
   override readonly name: string = 'conan';
+
+  /** The package cache, the profiles in `.conan2/profiles` are kept. */
+  override readonly cacheDirs = ['.conan2/p'];
 }
 
 @injectable()

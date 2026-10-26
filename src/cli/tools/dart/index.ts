@@ -8,6 +8,7 @@ import {
   initPubCache,
   prepareDartHome,
   preparePubCache,
+  pubCacheDirs,
 } from './utils.ts';
 
 // Dart SDK sample urls
@@ -43,6 +44,12 @@ export class DartInstallService extends BaseInstallService {
 
   /** The install rejects older majors, 2.0.0 is container tested. */
   override readonly minVersion = '2.0.0';
+
+  /**
+   * The packages pub downloaded, globally activated packages in the pub cache
+   * are kept.
+   */
+  override readonly cacheDirs = pubCacheDirs;
 
   /** The architecture name used by the dart sdk archives. */
   private get arch(): string {

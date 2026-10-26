@@ -94,6 +94,16 @@ export class DotnetInstallService extends BaseInstallService {
    */
   override readonly minVersion = '6.0.100';
 
+  /**
+   * The global packages folder and the nuget http caches, the nuget config in
+   * `.nuget/NuGet` is kept.
+   */
+  override readonly cacheDirs = [
+    '.local/share/NuGet/http-cache',
+    '.local/share/NuGet/v3-cache',
+    '.nuget/packages',
+  ];
+
   /** The architecture name used by the dotnet sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
