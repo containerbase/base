@@ -37,7 +37,8 @@ The cli reads through temporary views named like the tables, which combine both 
   Adding the row again removes the tombstone.
 - The restore reads the tombstones of the database on the volume read-only, after rolling back a journal left by an interrupted writer.
 
-Rows on the volume which equal a build-time row are build-time state, eg. from a volume docker filled from the image, so they are removed when the database is opened writable.
+On a volume docker filled from the image, the rows equal to a build-time row were copied from the image, so the first restore, before `.restored` exists, removes them.
+Later, such rows are runtime state and are kept, eg. a version installed at runtime which a newer image also installs at build time.
 After an image update the new build-time rows are used instead.
 
 ## Migration from older versions
@@ -107,7 +108,7 @@ Stores the rows of the [build-time database](#build-time-database-on-a-volume) w
 - `name`: name of the hidden row
 - `row`: the other columns of the hidden row as a json array, eg. `["22.0.0","",""]` for a `versions` row or `["node","22.0.0"]` for a `links` row
 
-All columns are `unique`.
+The combination of `tbl`, `name` and `row` is `unique`, a name can have several tombstones.
 A tombstone hides exactly this row, so a newer image's row with the same name but other values, eg. another current version, is used.
 
 ## `types`

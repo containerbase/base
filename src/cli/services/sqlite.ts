@@ -17,12 +17,24 @@ export function rowKey(table: string, alias: string): string {
   return `json_array(${columns[table]!.map((c) => `${alias}.${c}`).join(', ')})`;
 }
 
+/** Joins the rows `m` and `b` of a table on all their columns. */
+export function sameRow(table: string): string {
+  return ['name', ...columns[table]!]
+    .map((c) => `m.${c} = b.${c}`)
+    .join(' AND ');
+}
+
 /** Waits up to 5 seconds for a lock held by another process. */
 export const busyTimeout = 'PRAGMA busy_timeout = 5000;';
 
-/** The schema version of the database, `0` before the schema is created. */
-export function userVersion(db: DatabaseSync): number {
-  return Number(db.prepare('PRAGMA user_version').get()?.user_version);
+/**
+ * The schema version of the database, or of an attached one by its schema
+ * name, `0` before the schema is created.
+ */
+export function userVersion(db: DatabaseSync, schema = 'main'): number {
+  return Number(
+    db.prepare(`PRAGMA ${schema}.user_version`).get()?.user_version,
+  );
 }
 
 /** Whether the schema, eg. `main`, of the database has the table. */

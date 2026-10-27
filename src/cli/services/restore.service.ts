@@ -16,7 +16,15 @@ import {
   stampFile,
   tmpPath,
 } from './snapshot.service.ts';
-import { hasTable, rollbackJournal, rowKey } from './sqlite.ts';
+import {
+  busyTimeout,
+  columns,
+  hasTable,
+  rollbackJournal,
+  rowKey,
+  sameRow,
+  userVersion,
+} from './sqlite.ts';
 
 /**
  * Restored files by their path relative to `/opt/containerbase`, with their
@@ -139,7 +147,8 @@ export class RestoreService {
    * - writes the stamp of the snapshot.
    *
    * The database isn't copied, `DataService` attaches the build-time database
-   * on a restored volume, see `PathService.restoredFile`. Build-time versions
+   * on a restored volume, see `PathService.restoredFile`. The first restore
+   * removes the rows docker copied from the image, see `dedupeCopiedRows`. Build-time versions
    * uninstalled at runtime stay uninstalled: their folders, wrappers and
    * version files aren't restored, see `removedPaths`. As root, the created
    * folders and files are given to the user.
@@ -164,6 +173,7 @@ export class RestoreService {
     if (this.envSvc.isRoot) {
       await this.pathSvc.setOwner({ path: installDir });
     }
+    await this.dedupeCopiedRows();
     const removed = await this.removedPaths();
     await this.pruneLinks();
     await this.restoreFolders(removed);
@@ -171,6 +181,52 @@ export class RestoreService {
     const stamp = (await this.snapshotSvc.readStamp(snapshotDir))!;
     await this.pathSvc.writeFile(join(installDir, stampFile), stamp);
     this._needsRestore = Promise.resolve(false);
+  }
+
+  /**
+   * Removes the rows of the database on a volume restored for the first time,
+   * without `PathService.restoredFile`, which equal a row of the snapshot's
+   * database: docker copied them from the image, so they are build-time
+   * state, and after an image update the new build-time rows are used
+   * instead. Later restores and opens keep such rows, as they are runtime
+   * state then, eg. a version installed at runtime which a newer image also
+   * installs at build time. It's skipped when the databases have different
+   * schema versions, eg. a database of an older containerbase version. The
+   * writable open also rolls back a journal left by an interrupted writer.
+   *
+   * @throws when a database can't be read or written
+   */
+  private async dedupeCopiedRows(): Promise<void> {
+    const file = join(this.pathSvc.dataPath, databaseFile);
+    const base = this.snapshotSvc.snapshotPath(file);
+    if (
+      (await pathExists(this.pathSvc.restoredFile)) ||
+      !(await lstat(file)) ||
+      !(await lstat(base))
+    ) {
+      return;
+    }
+    const db = new DatabaseSync(file);
+    try {
+      db.exec(busyTimeout);
+      db.prepare('ATTACH DATABASE ? AS base').run(`file:${base}?mode=ro`);
+      const version = userVersion(db);
+      if (version === 0 || version !== userVersion(db, 'base')) {
+        return;
+      }
+      for (const table of Object.keys(columns)) {
+        const { changes } = db
+          .prepare(
+            `DELETE FROM main.${table} WHERE rowid IN (SELECT m.rowid FROM main.${table} m JOIN base.${table} b ON ${sameRow(table)})`,
+          )
+          .run();
+        if (changes) {
+          logger.debug({ table, changes }, 'restore: removed copied rows');
+        }
+      }
+    } finally {
+      db.close();
+    }
   }
 
   /**

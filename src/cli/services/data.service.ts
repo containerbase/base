@@ -12,6 +12,7 @@ import {
   hasTable,
   rollbackJournal,
   rowKey,
+  sameRow,
   userVersion,
 } from './sqlite.ts';
 
@@ -101,13 +102,6 @@ const mainOrder = 2 ** 40;
  */
 function tombstoned(table: string): string {
   return `EXISTS (SELECT 1 FROM tombstones t WHERE t.tbl = '${table}' AND t.name = b.name AND t.row = ${rowKey(table, 'b')})`;
-}
-
-/** Joins the rows `m` and `b` of a table on all their columns. */
-function sameRow(table: string): string {
-  return ['name', ...columns[table]!]
-    .map((c) => `m.${c} = b.${c}`)
-    .join(' AND ');
 }
 
 /**
@@ -249,10 +243,11 @@ export class DataService {
    * a volume at `/opt/containerbase` which is or needs to be restored, see
    * `RestoreService`, else empty tables, and creates the `views` the queries
    * read. So the image's build-time state comes from the snapshot, while the
-   * database on the volume only holds the runtime state: on a writable open,
-   * rows equal to build-time rows are removed from it, see `_dedupe`. A
-   * `tombstones` table missing in an older database is created, in memory for
-   * a read-only one.
+   * database on the volume holds the runtime state. Rows docker copied from
+   * the image are removed by the first restore, see `RestoreService`, not
+   * here, so runtime rows equal to build-time rows are kept. A `tombstones`
+   * table missing in an older database is created, in memory for a read-only
+   * one.
    *
    * @throws when the build-time database was created by a newer containerbase
    * version
@@ -267,9 +262,7 @@ export class DataService {
     ) {
       logger.debug({ base }, 'attaching the build-time database');
       db.prepare('ATTACH DATABASE ? AS base').run(`file:${base}?mode=ro`);
-      const version = Number(
-        db.prepare('PRAGMA base.user_version').get()?.user_version,
-      );
+      const version = userVersion(db, 'base');
       if (version > schemaVersion) {
         throw new Error(
           `The build-time containerbase database was created by a newer containerbase version (schema ${version}), update containerbase.`,
@@ -285,29 +278,7 @@ export class DataService {
     if (!hasTable(db, 'main', 'tombstones')) {
       db.exec(tombstonesTable(readOnly ? 'temp' : 'main'));
     }
-    if (attached && !readOnly) {
-      this._dedupe(db);
-    }
     db.exec(views);
-  }
-
-  /**
-   * Removes the rows of the database which equal a row of the attached
-   * build-time one. They are build-time state, eg. from a volume docker
-   * filled from the image, so after an image update the new build-time rows
-   * are used instead of the copied old ones.
-   */
-  private _dedupe(db: DatabaseSync): void {
-    for (const table of Object.keys(columns)) {
-      const { changes } = db
-        .prepare(
-          `DELETE FROM main.${table} WHERE rowid IN (SELECT m.rowid FROM main.${table} m JOIN base.${table} b ON ${sameRow(table)})`,
-        )
-        .run();
-      if (changes) {
-        logger.debug({ table, changes }, 'removed build-time rows');
-      }
-    }
   }
 
   /**

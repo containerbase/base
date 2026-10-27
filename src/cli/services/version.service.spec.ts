@@ -681,9 +681,10 @@ describe('cli/services/version.service', () => {
       expect(await vol.getType('pnpm')).toBe('gem');
     });
 
-    test('a volume filled from the image keeps no build-time rows', async () => {
+    test('runtime rows equal to build-time rows are kept', async () => {
       let vol = await build(image);
-      // docker copied the image's database into the volume
+      // the runtime state equals the build-time state, eg. node 22 was
+      // installed at runtime before an image installed it at build time
       await fs.copyFile(base, dbFile);
       await fs.chmod(dbFile, 0o664);
       vol = await (await testContainer()).getAsync(VersionService);
@@ -692,18 +693,25 @@ describe('cli/services/version.service', () => {
       ]);
       const copy = new DatabaseSync(dbFile, { readOnly: true });
       try {
-        expect(copy.prepare('SELECT * FROM main.versions').all()).toEqual([]);
-        expect(copy.prepare('SELECT * FROM main.state').all()).toEqual([]);
+        expect(copy.prepare('SELECT * FROM main.versions').all()).toHaveLength(
+          2,
+        );
       } finally {
         copy.close();
       }
 
-      // so the state of a newer image wins
-      vol = await update(newerImage);
-      expect(await vol.getCurrent('node')).toMatchObject({
-        tool: { version: '24.0.0' },
+      // so they stay when a newer image no longer has node 22
+      vol = await update(async (svc) => {
+        await svc.addInstalled({ name: 'node', version: '24.0.0' });
       });
-      expect(await vol.getType('pnpm')).toBe('gem');
+      expect(await vol.findInstalled('node')).toEqual([
+        { name: 'node', version: '24.0.0' },
+        { name: 'node', version: '22.0.0' },
+      ]);
+      expect(await vol.getCurrent('node')).toMatchObject({
+        tool: { version: '22.0.0' },
+      });
+      expect(await vol.getType('pnpm')).toBe('npm');
     });
 
     test('attaches the build-time database to a volume to restore', async () => {

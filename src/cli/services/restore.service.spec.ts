@@ -54,6 +54,19 @@ function mountVolume(): void {
   });
 }
 
+/** The rows of a table in the database on the volume. */
+function volumeRows(table: string): unknown[] {
+  const db = new DatabaseSync(
+    rootPath('opt/containerbase/data/containerbase.db'),
+    { readOnly: true },
+  );
+  try {
+    return db.prepare(`SELECT * FROM main.${table}`).all();
+  } finally {
+    db.close();
+  }
+}
+
 describe('cli/services/restore.service', () => {
   let child!: Container;
   let svc!: RestoreService;
@@ -217,6 +230,40 @@ describe('cli/services/restore.service', () => {
     expect(await versions.findInstalled('node')).toEqual([
       { name: 'node', version: '24.0.0' },
     ]);
+    // the rows docker copied from the image are removed
+    expect(volumeRows('versions')).toEqual([]);
+    expect(volumeRows('links')).toEqual([]);
+    expect(volumeRows('state')).toEqual([]);
+  });
+
+  test('keeps runtime rows equal to build-time rows after the first restore', async () => {
+    await buildAndMount();
+    await svc.restore();
+    // eg. node 24 installed at runtime, like the image at build time
+    const runtime = await (await testContainer()).getAsync(VersionService);
+    await runtime.addInstalled({ name: 'node', version: '24.0.0' });
+
+    // a normal open
+    const versions = await (await testContainer()).getAsync(VersionService);
+    await versions.addInstalled({ name: 'yarn', version: '2.0.0' });
+    expect(volumeRows('versions')).toHaveLength(2);
+
+    // an image update
+    await writeFile(`${snapshot}/.stamp`, 'newer');
+    await svc.restore();
+    expect(volumeRows('versions')).toHaveLength(2);
+  });
+
+  test('skips removing copied rows of a database of another schema', async () => {
+    await buildAndMount(true);
+    mountVolume();
+    const db = new DatabaseSync(`${install}/data/containerbase.db`);
+    db.exec('PRAGMA user_version = 0');
+    db.close();
+
+    await svc.restore();
+
+    expect(volumeRows('versions')).toHaveLength(2);
   });
 
   test('keeps the result of the check for the process', async () => {

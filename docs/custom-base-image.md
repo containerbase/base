@@ -256,7 +256,8 @@ When an image update brings a newer build-time version of a tool which was insta
 A build-time version uninstalled at runtime stays uninstalled, also after an image update: the restore doesn't link its folder again and doesn't copy back its wrappers and version file.
 This only holds while the image still has exactly that build-time state: when a newer image links or selects another version under the same name, its wrapper and version file are restored.
 Linking a build-time wrapper to another version at runtime hides the build-time link, so removing the runtime link doesn't bring back the old one.
-Database rows on the volume equal to build-time ones, eg. when docker filled the volume from the image, are dropped, so the state of a newer image wins.
+When docker filled the volume from the image, the first restore drops the database rows it copied, so the state of a newer image wins.
+Later, rows on the volume equal to build-time ones are runtime state and are kept, eg. a version installed at runtime which a newer image also installs.
 
 Copies go to a temp path next to their target first and are renamed into place, so an interrupted restore never leaves a half copied folder or file, and the next restore redoes it.
 Folders and files which exist on the volume are kept, eg. tools installed at runtime, their wrappers and a copied tool folder.
