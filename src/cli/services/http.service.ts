@@ -99,8 +99,18 @@ export interface HttpDownloadConfig {
   url: string;
   expectedChecksum?: string | undefined;
   checksumType?: HttpChecksumType | undefined;
-  fileName?: string;
+  /**
+   * The name of the downloaded file, only used when it's a plain file name,
+   * else the last segment of the url
+   */
+  fileName?: string | undefined;
 }
+
+/**
+ * A file name without a path, which doesn't start with a dot, so it stays in
+ * the cache folder of the download.
+ */
+const plainFileName = /^[\w+-][\w.+-]*$/;
 
 /** How a request is run, see {@link HttpService.getJson}. */
 export interface HttpRequestConfig {
@@ -135,8 +145,10 @@ export class HttpService {
    *
    * The cache folder is derived from the url, so a file downloaded before is
    * reused, as long as it still matches the expected checksum when one is
-   * given. Urls go through the configured url replacements, eg. a CDN. A
-   * failed download or checksum mismatch is tried up to three times.
+   * given. A `fileName` which isn't a plain file name is ignored, the file is
+   * then named like the last url segment. Urls go through the configured url
+   * replacements, eg. a CDN. A failed download or checksum mismatch is tried
+   * up to three times.
    *
    * @throws when all attempts failed
    */
@@ -152,8 +164,12 @@ export class HttpService {
 
     const cacheDir = this.envSvc.cacheDir ?? this.envSvc.tmpDir;
     const cachePath = join(cacheDir, urlChecksum);
-    // TODO: validate name
-    const file = fileName ?? new URL(url).pathname.split('/').pop()!;
+    let file = new URL(url).pathname.split('/').pop()!;
+    if (fileName && plainFileName.test(fileName)) {
+      file = fileName;
+    } else if (fileName) {
+      logger.debug({ url, fileName }, 'ignoring file name which is not plain');
+    }
     const filePath = join(cachePath, file);
 
     if (await this.pathSvc.fileExists(filePath)) {

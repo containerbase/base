@@ -296,7 +296,11 @@ export abstract class BaseInstallService {
 
   /**
    * Downloads a file picked by {@link findToolFile}, verified against its
-   * checksum. Url replacements and the cache apply.
+   * checksum, as a file of its name. The cache folder is keyed by the url, so
+   * it only shares the cache file with the installer's own download when that
+   * uses the same url and file name. A name which isn't a plain file name is
+   * ignored by the http service, see `HttpService.download`. Url replacements
+   * and the cache apply.
    *
    * @throws when the download fails
    */
@@ -307,6 +311,7 @@ export abstract class BaseInstallService {
       url: file.url,
       checksumType: type,
       expectedChecksum: value,
+      fileName: file.name,
     });
   }
 
