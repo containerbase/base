@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { TerraformInstallService } from './terraform.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/terraform', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the zip is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -55,6 +57,29 @@ describe('cli/tools/terraform', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const filename = 'terraform_1.17.0_linux_amd64.zip';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}/terraform/1.17.0/terraform_1.17.0_linux_arm64.zip`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}/terraform/1.17.0/${filename}`, archive, 'amd64'),
+    ]);
+    // there is no interceptor for the `SHA256SUMS`
+    scope(baseUrl).get(`/terraform/1.17.0/${filename}`).reply(200, archive);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(TerraformInstallService);
+
+    await expect(svc.install('1.17.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: join(pathSvc.versionedToolPath('terraform', '1.17.0'), 'bin'),
+    });
+  });
 
   test('install: rejects a missing checksum', async () => {
     const { svc } = await toolContext(TerraformInstallService);

@@ -19,21 +19,16 @@ export class GradleInstallService extends BaseInstallService {
   override readonly parent = 'java';
 
   /**
-   * Downloads the gradle distribution, verified against its `.sha256`, and
-   * extracts it into the versioned tool path.
+   * Downloads the gradle distribution and extracts it into the versioned tool
+   * path. The file and its checksum come from the tool-versions data, without
+   * data it is verified against its `.sha256`.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-${version}-bin.zip`;
     const url = `https://services.gradle.org/distributions/${filename}`;
-    const checksumFileUrl = `${url}.sha256`;
 
-    const expectedChecksum = await this.getChecksum(checksumFileUrl);
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256');
 
     await this.pathSvc.ensureToolPath(this.name);
 

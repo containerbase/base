@@ -11,7 +11,7 @@ import {
 import { DartInstallService, DartPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -30,6 +30,8 @@ describe('cli/tools/dart/index', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the sdk is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -60,6 +62,30 @@ describe('cli/tools/dart/index', () => {
         });
       },
     );
+
+    test('install: downloads the tool-versions file without the .sha256sum', async () => {
+      const sdkUrl = `${baseUrl}/dart-archive/channels/stable/release/3.6.0/sdk`;
+      mockToolFiles([
+        toolFile(`${sdkUrl}/dartsdk-linux-arm64-release.zip`, 'arm', 'arm64'),
+        toolFile(`${sdkUrl}/dartsdk-linux-x64-release.zip`, zip, 'amd64'),
+      ]);
+      // there is no interceptor for the `.sha256sum`
+      scope(baseUrl)
+        .get(
+          '/dart-archive/channels/stable/release/3.6.0/sdk/dartsdk-linux-x64-release.zip',
+        )
+        .reply(200, zip);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc, pathSvc } = await toolContext(DartInstallService);
+
+      await expect(svc.install('3.6.0')).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining('dartsdk-linux-x64-release.zip'),
+        cwd: pathSvc.versionedToolPath('dart', '3.6.0'),
+        strip: 1,
+      });
+    });
 
     test('install: rejects v1', async () => {
       const { svc } = await toolContext(DartInstallService);

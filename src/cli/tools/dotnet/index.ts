@@ -123,7 +123,9 @@ export class DotnetInstallService extends BaseInstallService {
   /**
    * Downloads the dotnet sdk and extracts it into the shared tool path, then
    * runs the first time setup and creates the nuget config, also for the user
-   * when running as root. No checksums are verified.
+   * when running as root. The sdk is verified against the sha512 of the
+   * release metadata from the tool-versions data, without data it is
+   * unverified.
    */
   override async install(version: string): Promise<void> {
     const toolPath = this.pathSvc.toolPath(this.name);
@@ -131,7 +133,7 @@ export class DotnetInstallService extends BaseInstallService {
     // https://github.com/dotnet/core/issues/9671
     // https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
     const url = `https://builds.dotnet.microsoft.com/dotnet/Sdk/${version}/dotnet-sdk-${version}-linux-${this.arch}.tar.gz`;
-    const file = await this.http.download({ url });
+    const file = await this.downloadWithoutChecksum(version, url);
 
     await this.compress.extract({
       file,
