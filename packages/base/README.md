@@ -121,6 +121,19 @@ replaceUrl(
 );
 ```
 
+A tool's data may list `minCb` ranges, the oldest containerbase version which can install a version and every version above it.
+`filterByMinCb(data, cbVersion)` returns the `versions` the given containerbase version can install, in the order of the data, and the `cb` values of the unmet ranges as `needed`.
+A `cbVersion` which isn't a release, like `0.0.0-PLACEHOLDER` (see `isReleaseVersion(version)`), skips the filter:
+
+```ts
+import { filterByMinCb, packageVersion } from '@containerbase/base';
+import type { ToolVersions } from '@containerbase/base';
+
+declare const data: ToolVersions; // the content of eg. `node.json`
+
+const { versions, needed } = filterByMinCb(data, packageVersion);
+```
+
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
 
 ## Contents
