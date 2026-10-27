@@ -10,6 +10,7 @@ import {
   SnapshotService,
   databaseFile,
   ifMissing,
+  isSame,
   linksFile,
   lstat,
   readdir,
@@ -449,7 +450,7 @@ export class RestoreService {
    * and it didn't change since, so runtime changes, eg. the wrappers of a
    * tool installed at runtime, are kept. An existing file which equals the
    * snapshot copy, eg. copied by docker into a new volume, is recorded as
-   * restored. A `removed` file isn't restored.
+   * restored, compared like the snapshot compares its copies, see `isSame`. A `removed` file isn't restored.
    */
   private async restoreEntry(
     rel: string,
@@ -477,7 +478,7 @@ export class RestoreService {
     if (dstStats) {
       const sig = await signature(dst, dstStats);
       if (previous[rel] !== sig) {
-        if (sig === (await signature(src, srcStats))) {
+        if (await isSame(src, srcStats, dst, dstStats)) {
           next[rel] = sig;
         }
         return;

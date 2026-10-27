@@ -416,6 +416,22 @@ describe('cli/services/restore.service', () => {
     );
   });
 
+  test('adopts files whose times differ below a millisecond', async () => {
+    await buildAndMount();
+    // a copy gets its time from a `Date`, so it can end up just below the
+    // millisecond of its source
+    await write('opt/containerbase/bin/node', 'wrapper');
+    await fs.utimes(`${snapshot}/bin/node`, 1_700_000_000, 1_700_000_000.0009);
+    await fs.utimes(`${install}/bin/node`, 1_700_000_000, 1_700_000_000.0011);
+
+    await svc.restore();
+
+    const restored = JSON.parse(await readFile(`${install}/.restored`, 'utf8'));
+    expect(restored['bin/node']).toBe(
+      `f 7 ${Math.trunc((await fs.stat(`${install}/bin/node`)).mtimeMs)}`,
+    );
+  });
+
   test('treats an unreadable record as empty', async () => {
     await buildAndMount();
     await write('opt/containerbase/.restored', 'not json');

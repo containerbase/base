@@ -85,9 +85,10 @@ async function readLines(path: string): Promise<string[]> {
 
 /**
  * Whether the copy `dst` of the file or link `src` is up to date: a link with
- * the same target, or a file with the same size and modification time.
+ * the same target, or a file with the same size and modification time. The
+ * times may differ below a millisecond, as a copy sets it from a `Date`.
  */
-async function isSame(
+export async function isSame(
   src: string,
   srcStats: Stats,
   dst: string,
