@@ -112,8 +112,12 @@ class DummyInstallService extends BaseInstallService {
   }
 
   /** Exposes the protected `downloadWithoutChecksum` to the tests. */
-  downloadUnverified(version: string, url: string): Promise<string> {
-    return this.downloadWithoutChecksum(version, url);
+  downloadUnverified(
+    version: string,
+    url: string,
+    name?: string,
+  ): Promise<string> {
+    return this.downloadWithoutChecksum(version, url, name);
   }
 
   /** Exposes the protected `downloadToolFile` to the tests. */
@@ -552,6 +556,53 @@ describe('cli/install-tool/base-install.service', () => {
       );
 
       expect(await fs.readFile(file, 'utf8')).toBe('any');
+    });
+
+    test.each([
+      { data: 'the data', path: '/unverified-data' },
+      { data: 'no data', path: '/unverified-none' },
+    ])('downloads a named file with $data', async ({ data, path }) => {
+      const url = `${baseUrl}${path}/tool.tgz`;
+      mockToolFiles(
+        data === 'the data'
+          ? [
+              {
+                name: 'tool-1.0.0-x86_64.tgz',
+                url,
+                checksum: `sha256:${checksum('tool')}`,
+              },
+            ]
+          : undefined,
+      );
+      scope(baseUrl).get(`${path}/tool.tgz`).reply(200, 'tool');
+
+      const file = await svc.downloadUnverified(
+        '1.0.0',
+        url,
+        'tool-1.0.0-x86_64.tgz',
+      );
+
+      expect(file).toMatch(/\/tool-1\.0\.0-x86_64\.tgz$/);
+      expect(await fs.readFile(file, 'utf8')).toBe('tool');
+    });
+
+    test('verifies a named file against the checksum of the data', async () => {
+      const url = `${baseUrl}/unverified-mismatch/tool.tgz`;
+      mockToolFiles([
+        {
+          name: 'tool-1.0.0-x86_64.tgz',
+          url,
+          checksum: `sha256:${checksum('other')}`,
+        },
+      ]);
+      scope(baseUrl)
+        .get('/unverified-mismatch/tool.tgz')
+        .times(3)
+        .reply(200, 'tool');
+
+      await expect(
+        svc.downloadUnverified('1.0.0', url, 'tool-1.0.0-x86_64.tgz'),
+      ).rejects.toThrow('download failed');
     });
   });
 

@@ -11,15 +11,18 @@ export class BazeliskInstallService extends BaseInstallService {
 
   /**
    * Downloads the bazelisk binary from GitHub into the versioned `bin`
-   * folder, with a `bazel` symlink to it. No checksums are verified.
+   * folder, with a `bazel` symlink to it. bazelisk publishes no checksums,
+   * the file is verified against the checksum of the tool-versions data, else
+   * unverified.
    */
   override async install(version: string): Promise<void> {
     const baseurl = `https://github.com/bazelbuild/bazelisk/releases/download/v${version}/`;
     const filename = `bazelisk-linux-${this.envSvc.arch}`;
 
-    const file = await this.http.download({
-      url: `${baseurl}${filename}`,
-    });
+    const file = await this.downloadWithoutChecksum(
+      version,
+      `${baseurl}${filename}`,
+    );
 
     await this.pathSvc.ensureToolPath(this.name);
 

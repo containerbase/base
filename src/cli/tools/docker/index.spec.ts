@@ -5,13 +5,14 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   CompressionService,
   EnvService,
+  HttpService,
   LinkToolService,
   PathService,
 } from '../../services/index.ts';
 import { DockerInstallService, DockerPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -29,6 +30,8 @@ describe('cli/tools/docker/index', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is downloaded unverified
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -49,11 +52,53 @@ describe('cli/tools/docker/index', () => {
         await expect(svc.install(version)).resolves.toBeUndefined();
 
         expect(extract).toHaveBeenCalledExactlyOnceWith({
-          file: expect.stringContaining(`docker-${version}.tgz`),
+          // named like the file of the tool-versions data
+          file: expect.stringContaining(`docker-${version}-${toolArch}.tgz`),
           cwd: join(pathSvc.versionedToolPath('docker', version), 'bin'),
           strip: 1,
           files: ['docker/docker'],
         });
+      },
+    );
+
+    test.each([
+      { hostArch: 'x64', toolArch: 'x86_64', version: '28.0.0' },
+      { hostArch: 'arm64', toolArch: 'aarch64', version: '28.0.1' },
+    ] as const)(
+      'install: verifies the $toolArch tool-versions file named with the arch',
+      async ({ hostArch, toolArch, version }) => {
+        vi.mocked(arch).mockReturnValue(hostArch);
+        const path = (dir: string): string =>
+          `/linux/static/stable/${dir}/docker-${version}.tgz`;
+        // the data adds the arch to the name, the url segment has none
+        mockToolFiles(
+          (['aarch64', 'x86_64'] as const).map((dir) => ({
+            ...toolFile(
+              `${baseUrl}${path(dir)}`,
+              `docker ${dir}`,
+              dir === 'x86_64' ? 'amd64' : 'arm64',
+            ),
+            name: `docker-${version}-${dir}.tgz`,
+          })),
+        );
+        scope(baseUrl).get(path(toolArch)).reply(200, `docker ${toolArch}`);
+        const download = vi.spyOn(HttpService.prototype, 'download');
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(DockerInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        // verified against the checksum of the data file of the arch
+        expect(download).toHaveBeenCalledWith(
+          expect.objectContaining({
+            expectedChecksum: checksum(`docker ${toolArch}`),
+          }),
+        );
+        expect(extract).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            file: expect.stringContaining(`docker-${version}-${toolArch}.tgz`),
+          }),
+        );
       },
     );
 
