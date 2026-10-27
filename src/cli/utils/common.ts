@@ -156,6 +156,8 @@ export async function cleanTmpFiles(
 const buildKitMounts = [
   '/volumes/buildx_buildkit_',
   '/buildkit/executor/resolv.conf',
+  // with `--network host`
+  '/buildkit/executor/resolv-host.conf',
 ];
 
 /** Whether the mounts show a buildkit build. */
