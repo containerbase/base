@@ -820,6 +820,38 @@ RUN set -ex; \
   [[ -d /tmp/containerbase && ! -L /tmp/containerbase ]]
 
 #--------------------------------------
+# test: cleanup
+#--------------------------------------
+FROM build AS test-cleanup
+
+# don't update!! the older version is left unlinked
+RUN install-tool pnpm 10.34.7
+
+# renovate: datasource=npm depName=pnpm
+ARG PNPM_VERSION=12.15.0
+RUN install-tool pnpm "${PNPM_VERSION}"
+
+RUN set -ex; \
+  mkdir -p "${USER_HOME}/.npm/_cacache" "${USER_HOME}/.local/share/pnpm/store/v10"; \
+  touch "${USER_HOME}/.npm/_cacache/marker" "${USER_HOME}/.local/share/pnpm/store/v10/marker"
+
+RUN set -ex; \
+  containerbase-cli cleanup --dry-run; \
+  [[ -d /opt/containerbase/tools/pnpm/10.34.7 ]]; \
+  [[ -f "${USER_HOME}/.npm/_cacache/marker" ]]; \
+  [[ -f "${USER_HOME}/.local/share/pnpm/store/v10/marker" ]]
+
+RUN set -ex; \
+  containerbase-cli cleanup; \
+  [[ ! -e /opt/containerbase/tools/pnpm/10.34.7 ]]; \
+  [[ ! -e "${USER_HOME}/.npm/_cacache" ]]; \
+  [[ -L "${USER_HOME}/.npm" ]]; \
+  [[ ! -e "${USER_HOME}/.local/share/pnpm/store" ]]; \
+  [[ -d "${USER_HOME}/.local/share/pnpm" ]]; \
+  node --version; \
+  pnpm --version | grep "^${PNPM_VERSION}$"
+
+#--------------------------------------
 # test: vp
 #--------------------------------------
 FROM build AS test-vp
@@ -862,6 +894,7 @@ COPY --from=testo /.dummy /.dummy
 COPY --from=testp /.dummy /.dummy
 COPY --from=testq /.dummy /.dummy
 COPY --from=test-tmp-dir /.dummy /.dummy
+COPY --from=test-cleanup /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 
 COPY --from=test-v20 /.dummy /.dummy
