@@ -102,24 +102,21 @@ export class BufInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the buf archive from GitHub, verified against the release's
-   * `sha256.txt`, and extracts only the `buf` binary into the versioned tool
-   * path.
+   * Downloads the buf archive from GitHub and extracts only the `buf` binary
+   * into the versioned tool path. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * `sha256.txt`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/bufbuild/buf/releases/download/v${version}/`;
     const filename = `buf-Linux-${this.ghArch}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}sha256.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'sha256.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

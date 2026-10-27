@@ -201,6 +201,42 @@ export abstract class BaseInstallService {
   }
 
   /**
+   * Downloads a file of a release folder: the file named `filename` of the
+   * tool-versions data, see {@link downloadToolFile}, else the file of the
+   * folder, verified against its sha256 in a checksum list of the same folder,
+   * see {@link findChecksum}.
+   *
+   * @param baseUrl - the url of the folder, with a trailing slash
+   * @param filename - the file to download, also its name in the data
+   * @param list - the file name of the checksum list, like `SHA256SUMS`
+   * @throws when the list has no checksum for `filename` or the download fails
+   */
+  protected async downloadChecksumListed(
+    version: string,
+    baseUrl: string,
+    filename: string,
+    list: string,
+  ): Promise<string> {
+    const file = await this.downloadToolFile(
+      version,
+      undefined,
+      (f) => f.name === filename,
+    );
+    if (file) {
+      return file;
+    }
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}${list}`,
+      filename,
+    );
+    return await this.http.download({
+      url: `${baseUrl}${filename}`,
+      checksumType: 'sha256',
+      expectedChecksum,
+    });
+  }
+
+  /**
    * Downloads a checksum file and returns its text without a leading BOM.
    * Files starting with a UTF-16LE BOM, like the PowerShell `hashes.sha256`,
    * are decoded as UTF-16LE, all others as UTF-8.

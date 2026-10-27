@@ -30,6 +30,24 @@ RUN install-tool dart 2.18.0
 
 GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/download/<version>/<file>` to `https://objects.githubusercontent.com/<some-url>` which seems to be an Amazon S3 bucket.
 
+## Tool versions data (containerbase.github.io)
+
+The image ships the tool versions data, which lists the files and checksums of the tool versions.
+For a version without embedded data, it's fetched from:
+
+- `<https://containerbase.github.io/tool-versions/v1/>`
+
+Samples:
+
+```txt
+https://containerbase.github.io/tool-versions/v1/mise.json
+https://containerbase.github.io/tool-versions/v1/mise.integrity.json
+https://containerbase.github.io/tool-versions/v1/mise/2026.2.13.json
+```
+
+The tools then download the listed files from the urls shown in their sections below, without their checksum files.
+Installing an exact version which isn't in the embedded data looks it up online first, before the tool's own download, so a blocked host costs the request timeout.
+
 ## `apko`
 
 apko releases are downloaded from:
@@ -568,7 +586,8 @@ Kustomize releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
+https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
+https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.3.0/checksums.txt
 ```
 
 ## `mise`

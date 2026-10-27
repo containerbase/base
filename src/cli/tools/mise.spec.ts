@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { MiseInstallService, MiseVersionResolver } from './mise.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/mise', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -54,6 +56,31 @@ describe('cli/tools/mise', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const releaseUrl = `${baseUrl}/jdx/mise/releases/download/v2026.3.0`;
+    const filename = 'mise-v2026.3.0-linux-x64.tar.xz';
+    mockToolFiles([
+      toolFile(
+        `${releaseUrl}/mise-v2026.3.0-linux-arm64.tar.xz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `SHASUMS256.txt`
+    scope(baseUrl)
+      .get(`/jdx/mise/releases/download/v2026.3.0/${filename}`)
+      .reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(MiseInstallService);
+
+    await expect(svc.install('2026.3.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
+  });
 
   test('install: throws without a matching checksum', async () => {
     const { svc } = await toolContext(MiseInstallService);

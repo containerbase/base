@@ -16,23 +16,20 @@ export class FluxInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the flux archive from GitHub, verified against the release's
-   * checksums file, and extracts it into the versioned `bin` folder.
+   * Downloads the flux archive from GitHub and extracts it into the versioned
+   * `bin` folder. The file and its checksum come from the tool-versions data,
+   * without data it is verified against the release's checksums file.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/fluxcd/flux2/releases/download/v${version}/`;
     const filename = `flux_${version}_linux_${this.arch}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}flux_${version}_checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      `flux_${version}_checksums.txt`,
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

@@ -9,23 +9,22 @@ export class HelmfileInstallService extends BaseInstallService {
   override readonly minVersion = '0.145.0';
 
   /**
-   * Downloads the helmfile archive from GitHub, verified against the
-   * release's checksums file, and extracts it into the versioned `bin` folder.
+   * Downloads the helmfile archive from GitHub and extracts it into the
+   * versioned `bin` folder. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * checksums file.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}_${version}_linux_${this.envSvc.arch}.tar.gz`;
     const url = `https://github.com/${name}/${name}/releases/download/v${version}/`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${url}${name}_${version}_checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      url,
       filename,
+      `${name}_${version}_checksums.txt`,
     );
-    const file = await this.http.download({
-      url: `${url}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
     await this.pathSvc.ensureToolPath(this.name);
     const cwd = await this.pathSvc.createVersionedToolPath(
       this.name,
