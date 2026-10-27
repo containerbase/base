@@ -1,7 +1,26 @@
-import { prepareInstallContainer } from '../install-tool/index.ts';
+import {
+  prepareInstallContainer,
+  prepareUninstallContainer,
+} from '../install-tool/index.ts';
 import { CacheService, createContainer } from '../services/index.ts';
 import { logger } from '../utils/index.ts';
 import { CleanupCacheService } from './cleanup-cache.service.ts';
+import { CleanupToolService } from './cleanup-tool.service.ts';
+
+/**
+ * Uninstalls all unlinked tool versions, see
+ * `CleanupToolService.cleanupTools`. Generic install services are registered
+ * for every installed `gem`, `npm` or `pip` package.
+ *
+ * @throws when the containerbase folders are not writable, except for a dry
+ * run
+ */
+export async function cleanupTools(dryRun = false): Promise<number | void> {
+  const container = await prepareUninstallContainer(dryRun);
+  container.bind(CleanupToolService).toSelf();
+  const svc = await container.getAsync(CleanupToolService);
+  return svc.cleanupTools(dryRun);
+}
 
 /**
  * Removes the known tool caches, see `CleanupCacheService.cleanupCache`, and

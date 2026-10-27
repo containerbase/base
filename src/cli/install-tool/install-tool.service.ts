@@ -219,6 +219,8 @@ export class InstallToolService {
 
   /**
    * Removes a tool version, or every installed version when none is given.
+   * A dry run only logs and skips `ensureBasePaths`, so it sets up no tmp
+   * link or base folders.
    *
    * @returns an exit code when the tool could not be uninstalled, eg. because
    * another tool depends on the version
@@ -234,7 +236,10 @@ export class InstallToolService {
       'InstallToolService.uninstall: supported tools',
     );
 
-    await this.pathSvc.ensureBasePaths();
+    if (!dryRun) {
+      // a dry run sets up no tmp link or base folders
+      await this.pathSvc.ensureBasePaths();
+    }
 
     if (!isNonEmptyStringAndNotWhitespace(version)) {
       const versions = new Set<string>();
