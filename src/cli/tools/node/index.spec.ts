@@ -417,6 +417,15 @@ describe('cli/tools/node/index', () => {
       expect(await fs.readlink(join(envSvc.userHome, '.npm'))).toBe(
         join(pathSvc.cachePath, '.npm'),
       );
+      expect((await fs.stat(join(envSvc.userHome, '.npm'))).isDirectory()).toBe(
+        true,
+      );
+      expect(await fs.readlink(join(envSvc.userHome, '.yarn'))).toBe(
+        join(pathSvc.cachePath, '.yarn'),
+      );
+      expect(
+        (await fs.stat(join(envSvc.userHome, '.yarn'))).isDirectory(),
+      ).toBe(true);
 
       // the tool env is only written once
       await expect(svc.initialize()).resolves.toBeUndefined();

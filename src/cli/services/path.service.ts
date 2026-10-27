@@ -392,6 +392,26 @@ export class PathService {
     await this.createDir(join(this.cachePath, '.cache'));
     await this.createDir(join(this.cachePath, '.config'));
     await this.createDir(join(this.cachePath, '.local', 'share'));
+    // targets of the `~/.npm` and `~/.yarn` links, also used without node's init
+    await this.ensureCacheDir('.npm');
+    await this.ensureCacheDir('.yarn');
+  }
+
+  /**
+   * Creates a folder in the cache path, eg. the target of a home folder link.
+   * A link to a folder, eg. a volume, is kept, a link to a missing target is
+   * skipped.
+   */
+  async ensureCacheDir(name: string): Promise<void> {
+    const path = join(this.cachePath, name);
+    if (await pathExists(path, 'dir')) {
+      return;
+    }
+    if ((await fs.lstat(path).catch(() => null))?.isSymbolicLink()) {
+      logger.debug({ path }, 'cache link target missing');
+      return;
+    }
+    await this.createDir(path);
   }
 
   /**

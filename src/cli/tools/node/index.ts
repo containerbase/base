@@ -6,7 +6,6 @@ import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { fileContent, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
-  prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
 } from './utils.ts';
@@ -16,18 +15,20 @@ import {
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
 
-  /** Initializes the cache and links the user's npm folders to it. */
+  /** Initializes the cache and links the user's npm and yarn folders to it. */
   override async prepare(): Promise<void> {
     await this.initialize();
     await prepareSymlinks(this.envSvc, this.pathSvc);
   }
 
   /**
-   * Creates the npm cache and `.npmrc`, and exports the node env with update
-   * notices and funding messages turned off and the openssl ca store used.
+   * Creates the npm and yarn caches and `.npmrc`, and exports the node env
+   * with update notices and funding messages turned off and the openssl ca
+   * store used.
    */
   override async initialize(): Promise<void> {
-    await prepareNpmCache(this.pathSvc);
+    await this.pathSvc.ensureCacheDir('.npm');
+    await this.pathSvc.ensureCacheDir('.yarn');
     await prepareNpmrc(this.pathSvc);
 
     if (!(await this.pathSvc.toolEnvExists(this.name))) {
@@ -57,14 +58,17 @@ export class NodeInstallService extends NodeBaseInstallService {
   override readonly minVersion = '8.7.0';
 
   /**
-   * The npm package cache, the packages `npx` downloaded and the pnpm store,
-   * `~/.local` links to the cache. The yarn classic cache is in `~/.cache`,
+   * The npm package cache, the packages `npx` downloaded, the pnpm store,
+   * `~/.local` links to the cache, and the global caches of yarn 2 to 5
+   * (`berry`) and yarn 6 (`zpm`). The yarn classic cache is in `~/.cache`,
    * which is cleaned anyway.
    */
   override readonly cacheDirs = [
     '.local/share/pnpm/store',
     '.npm/_cacache',
     '.npm/_npx',
+    '.yarn/berry/cache',
+    '.yarn/zpm/cache',
   ];
 
   /** The architecture name used by the nodejs.org archives. */

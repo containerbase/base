@@ -636,6 +636,7 @@ RUN set -ex; \
   containerbase-cli init tool node; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
   [[ -d /var/cache/containerbase/cache/.npm ]]; \
+  [[ -d /var/cache/containerbase/cache/.yarn ]]; \
   [[ -f /var/cache/containerbase/cache/.npmrc ]]; \
   [[ -d /var/cache/containerbase/cache/.cache ]]; \
   rm /var/cache/containerbase/tool.init.d/node
@@ -646,7 +647,8 @@ RUN set -ex; \
   docker-entrypoint.sh true; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
   [[ ! -e /var/cache/containerbase/tool.init.d/node ]]; \
-  [[ -d $USER_HOME/.npm ]]
+  [[ -d $USER_HOME/.npm ]]; \
+  [[ -d $USER_HOME/.yarn ]]
 
 # the fast path also takes a value with a trailing slash and keeps it
 RUN set -ex; \
@@ -683,7 +685,8 @@ RUN set -ex; \
   docker-entrypoint.sh true; \
   [[ "$(readlink /tmp/containerbase)" == /var/cache/containerbase ]]; \
   [[ -d /var/cache/containerbase/tool.init.d ]]; \
-  [[ -d $USER_HOME/.npm ]]
+  [[ -d $USER_HOME/.npm ]]; \
+  [[ -d $USER_HOME/.yarn ]]
 
 # a boot replaces a link to another folder
 RUN set -ex; \
@@ -850,6 +853,62 @@ RUN set -ex; \
   [[ -d "${USER_HOME}/.local/share/pnpm" ]]; \
   node --version; \
   pnpm --version | grep "^${PNPM_VERSION}$"
+
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.22
+
+# yarn classic still works with the linked `~/.yarn`, global installs use the npm prefix
+RUN set -ex; \
+  cd a; \
+  yarn install; \
+  [[ -d node_modules/semver ]]; \
+  [[ "$(yarn global bin)" == /usr/local/bin ]]; \
+  yarn global add semver@7.3.2; \
+  [[ "$(command -v semver)" == /usr/local/bin/semver ]]
+
+# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+ARG YARN_VERSION=4.18.1
+RUN install-tool yarn "${YARN_VERSION}"
+
+# the yarn berry global cache is kept in the containerbase cache
+RUN set -ex; \
+  cd b; \
+  yarn install; \
+  [[ -L "${USER_HOME}/.yarn" ]]; \
+  [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/berry/cache)" ]]; \
+  containerbase-cli cleanup cache; \
+  [[ ! -e /tmp/containerbase/cache/.yarn/berry/cache ]]; \
+  [[ -d /tmp/containerbase/cache/.yarn/berry ]]; \
+  yarn install; \
+  [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/berry/cache)" ]]; \
+  yarn --version | grep "^${YARN_VERSION}$"
+
+# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+ARG YARN6_VERSION=6.0.0-rc.19
+RUN install-tool yarn "${YARN6_VERSION}"
+
+# yarn 6 keeps its global cache in `~/.yarn/zpm/cache`
+RUN set -ex; \
+  mkdir /tmp/yarn6; \
+  cp b/package.json /tmp/yarn6/; \
+  cd /tmp/yarn6; \
+  yarn install; \
+  [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/zpm/cache)" ]]; \
+  containerbase-cli cleanup cache; \
+  [[ ! -e /tmp/containerbase/cache/.yarn/zpm/cache ]]; \
+  [[ -d /tmp/containerbase/cache/.yarn/zpm ]]; \
+  yarn --version | grep "^${YARN6_VERSION}$"
+
+USER root
+RUN rm -rf /tmp/containerbase
+USER 12021
+
+# without the entrypoint, the yarn wrapper's init recreates the emptied temp folder with the yarn folder
+RUN set -ex; \
+  cd /tmp/yarn6; \
+  yarn install; \
+  [[ -d "${USER_HOME}/.yarn" ]]; \
+  [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/zpm/cache)" ]]
 
 #--------------------------------------
 # test: vp

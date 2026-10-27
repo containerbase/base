@@ -12,7 +12,6 @@ import { logger } from '../../utils/index.ts';
 import {
   NpmBaseInstallService,
   prepareGlobalConfig,
-  prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
   prepareUserConfig,
@@ -386,15 +385,9 @@ describe('cli/tools/node/utils', () => {
   });
 
   describe('helpers', () => {
-    test('prepareNpmCache', async () => {
-      await expect(prepareNpmCache(pathSvc)).resolves.toBeUndefined();
-      expect(
-        (await fs.stat(join(pathSvc.cachePath, '.npm'))).isDirectory(),
-      ).toBe(true);
-    });
-
     test('prepareNpmrc', async () => {
       const npmrc = join(pathSvc.cachePath, '.npmrc');
+      await ensurePaths('tmp/containerbase/cache');
 
       await expect(prepareNpmrc(pathSvc)).resolves.toBeUndefined();
       expect(await fs.readFile(npmrc, 'utf8')).toBe('');
@@ -415,6 +408,9 @@ describe('cli/tools/node/utils', () => {
       );
       expect(await fs.readlink(join(envSvc.userHome, '.npmrc'))).toBe(
         join(pathSvc.cachePath, '.npmrc'),
+      );
+      expect(await fs.readlink(join(envSvc.userHome, '.yarn'))).toBe(
+        join(pathSvc.cachePath, '.yarn'),
       );
 
       // second run is a no-op
