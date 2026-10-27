@@ -39,23 +39,18 @@ export class SbtInstallService extends BaseInstallService {
   override readonly cacheDirs = ['.sbt/boot'];
 
   /**
-   * Downloads the sbt archive from GitHub, verified against its `.sha256`
-   * since v1.3.5, extracts it into the versioned tool path and drops the
-   * macOS and Windows launchers.
+   * Downloads the sbt archive from GitHub, extracts it into the versioned tool
+   * path and drops the macOS and Windows launchers. The file and its checksum
+   * come from the tool-versions data, without data it is verified against its
+   * `.sha256` since v1.3.5.
    */
   override async install(version: string): Promise<void> {
     const url = `https://github.com/sbt/sbt/releases/download/v${version}/${this.name}-${version}.tgz`;
 
     // sbt only publishes a `.sha256` checksum file since v1.3.5.
-    const expectedChecksum = semverGte(version, '1.3.5')
-      ? await this.getChecksum(`${url}.sha256`)
-      : undefined;
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = semverGte(version, '1.3.5')
+      ? await this.downloadChecksumSidecar(version, url, '.sha256')
+      : await this.downloadWithoutChecksum(version, url);
 
     await this.pathSvc.ensureToolPath(this.name);
 

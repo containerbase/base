@@ -12,6 +12,7 @@ import {
   vi,
 } from 'vitest';
 import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
+import type { HttpChecksumType } from '../services/http.service.ts';
 import {
   LinkToolService,
   PathService,
@@ -98,6 +99,21 @@ class DummyInstallService extends BaseInstallService {
     list: string,
   ): Promise<string> {
     return this.downloadChecksumListed(version, baseUrl, filename, list);
+  }
+
+  /** Exposes the protected `downloadChecksumSidecar` to the tests. */
+  downloadSidecar(
+    version: string,
+    url: string,
+    sidecar: string,
+    options?: { checksumType?: HttpChecksumType; name?: string },
+  ): Promise<string> {
+    return this.downloadChecksumSidecar(version, url, sidecar, options);
+  }
+
+  /** Exposes the protected `downloadWithoutChecksum` to the tests. */
+  downloadUnverified(version: string, url: string): Promise<string> {
+    return this.downloadWithoutChecksum(version, url);
   }
 
   /** Exposes the protected `downloadToolFile` to the tests. */
@@ -381,6 +397,161 @@ describe('cli/install-tool/base-install.service', () => {
       ).rejects.toThrow(
         `Checksum not found in ${baseUrl}/unlisted/SHA256SUMS for tool-amd64.tar.gz`,
       );
+    });
+  });
+
+  describe('downloadChecksumSidecar', () => {
+    const baseUrl = 'https://example.test';
+
+    test.each([
+      { options: undefined, sidecar: '.sha256', type: 'sha256' },
+      {
+        options: { checksumType: 'sha512' },
+        sidecar: '.sha512',
+        type: 'sha512',
+      },
+    ] as const)(
+      'downloads the file verified against its $sidecar',
+      async ({ options, sidecar, type }) => {
+        mockToolFiles();
+        const path = `/sidecar/tool-${type}.tar.gz`;
+        scope(baseUrl)
+          .get(`${path}${sidecar}`)
+          .reply(200, `${checksum('tool', type)}  tool.tar.gz\n`)
+          .get(path)
+          .reply(200, 'tool');
+
+        const file = await svc.downloadSidecar(
+          '1.0.0',
+          `${baseUrl}${path}`,
+          sidecar,
+          options,
+        );
+
+        expect(await fs.readFile(file, 'utf8')).toBe('tool');
+      },
+    );
+
+    test('downloads the file of the data named like the url', async () => {
+      mockToolFiles([
+        listedFile('tool-x64-musl.tar.gz', { arch: 'amd64' }),
+        listedFile('tool-x64.tar.gz', { arch: 'amd64' }),
+      ]);
+      // there is no interceptor for the sidecar
+      scope(baseUrl)
+        .get('/files/tool-x64.tar.gz')
+        .reply(200, 'tool-x64.tar.gz');
+
+      const file = await svc.downloadSidecar(
+        '1.0.0',
+        `${baseUrl}/files/tool-x64.tar.gz`,
+        '.sha256',
+      );
+
+      expect(await fs.readFile(file, 'utf8')).toBe('tool-x64.tar.gz');
+    });
+
+    test.each([
+      { data: 'the data', path: '/named-data' },
+      { data: 'the sidecar', path: '/named-sidecar' },
+    ])(
+      'downloads a named file verified against $data',
+      async ({ data, path }) => {
+        const url = `${baseUrl}${path}/tool`;
+        mockToolFiles(
+          data === 'the data'
+            ? [
+                {
+                  name: 'tool-v1.0.0-amd64',
+                  url,
+                  checksum: `sha256:${checksum('tool')}`,
+                  arch: 'amd64',
+                },
+              ]
+            : [],
+        );
+        const s = scope(baseUrl);
+        if (data === 'the sidecar') {
+          s.get(`${path}/tool.sha256`).reply(200, checksum('tool'));
+        }
+        s.get(`${path}/tool`).reply(200, 'tool');
+
+        const file = await svc.downloadSidecar('1.0.0', url, '.sha256', {
+          name: 'tool-v1.0.0-amd64',
+        });
+
+        expect(file).toMatch(/\/tool-v1\.0\.0-amd64$/);
+        expect(await fs.readFile(file, 'utf8')).toBe('tool');
+      },
+    );
+
+    test('names the file like the url for a name with a path', async () => {
+      mockToolFiles([]);
+      scope(baseUrl)
+        .get('/pathname/tool.sha256')
+        .reply(200, checksum('tool'))
+        .get('/pathname/tool')
+        .reply(200, 'tool');
+
+      const file = await svc.downloadSidecar(
+        '1.0.0',
+        `${baseUrl}/pathname/tool`,
+        '.sha256',
+        { name: '../tool-up' },
+      );
+
+      expect(file).toMatch(/\/[0-9a-f]+\/tool$/);
+    });
+
+    test('matches the decoded url name in the data', async () => {
+      // the data has the decoded name
+      mockToolFiles([
+        {
+          name: 'tool+1.tar.gz',
+          url: `${baseUrl}/encoded/tool%2B1.tar.gz`,
+          checksum: `sha256:${checksum('tool+1')}`,
+        },
+      ]);
+      // there is no interceptor for the sidecar
+      scope(baseUrl).get('/encoded/tool%2B1.tar.gz').reply(200, 'tool+1');
+
+      const file = await svc.downloadSidecar(
+        '1.0.0',
+        `${baseUrl}/encoded/tool%2B1.tar.gz`,
+        '.sha256',
+      );
+
+      expect(await fs.readFile(file, 'utf8')).toBe('tool+1');
+    });
+  });
+
+  describe('downloadWithoutChecksum', () => {
+    const baseUrl = 'https://example.test';
+
+    test('downloads the file of the data named like the url', async () => {
+      mockToolFiles([listedFile('tool-old.tar.gz')]);
+      scope(baseUrl)
+        .get('/files/tool-old.tar.gz')
+        .reply(200, 'tool-old.tar.gz');
+
+      const file = await svc.downloadUnverified(
+        '1.0.0',
+        `${baseUrl}/files/tool-old.tar.gz`,
+      );
+
+      expect(await fs.readFile(file, 'utf8')).toBe('tool-old.tar.gz');
+    });
+
+    test('downloads the file without data', async () => {
+      mockToolFiles();
+      scope(baseUrl).get('/unverified/tool.tar.gz').reply(200, 'any');
+
+      const file = await svc.downloadUnverified(
+        '1.0.0',
+        `${baseUrl}/unverified/tool.tar.gz`,
+      );
+
+      expect(await fs.readFile(file, 'utf8')).toBe('any');
     });
   });
 

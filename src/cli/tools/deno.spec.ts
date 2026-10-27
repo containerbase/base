@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { DenoInstallService } from './deno.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/deno', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the zip is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -49,6 +51,29 @@ describe('cli/tools/deno', () => {
       cwd: join(pathSvc.versionedToolPath('deno', version), 'bin'),
       strip: 0,
     });
+  });
+
+  test('install: downloads the tool-versions file without the .sha256sum', async () => {
+    const releaseUrl = '/denoland/deno/releases/download/v2.5.0';
+    const filename = 'deno-x86_64-unknown-linux-gnu.zip';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/deno-aarch64-unknown-linux-gnu.zip`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, zip, 'amd64'),
+    ]);
+    // there is no interceptor for the `.sha256sum`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, zip);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(DenoInstallService);
+
+    await expect(svc.install('2.5.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
   });
 
   test('link', async () => {

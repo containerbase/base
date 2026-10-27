@@ -10,7 +10,7 @@ import {
 } from './powershell.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -37,6 +37,8 @@ describe('cli/tools/dotnet/powershell', () => {
     vi.mocked(arch).mockReturnValue('x64');
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -140,6 +142,47 @@ describe('cli/tools/dotnet/powershell', () => {
         cwd: path,
       });
     });
+
+    test.each(['7.1.4', '7.6.7'])(
+      'install: downloads the %s tool-versions file without the list',
+      async (version) => {
+        vi.mocked(getDistro).mockResolvedValue({
+          name: 'Ubuntu',
+          versionCode: 'noble',
+          versionId: '24.04',
+        });
+        const filename = `powershell-${version}-linux-x64.tar.gz`;
+        mockToolFiles([
+          toolFile(
+            `${baseUrl}${releaseUrl}/v${version}/powershell-${version}-linux-arm64.tar.gz`,
+            'arm',
+            'arm64',
+          ),
+          toolFile(
+            `${baseUrl}${releaseUrl}/v${version}/${filename}`,
+            archive,
+            'amd64',
+          ),
+        ]);
+        // there is no interceptor for the `hashes.sha256`, the data has a
+        // checksum for the releases before 7.2.0 too
+        scope(baseUrl)
+          .get(`${releaseUrl}/v${version}/${filename}`)
+          .reply(200, archive);
+        const extract = vi
+          .spyOn(CompressionService.prototype, 'extract')
+          .mockImplementationOnce(({ cwd }) =>
+            fs.writeFile(join(cwd, 'pwsh'), 'pwsh', { mode: 0o644 }),
+          );
+        const { svc } = await toolContext(PowershellInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ file: expect.stringContaining(filename) }),
+        );
+      },
+    );
 
     test('install: rejects a missing checksum', async () => {
       const { svc } = await toolContext(PowershellInstallService);

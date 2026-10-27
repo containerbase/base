@@ -6,7 +6,7 @@ import { LinkToolService } from '../services/index.ts';
 import { VendirInstallService } from './vendir.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -26,6 +26,8 @@ describe('cli/tools/vendir', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the binary is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -74,6 +76,39 @@ describe('cli/tools/vendir', () => {
       ),
     ).toBe(binary);
   });
+
+  test.each(['0.23.0', '0.47.0'])(
+    'install: downloads the %s tool-versions file without the list',
+    async (version) => {
+      const filename = 'vendir-linux-amd64';
+      mockToolFiles([
+        toolFile(
+          `${baseUrl}${releaseUrl}/v${version}/vendir-linux-arm64`,
+          'arm',
+          'arm64',
+        ),
+        toolFile(
+          `${baseUrl}${releaseUrl}/v${version}/${filename}`,
+          binary,
+          'amd64',
+        ),
+      ]);
+      // there is no interceptor for the `checksums.txt`, the data has a
+      // checksum for the releases before 0.25.0 too
+      scope(baseUrl)
+        .get(`${releaseUrl}/v${version}/${filename}`)
+        .reply(200, binary);
+      const { svc, pathSvc } = await toolContext(VendirInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      const file = join(
+        pathSvc.versionedToolPath('vendir', version),
+        'bin/vendir',
+      );
+      expect(await fs.readFile(file, 'utf8')).toBe(binary);
+    },
+  );
 
   test('install: rejects a missing checksum', async () => {
     const { svc } = await toolContext(VendirInstallService);
