@@ -1,5 +1,6 @@
 import { type Bind, Container, ContainerModule } from 'inversify';
 import { AptService } from './apt.service.ts';
+import { CacheService } from './cache.service.ts';
 import { CompressionService } from './compression.service.ts';
 import { DataService } from './data.service.ts';
 import { EnvService } from './env.service.ts';
@@ -24,6 +25,7 @@ export { type InstalledTool, InstalledTools };
 
 export {
   AptService,
+  CacheService,
   CompressionService,
   DataService,
   EnvService,
@@ -44,6 +46,7 @@ export {
 /** Binds the core services, shared by every container. */
 function init<T extends { bind: Bind }>(options: T): void {
   options.bind(AptService).toSelf();
+  options.bind(CacheService).toSelf();
   options.bind(CompressionService).toSelf();
   options.bind(DataService).toSelf();
   options.bind(EnvService).toSelf();

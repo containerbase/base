@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { deleteAsync } from 'del';
-import { execa } from 'execa';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  CacheService,
   EnvService,
   IpcServer,
   LinkToolService,
@@ -36,6 +36,8 @@ export class InstallToolService {
   @multiInject(INSTALL_TOOL_TOKEN)
   @optional()
   private readonly toolSvcs: BaseInstallService[] = [];
+  @inject(CacheService)
+  private readonly cacheSvc!: CacheService;
   @inject(EnvService)
   private readonly envSvc!: EnvService;
 
@@ -52,7 +54,9 @@ export class InstallToolService {
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test.
+   * install, link and test. Afterwards the oldest files are evicted from the
+   * download cache when the disk is too full, see `CacheService.evict`. A
+   * failing eviction is only logged.
    *
    * @returns an exit code when the tool could not be installed
    */
@@ -204,10 +208,11 @@ export class InstallToolService {
         }
       }
 
-      if (this.envSvc.cacheDir) {
-        await execa('bash', ['/usr/local/containerbase/bin/cleanup-cache.sh'], {
-          stdio: ['inherit', 'inherit', 1],
-        });
+      try {
+        await this.cacheSvc.evict(dryRun);
+      } catch (err) {
+        // best effort, it must not change the result of the install
+        logger.warn({ err }, 'cannot evict the download cache');
       }
     }
   }

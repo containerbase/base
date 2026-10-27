@@ -151,6 +151,15 @@ Read the [tool-specific versions](./docs/tools.md#Versions-install-tool) docs fo
 You can replace the default registries used to download the tools.
 Read the [custom-registries](./docs/custom-registries.md) docs for more details.
 
+### Download cache
+
+Set `CONTAINERBASE_CACHE_DIR` to a folder to keep the downloaded tool archives there, eg. on a mounted volume, so later installs reuse them.
+Each download is stored as `<sha256 of the url>/<file name>`, and with `CONTAINERBASE_CACHE_FOLDERS` set the shell tools store their folder archives as `<sha256 of the key>/folder.tar.zst` in the same folder, which are evicted the same way.
+
+After each install, `containerbase-cli` removes the oldest files from that folder, by modification time, while the disk holding it is filled to `CONTAINERBASE_MAX_ALLOCATED_DISK` percent or more.
+Folders left empty are removed too, the cache folder itself is kept.
+`CONTAINERBASE_MAX_ALLOCATED_DISK` defaults to `100`, so only a full disk is cleaned, set a lower value, eg. `80`, to evict earlier.
+
 ### Logging
 
 The new CLI has some new logging features.

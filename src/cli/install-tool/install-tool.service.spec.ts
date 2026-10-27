@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
-import { execa } from 'execa';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  CacheService,
   EnvService,
   LinkToolService,
   VersionService,
@@ -174,15 +174,37 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(logger.debug).toHaveBeenCalledWith('cleaning root caches');
     });
 
-    test('skips the cache cleanup without a cache dir', async () => {
-      vi.spyOn(EnvService.prototype, 'cacheDir', 'get').mockReturnValue(null);
+    test('evicts the download cache', async () => {
+      const spy = vi.spyOn(CacheService.prototype, 'evict');
 
       expect(await install.install('bun', '1.0.8')).toBeUndefined();
+      expect(spy).toHaveBeenCalledExactlyOnceWith(false);
 
-      expect(vi.mocked(execa)).not.toHaveBeenCalledWith(
-        'bash',
-        ['/usr/local/containerbase/bin/cleanup-cache.sh'],
-        expect.any(Object),
+      expect(await install.install('bun', '1.0.9', true)).toBeUndefined();
+      expect(spy).toHaveBeenLastCalledWith(true);
+    });
+
+    test('a failing eviction does not fail the install', async () => {
+      const err = new Error('evict failed');
+      vi.spyOn(CacheService.prototype, 'evict').mockRejectedValueOnce(err);
+
+      expect(await install.install('bun', '1.0.10')).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { err },
+        'cannot evict the download cache',
+      );
+    });
+
+    test('a failing eviction keeps the install error', async () => {
+      vi.spyOn(BunInstallService.prototype, 'install').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+      vi.spyOn(CacheService.prototype, 'evict').mockRejectedValueOnce(
+        new Error('evict failed'),
+      );
+
+      await expect(install.install('bun', '1.0.11')).rejects.toThrow(
+        'install failed',
       );
     });
 
