@@ -184,9 +184,9 @@
       "minimumReleaseAge": "5 days"
     },
     {
-      "description": "Update the embedded tool-versions data weekly with a fix release",
+      "description": "Update the embedded tool-versions data daily with a fix release, so each day has a release with fresh offline data",
       "matchDepNames": ["tool-versions"],
-      "extends": ["schedule:weekly"],
+      "extends": ["schedule:daily"],
       "semanticCommitType": "fix"
     },
     {
