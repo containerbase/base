@@ -29,15 +29,21 @@ It has the files and checksums of the versions, so no checksum file is downloade
   Pass `name` when the data names the file differently, it's also the name of the downloaded file.
 - `this.downloadWithoutChecksum(version, url)` - for older releases without an upstream checksum.
   The data has a computed checksum for them when the tool's entry in the tool-versions `src/tools.ts` sets `computeMissing`, without data the file is downloaded unverified.
+- `this.downloadNamedToolFile(version, name)` - the data file named `name`, for installers with their own fallback, like golang and maven.
+  It returns `undefined` without that file for the host.
+- `this.downloadDistroToolFile(version, host, fallback)` - the data file of the host distro, else the one of `fallback`, like jammy for newer ubuntu releases.
+  The containerbase prebuilds with distro builds extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), which does this and falls back to the jammy prebuild and its `.sha512`.
 - `this.downloadToolFile(version, distro?, filter?)` - for other upstream layouts.
   It returns `undefined` without a data file for the host, so the installer can fall back to its own download.
 
 Verify every other download against an upstream checksum.
-`BaseInstallService` has two shared helpers for this, both of which throw when the checksum is missing:
+`BaseInstallService` has shared helpers for this, which throw when the checksum is missing:
 
 - `this.findChecksum(url, filename)` - for a checksum list file, one `<checksum>  <filename>` line per file.
   It strips a leading `./` or `*` from the listed name before comparing, and decodes UTF-16 files, like PowerShell's `hashes.sha256`, correctly.
 - `this.getChecksum(url)` - for a single `.sha256`-style sidecar file, ignoring any filename after the checksum.
+- `this.downloadOptionalChecksumSidecar(url, sidecar, checksumType)` - downloads a file verified against its sidecar, for releases which may lack it, like the maven and golang prebuilds.
+  It returns `undefined` without the sidecar file and doesn't use the tool-versions data, combine it with `this.downloadNamedToolFile`.
 
 When upstream only started publishing checksums, or switched archive formats, from some version on, pick the right one by version with `semverGte` rather than probing URLs.
 For four-part versions, like cabal's `3.18.1.0`, coerce first with `semverCoerce`.

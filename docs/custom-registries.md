@@ -549,7 +549,7 @@ jsonnet-bundler releases are downloaded from:
 - `https://github.com/containerbase/jb-prebuild/releases`
 
 The first url is used for semver versions like `0.5.1`, the second for four part versions like `0.6.0.1`.
-The prebuild download is always verified against its `.sha512` file, so a mirror needs to provide both files.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the prebuild download is verified against its `.sha512` file, so a mirror needs to provide both files.
 
 Samples:
 
@@ -781,7 +781,7 @@ https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4
 https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz
 ```
 
-The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download is verified against its `.sha512` file, so a mirror needs to provide both files.
 
 ### `gem` tools
 

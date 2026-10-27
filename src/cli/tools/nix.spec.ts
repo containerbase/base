@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { NixInstallService } from './nix.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/nix', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -46,6 +48,27 @@ describe('cli/tools/nix', () => {
 
     expect(extract).toHaveBeenCalledExactlyOnceWith({
       file: expect.stringContaining(`nix-${version}-${ghArch}.tar.xz`),
+      cwd: pathSvc.toolPath('nix'),
+    });
+  });
+
+  test('install: downloads the tool-versions file without the .sha512', async () => {
+    const release = `${baseUrl}${prebuild}/2.36.0`;
+    mockToolFiles([
+      toolFile(`${release}/nix-2.36.0-aarch64.tar.xz`, 'arm', 'arm64'),
+      toolFile(`${release}/nix-2.36.0-x86_64.tar.xz`, archive, 'amd64'),
+    ]);
+    // there is no interceptor for the `.sha512`
+    scope(baseUrl)
+      .get(`${prebuild}/2.36.0/nix-2.36.0-x86_64.tar.xz`)
+      .reply(200, archive);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(NixInstallService);
+
+    await expect(svc.install('2.36.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining('nix-2.36.0-x86_64.tar.xz'),
       cwd: pathSvc.toolPath('nix'),
     });
   });
