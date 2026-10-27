@@ -1,9 +1,9 @@
 import { inject, injectable, multiInject } from 'inversify';
-import { isReleaseVersion } from '../../../packages/base/src/release-version.ts';
+import { filterByMinCb } from '../../../packages/base/src/min-cb.ts';
 import { DistroCode } from '../../../packages/base/src/schema.ts';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
 import { EnvService, ToolVersionsService } from '../services/index.ts';
-import { getDistro, isValid, logger, semverGte } from '../utils/index.ts';
+import { getDistro, logger } from '../utils/index.ts';
 import {
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
@@ -12,12 +12,12 @@ import {
 
 /**
  * The architecture and the distro codename the tool is installed on, and the
- * running containerbase release version, `undefined` for a development build.
+ * running containerbase version, which may be a development build.
  */
 interface Host {
   arch: string;
   distro: string;
-  cb: string | undefined;
+  cb: string;
 }
 
 /**
@@ -45,11 +45,8 @@ function hostDistros(data: ToolVersions, distro: string): string[] {
  * `archs` or `distros` list, or the list has the host arch or a distro which
  * runs on the host (see {@link hostDistros}), and the
  * running containerbase version is not below the `cb` of the `minCb` ranges
- * which cover it. Unmet ranges are logged at debug level when they change the
- * result. A range covers its `version` and every version above it in the data,
- * prereleases count for the position, a range whose `version` is not listed is
- * ignored. A `cb` which is not valid semver is never met, a
- * development build (`cb` is `undefined`) skips none. The data lists the newest
+ * which cover it (see {@link filterByMinCb}). Unmet ranges are logged at debug
+ * level when they change the result. The data lists the newest
  * release first, in the versioning of the tool. A missing version or `latest`
  * is the newest release, or the newest LTS release for a tool whose data has
  * LTS flags, even when none is available for the host, then there is no match.
@@ -63,19 +60,7 @@ function pick(
   version: string | undefined,
   host: Host,
 ): string | undefined {
-  // the versions up to this index need a newer containerbase: a range which
-  // isn't met covers all versions from its start up to the newest one
-  let unmet = -1;
-  const unmetCbs: string[] = [];
-  if (host.cb !== undefined) {
-    for (const range of data.minCb ?? []) {
-      const start = data.versions.findIndex((v) => v.version === range.version);
-      if (start >= 0 && !(isValid(range.cb) && semverGte(host.cb, range.cb))) {
-        unmet = Math.max(unmet, start);
-        unmetCbs.push(range.cb);
-      }
-    }
-  }
+  const { versions: installable, needed } = filterByMinCb(data, host.cb);
   const stable = data.versions.filter((v) => !v.prerelease);
   const distros = hostDistros(data, host.distro);
   const forHost = (list: typeof data.versions): typeof data.versions =>
@@ -102,11 +87,11 @@ function pick(
     return releases.find((v) => v.version.startsWith(`${version}.`))?.version;
   };
 
-  const picked = find(forHost(data.versions.slice(unmet + 1)));
+  const picked = find(forHost(installable));
   // log only when the unmet ranges change the result of this request
-  if (unmetCbs.length && find(forHost(data.versions)) !== picked) {
+  if (needed.length && find(forHost(data.versions)) !== picked) {
     logger.debug(
-      { tool, running: host.cb, needed: unmetCbs },
+      { tool, running: host.cb, needed },
       'skipping the versions which need a newer containerbase',
     );
   }
@@ -172,7 +157,7 @@ export class ToolVersionResolverService {
     const host: Host = {
       arch: this.env.arch,
       distro: (await getDistro()).versionCode,
-      cb: isReleaseVersion(this.env.version) ? this.env.version : undefined,
+      cb: this.env.version,
     };
     if (version !== undefined && version !== 'latest') {
       const listed = await this.toolVersions.getVersions(tool);

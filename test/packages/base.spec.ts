@@ -593,6 +593,78 @@ describe('packages/base', () => {
     },
   );
 
+  describe('filterByMinCb', () => {
+    const data: tvTypes.ToolVersions = {
+      tool: 'example',
+      updatedAt,
+      minCb: [
+        { version: '2.0.0', cb: '14.51.0' },
+        { version: '1.5.0', cb: '14.60.0' },
+      ],
+      versions: [
+        { version: '3.0.0' },
+        { version: '2.1.0-rc.1', prerelease: true },
+        { version: '2.0.0' },
+        { version: '1.5.0' },
+        { version: '1.0.0' },
+      ],
+    };
+    const all = data.versions.map((v) => v.version);
+
+    test.each([
+      { cb: '14.60.0', versions: all, needed: [] },
+      { cb: '14.55.0', versions: all.slice(4), needed: ['14.60.0'] },
+      { cb: '14.50.0', versions: all.slice(4), needed: ['14.51.0', '14.60.0'] },
+      { cb: '0.0.0-PLACEHOLDER', versions: all, needed: [] },
+      { cb: '0.0.0-PLACEHOLDER+abc123', versions: all, needed: [] },
+    ])(
+      'filters by the containerbase version $cb',
+      ({ cb, versions, needed }) => {
+        const result = main.filterByMinCb(data, cb);
+
+        expect(result.versions.map((v) => v.version)).toEqual(versions);
+        expect(result.needed).toEqual(needed);
+      },
+    );
+
+    test('ignores a range whose version is not listed and keeps data without ranges', () => {
+      const unlisted = {
+        ...data,
+        minCb: [{ version: '9.9.9', cb: '99.0.0' }],
+      };
+
+      expect(main.filterByMinCb(unlisted, '14.0.0')).toEqual({
+        versions: data.versions,
+        needed: [],
+      });
+      expect(
+        main.filterByMinCb(
+          { tool: 'example', updatedAt, versions: data.versions },
+          '14.0.0',
+        ),
+      ).toEqual({ versions: data.versions, needed: [] });
+    });
+
+    test('never meets a cb which is not valid semver', () => {
+      const invalid = {
+        ...data,
+        minCb: [{ version: '1.5.0', cb: 'latest' }],
+      };
+
+      expect(main.filterByMinCb(invalid, '99.0.0')).toEqual({
+        versions: data.versions.slice(4),
+        needed: ['latest'],
+      });
+    });
+  });
+
+  test('isReleaseVersion tells releases from development builds', () => {
+    expect(main.isReleaseVersion('14.51.0')).toBe(true);
+    expect(main.isReleaseVersion('0.0.0-PLACEHOLDER')).toBe(false);
+    expect(main.isReleaseVersion('0.0.0-PLACEHOLDER+abc123')).toBe(false);
+    expect(main.isReleaseVersion('latest')).toBe(false);
+  });
+
   test('packageVersion is the version of the package', async () => {
     const pkg = JSON.parse(
       await readFile(
