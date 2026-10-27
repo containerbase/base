@@ -60,6 +60,12 @@ export class GolangInstallService extends BaseInstallService {
   override readonly name = 'golang';
   override readonly minVersion = '1.9.0';
 
+  /**
+   * The module cache, the build cache is in `~/.cache/go-build`, which is
+   * cleaned anyway.
+   */
+  override readonly cacheDirs = ['go/pkg/mod'];
+
   /** The architecture name used by the containerbase prebuild. */
   private get prebuildArch(): string {
     return this.envSvc.arch === 'arm64' ? 'aarch64' : 'x86_64';

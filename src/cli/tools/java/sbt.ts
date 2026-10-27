@@ -35,6 +35,9 @@ export class SbtInstallService extends BaseInstallService {
   override readonly minVersion = '0.13.17';
   override readonly parent = 'java';
 
+  /** The sbt launcher's downloaded sbt and scala versions. */
+  override readonly cacheDirs = ['.sbt/boot'];
+
   /**
    * Downloads the sbt archive from GitHub, verified against its `.sha256`
    * since v1.3.5, extracts it into the versioned tool path and drops the

@@ -4,6 +4,13 @@ import type { EnvService, PathService } from '../../services';
 import { pathExists } from '../../utils/index.ts';
 
 /**
+ * The package folders of the pub cache, relative to the containerbase cache.
+ * Globally activated packages in `.pub-cache/bin` and
+ * `.pub-cache/global_packages` are no cache.
+ */
+export const pubCacheDirs = ['.pub-cache/git', '.pub-cache/hosted'];
+
+/**
  * Links the user's `.dart` and `.dart-tool` folders to the cache, keeping any
  * existing link, and turns off the dart analytics for root.
  */

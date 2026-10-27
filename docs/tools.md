@@ -17,6 +17,7 @@
 - [List](#list)
   - [list-tools](#list-tools-command)
 - [Cleanup](#cleanup)
+  - [cleanup-cache](#cleanup-cache-command)
   - [cleanup-downloads](#cleanup-downloads-command)
 
 ---
@@ -524,6 +525,40 @@ When writing to a file, JSON output is minified.
 <br>
 
 ## Cleanup
+
+### `containerbase-cli cleanup cache` <a name="cleanup-cache-command"></a>
+
+#### Description <a name="Description-cleanup-cache"></a>
+
+Removes the known tool caches from `/tmp/containerbase/cache`.
+
+These are the cache folders of every supported tool, whether it is installed or not, eg. the npm cache in `.npm/_cacache`, the pnpm store in `.local/share/pnpm/store`, the maven repository in `.m2/repository` or the go module cache in `go/pkg/mod`.
+The contents of the generic `.cache` folder and the virtualenv cache in `.local/share/virtualenv` are removed too.
+Config files, like `.npmrc`, `.m2/settings.xml` or the conan profiles, are kept.
+When a tool's cache folder or `.cache` itself is a link, eg. to a volume, its target is emptied and the link kept, a link to a missing target is skipped.
+Entries inside `.cache` are removed as they are, so a link there is removed, not its target.
+
+The download cache in `CONTAINERBASE_CACHE_DIR` is left alone, use [`cleanup downloads`](#cleanup-downloads-command) for it.
+A cache folder or `.cache` entry holding it, eg. `.cache/containerbase`, is skipped.
+
+With `--dry-run` nothing is removed and every path which would be removed is logged.
+
+#### Usage <a name="Usage-cleanup-cache"></a>
+
+`$ containerbase-cli cleanup cache [-d,--dry-run]`
+
+#### Examples <a name="Examples-cleanup-cache"></a>
+
+- Removes all known tool caches
+  ```bash
+  containerbase-cli cleanup cache
+  ```
+- Lists the caches which would be removed
+  ```bash
+  containerbase-cli cleanup cache --dry-run
+  ```
+
+<br>
 
 ### `containerbase-cli cleanup downloads` <a name="cleanup-downloads-command"></a>
 

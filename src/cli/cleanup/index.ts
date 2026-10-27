@@ -1,5 +1,26 @@
+import { prepareInstallContainer } from '../install-tool/index.ts';
 import { CacheService, createContainer } from '../services/index.ts';
 import { logger } from '../utils/index.ts';
+import { CleanupCacheService } from './cleanup-cache.service.ts';
+
+/**
+ * Removes the known tool caches, see `CleanupCacheService.cleanupCache`, and
+ * logs how many were removed.
+ *
+ * @returns the removed paths, with `dryRun` the paths which would be removed
+ */
+export async function cleanupCache(dryRun = false): Promise<string[]> {
+  const container = await prepareInstallContainer();
+  container.bind(CleanupCacheService).toSelf();
+  const svc = await container.getAsync(CleanupCacheService);
+  const removed = await svc.cleanupCache(dryRun);
+  logger.info(
+    dryRun
+      ? `Dry run: would remove ${removed.length} cache paths`
+      : `Removed ${removed.length} cache paths`,
+  );
+  return removed;
+}
 
 /**
  * Evicts the oldest files from the download cache, see `CacheService.evict`,

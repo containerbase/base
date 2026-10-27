@@ -8,6 +8,7 @@ import {
   initPubCache,
   prepareDartHome,
   preparePubCache,
+  pubCacheDirs,
 } from './dart/utils.ts';
 
 @injectable()
@@ -71,6 +72,12 @@ export class FlutterInstallService extends BaseInstallService {
 
   /** The oldest prebuild. */
   override readonly minVersion = '1.22.6';
+
+  /**
+   * The packages pub downloaded, globally activated packages in the pub cache
+   * are kept.
+   */
+  override readonly cacheDirs = pubCacheDirs;
 
   /** The architecture name used by the flutter prebuilds. */
   private get ghArch(): string {

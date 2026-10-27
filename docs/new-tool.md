@@ -164,6 +164,8 @@ Containerbase then removes the shell wrappers, the current-version marker and th
 That default is only correct if `install()` writes **everything** below `createVersionedToolPath()`.
 If your tool writes anywhere else - `$HOME`, a shared cache, or system packages - either override `uninstall()` to clean that up, or raise it on the Issue so we can agree what should happen.
 
+If the tool keeps a download cache in the containerbase cache, eg. a folder its prepare service links from `$HOME`, declare it in `cacheDirs`, so `containerbase-cli cleanup cache` removes it, see the [tool installer best practices](./tool-installer-best-practices.md#folders-ownership-and-links).
+
 Two more things worth knowing:
 
 - If you attempt to uninstall a tool that other installed tools depend on (by declaring it as a `parent`), Containerbase will refuse to uninstall until `--recursive` is passed

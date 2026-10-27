@@ -1,3 +1,4 @@
+import './cleanup-cache.ts';
 import './cleanup-downloads.ts';
 import './cleanup-path.ts';
 import './file-download.ts';

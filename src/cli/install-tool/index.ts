@@ -107,7 +107,7 @@ import {
  * every v2 shell tool. The generic ones are bound last, so a modern service
  * wins over a custom v2 shell tool with the same name.
  */
-async function prepareInstallContainer(): Promise<Container> {
+export async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
   const container = createContainer();
 

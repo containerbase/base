@@ -38,6 +38,12 @@ export class ElixirInstallService extends BaseInstallService {
   override readonly minVersion = '1.4.3';
 
   /**
+   * The packages hex downloaded, the hex and rebar archives in `.mix` are
+   * kept, they are installed by `link`.
+   */
+  override readonly cacheDirs = ['.hex/packages'];
+
+  /**
    * Downloads the elixir archive from GitHub, verified against its
    * `.sha256sum` since v1.14.0, and extracts it into the versioned tool
    * path. Requiring `erlang` as parent covers the shell tool's `erl` check.

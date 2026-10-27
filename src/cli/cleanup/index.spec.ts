@@ -1,9 +1,51 @@
-import { describe, expect, test, vi } from 'vitest';
+import fs from 'node:fs/promises';
+import { join } from 'node:path';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { CacheService } from '../services/index.ts';
-import { logger } from '../utils/index.ts';
-import { cleanupDownloads } from './index.ts';
+import { logger, pathExists } from '../utils/index.ts';
+import { cleanupCache, cleanupDownloads } from './index.ts';
+import { ensurePaths, rootPath } from '~test/path.ts';
 
 describe('cli/cleanup/index', () => {
+  beforeAll(async () => {
+    await ensurePaths([
+      'tmp/containerbase/cache',
+      'usr/local/containerbase/tools/v2',
+      'var/lib/containerbase',
+    ]);
+  });
+
+  describe('cleanupCache', () => {
+    test('removes the caches of the registered tools', async () => {
+      const cache = rootPath('tmp/containerbase/cache/.cargo/registry');
+      await fs.mkdir(cache, { recursive: true });
+
+      const dryRun = await cleanupCache(true);
+      expect(dryRun).toContain(cache);
+      expect(await pathExists(cache)).toBe(true);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Dry run: would remove ${dryRun.length} cache paths`,
+      );
+
+      const removed = await cleanupCache();
+      expect(removed).toContain(cache);
+      expect(await pathExists(cache)).toBe(false);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Removed ${removed.length} cache paths`,
+      );
+    });
+
+    test('removes the pnpm store and keeps the global pnpm folder', async () => {
+      const pnpm = rootPath('tmp/containerbase/cache/.local/share/pnpm');
+      await fs.mkdir(join(pnpm, 'store/v10'), { recursive: true });
+      await fs.mkdir(join(pnpm, 'global'), { recursive: true });
+
+      expect(await cleanupCache()).toContain(join(pnpm, 'store'));
+
+      expect(await fs.readdir(pnpm)).toEqual(['global']);
+    });
+  });
+
   describe('cleanupDownloads', () => {
     test('evicts the download cache', async () => {
       const spy = vi
