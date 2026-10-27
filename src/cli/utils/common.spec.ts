@@ -158,9 +158,12 @@ UBUNTU_CODENAME=jammy`);
       expect(await isDockerBuild()).toBe(true);
     });
 
-    test('no docker build', async () => {
+    test.each([
+      '/var/lib/docker/containers/abc/resolv.conf',
+      '/var/lib/docker/buildkit/executor/resolv-other.conf',
+    ])('no docker build: %s', async (path) => {
       fsMocks.readFile.mockResolvedValueOnce(
-        '4854 4821 0:37 /var/lib/docker/containers/abc/resolv.conf /etc/resolv.conf rw,relatime - ext4 /dev/sdb rw\n',
+        `4854 4821 0:37 ${path} /etc/resolv.conf rw,relatime - ext4 /dev/sdb rw\n`,
       );
       expect(await isDockerBuild()).toBe(false);
     });
