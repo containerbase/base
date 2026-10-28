@@ -198,3 +198,16 @@ export const FormatIndex = z.object({
     }),
   ),
 });
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export const ReleaseInfo = z.object({
+  $schema: SchemaUrl,
+  /** the version of the release, like `1.7.22` */
+  version: z.string().min(1),
+  /** when the build of the data started, in UTC */
+  buildTime: z.iso.datetime(),
+});

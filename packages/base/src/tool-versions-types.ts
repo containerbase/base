@@ -228,3 +228,23 @@ export interface FormatIndex {
     removalDate?: string;
   }[];
 }
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export interface ReleaseInfo {
+  /**
+   * The url of the json schema of the file, which identifies its format.
+   */
+  $schema?: string;
+  /**
+   * The version of the release, like `1.7.22`.
+   */
+  version: string;
+  /**
+   * When the build of the data started, in UTC.
+   */
+  buildTime: string;
+}

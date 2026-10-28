@@ -12,6 +12,7 @@ export type {
   FileIntegrity,
   FileReference,
   FormatIndex,
+  ReleaseInfo,
   ToolFile,
   ToolIndex,
   ToolVersion,
