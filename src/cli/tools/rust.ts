@@ -58,10 +58,13 @@ export class RustInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the rust archive from static.rust-lang.org, verified against its
-   * `.sha256`, and runs its `install.sh` for cargo, rustc and the standard
-   * library into the versioned tool path. Uses the `.xz` archive since
-   * v1.19.0 / nightly 2017-05-05, and the `.gz` one before.
+   * Downloads the rust archive from static.rust-lang.org and runs its
+   * `install.sh` for cargo, rustc and the standard library into the versioned
+   * tool path. Uses the `.xz` archive since v1.19.0 / nightly 2017-05-05, and
+   * the `.gz` one before. The file and its checksum come from the
+   * tool-versions data, which also lists the dated nightlies, without data it
+   * is verified against its `.sha256`. `beta` and `nightly` always use the
+   * `.sha256`, they have no data.
    */
   override async install(version: string): Promise<void> {
     const target = `${this.rustArch}-unknown-linux-gnu`;
@@ -73,13 +76,15 @@ export class RustInstallService extends BaseInstallService {
 
     const url = `${baseUrl}.${this.archiveExt(version)}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    // `beta` and `nightly` change daily, the data only has dated nightlies
+    const file =
+      version === 'beta' || version === 'nightly'
+        ? await this.http.download({
+            url,
+            checksumType: 'sha256',
+            expectedChecksum: await this.getChecksum(`${url}.sha256`),
+          })
+        : await this.downloadChecksumSidecar(version, url, '.sha256');
 
     await this.pathSvc.withTempDir(`${this.name}-`, async (tmp) => {
       await this.compress.extract({ file, cwd: tmp, strip: 1 });

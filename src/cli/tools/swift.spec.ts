@@ -11,7 +11,7 @@ import { getDistro } from '../utils/index.ts';
 import { SwiftInstallService, SwiftPrepareService } from './swift.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -36,6 +36,8 @@ describe('cli/tools/swift', () => {
     vi.mocked(arch).mockReturnValue('x64');
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the archive is downloaded unverified
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -209,6 +211,53 @@ describe('cli/tools/swift', () => {
           cwd: pathSvc.versionedToolPath('swift', version),
           strip: 2,
         });
+      },
+    );
+
+    test.each([
+      { version: '5.9.4', name: '5.9.4', platform: 'ubuntu22.04' },
+      { version: '6.1.1', name: '6.1.1', platform: 'ubuntu24.04' },
+      // swift.org drops the `.0` patch before 6.4, the data too
+      { version: '6.2.0', name: '6.2', platform: 'ubuntu24.04' },
+    ])(
+      'install: verifies the $platform tool-versions file of $version on noble',
+      async ({ version, name, platform }) => {
+        vi.mocked(getDistro).mockResolvedValue({
+          name: 'Ubuntu',
+          versionCode: 'noble',
+          versionId: '24.04',
+        });
+        const release = `swift-${name}-RELEASE`;
+        const file = (ubuntu: string): string =>
+          `/swift-${name}-release/${ubuntu.replace(/\./g, '')}/${release}/${release}-${ubuntu}.tar.gz`;
+        // the data lists the 22.04 build for jammy, the 24.04 one for noble
+        const files = mockToolFiles(
+          (
+            [
+              ['ubuntu22.04', 'jammy'],
+              ['ubuntu24.04', 'noble'],
+            ] as const
+          ).map(([ubuntu, distro]) => ({
+            ...toolFile(
+              `${baseUrl}${file(ubuntu)}`,
+              ubuntu === platform ? archive : 'other',
+              'amd64',
+            ),
+            distro,
+          })),
+        );
+        scope(baseUrl).get(file(platform)).reply(200, archive);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(SwiftInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(files).toHaveBeenCalledExactlyOnceWith('swift', name);
+        expect(extract).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            file: expect.stringContaining(`${release}-${platform}.tar.gz`),
+          }),
+        );
       },
     );
 

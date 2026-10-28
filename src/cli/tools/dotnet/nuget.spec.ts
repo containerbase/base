@@ -5,7 +5,7 @@ import { LinkToolService } from '../../services/index.ts';
 import { NugetInstallService, NugetVersionResolver } from './nuget.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -18,6 +18,8 @@ describe('cli/tools/dotnet/nuget', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, `nuget.exe` is downloaded unverified
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -37,6 +39,21 @@ describe('cli/tools/dotnet/nuget', () => {
       `#!/bin/sh\nexec mono "${join(bin, 'nuget.exe')}" "$@"\n`,
     );
     expect((await fs.stat(join(bin, 'nuget'))).mode & 0o777).toBe(0o775);
+  });
+
+  test('install: verifies the tool-versions file', async () => {
+    const path = '/win-x86-commandline/v6.12.1/nuget.exe';
+    // one file for all archs
+    mockToolFiles([toolFile(`${baseUrl}${path}`, 'nuget binary')]);
+    scope(baseUrl).get(path).reply(200, 'nuget binary');
+    const { svc, pathSvc } = await toolContext(NugetInstallService);
+
+    await expect(svc.install('6.12.1')).resolves.toBeUndefined();
+
+    const bin = join(pathSvc.versionedToolPath('nuget', '6.12.1'), 'bin');
+    expect(await fs.readFile(join(bin, 'nuget.exe'), 'utf8')).toBe(
+      'nuget binary',
+    );
   });
 
   test('link', async () => {

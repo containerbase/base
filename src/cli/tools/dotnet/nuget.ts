@@ -21,16 +21,17 @@ export class NugetInstallService extends BaseInstallService {
 
   /**
    * Downloads `nuget.exe` into the versioned `bin` folder with a wrapper that
-   * runs it with mono. No checksums are verified.
+   * runs it with mono. nuget publishes no checksums, the file is verified
+   * against the checksum of the tool-versions data, else unverified.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://dist.nuget.org/win-x86-commandline/v${version}/`;
     const filename = `${this.name}.exe`;
 
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      fileName: `${filename}-v${version}`,
-    });
+    const file = await this.downloadWithoutChecksum(
+      version,
+      `${baseUrl}${filename}`,
+    );
 
     await this.pathSvc.ensureToolPath(this.name);
 

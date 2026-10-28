@@ -62,8 +62,9 @@ export class DartInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the stable dart sdk zip, verified against its `.sha256sum`, and
-   * extracts it into the versioned tool path.
+   * Downloads the stable dart sdk zip and extracts it into the versioned tool
+   * path. The file and its checksum come from the tool-versions data, without
+   * data it is verified against its `.sha256sum`.
    *
    * @throws for versions below 2
    */
@@ -78,13 +79,7 @@ export class DartInstallService extends BaseInstallService {
     const sdkFile = `dartsdk-linux-${this.arch}-release.zip`;
     const url = `${sdkUrl}/${sdkFile}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
-
-    const file = await this.http.download({
-      url,
-      expectedChecksum,
-      checksumType: 'sha256',
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256sum');
 
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);
     await this.compress.extract({ file, cwd: path, strip: 1 });

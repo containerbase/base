@@ -28,25 +28,22 @@ export class GhcInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the static deb10 ghc archive from downloads.haskell.org,
-   * verified against the release's `SHA256SUMS`, and extracts it into the
-   * versioned tool path.
+   * Downloads the static deb10 ghc archive from downloads.haskell.org and
+   * extracts it into the versioned tool path. The file and its checksum come
+   * from the tool-versions data, without data it is verified against the
+   * release's `SHA256SUMS`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://downloads.haskell.org/~ghc/${version}/`;
     // use static deb10 binary as it is compatible with all supported ubuntu versions
     const filename = `ghc-${version}-${this.arch}-deb10-linux.tar.xz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}SHA256SUMS`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'SHA256SUMS',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 
