@@ -9,11 +9,7 @@ import {
   ToolVersionsService,
 } from '../../services/index.ts';
 import { getDistro, logger } from '../../utils/index.ts';
-import {
-  MonoInstallService,
-  MonoPrepareService,
-  MonoVersionResolver,
-} from './mono.ts';
+import { MonoInstallService, MonoPrepareService } from './mono.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
 import { checksum, toolContext } from '~test/tool.ts';
@@ -172,17 +168,6 @@ describe('cli/tools/dotnet/mono', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `Removing existing mono link at ${tgt}`,
       );
-    });
-  });
-
-  describe('MonoVersionResolver', () => {
-    test('resolves latest', async () => {
-      scope(baseUrl)
-        .get('/containerbase/mono-prebuild/releases/latest/download/version')
-        .reply(200, '6.12.0');
-      const { svc } = await toolContext(MonoVersionResolver);
-
-      expect(await svc.resolve('latest')).toBe('6.12.0');
     });
   });
 });
