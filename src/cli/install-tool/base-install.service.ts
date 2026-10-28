@@ -4,6 +4,7 @@ import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts
 import {
   type HttpChecksumType,
   HttpChecksumTypes,
+  urlFileName,
 } from '../services/http.service.ts';
 import {
   CompressionService,
@@ -498,14 +499,6 @@ export abstract class BaseInstallService {
   ): Promise<SpawnResult> {
     return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
-}
-
-/**
- * The decoded last segment of the path of an url, the default name of a
- * download, like the tool-versions data names the file.
- */
-function urlFileName(url: string): string {
-  return decodeURIComponent(new URL(url).pathname.split('/').pop()!);
 }
 
 /**

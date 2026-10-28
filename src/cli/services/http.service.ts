@@ -112,6 +112,23 @@ export interface HttpDownloadConfig {
  */
 const plainFileName = /^[\w+-][\w.+-]*$/;
 
+/**
+ * The last segment of the path of an url, the default name of a download,
+ * percent-decoded like the tool-versions data names the files. The raw
+ * segment is kept when the decoded one isn't a plain file name or can't be
+ * decoded.
+ * @returns an empty string for an url ending in `/`
+ */
+export function urlFileName(url: string): string {
+  const segment = new URL(url).pathname.split('/').pop()!;
+  try {
+    const decoded = decodeURIComponent(segment);
+    return plainFileName.test(decoded) ? decoded : segment;
+  } catch {
+    return segment;
+  }
+}
+
 /** How a request is run, see {@link HttpService.getJson}. */
 export interface HttpRequestConfig {
   attempts?: number;
@@ -146,11 +163,12 @@ export class HttpService {
    * The cache folder is derived from the url, so a file downloaded before is
    * reused, as long as it still matches the expected checksum when one is
    * given. A `fileName` which isn't a plain file name is ignored, the file is
-   * then named like the last url segment. Urls go through the configured url
-   * replacements, eg. a CDN. A failed download or checksum mismatch is tried
-   * up to three times.
+   * then named like the last url segment, see {@link urlFileName}. Urls go
+   * through the configured url replacements, eg. a CDN. A failed download or
+   * checksum mismatch is tried up to three times.
    *
-   * @throws when all attempts failed
+   * @throws when the url has no file name and none is given, or when all
+   * attempts failed
    */
   async download({
     url,
@@ -164,11 +182,14 @@ export class HttpService {
 
     const cacheDir = this.envSvc.cacheDir ?? this.envSvc.tmpDir;
     const cachePath = join(cacheDir, urlChecksum);
-    let file = new URL(url).pathname.split('/').pop()!;
+    let file = urlFileName(url);
     if (fileName && plainFileName.test(fileName)) {
       file = fileName;
     } else if (fileName) {
       logger.debug({ url, fileName }, 'ignoring file name which is not plain');
+    }
+    if (!file) {
+      throw new Error(`no file name in url ${url}`);
     }
     const filePath = join(cachePath, file);
 
