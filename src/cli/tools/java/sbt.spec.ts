@@ -9,7 +9,7 @@ import {
 import { SbtInstallService, SbtPrepareService } from './sbt.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/java/sbt', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -105,6 +107,33 @@ describe('cli/tools/java/sbt', () => {
         strip: 1,
       });
     });
+
+    test.each(['1.3.3', '1.13.1'])(
+      'install: downloads the %s tool-versions file without the .sha256',
+      async (version) => {
+        const path = `${releaseUrl}/v${version}/sbt-${version}.tgz`;
+        // one file for all archs, the data has a checksum for the releases
+        // before 1.3.5 too
+        mockToolFiles([toolFile(`${baseUrl}${path}`, archive)]);
+        // there is no interceptor for the `.sha256`
+        scope(baseUrl).get(path).reply(200, archive);
+        const extract = vi
+          .spyOn(CompressionService.prototype, 'extract')
+          .mockImplementationOnce(async ({ cwd }) => {
+            await fs.mkdir(join(cwd, 'bin'));
+            await fs.writeFile(join(cwd, 'bin', 'sbt'), 'sbt');
+          });
+        const { svc } = await toolContext(SbtInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            file: expect.stringContaining(`sbt-${version}.tgz`),
+          }),
+        );
+      },
+    );
 
     test('install: rejects an empty checksum', async () => {
       const { svc } = await toolContext(SbtInstallService);

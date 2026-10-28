@@ -18,8 +18,9 @@ export class ApmInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the apm bundle from GitHub, verified against its `.sha256`, and
-   * extracts it into the versioned tool path.
+   * Downloads the apm bundle from GitHub and extracts it into the versioned
+   * tool path. The file and its checksum come from the tool-versions data,
+   * without data it is verified against its `.sha256`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -33,13 +34,7 @@ export class ApmInstallService extends BaseInstallService {
     const filename = `apm-linux-${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256');
 
     await this.pathSvc.ensureToolPath(this.name);
 

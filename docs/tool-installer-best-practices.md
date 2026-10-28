@@ -24,6 +24,11 @@ It has the files and checksums of the versions, so no checksum file is downloade
 - `this.downloadChecksumListed(version, baseUrl, filename, list)` - for a checksum list file in the release folder.
   It downloads the file named `filename` of the data, else `filename` of the folder, verified against the checksum `list`.
   Make sure `filename` is the file name the data lists for the host, a tool can have several files per arch.
+- `this.downloadChecksumSidecar(version, url, sidecar, { checksumType?, name? })` - for a `.sha256`-style sidecar file, like `${url}.sha256`.
+  It downloads the file of the data named like the last url segment, else the file, verified against its sidecar.
+  Pass `name` when the data names the file differently, it's also the name of the downloaded file.
+- `this.downloadWithoutChecksum(version, url)` - for older releases without an upstream checksum.
+  The data has a computed checksum for them when the tool's entry in the tool-versions `src/tools.ts` sets `computeMissing`, without data the file is downloaded unverified.
 - `this.downloadToolFile(version, distro?, filter?)` - for other upstream layouts.
   It returns `undefined` without a data file for the host, so the installer can fall back to its own download.
 
@@ -36,14 +41,14 @@ Verify every other download against an upstream checksum.
 
 When upstream only started publishing checksums, or switched archive formats, from some version on, pick the right one by version with `semverGte` rather than probing URLs.
 For four-part versions, like cabal's `3.18.1.0`, coerce first with `semverCoerce`.
-Leave `expectedChecksum` unset for older releases that have no upstream checksum, so nothing that worked before breaks.
-This is an explicit compatibility exception: `this.http.download` skips integrity validation in that case, so name the cutoff in a comment, and use another trusted integrity check if upstream offers one:
+Download older releases that have no upstream checksum with `this.downloadWithoutChecksum`, so nothing that worked before breaks.
+This is an explicit compatibility exception: without data it skips integrity validation, so name the cutoff in a comment, and use another trusted integrity check if upstream offers one:
 
 ```ts
 // sbt only publishes a `.sha256` checksum file since v1.3.5.
-const expectedChecksum = semverGte(version, '1.3.5')
-  ? await this.getChecksum(`${url}.sha256`)
-  : undefined;
+const file = semverGte(version, '1.3.5')
+  ? await this.downloadChecksumSidecar(version, url, '.sha256')
+  : await this.downloadWithoutChecksum(version, url);
 ```
 
 Real examples worth reading:

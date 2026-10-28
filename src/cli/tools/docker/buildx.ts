@@ -13,26 +13,23 @@ export class BuildxInstallService extends BaseInstallService {
   override readonly parent = 'docker';
 
   /**
-   * Downloads the buildx binary from GitHub into the versioned `bin` folder,
-   * verified against the release's `checksums.txt` from v0.7.0.
+   * Downloads the buildx binary from GitHub into the versioned `bin` folder.
+   * The file and its checksum come from the tool-versions data, without data
+   * it is verified against the release's `checksums.txt` from v0.7.0.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/docker/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux-${this.envSvc.arch}`;
 
-    let expectedChecksum: string | undefined;
-    if (semverGte(version, '0.7.0')) {
-      expectedChecksum = await this.findChecksum(
-        `${baseUrl}checksums.txt`,
-        filename,
-      );
-    }
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    // releases before 0.7.0 have no checksums
+    const file = semverGte(version, '0.7.0')
+      ? await this.downloadChecksumListed(
+          version,
+          baseUrl,
+          filename,
+          'checksums.txt',
+        )
+      : await this.downloadWithoutChecksum(version, `${baseUrl}${filename}`);
 
     await this.pathSvc.ensureToolPath(this.name);
 

@@ -217,11 +217,7 @@ export abstract class BaseInstallService {
     filename: string,
     list: string,
   ): Promise<string> {
-    const file = await this.downloadToolFile(
-      version,
-      undefined,
-      (f) => f.name === filename,
-    );
+    const file = await this.downloadNamedToolFile(version, filename);
     if (file) {
       return file;
     }
@@ -234,6 +230,78 @@ export abstract class BaseInstallService {
       checksumType: 'sha256',
       expectedChecksum,
     });
+  }
+
+  /**
+   * Downloads a file: the file named like it of the tool-versions data, see
+   * {@link downloadToolFile}, else the file, verified against the checksum in
+   * its sidecar file, eg. `tool.tar.gz.sha256`, see {@link getChecksum}.
+   *
+   * @param url - the url of the file
+   * @param sidecar - the suffix of the sidecar file, like `.sha256`
+   * @param options.checksumType - the algorithm of the checksum
+   * @param options.name - the name of the file in the data, also the name of
+   * the downloaded file when it's a plain file name, by default the decoded
+   * last url segment
+   * @throws when the sidecar has no checksum or the download fails
+   */
+  protected async downloadChecksumSidecar(
+    version: string,
+    url: string,
+    sidecar: string,
+    {
+      checksumType = 'sha256',
+      name,
+    }: { checksumType?: HttpChecksumType; name?: string } = {},
+  ): Promise<string> {
+    const file = await this.downloadNamedToolFile(
+      version,
+      name ?? urlFileName(url),
+    );
+    if (file) {
+      return file;
+    }
+    const expectedChecksum = await this.getChecksum(`${url}${sidecar}`);
+    return await this.http.download({
+      url,
+      checksumType,
+      expectedChecksum,
+      fileName: name,
+    });
+  }
+
+  /**
+   * Downloads a file of a release without an upstream checksum: the file
+   * named like it of the tool-versions data, which has a checksum computed by
+   * the data, see {@link downloadToolFile}, else the file unverified.
+   *
+   * @param url - the url of the file, its last segment is the name in the data
+   * @throws when the download fails
+   */
+  protected async downloadWithoutChecksum(
+    version: string,
+    url: string,
+  ): Promise<string> {
+    return (
+      (await this.downloadNamedToolFile(version, urlFileName(url))) ??
+      (await this.http.download({ url }))
+    );
+  }
+
+  /**
+   * Downloads the file named `name` of a version for the host from the
+   * tool-versions data, see {@link downloadToolFile}. A tool can list several
+   * files per host, eg. a musl and a glibc build.
+   */
+  private async downloadNamedToolFile(
+    version: string,
+    name: string,
+  ): Promise<string | undefined> {
+    return await this.downloadToolFile(
+      version,
+      undefined,
+      (f) => f.name === name,
+    );
   }
 
   /**
@@ -400,6 +468,14 @@ export abstract class BaseInstallService {
   ): Promise<SpawnResult> {
     return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
+}
+
+/**
+ * The decoded last segment of the path of an url, the default name of a
+ * download, like the tool-versions data names the file.
+ */
+function urlFileName(url: string): string {
+  return decodeURIComponent(new URL(url).pathname.split('/').pop()!);
 }
 
 /**

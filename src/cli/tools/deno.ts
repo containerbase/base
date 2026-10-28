@@ -21,8 +21,9 @@ export class DenoInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the deno zip from GitHub, verified against its `.sha256sum`,
-   * and extracts it into the versioned `bin` folder.
+   * Downloads the deno zip from GitHub and extracts it into the versioned
+   * `bin` folder. The file and its checksum come from the tool-versions data,
+   * without data it is verified against its `.sha256sum`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -34,13 +35,7 @@ export class DenoInstallService extends BaseInstallService {
     const filename = `deno-${this.ghArch}-unknown-linux-gnu.zip`;
     const url = `${baseUrl}${filename}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256sum`);
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256sum');
 
     await this.pathSvc.ensureToolPath(this.name);
 

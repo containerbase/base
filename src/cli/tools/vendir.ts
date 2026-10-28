@@ -14,26 +14,22 @@ export class VendirInstallService extends BaseInstallService {
   override readonly minVersion = '0.4.0';
 
   /**
-   * Downloads the vendir binary from GitHub into the versioned `bin` folder,
-   * verified against `checksums.txt` from v0.25.0.
+   * Downloads the vendir binary from GitHub into the versioned `bin` folder.
+   * The file and its checksum come from the tool-versions data, without data
+   * it is verified against `checksums.txt` from v0.25.0.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/vmware-tanzu/carvel-vendir/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}`;
 
-    let expectedChecksum: string | undefined;
-    if (semverGte(version, checksumsSince)) {
-      expectedChecksum = await this.findChecksum(
-        `${baseUrl}checksums.txt`,
-        filename,
-      );
-    }
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = semverGte(version, checksumsSince)
+      ? await this.downloadChecksumListed(
+          version,
+          baseUrl,
+          filename,
+          'checksums.txt',
+        )
+      : await this.downloadWithoutChecksum(version, `${baseUrl}${filename}`);
 
     await this.pathSvc.ensureToolPath(this.name);
 

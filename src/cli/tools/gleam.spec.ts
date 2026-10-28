@@ -4,7 +4,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { GleamInstallService } from './gleam.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -23,6 +23,8 @@ describe('cli/tools/gleam', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -48,6 +50,33 @@ describe('cli/tools/gleam', () => {
       cwd: pathSvc.versionedToolPath('gleam', version),
       strip: 0,
     });
+  });
+
+  test('install: downloads the tool-versions file without the .sha512', async () => {
+    const releaseUrl = '/gleam-lang/gleam/releases/download/v0.35.0';
+    const filename = 'gleam-v0.35.0-x86_64-unknown-linux-musl.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/gleam-v0.35.0-aarch64-unknown-linux-musl.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      // the data has the sha512 of the release
+      {
+        ...toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+        checksum: `sha512:${checksum(tarball, 'sha512')}`,
+      },
+    ]);
+    // there is no interceptor for the `.sha512`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(GleamInstallService);
+
+    await expect(svc.install('0.35.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
   });
 
   test('link', async () => {
