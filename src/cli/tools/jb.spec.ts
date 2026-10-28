@@ -6,7 +6,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { JsonnetBundlerInstallService } from './jb.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -26,6 +26,8 @@ describe('cli/tools/jb', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -76,6 +78,30 @@ describe('cli/tools/jb', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions prebuild without the .sha512', async () => {
+    const releaseUrl = '/containerbase/jb-prebuild/releases/download/0.6.0.3';
+    const filename = 'jb-0.6.0.3-x86_64.tar.xz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/jb-0.6.0.3-aarch64.tar.xz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `.sha512`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(JsonnetBundlerInstallService);
+
+    await expect(svc.install('0.6.0.3')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.toolPath('jb'),
+    });
+  });
 
   test.each([
     { version: '0.6.0', expected: true },

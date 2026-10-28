@@ -10,7 +10,6 @@ import {
   newestVersion,
   partialVersionHelp,
 } from '../../install-tool/tool-version-resolver.ts';
-import type { HttpChecksumType } from '../../services/http.service';
 import { isValid, logger } from '../../utils/index.ts';
 import { MavenMetadata } from './schema.ts';
 
@@ -37,64 +36,75 @@ export class MavenInstallService extends BaseInstallService {
 
   /**
    * Installs the containerbase maven prebuild when there is one, else the
-   * apache distribution from repo.maven.apache.org. Both are verified
-   * against their `.sha512`, or a `.sha1` for old apache releases.
+   * apache distribution from repo.maven.apache.org. The prebuild and its
+   * checksum come from the tool-versions data first. Without data both are
+   * verified against their `.sha512`, or a `.sha1` for old apache releases.
    *
    * @throws when no checksum file is found
    */
   override async install(version: string): Promise<void> {
-    const name = this.name;
-    let filename = `${name}-${version}.tar.xz`;
-    let url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${filename}`;
-    let checksumFileUrl = `${url}.sha512`;
-    const isOnGithub = await this.http.exists(checksumFileUrl);
-    let file: string;
-    let strip: number | undefined;
-
-    if (isOnGithub) {
-      logger.info(`using github`);
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      logger.info(`using repo.maven.apache.org`);
-      strip = 1;
-      // fallback to repo.maven.apache.org
-      filename = `apache-${name}-${version}-bin.tar.gz`;
-      url = `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${version}/${filename}`;
-      checksumFileUrl = `${url}.sha512`;
-      let expectedChecksum: string;
-      let checksumType: HttpChecksumType;
-      if (await this.http.exists(checksumFileUrl)) {
-        logger.debug(`using sha512 checksum for ${filename}`);
-        expectedChecksum = await this.getChecksum(`${url}.sha512`);
-        checksumType = 'sha512';
-      } else if (await this.http.exists(`${url}.sha1`)) {
-        logger.debug(`using sha1 checksum for ${filename}`);
-        expectedChecksum = await this.getChecksum(`${url}.sha1`);
-        checksumType = 'sha1';
-      } else {
-        throw new Error(`checksum file not found for ${filename}`);
-      }
-
-      file = await this.http.download({
-        url,
-        checksumType,
-        expectedChecksum,
-      });
-    }
+    const filename = `${this.name}-${version}.tar.xz`;
+    const prebuild =
+      (await this.downloadNamedToolFile(version, filename)) ??
+      (await this.downloadPrebuild(version, filename));
+    const file = prebuild ?? (await this.downloadApache(version));
 
     let path = await this.pathSvc.ensureToolPath(this.name);
 
-    if (strip) {
-      // from archive.apache.org
+    if (!prebuild) {
+      // from repo.maven.apache.org
       path = await this.pathSvc.createVersionedToolPath(this.name, version);
     }
 
-    await this.compress.extract({ file, cwd: path, strip });
+    await this.compress.extract({
+      file,
+      cwd: path,
+      strip: prebuild ? undefined : 1,
+    });
+  }
+
+  /**
+   * Downloads the containerbase prebuild from its GitHub release when it has
+   * a `.sha512`, verified against it. It probes the `.sha512` itself instead
+   * of using {@link downloadOptionalChecksumSidecar}, so the source is logged
+   * before the download starts.
+   * @returns `undefined` when there is no prebuild
+   */
+  private async downloadPrebuild(
+    version: string,
+    filename: string,
+  ): Promise<string | undefined> {
+    const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${filename}`;
+    const checksumFileUrl = `${url}.sha512`;
+    if (!(await this.http.exists(checksumFileUrl))) {
+      return undefined;
+    }
+    logger.info(`using github`);
+    const expectedChecksum = await this.getChecksum(checksumFileUrl);
+    return await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
+  }
+
+  /**
+   * Downloads the apache distribution from repo.maven.apache.org, verified
+   * against its `.sha512`, or a `.sha1` for old releases.
+   *
+   * @throws when no checksum file is found
+   */
+  private async downloadApache(version: string): Promise<string> {
+    logger.info(`using repo.maven.apache.org`);
+    const filename = `apache-${this.name}-${version}-bin.tar.gz`;
+    const url = `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${version}/${filename}`;
+    const file =
+      (await this.downloadOptionalChecksumSidecar(url, '.sha512', 'sha512')) ??
+      (await this.downloadOptionalChecksumSidecar(url, '.sha1', 'sha1'));
+    if (!file) {
+      throw new Error(`checksum file not found for ${filename}`);
+    }
+    return file;
   }
 
   /** Accepts any semver version and maven release versions like `3.0`. */

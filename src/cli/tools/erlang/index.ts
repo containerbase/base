@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { getDistro } from '../../utils/index.ts';
+import { PrebuildInstallService } from '../utils/prebuild.ts';
 
 /**
  * Matches erlang's version format: up to four numeric parts (major, minor,
@@ -35,25 +35,15 @@ export class ErlangPrepareService extends BasePrepareService {
 
 @injectable()
 @injectFromHierarchy()
-export class ErlangInstallService extends BaseInstallService {
+export class ErlangInstallService extends PrebuildInstallService {
   override readonly name = 'erlang';
 
   /** The first prebuild with jammy assets. */
   override readonly minVersion = '24.2.0.0';
 
-  /** The architecture name used by the erlang prebuild archives. */
-  private get arch(): string {
-    switch (this.envSvc.arch) {
-      case 'arm64':
-        return 'aarch64';
-      case 'amd64':
-        return 'x86_64';
-    }
-  }
-
   /**
-   * Downloads the containerbase prebuild, verified against its `.sha512`,
-   * and extracts it into the tool path.
+   * Installs the containerbase prebuild, see `PrebuildInstallService`. Only
+   * jammy prebuilds are published, noble and resolute use them too.
    *
    * @throws on an unsupported distro
    */
@@ -64,22 +54,7 @@ export class ErlangInstallService extends BaseInstallService {
         `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
       );
     }
-
-    // only jammy prebuilds are published, noble and resolute use them too
-    const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-jammy-${this.arch}.tar.xz`;
-
-    // every jammy prebuild has a checksum
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha512',
-      expectedChecksum,
-    });
-
-    const path = await this.pathSvc.ensureToolPath(this.name);
-    // the archive already contains the version folder itself
-    await this.compress.extract({ file, cwd: path });
+    await super.install(version);
   }
 
   /** Accepts four part versions like `28.5.0.7`. */

@@ -4,7 +4,7 @@ import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { ComposerInstallService, ComposerVersionResolver } from './composer.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -19,6 +19,8 @@ describe('cli/tools/php/composer', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -33,6 +35,25 @@ describe('cli/tools/php/composer', () => {
     const extract = vi.spyOn(CompressionService.prototype, 'extract');
 
     await expect(svc.install('2.8.3')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.toolPath('composer'),
+    });
+  });
+
+  test('install: downloads the tool-versions file without the .sha512', async () => {
+    const filename = 'composer-2.8.4.tar.xz';
+    // one file for all archs
+    mockToolFiles([
+      toolFile(`${baseUrl}${prebuild}/2.8.4/${filename}`, tarball),
+    ]);
+    // there is no interceptor for the `.sha512`
+    scope(baseUrl).get(`${prebuild}/2.8.4/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(ComposerInstallService);
+
+    await expect(svc.install('2.8.4')).resolves.toBeUndefined();
 
     expect(extract).toHaveBeenCalledExactlyOnceWith({
       file: expect.stringContaining(filename),

@@ -293,7 +293,7 @@ export abstract class BaseInstallService {
    * tool-versions data, see {@link downloadToolFile}. A tool can list several
    * files per host, eg. a musl and a glibc build.
    */
-  private async downloadNamedToolFile(
+  protected async downloadNamedToolFile(
     version: string,
     name: string,
   ): Promise<string | undefined> {
@@ -443,6 +443,31 @@ export abstract class BaseInstallService {
     }
     logger.debug(`Using ${fallback} file for ${this.name} on ${host}`);
     return await this.downloadToolFile(version, fallback);
+  }
+
+  /**
+   * Downloads a file when its sidecar file exists, verified against the
+   * checksum in it, see {@link getChecksum}. For releases which may lack the
+   * file, so the installer can fall back to another source. It doesn't use
+   * the tool-versions data, combine it with {@link downloadNamedToolFile}.
+   *
+   * @param url - the url of the file
+   * @param sidecar - the suffix of the sidecar file, like `.sha512`
+   * @param checksumType - the algorithm of the checksum
+   * @returns `undefined` when there is no sidecar file
+   * @throws when the sidecar has no checksum or the download fails
+   */
+  protected async downloadOptionalChecksumSidecar(
+    url: string,
+    sidecar: string,
+    checksumType: HttpChecksumType,
+  ): Promise<string | undefined> {
+    const checksumUrl = `${url}${sidecar}`;
+    if (!(await this.http.exists(checksumUrl))) {
+      return undefined;
+    }
+    const expectedChecksum = await this.getChecksum(checksumUrl);
+    return await this.http.download({ url, checksumType, expectedChecksum });
   }
 
   /** Creates a shell wrapper in the global bin folder for a tool binary. */

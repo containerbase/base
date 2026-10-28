@@ -10,7 +10,7 @@ import {
 import { GolangInstallService, GolangPrepareService } from './golang.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -39,6 +39,8 @@ describe('cli/tools/golang', () => {
     vi.mocked(arch).mockReturnValue('x64');
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -102,6 +104,33 @@ describe('cli/tools/golang', () => {
         });
       },
     );
+
+    test('install: downloads the tool-versions prebuild without the .sha512', async () => {
+      const version = '1.23.1';
+      mockToolFiles([
+        toolFile(
+          `${githubUrl}${prebuildPath(version, 'aarch64')}`,
+          'arm',
+          'arm64',
+        ),
+        toolFile(
+          `${githubUrl}${prebuildPath(version, 'x86_64')}`,
+          archive,
+          'amd64',
+        ),
+      ]);
+      // there is no interceptor for the `.sha512`
+      scope(githubUrl).get(prebuildPath(version, 'x86_64')).reply(200, archive);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc, pathSvc } = await toolContext(GolangInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining(`golang-${version}-x86_64.tar.xz`),
+        cwd: pathSvc.toolPath('golang'),
+      });
+    });
 
     test('install: falls back to the official build for a >= 1.21 version', async () => {
       const version = '1.21.6';
