@@ -284,10 +284,11 @@ describe('cli/tools/php/index', () => {
       expect(await svc.resolve('latest')).toBe('8.3.13');
     });
 
-    test('keeps a pinned version', async () => {
+    test('keeps a pinned version, which the tool-versions data resolves', async () => {
       const { svc } = await toolContext(PhpVersionResolver);
 
       expect(await svc.resolve('8.3.13')).toBe('8.3.13');
+      expect(svc.latestOnly).toBe(true);
     });
   });
 });

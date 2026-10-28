@@ -96,10 +96,11 @@ describe('cli/tools/php/composer', () => {
       expect(await svc.resolve('latest')).toBe('2.8.3');
     });
 
-    test('keeps a pinned version', async () => {
+    test('keeps a pinned version, which the tool-versions data resolves', async () => {
       const { svc } = await toolContext(ComposerVersionResolver);
 
       expect(await svc.resolve('2.8.3')).toBe('2.8.3');
+      expect(svc.latestOnly).toBe(true);
     });
   });
 });

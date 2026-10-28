@@ -127,10 +127,11 @@ describe('cli/tools/mise', () => {
       },
     );
 
-    test('keeps a pinned version', async () => {
+    test('keeps a pinned version, which the tool-versions data resolves', async () => {
       const { svc } = await toolContext(MiseVersionResolver);
 
       expect(await svc.resolve('2026.2.13')).toBe('2026.2.13');
+      expect(svc.latestOnly).toBe(true);
     });
   });
 });

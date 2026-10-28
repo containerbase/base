@@ -27,6 +27,18 @@ class DummyVersionResolver extends ToolVersionResolver {
   }
 }
 
+@injectable()
+@injectFromHierarchy()
+class LatestOnlyVersionResolver extends ToolVersionResolver {
+  readonly tool = 'latest-only';
+  override readonly latestOnly = true;
+
+  /** Resolves any version to `9.9.9`. */
+  resolve(_version: string | undefined): Promise<string | undefined> {
+    return Promise.resolve('9.9.9');
+  }
+}
+
 vi.mock('node:os', async (importOriginal) => ({
   ...(await importOriginal<typeof import('node:os')>()),
   arch: vi.fn(() => 'x64'),
@@ -150,6 +162,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     child = createContainer();
     child.bind(ToolVersionResolverService).toSelf();
     child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
+    child.bind(TOOL_VERSION_RESOLVER).to(LatestOnlyVersionResolver);
     svc = await child.getAsync(ToolVersionResolverService);
   });
 
@@ -177,6 +190,32 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
     expect(embedded).not.toHaveBeenCalled();
     expect(online).not.toHaveBeenCalled();
+  });
+
+  test.each([undefined, '', ' ', 'latest'])(
+    'resolves %j with a resolver which only resolves latest',
+    async (version) => {
+      const online = vi.spyOn(
+        ToolVersionsService.prototype,
+        'getOnlineVersions',
+      );
+
+      expect(await svc.resolve('latest-only', version)).toBe('9.9.9');
+
+      expect(online).not.toHaveBeenCalled();
+    },
+  );
+
+  test('resolves a partial version of a resolver which only resolves latest from the data', async () => {
+    serve('latest-only', 200, ['2.1.0', '2.0.0']);
+
+    expect(await svc.resolve('latest-only', '2')).toBe('2.1.0');
+  });
+
+  test('keeps an exact version of a resolver which only resolves latest', async () => {
+    await embed('latest-only', ['1.2.3']);
+
+    expect(await svc.resolve('latest-only', '1.2.3')).toBe('1.2.3');
   });
 
   test.each([undefined, 'latest'])(

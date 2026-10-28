@@ -2,7 +2,10 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../install-tool/tool-version-resolver.ts';
+import {
+  ToolVersionResolver,
+  partialVersionHelp,
+} from '../install-tool/tool-version-resolver.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -71,6 +74,13 @@ export class MiseInstallService extends BaseInstallService {
 @injectFromHierarchy()
 export class MiseVersionResolver extends ToolVersionResolver {
   readonly tool = 'mise';
+
+  /** Other versions are resolved from the tool-versions data. */
+  // TODO: drop in the next major, when `latest` comes from the data too (#7962)
+  override readonly latestOnly = true;
+
+  /** Partial versions are resolved from the tool-versions data. */
+  override readonly versionHelp = partialVersionHelp;
 
   /** Resolves a missing version or `latest` from mise.jdx.dev. */
   async resolve(version: string | undefined): Promise<string | undefined> {
