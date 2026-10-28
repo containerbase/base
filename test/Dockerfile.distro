@@ -244,7 +244,7 @@ RUN install-tool python 3.14.10
 # renovate: datasource=pypi
 RUN install-tool checkov 3.3.30
 # renovate: datasource=pypi
-RUN install-tool conan 2.33.0
+RUN install-tool conan 2.34.0
 # renovate: datasource=pypi
 RUN install-tool copier 9.19.1
 # renovate: datasource=pypi
