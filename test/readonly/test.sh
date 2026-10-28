@@ -46,6 +46,7 @@ for user in root 12021; do
   run --user "${user}" "${image}" node --version
   run --user "${user}" "${image}" npm --version
   run --user "${user}" "${image}" flux --version
+  run --user "${user}" "${image}" git --version
 
   # installing tools needs a writable `/opt/containerbase`, so it fails before
   # downloading anything, use a version that isn't installed yet
@@ -82,6 +83,7 @@ done
 
 node_dir=/opt/containerbase/tools/node/24.22.1
 php_dir=/opt/containerbase/tools/php/8.5.12
+git_dir=/opt/containerbase/tools/git/2.56.0
 volume=containerbase-test-readonly
 
 # Removes the test volume, if it exists.
@@ -117,13 +119,18 @@ for setup in "root nocopy" "root" "12021"; do
   remove_volume
 
   # the first start restores the volume: build-time folders link to the
-  # snapshot, `php` writes into its folder, so it's copied
+  # snapshot, `php` writes into its folder, so it's copied, `git` finds its
+  # helpers through its real path in the snapshot
   output=$(run_volume_output "${nocopy}" --user "${user}" "${image}" bash -c "
     set -ex
     test -f /opt/containerbase/.restored
     test -L ${node_dir}
     test -d ${php_dir} && test ! -L ${php_dir}
+    test -L ${git_dir}
     node --version && npm --version && php --version && flux --version
+    git --version | grep -Fx 'git version 2.56.0'
+    git --exec-path | grep -Fx \"\$(readlink -f ${git_dir})/libexec/git-core\"
+    git ls-remote https://github.com/containerbase/base HEAD
     containerbase-cli list tools
   ")
   echo "${output}"

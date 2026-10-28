@@ -24,10 +24,17 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
+   * The distro whose prebuild every supported ubuntu release can use, by
+   * default jammy. Tools with newer prebuilds override it, eg. git uses noble.
+   */
+  protected readonly fallbackDistro: string = 'jammy';
+
+  /**
    * Downloads the distro specific containerbase prebuild and extracts it into
    * the tool path. The file and its checksum come from the tool-versions
    * data, the one of the host distro first. Newer ubuntu releases fall back to
-   * the jammy prebuild, without data it is verified against its `.sha512`.
+   * the {@link fallbackDistro} prebuild, without data it is verified against
+   * its `.sha512`.
    */
   override async install(version: string): Promise<void> {
     const file = await this.download(version);
@@ -39,14 +46,15 @@ export abstract class PrebuildInstallService extends BaseInstallService {
 
   /**
    * Downloads the prebuild of the host distro from the tool-versions data,
-   * else the jammy one, which every supported ubuntu release can use, from
-   * the data or from its GitHub release.
+   * else the {@link fallbackDistro} one, which every supported ubuntu release
+   * can use, from the data or from its GitHub release.
    */
   private async download(version: string): Promise<string> {
     const host = (await getDistro()).versionCode;
+    const fallback = this.fallbackDistro;
     return (
-      (await this.downloadDistroToolFile(version, host, 'jammy')) ??
-      (await this.downloadPrebuild(version, 'jammy'))
+      (await this.downloadDistroToolFile(version, host, fallback)) ??
+      (await this.downloadPrebuild(version, fallback))
     );
   }
 
@@ -60,7 +68,7 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   ): Promise<string> {
     const name = this.name;
     const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    // every jammy prebuild has a checksum
+    // every prebuild of the fallback distro has a checksum
     const expectedChecksum = await this.getChecksum(`${url}.sha512`);
     return await this.http.download({
       url,

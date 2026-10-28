@@ -132,16 +132,43 @@ RUN set -ex; \
 #--------------------------------------
 FROM base AS test-git
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
+
+USER 12021
+
+# the version folder may link to the build-time snapshot, so compare real paths
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  tool="$(readlink -f /opt/containerbase/tools/git/2.56.0)"; \
+  readlink -f /usr/local/bin/git | grep -Fx "${tool}/bin/git"; \
+  git --exec-path | grep -Fx "${tool}/libexec/git-core"; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version | grep '^git version 2\.56\.0$'; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild log -1 --oneline; \
+  rm -rf /tmp/git-prebuild; \
+  true
 
 #--------------------------------------
 # Image: git-lfs
 #--------------------------------------
 FROM test-git AS test-git-lfs
 
+USER root
+
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.1
+
+USER 12021
+
+RUN set -ex; \
+  git lfs version | grep '^git-lfs/3\.8\.1 '; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
 
 #--------------------------------------
 # Image: helmfile

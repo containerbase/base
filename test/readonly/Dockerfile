@@ -12,6 +12,10 @@ ARG CONTAINERBASE_CDN_NPM
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
+# root only tool linked into the global bin folder, already in the base image
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
+
 # prepared tool, its init links the user caches to `/tmp`
 RUN prepare-tool node
 

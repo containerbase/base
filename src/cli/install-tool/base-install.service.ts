@@ -67,13 +67,12 @@ export abstract class BaseInstallService {
 
   /**
    * Some tools can only be installed as root, so they are only available at
-   * image build time. Eg. git is installed via apt.
+   * image build time. Eg. git, which writes the system wide `/etc/gitconfig`.
    */
   readonly needsRoot: boolean = false;
 
   /**
-   * Tools which are not installed into a versioned tool path can't be
-   * uninstalled, eg. git is installed system wide via apt.
+   * Some tools can't be uninstalled, eg. git, which other tools depend on.
    */
   readonly canUninstall: boolean = true;
 
@@ -158,7 +157,7 @@ export abstract class BaseInstallService {
    * Moves the folder the install of the version created into the build-time
    * snapshot and links it back, by default the versioned tool path, see
    * `SnapshotService.moveAndLink`. Tools installing somewhere else override
-   * it, eg. `git` or `dotnet`.
+   * it, eg. `dotnet`.
    */
   async snapshot(version: string): Promise<void> {
     await this.snapshotSvc.moveAndLink(
