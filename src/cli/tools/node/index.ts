@@ -149,10 +149,15 @@ export class NodeInstallService extends NodeBaseInstallService {
       undefined,
       (f) => f.name === prebuildName,
     );
+    const prebuildUrl = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${prebuildName}`;
     return (
       (prebuild?.file
         ? await this.downloadListedFile(prebuild.file)
-        : await this.downloadPrebuildRelease(version)) ??
+        : await this.downloadOptionalChecksumSidecar(
+            prebuildUrl,
+            '.sha512',
+            'sha512',
+          )) ??
       (await this.downloadToolFile(
         version,
         undefined,
@@ -160,28 +165,6 @@ export class NodeInstallService extends NodeBaseInstallService {
       )) ??
       (await this.downloadArchive(version))
     );
-  }
-
-  /**
-   * Downloads the containerbase node prebuild when its release has a
-   * `.sha512`, verified against it.
-   * @returns `undefined` when the release has no `.sha512`
-   */
-  private async downloadPrebuildRelease(
-    version: string,
-  ): Promise<string | undefined> {
-    const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.prebuildName(version)}`;
-    const checksumFileUrl = `${url}.sha512`;
-
-    if (!(await this.http.exists(checksumFileUrl))) {
-      return undefined;
-    }
-    const expectedChecksum = await this.getChecksum(checksumFileUrl);
-    return await this.http.download({
-      url,
-      checksumType: 'sha512',
-      expectedChecksum,
-    });
   }
 
   /**
