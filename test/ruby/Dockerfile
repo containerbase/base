@@ -131,6 +131,12 @@ RUN install-tool cocoapods 1.17.0
 
 RUN pod env
 
+# TODO: drop once typhoeus/typhoeus#825 is fixed, typhoeus 1.7.0 hangs `pod install`
+RUN set -ex; \
+  export GEM_HOME=$(echo /opt/containerbase/tools/cocoapods/*/*); \
+  gem uninstall -a -x -I typhoeus; \
+  gem install --no-document typhoeus -v 1.6.0;
+
 RUN set -ex; \
   cd b/Project; \
   pod install;
