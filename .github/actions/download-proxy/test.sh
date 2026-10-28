@@ -95,6 +95,8 @@ check github.com/nubjs/nub/releases/download/v0.9.3/nub-linux-x64.tar.gz.sha256 
 check github.com/containerbase/maven-prebuild/releases/latest/download/version 200
 # encoded `%2F` in the release tag
 check 'github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/checksums.txt' 200
+# a slash in the release tag
+check github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.8.3/checksums.txt 200
 # redirects to cdn.dl.k8s.io
 check dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl.sha256 200
 # lookup with a query string

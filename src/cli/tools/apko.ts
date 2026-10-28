@@ -19,8 +19,9 @@ export class ApkoInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the apko archive from GitHub, verified against the release's
-   * `checksums.txt`, and extracts it into the versioned `bin` folder.
+   * Downloads the apko archive from GitHub and extracts it into the versioned
+   * `bin` folder. The file and its checksum come from the tool-versions data,
+   * without data it is verified against the release's `checksums.txt`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -31,16 +32,12 @@ export class ApkoInstallService extends BaseInstallService {
 
     const filename = `apko_${version}_linux_${this.ghArch}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'checksums.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

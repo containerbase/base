@@ -18,7 +18,16 @@ Raising the minimum supported version is a separate, breaking change, not part o
 
 Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 
-Verify every download against an upstream checksum.
+Download from the [tool-versions](https://github.com/containerbase/tool-versions) data first, when it lists the tool.
+It has the files and checksums of the versions, so no checksum file is downloaded:
+
+- `this.downloadChecksumListed(version, baseUrl, filename, list)` - for a checksum list file in the release folder.
+  It downloads the file named `filename` of the data, else `filename` of the folder, verified against the checksum `list`.
+  Make sure `filename` is the file name the data lists for the host, a tool can have several files per arch.
+- `this.downloadToolFile(version, distro?, filter?)` - for other upstream layouts.
+  It returns `undefined` without a data file for the host, so the installer can fall back to its own download.
+
+Verify every other download against an upstream checksum.
 `BaseInstallService` has two shared helpers for this, both of which throw when the checksum is missing:
 
 - `this.findChecksum(url, filename)` - for a checksum list file, one `<checksum>  <filename>` line per file.

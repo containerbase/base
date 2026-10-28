@@ -23,7 +23,11 @@ export class VpInstallService extends BaseInstallService {
     }
   }
 
-  /** Downloads and extracts the Vite+ release, verified against its SHA-256 checksum. */
+  /**
+   * Downloads and extracts the Vite+ release. The file and its checksum come
+   * from the tool-versions data, without data it is verified against the
+   * release's `vp-checksums.txt`.
+   */
   override async install(version: string): Promise<void> {
     if (!semverGte(version, checksumMinVersion)) {
       throw new Error(
@@ -34,16 +38,12 @@ export class VpInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/voidzero-dev/vite-plus/releases/download/v${version}/`;
     const filename = `vp-${this.target}-unknown-linux-gnu.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}vp-checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'vp-checksums.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
     const path = await this.pathSvc.createVersionedToolPath(

@@ -14,24 +14,21 @@ export class GitLfsInstallService extends BaseInstallService {
   override readonly parent = 'git';
 
   /**
-   * Downloads the git-lfs archive from GitHub, verified against the release's
-   * `sha256sums.asc`, and copies only the `git-lfs` binary into the versioned
-   * `bin` folder.
+   * Downloads the git-lfs archive from GitHub and copies only the `git-lfs`
+   * binary into the versioned `bin` folder. The file and its checksum come
+   * from the tool-versions data, without data it is verified against the
+   * release's `sha256sums.asc`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/git-lfs/git-lfs/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}-v${version}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}sha256sums.asc`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'sha256sums.asc',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.withTempDir(`${this.name}-`, async (tmp) => {
       // v3.2+ has a subdir https://github.com/git-lfs/git-lfs/pull/4980

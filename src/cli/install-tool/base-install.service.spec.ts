@@ -22,7 +22,7 @@ import { BaseInstallService, selectToolFile } from './base-install.service.ts';
 import { testContainer } from '~test/di.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
-import { checksum } from '~test/tool.ts';
+import { checksum, mockToolFiles } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -35,8 +35,11 @@ vi.mock('../utils/index.ts', async (importActual) => ({
   getDistro: vi.fn(),
 }));
 
-/** A file of a version for the tests. */
-function toolFile(
+/**
+ * A file of a version for the tests, named `name` and with the checksum of
+ * its name as content.
+ */
+function listedFile(
   name: string,
   props: Pick<ToolFile, 'arch' | 'distro'> = {},
 ): ToolFile {
@@ -85,6 +88,16 @@ class DummyInstallService extends BaseInstallService {
   /** Exposes the protected `findChecksum` to the tests. */
   find(url: string, filename: string): Promise<string> {
     return this.findChecksum(url, filename);
+  }
+
+  /** Exposes the protected `downloadChecksumListed` to the tests. */
+  downloadListed(
+    version: string,
+    baseUrl: string,
+    filename: string,
+    list: string,
+  ): Promise<string> {
+    return this.downloadChecksumListed(version, baseUrl, filename, list);
   }
 
   /** Exposes the protected `downloadToolFile` to the tests. */
@@ -300,24 +313,93 @@ describe('cli/install-tool/base-install.service', () => {
     });
   });
 
+  describe('downloadChecksumListed', () => {
+    const baseUrl = 'https://example.test';
+
+    test('downloads the file of the data with the name', async () => {
+      // the other file of the arch comes first
+      mockToolFiles([
+        listedFile('tool-amd64-musl.tar.gz', { arch: 'amd64' }),
+        listedFile('tool-amd64.tar.gz', { arch: 'amd64' }),
+      ]);
+      // there is no interceptor for the list
+      scope(baseUrl)
+        .get('/files/tool-amd64.tar.gz')
+        .reply(200, 'tool-amd64.tar.gz');
+
+      const file = await svc.downloadListed(
+        '1.0.0',
+        `${baseUrl}/files/`,
+        'tool-amd64.tar.gz',
+        'SHA256SUMS',
+      );
+
+      expect(await fs.readFile(file, 'utf8')).toBe('tool-amd64.tar.gz');
+    });
+
+    test.each([
+      { data: 'no data', path: '/release', files: undefined },
+      {
+        data: 'no file with the name',
+        path: '/unnamed',
+        files: [listedFile('tool-amd64-musl.tar.gz', { arch: 'amd64' })],
+      },
+    ])(
+      'downloads the file verified against the list with $data',
+      async ({ path, files }) => {
+        mockToolFiles(files);
+        scope(baseUrl)
+          .get(`${path}/SHA256SUMS`)
+          .reply(200, `${checksum('tool')}  tool-amd64.tar.gz\n`)
+          .get(`${path}/tool-amd64.tar.gz`)
+          .reply(200, 'tool');
+
+        const file = await svc.downloadListed(
+          '1.0.0',
+          `${baseUrl}${path}/`,
+          'tool-amd64.tar.gz',
+          'SHA256SUMS',
+        );
+
+        expect(await fs.readFile(file, 'utf8')).toBe('tool');
+      },
+    );
+
+    test('throws on a missing checksum', async () => {
+      mockToolFiles();
+      scope(baseUrl)
+        .get('/unlisted/SHA256SUMS')
+        .reply(200, `${checksum('tool')}  tool-arm64.tar.gz\n`);
+
+      await expect(
+        svc.downloadListed(
+          '1.0.0',
+          `${baseUrl}/unlisted/`,
+          'tool-amd64.tar.gz',
+          'SHA256SUMS',
+        ),
+      ).rejects.toThrow(
+        `Checksum not found in ${baseUrl}/unlisted/SHA256SUMS for tool-amd64.tar.gz`,
+      );
+    });
+  });
+
   describe('downloadToolFile', () => {
     const baseUrl = 'https://example.test';
     const files = [
-      toolFile('dummy-arm64.tar.gz', { arch: 'arm64' }),
-      toolFile('dummy-jammy-amd64.tar.gz', { arch: 'amd64', distro: 'jammy' }),
-      toolFile('dummy-noble-amd64.tar.gz', { arch: 'amd64', distro: 'noble' }),
+      listedFile('dummy-arm64.tar.gz', { arch: 'arm64' }),
+      listedFile('dummy-jammy-amd64.tar.gz', {
+        arch: 'amd64',
+        distro: 'jammy',
+      }),
+      listedFile('dummy-noble-amd64.tar.gz', {
+        arch: 'amd64',
+        distro: 'noble',
+      }),
     ];
 
-    /** Mocks the files of the dummy version `1.0.0`. */
-    function mockFiles(list: ToolFile[]): void {
-      vi.spyOn(
-        ToolVersionsService.prototype,
-        'getVersionFiles',
-      ).mockResolvedValue({ tool: 'dummy', version: '1.0.0', files: list });
-    }
-
     test('downloads the file of the host distro and arch', async () => {
-      mockFiles(files);
+      mockToolFiles(files);
       scope(baseUrl)
         .get('/files/dummy-noble-amd64.tar.gz')
         .reply(200, 'dummy-noble-amd64.tar.gz');
@@ -329,7 +411,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('downloads the file of the given distro', async () => {
-      mockFiles(files);
+      mockToolFiles(files);
       scope(baseUrl)
         .get('/files/dummy-jammy-amd64.tar.gz')
         .reply(200, 'dummy-jammy-amd64.tar.gz');
@@ -340,9 +422,9 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('picks only from the files the filter accepts', async () => {
-      mockFiles([
-        toolFile('dummy-generic.tar.gz'),
-        toolFile('dummy-other.tar.gz'),
+      mockToolFiles([
+        listedFile('dummy-generic.tar.gz'),
+        listedFile('dummy-other.tar.gz'),
       ]);
       scope(baseUrl)
         .get('/files/dummy-other.tar.gz')
@@ -361,7 +443,9 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('names the file like the data, not like the url', async () => {
-      mockFiles([{ ...toolFile('dummy-named.tar.gz'), url: `${baseUrl}/abc` }]);
+      mockToolFiles([
+        { ...listedFile('dummy-named.tar.gz'), url: `${baseUrl}/abc` },
+      ]);
       scope(baseUrl).get('/abc').reply(200, 'dummy-named.tar.gz');
 
       expect(await svc.download('1.0.0')).toMatch(
@@ -370,7 +454,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('throws on a checksum mismatch', async () => {
-      mockFiles([toolFile('dummy-tampered.tar.gz')]);
+      mockToolFiles([listedFile('dummy-tampered.tar.gz')]);
       scope(baseUrl)
         .get('/files/dummy-tampered.tar.gz')
         .times(3)
@@ -383,7 +467,7 @@ describe('cli/install-tool/base-install.service', () => {
       'has no file for an unsupported checksum $checksum',
       async ({ checksum }) => {
         // a download would find no interceptor and fail the test
-        mockFiles([{ ...toolFile('dummy-md5.tar.gz'), checksum }]);
+        mockToolFiles([{ ...listedFile('dummy-md5.tar.gz'), checksum }]);
 
         expect(await svc.download('1.0.0')).toBeUndefined();
         expect(logger.warn).toHaveBeenCalledWith(
@@ -395,13 +479,13 @@ describe('cli/install-tool/base-install.service', () => {
 
     test('skips a more specific file with an unsupported checksum', async () => {
       const blake3 = {
-        ...toolFile('dummy-blake3-noble-amd64.tar.gz', {
+        ...listedFile('dummy-blake3-noble-amd64.tar.gz', {
           arch: 'amd64',
           distro: 'noble',
         }),
         checksum: `blake3:${'b'.repeat(64)}`,
       };
-      mockFiles([blake3, toolFile('dummy-any.tar.gz')]);
+      mockToolFiles([blake3, listedFile('dummy-any.tar.gz')]);
       scope(baseUrl)
         .get('/files/dummy-any.tar.gz')
         .reply(200, 'dummy-any.tar.gz');
@@ -414,16 +498,16 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('does not warn about an unsupported checksum of another host', async () => {
-      mockFiles([
+      mockToolFiles([
         {
-          ...toolFile('dummy-blake3-arm64.tar.gz', { arch: 'arm64' }),
+          ...listedFile('dummy-blake3-arm64.tar.gz', { arch: 'arm64' }),
           checksum: `blake3:${'b'.repeat(64)}`,
         },
         {
-          ...toolFile('dummy-blake3-jammy.tar.gz', { distro: 'jammy' }),
+          ...listedFile('dummy-blake3-jammy.tar.gz', { distro: 'jammy' }),
           checksum: `blake3:${'c'.repeat(64)}`,
         },
-        toolFile('dummy-other-host.tar.gz'),
+        listedFile('dummy-other-host.tar.gz'),
       ]);
       scope(baseUrl)
         .get('/files/dummy-other-host.tar.gz')
@@ -434,10 +518,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('has no file without data', async () => {
-      vi.spyOn(
-        ToolVersionsService.prototype,
-        'getVersionFiles',
-      ).mockResolvedValue(undefined);
+      mockToolFiles();
 
       expect(await svc.download('1.0.0')).toBeUndefined();
       // no data isn't a missing file, and needs no distro
@@ -449,7 +530,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('has no file without one for the host', async () => {
-      mockFiles(files);
+      mockToolFiles(files);
 
       expect(await svc.download('1.0.0', 'resolute')).toBeUndefined();
       expect(logger.debug).toHaveBeenCalledWith(
@@ -459,7 +540,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('logs the host codename for a missing file', async () => {
-      mockFiles(files);
+      mockToolFiles(files);
 
       expect(
         await svc.download('1.0.0', undefined, () => false),
@@ -481,15 +562,11 @@ describe('cli/install-tool/base-install.service', () => {
     function mockFiles(
       distros: string[],
     ): MockInstance<ToolVersionsService['getVersionFiles']> {
-      return vi
-        .spyOn(ToolVersionsService.prototype, 'getVersionFiles')
-        .mockResolvedValue({
-          tool: 'dummy',
-          version: '2.0.0',
-          files: distros.map((distro) =>
-            toolFile(`dummy-2-${distro}.tar.gz`, { arch: 'amd64', distro }),
-          ),
-        });
+      return mockToolFiles(
+        distros.map((distro) =>
+          listedFile(`dummy-2-${distro}.tar.gz`, { arch: 'amd64', distro }),
+        ),
+      );
     }
 
     test.each([
@@ -527,11 +604,11 @@ describe('cli/install-tool/base-install.service', () => {
   });
 
   describe('selectToolFile', () => {
-    const generic = toolFile('generic');
-    const amd64 = toolFile('amd64', { arch: 'amd64' });
-    const arm64 = toolFile('arm64', { arch: 'arm64' });
-    const jammy = toolFile('jammy', { distro: 'jammy' });
-    const jammyAmd64 = toolFile('jammy-amd64', {
+    const generic = listedFile('generic');
+    const amd64 = listedFile('amd64', { arch: 'amd64' });
+    const arm64 = listedFile('arm64', { arch: 'arm64' });
+    const jammy = listedFile('jammy', { distro: 'jammy' });
+    const jammyAmd64 = listedFile('jammy-amd64', {
       arch: 'amd64',
       distro: 'jammy',
     });
@@ -563,7 +640,7 @@ describe('cli/install-tool/base-install.service', () => {
     });
 
     test('has no file of another arch or distro', () => {
-      const noble = toolFile('noble', { distro: 'noble' });
+      const noble = listedFile('noble', { distro: 'noble' });
 
       expect(selectToolFile([arm64, noble], 'amd64', 'jammy')).toBeUndefined();
       expect(selectToolFile([], 'amd64', 'jammy')).toBeUndefined();

@@ -12,9 +12,10 @@ export class GhInstallService extends BaseInstallService {
   override readonly minVersion = '2.0.0';
 
   /**
-   * Downloads the gh archive from GitHub, verified against the release's
-   * checksums file, and extracts only the `gh` binary into the versioned
-   * tool path.
+   * Downloads the gh archive from GitHub and extracts only the `gh` binary
+   * into the versioned tool path. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * checksums file.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -25,16 +26,12 @@ export class GhInstallService extends BaseInstallService {
     const dirname = `gh_${version}_linux_${this.envSvc.arch}`;
     const filename = `${dirname}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}gh_${version}_checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      `gh_${version}_checksums.txt`,
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 
