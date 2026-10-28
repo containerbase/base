@@ -360,6 +360,15 @@ describe('cli/install-tool/base-install.service', () => {
       ).toBeUndefined();
     });
 
+    test('names the file like the data, not like the url', async () => {
+      mockFiles([{ ...toolFile('dummy-named.tar.gz'), url: `${baseUrl}/abc` }]);
+      scope(baseUrl).get('/abc').reply(200, 'dummy-named.tar.gz');
+
+      expect(await svc.download('1.0.0')).toMatch(
+        /\/[0-9a-f]+\/dummy-named\.tar\.gz$/,
+      );
+    });
+
     test('throws on a checksum mismatch', async () => {
       mockFiles([toolFile('dummy-tampered.tar.gz')]);
       scope(baseUrl)

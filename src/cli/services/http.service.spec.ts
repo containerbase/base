@@ -73,6 +73,29 @@ describe('cli/services/http.service', () => {
     expect(file.endsWith('/no-cache.txt')).toBe(true);
   });
 
+  test('download: names the file like the plain file name', async () => {
+    scope(baseUrl).get('/named').reply(200, 'ok');
+
+    const file = await http.download({
+      url: `${baseUrl}/named`,
+      fileName: 'tool-1.0.0.tar.gz',
+    });
+
+    expect(file).toMatch(/\/[0-9a-f]+\/tool-1\.0\.0\.tar\.gz$/);
+  });
+
+  test.each(['../tool-up.tar.gz', '.tool-hidden.tar.gz', 'sub/tool.tar.gz'])(
+    'download: names the file like the url for the file name %s',
+    async (fileName) => {
+      const path = `/unnamed-${fileName.length}.tar.gz`;
+      scope(baseUrl).get(path).reply(200, 'ok');
+
+      const file = await http.download({ url: `${baseUrl}${path}`, fileName });
+
+      expect(file).toMatch(/\/[0-9a-f]+\/unnamed-\d+\.tar\.gz$/);
+    },
+  );
+
   test('download', async () => {
     scope(baseUrl).get('/test.txt').reply(200, 'ok');
 
