@@ -27,8 +27,10 @@ It has the files and checksums of the versions, so no checksum file is downloade
 - `this.downloadChecksumSidecar(version, url, sidecar, { checksumType?, name? })` - for a `.sha256`-style sidecar file, like `${url}.sha256`.
   It downloads the file of the data named like the last url segment, else the file, verified against its sidecar.
   Pass `name` when the data names the file differently, it's also the name of the downloaded file.
-- `this.downloadWithoutChecksum(version, url)` - for older releases without an upstream checksum.
-  The data has a computed checksum for them when the tool's entry in the tool-versions `src/tools.ts` sets `computeMissing`, without data the file is downloaded unverified.
+- `this.downloadWithoutChecksum(version, url, name?)` - for releases without an upstream checksum, like bazelisk or older docker-compose releases.
+  The data has a computed checksum for them when the tool's entry in the tool-versions `src/tools.ts` sets `checksum: { compute: true }` or `computeMissing`, like docker's, or when its datasource computes it, like nuget's; without data the file is downloaded unverified.
+  The data can also have an upstream checksum the installer doesn't read itself, like dotnet's sha512 from its release metadata.
+  Pass `name` when the data names the file differently, like docker.
 - `this.downloadNamedToolFile(version, name)` - the data file named `name`, for installers with their own fallback, like golang and maven.
   It returns `undefined` without that file for the host.
 - `this.downloadDistroToolFile(version, host, fallback)` - the data file of the host distro, else the one of `fallback`, like jammy for newer ubuntu releases.

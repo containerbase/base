@@ -272,19 +272,24 @@ export abstract class BaseInstallService {
 
   /**
    * Downloads a file of a release without an upstream checksum: the file
-   * named like it of the tool-versions data, which has a checksum computed by
-   * the data, see {@link downloadToolFile}, else the file unverified.
+   * named `name` of the tool-versions data, by default the last url segment,
+   * which has a checksum computed by the data, see {@link downloadToolFile},
+   * else the file unverified.
    *
-   * @param url - the url of the file, its last segment is the name in the data
+   * @param url - the url of the file
+   * @param name - the name of the file in the data, also the name of the
+   * downloaded file when it's a plain file name, by default the decoded last
+   * url segment
    * @throws when the download fails
    */
   protected async downloadWithoutChecksum(
     version: string,
     url: string,
+    name?: string,
   ): Promise<string> {
     return (
-      (await this.downloadNamedToolFile(version, urlFileName(url))) ??
-      (await this.http.download({ url }))
+      (await this.downloadNamedToolFile(version, name ?? urlFileName(url))) ??
+      (await this.http.download({ url, fileName: name }))
     );
   }
 

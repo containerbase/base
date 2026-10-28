@@ -14,7 +14,9 @@ export class ScalaInstallService extends BaseInstallService {
   /**
    * Downloads the scala archive from GitHub releases, or from lightbend for
    * versions before v2.10.5, and extracts it into the versioned tool path.
-   * Neither host publishes checksums, so the download is unverified.
+   * Neither host publishes checksums, the archive is verified against the
+   * checksum of the tool-versions data, which lists the GitHub releases, else
+   * unverified.
    */
   override async install(version: string): Promise<void> {
     const filename = `${this.name}-${version}.tgz`;
@@ -23,7 +25,7 @@ export class ScalaInstallService extends BaseInstallService {
       ? `https://github.com/scala/scala/releases/download/v${version}/${filename}`
       : `https://downloads.lightbend.com/${this.name}/${version}/${filename}`;
 
-    const file = await this.http.download({ url });
+    const file = await this.downloadWithoutChecksum(version, url);
 
     await this.pathSvc.ensureToolPath(this.name);
 

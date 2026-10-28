@@ -23,16 +23,15 @@ export class ProtocInstallService extends BaseInstallService {
 
   /**
    * Downloads the protoc zip from GitHub and extracts it into the versioned
-   * tool path. No checksums are verified.
+   * tool path. protobuf publishes no checksums, the zip is verified against
+   * the checksum of the tool-versions data, else unverified.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
 
     const url = `https://github.com/protocolbuffers/protobuf/releases/download/v${version}/${name}-${version}-linux-${this.ghArch}.zip`;
 
-    const file = await this.http.download({
-      url,
-    });
+    const file = await this.downloadWithoutChecksum(version, url);
 
     const cwd = await this.pathSvc.createVersionedToolPath(name, version);
 
