@@ -104,10 +104,17 @@ Some tools accept partial versions and install a matching release:
 - `java`, `java-jre`, `java-jdk`: A major (`21`), major.minor (`11.0`) or major.minor.patch (`11.0.24`) version installs the newest matching GA release.
   A full version with a build, like `17.0.12+7`, is used as is.
   Without a version, or with `latest`, the newest LTS is installed.
+  A missing version, `latest` and a major or major.minor version are resolved from the [tool-versions data](#tool-versions-data) like for the other tools below, with the newest release the data flags as LTS for `latest`, and from the adoptium API when the data has no LTS flags or no match.
+  A major.minor.patch version always uses the adoptium API.
 - `node`: A major (`22`) or major.minor (`22.11`) version installs the newest matching release.
   Without a version, or with `latest`, the newest LTS is installed.
+  These versions are resolved from the [tool-versions data](#tool-versions-data) like for the other tools below, with the newest release the data flags as LTS for `latest`, and from nodejs.org when the data has no LTS flags or no match.
 - `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the `latest` dist tag if it matches and is not deprecated, otherwise the newest matching release, prereleases are skipped and deprecated versions are used only if there is no other.
   Without a version, or with `latest`, the `latest` release is installed.
+  With `install-tool`, for `yarn`, `corepack`, `npm` and `pnpm` the dist tag and the deprecated versions come from the [tool-versions data](#tool-versions-data) when it has them, else from the npm registry, eg. for `yarn` 6 and newer.
+  The tool-versions data keeps the previous `latest` until a new release is older than its minimum release age of 1 hour, so it can lag behind npm for a short time.
+  Packages installed with [`install-npm`](#install-npm-command), [`install-gem`](#install-gem-command) or [`install-pip`](#install-pip-command) never read the tool-versions data, they use their registry.
+  A package name which matches a tool with its own resolver, like `install-npm php`, uses the resolver of that tool instead.
 - `conan`, `poetry` and any package installed with [`install-pip`](#install-pip-command): A major (`2`) or major.minor (`2.1`) version installs the newest matching release, prereleases and yanked releases are skipped.
   A version which exists as a release, like `5.2`, is kept, even a yanked one, which pip installs when pinned.
   Without access to pypi.org, eg. for a package from a private index, the version is kept too.
@@ -137,8 +144,49 @@ Some tools accept partial versions and install a matching release:
 - `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
   A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
+- `php`, `composer`, `mise`: A major (`8`) or major.minor (`8.3`) version is resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
+  Without a version, or with `latest`, the latest release is looked up directly, as the data can lag behind a new release: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
 
-Any other version is used as is.
+The tools above keep their own rules, except where noted.
+`java`, `node` and the npm tools only read the tool-versions data when the image embeds data for the tool, and use their own lookup instead of the embedded data when the online data can't be loaded, unless the embedded data is current or the online data is turned off, see below.
+So while the embedded data is older than the max age, `latest` and partial versions of these tools first ask the online tool-versions data, and where `containerbase.github.io` is silently dropped, that waits up to the 30 s timeout of the tool-versions data before their own source answers, which `CONTAINERBASE_RESOLVER_OFFLINE=true` avoids.
+When the data lists matching releases, but all of them need a newer containerbase, a warning is logged and the tool's own lookup is used, like before.
+For an exact version of these tools, the version the tool's own lookup resolves, like the java build `11.0.24+8` for `11.0.24`, is logged as a warning when the embedded data lists it as needing a newer containerbase, and is still installed.
+
+#### Tool-versions data <a name="tool-versions-data"></a>
+
+Any other tool resolves its version from the [tool-versions](https://github.com/containerbase/tool-versions) data:
+
+- The data embedded in the image is used while it is younger than 24 hours, by the build time of its `release.json`, for the tools it has; a tool which only the online data has is looked up online.
+  Set `CONTAINERBASE_RESOLVER_MAX_AGE` to change that age, with a unit, like `12h`, `2 days` or `1 day 2h`, a month counts as 30 days and an invalid value uses the default.
+  A bare number is milliseconds, like for Renovate, so `24` is 24 ms, not 24 hours, a number without a unit is logged as a warning, also in a compound value like `1h30`.
+  A negative value is invalid.
+  Embedded data built in the future, when the clock of the container is behind, is treated as older.
+  Older embedded data, or embedded data without a `release.json`, is replaced by the online data, read from `https://containerbase.github.io/tool-versions/v1/<tool>.json` with [url replacements](./custom-registries.md#tool-versions-data-containerbasegithubio) applied, with a single attempt which gives up after at most 30 s.
+  When it can't be loaded, the embedded data is used with a warning, as it may be outdated.
+  A major or major.minor version which the embedded data lists as a release, like `8.10`, is kept without the online lookup.
+- Set `CONTAINERBASE_RESOLVER_OFFLINE=true`, in any case, to never read the online tool-versions data, only the embedded tool-versions data is used.
+  Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
+  Warnings based on embedded data older than the max age say that it may be outdated.
+  This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
+  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget`, `conan`, `poetry`, `cocoapods` and the typed pip and gem tools.
+  For example `java`, `node` and the npm tools use it when the embedded data has no match, `php`, `composer` and `mise` for `latest`.
+  These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
+- Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
+  For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.
+  When the dist tag isn't available for the host or needs a newer containerbase, it is the newest release which is, and isn't deprecated.
+- A major (`20`) or major.minor (`3.12`) version installs the newest matching release, a version which exists as a release, like `8.10`, is kept.
+  For a tool installed with npm it is the `latest` dist tag when it matches and isn't deprecated, else the newest matching release which isn't deprecated, deprecated ones only when nothing else matches.
+- Only releases available for the host arch and distro, and installable by the running containerbase version (`minCb` of the data), are picked, prereleases are skipped, except the `latest` dist tag of a tool installed with npm for a missing version or `latest`.
+  When no release matches, a warning names the reason: a matching release needs a newer containerbase, only prereleases match, the matching releases aren't available for the host arch and distro, or the data has no such release.
+  A given version, also `latest`, is then used as is, so the install may fail later; without a version, no version is resolved and the install fails.
+  When only prereleases match, install an exact prerelease version instead.
+  For `protoc` and `swift`, which publish major.minor releases, a major.minor version whose line the data doesn't list at all is used as is without a warning, as the data may not list a new release yet.
+- Any other version, also a prerelease, is used as is.
+  A warning is logged when the data embedded in the image lists it and it needs a newer containerbase, the online data isn't read for it.
+
+A tool without tool-versions data keeps the version as given.
+The next major release fails the install instead of warning, see [#7962](https://github.com/containerbase/base/issues/7962).
 
 <br>
 

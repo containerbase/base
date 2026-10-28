@@ -48,6 +48,11 @@ https://containerbase.github.io/tool-versions/v1/mise/2026.2.13.json
 The tools then download the listed files from the urls shown in their sections below, without their checksum files.
 Installing an exact version which isn't in the embedded data looks it up online first, before the tool's own download, so a blocked host costs the request timeout.
 
+Resolving a missing version, `latest` or a major or major.minor version of a tool from the data reads `<tool>.json` online too, when the embedded data is older than the max age (24 hours by default, set by `CONTAINERBASE_RESOLVER_MAX_AGE`), was built in the future because the clock of the container is behind, or has no `release.json`, with the embedded data as fallback, see [tool-versions data](./tools.md#tool-versions-data).
+`java`, `node` and the npm tools `corepack`, `npm`, `pnpm` and `yarn` skip that fallback and ask their own source when the online data can't be loaded.
+A tool-versions request gives up after at most 30 s.
+Set `CONTAINERBASE_RESOLVER_OFFLINE=true` to never read the online data, a version which isn't in the embedded data is then downloaded from the source of its installer.
+
 ## `apko`
 
 apko releases are downloaded from:
@@ -698,6 +703,7 @@ Samples:
 ```txt
 https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz.sha512
 https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz
+https://github.com/containerbase/php-prebuild/releases/latest/download/version
 ```
 
 ### `composer`
