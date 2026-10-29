@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import {
   IpcServer,
   PathService,
+  ToolVersionsService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -241,6 +242,61 @@ describe('cli/install-tool/index', () => {
       vi.spyOn(svc.prototype, 'resolve').mockResolvedValue('1.0.0');
       expect(await resolveVersion('dummy', '1.0.0', type)).toBe('1.0.0');
     });
+
+    test.each(['flux', 'pnpm', 'npm', 'yarn'])(
+      'resolves install-npm %s with the registry, not the tool-versions data',
+      async (tool) => {
+        // the data has a file with the name of the package
+        await fs.mkdir(rootPath('usr/local/containerbase/tool-versions/v1'), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          rootPath(`usr/local/containerbase/tool-versions/v1/${tool}.json`),
+          JSON.stringify({
+            tool,
+            updatedAt: '2026-10-16T00:00:00Z',
+            type: 'npm',
+            latest: '9.9.9',
+            versions: [{ version: '9.9.9' }],
+          }),
+        );
+        const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+        const data = vi.spyOn(
+          ToolVersionsService.prototype,
+          'getResolveVersions',
+        );
+        // the yarn resolver of install-tool is used for `yarn` too
+        vi.spyOn(NpmVersionResolver.prototype, 'resolve').mockResolvedValue(
+          '1.2.3',
+        );
+
+        // install-npm turns the data off
+        expect(await resolveVersion(tool, 'latest', 'npm', false)).toBe(
+          '1.2.3',
+        );
+
+        expect(embedded).not.toHaveBeenCalled();
+        expect(data).not.toHaveBeenCalled();
+      },
+    );
+
+    test.each([
+      { tool: 'php', version: '8.3', type: 'npm' as const },
+      { tool: 'php', version: '8.3.10', type: 'npm' as const },
+      { tool: 'mise', version: '2026.10', type: 'pip' as const },
+      { tool: 'mise', version: '2026.10.21', type: 'pip' as const },
+    ])(
+      'keeps install-$type $tool $version without the tool-versions data',
+      async ({ tool, version, type }) => {
+        // the latest-only resolver of install-tool answers, it keeps any
+        // version but `latest`
+        const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+        expect(await resolveVersion(tool, version, type, false)).toBe(version);
+
+        expect(embedded).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('linkTool', () => {

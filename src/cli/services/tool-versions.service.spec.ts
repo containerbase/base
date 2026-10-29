@@ -447,6 +447,24 @@ describe('cli/services/tool-versions.service', () => {
       });
     });
 
+    test('has nothing without the fallback when the online data is not available', async () => {
+      await writeFile(`${dir}/resolve5.json`, JSON.stringify(data('resolve5')));
+      scope(baseUrl).get('/tool-versions/v1/resolve5.json').reply(404);
+
+      expect(await svc.getResolveVersions('resolve5', false)).toBeUndefined();
+    });
+
+    test('uses the embedded data without the fallback when the online data is skipped', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+      const embedded = data('resolve6');
+      await writeFile(`${dir}/resolve6.json`, JSON.stringify(embedded));
+
+      expect(await svc.getResolveVersions('resolve6', false)).toEqual({
+        data: embedded,
+        source: 'offline',
+      });
+    });
+
     test('has nothing for a tool without data', async () => {
       scope(baseUrl).get('/tool-versions/v1/resolve4.json').reply(404);
 
@@ -467,6 +485,16 @@ describe('cli/services/tool-versions.service', () => {
       expect(await svc.getResolveVersions('off')).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
         { tool: 'off' },
+        'No embedded tool-versions data, CONTAINERBASE_RESOLVER_OFFLINE turns the online data off',
+      );
+    });
+
+    test('does not warn for a tool with its own resolver', async () => {
+      // no interceptor, a request would fail the test
+      expect(await svc.getResolveVersions('offres', false)).toBeUndefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { tool: 'offres' },
         'No embedded tool-versions data, CONTAINERBASE_RESOLVER_OFFLINE turns the online data off',
       );
     });

@@ -289,6 +289,22 @@ describe('cli/tools/node/resolver', () => {
       expect(svc.tool).toBe('del-cli');
       expect(await svc.resolve(undefined)).toBe('6.0.0');
     });
+
+    test.each([
+      // typed npm tools read the tool-versions data first
+      { tool: 'pnpm', dataField: 'latest' },
+      { tool: 'npm', dataField: 'latest' },
+      // any other package always uses the npm registry
+      { tool: 'del-cli', dataField: undefined },
+      { tool: 'flux', dataField: undefined },
+    ])(
+      'reads the tool-versions data for $tool: $dataField',
+      ({ tool, dataField }) => {
+        const Resolver = createNpmVersionResolver(tool);
+
+        expect(new Resolver().dataField).toBe(dataField);
+      },
+    );
   });
 
   describe('YarnVersionResolver', () => {

@@ -40,6 +40,54 @@ class LatestOnlyVersionResolver extends ToolVersionResolver {
   }
 }
 
+@injectable()
+@injectFromHierarchy()
+class LtsDataVersionResolver extends ToolVersionResolver {
+  readonly tool = 'lts-data';
+  override readonly dataField = 'lts';
+
+  /** Resolves any version to `9.9.9`, so its use is visible. */
+  resolve(_version: string | undefined): Promise<string | undefined> {
+    return Promise.resolve('9.9.9');
+  }
+}
+
+@injectable()
+@injectFromHierarchy()
+class NpmDataVersionResolver extends ToolVersionResolver {
+  readonly tool = 'npm-data';
+  override readonly dataField = 'latest';
+
+  /** Resolves any version to `9.9.9`, so its use is visible. */
+  resolve(_version: string | undefined): Promise<string | undefined> {
+    return Promise.resolve('9.9.9');
+  }
+}
+
+@injectable()
+@injectFromHierarchy()
+class ExactDataVersionResolver extends ToolVersionResolver {
+  readonly tool = 'exact-data';
+  override readonly dataField = 'lts';
+
+  /** Keeps the version, like node does for an exact one. */
+  resolve(version: string | undefined): Promise<string | undefined> {
+    return Promise.resolve(version);
+  }
+}
+
+@injectable()
+@injectFromHierarchy()
+class BuildDataVersionResolver extends ToolVersionResolver {
+  readonly tool = 'build-data';
+  override readonly dataField = 'lts';
+
+  /** Appends the build `+8`, like java does for an exact version. */
+  resolve(version: string | undefined): Promise<string | undefined> {
+    return Promise.resolve(`${version}+8`);
+  }
+}
+
 vi.mock('node:os', async (importOriginal) => ({
   ...(await importOriginal<typeof import('node:os')>()),
   arch: vi.fn(() => 'x64'),
@@ -70,6 +118,7 @@ type Entry =
   | {
       version: string;
       lts?: true;
+      deprecated?: true;
       archs?: string[];
       distros?: string[];
     };
@@ -166,11 +215,384 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     child.bind(ToolVersionResolverService).toSelf();
     child.bind(TOOL_VERSION_RESOLVER).to(DummyVersionResolver);
     child.bind(TOOL_VERSION_RESOLVER).to(LatestOnlyVersionResolver);
+    child.bind(TOOL_VERSION_RESOLVER).to(LtsDataVersionResolver);
+    child.bind(TOOL_VERSION_RESOLVER).to(NpmDataVersionResolver);
+    child.bind(TOOL_VERSION_RESOLVER).to(ExactDataVersionResolver);
+    child.bind(TOOL_VERSION_RESOLVER).to(BuildDataVersionResolver);
     svc = await child.getAsync(ToolVersionResolverService);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  describe('a resolver with an lts data field', () => {
+    /** Releases of a tool with LTS lines, newest first. */
+    const lts: Entry[] = [
+      '25.1.0',
+      '24.2.0-lts',
+      '24.1.0-lts',
+      '23.0.0',
+      '22.5.0-lts',
+    ];
+
+    beforeEach(async () => {
+      // the data is only read for a tool with an embedded file
+      await embed('lts-data', ['0.0.1']);
+    });
+
+    test.each([undefined, '', 'latest'])(
+      'resolves %j to the newest lts release of the data',
+      async (version) => {
+        serve('lts-data', 200, { ...toolFile('lts-data', lts), lts: true });
+
+        expect(await svc.resolve('lts-data', version)).toBe('24.2.0');
+      },
+    );
+
+    test('resolves a partial version from the data', async () => {
+      serve('lts-data', 200, { ...toolFile('lts-data', lts), lts: true });
+
+      expect(await svc.resolve('lts-data', '23')).toBe('23.0.0');
+    });
+
+    test('uses the resolver when the partial version has no match, without a warning', async () => {
+      serve('lts-data', 200, { ...toolFile('lts-data', lts), lts: true });
+
+      expect(await svc.resolve('lts-data', '26')).toBe('9.9.9');
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('uses the resolver when the online data has no lts field', async () => {
+      serve('lts-data', 200, lts);
+
+      expect(await svc.resolve('lts-data', 'latest')).toBe('9.9.9');
+    });
+
+    test('uses the resolver, not the embedded data, when the online data is not available', async () => {
+      await writeFile(
+        `${dir}/lts-data.json`,
+        JSON.stringify({ ...toolFile('lts-data', lts), lts: true }),
+      );
+      serve('lts-data', 404);
+
+      expect(await svc.resolve('lts-data', 'latest')).toBe('9.9.9');
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('uses the embedded data when the online data is turned off', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+      await writeFile(
+        `${dir}/lts-data.json`,
+        JSON.stringify({ ...toolFile('lts-data', lts), lts: true }),
+      );
+
+      expect(await svc.resolve('lts-data', 'latest')).toBe('24.2.0');
+    });
+
+    test('uses the resolver when the embedded data has no lts field', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+      await embed('lts-data', lts);
+
+      expect(await svc.resolve('lts-data', '24')).toBe('9.9.9');
+    });
+
+    test('skips the data of a tool without an embedded file', async () => {
+      await rm(`${dir}/lts-data.json`);
+      const online = vi.spyOn(HttpService.prototype, 'getJson');
+
+      expect(await svc.resolve('lts-data', undefined)).toBe('9.9.9');
+
+      expect(online).not.toHaveBeenCalled();
+    });
+
+    test.each([undefined, '24'])(
+      'skips the data for %j when it is turned off, like for install-npm',
+      async (version) => {
+        const data = vi.spyOn(
+          ToolVersionsService.prototype,
+          'getResolveVersions',
+        );
+
+        expect(await svc.resolve('lts-data', version, false)).toBe('9.9.9');
+
+        expect(data).not.toHaveBeenCalled();
+      },
+    );
+
+    test.each([undefined, 'latest', '24'])(
+      'warns and uses the resolver for %j when every match needs a newer containerbase',
+      async (version) => {
+        serve('lts-data', 200, {
+          ...toolFile('lts-data', lts),
+          lts: true,
+          minCb: [{ version: '22.5.0', cb: '15.0.0' }],
+        });
+
+        expect(await svc.resolve('lts-data', version)).toBe('9.9.9');
+
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          'lts-data 24.2.0 needs containerbase 15.0.0 or newer, running 14.51.0, the own lookup of the tool is used',
+        );
+      },
+    );
+
+    test.each([
+      {
+        name: 'turned off online data',
+        setup: () => {
+          vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+          return Promise.resolve();
+        },
+        // the embedded data may be months old then
+        note: ' (embedded, possibly outdated tool-versions data)',
+      },
+      {
+        name: 'current embedded data',
+        setup: () =>
+          writeFile(
+            `${dir}/../release.json`,
+            JSON.stringify({
+              version: '1.8.0',
+              buildTime: new Date(Date.now() - 60_000).toISOString(),
+            }),
+          ),
+        note: '',
+      },
+    ])(
+      'notes the embedded data in the newer containerbase warning with $name',
+      async ({ setup, note }) => {
+        await setup();
+        await writeFile(
+          `${dir}/lts-data.json`,
+          JSON.stringify({
+            ...toolFile('lts-data', lts),
+            lts: true,
+            minCb: [{ version: '22.5.0', cb: '15.0.0' }],
+          }),
+        );
+
+        expect(await svc.resolve('lts-data', 'latest')).toBe('9.9.9');
+
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          `lts-data 24.2.0 needs containerbase 15.0.0 or newer, running 14.51.0, the own lookup of the tool is used${note}`,
+        );
+      },
+    );
+
+    test('keeps a release the embedded data with the lts field lists', async () => {
+      await writeFile(
+        `${dir}/lts-data.json`,
+        JSON.stringify({ ...toolFile('lts-data', ['8.10']), lts: true }),
+      );
+
+      expect(await svc.resolve('lts-data', '8.10')).toBe('8.10');
+    });
+
+    test('passes an exact version to the resolver', async () => {
+      expect(await svc.resolve('lts-data', '24.1.0')).toBe('9.9.9');
+    });
+
+    test('warns and keeps an exact version the embedded data lists as needing a newer containerbase', async () => {
+      await embed(
+        'exact-data',
+        ['26.13.0', '24.1.0'],
+        [{ version: '26.13.0', cb: '15.0.0' }],
+      );
+      const online = vi.spyOn(HttpService.prototype, 'getJson');
+
+      expect(await svc.resolve('exact-data', '26.13.0')).toBe('26.13.0');
+
+      expect(online).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        'exact-data 26.13.0 needs containerbase 15.0.0 or newer, running 14.51.0, 26.13.0 is used as is',
+      );
+    });
+
+    test('warns about the version the resolver resolves an exact one to', async () => {
+      // the data only lists the builds, like for java
+      await embed(
+        'build-data',
+        ['11.0.25+9', '11.0.24+8'],
+        [{ version: '11.0.24+8', cb: '15.0.0' }],
+      );
+
+      expect(await svc.resolve('build-data', '11.0.24')).toBe('11.0.24+8');
+
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        'build-data 11.0.24+8 needs containerbase 15.0.0 or newer, running 14.51.0, 11.0.24+8 is used as is',
+      );
+    });
+
+    test('reads no data for an exact version when it is turned off, like for install-npm', async () => {
+      await embed(
+        'exact-data',
+        ['26.13.0', '24.1.0'],
+        [{ version: '26.13.0', cb: '15.0.0' }],
+      );
+      const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+      expect(await svc.resolve('exact-data', '26.13.0', false)).toBe('26.13.0');
+
+      expect(embedded).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('npm tools', () => {
+    /**
+     * The data of an npm tool with the `latest` dist-tag.
+     * @param tool - the tool name
+     * @param list - the versions, newest first
+     * @param latest - the `latest` dist-tag
+     */
+    function npmFile(tool: string, list: Entry[], latest: string): object {
+      return { ...toolFile(tool, list), type: 'npm', latest };
+    }
+
+    beforeEach(async () => {
+      // the data is only read for a tool with an embedded file
+      await embed('npm-data', ['0.0.1']);
+    });
+
+    test.each([undefined, 'latest'])(
+      'resolves %j to the latest dist-tag, not the newest release',
+      async (version) => {
+        serve(
+          'npm-data',
+          200,
+          npmFile('npm-data', ['11.0.0', '10.9.0', '10.8.0'], '10.9.0'),
+        );
+
+        expect(await svc.resolve('npm-data', version)).toBe('10.9.0');
+      },
+    );
+
+    test.each([
+      // the latest dist-tag wins over a newer release of the line
+      { version: '10', latest: '10.8.0', expected: '10.8.0' },
+      // a deprecated latest dist-tag is skipped
+      { version: '10', latest: '10.9.0', expected: '10.8.0' },
+      // a line without the latest dist-tag
+      { version: '9', latest: '10.8.0', expected: '9.2.0' },
+      // only deprecated releases match
+      { version: '8', latest: '10.8.0', expected: '8.1.0' },
+    ])(
+      'resolves $version with the latest dist-tag $latest',
+      async ({ version, latest, expected }) => {
+        serve(
+          'npm-data',
+          200,
+          npmFile(
+            'npm-data',
+            [
+              { version: '10.9.0', deprecated: true },
+              '10.8.0',
+              '9.3.0-rc1',
+              { version: '9.3.0', deprecated: true },
+              '9.2.0',
+              { version: '8.1.0', deprecated: true },
+              { version: '8.0.0', deprecated: true },
+            ],
+            latest,
+          ),
+        );
+
+        expect(await svc.resolve('npm-data', version)).toBe(expected);
+      },
+    );
+
+    test('uses the resolver when the data has no latest dist-tag', async () => {
+      serve('npm-data', 200, ['10.9.0']);
+
+      expect(await svc.resolve('npm-data', '10')).toBe('9.9.9');
+    });
+
+    test.each([
+      {
+        name: 'needs a newer containerbase',
+        file: {
+          ...npmFile(
+            'npm-data',
+            [
+              '11.0.0',
+              '10.9.0',
+              { version: '10.8.0', deprecated: true },
+              '10.7.0',
+            ],
+            '10.9.0',
+          ),
+          minCb: [{ version: '10.9.0', cb: '15.0.0' }],
+        },
+        expected: '10.7.0',
+      },
+      {
+        name: 'is not available for the host',
+        file: npmFile(
+          'npm-data',
+          [{ version: '10.9.0', archs: ['arm64'] }, '10.8.0'],
+          '10.9.0',
+        ),
+        expected: '10.8.0',
+      },
+      {
+        name: 'is not installable and only deprecated releases are',
+        file: npmFile(
+          'npm-data',
+          [
+            { version: '10.9.0', archs: ['arm64'] },
+            { version: '10.8.0', deprecated: true },
+          ],
+          '10.9.0',
+        ),
+        expected: '10.8.0',
+      },
+    ])(
+      'resolves latest to the newest installable release when the dist-tag $name',
+      async ({ file, expected }) => {
+        serve('npm-data', 200, file);
+
+        expect(await svc.resolve('npm-data', 'latest')).toBe(expected);
+      },
+    );
+
+    test('resolves latest to a prerelease dist-tag', async () => {
+      serve(
+        'npm-data',
+        200,
+        npmFile('npm-data', ['11.0.0-rc1', '10.9.0'], '11.0.0-rc1'),
+      );
+
+      expect(await svc.resolve('npm-data', undefined)).toBe('11.0.0-rc1');
+    });
+
+    test('warns and uses the resolver when the whole line needs a newer containerbase', async () => {
+      serve('npm-data', 200, {
+        ...npmFile('npm-data', ['10.9.0', '10.8.0', '9.0.0'], '9.0.0'),
+        minCb: [{ version: '10.8.0', cb: '15.0.0' }],
+      });
+
+      expect(await svc.resolve('npm-data', '10')).toBe('9.9.9');
+
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        'npm-data 10.9.0 needs containerbase 15.0.0 or newer, running 14.51.0, the own lookup of the tool is used',
+      );
+    });
+
+    test('skips the data of a package without an embedded file', async () => {
+      await rm(`${dir}/npm-data.json`);
+      // no online mock: a request would fail the test
+
+      expect(await svc.resolve('npm-data', '10')).toBe('9.9.9');
+    });
+
+    test('resolves a tool without a resolver to the latest dist-tag', async () => {
+      serve('other', 200, npmFile('other', ['2.0.0', '1.9.0'], '1.9.0'));
+
+      expect(await svc.resolve('other', 'latest')).toBe('1.9.0');
+    });
   });
 
   test('resolves with the matching resolver', async () => {
@@ -217,6 +639,30 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
     expect(await svc.resolve('latest-only', '1.2.3')).toBe('1.2.3');
   });
+
+  test.each(['2', '1.2.3'])(
+    'lets a resolver which only resolves latest answer %s without the data',
+    async (version) => {
+      await embed('latest-only', ['2.1.0', '1.2.3']);
+      const data = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+      expect(await svc.resolve('latest-only', version, false)).toBe('9.9.9');
+
+      expect(data).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each([undefined, '2', '1.2.3'])(
+    'keeps %j of a tool without a resolver without the data',
+    async (version) => {
+      await embed('other', ['2.1.0', '1.2.3']);
+      const data = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+      expect(await svc.resolve('other', version, false)).toBe(version);
+
+      expect(data).not.toHaveBeenCalled();
+    },
+  );
 
   test.each([undefined, 'latest'])(
     'resolves %s of a tool without a resolver to the newest release',

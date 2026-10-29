@@ -6,6 +6,7 @@ import {
   partialVersionHelp,
 } from '../../install-tool/tool-version-resolver.ts';
 import { semverMaxSatisfying, semverSatisfies } from '../../utils/index.ts';
+import { ResolverMap, getToolType } from '../index.ts';
 import { yarnPackage } from './npm.ts';
 import {
   type NodeVersionMeta,
@@ -32,8 +33,12 @@ export class NodeVersionResolver extends ToolVersionResolver {
 
   override readonly versionHelp = partialVersionHelp;
 
+  /** `latest` is the newest LTS release of the tool-versions data. */
+  override readonly dataField = 'lts';
+
   /**
-   * Resolves a version from nodejs.org.
+   * Resolves a version from nodejs.org, when the tool-versions data can't
+   * answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the newest lts release.
    * - A major (`20`) or major.minor (`20.11`) version resolves to the newest
@@ -74,7 +79,8 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
   override readonly versionHelp = npmPartialVersionHelp;
 
   /**
-   * Resolves a version from the npm registry.
+   * Resolves a version from the npm registry, for a typed npm tool when the
+   * tool-versions data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the npm `latest` dist tag.
    * - A major (`9`) or major.minor (`9.15`) version resolves to the `latest`
@@ -145,16 +151,23 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
 }
 
 /**
- * Creates a version resolver for a tool which is a plain npm package.
+ * Creates a version resolver for a tool which is a plain npm package. Only a
+ * typed npm tool of the {@link ResolverMap}, like `npm` or `pnpm`, reads the
+ * tool-versions data first, any other package installed with `install-npm`
+ * always uses the npm registry, as the data has no file for it.
  * @param tool - the tool and npm package name
  */
 export function createNpmVersionResolver(
   tool: string,
 ): new () => NpmVersionResolver {
+  const typed = getToolType(ResolverMap, tool) === 'npm';
   @injectable()
   @injectFromHierarchy()
   class GenericVersionResolver extends NpmVersionResolver {
     override readonly tool: string = tool;
+
+    /** The `latest` dist-tag of the data, only for a typed npm tool. */
+    override readonly dataField = typed ? ('latest' as const) : undefined;
   }
   return GenericVersionResolver;
 }
@@ -163,6 +176,12 @@ export function createNpmVersionResolver(
 @injectFromHierarchy()
 export class YarnVersionResolver extends NpmVersionResolver {
   readonly tool = 'yarn';
+
+  /**
+   * `latest` is the `latest` dist-tag of the tool-versions data, which also
+   * flags the deprecated versions.
+   */
+  override readonly dataField = 'latest';
 
   /**
    * The npm package of the requested yarn major version, see

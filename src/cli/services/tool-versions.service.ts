@@ -85,20 +85,31 @@ export class ToolVersionsService {
    * loaded, else the embedded data. A tool which only the online data has is
    * looked up online, unless it is turned off. Online data is final, the
    * embedded data is older and can't know more. The source tells whether the
-   * embedded data is current, see {@link ResolveVersions}. Only tools without
-   * their own resolver read it, so a tool without embedded data while the
-   * online data is turned off is logged as a warning, once per tool.
-   * @returns `undefined` when the tool has no data
+   * embedded data is current, see {@link ResolveVersions}. A tool without its
+   * own resolver and without embedded data while the online data is turned
+   * off is logged as a warning, once per tool.
+   * @param fallback - whether the embedded data replaces online data which
+   * can't be loaded, a tool with its own resolver turns it off, so the
+   * resolver asks its own source instead; the embedded data is still used when
+   * the online data is turned off or the embedded data is current
+   * @returns `undefined` when the tool has no data, or none to use
    */
-  async getResolveVersions(tool: string): Promise<ResolveVersions | undefined> {
+  async getResolveVersions(
+    tool: string,
+    fallback = true,
+  ): Promise<ResolveVersions | undefined> {
     const offline = this.env.resolverOffline;
     const data = await this.getVersions(tool);
     if (offline) {
       if (!data) {
-        warnOnce(
-          'No embedded tool-versions data, CONTAINERBASE_RESOLVER_OFFLINE turns the online data off',
-          { tool },
-        );
+        const message =
+          'No embedded tool-versions data, CONTAINERBASE_RESOLVER_OFFLINE turns the online data off';
+        if (fallback) {
+          warnOnce(message, { tool });
+        } else {
+          // the own resolver of the tool looks it up
+          logger.debug({ tool }, message);
+        }
         return undefined;
       }
       // only embedded data older than the max age may be outdated
@@ -114,7 +125,7 @@ export class ToolVersionsService {
     if (online) {
       return { data: online, source: 'online' };
     }
-    return data && { data, source: 'fallback' };
+    return fallback && data ? { data, source: 'fallback' } : undefined;
   }
 
   /**
