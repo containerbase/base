@@ -30,7 +30,7 @@ export {
   validateContainerbaseVersion,
 } from './containerbase.ts';
 
-export { filterByMinCb } from './min-cb.ts';
+export { filterByMinCb, minCbByVersion } from './min-cb.ts';
 export { isReleaseVersion } from './release-version.ts';
 
 export {
