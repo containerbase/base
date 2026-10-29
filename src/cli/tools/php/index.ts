@@ -1,18 +1,14 @@
 import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { getDistro } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class PhpPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'php';
 
   /**

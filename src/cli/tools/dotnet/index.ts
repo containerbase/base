@@ -1,16 +1,12 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { getDistro, parse, pathExists } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class DotnetPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   readonly name = 'dotnet';
 
   /**
