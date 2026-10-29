@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import { injectFromHierarchy, injectable } from 'inversify';
+import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { AptService } from '../../services/index.ts';
 import { fileContent, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
@@ -13,10 +14,18 @@ import {
 @injectable()
 @injectFromHierarchy()
 export class NodePrepareService extends BasePrepareService {
+  @inject(AptService)
+  private readonly aptSvc!: AptService;
+
   override name = 'node';
 
-  /** Initializes the cache and links the user's npm and yarn folders to it. */
+  /**
+   * Installs `libatomic1`, which the official node 26.13.0+ binaries need,
+   * then initializes the cache and links the user's npm and yarn folders to it.
+   */
   override async prepare(): Promise<void> {
+    // https://github.com/nodejs/node/issues/60790
+    await this.aptSvc.install('libatomic1');
     await this.initialize();
     await prepareSymlinks(this.envSvc, this.pathSvc);
   }
