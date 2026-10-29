@@ -292,6 +292,36 @@ describe('packages/base', () => {
     expect(schemas.ToolVersion.parse(version)).toEqual(version);
   });
 
+  test('ToolVersions keeps the lts flag and the latest version', () => {
+    const file = {
+      tool: 'tool',
+      lts: true,
+      latest: '1.0.0',
+      updatedAt,
+      versions: [{ version: '1.0.0' }, { version: '0.9.0', deprecated: true }],
+    } as const;
+
+    expect(schemas.ToolVersions.parse(file)).toEqual(file);
+  });
+
+  test.each([
+    { name: 'a false lts flag', value: { lts: false } },
+    { name: 'an empty latest version', value: { latest: '' } },
+    {
+      name: 'a false deprecated flag',
+      value: { versions: [{ version: '1.0.0', deprecated: false }] },
+    },
+  ])('ToolVersions rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersions.safeParse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        ...value,
+      }).success,
+    ).toBe(false);
+  });
+
   test('ToolVersions keeps the minCb ranges', () => {
     const minCb = [{ version: '0.9.0', cb: '14.51.0' }];
     const file = {
