@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import shell from 'shelljs';
+import { execa } from 'execa';
 import { hashFile } from './utils.js';
 
 /** @typedef {import('semantic-release').PrepareContext} PrepareContext */
@@ -23,16 +23,32 @@ function releaseError(message) {
 }
 
 /**
- * Runs a shell command, its output goes straight to the log, and throws when
- * it fails.
- * @param {string} cmd
+ * Runs a command without throwing. The output is piped through
+ * `process.stdout` and `process.stderr`, where semantic-release masks secrets.
+ * @param {string} file
+ * @param {string[]} args
  */
-function exec(cmd) {
-  const r = shell.exec(cmd);
-  if (r.code) {
-    throw releaseError(`Command failed with exit code ${r.code}: ${cmd}`);
+async function run(file, args) {
+  const proc = execa(file, args, { reject: false });
+  proc.stdout.pipe(process.stdout);
+  proc.stderr.pipe(process.stderr);
+  return await proc;
+}
+
+/**
+ * Runs a command and throws when it fails.
+ * @param {string} file
+ * @param {string[]} args
+ */
+async function exec(file, args) {
+  const result = await run(file, args);
+  if (result.failed) {
+    throw releaseError(result.shortMessage);
   }
 }
+
+/** Platforms of the release images. */
+const platforms = '--set=settings.platform=linux/amd64,linux/arm64';
 
 /**
  * Sets the env the build and the docker bake file read for the release.
@@ -59,23 +75,27 @@ export async function prepare(_config, context) {
   );
   setReleaseEnv(context);
 
-  shell.mkdir('-p', 'bin');
+  await fs.mkdir('bin', { recursive: true });
 
-  exec('pnpm build');
+  await exec('pnpm', ['build']);
 
   await fs.writeFile(
     'dist/docker/usr/local/containerbase/version',
     nextRelease.version,
   );
-  exec('tar -cJf ./bin/containerbase.tar.xz -C ./dist/docker .');
+  await exec('tar', [
+    '-cJf',
+    './bin/containerbase.tar.xz',
+    '-C',
+    './dist/docker',
+    '.',
+  ]);
 
   await hashFile('./bin/containerbase.tar.xz', 'sha512');
   await hashFile('./dist/cli/containerbase-cli-amd64', 'sha512');
   await hashFile('./dist/cli/containerbase-cli-arm64', 'sha512');
 
-  exec(
-    'docker buildx bake --set settings.platform=linux/amd64,linux/arm64 build',
-  );
+  await exec('docker', ['buildx', 'bake', platforms, 'build']);
 }
 
 /**
@@ -94,9 +114,14 @@ export async function publish(_config, context) {
   const metadataFile = path.join(tmp, 'metadata.json');
 
   logger.log('Pushing docker images');
-  exec(
-    `docker buildx bake --set settings.platform=linux/amd64,linux/arm64 --metadata-file ${metadataFile} push`,
-  );
+  await exec('docker', [
+    'buildx',
+    'bake',
+    platforms,
+    '--metadata-file',
+    metadataFile,
+    'push',
+  ]);
 
   const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
   digest = meta?.push?.['containerimage.digest'];
@@ -113,7 +138,7 @@ export async function publish(_config, context) {
  * @param {unknown} _config
  * @param {SuccessContext} context
  */
-export function success(_config, { logger }) {
+export async function success(_config, { logger }) {
   if (!digest) {
     return;
   }
@@ -122,11 +147,12 @@ export function success(_config, { logger }) {
     `${process.env.OWNER}/${process.env.FILE}`,
     `ghcr.io/${process.env.OWNER}/${process.env.FILE}`,
   ]) {
-    const r = shell.exec(`cosign sign --yes ${image}@${digest}`);
-    if (r.code) {
-      logger.error(`Signing ${image}@${digest} failed`);
+    const result = await run('cosign', ['sign', '--yes', `${image}@${digest}`]);
+    if (result.failed) {
+      logger.error(result.shortMessage);
       process.stdout.write(
-        `::error title=Image signing failed::Signing ${image}@${digest} failed with exit code ${r.code}\n`,
+        // an annotation ends at the first newline
+        `::error title=Image signing failed::${result.shortMessage.split('\n')[0]}\n`,
       );
     }
   }
