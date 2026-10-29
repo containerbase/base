@@ -6,6 +6,7 @@ import {
   partialVersionHelp,
 } from '../../install-tool/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
+import { ResolverMap, getToolType } from '../index.ts';
 import { PypiJson } from './schema.ts';
 
 @injectable()
@@ -13,7 +14,8 @@ export abstract class PipVersionResolver extends ToolVersionResolver {
   override readonly versionHelp = partialVersionHelp;
 
   /**
-   * Resolves a version from pypi.
+   * Resolves a version from pypi, for a typed pip tool when the tool-versions
+   * data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the latest release.
    * - A major (`21`) or major.minor (`21.3`) version which is no existing
@@ -71,16 +73,24 @@ export abstract class PipVersionResolver extends ToolVersionResolver {
 }
 
 /**
- * Creates a version resolver for a tool which is a plain pip package.
+ * Creates a version resolver for a tool which is a plain pip package. Only a
+ * typed pip tool of the {@link ResolverMap}, like `uv` or `pipenv`, reads the
+ * tool-versions data first, also the embedded data when the online data can't
+ * be loaded, any other package installed with `install-pip`
+ * always uses pypi, as the data has no file for it.
  * @param tool - the tool and pypi package name
  */
 export function createPipVersionResolver(
   tool: string,
 ): new () => PipVersionResolver {
+  const typed = getToolType(ResolverMap, tool) === 'pip';
   @injectable()
   @injectFromHierarchy()
   class GenericVersionResolver extends PipVersionResolver {
     override readonly tool: string = tool;
+
+    /** The releases of the data, only for a typed pip tool. */
+    override readonly dataField = typed ? ('versions' as const) : undefined;
   }
   return GenericVersionResolver;
 }

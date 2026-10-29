@@ -85,9 +85,10 @@ export class ToolVersionsService {
    * loaded, else the embedded data. A tool which only the online data has is
    * looked up online, unless it is turned off. Online data is final, the
    * embedded data is older and can't know more. The source tells whether the
-   * embedded data is current, see {@link ResolveVersions}. Only tools without
-   * their own resolver read it, so a tool without embedded data while the
-   * online data is turned off is logged as a warning, once per tool.
+   * embedded data is current, see {@link ResolveVersions}. A tool without
+   * embedded data while the online data is turned off is logged as a warning,
+   * once per tool; a tool with its own resolver only reads it when the image
+   * embeds data for it.
    * @returns `undefined` when the tool has no data
    */
   async getResolveVersions(tool: string): Promise<ResolveVersions | undefined> {

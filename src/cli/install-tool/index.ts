@@ -453,12 +453,17 @@ export async function linkTool(
 
 /**
  * Resolves the version to install, eg. `latest` to a concrete version. For a
- * `gem`, `npm` or `pip` type, a generic resolver is registered first.
+ * `gem`, `npm` or `pip` type, a generic resolver is registered after the tool
+ * resolvers, so a tool's own resolver wins.
+ * @param data - whether the resolvers may read the tool-versions data first:
+ * true for `install-tool`, false for `install-gem`, `install-npm` and
+ * `install-pip`, which always ask their registry
  */
 export async function resolveVersion(
   tool: string,
   version: string | undefined,
   type?: InstallToolType,
+  data = true,
 ): Promise<string | undefined> {
   const container = prepareResolveContainer();
 
@@ -468,7 +473,7 @@ export async function resolveVersion(
       .to(createGenericVersionResolver(type, tool));
   }
   const svc = await container.getAsync(ToolVersionResolverService);
-  return svc.resolve(tool, version);
+  return svc.resolve(tool, version, data);
 }
 
 interface UninstallToolConfig {

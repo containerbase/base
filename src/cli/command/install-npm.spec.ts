@@ -35,6 +35,13 @@ describe('cli/command/install-npm', () => {
 
     vi.stubEnv('DEL_CLI_VERSION', '5.0.0');
     expect(await cli.run(['del-cli'])).toBe(0);
+    // install-npm never reads the tool-versions data
+    expect(mocks.resolveVersion).toHaveBeenLastCalledWith(
+      'del-cli',
+      '5.0.0',
+      'npm',
+      false,
+    );
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'del-cli',

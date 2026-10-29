@@ -50,7 +50,8 @@ export interface ToolVersion {
   prerelease?: true;
   lts?: true;
   /**
-   * The registry deprecates the version, only for npm tools.
+   * The registry deprecates the version: npm deprecated it, all its PyPI files
+   * are yanked, or the gem is gone from rubygems.
    */
   deprecated?: true;
   /**

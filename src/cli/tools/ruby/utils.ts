@@ -13,6 +13,7 @@ import {
 } from '../../install-tool/tool-version-resolver.ts';
 import { VersionService } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
+import { ResolverMap, getToolType } from '../index.ts';
 import { RubyGemJson, RubyGemVersionsJson } from './schema.ts';
 
 const defaultRegistry = 'https://rubygems.org/';
@@ -194,8 +195,9 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
   override readonly versionHelp = partialVersionHelp;
 
   /**
-   * Resolves a version from rubygems.org, a configured gem registry is not
-   * used for the lookup. Like other lookups, the request goes through the
+   * Resolves a version from rubygems.org, for a typed gem tool when the
+   * tool-versions data can't answer, see {@link dataField}. A configured gem
+   * registry is not used for the lookup. Like other lookups, the request goes through the
    * configured CDN and URL replacements.
    *
    * - A missing version or `latest` resolves to the latest release.
@@ -250,16 +252,24 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
 }
 
 /**
- * Creates a version resolver for a tool which is a plain gem.
+ * Creates a version resolver for a tool which is a plain gem. Only a typed gem
+ * tool of the {@link ResolverMap}, like `bundler`, reads the tool-versions
+ * data first, also the embedded data when the online data can't be loaded,
+ * any other gem installed with `install-gem` always uses
+ * rubygems.org, as the data has no file for it.
  * @param tool - the tool and gem name
  */
 export function createGemVersionResolver(
   tool: string,
 ): new () => RubyGemVersionResolver {
+  const typed = getToolType(ResolverMap, tool) === 'gem';
   @injectable()
   @injectFromHierarchy()
   class GenericVersionResolver extends RubyGemVersionResolver {
     override readonly tool: string = tool;
+
+    /** The releases of the data, only for a typed gem tool. */
+    override readonly dataField = typed ? ('versions' as const) : undefined;
   }
   return GenericVersionResolver;
 }

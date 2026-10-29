@@ -75,7 +75,15 @@ export class InstallToolCommand extends Command {
       logger.debug(
         `Try resolving version for ${this.name}@${version ?? 'latest'} ...`,
       );
-      version = await resolveVersion(this.name, version, type);
+      // only `install-tool` reads the tool-versions data, `install-gem`,
+      // `install-npm` and `install-pip` set `this.type` and always ask their
+      // registry
+      version = await resolveVersion(
+        this.name,
+        version,
+        type,
+        this.type === undefined,
+      );
 
       if (!isNonEmptyStringAndNotWhitespace(version)) {
         error = true;
