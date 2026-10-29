@@ -2,6 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Logger as PinoLogger } from 'pino';
+import semverLt from 'semver/functions/lt.js';
 import { describe, expect, expectTypeOf, test, vi } from 'vitest';
 import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
@@ -247,6 +248,9 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof schemas.FormatIndex>
     >().toEqualTypeOf<tvTypes.FormatIndex>();
+    expectTypeOf<
+      z.infer<typeof schemas.ReleaseInfo>
+    >().toEqualTypeOf<tvTypes.ReleaseInfo>();
   });
 
   test('ToolVersions parses a <tool>.json file', () => {
@@ -289,6 +293,36 @@ describe('packages/base', () => {
     };
 
     expect(schemas.ToolVersion.parse(version)).toEqual(version);
+  });
+
+  test('ToolVersions keeps the lts flag and the latest version', () => {
+    const file = {
+      tool: 'tool',
+      lts: true,
+      latest: '1.0.0',
+      updatedAt,
+      versions: [{ version: '1.0.0' }, { version: '0.9.0', deprecated: true }],
+    } as const;
+
+    expect(schemas.ToolVersions.parse(file)).toEqual(file);
+  });
+
+  test.each([
+    { name: 'a false lts flag', value: { lts: false } },
+    { name: 'an empty latest version', value: { latest: '' } },
+    {
+      name: 'a false deprecated flag',
+      value: { versions: [{ version: '1.0.0', deprecated: false }] },
+    },
+  ])('ToolVersions rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersions.safeParse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        ...value,
+      }).success,
+    ).toBe(false);
   });
 
   test('ToolVersions keeps the minCb ranges', () => {
@@ -394,6 +428,27 @@ describe('packages/base', () => {
         ],
       }).success,
     ).toBe(true);
+  });
+
+  test('ReleaseInfo parses the root release file', () => {
+    expect(
+      schemas.ReleaseInfo.parse({
+        $schema:
+          'https://containerbase.github.io/tool-versions/release.schema.json',
+        version: '1.7.22',
+        buildTime: '2026-10-28T03:00:00.000Z',
+        added: true,
+      }),
+    ).toEqual({
+      $schema:
+        'https://containerbase.github.io/tool-versions/release.schema.json',
+      version: '1.7.22',
+      buildTime: '2026-10-28T03:00:00.000Z',
+    });
+    expect(
+      schemas.ReleaseInfo.safeParse({ version: '1.7.22', buildTime: 'today' })
+        .success,
+    ).toBe(false);
   });
 
   test('unknown keys and archs still parse', () => {
@@ -702,6 +757,130 @@ describe('packages/base', () => {
       }
       expectTypeOf<RenovateLogger>().toExtend<Logger>();
     });
+  });
+
+  describe('minCbByVersion', () => {
+    const data: tvTypes.ToolVersions = {
+      tool: 'example',
+      updatedAt,
+      versions: [
+        { version: '3.0.0' },
+        { version: '2.1.0-rc.1', prerelease: true },
+        { version: '2.0.0' },
+        { version: '1.5.0' },
+        { version: '1.0.0' },
+      ],
+    };
+
+    test('lists the versions a single range covers', () => {
+      const single = { ...data, minCb: [{ version: '2.0.0', cb: '14.51.0' }] };
+
+      expect(main.minCbByVersion(single)).toEqual(
+        new Map([
+          ['3.0.0', '14.51.0'],
+          ['2.1.0-rc.1', '14.51.0'],
+          ['2.0.0', '14.51.0'],
+        ]),
+      );
+    });
+
+    test('counts prereleases for the position', () => {
+      const prerelease = {
+        ...data,
+        minCb: [{ version: '2.1.0-rc.1', cb: '14.51.0' }],
+      };
+
+      expect(main.minCbByVersion(prerelease)).toEqual(
+        new Map([
+          ['3.0.0', '14.51.0'],
+          ['2.1.0-rc.1', '14.51.0'],
+        ]),
+      );
+    });
+
+    test('uses the highest cb of overlapping ranges', () => {
+      const overlapping = {
+        ...data,
+        minCb: [
+          { version: '1.5.0', cb: '14.60.0' },
+          { version: '2.0.0', cb: '14.51.0' },
+          { version: '2.1.0-rc.1', cb: '14.70.0' },
+        ],
+      };
+
+      expect(main.minCbByVersion(overlapping)).toEqual(
+        new Map([
+          ['3.0.0', '14.70.0'],
+          ['2.1.0-rc.1', '14.70.0'],
+          ['2.0.0', '14.60.0'],
+          ['1.5.0', '14.60.0'],
+        ]),
+      );
+    });
+
+    test('ignores a range whose version is not listed', () => {
+      const unlisted = {
+        ...data,
+        minCb: [{ version: '9.9.9', cb: '99.0.0' }],
+      };
+
+      expect(main.minCbByVersion(unlisted)).toEqual(new Map());
+    });
+
+    test('lets a cb which is not valid semver win', () => {
+      const invalid = {
+        ...data,
+        minCb: [
+          { version: '1.5.0', cb: '14.60.0' },
+          { version: '2.0.0', cb: 'latest' },
+          { version: '2.1.0-rc.1', cb: 'next' },
+          { version: '3.0.0', cb: '99.0.0' },
+        ],
+      };
+
+      expect(main.minCbByVersion(invalid)).toEqual(
+        new Map([
+          ['3.0.0', 'latest'],
+          ['2.1.0-rc.1', 'latest'],
+          ['2.0.0', 'latest'],
+          ['1.5.0', '14.60.0'],
+        ]),
+      );
+    });
+
+    test('returns an empty map without ranges', () => {
+      expect(main.minCbByVersion(data)).toEqual(new Map());
+    });
+
+    test.each(['14.40.0', '14.51.0', '14.55.0', '14.60.0', '15.0.0'])(
+      'matches filterByMinCb for the containerbase version %s',
+      (cb) => {
+        const ranged = {
+          ...data,
+          minCb: [
+            { version: '2.0.0', cb: '14.51.0' },
+            { version: '1.5.0', cb: '14.60.0' },
+          ],
+        };
+        const needs = main.minCbByVersion(ranged);
+        const dropped = ranged.versions
+          .map((v) => v.version)
+          .filter(
+            (v) =>
+              !main
+                .filterByMinCb(ranged, cb)
+                .versions.some((r) => r.version === v),
+          );
+        const unmet = ranged.versions
+          .map((v) => v.version)
+          .filter((v) => {
+            const needed = needs.get(v);
+            return needed !== undefined && semverLt(cb, needed);
+          });
+
+        expect(unmet).toEqual(dropped);
+      },
+    );
   });
 
   test('isReleaseVersion tells releases from development builds', () => {

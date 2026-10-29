@@ -12,6 +12,7 @@ export type {
   FileIntegrity,
   FileReference,
   FormatIndex,
+  ReleaseInfo,
   ToolFile,
   ToolIndex,
   ToolVersion,
@@ -32,7 +33,7 @@ export {
 export type { ConfigureOptions, LogFn, Logger } from './logger.ts';
 export { configure } from './logger.ts';
 
-export { filterByMinCb } from './min-cb.ts';
+export { filterByMinCb, minCbByVersion } from './min-cb.ts';
 export { isReleaseVersion } from './release-version.ts';
 
 export {

@@ -51,6 +51,8 @@ export const ToolVersion = z.object({
   version: z.string().min(1),
   prerelease: z.literal(true).exactOptional(),
   lts: z.literal(true).exactOptional(),
+  /** the registry deprecates the version, only for npm tools */
+  deprecated: z.literal(true).exactOptional(),
   /** when the version was released, in UTC */
   releaseTimestamp: z.iso.datetime().exactOptional(),
   /**
@@ -93,6 +95,13 @@ export const ToolVersions = z.object({
   sourceUrl: z.url({ protocol: /^https$/ }).exactOptional(),
   /** the homepage of the tool, omitted when unset */
   homepage: z.url({ protocol: /^https$/ }).exactOptional(),
+  /** the tool has LTS release streams, like `node` and `java` */
+  lts: z.literal(true).exactOptional(),
+  /**
+   * the version of the npm `latest` dist-tag, only for npm tools and only when
+   * it is listed in `versions`
+   */
+  latest: z.string().min(1).exactOptional(),
   /**
    * the oldest version containerbase supports, on the `defaultDistro` of the
    * root index, in the versioning of the tool. Older versions aren't listed.
@@ -197,4 +206,17 @@ export const FormatIndex = z.object({
       removalDate: z.iso.date().exactOptional(),
     }),
   ),
+});
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export const ReleaseInfo = z.object({
+  $schema: SchemaUrl,
+  /** the version of the release, like `1.7.22` */
+  version: z.string().min(1),
+  /** when the build of the data started, in UTC */
+  buildTime: z.iso.datetime(),
 });

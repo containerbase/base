@@ -50,6 +50,10 @@ export interface ToolVersion {
   prerelease?: true;
   lts?: true;
   /**
+   * The registry deprecates the version, only for npm tools.
+   */
+  deprecated?: true;
+  /**
    * When the version was released, in UTC.
    */
   releaseTimestamp?: string;
@@ -97,6 +101,15 @@ export interface ToolVersions {
    * The homepage of the tool, omitted when unset.
    */
   homepage?: string;
+  /**
+   * The tool has LTS release streams, like `node` and `java`.
+   */
+  lts?: true;
+  /**
+   * The version of the npm `latest` dist-tag, only for npm tools and only when
+   * it is listed in `versions`.
+   */
+  latest?: string;
   /**
    * The oldest version containerbase supports, on the `defaultDistro` of the
    * root index, in the versioning of the tool. Older versions aren't listed.
@@ -227,4 +240,24 @@ export interface FormatIndex {
      */
     removalDate?: string;
   }[];
+}
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export interface ReleaseInfo {
+  /**
+   * The url of the json schema of the file, which identifies its format.
+   */
+  $schema?: string;
+  /**
+   * The version of the release, like `1.7.22`.
+   */
+  version: string;
+  /**
+   * When the build of the data started, in UTC.
+   */
+  buildTime: string;
 }

@@ -48,7 +48,7 @@ defaultDistro; // 'noble'
 ```
 
 The format of the published [tool-versions](https://github.com/containerbase/tool-versions/blob/main/docs/format.md) data is exported too, so its readers share one definition.
-The zod schemas (`ToolVersions`, `VersionFiles`, `VersionIntegrity`, `ToolIndex`, `FormatIndex` and their parts) live behind the `zod` entry point, the zod free types behind the main one:
+The zod schemas (`ToolVersions`, `VersionFiles`, `VersionIntegrity`, `ToolIndex`, `FormatIndex`, `ReleaseInfo` and their parts) live behind the `zod` entry point, the zod free types behind the main one:
 
 ```ts
 import { ToolVersions } from '@containerbase/base/zod';
@@ -132,6 +132,16 @@ import type { ToolVersions } from '@containerbase/base';
 declare const data: ToolVersions; // the content of eg. `node.json`
 
 const { versions, needed } = filterByMinCb(data, packageVersion);
+```
+
+`minCbByVersion(data)` returns the containerbase version each covered tool version needs as a `Map` by version, the newest `cb` of the ranges covering it.
+A `cb` which isn't valid semver wins over valid ones, as it is never met.
+Versions no range covers aren't listed:
+
+```ts
+import { minCbByVersion } from '@containerbase/base';
+
+const needs = minCbByVersion(data); // eg. `needs.get('2.0.0')` is `'14.51.0'`
 ```
 
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
