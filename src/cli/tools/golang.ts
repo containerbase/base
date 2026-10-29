@@ -1,17 +1,13 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { z } from 'zod';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../services/index.ts';
 import { parse } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class GolangPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'golang';
 
   /**

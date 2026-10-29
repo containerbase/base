@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { env as penv } from 'node:process';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { fileContent, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
@@ -14,9 +13,6 @@ import {
 @injectable()
 @injectFromHierarchy()
 export class NodePrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override name = 'node';
 
   /**
