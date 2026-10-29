@@ -85,6 +85,10 @@ RUN install-tool renovate 44.181.8
 #--------------------------------------
 FROM test-node AS test-vp
 
+# pin the node vp's setup downloads, it uses the latest lts otherwise
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+ARG VP_SETUP_NODE_VERSION=24.22.1
+
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
 ARG VP_VERSION=1.4.0
 RUN install-tool vp "${VP_VERSION}"
