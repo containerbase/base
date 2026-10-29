@@ -1,14 +1,26 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { format, resolveConfig } from 'prettier';
+import { format } from 'oxfmt';
 import { z } from 'zod';
 import type { SupportedTools } from '../packages/base/src/schema.ts';
 import { SupportedTools as SupportedToolsSchema } from '../packages/base/src/schema.ts';
 
 // generates the data of the `@containerbase/base` package
 const pkgDir = new URL('../packages/base/', import.meta.url);
+
+// `format` doesn't discover the config file, so pass its options
+const options = JSON.parse(
+  await readFile(new URL('../.oxfmtrc.json', import.meta.url), 'utf8'),
+);
 
 // the install services read from and write below `<rootDir>`, so run them
 // against a temporary root which only links the shell tools of this repo
@@ -24,18 +36,14 @@ globalThis.rootDir = rootDir;
 const { listSupportedTools } = await import('../src/cli/install-tool/index.ts');
 
 /**
- * Writes a generated file of the base package, formatted with prettier.
+ * Writes a generated file of the base package, formatted with oxfmt.
  * @param file - path relative to `packages/base/`
  * @param content - the unformatted content
  */
 async function write(file: string, content: string): Promise<void> {
   const target = fileURLToPath(new URL(file, pkgDir));
-  const options = await resolveConfig(target);
-  await writeFile(
-    target,
-    await format(content, { ...options, filepath: target }),
-    { encoding: 'utf8' },
-  );
+  const { code } = await format(target, content, options);
+  await writeFile(target, code, { encoding: 'utf8' });
 }
 
 const tools: SupportedTools['tools'] = {};

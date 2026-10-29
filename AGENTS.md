@@ -37,7 +37,7 @@ All tooling runs through `pnpm`:
 - `pnpm vitest run`: run the unit tests
 - `pnpm tsc --noEmit`: type check
 - `pnpm oxlint` and `pnpm oxlint-fix`: lint and fix lint findings
-- `pnpm prettier` and `pnpm prettier-fix`: check and fix formatting
+- `pnpm oxfmt` and `pnpm oxfmt-fix`: check and fix formatting
 - `pnpm lint:markdown`: lint markdown
 - `pnpm lint:schema`: check the committed json schemas are up to date
 - `pnpm schema`: regenerate the committed json schemas

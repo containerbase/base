@@ -7,12 +7,16 @@
     "tools"
   ],
   "homepage": "https://github.com/containerbase/base#readme",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/containerbase/base.git",
     "directory": "packages/base"
   },
-  "license": "MIT",
+  "files": [
+    "data",
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -27,10 +31,10 @@
     "./tools.json": "./data/tools.json",
     "./tools.schema.json": "./data/tools.schema.json"
   },
-  "files": [
-    "data",
-    "dist"
-  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "dependencies": {
     "semver": "^7.8.5"
   },
@@ -48,9 +52,5 @@
   },
   "engines": {
     "node": ">=24.10.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
   }
 }

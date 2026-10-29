@@ -2,19 +2,19 @@
   "name": "containerbase",
   "version": "0.0.0-semantic-release",
   "private": true,
-  "repository": "https://github.com/containerbase/base.git",
   "license": "MIT",
   "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
     "Michael Kriese <michael.kriese@visualon.de>"
   ],
+  "repository": "https://github.com/containerbase/base.git",
   "type": "module",
   "scripts": {
     "bats": "node tools/bats.js --timing --verbose-run",
     "build": "run-s 'build:*'",
     "build:base": "tsc -p packages/base",
     "build:cli": "node tools/build.js",
-    "lint": "run-s prettier oxlint lint:types lint:docs lint:markdown lint:schema lint:tools lint:versions",
+    "lint": "run-s oxfmt oxlint lint:types lint:docs lint:markdown lint:schema lint:tools lint:versions",
     "lint:docs": "node tools/lint-docs.ts",
     "lint:markdown": "markdownlint-cli2 '**/*.md'",
     "lint:schema": "pnpm schema && git diff --exit-code docs/list-tools.schema.json",
@@ -23,13 +23,13 @@
     "lint:types:default": "tsc",
     "lint:types:dist": "tsc -p tsconfig.dist.json",
     "lint:versions": "node tools/lint-versions.ts",
-    "lint-fix": "run-s prettier-fix oxlint-fix 'lint-fix:*'",
+    "lint-fix": "run-s oxfmt-fix oxlint-fix 'lint-fix:*'",
     "lint-fix:markdown": "markdownlint-cli2 --fix '**/*.md'",
+    "oxfmt": "oxfmt --check",
+    "oxfmt-fix": "oxfmt",
     "oxlint": "oxlint",
     "oxlint-fix": "oxlint --fix",
     "prepare": "husky",
-    "prettier": "prettier --cache -c -u \"**/*.*\"",
-    "prettier-fix": "prettier --cache -w -u \"**/*.*\"",
     "release:prepare": "node tools/prepare-release.js",
     "release:publish": "node tools/publish-release.js",
     "schema": "node tools/schema.ts",
@@ -91,10 +91,9 @@
     "markdownlint-cli2": "0.24.0",
     "nock": "14.0.17",
     "npm-run-all2": "9.0.4",
+    "oxfmt": "0.74.0",
     "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2005",
-    "prettier": "3.9.10",
-    "prettier-plugin-packagejson": "3.0.3",
     "rolldown": "1.2.15",
     "semantic-release": "25.0.9",
     "shelljs": "0.10.0",
@@ -108,9 +107,9 @@
     "markdownlint": "*",
     "thread-stream": "*"
   },
-  "packageManager": "pnpm@12.15.0",
   "engines": {
     "node": ">=24.15.0",
     "pnpm": "^12.0.0"
-  }
+  },
+  "packageManager": "pnpm@12.15.0"
 }

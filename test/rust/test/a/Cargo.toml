@@ -4,11 +4,7 @@ version = "0.1.0"
 authors = []
 
 [workspace]
-members = [
-    "crate1",
-    "crate2",
-    "subdir/crate3"
-]
+members = ["crate1", "crate2", "subdir/crate3"]
 
 [dependencies]
 crate4 = { path = "subdir/crate4", version = "0.1.0" }
