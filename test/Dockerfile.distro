@@ -128,7 +128,7 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.17.0
+RUN install-tool terraform 1.17.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
 RUN install-tool tofu 1.13.2

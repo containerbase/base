@@ -190,7 +190,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.17.0
+RUN install-tool terraform 1.17.1
 
 #--------------------------------------
 # Image: tofu
