@@ -23,16 +23,12 @@ function releaseError(message) {
 }
 
 /**
- * Runs a command without throwing. The output is piped through
- * `process.stdout` and `process.stderr`, where semantic-release masks secrets.
+ * Runs a command without throwing, its output goes straight to the log.
  * @param {string} file
  * @param {string[]} args
  */
-async function run(file, args) {
-  const proc = execa(file, args, { reject: false });
-  proc.stdout.pipe(process.stdout);
-  proc.stderr.pipe(process.stderr);
-  return await proc;
+function run(file, args) {
+  return execa(file, args, { reject: false, stdio: 'inherit' });
 }
 
 /**
