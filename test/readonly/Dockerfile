@@ -20,4 +20,4 @@ RUN install-tool node 24.22.1
 
 # tool without a prepare step
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.6
+RUN install-tool flux v2.10.0

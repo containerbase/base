@@ -72,7 +72,7 @@ RUN install-tool dotnet 10.0.403
 RUN install-tool flutter 3.47.8
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.6
+RUN install-tool flux v2.10.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
 RUN install-tool git-lfs v3.8.1
