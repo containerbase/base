@@ -96,6 +96,42 @@ describe('cli/services/http.service', () => {
     },
   );
 
+  test.each([
+    { segment: 'tool%2B1.0.tar.gz', name: 'tool+1.0.tar.gz' },
+    // decoded, they are no plain file name or no valid encoding
+    { segment: 'sub%2Ftool.tar.gz', name: 'sub%2Ftool.tar.gz' },
+    { segment: '%2Ehidden.tar.gz', name: '%2Ehidden.tar.gz' },
+    { segment: 'tool%E0.tar.gz', name: 'tool%E0.tar.gz' },
+  ])(
+    'download: names the file $name for the url segment $segment',
+    async ({ segment, name }) => {
+      scope(baseUrl).get(`/encoded/${segment}`).reply(200, 'ok');
+
+      const file = await http.download({
+        url: `${baseUrl}/encoded/${segment}`,
+      });
+
+      expect(file.endsWith(`/${name}`)).toBe(true);
+    },
+  );
+
+  test('download: throws for an url without a file name', async () => {
+    await expect(http.download({ url: `${baseUrl}/folder/` })).rejects.toThrow(
+      `no file name in url ${baseUrl}/folder/`,
+    );
+  });
+
+  test('download: names the file for an url without a file name', async () => {
+    scope(baseUrl).get('/folder-named/').reply(200, 'ok');
+
+    const file = await http.download({
+      url: `${baseUrl}/folder-named/`,
+      fileName: 'tool.tar.gz',
+    });
+
+    expect(file.endsWith('/tool.tar.gz')).toBe(true);
+  });
+
   test('download', async () => {
     scope(baseUrl).get('/test.txt').reply(200, 'ok');
 
