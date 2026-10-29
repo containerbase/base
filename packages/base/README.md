@@ -146,6 +146,16 @@ const needs = minCbByVersion(data); // eg. `needs.get('2.0.0')` is `'14.51.0'`
 
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
 
+The package logs nothing by default.
+`configure({ logger })` sets the logger its functions log to, eg. a pino or Renovate logger, and `configure()` turns logging off again:
+
+```ts
+import { configure } from '@containerbase/base';
+import { logger } from './logger.ts';
+
+configure({ logger });
+```
+
 ## Contents
 
 Each entry may carry the following metadata:

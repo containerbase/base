@@ -1,6 +1,7 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import type { Logger as PinoLogger } from 'pino';
 import semverLt from 'semver/functions/lt.js';
 import { describe, expect, expectTypeOf, test, vi } from 'vitest';
 import type { z } from 'zod';
@@ -21,6 +22,7 @@ import {
   toolVersionsPath,
   validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
+import { type Logger, getLogger } from '../../packages/base/src/logger.ts';
 import {
   Arch,
   DistroCode,
@@ -710,6 +712,50 @@ describe('packages/base', () => {
         versions: data.versions.slice(4),
         needed: ['latest'],
       });
+    });
+  });
+
+  describe('configure', () => {
+    test('sets the logger and resets it to the silent default', () => {
+      const debug = vi.fn();
+      const logger = {
+        trace: vi.fn(),
+        debug,
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      };
+
+      const silent = getLogger();
+      expect(() => silent.warn({ tool: 'node' }, 'silent')).not.toThrow();
+
+      main.configure({ logger });
+      getLogger().debug({ tool: 'node' }, 'message');
+      expect(debug).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'node' },
+        'message',
+      );
+
+      main.configure();
+      expect(getLogger()).toBe(silent);
+    });
+
+    test('accepts a pino and a Renovate logger', () => {
+      expectTypeOf<PinoLogger>().toExtend<Logger>();
+      // the log methods of lib/logger/types.ts in Renovate
+      interface RenovateLogger {
+        trace(msg: string): void;
+        trace(meta: Record<string, any>, msg?: string): void;
+        debug(msg: string): void;
+        debug(meta: Record<string, any>, msg?: string): void;
+        info(msg: string): void;
+        info(meta: Record<string, any>, msg?: string): void;
+        warn(msg: string): void;
+        warn(meta: Record<string, any>, msg?: string): void;
+        error(msg: string): void;
+        error(meta: Record<string, any>, msg?: string): void;
+      }
+      expectTypeOf<RenovateLogger>().toExtend<Logger>();
     });
   });
 
