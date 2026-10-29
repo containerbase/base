@@ -245,6 +245,9 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof schemas.FormatIndex>
     >().toEqualTypeOf<tvTypes.FormatIndex>();
+    expectTypeOf<
+      z.infer<typeof schemas.ReleaseInfo>
+    >().toEqualTypeOf<tvTypes.ReleaseInfo>();
   });
 
   test('ToolVersions parses a <tool>.json file', () => {
@@ -392,6 +395,27 @@ describe('packages/base', () => {
         ],
       }).success,
     ).toBe(true);
+  });
+
+  test('ReleaseInfo parses the root release file', () => {
+    expect(
+      schemas.ReleaseInfo.parse({
+        $schema:
+          'https://containerbase.github.io/tool-versions/release.schema.json',
+        version: '1.7.22',
+        buildTime: '2026-10-28T03:00:00.000Z',
+        added: true,
+      }),
+    ).toEqual({
+      $schema:
+        'https://containerbase.github.io/tool-versions/release.schema.json',
+      version: '1.7.22',
+      buildTime: '2026-10-28T03:00:00.000Z',
+    });
+    expect(
+      schemas.ReleaseInfo.safeParse({ version: '1.7.22', buildTime: 'today' })
+        .success,
+    ).toBe(false);
   });
 
   test('unknown keys and archs still parse', () => {
