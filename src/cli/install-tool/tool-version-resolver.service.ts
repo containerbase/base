@@ -155,6 +155,28 @@ function pick(
 const twoPartReleaseTools = new Set(['protoc', 'swift']);
 
 /**
+ * Logs a warning about the tool-versions data, noting when it is the possibly
+ * outdated embedded data.
+ * @param outdated - whether the data is the embedded fallback for online data
+ * which can't be loaded or is turned off, not current embedded data
+ * @param context - the tool and versions, for the log
+ */
+function warnData(
+  message: string,
+  outdated: boolean,
+  context?: Record<string, unknown>,
+): void {
+  const text = outdated
+    ? `${message} (embedded, possibly outdated tool-versions data)`
+    : message;
+  if (context) {
+    logger.warn(context, text);
+  } else {
+    logger.warn(text);
+  }
+}
+
+/**
  * Logs a missing version, `latest` or a partial version without a match in
  * the data. A given version is used as is, a missing one resolves to none. It
  * warns about a release which needs a newer containerbase, a request which
@@ -163,7 +185,8 @@ const twoPartReleaseTools = new Set(['protoc', 'swift']);
  * {@link twoPartReleaseTools} whose line the data doesn't list at all is only
  * logged at debug level.
  * @param blocked - the release the `minCb` filter skipped, see {@link pick}
- * @param embedded - whether the data is the embedded fallback
+ * @param embedded - whether the data is the possibly outdated embedded data,
+ * the fallback for online data which can't be loaded or used offline
  */
 function logNoMatch(
   tool: string,
@@ -192,12 +215,7 @@ function logNoMatch(
       ? 'no version is resolved'
       : `${version} is used as is`;
   /** Logs the warning, naming the embedded data as its source. */
-  const warn = (message: string): void =>
-    logger.warn(
-      embedded
-        ? `${message} (embedded, possibly outdated tool-versions data)`
-        : message,
-    );
+  const warn = (message: string): void => warnData(message, embedded);
 
   if (blocked !== undefined) {
     warn(
@@ -267,16 +285,17 @@ export class ToolVersionResolverService {
    * tool-versions data, any other version is kept after the {@link checkExact}
    * check. A partial version which the embedded data lists as a release, like
    * `8.10`, is kept without the online lookup, so it doesn't wait for a
-   * timeout when offline. The embedded data is otherwise only used when the
-   * online data can't be loaded, as it may be outdated. Online data without a
-   * match is final, the embedded data is older and can't know more. A resolved
-   * version is logged at debug level, or with a warning when the embedded data
-   * replaces the online data, a version without a match is logged by
-   * {@link logNoMatch}. Only releases available for the host arch and distro,
-   * and installable by the running containerbase version (`minCb`), are
-   * considered, also for the embedded release check. Only a release version of
-   * containerbase filters by `minCb`, any other version, like
-   * `0.0.0-PLACEHOLDER`, is a development build and doesn't.
+   * timeout when offline. The data comes from
+   * {@link ToolVersionsService.getResolveVersions}: the online data, unless it
+   * is turned off or the embedded data is current, else the embedded data,
+   * which is only a possibly outdated fallback when the online data can't be
+   * loaded. A resolved version is logged at debug level, or with a warning
+   * when the embedded data replaces the online data, a version without a match
+   * is logged by {@link logNoMatch}. Only releases available for the host arch
+   * and distro, and installable by the running containerbase version
+   * (`minCb`), are considered, also for the embedded release check. Only a
+   * release version of containerbase filters by `minCb`, any other version,
+   * like `0.0.0-PLACEHOLDER`, is a development build and doesn't.
    * @returns an exact version as given, else the resolved release, or
    * `undefined` when the data has no match or the tool has no data
    */
@@ -306,33 +325,37 @@ export class ToolVersionResolverService {
       }
     }
 
-    const online = await this.toolVersions.getOnlineVersions(tool);
-    if (online) {
-      const { version: resolved, blocked } = pick(tool, online, version, host);
-      if (resolved === undefined) {
-        logNoMatch(tool, online, version, host, blocked, false);
-        return undefined;
-      }
-      logger.debug(
-        { tool, version, resolved },
-        'version resolved from the online tool-versions data',
-      );
-      return resolved;
-    }
-
-    const data = await this.toolVersions.getVersions(tool);
-    if (!data) {
+    const found = await this.toolVersions.getResolveVersions(tool);
+    if (!found) {
       return undefined;
     }
+    const { data, source } = found;
     const { version: resolved, blocked } = pick(tool, data, version, host);
     if (resolved === undefined) {
-      logNoMatch(tool, data, version, host, blocked, true);
+      // the embedded data may be outdated when the online data was looked up
+      // or is turned off, not when it is current
+      logNoMatch(
+        tool,
+        data,
+        version,
+        host,
+        blocked,
+        source === 'fallback' || source === 'offline',
+      );
       return undefined;
     }
-    logger.warn(
-      { tool, version, resolved },
-      'online tool-versions data not available, using the embedded, possibly outdated data',
-    );
+    if (source === 'fallback') {
+      warnData('online data not available', true, {
+        tool,
+        version,
+        resolved,
+      });
+    } else {
+      logger.debug(
+        { tool, version, resolved },
+        `version resolved from the ${source === 'online' ? 'online' : 'embedded'} tool-versions data`,
+      );
+    }
     return resolved;
   }
 
