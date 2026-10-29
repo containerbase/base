@@ -63,7 +63,7 @@ RUN install-tool dart 3.13.7
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.5
+RUN install-tool devbox 0.19.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.403
