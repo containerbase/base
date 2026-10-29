@@ -65,8 +65,7 @@ jobs:
             -e '^\.gitignore$' \
             -e '^LICENSE$' \
             -e '^\.oxlintrc\.json$' \
-            -e '^\.prettierrc\.json$' \
-            -e '^\.prettierignore$' \
+            -e '^\.oxfmtrc\.json$' \
             -e '^\.markdownlint-cli2\.jsonc$' \
             -e '^\.github/zizmor\.yml$' \
             -e '^tools/(audit-sarif|lint-docs|lint-versions)\.ts$' \
@@ -158,7 +157,7 @@ jobs:
       - name: lint
         run: |
           pnpm oxlint --format github
-          pnpm prettier
+          pnpm oxfmt
           pnpm lint:docs
           pnpm lint:markdown
           pnpm lint:types
