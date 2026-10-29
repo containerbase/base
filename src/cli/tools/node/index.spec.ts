@@ -400,11 +400,19 @@ describe('cli/tools/node/index', () => {
 
   describe('NodePrepareService', () => {
     test('initialize and prepare', async () => {
+      // CI configures an apt proxy, which `AptService` would write to `/etc`
+      vi.stubEnv('APT_HTTP_PROXY', undefined);
       const { svc, child } = await toolContext(NodePrepareService);
       const pathSvc = await child.getAsync(PathService);
       const envSvc = await child.getAsync(EnvService);
 
       await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(execaMock).toHaveBeenCalledWith(
+        'apt-get',
+        expect.arrayContaining(['libatomic1']),
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
 
       const env = await fs.readFile(
         join(pathSvc.toolPath('node'), 'env.sh'),
