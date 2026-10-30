@@ -16,6 +16,7 @@ import {
   type ShellWrapperConfig,
 } from './link-tool.service.ts';
 import { PathService } from './path.service.ts';
+import { SnapshotService } from './snapshot.service.ts';
 import { ToolVersionsService } from './tool-versions.service.ts';
 import { V2ToolService } from './v2-tool.service.ts';
 import { type InstalledTool, InstalledTools } from './version.schema.ts';
@@ -34,6 +35,7 @@ export {
   lookupTimeout,
   toolVersionsTimeout,
   PathService,
+  SnapshotService,
   ToolVersionsService,
   V2ToolService,
   VersionService,
@@ -52,6 +54,7 @@ function init<T extends { bind: Bind }>(options: T): void {
   options.bind(EnvService).toSelf();
   options.bind(HttpService).toSelf();
   options.bind(PathService).toSelf();
+  options.bind(SnapshotService).toSelf();
   options.bind(ToolVersionsService).toSelf();
   options.bind(V2ToolService).toSelf();
   options.bind(VersionService).toSelf();

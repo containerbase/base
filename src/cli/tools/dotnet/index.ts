@@ -160,6 +160,26 @@ export class DotnetInstallService extends BaseInstallService {
     }
   }
 
+  /**
+   * Moves the whole tool path into the build-time snapshot and links it back,
+   * as all sdk versions share it. Later sdk installs write through the link,
+   * an already linked tool path is skipped.
+   */
+  override async snapshot(_version: string): Promise<void> {
+    await this.snapshotSvc.moveAndLink(this.pathSvc.toolPath(this.name));
+  }
+
+  /**
+   * Removes the `sdk/<version>` folder of the sdk from the snapshot, which
+   * the linked tool path points to. The runtimes, packs and templates the
+   * sdk archive brought along may be shared with other sdks, so they're kept.
+   */
+  override async removeSnapshot(version: string): Promise<void> {
+    await this.snapshotSvc.remove(
+      join(this.pathSvc.toolPath(this.name), 'sdk', version),
+    );
+  }
+
   /** Links the `dotnet` binary into the global bin folder. */
   override async link(_version: string): Promise<void> {
     const src = this.pathSvc.toolPath(this.name);

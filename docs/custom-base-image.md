@@ -193,3 +193,31 @@ RUN containerbase-cli init tool all
 
 When the rootfs isn't reset between jobs, the tool caches and configs (`.npm`, `.m2`, `.npmrc`, …) in that folder carry over to the next job.
 Reset the rootfs per job or clean the folder yourself.
+
+## Build-time snapshot
+
+At image build time, `install-tool` and `prepare-tool` keep a snapshot of what they write to `/opt/containerbase` in `/var/lib/containerbase/opt`, at the same paths below it.
+This prepares mounting a volume at `/opt/containerbase`, which hides what the image installed there.
+The image build is detected from the BuildKit mounts.
+Installs at runtime don't add to the snapshot.
+Without a volume, a tool writing into its own linked version folder at runtime, eg. a global `npm` or `gem` install, writes through the symlink into the snapshot though, like a `dotnet` sdk installed at runtime, see below.
+Installs as the user at image build time are added too, `install-containerbase` creates `/var/lib/containerbase/opt` owned by the user and the root group.
+The `COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/` of the samples above doesn't copy the snapshot of the base image.
+
+- The folder an install creates is moved to the snapshot and replaced by a symlink to it, eg. `/opt/containerbase/tools/node/24.22.0` links to `/var/lib/containerbase/opt/tools/node/24.22.0`.
+  This also applies to v2 shell tools, and to a version installed earlier whose folder isn't linked yet, when it's installed again.
+  Tools installed with npm, pip or gem, eg. `yarn`, keep a real version folder, only the folder of the node, python or ruby version below it is linked.
+- `dotnet` installs all sdk versions into `/opt/containerbase/tools/dotnet`, so that whole folder is moved and linked on the first install, later sdk installs write through the symlink.
+  So without a volume, sdks installed at runtime are written into the snapshot as well.
+  Uninstalling an sdk or a failed sdk install at image build time only removes its `sdk/<version>` folder, the runtimes, packs and templates it brought along stay.
+- The `bin`, `lib`, `env.d`, `versions` and `ssl` folders, the `env.sh` of every tool and the database `data/containerbase.db` are copied once per install, also a failed one, uninstall and prepare.
+  `/usr/local/bin` and `/usr/local/lib` link to `/opt/containerbase/bin` and `/opt/containerbase/lib`, so files other software puts there are copied too.
+  They're only part of the snapshot when a containerbase install or prepare runs after them, and the image stores them twice.
+  Only changed files are copied, compared by size and modification time, and copies of removed files are removed, so unchanged files stay in their image layer.
+  The database is only copied again when it changed.
+  Symlinks are copied as symlinks, the copies keep the mode and, as root, the owner of their source.
+
+The tools keep working through the symlinks, so the absolute paths written at install time stay valid.
+Uninstalling a tool version removes the symlink.
+At image build time its copy is removed from the snapshot too, at runtime the snapshot is kept.
+A failed install at image build time also removes the copy of the version.

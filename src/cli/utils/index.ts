@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { argv0 } from 'node:process';
 import { type Options, type Result, type ResultPromise, execa } from 'execa';
 import { type CliMode, cliModes } from './types.ts';
@@ -47,4 +48,21 @@ export function spawn(
     preferLocal: false,
     node: false,
   });
+}
+
+/**
+ * Moves a file or folder. Uses `mv` when renaming fails across devices, eg.
+ * for folders of a lower overlay layer, as it keeps the owner.
+ *
+ * @throws when the path can't be moved, eg. `ENOENT` for a missing path
+ */
+export async function move(from: string, to: string): Promise<void> {
+  try {
+    await fs.rename(from, to);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'EXDEV') {
+      throw err;
+    }
+    await spawn('mv', [from, to]);
+  }
 }

@@ -190,6 +190,64 @@ describe('cli/tools/dotnet/index', () => {
       });
     });
 
+    test('removeSnapshot removes the sdk folder', async () => {
+      const { svc, pathSvc } = await toolContext(DotnetInstallService);
+      const sdk = join(pathSvc.snapshotDir, 'tools/dotnet/sdk/8.0.106');
+      const runtime = join(pathSvc.snapshotDir, 'tools/dotnet/shared/x/8.0.6');
+      await fs.mkdir(sdk, { recursive: true });
+      await fs.mkdir(runtime, { recursive: true });
+
+      await expect(svc.removeSnapshot('8.0.106')).resolves.toBeUndefined();
+
+      expect(await fs.lstat(sdk).catch(() => null)).toBeNull();
+      expect((await fs.lstat(runtime)).isDirectory()).toBe(true);
+      await fs.rm(join(pathSvc.snapshotDir, 'tools/dotnet'), {
+        recursive: true,
+      });
+    });
+
+    test('snapshot: links the tool path', async () => {
+      const { svc, pathSvc } = await toolContext(DotnetInstallService);
+      const toolPath = pathSvc.toolPath('dotnet');
+      const target = join(pathSvc.snapshotDir, 'tools/dotnet');
+      const sdk = join(toolPath, 'sdk', '8.0.104');
+      await fs.mkdir(sdk, { recursive: true });
+      await fs.writeFile(join(sdk, '.version'), '8.0.104');
+
+      await expect(svc.snapshot('8.0.104')).resolves.toBeUndefined();
+
+      expect(await fs.readlink(toolPath)).toBe(target);
+      expect(
+        await fs.readFile(join(target, 'sdk/8.0.104/.version'), 'utf8'),
+      ).toBe('8.0.104');
+      expect(await svc.isInstalled('8.0.104')).toBe(true);
+
+      // a later sdk install writes through the link
+      scope(baseUrl)
+        .get('/dotnet/Sdk/8.0.105/dotnet-sdk-8.0.105-linux-x64.tar.gz')
+        .reply(200, 'dotnet archive');
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      await expect(svc.install('8.0.105')).resolves.toBeUndefined();
+      expect(extract).toHaveBeenCalledWith(
+        expect.objectContaining({ cwd: toolPath }),
+      );
+      expect(await pathSvc.ensureToolPath('dotnet')).toBe(toolPath);
+      expect(await pathSvc.createToolPath('dotnet')).toBe(toolPath);
+      await pathSvc.exportToolEnv('dotnet', { DOTNET_ROOT: toolPath });
+      expect(await fs.readFile(join(target, 'env.sh'), 'utf8')).toContain(
+        'DOTNET_ROOT',
+      );
+
+      // the linked tool path is skipped
+      await expect(svc.snapshot('8.0.105')).resolves.toBeUndefined();
+      expect(await fs.readlink(toolPath)).toBe(target);
+
+      // restore a real tool path for the other tests
+      await fs.rm(toolPath);
+      await fs.rm(join(target, 'env.sh'));
+      await fs.rename(target, toolPath);
+    });
+
     test('runs the tool test', async () => {
       const { svc } = await toolContext(DotnetInstallService);
 

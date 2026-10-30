@@ -251,6 +251,19 @@ describe('cli/tools/python/utils', () => {
     await expect(svc.install('1.0.1')).resolves.toBeUndefined();
   });
 
+  test('snapshot: links the python version folder', async () => {
+    const svc = await child.getAsync(HashinInstallService);
+    await svc.install('1.0.2');
+    const versionPath = pathSvc.versionedToolPath('hashin', '1.0.2');
+
+    await expect(svc.snapshot('1.0.2')).resolves.toBeUndefined();
+
+    expect(await fs.readlink(path.join(versionPath, pythonVersion))).toBe(
+      path.join(pathSvc.snapshotDir, 'tools/hashin/1.0.2', pythonVersion),
+    );
+    expect((await fs.lstat(versionPath)).isDirectory()).toBe(true);
+  });
+
   test('install: throws when virtualenv fails', async () => {
     execaMock.mockResolvedValue({ failed: true, all: 'venv boom' });
     const svc = await child.getAsync(HashinInstallService);

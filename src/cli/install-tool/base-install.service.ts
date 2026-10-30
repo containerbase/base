@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
 import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
 import {
@@ -13,6 +14,7 @@ import {
   LinkToolService,
   PathService,
   type ShellWrapperConfig,
+  SnapshotService,
   ToolVersionsService,
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
@@ -37,6 +39,8 @@ export abstract class BaseInstallService {
   protected readonly http!: HttpService;
   @inject(CompressionService)
   protected readonly compress!: CompressionService;
+  @inject(SnapshotService)
+  protected readonly snapshotSvc!: SnapshotService;
 
   @inject(LinkToolService)
   private readonly _link!: LinkToolService;
@@ -140,6 +144,44 @@ export abstract class BaseInstallService {
    */
   postInstall(_version: string): Promise<void> {
     return Promise.resolve();
+  }
+
+  /**
+   * Moves the folder the install of the version created into the build-time
+   * snapshot and links it back, by default the versioned tool path, see
+   * `SnapshotService.moveAndLink`. Tools installing somewhere else override
+   * it, eg. `git` or `dotnet`.
+   */
+  async snapshot(version: string): Promise<void> {
+    await this.snapshotSvc.moveAndLink(
+      this.pathSvc.versionedToolPath(this.name, version),
+    );
+  }
+
+  /**
+   * Moves the folder of the parent version below the versioned tool path into
+   * the build-time snapshot and links it back, so the versioned tool path
+   * stays a real folder for other parent versions, eg. for npm, pip and gem
+   * tools installed per node, python or ruby version.
+   */
+  protected async snapshotParentFolder(
+    version: string,
+    parentVersion: string,
+  ): Promise<void> {
+    await this.snapshotSvc.moveAndLink(
+      join(this.pathSvc.versionedToolPath(this.name, version), parentVersion),
+    );
+  }
+
+  /**
+   * Removes the build-time snapshot copy of what `uninstall` removed, the
+   * versioned tool path, including the folders per parent version of npm,
+   * pip and gem tools below it.
+   */
+  async removeSnapshot(version: string): Promise<void> {
+    await this.snapshotSvc.remove(
+      this.pathSvc.versionedToolPath(this.name, version),
+    );
   }
 
   /**

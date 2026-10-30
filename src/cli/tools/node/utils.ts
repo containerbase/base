@@ -156,6 +156,15 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
     });
   }
 
+  /**
+   * Moves the folder of the current node version below the versioned tool
+   * path into the build-time snapshot and links it back, so the versioned
+   * tool path stays a real folder for other node versions.
+   */
+  override async snapshot(version: string): Promise<void> {
+    await this.snapshotParentFolder(version, await this.getNodeVersion());
+  }
+
   /** Whether the version is installed for the current node version. */
   override async isInstalled(version: string): Promise<boolean> {
     const node = await this.getNodeVersion();

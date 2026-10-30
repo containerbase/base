@@ -103,6 +103,20 @@ export class GitInstallService extends BaseInstallService {
   }
 
   /**
+   * git is installed system wide by apt, so there is no folder to snapshot.
+   */
+  override snapshot(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /**
+   * git is installed system wide by apt, so there is no snapshot copy.
+   */
+  override removeSnapshot(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /**
    * Marks every repository as safe, whoever owns it.
    */
   override async postInstall(_version: string): Promise<void> {

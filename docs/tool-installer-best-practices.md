@@ -100,6 +100,10 @@ Root's `/root/.cache` isn't touched.
 
 See [`src/cli/services/path.service.ts`](../src/cli/services/path.service.ts) for the full set of path helpers before reaching for `node:fs` directly.
 
+At image build time, the folder an install created is moved into the [build-time snapshot](./custom-base-image.md#build-time-snapshot) and linked back, by default `versionedToolPath(tool, version)`.
+An installer writing somewhere else must override `snapshot` and `removeSnapshot`, like `dotnet`, which shares one tool path for all versions, or tools installed below a parent version, which use `snapshotParentFolder`.
+A build-time install which leaves no folder to move logs a warning.
+
 ## Shared helpers
 
 Logic that several installers repeat belongs in a protected helper on `BaseInstallService`, or a method on `PathService`, not copied into each tool or dropped into a loose utils file.

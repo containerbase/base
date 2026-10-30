@@ -7,12 +7,13 @@ import {
   EnvService,
   LinkToolService,
   PathService,
+  SnapshotService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
 import { BunInstallService } from '../tools/bun.ts';
 import { BlockingChild, NotRoot, NotSupported } from '../utils/codes.ts';
-import { isDockerBuild, logger } from '../utils/index.ts';
+import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
 import { BaseInstallService } from './base-install.service.ts';
 import { V1ToolInstallService } from './install-legacy-tool.service.ts';
 import {
@@ -104,6 +105,12 @@ describe('cli/install-tool/install-tool.service', () => {
         name: 'bun',
         tool: { name: 'bun', version: '1.0.0' },
       });
+      // the install updates the snapshot itself
+      expect(prepareTools).toHaveBeenCalledExactlyOnceWith(
+        ['bun'],
+        false,
+        false,
+      );
     });
 
     test('fails if the tool needs root', async () => {
@@ -173,6 +180,152 @@ describe('cli/install-tool/install-tool.service', () => {
 
       expect(logger.debug).toHaveBeenCalledWith('cleaning apt caches');
       expect(logger.debug).toHaveBeenCalledWith('cleaning root caches');
+    });
+
+    test('snapshots a build-time install', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const tool = vi.spyOn(BunInstallService.prototype, 'snapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.install('bun', '1.2.0')).toBeUndefined();
+
+      expect(tool).toHaveBeenCalledExactlyOnceWith('1.2.0');
+      expect(files).toHaveBeenCalledOnce();
+      expect(
+        await pathExists(
+          rootPath('var/lib/containerbase/opt/data/containerbase.db'),
+          'file',
+        ),
+      ).toBe(true);
+    });
+
+    test('moves a still real folder of an installed version', async () => {
+      expect(await install.install('bun', '1.2.1')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const tool = vi.spyOn(BunInstallService.prototype, 'snapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.install('bun', '1.2.1')).toBeUndefined();
+
+      expect(tool).toHaveBeenCalledExactlyOnceWith('1.2.1');
+      expect(files).toHaveBeenCalledOnce();
+    });
+
+    test('snapshots only the files for a v1 tool', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const move = vi.spyOn(SnapshotService.prototype, 'moveAndLink');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.install('leg', '1.2.0')).toBeUndefined();
+
+      expect(move).not.toHaveBeenCalled();
+      expect(files).toHaveBeenCalledOnce();
+    });
+
+    test('skips the snapshot for a dry run', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.install('bun', '1.2.6', true)).toBeUndefined();
+
+      expect(files).not.toHaveBeenCalled();
+    });
+
+    test('updates the snapshot after a failed install', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(BunInstallService.prototype, 'install').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+      const tool = vi.spyOn(BunInstallService.prototype, 'snapshot');
+      const remove = vi.spyOn(BunInstallService.prototype, 'removeSnapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      await expect(install.install('bun', '1.2.2')).rejects.toThrow(
+        'install failed',
+      );
+
+      expect(remove).toHaveBeenCalledExactlyOnceWith('1.2.2');
+      expect(tool).not.toHaveBeenCalled();
+      expect(files).toHaveBeenCalledOnce();
+    });
+
+    test('keeps the install error when the snapshot fails', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(BunInstallService.prototype, 'install').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+      const removeErr = new Error('remove failed');
+      vi.spyOn(
+        BunInstallService.prototype,
+        'removeSnapshot',
+      ).mockRejectedValueOnce(removeErr);
+      const filesErr = new Error('snapshot failed');
+      vi.spyOn(
+        SnapshotService.prototype,
+        'snapshotFiles',
+      ).mockRejectedValueOnce(filesErr);
+
+      await expect(install.install('bun', '1.2.7')).rejects.toThrow(
+        'install failed',
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err: removeErr, tool: 'bun', version: '1.2.7' },
+        'could not remove the snapshot',
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err: filesErr, tool: 'bun', version: '1.2.7' },
+        'could not update the snapshot',
+      );
+    });
+
+    test('keeps the snapshot of a failed v1 install', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(V1ToolInstallService.prototype, 'execute').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+      const remove = vi.spyOn(SnapshotService.prototype, 'remove');
+
+      await expect(install.install('leg', '1.2.1')).rejects.toThrow(
+        'install failed',
+      );
+
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    test('keeps the snapshot copy of a failed runtime install', async () => {
+      vi.spyOn(BunInstallService.prototype, 'install').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+      const remove = vi.spyOn(BunInstallService.prototype, 'removeSnapshot');
+
+      await expect(install.install('bun', '1.2.4')).rejects.toThrow(
+        'install failed',
+      );
+
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    test('cleans the caches when the snapshot fails', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(
+        SnapshotService.prototype,
+        'snapshotFiles',
+      ).mockRejectedValueOnce(new Error('snapshot failed'));
+
+      await expect(install.install('bun', '1.2.5')).rejects.toThrow(
+        'snapshot failed',
+      );
+
+      expect(logger.debug).toHaveBeenCalledWith('cleaning tmp files');
+    });
+
+    test('skips the snapshot outside of an image build', async () => {
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.install('bun', '1.2.3')).toBeUndefined();
+
+      expect(files).not.toHaveBeenCalled();
     });
 
     test('evicts the download cache', async () => {
@@ -341,14 +494,89 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(await ver.getCurrent('bun')).toBeNull();
     });
 
+    test('removes the snapshot copy at image build time', async () => {
+      expect(await install.install('bun', '3.2.0')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const remove = vi.spyOn(BunInstallService.prototype, 'removeSnapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.uninstall('bun', '3.2.0')).toBeUndefined();
+
+      expect(remove).toHaveBeenCalledExactlyOnceWith('3.2.0');
+      expect(files).toHaveBeenCalledOnce();
+    });
+
+    test('keeps the snapshot outside of an image build', async () => {
+      expect(await install.install('bun', '3.3.0')).toBeUndefined();
+      const remove = vi.spyOn(BunInstallService.prototype, 'removeSnapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.uninstall('bun', '3.3.0')).toBeUndefined();
+
+      expect(remove).not.toHaveBeenCalled();
+      expect(files).not.toHaveBeenCalled();
+    });
+
+    test('updates the snapshot after a failed uninstall', async () => {
+      expect(await install.install('bun', '3.5.0')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(BunInstallService.prototype, 'uninstall').mockRejectedValueOnce(
+        new Error('uninstall failed'),
+      );
+      const filesErr = new Error('snapshot failed');
+      const files = vi
+        .spyOn(SnapshotService.prototype, 'snapshotFiles')
+        .mockRejectedValueOnce(filesErr);
+
+      await expect(install.uninstall('bun', '3.5.0')).rejects.toThrow(
+        'uninstall failed',
+      );
+
+      expect(files).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err: filesErr, tool: 'bun' },
+        'could not update the snapshot',
+      );
+    });
+
+    test('fails when the snapshot of an uninstall fails', async () => {
+      expect(await install.install('bun', '3.6.0')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(
+        SnapshotService.prototype,
+        'snapshotFiles',
+      ).mockRejectedValueOnce(new Error('snapshot failed'));
+
+      await expect(install.uninstall('bun', '3.6.0')).rejects.toThrow(
+        'snapshot failed',
+      );
+    });
+
+    test('dry run keeps the snapshot at image build time', async () => {
+      expect(await install.install('bun', '3.4.0')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
+
+      expect(await install.uninstall('bun', '3.4.0', true)).toBeUndefined();
+
+      expect(files).not.toHaveBeenCalled();
+    });
+
     test('all versions', async () => {
       expect(await install.install('bun', '4.0.0')).toBeUndefined();
       expect(await install.install('bun', '4.1.0')).toBeUndefined();
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const remove = vi.spyOn(BunInstallService.prototype, 'removeSnapshot');
+      const files = vi.spyOn(SnapshotService.prototype, 'snapshotFiles');
 
       expect(await install.uninstall('bun')).toBe(0);
 
       const ver = await child.getAsync(VersionService);
       expect(await ver.findInstalled('bun')).toEqual([]);
+      // the copies of all versions are removed, the files updated once
+      expect(remove).toHaveBeenCalledWith('4.0.0');
+      expect(remove).toHaveBeenCalledWith('4.1.0');
+      expect(files).toHaveBeenCalledOnce();
     });
 
     test('blocked by a child tool', async () => {
