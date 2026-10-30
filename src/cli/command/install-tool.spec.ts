@@ -38,6 +38,13 @@ describe('cli/command/install-tool', () => {
     );
     vi.stubEnv('NODE_VERSION', '16.13.0');
     expect(await cli.run(['node'])).toBe(0);
+    // install-tool may read the tool-versions data
+    expect(mocks.resolveVersion).toHaveBeenLastCalledWith(
+      'node',
+      '16.13.0',
+      undefined,
+      true,
+    );
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
     expect(mocks.installTool).toHaveBeenCalledWith(
       'node',
