@@ -56,6 +56,9 @@ export class PhpPrepareService extends BasePrepareService {
 export class PhpInstallService extends BaseInstallService {
   readonly name = 'php';
 
+  /** Php extensions may be installed into the version folder at runtime. */
+  override readonly writesToInstallDir = true;
+
   /** The first jammy prebuild. */
   override readonly minVersion = '7.4.0';
 

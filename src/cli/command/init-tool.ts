@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
+import { restoreInstallDir } from '../install-tool/index.ts';
 import { initializeTools } from '../prepare-tool/index.ts';
 import { logger } from '../utils/index.ts';
 import { command } from './utils.ts';
@@ -21,19 +22,30 @@ export class InitToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
-  /** Initializes the passed tools, or all prepared tools for `all`. */
+  /**
+   * Restores `/opt/containerbase` from the build-time snapshot when it doesn't
+   * match it, eg. an empty volume, unless it's a dry run. Then initializes the
+   * passed tools, or all prepared tools for `all`, also when the restore
+   * failed, eg. to link the tmp dir, and reports the restore error afterwards.
+   */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
     logger.info(`Initializing tools ${this.tools.join(', ')}...`);
     try {
-      return await initializeTools(this.tools, this.dryRun);
+      if (!this.dryRun) {
+        try {
+          await restoreInstallDir();
+        } catch (err) {
+          error = true;
+          this.reportError(err);
+        }
+      }
+      const res = await initializeTools(this.tools, this.dryRun);
+      return error ? 1 : res;
     } catch (err) {
       error = true;
-      logger.debug(err);
-      if (err instanceof Error) {
-        logger.fatal(err.message);
-      }
+      this.reportError(err);
       return 1;
       /* v8 ignore next -- coverage bug */
     } finally {
@@ -46,6 +58,14 @@ export class InitToolCommand extends Command {
           `Initialize tools ${this.tools.join(', ')} succeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
+    }
+  }
+
+  /** Logs the error, with its message as fatal when it is an `Error`. */
+  private reportError(err: unknown): void {
+    logger.debug(err);
+    if (err instanceof Error) {
+      logger.fatal(err.message);
     }
   }
 }

@@ -179,6 +179,7 @@ describe('cli/install-tool/base-install.service', () => {
     expect(svc.alias).toBe('dummy');
     expect(svc.parent).toBeUndefined();
     expect(svc.type).toBeUndefined();
+    expect(svc.writesToInstallDir).toBe(false);
     expect(svc.toString()).toBe('dummy');
   });
 

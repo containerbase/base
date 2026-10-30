@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import {
+  DataService,
   IpcServer,
   PathService,
+  RestoreService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -22,6 +24,7 @@ import {
   linkTool,
   listSupportedTools,
   resolveVersion,
+  restoreInstallDir,
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
@@ -97,6 +100,63 @@ describe('cli/install-tool/index', () => {
         { tool: 'gradle', parent: 'java' },
         'parent tool not installed',
       );
+    });
+
+    test('restores /opt/containerbase before opening the database', async () => {
+      const restore = vi.spyOn(RestoreService.prototype, 'restore');
+      const db = vi.spyOn(DataService.prototype, 'db');
+
+      expect(
+        await installTool('dummy-npm-order', '1.0.0', true, 'npm'),
+      ).toBeUndefined();
+      expect(restore).not.toHaveBeenCalled();
+
+      vi.spyOn(NpmBaseInstallService.prototype, 'install').mockResolvedValue();
+      vi.spyOn(NpmBaseInstallService.prototype, 'validate').mockResolvedValue(
+        true,
+      );
+      vi.spyOn(
+        NpmBaseInstallService.prototype,
+        'postInstall',
+      ).mockResolvedValue();
+      vi.spyOn(NpmBaseInstallService.prototype, 'test').mockResolvedValue();
+      db.mockClear();
+      expect(
+        await installTool('dummy-npm-order', '1.0.0', false, 'npm'),
+      ).toBeUndefined();
+      expect(restore).toHaveBeenCalledOnce();
+      expect(restore.mock.invocationCallOrder[0]).toBeLessThan(
+        db.mock.invocationCallOrder[0]!,
+      );
+    });
+
+    test('restoreInstallDir does not open the database', async () => {
+      const restore = vi.spyOn(RestoreService.prototype, 'restore');
+      const db = vi.spyOn(DataService.prototype, 'db');
+
+      await expect(restoreInstallDir()).resolves.toBeUndefined();
+
+      expect(restore).toHaveBeenCalledOnce();
+      expect(db).not.toHaveBeenCalled();
+    });
+
+    test('dry runs open the database read-only on a volume to restore', async () => {
+      const restore = vi.spyOn(RestoreService.prototype, 'restore');
+      vi.spyOn(RestoreService.prototype, 'needsRestore').mockResolvedValue(
+        true,
+      );
+      const readOnly = vi
+        .spyOn(DataService.prototype, 'readOnly')
+        .mockReturnValue();
+
+      expect(await installTool('bun', '1.0.10', true)).toBeUndefined();
+      expect(
+        await uninstallTool({ tool: 'bun', version: '1.0.10', dryRun: true }),
+      ).toBeUndefined();
+
+      // the uninstall dry run opens the database read-only anyway
+      expect(readOnly).toHaveBeenCalledTimes(3);
+      expect(restore).not.toHaveBeenCalled();
     });
 
     test('works', async () => {
@@ -305,6 +365,20 @@ describe('cli/install-tool/index', () => {
   });
 
   describe('uninstallTool', () => {
+    test('restores /opt/containerbase before opening the database', async () => {
+      const restore = vi.spyOn(RestoreService.prototype, 'restore');
+      const db = vi.spyOn(DataService.prototype, 'db');
+
+      expect(
+        await uninstallTool({ tool: 'bun', version: '9.9.8' }),
+      ).toBeUndefined();
+
+      expect(restore).toHaveBeenCalledOnce();
+      expect(restore.mock.invocationCallOrder[0]).toBeLessThan(
+        db.mock.invocationCallOrder[0]!,
+      );
+    });
+
     test('fails first when the folders are not writable', async () => {
       const pathSvc = await createContainer().getAsync(PathService);
       failAccess(pathSvc.binDir, 'EACCES');
