@@ -8,7 +8,17 @@ import {
   getUrlReplacements,
   replaceUrl,
 } from '../../../packages/base/src/url.ts';
-import { type Arch, isInside, logger } from '../utils/index.ts';
+import {
+  type Arch,
+  hasUnitlessPart,
+  isInside,
+  logger,
+  toMs,
+  warnOnce,
+} from '../utils/index.ts';
+
+/** The default max age of the embedded tool-versions data, 24 hours. */
+const defaultMaxAge = 24 * 60 * 60 * 1000;
 
 @injectable(bindingScopeValues.Singleton)
 export class EnvService {
@@ -161,6 +171,58 @@ export class EnvService {
    */
   get version(): string {
     return globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
+  }
+
+  /**
+   * Whether the online tool-versions data is never fetched, set by
+   * `CONTAINERBASE_RESOLVER_OFFLINE=true`, in any case. Any other value but
+   * `false` or an empty one is logged as a warning, once, and doesn't turn it
+   * off.
+   */
+  get resolverOffline(): boolean {
+    const value = env.CONTAINERBASE_RESOLVER_OFFLINE ?? '';
+    const lower = value.toLowerCase();
+    if (lower === 'true') {
+      return true;
+    }
+    if (lower !== '' && lower !== 'false') {
+      warnOnce('Invalid CONTAINERBASE_RESOLVER_OFFLINE, use true or false', {
+        value,
+      });
+    }
+    return false;
+  }
+
+  /**
+   * The age in milliseconds up to which the embedded tool-versions data is
+   * used without looking up the online data, from
+   * `CONTAINERBASE_RESOLVER_MAX_AGE`, like `24h`, `2 days` or `1 day 2h`, a
+   * month counts as 30 days. Defaults to 24 hours when unset, an invalid
+   * value or one with a negative part is logged as a warning and uses the
+   * default. A part without a unit, like `24` or the `30` of `1h30`, is
+   * milliseconds, like for Renovate, which is logged as a warning too. Each
+   * warning is logged once.
+   */
+  get resolverMaxAge(): number {
+    const value = env.CONTAINERBASE_RESOLVER_MAX_AGE;
+    if (!isNonEmptyString(value)) {
+      return defaultMaxAge;
+    }
+    const age = toMs(value);
+    if (age === null) {
+      warnOnce(
+        'Invalid CONTAINERBASE_RESOLVER_MAX_AGE, using the default of 24 hours',
+        { value },
+      );
+      return defaultMaxAge;
+    }
+    if (hasUnitlessPart(value)) {
+      warnOnce(
+        'CONTAINERBASE_RESOLVER_MAX_AGE has a number without a unit, it is read as milliseconds',
+        { value },
+      );
+    }
+    return age;
   }
 
   /** Whether tool tests are skipped, set by `SKIP_VERSION`. */
