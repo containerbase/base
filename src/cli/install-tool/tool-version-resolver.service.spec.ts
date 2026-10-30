@@ -213,8 +213,6 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     { version: '3.12', resolved: '3.12.4' },
     // a release itself stays as it is
     { version: '8.10', resolved: '8.10' },
-    // no release of that line
-    { version: '21', resolved: '21' },
   ])(
     'resolves the partial version $version of a tool without a resolver',
     async ({ version, resolved }) => {
@@ -316,22 +314,152 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
   });
 
-  test('keeps the version when the online data has no match, without the embedded data', async () => {
+  test('warns and keeps the version when the online data has no match, without the embedded data', async () => {
     await embed('other', ['20.1.0']);
     serve('other', 200, ['19.0.0']);
 
     expect(await svc.resolve('other', '20')).toBe('20');
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'The tool-versions data has no other release matching 20, 20 is used as is',
+    );
   });
 
-  test('keeps the version when the embedded data has no match either', async () => {
+  test('warns and keeps the version when the embedded data has no match either', async () => {
     await embed('other', ['19.0.0']);
     serve('other', 404);
 
     expect(await svc.resolve('other', '20')).toBe('20');
 
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'The tool-versions data has no other release matching 20, 20 is used as is (embedded, possibly outdated tool-versions data)',
+    );
+  });
+
+  test('warns and keeps a two-part version of another tool which the data does not list', async () => {
+    serve('other', 200, ['6.3.2', '6.3']);
+
+    expect(await svc.resolve('other', '6.4')).toBe('6.4');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'The tool-versions data has no other release matching 6.4, 6.4 is used as is',
+    );
+  });
+
+  test('keeps a two-part swift release which the data does not list yet without a warning', async () => {
+    serve('swift', 200, ['6.3.2', '6.3', '6.2']);
+
+    expect(await svc.resolve('swift', '6.4')).toBe('6.4');
+
     expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      { tool: 'swift', version: '6.4' },
+      'two-part version not listed in the tool-versions data, used as is',
+    );
+  });
+
+  test('warns about a listed two-part swift release which is not available for the host', async () => {
+    serve('swift', 200, [{ version: '6.3', archs: ['arm64'] }]);
+
+    expect(await svc.resolve('swift', '6.3')).toBe('6.3');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No swift release matches 6.3 for amd64 on jammy, 6.3 is used as is',
+    );
+  });
+
+  test('warns about a two-part swift line whose releases are not available for the host', async () => {
+    serve('swift', 200, [
+      { version: '6.2.3', archs: ['arm64'] },
+      { version: '6.2.1', archs: ['arm64'] },
+    ]);
+
+    expect(await svc.resolve('swift', '6.2')).toBe('6.2');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No swift release matches 6.2 for amd64 on jammy, 6.2 is used as is',
+    );
+  });
+
+  test.each([
+    { version: '6.3', resolved: '6.3' },
+    { version: '6', resolved: '6.3.2' },
+  ])(
+    'resolves the swift version $version from the data',
+    async ({ version, resolved }) => {
+      serve('swift', 200, ['6.3.2', '6.3', '6.2']);
+
+      expect(await svc.resolve('swift', version)).toBe(resolved);
+    },
+  );
+
+  test('warns and keeps a one-part swift version without a match', async () => {
+    serve('swift', 200, ['6.3.2', '6.3']);
+
+    expect(await svc.resolve('swift', '7')).toBe('7');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'The tool-versions data has no swift release matching 7, 7 is used as is',
+    );
+  });
+
+  test('warns and keeps a partial version which only prereleases match', async () => {
+    serve('other', 200, versions);
+
+    expect(await svc.resolve('other', '21')).toBe('21');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches 21, only prereleases like 21.0.0-rc1 do, 21 is used as is, install an exact prerelease version instead',
+    );
+  });
+
+  test('warns and keeps a partial version whose release is not available for the host', async () => {
+    serve('other', 200, [
+      '21.0.0-rc1',
+      { version: '21.0.0', archs: ['arm64'] },
+      '20.0.0',
+    ]);
+
+    expect(await svc.resolve('other', '21')).toBe('21');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches 21 for amd64 on jammy, 21 is used as is',
+    );
+  });
+
+  test('warns and keeps latest when the data only has prereleases', async () => {
+    serve('other', 200, ['2.0.0-rc1']);
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches latest, only prereleases like 2.0.0-rc1 do, latest is used as is, install an exact prerelease version instead',
+    );
+  });
+
+  test('warns when the data has no release at all', async () => {
+    serve('other', 200, {
+      tool: 'other',
+      updatedAt: '2026-10-16T00:00:00Z',
+      versions: [],
+    });
+
+    expect(await svc.resolve('other', undefined)).toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'The tool-versions data has no other release matching latest, no version is resolved',
+    );
+  });
+
+  test('warns and keeps a partial version when the embedded data needs a newer containerbase', async () => {
+    await embed('other', ['3.12.5'], [{ version: '3.12.5', cb: '15.0.0' }]);
+    serve('other', 404);
+
+    expect(await svc.resolve('other', '3.12')).toBe('3.12');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'other 3.12.5 needs containerbase 15.0.0 or newer, running 14.51.0, 3.12 is used as is (embedded, possibly outdated tool-versions data)',
+    );
   });
 
   test.each([undefined, 'latest', '2'])(
@@ -422,6 +550,10 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     ]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches latest for amd64 on jammy, latest is used as is',
+    );
   });
 
   test('uses the builds of an older distro for the releases without host distro builds', async () => {
@@ -455,6 +587,10 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     });
 
     expect(await svc.resolve('other', '6.3')).toBe('6.3');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches 6.3 for amd64 on resolute, 6.3 is used as is',
+    );
   });
 
   test('picks a release without archs and distros lists', async () => {
@@ -489,6 +625,10 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
       ]);
 
       expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        'No other release matches latest for amd64 on jammy, latest is used as is',
+      );
     },
   );
 
@@ -510,10 +650,14 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '8.10')).toBe('8.10.2');
   });
 
-  test('keeps the version when no release is available for the host', async () => {
+  test('warns and resolves no version for a missing version when no release is available for the host', async () => {
     serve('other', 200, [{ version: '3.0.0', archs: ['arm64'] }]);
 
-    expect(await svc.resolve('other', 'latest')).toBe('latest');
+    expect(await svc.resolve('other', undefined)).toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'No other release matches latest for amd64 on jammy, no version is resolved',
+    );
   });
 
   test('skips the versions from the start of a range which needs a newer containerbase', async () => {
@@ -625,7 +769,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '3.12')).toBe('3.12.4');
   });
 
-  test('keeps latest when every lts release needs a newer containerbase', async () => {
+  test('warns and keeps latest when every lts release needs a newer containerbase', async () => {
     serve(
       'other',
       200,
@@ -635,6 +779,76 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
     // the range covers its version 24.1.0 and 25.0.0 listed above it
     expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'other 24.1.0 needs containerbase 15.0.0 or newer, running 14.51.0, latest is used as is',
+    );
+  });
+
+  test('names the highest cb of the unmet ranges which cover the skipped release', async () => {
+    serve(
+      'other',
+      200,
+      ['3.0.0', '2.1.0', '2.0.0'],
+      [
+        { version: '3.0.0', cb: '16.0.0' },
+        { version: '2.1.0', cb: '15.0.0' },
+        { version: '2.0.0', cb: '15.1.0' },
+      ],
+    );
+
+    expect(await svc.resolve('other', '2')).toBe('2');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'other 2.1.0 needs containerbase 15.1.0 or newer, running 14.51.0, 2 is used as is',
+    );
+  });
+
+  test('warns about a newer containerbase when no cb of the covering ranges is valid', async () => {
+    serve(
+      'other',
+      200,
+      ['2.0.0'],
+      [
+        { version: '2.0.0', cb: '' },
+        { version: '2.0.0', cb: 'new' },
+      ],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'other 2.0.0 needs a newer containerbase, running 14.51.0, latest is used as is',
+    );
+  });
+
+  test('warns about a newer containerbase when an invalid cb covers the release next to a valid one', async () => {
+    serve(
+      'other',
+      200,
+      ['2.0.0'],
+      [
+        { version: '2.0.0', cb: '15.0.0' },
+        { version: '2.0.0', cb: 'new' },
+      ],
+    );
+
+    expect(await svc.resolve('other', 'latest')).toBe('latest');
+
+    // an invalid cb is never met, so it wins over the valid one
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'other 2.0.0 needs a newer containerbase, running 14.51.0, latest is used as is',
+    );
+  });
+
+  test('warns and keeps a listed two-part swift version which needs a newer containerbase', async () => {
+    serve('swift', 200, ['6.3'], [{ version: '6.3', cb: '15.0.0' }]);
+
+    expect(await svc.resolve('swift', '6.3')).toBe('6.3');
+
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'swift 6.3 needs containerbase 15.0.0 or newer, running 14.51.0, 6.3 is used as is',
+    );
   });
 
   test('skips the versions of a range with an empty cb', async () => {
@@ -686,7 +900,89 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '8.10')).toBe('8.10.2');
   });
 
-  test('makes no request and reads no data for an exact version', async () => {
+  test.each(['1.2.3', '21.0.0-rc1'])(
+    'keeps the exact version %s the embedded data lists without the online lookup',
+    async (version) => {
+      await embed(
+        'other',
+        ['21.0.0-rc1', '1.2.3', '1.0.0'],
+        [{ version: '1.0.0', cb: '14.0.0' }],
+      );
+      // no online mock: a request would fail the test
+      const online = vi.spyOn(
+        ToolVersionsService.prototype,
+        'getOnlineVersions',
+      );
+
+      expect(await svc.resolve('other', version)).toBe(version);
+
+      expect(online).not.toHaveBeenCalled();
+      expect(getDistro).not.toHaveBeenCalled();
+    },
+  );
+
+  test('keeps an exact version which is only available for another host', async () => {
+    await embed('other', [{ version: '1.2.3', archs: ['arm64'] }]);
+
+    expect(await svc.resolve('other', '1.2.3')).toBe('1.2.3');
+  });
+
+  test.each(['1.2.3', '21.0.0-rc1'])(
+    'warns and keeps the exact version %s the embedded data lists as needing a newer containerbase',
+    async (version) => {
+      await embed(
+        'other',
+        ['21.0.0-rc1', '1.2.3', '1.0.0'],
+        [{ version: '1.2.3', cb: '15.0.0' }],
+      );
+
+      expect(await svc.resolve('other', version)).toBe(version);
+
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        `other ${version} needs containerbase 15.0.0 or newer, running 14.51.0, ${version} is used as is`,
+      );
+    },
+  );
+
+  test('keeps an exact version listed below an unmet range without a warning', async () => {
+    await embed(
+      'other',
+      ['1.2.3', '1.0.0'],
+      [{ version: '1.2.3', cb: '15.0.0' }],
+    );
+
+    expect(await svc.resolve('other', '1.0.0')).toBe('1.0.0');
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test.each(['1.2.4', '1.3.0-rc1'])(
+    'keeps the exact version %s which the embedded data does not list without the online lookup',
+    async (version) => {
+      await embed('other', ['1.2.3'], [{ version: '1.2.3', cb: '15.0.0' }]);
+      // no online mock: a request would fail the test
+      const online = vi.spyOn(
+        ToolVersionsService.prototype,
+        'getOnlineVersions',
+      );
+
+      expect(await svc.resolve('other', version)).toBe(version);
+
+      expect(online).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    },
+  );
+
+  test('keeps an exact version of a tool without embedded data without the online lookup', async () => {
+    const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
+
+    expect(await svc.resolve('other', '1.2.3')).toBe('1.2.3');
+
+    expect(online).not.toHaveBeenCalled();
+  });
+
+  test('makes no request and reads no data for an exact version on a development build', async () => {
+    vi.stubGlobal('CONTAINERBASE_VERSION', '0.0.0-PLACEHOLDER');
     const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
     const online = vi.spyOn(ToolVersionsService.prototype, 'getOnlineVersions');
 
