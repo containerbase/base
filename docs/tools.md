@@ -154,6 +154,8 @@ Installs a gem package into the container.
 
 Note: requires ruby to be installed.
 
+Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-gem yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` gem. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+
 #### Usage <a name="Usage-install-gem"></a>
 
 `$ containerbase-cli install gem [-d,--dry-run] <name> [version]`
@@ -202,6 +204,8 @@ Installs a npm package into the container.
 
 Note: requires node to be installed.
 
+Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-npm yarn` installs the latest `@yarnpkg/cli-dist`, not the latest `yarn` package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+
 #### Usage <a name="Usage-install-npm"></a>
 
 `$ containerbase-cli install npm [-d,--dry-run] <name> [version]`
@@ -249,6 +253,8 @@ A major or major.minor version installs the matching `latest` release, else the 
 Installs a pip package into the container.
 
 Note: requires python to be installed.
+
+Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-pip yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` pip package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
 
 #### Usage <a name="Usage-install-pip"></a>
 
