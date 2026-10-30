@@ -253,8 +253,8 @@ importers:
         specifier: 2.0.23
         version: 2.0.23
       '@containerbase/oxlint-plugin':
-        specifier: 1.0.4
-        version: 1.0.4(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))
+        specifier: 1.0.5
+        version: 1.0.5(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.4
         version: 1.4.4(semantic-release@25.0.9(supports-color@7.2.0)(typescript@6.0.3))
@@ -431,8 +431,8 @@ packages:
     resolution: {integrity: sha512-praMugrE0F6eSYteJMFXshagQ7n3kY+GGCqrOViNwQTR33LNaQe9hQE2RIsiplucVjHyOLt3rPOizcrsqVnNdA==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
-  '@containerbase/oxlint-plugin@1.0.4':
-    resolution: {integrity: sha512-fs9guiStnwYDDl5mcqzBb7s6QzQU9AAImSVeixSBPkY88217rbhBNiY029Ckp2mSYkTAsjtpYbqEq5OMtqebVw==}
+  '@containerbase/oxlint-plugin@1.0.5':
+    resolution: {integrity: sha512-kMMFWkl0R+iNSuytI6grl+mwlzO/VIENbaYjbMjkGiLDrb3k/0K6j9A0xuXJ1P7vLZS2hfj5sU07ca5YO4CYOA==}
     engines: {node: '>=24.10.0', pnpm: '>=11.0.0'}
     peerDependencies:
       oxlint: '>=1.86.0'
@@ -3829,7 +3829,7 @@ snapshots:
     dependencies:
       istanbul-reports: 3.2.0
 
-  '@containerbase/oxlint-plugin@1.0.4(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))':
+  '@containerbase/oxlint-plugin@1.0.5(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))':
     dependencies:
       '@oxlint/plugins': 1.90.0
       oxlint: 1.90.0(oxlint-tsgolint@7.0.2005)
