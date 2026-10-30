@@ -233,7 +233,7 @@ You can mount a writable volume at `/opt/containerbase`, also with a read-only r
 The volume may start empty or hold the state of an earlier container, also of an older image.
 
 `containerbase-cli init tool all`, which `docker-entrypoint.sh` runs, restores the volume from the snapshot when its `.stamp` is missing or differs from the stamp of the snapshot.
-It also restores it when a flagged folder on a writable volume still links to the snapshot, eg. when docker filled a new volume from the image, so the stamps match.
+It also restores a writable volume with matching stamps, eg. when docker filled a new volume from the image, when it has no `.restored` yet or when a flagged folder on it still links to the snapshot.
 The entrypoint runs it for these reasons too, independent of `/tmp/containerbase`.
 `install-tool`, `install-npm`, `install-gem`, `install-pip` and the `uninstall-*` commands restore it implicitly before they open the database.
 Their dry runs don't restore it, and don't create a database on a volume which isn't restored yet.
@@ -247,10 +247,19 @@ The restore:
 - links the folders listed in `.links` which are missing on the volume,
   the flagged folders are copied instead, also replacing a link to the snapshot, so the writes of these tools persist with the volume,
 - copies the missing files of the `bin`, `lib`, `env.d`, `versions` and `ssl` folders and the `env.sh` of every tool,
-- copies the database `data/containerbase.db` when the volume has none,
 - writes the stamp of the snapshot to `/opt/containerbase/.stamp`.
 
-Copies go to a temp path next to their target first and are renamed into place, so an interrupted restore never leaves a half copied folder, file or database, and the next restore redoes it.
+The database isn't copied: the database on the volume only holds the runtime state, the build-time database of the snapshot is attached read-only, see [databases](./databases.md#build-time-database-on-a-volume).
+So after an image update the cli knows the new build-time versions right away.
+Runtime state wins over build-time state by name, like the files: a tool's current version or wrapper set at runtime overrides the one of the image.
+When an image update brings a newer build-time version of a tool which was installed at runtime too, its wrapper and current version stay the runtime ones until the tool is installed again.
+A build-time version uninstalled at runtime stays uninstalled, also after an image update: the restore doesn't link its folder again and doesn't copy back its wrappers and version file.
+This only holds while the image still has exactly that build-time state: when a newer image links or selects another version under the same name, its wrapper and version file are restored.
+Linking a build-time wrapper to another version at runtime hides the build-time link, so removing the runtime link doesn't bring back the old one.
+When docker filled the volume from the image, the first restore drops the database rows it copied, so the state of a newer image wins.
+Later, rows on the volume equal to build-time ones are runtime state and are kept, eg. a version installed at runtime which a newer image also installs.
+
+Copies go to a temp path next to their target first and are renamed into place, so an interrupted restore never leaves a half copied folder or file, and the next restore redoes it.
 Folders and files which exist on the volume are kept, eg. tools installed at runtime, their wrappers and a copied tool folder.
 The files the restore copied are recorded in `/opt/containerbase/.restored`, also existing files which equal the snapshot copy, eg. copied by docker into a new volume.
 On a later restore, eg. after an image update, such a file is replaced by the new copy, or removed when the snapshot no longer has it, unless it changed on the volume since.

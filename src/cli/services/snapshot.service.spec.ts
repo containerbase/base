@@ -332,7 +332,7 @@ describe('cli/services/snapshot.service', () => {
       const dataSvc = await child.getAsync(DataService);
       const db = await dataSvc.db();
       db.prepare(
-        "INSERT INTO versions (name, version) VALUES ('node', '20.0.0')",
+        "INSERT INTO main.versions (name, version) VALUES ('node', '20.0.0')",
       ).run();
 
       await svc.snapshotFiles();
@@ -378,7 +378,7 @@ describe('cli/services/snapshot.service', () => {
 
       // a changed database is copied again
       db.prepare(
-        "INSERT INTO versions (name, version) VALUES ('node', '22.0.0')",
+        "INSERT INTO main.versions (name, version) VALUES ('node', '22.0.0')",
       ).run();
       await fs.utimes(
         rootPath('opt/containerbase/data/containerbase.db'),

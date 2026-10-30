@@ -9,6 +9,7 @@ import { EnvService } from './env.service.ts';
 import { PathService } from './path.service.ts';
 import { RestoreService } from './restore.service.ts';
 import { SnapshotService } from './snapshot.service.ts';
+import { VersionService } from './version.service.ts';
 import { testContainer } from '~test/di.ts';
 import { rootPath } from '~test/path.ts';
 
@@ -53,6 +54,19 @@ function mountVolume(): void {
   });
 }
 
+/** The rows of a table in the database on the volume. */
+function volumeRows(table: string): unknown[] {
+  const db = new DatabaseSync(
+    rootPath('opt/containerbase/data/containerbase.db'),
+    { readOnly: true },
+  );
+  try {
+    return db.prepare(`SELECT * FROM main.${table}`).all();
+  } finally {
+    db.close();
+  }
+}
+
 describe('cli/services/restore.service', () => {
   let child!: Container;
   let svc!: RestoreService;
@@ -82,14 +96,18 @@ describe('cli/services/restore.service', () => {
     await write('opt/containerbase/tools/php/8.0.0/bin/php', 'php');
     await write('opt/containerbase/tools/yarn/1.0.0/24.0.0/bin/yarn');
     await write('opt/containerbase/bin/node', 'wrapper');
+    await write('opt/containerbase/versions/node', '24.0.0');
     await fs.symlink('node', rootPath('opt/containerbase/bin/nodejs'));
     await snapshotSvc.moveAndLink(`${install}/tools/node/24.0.0`);
     await snapshotSvc.moveAndLink(`${install}/tools/php/8.0.0`, true);
     await snapshotSvc.moveAndLink(`${install}/tools/yarn/1.0.0/24.0.0`);
     const db = await (await child.getAsync(DataService)).db();
-    db.prepare(
-      "INSERT INTO versions (name, version) VALUES ('node', '24.0.0')",
-    ).run();
+    db.exec(`
+      INSERT INTO main.versions (name, version) VALUES ('node', '24.0.0');
+      INSERT INTO main.versions VALUES ('yarn', '1.0.0', 'node', '24.0.0');
+      INSERT INTO main.links VALUES ('node', 'node', '24.0.0');
+      INSERT INTO main.state (name, tool_name, tool_version) VALUES ('node', 'node', '24.0.0');
+    `);
     await snapshotSvc.snapshotFiles();
     db.close();
 
@@ -146,16 +164,12 @@ describe('cli/services/restore.service', () => {
     expect(
       Object.keys(JSON.parse(await readFile(`${install}/.restored`, 'utf8'))),
     ).toContain('bin/node');
-    const db = new DatabaseSync(`${install}/data/containerbase.db`, {
-      readOnly: true,
-    });
-    try {
-      expect(db.prepare('SELECT name, version FROM versions').all()).toEqual([
-        { name: 'node', version: '24.0.0' },
-      ]);
-    } finally {
-      db.close();
-    }
+    // the database isn't copied, the build-time one is attached instead
+    expect(await pathExists(`${install}/data/containerbase.db`)).toBe(false);
+    const versions = await (await testContainer()).getAsync(VersionService);
+    expect(await versions.findInstalled('node')).toEqual([
+      { name: 'node', version: '24.0.0' },
+    ]);
 
     // a second run is a no-op
     const spy = vi.spyOn(PathService.prototype, 'ensureWritableDirs');
@@ -166,19 +180,22 @@ describe('cli/services/restore.service', () => {
   test('redoes the copies of an interrupted restore', async () => {
     await buildAndMount();
     await mkdir(`${install}/tools/php/8.0.0.tmp/bin`, { recursive: true });
-    await mkdir(`${install}/data`);
-    await writeFile(`${install}/data/containerbase.db.tmp`, 'truncated');
+    await mkdir(`${install}/bin`);
+    await writeFile(`${install}/bin/node.tmp`, 'truncated');
 
     await svc.restore();
 
     expect(await fs.readdir(`${install}/tools/php`)).toEqual(['8.0.0']);
-    expect(await fs.readdir(`${install}/data`)).toEqual(['containerbase.db']);
+    expect(await readFile(`${install}/bin/node`, 'utf8')).toBe('wrapper');
+    expect(await pathExists(`${install}/bin/node.tmp`)).toBe(false);
   });
 
   test('copies flagged folders a volume still links to the snapshot', async () => {
-    // eg. docker filled the volume from the image, so the stamps match
+    // eg. docker filled the volume from the image, so the stamps match, and
+    // an older containerbase restored it
     await buildAndMount(true);
     mountVolume();
+    await write('opt/containerbase/.restored', '{}');
 
     await svc.restore();
 
@@ -189,6 +206,77 @@ describe('cli/services/restore.service', () => {
     const spy = vi.spyOn(PathService.prototype, 'ensureWritableDirs');
     await svc.restore();
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  test('restores a volume docker filled without linked copies', async () => {
+    // eg. an image whose flagged folders docker copied into the volume
+    await buildAndMount(true);
+    mountVolume();
+    await rm(`${install}/tools/php/8.0.0`);
+    await snapshotSvc.copy(
+      `${snapshot}/tools/php/8.0.0`,
+      `${install}/tools/php/8.0.0`,
+    );
+
+    expect(await svc.needsRestore()).toBe(true);
+    await svc.restore();
+
+    expect(await svc.needsRestore()).toBe(false);
+    expect(
+      Object.keys(JSON.parse(await readFile(`${install}/.restored`, 'utf8'))),
+    ).toContain('bin/node');
+    // so the build-time database is attached
+    const versions = await (await testContainer()).getAsync(VersionService);
+    expect(await versions.findInstalled('node')).toEqual([
+      { name: 'node', version: '24.0.0' },
+    ]);
+    // the rows docker copied from the image are removed
+    expect(volumeRows('versions')).toEqual([]);
+    expect(volumeRows('links')).toEqual([]);
+    expect(volumeRows('state')).toEqual([]);
+  });
+
+  test('keeps runtime rows equal to build-time rows after the first restore', async () => {
+    await buildAndMount();
+    await svc.restore();
+    // eg. node 24 installed at runtime, like the image at build time
+    const runtime = await (await testContainer()).getAsync(VersionService);
+    await runtime.addInstalled({ name: 'node', version: '24.0.0' });
+
+    // a normal open
+    const versions = await (await testContainer()).getAsync(VersionService);
+    await versions.addInstalled({ name: 'yarn', version: '2.0.0' });
+    expect(volumeRows('versions')).toHaveLength(2);
+
+    // an image update
+    await writeFile(`${snapshot}/.stamp`, 'newer');
+    await svc.restore();
+    expect(volumeRows('versions')).toHaveLength(2);
+  });
+
+  test('skips removing copied rows of a database of another schema', async () => {
+    await buildAndMount(true);
+    mountVolume();
+    const db = new DatabaseSync(`${install}/data/containerbase.db`);
+    db.exec('PRAGMA user_version = 0');
+    db.close();
+
+    await svc.restore();
+
+    expect(volumeRows('versions')).toHaveLength(2);
+  });
+
+  test('keeps the result of the check for the process', async () => {
+    await buildAndMount();
+    const readStamp = vi.spyOn(SnapshotService.prototype, 'readStamp');
+
+    expect(await svc.needsRestore()).toBe(true);
+    expect(await svc.needsRestore()).toBe(true);
+    expect(await (await child.getAsync(RestoreService)).needsRestore()).toBe(
+      true,
+    );
+
+    expect(readStamp).toHaveBeenCalledTimes(2);
   });
 
   test('keeps the links of an image without a volume', async () => {
@@ -212,6 +300,7 @@ describe('cli/services/restore.service', () => {
   test('keeps a flagged folder linked elsewhere', async () => {
     await buildAndMount(true);
     mountVolume();
+    await write('opt/containerbase/.restored', '{}');
     await rm(`${install}/tools/php/8.0.0`);
     await fs.symlink('/other', `${install}/tools/php/8.0.0`);
 
@@ -227,7 +316,9 @@ describe('cli/services/restore.service', () => {
     await buildAndMount();
     await write('opt/containerbase/bin/node', 'runtime wrapper');
     await write('opt/containerbase/tools/node/24.0.0/bin/node', 'runtime');
-    await write('opt/containerbase/data/containerbase.db', 'runtime db');
+    // a database without tombstones, eg. of an older version
+    await mkdir(`${install}/data`);
+    new DatabaseSync(`${install}/data/containerbase.db`).close();
     await write('var/lib/containerbase/opt/bin/dir/file');
     await write('opt/containerbase/bin/dir', 'a file');
 
@@ -238,12 +329,78 @@ describe('cli/services/restore.service', () => {
       'runtime wrapper',
     );
     expect(await isRealDir('opt/containerbase/tools/node/24.0.0')).toBe(true);
-    expect(await readFile(`${install}/data/containerbase.db`, 'utf8')).toBe(
-      'runtime db',
-    );
     expect(
       Object.keys(JSON.parse(await readFile(`${install}/.restored`, 'utf8'))),
     ).not.toContain('bin/node');
+  });
+
+  test('keeps build-time versions uninstalled at runtime uninstalled', async () => {
+    await buildAndMount();
+    await svc.restore();
+    // uninstall node at runtime, like `uninstall-tool`
+    const versions = await (await testContainer()).getAsync(VersionService);
+    const node = { name: 'node', version: '24.0.0' };
+    await versions.removeInstalled({ name: 'yarn' });
+    await versions.removeInstalled(node);
+    await versions.removeLinks(node);
+    await versions.removeCurrent('node');
+    await rm(`${install}/tools/node/24.0.0`);
+    await rm(`${install}/tools/yarn/1.0.0/24.0.0`);
+    await rm(`${install}/bin/node`);
+    // an image update
+    await writeFile(`${snapshot}/.stamp`, 'newer');
+
+    await svc.restore();
+
+    expect(await pathExists(`${install}/tools/node/24.0.0`)).toBe(false);
+    expect(await pathExists(`${install}/tools/yarn/1.0.0/24.0.0`)).toBe(false);
+    expect(await pathExists(`${install}/bin/node`)).toBe(false);
+    expect(await pathExists(`${install}/versions/node`)).toBe(false);
+    expect(await isRealDir('opt/containerbase/tools/php/8.0.0')).toBe(true);
+  });
+
+  test('restores the files of a newer build-time row of the same name', async () => {
+    await buildAndMount();
+    await svc.restore();
+    const versions = await (await testContainer()).getAsync(VersionService);
+    const node = { name: 'node', version: '24.0.0' };
+    await versions.removeLinks(node);
+    await versions.removeCurrent('node');
+    await rm(`${install}/bin/node`);
+    expect(await pathExists(`${install}/versions/node`)).toBe(false);
+    // a newer image links and selects another node version
+    const base = new DatabaseSync(`${snapshot}/data/containerbase.db`);
+    base.exec(`
+      UPDATE links SET tool_version = '26.0.0';
+      UPDATE state SET tool_version = '26.0.0';
+    `);
+    base.close();
+    await writeFile(`${snapshot}/bin/node`, 'wrapper 26');
+    await writeFile(`${snapshot}/versions/node`, '26.0.0');
+    await writeFile(`${snapshot}/.stamp`, 'newer');
+
+    await svc.restore();
+
+    expect(await readFile(`${install}/bin/node`, 'utf8')).toBe('wrapper 26');
+    expect(await readFile(`${install}/versions/node`, 'utf8')).toBe('26.0.0');
+  });
+
+  test('rolls back a journal left on the volume before reading it', async () => {
+    await buildAndMount();
+    await svc.restore();
+    const versions = await (await testContainer()).getAsync(VersionService);
+    await versions.removeLinks({ name: 'node', version: '24.0.0' });
+    await rm(`${install}/bin/node`);
+    // an interrupted writer
+    await writeFile(`${install}/data/containerbase.db-journal`, '');
+    await writeFile(`${snapshot}/.stamp`, 'newer');
+    const close = vi.spyOn(DatabaseSync.prototype, 'close');
+
+    await svc.restore();
+
+    // a writable connection is opened and closed before the read-only one
+    expect(close).toHaveBeenCalledTimes(2);
+    expect(await pathExists(`${install}/bin/node`)).toBe(false);
   });
 
   test('adopts files equal to the snapshot', async () => {
@@ -256,6 +413,22 @@ describe('cli/services/restore.service', () => {
     const restored = JSON.parse(await readFile(`${install}/.restored`, 'utf8'));
     expect(Object.keys(restored)).toEqual(
       expect.arrayContaining(['bin/node', 'bin/nodejs']),
+    );
+  });
+
+  test('adopts files whose times differ below a millisecond', async () => {
+    await buildAndMount();
+    // a copy gets its time from a `Date`, so it can end up just below the
+    // millisecond of its source
+    await write('opt/containerbase/bin/node', 'wrapper');
+    await fs.utimes(`${snapshot}/bin/node`, 1_700_000_000, 1_700_000_000.0009);
+    await fs.utimes(`${install}/bin/node`, 1_700_000_000, 1_700_000_000.0011);
+
+    await svc.restore();
+
+    const restored = JSON.parse(await readFile(`${install}/.restored`, 'utf8'));
+    expect(restored['bin/node']).toBe(
+      `f 7 ${Math.trunc((await fs.stat(`${install}/bin/node`)).mtimeMs)}`,
     );
   });
 

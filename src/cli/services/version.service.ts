@@ -7,6 +7,7 @@ import { fileRights, logger, tool2path } from '../utils/index.ts';
 import { DataService } from './data.service.ts';
 import { parentColumns, parentParams, toParent } from './parent.ts';
 import { PathService } from './path.service.ts';
+import { rowKey } from './sqlite.ts';
 import type {
   InstalledTool,
   InstalledToolVersion,
@@ -48,6 +49,14 @@ const parentFilter =
 
 const selectState =
   'SELECT name, tool_name, tool_version, parent_name, parent_version FROM state';
+
+/**
+ * Adds a tombstone for every row of the build-time database matching the
+ * `WHERE` clause, which hides exactly this row, see `DataService`.
+ */
+function tombstoneSql(table: string, where: string): string {
+  return `INSERT OR IGNORE INTO tombstones (tbl, name, row) SELECT '${table}', name, ${rowKey(table, 'b')} FROM base_${table} b WHERE ${where}`;
+}
 
 /** Matches the versions by the given fields only. */
 const versionFilter = `(:name IS NULL OR name = :name) AND (:version IS NULL OR version = :version) AND ${parentFilter}`;
@@ -109,6 +118,9 @@ export interface ToolType {
  * - state: the current version per tool, the one on the path
  * - links: the shell wrapper names created for a tool version
  * - types: the installer of dynamically installed tools, eg. `npm`
+ *
+ * Reads go through views over the database and the attached build-time one,
+ * writes only change the database, see `DataService`.
  */
 @injectable()
 export class VersionService {
@@ -154,25 +166,37 @@ export class VersionService {
     return Promise.try(() => this._listInstalled());
   }
 
-  /** Records an installed version. */
+  /**
+   * Records an installed version, also removing a tombstone of the version,
+   * see `removeInstalled`.
+   */
   addInstalled(tool: ToolVersion): Promise<void> {
     return Promise.try(() => {
+      const row = [tool.version, ...parentColumns(tool.parent)];
       this._db
         .prepare(
-          'INSERT INTO versions (name, version, parent_name, parent_version) VALUES (?, ?, ?, ?)',
+          'INSERT INTO main.versions (name, version, parent_name, parent_version) VALUES (?, ?, ?, ?)',
         )
-        .run(tool.name, tool.version, ...parentColumns(tool.parent));
+        .run(tool.name, ...row);
+      this._untombstone('versions', tool.name, row);
     });
   }
 
-  /** Removes every recorded version matching the given fields. */
+  /**
+   * Removes every recorded version matching the given fields. Matching
+   * versions of the build-time database get a tombstone, which hides them.
+   */
   removeInstalled(tool: Partial<ToolVersion>): Promise<void> {
     return Promise.try(() => {
-      this._db.prepare(`DELETE FROM versions WHERE ${versionFilter}`).run({
+      const params = {
         name: tool.name ?? null,
         version: tool.version ?? null,
         ...parentParams(tool.parent),
-      });
+      };
+      this._db.prepare(tombstoneSql('versions', versionFilter)).run(params);
+      this._db
+        .prepare(`DELETE FROM main.versions WHERE ${versionFilter}`)
+        .run(params);
     });
   }
 
@@ -208,7 +232,7 @@ export class VersionService {
       (
         this._db
           .prepare(
-            'SELECT name, tool_name, tool_version FROM links WHERE tool_name = ? AND tool_version = ? ORDER BY rowid',
+            'SELECT name, tool_name, tool_version FROM links WHERE tool_name = ? AND tool_version = ? ORDER BY ord',
           )
           .all(tool.name, tool.version) as LinkRow[]
       ).map(toToolLink),
@@ -217,23 +241,44 @@ export class VersionService {
 
   /**
    * Points a shell wrapper name at a tool version, replacing whatever it
-   * pointed at before.
+   * pointed at before. A build-time link of the name to another tool version
+   * gets a tombstone, so removing this link doesn't bring it back.
    */
   setLink(link: ToolLink): Promise<void> {
     return Promise.try(() => {
       this._db
         .prepare(
-          'INSERT INTO links (name, tool_name, tool_version) VALUES (?, ?, ?) ON CONFLICT(name) DO UPDATE SET tool_name = excluded.tool_name, tool_version = excluded.tool_version',
+          'INSERT INTO main.links (name, tool_name, tool_version) VALUES (?, ?, ?) ON CONFLICT(name) DO UPDATE SET tool_name = excluded.tool_name, tool_version = excluded.tool_version',
         )
         .run(link.name, link.tool.name, link.tool.version);
+      this._db
+        .prepare(
+          tombstoneSql(
+            'links',
+            'name = ? AND (tool_name <> ? OR tool_version <> ?)',
+          ),
+        )
+        .run(link.name, link.tool.name, link.tool.version);
+      this._untombstone('links', link.name, [
+        link.tool.name,
+        link.tool.version,
+      ]);
     });
   }
 
-  /** Forgets every shell wrapper name created for a tool version. */
+  /**
+   * Forgets every shell wrapper name created for a tool version, the ones of
+   * the build-time database get a tombstone.
+   */
   removeLinks(tool: Tool): Promise<void> {
     return Promise.try(() => {
       this._db
-        .prepare('DELETE FROM links WHERE tool_name = ? AND tool_version = ?')
+        .prepare(tombstoneSql('links', 'tool_name = ? AND tool_version = ?'))
+        .run(tool.name, tool.version);
+      this._db
+        .prepare(
+          'DELETE FROM main.links WHERE tool_name = ? AND tool_version = ?',
+        )
         .run(tool.name, tool.version);
     });
   }
@@ -261,16 +306,17 @@ export class VersionService {
   /** Makes a version the current one, replacing the previous current one. */
   setCurrent(state: ToolState): Promise<void> {
     return Promise.try(() => {
+      const row = [
+        state.tool.name,
+        state.tool.version,
+        ...parentColumns(state.parent),
+      ];
       this._db
         .prepare(
-          'INSERT INTO state (name, tool_name, tool_version, parent_name, parent_version) VALUES (?, ?, ?, ?, ?) ON CONFLICT(name) DO UPDATE SET tool_name = excluded.tool_name, tool_version = excluded.tool_version, parent_name = excluded.parent_name, parent_version = excluded.parent_version',
+          'INSERT INTO main.state (name, tool_name, tool_version, parent_name, parent_version) VALUES (?, ?, ?, ?, ?) ON CONFLICT(name) DO UPDATE SET tool_name = excluded.tool_name, tool_version = excluded.tool_version, parent_name = excluded.parent_name, parent_version = excluded.parent_version',
         )
-        .run(
-          state.name,
-          state.tool.name,
-          state.tool.version,
-          ...parentColumns(state.parent),
-        );
+        .run(state.name, ...row);
+      this._untombstone('state', state.name, row);
     });
   }
 
@@ -287,9 +333,13 @@ export class VersionService {
     });
   }
 
-  /** Forgets the current version and removes its legacy version file. */
+  /**
+   * Forgets the current version and removes its legacy version file. The
+   * current version of the build-time database gets a tombstone.
+   */
   async removeCurrent(name: string): Promise<void> {
-    this._db.prepare('DELETE FROM state WHERE name = ?').run(name);
+    this._db.prepare(tombstoneSql('state', 'name = ?')).run(name);
+    this._db.prepare('DELETE FROM main.state WHERE name = ?').run(name);
     const path = join(this.pathSvc.versionPath, tool2path(name));
     try {
       await rm(path);
@@ -324,20 +374,36 @@ export class VersionService {
       if (type) {
         this._db
           .prepare(
-            'INSERT INTO types (name, type) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET type = excluded.type',
+            'INSERT INTO main.types (name, type) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET type = excluded.type',
           )
           .run(name, type);
+        this._untombstone('types', name, [type]);
       } else {
-        this._db.prepare('DELETE FROM types WHERE name = ?').run(name);
+        this._db.prepare(tombstoneSql('types', 'name = ?')).run(name);
+        this._db.prepare('DELETE FROM main.types WHERE name = ?').run(name);
       }
     });
+  }
+
+  /**
+   * Removes the tombstone of exactly this row, see `tombstoneSql`, as it's
+   * recorded again.
+   *
+   * @param row - the columns of the table besides `name`
+   */
+  private _untombstone(table: string, name: string, row: string[]): void {
+    this._db
+      .prepare(
+        `DELETE FROM tombstones WHERE tbl = ? AND name = ? AND row = json_array(${row.map(() => '?').join(', ')})`,
+      )
+      .run(table, name, ...row);
   }
 
   /** The `versions` rows matching the `WHERE` clause, in insertion order. */
   private _versions(where: string, ...params: string[]): VersionRow[] {
     return this._db
       .prepare(
-        `SELECT name, version, parent_name, parent_version FROM versions ${where} ORDER BY rowid`,
+        `SELECT name, version, parent_name, parent_version FROM versions ${where} ORDER BY ord`,
       )
       .all(...params) as VersionRow[];
   }
@@ -346,7 +412,7 @@ export class VersionService {
   private _types(): ToolType[] {
     return (
       this._db
-        .prepare('SELECT name, type FROM types ORDER BY rowid')
+        .prepare('SELECT name, type FROM types ORDER BY ord')
         .all() as TypeRow[]
     ).map(({ name, type }) => ({ name, type }));
   }

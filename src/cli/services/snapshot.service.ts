@@ -1,10 +1,10 @@
 import type { Stats } from 'node:fs';
 import fs from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { inject, injectable } from 'inversify';
 import { hash } from '../utils/hash.ts';
 import { isInside, logger, move } from '../utils/index.ts';
-import { DataService } from './data.service.ts';
 import { EnvService } from './env.service.ts';
 import { PathService } from './path.service.ts';
 
@@ -85,9 +85,10 @@ async function readLines(path: string): Promise<string[]> {
 
 /**
  * Whether the copy `dst` of the file or link `src` is up to date: a link with
- * the same target, or a file with the same size and modification time.
+ * the same target, or a file with the same size and modification time. The
+ * times may differ below a millisecond, as a copy sets it from a `Date`.
  */
-async function isSame(
+export async function isSame(
   src: string,
   srcStats: Stats,
   dst: string,
@@ -118,8 +119,6 @@ export class SnapshotService {
   private readonly pathSvc!: PathService;
   @inject(EnvService)
   private readonly envSvc!: EnvService;
-  @inject(DataService)
-  private readonly dataSvc!: DataService;
 
   /**
    * Moves the folder an install created into the snapshot and replaces it by
@@ -451,7 +450,9 @@ export class SnapshotService {
    * `VACUUM INTO`, replacing an older copy, with the owner and mode of the
    * database. The copy has no journal, so it can be opened read-only. It gets
    * the modification time of the database, so an unchanged database isn't
-   * copied again. Skipped without a database.
+   * copied again. It uses an own read-only connection, as the one of
+   * `DataService` reads through views, which `VACUUM INTO` can't handle.
+   * Skipped without a database.
    */
   private async snapshotDatabase(): Promise<void> {
     const file = join(this.pathSvc.dataPath, databaseFile);
@@ -470,8 +471,12 @@ export class SnapshotService {
     await fs.rm(target, { force: true });
     await fs.rm(`${target}-journal`, { force: true });
     await this.pathSvc.createDir(dirname(target));
-    const db = await this.dataSvc.db();
-    db.prepare('VACUUM INTO ?').run(target);
+    const db = new DatabaseSync(file, { readOnly: true });
+    try {
+      db.prepare('VACUUM INTO ?').run(target);
+    } finally {
+      db.close();
+    }
     await fs.utimes(target, stats.atime, stats.mtime);
     await this.setOwner(target, stats);
   }

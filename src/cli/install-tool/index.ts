@@ -320,7 +320,8 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
  * Restores `/opt/containerbase` from the build-time snapshot when it doesn't
  * match it, eg. an empty volume, see `RestoreService`. It uses a bare
  * container without install services, so nothing opens the database before
- * the restore copied it.
+ * the volume is restored, see `DataService`, which attaches the build-time
+ * database on a restored volume.
  *
  * @throws when `/opt/containerbase` isn't writable
  */
@@ -333,7 +334,8 @@ export async function restoreInstallDir(): Promise<void> {
  * Runs before anything opens the database: restores `/opt/containerbase`,
  * see `restoreInstallDir`. A dry run changes nothing, so when a restore is
  * needed the database is only opened read-only, which doesn't create one on
- * a volume.
+ * a volume, with the build-time database attached, so build-time versions
+ * count as installed.
  *
  * @throws when `/opt/containerbase` isn't writable
  */
