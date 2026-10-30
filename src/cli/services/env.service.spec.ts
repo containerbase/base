@@ -10,7 +10,7 @@ import {
   test,
   vi,
 } from 'vitest';
-import { logger } from '../utils/index.ts';
+import { logger, resetWarnings } from '../utils/index.ts';
 import { EnvService } from './index.ts';
 import { testContainer } from '~test/di.ts';
 import { rootPath } from '~test/path.ts';
@@ -44,6 +44,8 @@ describe('cli/services/env.service', () => {
   beforeEach(async () => {
     globalThis.rootDir = rootDir;
     mocks.arch.mockReturnValue('x64');
+    // the env warnings are logged once per process
+    resetWarnings();
     await init();
   });
 
@@ -132,6 +134,107 @@ describe('cli/services/env.service', () => {
       delete env.CONTAINERBASE_MAX_ALLOCATED_DISK;
     }
   });
+
+  test.each([
+    { value: undefined, expected: false },
+    { value: '', expected: false },
+    { value: 'false', expected: false },
+    { value: 'FALSE', expected: false },
+    { value: 'true', expected: true },
+    { value: 'True', expected: true },
+  ])('resolverOffline: $value', ({ value, expected }) => {
+    if (value === undefined) {
+      delete env.CONTAINERBASE_RESOLVER_OFFLINE;
+    } else {
+      env.CONTAINERBASE_RESOLVER_OFFLINE = value;
+    }
+    try {
+      expect(svc.resolverOffline).toBe(expected);
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      delete env.CONTAINERBASE_RESOLVER_OFFLINE;
+    }
+  });
+
+  test('resolverOffline warns about an invalid value once', () => {
+    env.CONTAINERBASE_RESOLVER_OFFLINE = 'yes';
+    try {
+      expect(svc.resolverOffline).toBe(false);
+      expect(svc.resolverOffline).toBe(false);
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { value: 'yes' },
+        'Invalid CONTAINERBASE_RESOLVER_OFFLINE, use true or false',
+      );
+    } finally {
+      delete env.CONTAINERBASE_RESOLVER_OFFLINE;
+    }
+  });
+
+  test.each([
+    { value: undefined, expected: 24 * 3_600_000 },
+    { value: '', expected: 24 * 3_600_000 },
+    { value: '2h', expected: 2 * 3_600_000 },
+    { value: '1 day 2h', expected: 26 * 3_600_000 },
+    // the parts are split case insensitive, `M` is a month like for Renovate
+    { value: '1H 30MIN', expected: 90 * 60_000 },
+    { value: '1 month', expected: 30 * 24 * 3_600_000 },
+    // the month word in any case, a lowercase `m` is a minute
+    { value: '1 Month', expected: 30 * 24 * 3_600_000 },
+    { value: '2 MONTHS', expected: 60 * 24 * 3_600_000 },
+    { value: '2M', expected: 60 * 24 * 3_600_000 },
+    { value: '2m', expected: 2 * 60_000 },
+  ])('resolverMaxAge: $value', ({ value, expected }) => {
+    if (value === undefined) {
+      delete env.CONTAINERBASE_RESOLVER_MAX_AGE;
+    } else {
+      env.CONTAINERBASE_RESOLVER_MAX_AGE = value;
+    }
+    try {
+      expect(svc.resolverMaxAge).toBe(expected);
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      delete env.CONTAINERBASE_RESOLVER_MAX_AGE;
+    }
+  });
+
+  test.each(['soon', '  ', '-1h', '1h -2h', '2h -1h'])(
+    'resolverMaxAge warns about the invalid value %j once and uses the default',
+    (value) => {
+      env.CONTAINERBASE_RESOLVER_MAX_AGE = value;
+      try {
+        expect(svc.resolverMaxAge).toBe(24 * 3_600_000);
+        expect(svc.resolverMaxAge).toBe(24 * 3_600_000);
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { value },
+          'Invalid CONTAINERBASE_RESOLVER_MAX_AGE, using the default of 24 hours',
+        );
+      } finally {
+        delete env.CONTAINERBASE_RESOLVER_MAX_AGE;
+      }
+    },
+  );
+
+  test.each([
+    // a plain number is milliseconds, like for Renovate
+    { value: '24', expected: 24 },
+    // also a part of a compound value
+    { value: '1h30', expected: 3_600_000 + 30 },
+  ])(
+    'resolverMaxAge warns once that a part of $value without a unit is milliseconds',
+    ({ value, expected }) => {
+      env.CONTAINERBASE_RESOLVER_MAX_AGE = value;
+      try {
+        expect(svc.resolverMaxAge).toBe(expected);
+        expect(svc.resolverMaxAge).toBe(expected);
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { value },
+          'CONTAINERBASE_RESOLVER_MAX_AGE has a number without a unit, it is read as milliseconds',
+        );
+      } finally {
+        delete env.CONTAINERBASE_RESOLVER_MAX_AGE;
+      }
+    },
+  );
 
   describe('containerbaseTmpDir', () => {
     // `node:process` is mocked with a plain `env` object, which `vi.stubEnv` doesn't reach

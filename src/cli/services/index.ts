@@ -16,7 +16,10 @@ import {
   type ShellWrapperConfig,
 } from './link-tool.service.ts';
 import { PathService } from './path.service.ts';
-import { ToolVersionsService } from './tool-versions.service.ts';
+import {
+  type ResolveVersions,
+  ToolVersionsService,
+} from './tool-versions.service.ts';
 import { V2ToolService } from './v2-tool.service.ts';
 import { type InstalledTool, InstalledTools } from './version.schema.ts';
 import { VersionService } from './version.service.ts';
@@ -34,6 +37,7 @@ export {
   lookupTimeout,
   toolVersionsTimeout,
   PathService,
+  type ResolveVersions,
   ToolVersionsService,
   V2ToolService,
   VersionService,

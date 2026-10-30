@@ -7,6 +7,8 @@ export * from './versions.ts';
 export * from './logger.ts';
 export * from './common.ts';
 export * from './tags.ts';
+export * from './time.ts';
+export * from './warn.ts';
 export type {
   Options as SpawnOptions,
   Result as SpawnResult,

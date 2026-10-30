@@ -1,7 +1,15 @@
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { logger } from '../utils/index.ts';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
+import { logger, resetWarnings } from '../utils/index.ts';
 import {
   HttpService,
   ToolVersionsService,
@@ -159,16 +167,23 @@ describe('cli/services/tool-versions.service', () => {
     );
   });
 
-  describe('getOnlineVersions', () => {
+  describe('the online data', () => {
+    // a tool without embedded data is resolved from the online data
     const baseUrl = 'https://containerbase.github.io';
 
     test('fetches the published file once per instance', async () => {
       const online = data('online');
       scope(baseUrl).get('/tool-versions/v1/online.json').reply(200, online);
 
-      expect(await svc.getOnlineVersions('online')).toEqual(online);
+      expect(await svc.getResolveVersions('online')).toEqual({
+        data: online,
+        source: 'online',
+      });
       // cached, a second request would fail without an interceptor
-      expect(await svc.getOnlineVersions('online')).toEqual(online);
+      expect(await svc.getResolveVersions('online')).toEqual({
+        data: online,
+        source: 'online',
+      });
     });
 
     test('uses a timeout and no retries', async () => {
@@ -177,7 +192,7 @@ describe('cli/services/tool-versions.service', () => {
         .get('/tool-versions/v1/opts.json')
         .reply(200, data('opts'));
 
-      await svc.getOnlineVersions('opts');
+      await svc.getResolveVersions('opts');
 
       expect(spy).toHaveBeenCalledExactlyOnceWith(
         'https://containerbase.github.io/tool-versions/v1/opts.json',
@@ -193,14 +208,14 @@ describe('cli/services/tool-versions.service', () => {
         .once()
         .replyWithError('connection reset');
 
-      expect(await svc.getOnlineVersions('down')).toBeUndefined();
+      expect(await svc.getResolveVersions('down')).toBeUndefined();
       expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('has no versions for an unreachable file', async () => {
       scope(baseUrl).get('/tool-versions/v1/gone.json').reply(404);
 
-      expect(await svc.getOnlineVersions('gone')).toBeUndefined();
+      expect(await svc.getResolveVersions('gone')).toBeUndefined();
       expect(logger.error).not.toHaveBeenCalled();
     });
 
@@ -209,7 +224,7 @@ describe('cli/services/tool-versions.service', () => {
         .get('/tool-versions/v1/mixed.json')
         .reply(200, data('other'));
 
-      expect(await svc.getOnlineVersions('mixed')).toBeUndefined();
+      expect(await svc.getResolveVersions('mixed')).toBeUndefined();
       expect(logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ tool: 'mixed', dataTool: 'other' }),
         'online tool-versions data of another tool',
@@ -221,7 +236,7 @@ describe('cli/services/tool-versions.service', () => {
         .get('/tool-versions/v1/bad.json')
         .reply(200, { ...data('bad'), versions: undefined });
 
-      expect(await svc.getOnlineVersions('bad')).toBeUndefined();
+      expect(await svc.getResolveVersions('bad')).toBeUndefined();
       expect(logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({
           tool: 'bad',
@@ -229,6 +244,241 @@ describe('cli/services/tool-versions.service', () => {
         }),
         'invalid online tool-versions data',
       );
+    });
+  });
+
+  describe('the age of the embedded data', () => {
+    const baseUrl = 'https://containerbase.github.io';
+    /** The embedded `release.json`. */
+    let release!: string;
+
+    /**
+     * Writes the embedded `release.json`.
+     * @param age - how long ago the data was built, in milliseconds
+     */
+    async function built(age: number): Promise<void> {
+      await writeFile(
+        release,
+        JSON.stringify({
+          version: '1.8.0',
+          buildTime: new Date(Date.now() - age).toISOString(),
+        }),
+      );
+    }
+
+    /** The embedded data of the tool `age`. */
+    const embedded = data('age');
+
+    /**
+     * Resolves the tool `age`, the source is `embedded` while the embedded
+     * data is current, else `fallback`, as the online data is not available.
+     * @param current - whether the embedded data is expected to be current,
+     * else the online lookup is mocked
+     */
+    async function resolveAge(current: boolean): Promise<string | undefined> {
+      if (!current) {
+        scope(baseUrl).get('/tool-versions/v1/age.json').reply(404);
+      }
+      // without an interceptor a request would fail the test
+      return (await svc.getResolveVersions('age'))?.source;
+    }
+
+    beforeEach(async () => {
+      release = rootPath('usr/local/containerbase/tool-versions/release.json');
+      await rm(release, { force: true });
+      await writeFile(`${dir}/age.json`, JSON.stringify(embedded));
+    });
+
+    afterAll(async () => {
+      // the later tests run without an embedded release
+      await rm(release, { force: true });
+    });
+
+    test('is not current without an embedded release', async () => {
+      expect(await resolveAge(false)).toBe('fallback');
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ file: release }),
+        'no embedded tool-versions release',
+      );
+    });
+
+    test('is not current with an invalid embedded release', async () => {
+      await writeFile(release, JSON.stringify({ version: '1.8.0' }));
+
+      expect(await resolveAge(false)).toBe('fallback');
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ file: release }),
+        'invalid embedded tool-versions release',
+      );
+    });
+
+    test('is current within the max age', async () => {
+      await built(60_000);
+
+      expect(await resolveAge(true)).toBe('embedded');
+    });
+
+    test('checks the age once per instance', async () => {
+      await built(60_000);
+
+      expect(await resolveAge(true)).toBe('embedded');
+      expect(await resolveAge(true)).toBe('embedded');
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ release: '1.8.0', current: true }),
+        'embedded tool-versions data age',
+      );
+    });
+
+    test('is not current when the embedded data was built in the future', async () => {
+      await built(-3_600_000);
+
+      expect(await resolveAge(false)).toBe('fallback');
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ release: '1.8.0' }),
+        'embedded tool-versions data built in the future, using the online data',
+      );
+    });
+
+    test('is not current when the embedded data is older than 24 hours', async () => {
+      await built(25 * 3_600_000);
+
+      expect(await resolveAge(false)).toBe('fallback');
+    });
+
+    test('uses the max age of CONTAINERBASE_RESOLVER_MAX_AGE', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_MAX_AGE', '1 week');
+      await built(25 * 3_600_000);
+
+      expect(await resolveAge(true)).toBe('embedded');
+    });
+
+    test.each([
+      // current data isn't outdated, also with the online data turned off
+      { age: 60_000, source: 'embedded' },
+      { age: 25 * 3_600_000, source: 'offline' },
+    ])(
+      'tells $source data built $age ms ago when the online data is turned off',
+      async ({ age, source }) => {
+        vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+        await built(age);
+
+        // no interceptor, a request would fail the test
+        expect(await resolveAge(true)).toBe(source);
+      },
+    );
+  });
+
+  describe('getResolveVersions', () => {
+    const baseUrl = 'https://containerbase.github.io';
+
+    test('prefers the online data', async () => {
+      await writeFile(`${dir}/resolve1.json`, JSON.stringify(data('resolve1')));
+      const online = data('resolve1', [{ version: '2.0.0' }]);
+      scope(baseUrl).get('/tool-versions/v1/resolve1.json').reply(200, online);
+
+      expect(await svc.getResolveVersions('resolve1')).toEqual({
+        data: online,
+        source: 'online',
+      });
+    });
+
+    test('uses the embedded data when the online data is turned off', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+      const embedded = data('resolve2');
+      await writeFile(`${dir}/resolve2.json`, JSON.stringify(embedded));
+
+      // no interceptor, a request would fail the test
+      expect(await svc.getResolveVersions('resolve2')).toEqual({
+        data: embedded,
+        source: 'offline',
+      });
+    });
+
+    test('uses the embedded data while it is current', async () => {
+      const release = rootPath(
+        'usr/local/containerbase/tool-versions/release.json',
+      );
+      await writeFile(
+        release,
+        JSON.stringify({
+          version: '1.8.0',
+          buildTime: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      );
+      const embedded = data('resolve7');
+      await writeFile(`${dir}/resolve7.json`, JSON.stringify(embedded));
+
+      try {
+        // no interceptor, a request would fail the test
+        expect(await svc.getResolveVersions('resolve7')).toEqual({
+          data: embedded,
+          source: 'embedded',
+        });
+
+        // a tool which only the online data has is looked up online
+        const online = data('resolve8');
+        scope(baseUrl)
+          .get('/tool-versions/v1/resolve8.json')
+          .reply(200, online);
+        expect(await svc.getResolveVersions('resolve8')).toEqual({
+          data: online,
+          source: 'online',
+        });
+      } finally {
+        await rm(release, { force: true });
+      }
+    });
+
+    test('has nothing for a tool without embedded data when the online data is turned off', async () => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+
+      // no interceptor, a request would fail the test
+      expect(await svc.getResolveVersions('resolve9')).toBeUndefined();
+    });
+
+    test('falls back to the embedded data when the online data is not available', async () => {
+      const embedded = data('resolve3');
+      await writeFile(`${dir}/resolve3.json`, JSON.stringify(embedded));
+      scope(baseUrl).get('/tool-versions/v1/resolve3.json').reply(404);
+
+      expect(await svc.getResolveVersions('resolve3')).toEqual({
+        data: embedded,
+        source: 'fallback',
+      });
+    });
+
+    test('has nothing for a tool without data', async () => {
+      scope(baseUrl).get('/tool-versions/v1/resolve4.json').reply(404);
+
+      expect(await svc.getResolveVersions('resolve4')).toBeUndefined();
+    });
+  });
+
+  describe('turned off online data', () => {
+    beforeEach(() => {
+      vi.stubEnv('CONTAINERBASE_RESOLVER_OFFLINE', 'true');
+      // the warnings are logged once per process
+      resetWarnings();
+    });
+
+    test('fetches no versions and warns once about offline mode', async () => {
+      // no interceptor, a request would fail the test
+      expect(await svc.getResolveVersions('off')).toBeUndefined();
+      expect(await svc.getResolveVersions('off')).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'off' },
+        'No embedded tool-versions data, CONTAINERBASE_RESOLVER_OFFLINE turns the online data off',
+      );
+    });
+
+    test('fetches no version files, but reads the embedded ones', async () => {
+      const embedded = files('offemb', '1.0.0');
+      await mkdir(`${dir}/offemb`, { recursive: true });
+      await writeFile(`${dir}/offemb/1.0.0.json`, JSON.stringify(embedded));
+
+      expect(await svc.getVersionFiles('offemb', '1.0.0')).toEqual(embedded);
+      // no interceptor, a request would fail the test
+      expect(await svc.getVersionFiles('offemb', '2.0.0')).toBeUndefined();
     });
   });
 
