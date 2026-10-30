@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 import { execa } from 'execa';
 import { hashFile } from './utils.js';
 
@@ -45,6 +46,37 @@ async function exec(file, args) {
 
 /** Platforms of the release images. */
 const platforms = '--set=settings.platform=linux/amd64,linux/arm64';
+
+/** Signing attempts per image, transient sigstore or registry errors pass on a retry. */
+const signAttempts = 3;
+
+/** Delay between signing attempts in milliseconds. */
+const signDelay = 10_000;
+
+/**
+ * Signs an image, retrying failed attempts. When all attempts fail it reports
+ * a GitHub Actions error annotation instead of failing the release.
+ * @param {SuccessContext['logger']} logger
+ * @param {string} image
+ */
+async function sign(logger, image) {
+  for (let attempt = 1; ; attempt++) {
+    const result = await run('cosign', ['sign', '--yes', image]);
+    if (!result.failed) {
+      return;
+    }
+    if (attempt >= signAttempts) {
+      logger.error(result.shortMessage);
+      process.stdout.write(
+        // an annotation ends at the first newline
+        `::error title=Image signing failed::${result.shortMessage.split('\n')[0]}\n`,
+      );
+      return;
+    }
+    logger.log(`Signing ${image} failed, retrying in ${signDelay / 1000}s`);
+    await setTimeout(signDelay);
+  }
+}
 
 /**
  * Sets the env the build and the docker bake file read for the release.
@@ -126,6 +158,11 @@ export async function publish(_config, context) {
     logger.error(`Bake metadata:\n${JSON.stringify(meta, null, 2)}`);
     throw releaseError('Missing image digest in the bake metadata');
   }
+
+  // the workflow attests the images with this digest
+  if (process.env.GITHUB_OUTPUT) {
+    await fs.appendFile(process.env.GITHUB_OUTPUT, `digest=${digest}\n`);
+  }
 }
 
 /**
@@ -143,13 +180,6 @@ export async function success(_config, { logger }) {
     `${process.env.OWNER}/${process.env.FILE}`,
     `ghcr.io/${process.env.OWNER}/${process.env.FILE}`,
   ]) {
-    const result = await run('cosign', ['sign', '--yes', `${image}@${digest}`]);
-    if (result.failed) {
-      logger.error(result.shortMessage);
-      process.stdout.write(
-        // an annotation ends at the first newline
-        `::error title=Image signing failed::${result.shortMessage.split('\n')[0]}\n`,
-      );
-    }
+    await sign(logger, `${image}@${digest}`);
   }
 }
