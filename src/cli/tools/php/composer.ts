@@ -1,8 +1,7 @@
 import { join } from 'node:path';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { PrebuildVersionResolver } from '../utils/prebuild.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -43,16 +42,6 @@ export class ComposerInstallService extends BaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
-export class ComposerVersionResolver extends ToolVersionResolver {
+export class ComposerVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'composer';
-
-  /** Resolves a missing version or `latest` to the latest composer prebuild. */
-  async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.get(
-        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
-      );
-    }
-    return version;
-  }
 }

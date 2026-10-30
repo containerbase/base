@@ -74,9 +74,15 @@ const dynamicResolvers: readonly VersionResolverClass[] = Object.entries(
   ResolverMap,
 ).map(([tool, type]) => createGenericVersionResolver(type, tool));
 
+/** The help note on the versions of the tools without their own note. */
+const dataVersionHelp =
+  'Other tools resolve a missing version, `latest` or a major or major.minor version from the containerbase tool-versions data, any other version is used as is.';
+
 /**
  * Builds the install-tool help text about tool specific versions from the
- * version notes of the resolvers. Tools with the same note are listed together.
+ * version notes of the resolvers, followed by the resolution of the other
+ * tools from the tool-versions data. Tools with the same note are listed
+ * together.
  * @param resolvers - the resolvers to read the notes from
  * @returns the help text, or an empty string if no resolver has a note
  */
@@ -118,5 +124,5 @@ export function getVersionHelp(
       ({ note, tools }) =>
         `- ${tools.map((tool) => `\`${tool}\``).join(', ')}: ${note}`,
     );
-  return `Some tools accept partial versions:\n\n${lines.join('\n')}`;
+  return `Some tools accept partial versions:\n\n${lines.join('\n')}\n\n${dataVersionHelp}`;
 }

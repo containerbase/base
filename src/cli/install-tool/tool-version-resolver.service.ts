@@ -1,3 +1,4 @@
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { inject, injectable, multiInject } from 'inversify';
 import semverGte from 'semver/functions/gte';
 import semverValid from 'semver/functions/valid';
@@ -244,14 +245,18 @@ export class ToolVersionResolverService {
   /**
    * Resolves the version with the tool's resolver. A tool without a resolver
    * is resolved from the tool-versions data, and keeps its version when the
-   * data can't answer.
+   * data can't answer. A resolver which only resolves `latest` (see
+   * {@link ToolVersionResolver.latestOnly}) gets a missing, empty or `latest`
+   * version, any other version is resolved from the data.
    */
   async resolve(
     tool: string,
     version: string | undefined,
   ): Promise<string | undefined> {
     const resolver = this.resolver.find((r) => r.tool === tool);
-    if (resolver) {
+    const latest =
+      !isNonEmptyStringAndNotWhitespace(version) || version === 'latest';
+    if (resolver && (latest || !resolver.latestOnly)) {
       return (await resolver.resolve(version)) ?? version;
     }
     return (await this.resolveFromData(tool, version)) ?? version;
