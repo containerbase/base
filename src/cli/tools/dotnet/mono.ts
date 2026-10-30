@@ -3,10 +3,7 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { fileContent, logger, pathExists } from '../../utils/index.ts';
-import {
-  PrebuildInstallService,
-  PrebuildVersionResolver,
-} from '../utils/prebuild.ts';
+import { PrebuildInstallService } from '../utils/prebuild.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -116,10 +113,4 @@ export class MonoInstallService extends PrebuildInstallService {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src, name: 'cert-sync' });
   }
-}
-
-@injectable()
-@injectFromHierarchy()
-export class MonoVersionResolver extends PrebuildVersionResolver {
-  readonly tool = 'mono';
 }

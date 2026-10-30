@@ -203,7 +203,6 @@ https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.1
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz.sha512
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz
-https://github.com/containerbase/mono-prebuild/releases/latest/download/version
 ```
 
 #### `nuget`
