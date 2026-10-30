@@ -1,10 +1,9 @@
 import { join } from 'node:path';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { getDistro } from '../../utils/index.ts';
+import { PrebuildVersionResolver } from '../utils/prebuild.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -130,16 +129,6 @@ export class PhpInstallService extends BaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
-export class PhpVersionResolver extends ToolVersionResolver {
+export class PhpVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'php';
-
-  /** Resolves a missing version or `latest` to the latest php prebuild. */
-  async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.get(
-        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
-      );
-    }
-    return version;
-  }
 }
