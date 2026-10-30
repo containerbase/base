@@ -7,10 +7,9 @@ import { semverGte } from '../../utils/index.ts';
 
 /**
  * The distro specific dependencies.
- * @see {@link https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2204#dependencies-4}
+ * @see {@link https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?tabs=dotnet10&pivots=os-linux-ubuntu-2404#dependencies-3}
  */
 const distroPackages: Record<string, string[] | undefined> = {
-  jammy: ['libicu70', 'libssl3'],
   noble: ['libicu74', 'libssl3t64'],
   resolute: ['libbrotli1', 'libicu78', 'libssl3t64'],
 };

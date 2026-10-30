@@ -34,8 +34,9 @@ function hostDistros(data: ToolVersions, distro: string): string[] {
   }
   // oldest first; Ubuntu only, other distro families like Debian need their own
   // ordering and builds. An unknown distro, eg. an unreadable os-release, gets
-  // none, so only releases without a `distros` list match.
-  const ubuntu: readonly string[] = DistroCode.options;
+  // none, so only releases without a `distros` list match. jammy is no longer
+  // a supported host, but its prebuilds are still used on newer releases.
+  const ubuntu: readonly string[] = ['jammy', ...DistroCode.options];
   return ubuntu.slice(0, ubuntu.indexOf(distro) + 1);
 }
 
