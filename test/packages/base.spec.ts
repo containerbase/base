@@ -741,6 +741,11 @@ describe('packages/base', () => {
       main.configure();
       expect(main.getLogger()).toBe(silent);
       expect(main.isConfigured()).toBe(false);
+
+      // an explicitly passed silent logger still counts as configured
+      main.configure({ logger: silent });
+      expect(main.isConfigured()).toBe(true);
+      main.configure();
     });
 
     test('accepts a pino and a Renovate logger', () => {

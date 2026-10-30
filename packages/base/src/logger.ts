@@ -35,6 +35,7 @@ const silentLogger: Logger = {
 };
 
 let current = silentLogger;
+let configured = false;
 
 /**
  * Configures the package, eg. sets the logger its functions log to. Options
@@ -44,6 +45,7 @@ let current = silentLogger;
  */
 export function configure(options: ConfigureOptions = {}): void {
   current = options.logger ?? silentLogger;
+  configured = options.logger !== undefined;
 }
 
 /** The logger set by `configure`, a silent one by default. */
@@ -56,5 +58,5 @@ export function getLogger(): Logger {
  * configure a fallback logger itself when nobody else did.
  */
 export function isConfigured(): boolean {
-  return current !== silentLogger;
+  return configured;
 }
