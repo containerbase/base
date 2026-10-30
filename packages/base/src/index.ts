@@ -31,7 +31,7 @@ export {
 } from './containerbase.ts';
 
 export type { ConfigureOptions, LogFn, Logger } from './logger.ts';
-export { configure } from './logger.ts';
+export { configure, getLogger, isConfigured } from './logger.ts';
 
 export { filterByMinCb, minCbByVersion } from './min-cb.ts';
 export { isReleaseVersion } from './release-version.ts';

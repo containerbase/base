@@ -50,3 +50,11 @@ export function configure(options: ConfigureOptions = {}): void {
 export function getLogger(): Logger {
   return current;
 }
+
+/**
+ * Whether `configure` has set a logger, so a package building on this one can
+ * configure a fallback logger itself when nobody else did.
+ */
+export function isConfigured(): boolean {
+  return current !== silentLogger;
+}
