@@ -156,6 +156,20 @@ import { logger } from './logger.ts';
 configure({ logger });
 ```
 
+`getLogger()` returns the configured logger, so a package building on `@containerbase/base` can log to the same one.
+`isConfigured()` tells whether a logger was set, so that package can configure a fallback when nobody did:
+
+```ts
+import { configure, getLogger, isConfigured } from '@containerbase/base';
+import { fallbackLogger } from './logger.ts';
+
+if (!isConfigured()) {
+  configure({ logger: fallbackLogger });
+}
+
+getLogger().debug({ tool: 'node' }, 'resolving');
+```
+
 ## Contents
 
 Each entry may carry the following metadata:

@@ -22,7 +22,7 @@ import {
   toolVersionsPath,
   validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
-import { type Logger, getLogger } from '../../packages/base/src/logger.ts';
+import type { Logger } from '../../packages/base/src/logger.ts';
 import {
   Arch,
   DistroCode,
@@ -726,18 +726,26 @@ describe('packages/base', () => {
         error: vi.fn(),
       };
 
-      const silent = getLogger();
+      const silent = main.getLogger();
       expect(() => silent.warn({ tool: 'node' }, 'silent')).not.toThrow();
+      expect(main.isConfigured()).toBe(false);
 
       main.configure({ logger });
-      getLogger().debug({ tool: 'node' }, 'message');
+      expect(main.isConfigured()).toBe(true);
+      main.getLogger().debug({ tool: 'node' }, 'message');
       expect(debug).toHaveBeenCalledExactlyOnceWith(
         { tool: 'node' },
         'message',
       );
 
       main.configure();
-      expect(getLogger()).toBe(silent);
+      expect(main.getLogger()).toBe(silent);
+      expect(main.isConfigured()).toBe(false);
+
+      // an explicitly passed silent logger still counts as configured
+      main.configure({ logger: silent });
+      expect(main.isConfigured()).toBe(true);
+      main.configure();
     });
 
     test('accepts a pino and a Renovate logger', () => {
