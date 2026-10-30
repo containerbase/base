@@ -16,7 +16,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN prepare-tool node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.2
+RUN install-tool node 26.13.0
 
 # tool without a prepare step
 # renovate: datasource=github-releases packageName=fluxcd/flux2
