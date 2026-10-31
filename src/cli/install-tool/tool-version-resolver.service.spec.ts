@@ -154,12 +154,12 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
     // the host runs containerbase 14.51.0
     vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
-    // the host is amd64 on jammy
+    // the host is amd64 on noble
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
 
     child = createContainer();
@@ -605,8 +605,8 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
   test('skips a release which is only available for another distro', async () => {
     serve('other', 200, [
-      { version: '3.0.0', distros: ['noble', 'resolute'] },
-      { version: '2.0.0', distros: ['jammy', 'noble'] },
+      { version: '3.0.0', distros: ['resolute'] },
+      { version: '2.0.0', distros: ['noble', 'resolute'] },
       '1.0.0',
     ]);
 
@@ -651,7 +651,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
   test('skips the builds of a newer distro on an older host', async () => {
     serve('other', 200, [
       { version: '3.0.0', distros: ['resolute'] },
-      { version: '2.0.0', distros: ['noble'] },
+      { version: '2.0.0', distros: ['resolute'] },
     ]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
@@ -709,7 +709,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
   test('skips an lts release which is not available for the host', async () => {
     serve('other', 200, [
-      { version: '24.1.0', lts: true, distros: ['noble'] },
+      { version: '24.1.0', lts: true, distros: ['resolute'] },
       { version: '22.1.0', lts: true },
       '25.0.0',
     ]);
@@ -719,7 +719,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
 
   test.each([
     { name: 'arch', limit: { archs: ['arm64'] } },
-    { name: 'distro', limit: { distros: ['noble'] } },
+    { name: 'distro', limit: { distros: ['resolute'] } },
   ])(
     'keeps latest when no lts release is available for the host $name',
     async ({ limit }) => {
@@ -740,7 +740,7 @@ describe('cli/install-tool/tool-version-resolver.service', () => {
   test('resolves a partial version to a release available for the host', async () => {
     serve('other', 200, [
       { version: '3.12.5', archs: ['arm64'] },
-      { version: '3.12.4', distros: ['noble'] },
+      { version: '3.12.4', distros: ['resolute'] },
       '3.12.3',
       '3.11.9',
     ]);

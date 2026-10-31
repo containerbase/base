@@ -174,14 +174,14 @@ getLogger().debug({ tool: 'node' }, 'resolving');
 
 Each entry may carry the following metadata:
 
-| Field              | Description                                                                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`             | the package manager installing the tool, one of `gem`, `npm`, `pip` or `dotnet`                                                                                                       |
-| `parent`           | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer`                                                                       |
-| `deprecated`       | the tool should not be used any more                                                                                                                                                  |
-| `root`             | the tool can only be installed as root, so at image build time                                                                                                                        |
-| `minVersion`       | the oldest version containerbase supports for the tool on the default distro, in the tool's versioning; tools without a known limit have none                                         |
-| `distroMinVersion` | the oldest version supported on an Ubuntu release (`jammy`, `noble` or `resolute`), only for releases whose floor differs from `minVersion`, which is the floor on the default distro |
+| Field              | Description                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`             | the package manager installing the tool, one of `gem`, `npm`, `pip` or `dotnet`                                                                                              |
+| `parent`           | the tool it depends on, eg. `composer` depends on `php`, which requires `php` to be installed before `composer`                                                              |
+| `deprecated`       | the tool should not be used any more                                                                                                                                         |
+| `root`             | the tool can only be installed as root, so at image build time                                                                                                               |
+| `minVersion`       | the oldest version containerbase supports for the tool on the default distro, in the tool's versioning; tools without a known limit have none                                |
+| `distroMinVersion` | the oldest version supported on an Ubuntu release (`noble` or `resolute`), only for releases whose floor differs from `minVersion`, which is the floor on the default distro |
 
 Only the names `install-tool` accepts are listed.
 Packages installed with an arbitrary name via `install-gem`, `install-npm` or `install-pip` are not, as that list is unbounded.
