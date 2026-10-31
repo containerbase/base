@@ -654,9 +654,7 @@ Those tools are installed via `npm` package manager.
 
 Known tools:
 
-- `bower`
 - `corepack`
-- `lerna`
 - `npm`
 - `pnpm`
 - `renovate`
