@@ -93,7 +93,7 @@
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
     "oxlint-tsgolint": "7.0.2005",
-    "rolldown": "1.2.15",
+    "rolldown": "1.2.16",
     "semantic-release": "25.0.9",
     "shelljs": "0.10.0",
     "tsx": "4.23.15",
