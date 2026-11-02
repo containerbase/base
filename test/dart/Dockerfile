@@ -84,7 +84,7 @@ FROM build AS testc
 USER 12021
 
 # renovate: datasource=docker
-RUN install-tool dart 2.19.6
+RUN install-tool dart 3.13.7
 
 RUN set -ex; \
     cd a; \
