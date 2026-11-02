@@ -61,6 +61,9 @@ export class ConanInstallService extends PipBaseInstallService {
 @injectFromHierarchy()
 export class ConanVersionResolver extends PipVersionResolver {
   override tool = 'conan';
+
+  /** The releases of the tool-versions data, pypi is the fallback. */
+  override readonly dataField = 'versions';
 }
 
 /** The conan name of the architecture. */

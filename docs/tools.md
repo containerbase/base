@@ -123,7 +123,7 @@ Some tools accept partial versions and install a matching release:
   A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
-  With `install-tool`, for `checkov`, `copier`, `hashin`, `kas`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
+  With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
   The data flags a release whose files are all yanked as deprecated, `latest` and major or major.minor versions skip those, a deprecated release is only installed when the full version is given, and the `poetry-plugin-pypi-mirror` limit applies to the data too.
   So a missing version or `latest` of `poetry` always asks pypi.org for that limit, also when the data has a match and with `CONTAINERBASE_RESOLVER_OFFLINE=true`.
 - `android-sdk-cmdline-tools`: A major (`14`) or major.minor (`14.1`) version installs the newest matching stable release, compared numerically.
@@ -176,7 +176,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
-  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget`, `conan` and `cocoapods`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
+  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget` and `cocoapods`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
   For example `java`, `node` and the npm, pip and gem tools of `install-tool` use it when the embedded data has no match, `php`, `composer` and `mise` for `latest`.
   These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
