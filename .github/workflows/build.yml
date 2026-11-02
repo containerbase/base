@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
         with:
           save-cache: true
 
@@ -152,7 +152,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
 
       - name: lint
         run: |
@@ -204,7 +204,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
 
       - name: Install ubuntu dependencies
         run: |
@@ -226,7 +226,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
 
       # the schema tests validate the embedded tool-versions data, so a
       # breaking change of its format fails here
@@ -259,7 +259,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
 
       - name: build
         run: pnpm build
@@ -294,7 +294,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -347,7 +347,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -403,7 +403,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -449,7 +449,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@ec6b0dfe9b98e216fc3d2dbfd0e35c3d69b79e95 # v5.3.14
+        uses: containerbase/internal-tools/setup@59f82735f639df5ecc8febc4ae9d10ed8ea03c7a # v5.3.15
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
