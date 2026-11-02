@@ -135,15 +135,19 @@ export class MavenVersionResolver extends ToolVersionResolver {
 
   override readonly versionHelp = partialVersionHelp;
 
+  /** The releases of the tool-versions data, the lookup is the fallback. */
+  override readonly dataField = 'versions';
+
   /**
    * Resolves a version, the release list is read from repo.maven.apache.org
-   * through the configured CDN and URL replacements.
+   * through the configured CDN and URL replacements, when the tool-versions
+   * data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the latest maven prebuild.
    * - A major (`3`) or major.minor (`3.9`) version which is no existing
    *   release resolves to the newest matching stable release, prereleases
    *   like `4.0.0-rc-1` are skipped. An existing release is kept. Without
-   *   access to the release list the version is kept too.
+   *   access to the release list the version is kept too, with a warning.
    * - Any other version is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -163,8 +167,9 @@ export class MavenVersionResolver extends ToolVersionResolver {
       } catch (err) {
         // keep the version: an `X.Y` release like `3.0` passes `validate` and
         // installs from the repo.maven.apache.org fallback, a bare major fails
-        // validation
-        logger.debug(
+        // validation; the tool-versions data had no match either
+        // TODO: fail in the next major (#7962)
+        logger.warn(
           { err, tool: this.tool, version },
           'maven metadata lookup or parsing failed, keeping the version',
         );

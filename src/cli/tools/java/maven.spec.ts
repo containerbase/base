@@ -350,7 +350,13 @@ describe('cli/tools/java/maven', () => {
         scope(repoUrl).get(metadataPath).times(3).replyWithError('reset');
         const { svc } = await toolContext(MavenVersionResolver);
 
+        // the tool-versions data is read first, see dataField
+        expect(svc.dataField).toBe('versions');
         expect(await svc.resolve('3.9')).toBe('3.9');
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ tool: 'maven', version: '3.9' }),
+          'maven metadata lookup or parsing failed, keeping the version',
+        );
       });
     });
   });

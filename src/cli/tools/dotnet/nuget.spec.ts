@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { LinkToolService } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 import { NugetInstallService, NugetVersionResolver } from './nuget.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
@@ -209,7 +210,13 @@ describe('cli/tools/dotnet/nuget', () => {
         .replyWithError('connection reset');
       const { svc } = await toolContext(NugetVersionResolver);
 
+      // the tool-versions data is read first, see dataField
+      expect(svc.dataField).toBe('versions');
       expect(await svc.resolve('6')).toBe('6');
+      expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ version: '6' }),
+        'nuget lookup failed, keeping the version',
+      );
     });
 
     test('keeps a pinned version', async () => {

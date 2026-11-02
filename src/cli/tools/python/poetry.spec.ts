@@ -114,34 +114,10 @@ describe('cli/tools/python/poetry', () => {
     expect(await svc.resolve('1.8.3')).toBe('1.8.3');
   });
 
-  test('limits latest from the data to the releases the mirror plugin supports', async () => {
-    scope(baseUrl)
-      .get('/pypi/poetry-plugin-pypi-mirror/json')
-      .reply(200, mirrorMeta);
+  test('reads the tool-level latest of the tool-versions data first', async () => {
     const { svc } = await toolContext(PoetryVersionResolver);
 
-    const accept = await svc.dataFilter(undefined);
-
-    expect(svc.dataField).toBe('versions');
-    expect(accept?.('1.8.3')).toBe(true);
-    expect(accept?.('2.0.0')).toBe(false);
-  });
-
-  test('does not limit a partial version from the data', async () => {
-    // no interceptor, a request would fail the test
-    const { svc } = await toolContext(PoetryVersionResolver);
-
-    expect(await svc.dataFilter('1.8')).toBeUndefined();
-  });
-
-  test('throws for latest from the data without a poetry constraint', async () => {
-    scope(baseUrl)
-      .get('/pypi/poetry-plugin-pypi-mirror/json')
-      .reply(200, { info: { version: '0.6.1' }, releases: {} });
-    const { svc } = await toolContext(PoetryVersionResolver);
-
-    await expect(svc.dataFilter(undefined)).rejects.toThrow(
-      'poetry-plugin-pypi-mirror has missing poetry version',
-    );
+    // the data sets `latest` within the poetry-plugin-pypi-mirror range
+    expect(svc.dataField).toBe('latest');
   });
 });

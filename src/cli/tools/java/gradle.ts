@@ -61,14 +61,18 @@ export class GradleVersionResolver extends ToolVersionResolver {
 
   override readonly versionHelp = partialVersionHelp;
 
+  /** The releases of the tool-versions data, the lookup is the fallback. */
+  override readonly dataField = 'versions';
+
   /**
-   * Resolves a version, the release list is read from services.gradle.org.
+   * Resolves a version, the release list is read from services.gradle.org,
+   * when the tool-versions data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the current release.
    * - A major (`8`) or major.minor (`9.0`) version which is no existing
    *   release resolves to the newest matching stable release. An existing
-   *   release like `8.10` is kept, and so is the version when the release
-   *   list can't be loaded.
+   *   release like `8.10` is kept, and so is the version with a warning when
+   *   the release list can't be loaded.
    * - Any other version is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -88,8 +92,10 @@ export class GradleVersionResolver extends ToolVersionResolver {
       } catch (err) {
         // keep the version like before partial versions were resolved: an
         // existing `X.Y` release still installs, while a bare major passes the
-        // loose gradle validation and then fails to download
-        logger.debug(
+        // loose gradle validation and then fails to download; the tool-versions
+        // data had no match either
+        // TODO: fail in the next major (#7962)
+        logger.warn(
           { err, tool: this.tool, version },
           'gradle release lookup or parsing failed, keeping the version',
         );

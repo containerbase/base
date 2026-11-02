@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { CompressionService, LinkToolService } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 import { GradleInstallService, GradleVersionResolver } from './gradle.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
@@ -180,7 +181,13 @@ describe('cli/tools/java/gradle', () => {
         scope(baseUrl).get('/versions/all').times(3).replyWithError('reset');
         const { svc } = await toolContext(GradleVersionResolver);
 
+        // the tool-versions data is read first, see dataField
+        expect(svc.dataField).toBe('versions');
         expect(await svc.resolve('8.10')).toBe('8.10');
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ tool: 'gradle', version: '8.10' }),
+          'gradle release lookup or parsing failed, keeping the version',
+        );
       });
 
       test.each([

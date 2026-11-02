@@ -150,6 +150,8 @@ describe('cli/tools/java/android', () => {
     test('resolves latest', async () => {
       const { svc } = await toolContext(AndroidSdkCmdlineToolsVersionResolver);
 
+      // the tool-versions data is read first, see dataField
+      expect(svc.dataField).toBe('versions');
       expect(await svc.resolve('latest')).toBe('19.2');
     });
 

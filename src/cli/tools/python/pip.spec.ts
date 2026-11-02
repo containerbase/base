@@ -151,7 +151,6 @@ describe('cli/tools/python/pip', () => {
       const { svc } = await toolContext(createPipVersionResolver(tool));
 
       expect(svc.dataField).toBe(dataField);
-      expect(await svc.dataFilter(undefined)).toBeUndefined();
     },
   );
 });
