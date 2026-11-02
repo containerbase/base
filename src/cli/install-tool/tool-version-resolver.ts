@@ -85,14 +85,6 @@ export abstract class ToolVersionResolver {
   readonly versionHelp: string | undefined = undefined;
 
   /**
-   * Whether the resolver only resolves a missing version or `latest`, any
-   * other version is resolved from the tool-versions data, like for a tool
-   * without a resolver.
-   */
-  // TODO: drop in the next major, when `latest` comes from the data too (#7962)
-  readonly latestOnly: boolean = false;
-
-  /**
    * The field of the tool-versions data the tool's rules for a missing
    * version, `latest` and partial versions need, eg. `lts` for a tool whose
    * `latest` is the newest LTS release, `latest` for an npm tool, `versions`

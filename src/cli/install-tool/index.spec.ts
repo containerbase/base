@@ -297,8 +297,8 @@ describe('cli/install-tool/index', () => {
     ])(
       'keeps install-$type $tool $version without the tool-versions data',
       async ({ tool, version, type }) => {
-        // the latest-only resolver of install-tool answers, it keeps any
-        // version but `latest`
+        // the resolver of install-tool answers, it keeps any version but
+        // `latest`
         const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
 
         expect(await resolveVersion(tool, version, type, false)).toBe(version);
@@ -512,13 +512,14 @@ describe('cli/install-tool/index', () => {
           versions: ltsReleases,
           expected: '24.2.0',
         },
-        {
-          tool: 'conan',
+        // composer is mocked here, php covers the prebuild resolver
+        ...['conan', 'mise', 'php'].map((tool) => ({
+          tool,
           type: undefined,
           extra: {},
           versions: releases,
           expected: '2.5.1',
-        },
+        })),
         {
           tool: 'java',
           type: undefined,

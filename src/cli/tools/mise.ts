@@ -75,14 +75,17 @@ export class MiseInstallService extends BaseInstallService {
 export class MiseVersionResolver extends ToolVersionResolver {
   readonly tool = 'mise';
 
-  /** Other versions are resolved from the tool-versions data. */
-  // TODO: drop in the next major, when `latest` comes from the data too (#7962)
-  override readonly latestOnly = true;
+  /** The releases of the tool-versions data, mise.jdx.dev is the fallback. */
+  override readonly dataField = 'versions';
 
   /** Partial versions are resolved from the tool-versions data. */
   override readonly versionHelp = partialVersionHelp;
 
-  /** Resolves a missing version or `latest` from mise.jdx.dev. */
+  /**
+   * Resolves a missing version or `latest` from mise.jdx.dev, when the
+   * tool-versions data can't answer, see {@link dataField}. Any other version
+   * is kept.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return (await this.get('https://mise.jdx.dev/VERSION')).trim();

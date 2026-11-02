@@ -131,7 +131,8 @@ describe('cli/tools/mise', () => {
       const { svc } = await toolContext(MiseVersionResolver);
 
       expect(await svc.resolve('2026.2.13')).toBe('2026.2.13');
-      expect(svc.latestOnly).toBe(true);
+      // latest and partial versions come from the data first
+      expect(svc.dataField).toBe('versions');
     });
   });
 });
