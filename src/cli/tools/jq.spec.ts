@@ -7,7 +7,7 @@ import { LinkToolService } from '../services/index.ts';
 import { JqInstallService } from './jq.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -27,6 +27,8 @@ describe('cli/tools/jq', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the binary is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -58,6 +60,26 @@ describe('cli/tools/jq', () => {
       expect((await fs.stat(file)).mode & 0o777).toBe(0o775);
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const filename = 'jq-linux-amd64';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/jq-1.8.5/jq-linux-arm64`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/jq-1.8.5/${filename}`, binary, 'amd64'),
+    ]);
+    // there is no interceptor for the checksum list
+    scope(baseUrl).get(`${releaseUrl}/jq-1.8.5/${filename}`).reply(200, binary);
+    const { svc, pathSvc } = await toolContext(JqInstallService);
+
+    await expect(svc.install('1.8.5')).resolves.toBeUndefined();
+
+    const file = join(pathSvc.versionedToolPath('jq', '1.8.5'), 'bin/jq');
+    expect(await fs.readFile(file, 'utf8')).toBe(binary);
+  });
 
   test('install: rejects a missing checksum', async () => {
     const { svc } = await toolContext(JqInstallService);
