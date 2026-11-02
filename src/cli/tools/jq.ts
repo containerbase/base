@@ -12,23 +12,20 @@ export class JqInstallService extends BaseInstallService {
   override readonly minVersion = '1.7.1';
 
   /**
-   * Downloads the jq binary from GitHub, verified against the release's
-   * `sha256sum.txt`, into the versioned `bin` folder.
+   * Downloads the jq binary from GitHub into the versioned `bin` folder. The
+   * file and its checksum come from the tool-versions data, without data it
+   * is verified against the release's `sha256sum.txt`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/jqlang/${this.name}/releases/download/jq-${version}/`;
     const filename = `${this.name}-linux-${this.envSvc.arch}`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}sha256sum.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'sha256sum.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 
