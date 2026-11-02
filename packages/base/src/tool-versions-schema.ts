@@ -51,7 +51,10 @@ export const ToolVersion = z.object({
   version: z.string().min(1),
   prerelease: z.literal(true).exactOptional(),
   lts: z.literal(true).exactOptional(),
-  /** the registry deprecates the version, only for npm tools */
+  /**
+   * the registry deprecates the version: npm deprecated it, all its PyPI files
+   * are yanked, or the gem is gone from rubygems
+   */
   deprecated: z.literal(true).exactOptional(),
   /** when the version was released, in UTC */
   releaseTimestamp: z.iso.datetime().exactOptional(),

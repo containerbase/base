@@ -31,8 +31,15 @@ export class JavaVersionResolver extends ToolVersionResolver {
     'A major, major.minor or major.minor.patch version, like `21` or `11.0`, installs the newest matching release.';
 
   /**
+   * `latest` is the newest LTS release of the tool-versions data, a
+   * major.minor.patch version always uses the adoptium lookup.
+   */
+  override readonly dataField = 'lts';
+
+  /**
    * Resolves a missing version or `latest` to the newest adoptium lts and a
-   * partial version (`11`, `11.0` or `11.0.24`) to its newest ga release.
+   * partial version (`11`, `11.0` or `11.0.24`) to its newest ga release,
+   * when the tool-versions data can't answer, see {@link dataField}.
    * Any other version, like a full version with a build such as `17.0.12+7`,
    * is returned unchanged.
    *

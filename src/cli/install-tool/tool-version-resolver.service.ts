@@ -12,6 +12,8 @@ import type { ToolVersions } from '../../../packages/base/src/tool-versions-type
 import { EnvService, ToolVersionsService } from '../services/index.ts';
 import { getDistro, logger } from '../utils/index.ts';
 import {
+  type DataField,
+  type DataFilter,
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
@@ -47,11 +49,13 @@ function hostDistros(data: ToolVersions, distro: string): string[] {
 }
 
 /**
- * The release picked from the data, and the one picked without the `minCb`
- * filter when that differs, as it needs a newer containerbase.
+ * The release picked from the data, whether it is a deprecated one, and the
+ * one picked without the `minCb` filter when that differs, as it needs a newer
+ * containerbase.
  */
 interface Picked {
   version: string | undefined;
+  deprecated: boolean;
   blocked: string | undefined;
 }
 
@@ -85,6 +89,28 @@ function newerCbWarning(
 }
 
 /**
+ * The warning for the release which the `minCb` filter skipped, see
+ * {@link newerCbWarning}.
+ * @param blocked - the skipped release, see {@link pick}
+ * @param outcome - what happens instead
+ */
+function blockedWarning(
+  tool: string,
+  data: ToolVersions,
+  blocked: string,
+  host: Host,
+  outcome: string,
+): string {
+  return newerCbWarning(
+    tool,
+    blocked,
+    minCbByVersion(data).get(blocked),
+    host.cb,
+    outcome,
+  );
+}
+
+/**
  * Picks a release from the data, prereleases and releases which are not
  * available for the host are skipped. A release is available when it has no
  * `archs` or `distros` list, or the list has the host arch or a distro which
@@ -95,16 +121,34 @@ function newerCbWarning(
  * release first, in the versioning of the tool. A missing version or `latest`
  * is the newest release, or the newest LTS release for a tool whose data has
  * LTS flags, even when none is available for the host, then there is no match.
- * A partial version, a major (`20`) or major.minor (`3.12`) one, is the newest
- * release of that line, unless it is a release itself, like `8.10`.
- * @returns the picked release, `undefined` when none matches, and the release
- * which the `minCb` filter skipped instead, if any
+ * For an npm tool, whose data has the `latest` dist-tag, it is that release,
+ * also a prerelease, like npm installs it. When the dist-tag is deprecated,
+ * isn't available for the host or installable by the running containerbase,
+ * it is the newest release which is, and isn't deprecated. A partial version,
+ * a major (`20`) or major.minor (`3.12`) one, is the newest release of that
+ * line, unless it is a release itself, like `8.10`. For an npm tool it is the
+ * `latest` dist-tag when it matches, else the newest release of the line.
+ * Every tool skips its deprecated releases for a missing version, `latest`
+ * and a partial one, like an npm deprecated release, a PyPI release whose
+ * files are all yanked or a gem gone from rubygems, so only deprecated matches
+ * are no match, unless `deprecatedFallback` picks them then; an existing
+ * release is kept, also a deprecated one.
+ * @param accept - limits the releases further, see
+ * {@link ToolVersionResolver.dataFilter}
+ * @param deprecatedFallback - whether only deprecated matches pick the newest
+ * of them, the deprecated `latest` dist-tag of an npm tool first, for a tool
+ * without its own resolver, which has no other lookup
+ * @returns the picked release, `undefined` when none matches, whether it is a
+ * deprecated one, and the release which the `minCb` filter skipped instead,
+ * if any, a deprecated one only when the fallback picks from all releases
  */
 function pick(
   tool: string,
   data: ToolVersions,
   version: string | undefined,
   host: Host,
+  accept?: DataFilter,
+  deprecatedFallback = false,
 ): Picked {
   const { versions: installable, needed } = filterByMinCb(data, host.cb);
   const stable = data.versions.filter((v) => !v.prerelease);
@@ -112,38 +156,92 @@ function pick(
   const forHost = (list: typeof data.versions): typeof data.versions =>
     list.filter(
       (v) =>
-        !v.prerelease &&
         (!v.archs || v.archs.includes(host.arch)) &&
         (!v.distros || v.distros.some((d) => distros.includes(d))),
     );
 
-  /** Picks the requested release from the candidates, newest first. */
-  const find = (releases: typeof data.versions): string | undefined => {
+  /**
+   * Picks the requested release from the candidates available for the host,
+   * newest first, which include the prereleases.
+   * @param deprecated - whether deprecated releases are picked too
+   */
+  const find = (
+    available: typeof data.versions,
+    deprecated = false,
+  ): string | undefined => {
+    const candidates = accept
+      ? available.filter((v) => accept(v.version))
+      : available;
+    const releases = candidates.filter((v) => !v.prerelease);
+    // every tool skips its deprecated releases, like an npm deprecated one, a
+    // PyPI release whose files are all yanked or a gem gone from rubygems
+    const active = deprecated
+      ? releases
+      : releases.filter((v) => !v.deprecated);
     if (version === undefined || version === 'latest') {
+      if (data.latest !== undefined) {
+        // an npm tool: the `latest` dist-tag, also a prerelease, like npm
+        // installs it, unless it is deprecated or isn't installable, else the
+        // newest release which isn't deprecated
+        return (
+          candidates.find(
+            (v) => v.version === data.latest && (deprecated || !v.deprecated),
+          ) ?? active[0]
+        )?.version;
+      }
       // the LTS flags are read before the host filter (arch, distro and
       // containerbase version), so a tool with LTS releases never falls back
       // to a release which isn't an LTS one
       return (
-        stable.some((v) => v.lts) ? releases.find((v) => v.lts) : releases[0]
+        data.lts || stable.some((v) => v.lts)
+          ? active.find((v) => v.lts)
+          : active[0]
       )?.version;
     }
+    // an existing release is kept, also a deprecated one, like a pinned one
     if (releases.some((v) => v.version === version)) {
       return version;
     }
-    return releases.find((v) => matches(v.version, version))?.version;
+    const line = active.filter((v) => matches(v.version, version));
+    // an npm tool, like npm: the `latest` dist-tag when it matches, else the
+    // newest release of the line
+    return (line.find((v) => v.version === data.latest) ?? line[0])?.version;
   };
 
-  const picked = find(forHost(installable));
-  const unfiltered = needed.length ? find(forHost(data.versions)) : picked;
+  /**
+   * Picks the installable release and the one the `minCb` filter skips
+   * instead, if any.
+   * @param deprecated - whether deprecated releases are picked too
+   */
+  const run = (
+    deprecated: boolean,
+  ): { version: string | undefined; blocked: string | undefined } => {
+    const version = find(forHost(installable), deprecated);
+    const unfiltered = needed.length
+      ? find(forHost(data.versions), deprecated)
+      : version;
+    return {
+      version,
+      blocked: unfiltered === version ? undefined : unfiltered,
+    };
+  };
+
+  let picked = run(false);
+  let deprecated = false;
+  if (picked.version === undefined && deprecatedFallback) {
+    // nothing which isn't deprecated is installable, so pick again from all
+    // releases, also the deprecated ones
+    picked = run(true);
+    deprecated = picked.version !== undefined;
+  }
   // log only when the unmet ranges change the result of this request
-  if (unfiltered !== picked) {
+  if (picked.blocked !== undefined) {
     logger.debug(
       { tool, running: host.cb, needed },
       'skipping the versions which need a newer containerbase',
     );
-    return { version: picked, blocked: unfiltered };
   }
-  return { version: picked, blocked: undefined };
+  return { ...picked, deprecated };
 }
 
 /**
@@ -157,8 +255,9 @@ const twoPartReleaseTools = new Set(['protoc', 'swift']);
 /**
  * Logs a warning about the tool-versions data, noting when it is the possibly
  * outdated embedded data.
- * @param outdated - whether the data is the embedded fallback for online data
- * which can't be loaded or is turned off, not current embedded data
+ * @param outdated - whether the data is the possibly outdated embedded data,
+ * the fallback for online data which can't be loaded or is turned off, not
+ * current embedded data
  * @param context - the tool and versions, for the log
  */
 function warnData(
@@ -185,8 +284,9 @@ function warnData(
  * {@link twoPartReleaseTools} whose line the data doesn't list at all is only
  * logged at debug level.
  * @param blocked - the release the `minCb` filter skipped, see {@link pick}
- * @param embedded - whether the data is the possibly outdated embedded data,
- * the fallback for online data which can't be loaded or used offline
+ * @param outdated - whether the data is the possibly outdated embedded data,
+ * the fallback for online data which can't be loaded or is turned off, not
+ * current embedded data
  */
 function logNoMatch(
   tool: string,
@@ -194,7 +294,7 @@ function logNoMatch(
   version: string | undefined,
   host: Host,
   blocked: string | undefined,
-  embedded: boolean,
+  outdated: boolean,
 ): void {
   const requested = version ?? 'latest';
   if (
@@ -214,25 +314,18 @@ function logNoMatch(
     version === undefined
       ? 'no version is resolved'
       : `${version} is used as is`;
-  /** Logs the warning, naming the embedded data as its source. */
-  const warn = (message: string): void => warnData(message, embedded);
+  /** Logs the warning, noting when the data may be outdated. */
+  const warn = (message: string): void => warnData(message, outdated);
 
   if (blocked !== undefined) {
-    warn(
-      newerCbWarning(
-        tool,
-        blocked,
-        minCbByVersion(data).get(blocked),
-        host.cb,
-        outcome,
-      ),
-    );
+    warn(blockedWarning(tool, data, blocked, host, outcome));
     return;
   }
   const line =
     version === undefined || version === 'latest'
       ? data.versions
       : data.versions.filter((v) => matches(v.version, version));
+  // a tool without its own resolver also picks a deprecated release, see pick
   if (line.some((v) => !v.prerelease)) {
     warn(
       `No ${tool} release matches ${requested} for ${host.arch} on ${host.distro}, ${outcome}`,
@@ -265,18 +358,63 @@ export class ToolVersionResolverService {
    * is resolved from the tool-versions data, and keeps its version when the
    * data can't answer. A resolver which only resolves `latest` (see
    * {@link ToolVersionResolver.latestOnly}) gets a missing, empty or `latest`
-   * version, any other version is resolved from the data.
+   * version, any other version is resolved from the data. A resolver with a
+   * {@link ToolVersionResolver.dataField} resolves a missing, empty or
+   * `latest` version and a partial version from the data first, when the
+   * embedded data has a file for the tool, so an arbitrary package makes no
+   * request for data which doesn't exist, limited by its
+   * {@link ToolVersionResolver.dataFilter}. It only gets them when the data
+   * can't answer, and gets any other version. The version it resolves for an
+   * exact one, like the java build `11.0.24+8` for `11.0.24`, is checked
+   * against the `minCb` ranges of the embedded data, which only warns, see
+   * {@link checkExact}.
+   * @param data - whether the tool-versions data may be read at all,
+   * `install-gem`, `install-npm` and `install-pip` turn it off, so they always
+   * ask their registry: the resolver then answers any version, also a
+   * latest-only one, and a tool without a resolver keeps its version
    */
   async resolve(
     tool: string,
     version: string | undefined,
+    data = true,
   ): Promise<string | undefined> {
     const resolver = this.resolver.find((r) => r.tool === tool);
     const latest =
       !isNonEmptyStringAndNotWhitespace(version) || version === 'latest';
-    if (resolver && (latest || !resolver.latestOnly)) {
-      return (await resolver.resolve(version)) ?? version;
+    if (
+      data &&
+      resolver?.dataField &&
+      (latest || isPartialVersion(version)) &&
+      (await this.toolVersions.getVersions(tool))
+    ) {
+      const requested = latest ? undefined : version;
+      const resolved = await this.resolveFromData(
+        tool,
+        latest && version !== 'latest' ? undefined : version,
+        resolver.dataField,
+        await resolver.dataFilter(requested),
+      );
+      if (resolved !== undefined) {
+        return resolved;
+      }
     }
+    // without the data, the resolver answers any version, also a latest-only
+    // one, and a tool without a resolver keeps its version
+    if (resolver && (latest || !resolver.latestOnly || !data)) {
+      const resolved = (await resolver.resolve(version)) ?? version;
+      if (data && resolver.dataField && !latest && !isPartialVersion(version)) {
+        // the version the resolver answers is the one the data lists, eg. the
+        // java build `11.0.24+8` for `11.0.24`, it is never undefined here
+        // TODO: fail in the next major instead of only warning (#7962)
+        await this.checkExact(tool, resolved!);
+      }
+      return resolved;
+    }
+    if (!data) {
+      return version;
+    }
+    // a latest-only resolver has no `dataField`, the two flags exclude each
+    // other, so its partial versions are resolved like for a tool without one
     return (await this.resolveFromData(tool, version)) ?? version;
   }
 
@@ -289,25 +427,39 @@ export class ToolVersionResolverService {
    * {@link ToolVersionsService.getResolveVersions}: the online data, unless it
    * is turned off or the embedded data is current, else the embedded data,
    * which is only a possibly outdated fallback when the online data can't be
-   * loaded. A resolved version is logged at debug level, or with a warning
-   * when the embedded data replaces the online data, a version without a match
-   * is logged by {@link logNoMatch}. Only releases available for the host arch
+   * loaded, also for a tool with its own resolver. A resolved version is
+   * logged at debug level, or with a warning when the embedded data replaces
+   * the online data, a version without a match is logged by
+   * {@link logNoMatch}. Only releases available for the host arch
    * and distro, and installable by the running containerbase version
    * (`minCb`), are considered, also for the embedded release check. Only a
    * release version of containerbase filters by `minCb`, any other version,
    * like `0.0.0-PLACEHOLDER`, is a development build and doesn't.
+   * @param required - the field the data needs for the resolver of the tool,
+   * see {@link ToolVersionResolver.dataField}: data without it is skipped, as
+   * the resolver asks its own source; no match is only logged at debug level
+   * then, matching releases which all need a newer containerbase with a
+   * warning, and the resolver answers like before
+   * @param accept - the limits of the resolver of the tool on the releases,
+   * see {@link ToolVersionResolver.dataFilter}
    * @returns an exact version as given, else the resolved release, or
    * `undefined` when the data has no match or the tool has no data
    */
   private async resolveFromData(
     tool: string,
     version: string | undefined,
+    required?: DataField,
+    accept?: DataFilter,
   ): Promise<string | undefined> {
     const given = version !== undefined && version !== 'latest';
     if (given && !isPartialVersion(version)) {
       await this.checkExact(tool, version);
       return version;
     }
+
+    /** Whether the data has the field the resolver of the tool needs. */
+    const usable = (data: ToolVersions | undefined): data is ToolVersions =>
+      !!data && (!required || data[required] !== undefined);
 
     const host: Host = {
       arch: this.env.arch,
@@ -316,7 +468,10 @@ export class ToolVersionResolverService {
     };
     if (given) {
       const listed = await this.toolVersions.getVersions(tool);
-      if (listed && pick(tool, listed, version, host).version === version) {
+      if (
+        usable(listed) &&
+        pick(tool, listed, version, host, accept).version === version
+      ) {
         logger.debug(
           { tool, version, resolved: version },
           'version resolved from the embedded tool-versions data',
@@ -330,19 +485,67 @@ export class ToolVersionResolverService {
       return undefined;
     }
     const { data, source } = found;
-    const { version: resolved, blocked } = pick(tool, data, version, host);
-    if (resolved === undefined) {
-      // the embedded data may be outdated when the online data was looked up
-      // or is turned off, not when it is current
-      logNoMatch(
-        tool,
-        data,
-        version,
-        host,
-        blocked,
-        source === 'fallback' || source === 'offline',
+    if (!usable(data)) {
+      logger.debug(
+        { tool, required },
+        'tool-versions data without the field, using the resolver',
       );
       return undefined;
+    }
+    // a tool without its own resolver has no other lookup, so it picks a
+    // deprecated release when nothing else matches
+    const {
+      version: resolved,
+      deprecated,
+      blocked,
+    } = pick(tool, data, version, host, accept, !required);
+    // the embedded data may be outdated when the online data was looked up or
+    // is turned off, not when it is current
+    const outdated = source === 'fallback' || source === 'offline';
+    if (resolved === undefined) {
+      if (!required) {
+        logNoMatch(tool, data, version, host, blocked, outdated);
+      } else if (blocked === undefined) {
+        logger.debug(
+          { tool, version },
+          'no match in the tool-versions data, using the resolver',
+        );
+      } else {
+        // TODO: fail in the next major instead of using the resolver (#7962)
+        warnData(
+          blockedWarning(
+            tool,
+            data,
+            blocked,
+            host,
+            'the own lookup of the tool is used',
+          ),
+          outdated,
+        );
+      }
+      return undefined;
+    }
+    // TODO: fail in the next major instead of using a deprecated release (#7962)
+    if (deprecated && blocked !== undefined) {
+      // a newer release needs a newer containerbase
+      warnData(
+        blockedWarning(
+          tool,
+          data,
+          blocked,
+          host,
+          `the deprecated ${resolved} is used`,
+        ),
+        outdated,
+      );
+    } else if (deprecated) {
+      warnData(
+        resolved === data.latest
+          ? 'only deprecated releases match, the deprecated latest dist-tag is used'
+          : 'only deprecated releases match, the newest of them is used',
+        outdated,
+        { tool, version, resolved },
+      );
     }
     if (source === 'fallback') {
       warnData('online data not available', true, {

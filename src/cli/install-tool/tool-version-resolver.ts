@@ -5,6 +5,17 @@ import { EnvService, HttpService, lookupOptions } from '../services/index.ts';
 
 export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 
+/**
+ * A field of the tool-versions data a resolver needs, see
+ * {@link ToolVersionResolver.dataField}: the tool-level `lts` or `latest`
+ * field, or `versions` for a tool which only needs its releases, which every
+ * tool file has.
+ */
+export type DataField = 'lts' | 'latest' | 'versions';
+
+/** Checks a release of the tool-versions data, see {@link ToolVersionResolver.dataFilter}. */
+export type DataFilter = (version: string) => boolean;
+
 /** The version note shared by the tools accepting major or major.minor versions. */
 export const partialVersionHelp =
   'A major or major.minor version installs the newest matching release.';
@@ -80,6 +91,31 @@ export abstract class ToolVersionResolver {
    */
   // TODO: drop in the next major, when `latest` comes from the data too (#7962)
   readonly latestOnly: boolean = false;
+
+  /**
+   * The field of the tool-versions data the tool's rules for a missing
+   * version, `latest` and partial versions need, eg. `lts` for a tool whose
+   * `latest` is the newest LTS release, `latest` for an npm tool, `versions`
+   * for a gem or pip tool, whose `latest` is the newest release. When it is
+   * set, those versions are resolved from data with the field first, the
+   * online data or the embedded data, which replaces online data that can't
+   * be loaded with a warning, and the resolver only gets them when the data
+   * has no match. `undefined` resolves every version with the resolver.
+   */
+  readonly dataField: DataField | undefined = undefined;
+
+  /**
+   * Limits the releases of the tool-versions data the requested version may
+   * resolve to, for a tool with its own limits, like poetry, see
+   * {@link dataField}. Releases it rejects are skipped like releases which
+   * aren't available for the host.
+   * @param _version - the requested version, `undefined` for a missing one or
+   * `latest`
+   * @returns the check of a release, `undefined` without a limit
+   */
+  dataFilter(_version: string | undefined): Promise<DataFilter | undefined> {
+    return Promise.resolve(undefined);
+  }
 
   /**
    * Resolves the requested version, eg. a missing version or `latest` to the

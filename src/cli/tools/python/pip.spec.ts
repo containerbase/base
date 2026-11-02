@@ -139,4 +139,19 @@ describe('cli/tools/python/pip', () => {
     expect(svc.versionHelp).toBe(partialVersionHelp);
     expect(await svc.resolve('latest')).toBe('3.2.1');
   });
+
+  test.each([
+    // a typed pip tool reads the tool-versions data first
+    { tool: 'checkov', dataField: 'versions' },
+    // any other package always asks pypi
+    { tool: 'requests', dataField: undefined },
+  ])(
+    'createPipVersionResolver reads the data for $tool: $dataField',
+    async ({ tool, dataField }) => {
+      const { svc } = await toolContext(createPipVersionResolver(tool));
+
+      expect(svc.dataField).toBe(dataField);
+      expect(await svc.dataFilter(undefined)).toBeUndefined();
+    },
+  );
 });

@@ -2,6 +2,7 @@ import { arch } from 'node:os';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { HttpService, lookupOptions } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 import {
   NodeVersionResolver,
   NpmVersionResolver,
@@ -212,7 +213,7 @@ describe('cli/tools/node/resolver', () => {
         expect(await svc.resolve('9')).toBe('9.1.0');
       });
 
-      test('falls back to the newest version if all matching versions are deprecated', async () => {
+      test('resolves to the newest deprecated release with a warning if all matching versions are deprecated', async () => {
         scope(registryUrl)
           .get('/pnpm')
           .reply(200, {
@@ -226,6 +227,48 @@ describe('cli/tools/node/resolver', () => {
         const { svc } = await toolContext(PnpmVersionResolver);
 
         expect(await svc.resolve('9')).toBe('9.2.0');
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { tool: 'pnpm', version: '9', resolved: '9.2.0' },
+          'only deprecated releases match, the newest of them is used',
+        );
+      });
+
+      test('resolves latest past a deprecated latest dist tag', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '9.3.0' },
+            versions: {
+              '9.1.0': {},
+              '9.2.0': {},
+              '9.3.0': { deprecated: 'broken release' },
+              '9.4.0-rc.1': {},
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('latest')).toBe('9.2.0');
+      });
+
+      test('keeps a deprecated latest dist tag with a warning when every release is deprecated', async () => {
+        scope(registryUrl)
+          .get('/pnpm')
+          .reply(200, {
+            name: 'pnpm',
+            'dist-tags': { latest: '9.3.0' },
+            versions: {
+              '9.2.0': { deprecated: 'broken release' },
+              '9.3.0': { deprecated: 'broken release' },
+            },
+          });
+        const { svc } = await toolContext(PnpmVersionResolver);
+
+        expect(await svc.resolve('latest')).toBe('9.3.0');
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { tool: 'pnpm', latest: '9.3.0' },
+          'the latest dist tag is deprecated and no other release is, it is used anyway',
+        );
       });
 
       test('skips a deprecated latest dist tag', async () => {
@@ -275,7 +318,8 @@ describe('cli/tools/node/resolver', () => {
           });
         const { svc } = await toolContext(PnpmVersionResolver);
 
-        expect(await svc.resolve('latest')).toBe('9.4.0');
+        // the deprecated latest dist tag is skipped
+        expect(await svc.resolve('latest')).toBe('9.3.0');
         expect(await svc.resolve('9')).toBe('9.3.0');
       });
     });
@@ -289,6 +333,22 @@ describe('cli/tools/node/resolver', () => {
       expect(svc.tool).toBe('del-cli');
       expect(await svc.resolve(undefined)).toBe('6.0.0');
     });
+
+    test.each([
+      // typed npm tools read the tool-versions data first
+      { tool: 'pnpm', dataField: 'latest' },
+      { tool: 'npm', dataField: 'latest' },
+      // any other package always uses the npm registry
+      { tool: 'del-cli', dataField: undefined },
+      { tool: 'flux', dataField: undefined },
+    ])(
+      'reads the tool-versions data for $tool: $dataField',
+      ({ tool, dataField }) => {
+        const Resolver = createNpmVersionResolver(tool);
+
+        expect(new Resolver().dataField).toBe(dataField);
+      },
+    );
   });
 
   describe('YarnVersionResolver', () => {
