@@ -34,23 +34,51 @@ const silentLogger: Logger = {
   error: noop,
 };
 
-let current = silentLogger;
-let configured = false;
+/**
+ * The logger state, shared by every installed copy of the package through
+ * {@link registryKey}, whatever its version. Its shape is a contract across
+ * versions: only add optional fields, never change or remove one.
+ */
+interface LoggerState {
+  logger: Logger;
+  configured: boolean;
+}
+
+/** The global key of the shared {@link LoggerState}. */
+const registryKey = Symbol.for('containerbase.logger');
+
+/**
+ * The shared logger state, created as a silent and unconfigured one by the
+ * first copy which needs it.
+ */
+function state(): LoggerState {
+  const registry = globalThis as unknown as Record<
+    symbol,
+    LoggerState | undefined
+  >;
+  return (registry[registryKey] ??= {
+    logger: silentLogger,
+    configured: false,
+  });
+}
 
 /**
  * Configures the package, eg. sets the logger its functions log to. Options
- * which are left out are reset to their defaults.
+ * which are left out are reset to their defaults. Every installed copy of the
+ * package shares the logger, so a package building on another version of this
+ * one logs to it too.
  *
  * @param options the options to set
  */
 export function configure(options: ConfigureOptions = {}): void {
-  current = options.logger ?? silentLogger;
-  configured = options.logger !== undefined;
+  const current = state();
+  current.logger = options.logger ?? silentLogger;
+  current.configured = options.logger !== undefined;
 }
 
 /** The logger set by `configure`, a silent one by default. */
 export function getLogger(): Logger {
-  return current;
+  return state().logger;
 }
 
 /**
@@ -58,5 +86,5 @@ export function getLogger(): Logger {
  * configure a fallback logger itself when nobody else did.
  */
 export function isConfigured(): boolean {
-  return configured;
+  return state().configured;
 }

@@ -748,6 +748,28 @@ describe('packages/base', () => {
       main.configure();
     });
 
+    test('shares the logger with another copy of the package', async () => {
+      const logger = {
+        trace: vi.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      };
+      vi.resetModules();
+      const copy = await import('../../packages/base/src/logger.ts');
+      expect(copy.configure).not.toBe(main.configure);
+      expect(copy.isConfigured()).toBe(false);
+
+      main.configure({ logger });
+      expect(copy.isConfigured()).toBe(true);
+      expect(copy.getLogger()).toBe(logger);
+
+      copy.configure();
+      expect(main.isConfigured()).toBe(false);
+      expect(() => main.getLogger().warn('silent')).not.toThrow();
+    });
+
     test('accepts a pino and a Renovate logger', () => {
       expectTypeOf<PinoLogger>().toExtend<Logger>();
       // the log methods of lib/logger/types.ts in Renovate
