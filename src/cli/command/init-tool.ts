@@ -43,7 +43,7 @@ export class InitToolCommand extends Command {
         );
       } else {
         logger.info(
-          `Initialize tools ${this.tools.join(', ')} succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Initialize tools ${this.tools.join(', ')} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }

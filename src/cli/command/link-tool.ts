@@ -63,7 +63,7 @@ export class LinkToolCommand extends Command {
         );
       } else {
         logger.debug(
-          `Linking tools ${this.name} (${this.tool}) succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Linking tools ${this.name} (${this.tool}) succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }

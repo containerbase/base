@@ -69,7 +69,7 @@ export class FileDownloadCommand extends Command {
         );
       } else {
         logger.info(
-          `Download succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Download succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }
