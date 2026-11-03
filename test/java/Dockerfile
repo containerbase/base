@@ -105,12 +105,12 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: Java 21 LTS + Gradle 9
+# test: Java 25 LTS + Gradle 9
 #--------------------------------------
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.13+9.0.LTS
+RUN install-tool java-jre 25.0.5+8.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 9.8.2
@@ -169,6 +169,7 @@ RUN prepare-tool java gradle
 # test openshift userid missmatch
 USER 1001
 
+# old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version depName=java packageName=java?os=linux&architecture=x64
 ARG JAVA_JDK_VERSION=17.0.21+9
 RUN install-tool java-jdk
@@ -186,6 +187,7 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 #--------------------------------------
 FROM base AS test-gradle-e
 
+# old LTS, gradle 8 doesn't run on java 25, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java-jre 21.0.13+9.0.LTS
 
