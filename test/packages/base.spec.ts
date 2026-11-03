@@ -16,6 +16,7 @@ import {
   isToolVersionsFormat,
   packageVersion,
   replaceUrl,
+  replaceUrlPrefix,
   toolNames,
   toolVersionsFormat,
   toolVersionsFormatPath,
@@ -1069,5 +1070,73 @@ describe('packages/base', () => {
     expect(replaceUrl('https://registry.npmjs.org', replacements, '')).toBe(
       'https://registry.npmjs.org',
     );
+  });
+
+  describe('replaceUrlPrefix', () => {
+    interface Rule {
+      from: string;
+      to: string;
+      public?: boolean;
+    }
+    const npm: Rule = {
+      from: 'https://registry.npmjs.org/',
+      to: 'https://npm.example.test/',
+    };
+    const mirror: Rule = {
+      from: 'https://npm.example.test/',
+      to: 'https://mirror.example.test/npm/',
+      public: true,
+    };
+
+    test('keeps a url without a matching prefix', () => {
+      expect(replaceUrlPrefix('https://example.com/file.txt', [npm])).toEqual({
+        url: 'https://example.com/file.txt',
+        applied: [],
+      });
+    });
+
+    test('keeps the url without rules', () => {
+      expect(replaceUrlPrefix('https://registry.npmjs.org/foo', [])).toEqual({
+        url: 'https://registry.npmjs.org/foo',
+        applied: [],
+      });
+    });
+
+    test('replaces a prefix', () => {
+      expect(replaceUrlPrefix('https://registry.npmjs.org/foo', [npm])).toEqual(
+        {
+          url: 'https://npm.example.test/foo',
+          applied: [npm],
+        },
+      );
+    });
+
+    test('chains the rules in order and keeps their extra fields', () => {
+      const result = replaceUrlPrefix('https://registry.npmjs.org/foo', [
+        npm,
+        mirror,
+      ]);
+      expect(result).toEqual({
+        url: 'https://mirror.example.test/npm/foo',
+        applied: [npm, mirror],
+      });
+      expect(result.applied[1]).toBe(mirror);
+      expectTypeOf(result.applied).toEqualTypeOf<Rule[]>();
+    });
+
+    test('applies a rule only to the result of the previous ones', () => {
+      expect(
+        replaceUrlPrefix('https://registry.npmjs.org/foo', [mirror, npm]),
+      ).toEqual({
+        url: 'https://npm.example.test/foo',
+        applied: [npm],
+      });
+    });
+
+    test('ignores a match outside the start of the url', () => {
+      const url =
+        'https://example.com/redirect?u=https://registry.npmjs.org/foo';
+      expect(replaceUrlPrefix(url, [npm])).toEqual({ url, applied: [] });
+    });
   });
 });

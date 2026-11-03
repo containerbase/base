@@ -42,8 +42,13 @@ export {
   toolVersionsFormatPath,
 } from './tool-versions-format.ts';
 
-export type { UrlReplacement, UrlReplacements } from './url.ts';
-export { getUrlReplacements, replaceUrl } from './url.ts';
+export type {
+  UrlPrefixResult,
+  UrlPrefixRule,
+  UrlReplacement,
+  UrlReplacements,
+} from './url.ts';
+export { getUrlReplacements, replaceUrl, replaceUrlPrefix } from './url.ts';
 
 export { tools };
 
