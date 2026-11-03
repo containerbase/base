@@ -513,6 +513,13 @@ describe('cli/install-tool/index', () => {
           expected: '24.2.0',
         },
         {
+          tool: 'conan',
+          type: undefined,
+          extra: {},
+          versions: releases,
+          expected: '2.5.1',
+        },
+        {
           tool: 'java',
           type: undefined,
           extra: { lts: true },
