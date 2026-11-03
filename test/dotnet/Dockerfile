@@ -74,7 +74,7 @@ RUN set -ex;  \
 #--------------------------------------
 FROM base AS testb
 
-# only patch updates
+# old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 8.0.427
 
