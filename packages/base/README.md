@@ -123,7 +123,8 @@ replaceUrl(
 
 `replaceUrl` replaces the first occurrence of a `from` anywhere in the url; the next major only matches at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
 `replaceUrlPrefix(url, rules)` already does: the rules apply in order, each to the result of the previous ones, and only when the url starts with its `from`.
-It has no cdn step and returns the replaced url with the rules that matched, other fields of the rules are kept:
+It has no cdn step and returns the replaced url with the rules that matched, other fields of the rules are kept.
+End `from` and `to` with a `/`, like `https://example.com/`, so a rule only matches that host: `https://example.com` also matches `https://example.com.test/`.
 
 ```ts
 import { replaceUrlPrefix } from '@containerbase/base';

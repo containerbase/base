@@ -96,7 +96,9 @@ export interface UrlPrefixResult<T extends UrlPrefixRule> {
  * Replaces url prefixes: the rules are applied in order, each one to the
  * result of the previous ones, and a rule only applies when the url starts
  * with its `from`, which is then replaced by its `to`. Unlike `replaceUrl`,
- * a `from` elsewhere in the url never matches, and there is no cdn.
+ * a `from` elsewhere in the url never matches, and there is no cdn. End `from`
+ * and `to` with a `/`, like `https://example.com/`, so a rule only matches that
+ * host: `https://example.com` also matches `https://example.com.test/`.
  *
  * @param url the url to replace
  * @param rules the rules, in order
