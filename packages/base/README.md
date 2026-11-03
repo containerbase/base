@@ -157,6 +157,7 @@ configure({ logger });
 ```
 
 `getLogger()` returns the configured logger, so a package building on `@containerbase/base` can log to the same one.
+All installed copies of the package share the logger, also when they have different versions, so such a package logs to it even when it uses another copy.
 `isConfigured()` tells whether a logger was set, so that package can configure a fallback when nobody did:
 
 ```ts
