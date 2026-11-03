@@ -45,7 +45,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.2
+RUN install-tool node 26.13.0
 
 # ensure npmrc is writable by user
 RUN set -ex; [ $(stat --format '%u' "/tmp/containerbase/cache/.npmrc") -eq ${USER_ID} ]
@@ -126,17 +126,18 @@ RUN set -ex; cd a; \
   pnpm i
 
 #--------------------------------------
-# test: node 20
+# test: node 24
 #--------------------------------------
 
-FROM base AS test-v20
+FROM base AS test-v24
 
 RUN prepare-tool node
 
 USER 12021
 
+# old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 20.20.2
+RUN install-tool node 24.22.2
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -172,6 +173,7 @@ RUN prepare-tool node
 
 USER 12021
 
+# old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.23.4
 
@@ -411,7 +413,13 @@ RUN npm --version | grep "${NPM_VERSION}"
 #--------------------------------------
 # test: corepack
 #--------------------------------------
-FROM build AS testl
+FROM base AS testl
+
+# node 25+ doesn't bundle corepack, old LTS, no major updates (see .github/renovate.json)
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 24.22.2
+
+USER 12021
 
 SHELL [ "/bin/sh", "-c" ]
 RUN set -ex; \
@@ -960,6 +968,6 @@ COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-cleanup /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 
-COPY --from=test-v20 /.dummy /.dummy
+COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
 COPY --from=test-partial /.dummy /.dummy

@@ -291,6 +291,14 @@
       "matchCurrentVersion": "/^28\\./",
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "description": "Keep the old node LTS test stages on their major, only the newest LTS gets major updates",
+      "matchDepNames": ["node"],
+      "matchFileNames": ["test/node/Dockerfile"],
+      "matchCurrentVersion": "/^(22|24)\\./",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ],
   "customManagers": [
