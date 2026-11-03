@@ -121,6 +121,20 @@ replaceUrl(
 );
 ```
 
+`replaceUrl` replaces the first occurrence of a `from` anywhere in the url; the next major only matches at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
+`replaceUrlPrefix(url, rules)` already does: the rules apply in order, each to the result of the previous ones, and only when the url starts with its `from`.
+It has no cdn step and returns the replaced url with the rules that matched, other fields of the rules are kept.
+End `from` and `to` with a `/`, like `https://example.com/`, so a rule only matches that host: `https://example.com` also matches `https://example.com.test/`.
+
+```ts
+import { replaceUrlPrefix } from '@containerbase/base';
+
+const { url, applied } = replaceUrlPrefix('https://registry.npmjs.org/foo', [
+  { from: 'https://registry.npmjs.org/', to: 'https://npm.example.test/' },
+]);
+// url: 'https://npm.example.test/foo', applied: [the rule]
+```
+
 A tool's data may list `minCb` ranges, the oldest containerbase version which can install a version and every version above it.
 `filterByMinCb(data, cbVersion)` returns the `versions` the given containerbase version can install, in the order of the data, and the `cb` values of the unmet ranges as `needed`.
 A `cbVersion` which isn't a release, like `0.0.0-PLACEHOLDER` (see `isReleaseVersion(version)`), skips the filter:

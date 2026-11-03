@@ -57,6 +57,7 @@ export function getUrlReplacements(
  * @param cdn the cdn url, eg. from `CONTAINERBASE_CDN`, skipped when empty
  * @returns the replaced url
  */
+// TODO: match only at the start of the url in the next major, like `replaceUrlPrefix` (#8160)
 export function replaceUrl(
   url: string,
   replacements: readonly UrlReplacement[],
@@ -73,4 +74,49 @@ export function replaceUrl(
   }
 
   return result;
+}
+
+/** A url prefix replacement rule, other fields are kept as they are. */
+export interface UrlPrefixRule {
+  /** The url prefix to replace. */
+  from: string;
+  /** Its replacement. */
+  to: string;
+}
+
+/** The result of `replaceUrlPrefix`. */
+export interface UrlPrefixResult<T extends UrlPrefixRule> {
+  /** The replaced url. */
+  url: string;
+  /** The rules which matched, in order. */
+  applied: T[];
+}
+
+/**
+ * Replaces url prefixes: the rules are applied in order, each one to the
+ * result of the previous ones, and a rule only applies when the url starts
+ * with its `from`, which is then replaced by its `to`. Unlike `replaceUrl`,
+ * a `from` elsewhere in the url never matches, and there is no cdn. End `from`
+ * and `to` with a `/`, like `https://example.com/`, so a rule only matches that
+ * host: `https://example.com` also matches `https://example.com.test/`.
+ *
+ * @param url the url to replace
+ * @param rules the rules, in order
+ * @returns the replaced url and the rules which matched
+ */
+export function replaceUrlPrefix<T extends UrlPrefixRule>(
+  url: string,
+  rules: readonly T[],
+): UrlPrefixResult<T> {
+  let result = url;
+  const applied: T[] = [];
+
+  for (const rule of rules) {
+    if (result.startsWith(rule.from)) {
+      result = rule.to + result.slice(rule.from.length);
+      applied.push(rule);
+    }
+  }
+
+  return { url: result, applied };
 }
