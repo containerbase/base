@@ -189,7 +189,8 @@
       "description": "Update the embedded tool-versions data daily with a fix release, so each day has a release with fresh offline data",
       "matchDepNames": ["tool-versions"],
       "extends": ["schedule:daily"],
-      "semanticCommitType": "fix"
+      "semanticCommitType": "fix",
+      "prPriority": 10
     },
     {
       "description": "Handle the tag prefix of jq releases",
