@@ -100,7 +100,8 @@ describe('cli/tools/php/composer', () => {
       const { svc } = await toolContext(ComposerVersionResolver);
 
       expect(await svc.resolve('2.8.3')).toBe('2.8.3');
-      expect(svc.latestOnly).toBe(true);
+      // latest and partial versions come from the data first
+      expect(svc.dataField).toBe('versions');
     });
   });
 });

@@ -288,7 +288,8 @@ describe('cli/tools/php/index', () => {
       const { svc } = await toolContext(PhpVersionResolver);
 
       expect(await svc.resolve('8.3.13')).toBe('8.3.13');
-      expect(svc.latestOnly).toBe(true);
+      // latest and partial versions come from the data first
+      expect(svc.dataField).toBe('versions');
     });
   });
 });

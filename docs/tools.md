@@ -150,11 +150,11 @@ Some tools accept partial versions and install a matching release:
 - `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
   A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
-- `php`, `composer`, `mise`: A major (`8`) or major.minor (`8.3`) version is resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
-  Without a version, or with `latest`, the latest release is looked up directly, as the data can lag behind a new release: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
+- `php`, `composer`, `mise`: A missing version, `latest` and a major (`8`) or major.minor (`8.3`) version are resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
+  When the data has no match, a missing version or `latest` is looked up directly: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
 
 The tools above keep their own rules, except where noted.
-`java`, `node` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
+`java`, `node`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
 They use the embedded data with a warning when the online data can't be loaded, like the other tools, and only ask their own lookup when neither data has a match.
 So while the embedded data is older than the max age, `latest` and partial versions of these tools first ask the online tool-versions data, and where `containerbase.github.io` is silently dropped, that waits up to the 30 s timeout of the tool-versions data before the embedded data or their own source answers, which `CONTAINERBASE_RESOLVER_OFFLINE=true` avoids.
 When the data lists matching releases, but all of them need a newer containerbase, a warning is logged and the tool's own lookup is used, like before.
@@ -177,7 +177,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
   Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget` and `cocoapods`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
-  For example `java`, `node` and the npm, pip and gem tools of `install-tool` use it when the embedded data has no match, `php`, `composer` and `mise` for `latest`.
+  For example `java`, `node`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` use it when the embedded data has no match.
   These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
   For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.

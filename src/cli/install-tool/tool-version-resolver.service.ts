@@ -356,9 +356,9 @@ export class ToolVersionResolverService {
   /**
    * Resolves the version with the tool's resolver. A tool without a resolver
    * is resolved from the tool-versions data, and keeps its version when the
-   * data can't answer. A resolver which only resolves `latest` (see
-   * {@link ToolVersionResolver.latestOnly}) gets a missing, empty or `latest`
-   * version, any other version is resolved from the data. A resolver with a
+   * data can't answer. A resolver without a
+   * {@link ToolVersionResolver.dataField} answers every version. A resolver
+   * with a
    * {@link ToolVersionResolver.dataField} resolves a missing, empty or
    * `latest` version and a partial version from the data first, when the
    * embedded data has a file for the tool, so an arbitrary package makes no
@@ -370,8 +370,8 @@ export class ToolVersionResolverService {
    * {@link checkExact}.
    * @param data - whether the tool-versions data may be read at all,
    * `install-gem`, `install-npm` and `install-pip` turn it off, so they always
-   * ask their registry: the resolver then answers any version, also a
-   * latest-only one, and a tool without a resolver keeps its version
+   * ask their registry: the resolver then answers any version, and a tool
+   * without a resolver keeps its version
    */
   async resolve(
     tool: string,
@@ -398,9 +398,9 @@ export class ToolVersionResolverService {
         return resolved;
       }
     }
-    // without the data, the resolver answers any version, also a latest-only
-    // one, and a tool without a resolver keeps its version
-    if (resolver && (latest || !resolver.latestOnly || !data)) {
+    // without the data, the resolver answers any version, and a tool without a
+    // resolver keeps its version
+    if (resolver) {
       const resolved = (await resolver.resolve(version)) ?? version;
       if (data && resolver.dataField && !latest && !isPartialVersion(version)) {
         // the version the resolver answers is the one the data lists, eg. the
@@ -413,8 +413,6 @@ export class ToolVersionResolverService {
     if (!data) {
       return version;
     }
-    // a latest-only resolver has no `dataField`, the two flags exclude each
-    // other, so its partial versions are resolved like for a tool without one
     return (await this.resolveFromData(tool, version)) ?? version;
   }
 
