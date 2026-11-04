@@ -9,8 +9,9 @@ You can find the default urls in the tool sections below.
 The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables must match.
 Theses variables are case sensitive.
 The numbers will be processed in numerical order and can have gaps.
-Each `URL_REPLACE_*_FROM` replaces its first occurrence anywhere in the url.
-The next major only replaces it at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
+Each `URL_REPLACE_*_FROM` replaces the url only when it starts with it, applied to the result of the replacements before.
+With `CONTAINERBASE_CDN` set, its rewrite runs first, so match the cdn url, see [containerbase CDN](./cdn.md).
+Use the full url prefix with `http://` or `https://`, a `URL_REPLACE_*_FROM` without one, like a bare host, prints a warning.
 
 ```Dockerfile
 FROM containerbase/base
