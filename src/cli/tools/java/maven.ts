@@ -36,25 +36,30 @@ export class MavenInstallService extends BaseInstallService {
 
   /**
    * Installs the containerbase maven prebuild when there is one, else the
-   * apache distribution from repo.maven.apache.org. The prebuild and its
-   * checksum come from the tool-versions data first. Without data both are
-   * verified against their `.sha512`, or a `.sha1` for old apache releases.
+   * apache distribution. The tool-versions data lists both files of a
+   * version, so they are picked by name, the prebuild first. Without data
+   * the prebuild comes from its GitHub release and the apache distribution
+   * from repo.maven.apache.org, verified against their `.sha512`, or a
+   * `.sha1` for old apache releases.
    *
    * @throws when no checksum file is found
    */
   override async install(version: string): Promise<void> {
-    const filename = `${this.name}-${version}.tar.xz`;
-    const prebuild =
-      (await this.downloadNamedToolFile(version, filename)) ??
-      (await this.downloadPrebuild(version, filename));
-    const file = prebuild ?? (await this.downloadApache(version));
-
-    let path = await this.pathSvc.ensureToolPath(this.name);
-
-    if (!prebuild) {
-      // from repo.maven.apache.org
-      path = await this.pathSvc.createVersionedToolPath(this.name, version);
+    const prebuildFile = `${this.name}-${version}.tar.xz`;
+    const apacheFile = `apache-${this.name}-${version}-bin.tar.gz`;
+    let file = await this.downloadNamedToolFile(version, prebuildFile);
+    let prebuild = !!file;
+    file ??= await this.downloadNamedToolFile(version, apacheFile);
+    if (!file) {
+      file = await this.downloadPrebuild(version, prebuildFile);
+      prebuild = !!file;
     }
+    file ??= await this.downloadApache(version, apacheFile);
+
+    // the apache distribution has a top level folder, the prebuild not
+    const path = prebuild
+      ? await this.pathSvc.ensureToolPath(this.name)
+      : await this.pathSvc.createVersionedToolPath(this.name, version);
 
     await this.compress.extract({
       file,
@@ -92,11 +97,14 @@ export class MavenInstallService extends BaseInstallService {
    * Downloads the apache distribution from repo.maven.apache.org, verified
    * against its `.sha512`, or a `.sha1` for old releases.
    *
+   * @param filename - the name of the apache distribution file
    * @throws when no checksum file is found
    */
-  private async downloadApache(version: string): Promise<string> {
+  private async downloadApache(
+    version: string,
+    filename: string,
+  ): Promise<string> {
     logger.info(`using repo.maven.apache.org`);
-    const filename = `apache-${this.name}-${version}-bin.tar.gz`;
     const url = `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${version}/${filename}`;
     const file =
       (await this.downloadOptionalChecksumSidecar(url, '.sha512', 'sha512')) ??

@@ -501,7 +501,8 @@ Maven releases are downloaded from:
 - `https://github.com/containerbase/maven-prebuild/releases`
 - `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven`
 
-The first url is preferred and the second is used as fallback for older versions.
+The first url is preferred and the second is used for versions without a prebuild.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the downloads are verified against their `.sha512` file, or `.sha1` for old Apache releases, so a mirror needs to provide both files.
 
 Samples:
 
