@@ -5,7 +5,7 @@ import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import {
   ToolVersionResolver,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import { getDistro } from '../../utils/index.ts';
 
 @injectable()

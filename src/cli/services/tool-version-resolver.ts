@@ -1,7 +1,8 @@
 import merge from 'deepmerge';
 import type { OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from 'got';
 import { inject, injectable } from 'inversify';
-import { EnvService, HttpService, lookupOptions } from '../services/index.ts';
+import { EnvService } from './env.service.ts';
+import { HttpService, lookupOptions } from './http.service.ts';
 
 export const TOOL_VERSION_RESOLVER = Symbol('TOOL_VERSION_RESOLVER');
 

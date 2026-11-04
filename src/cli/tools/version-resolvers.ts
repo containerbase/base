@@ -1,32 +1,37 @@
-import { NugetVersionResolver } from '../tools/dotnet/nuget.ts';
-import { ResolverMap } from '../tools/index.ts';
-import { AndroidSdkCmdlineToolsVersionResolver } from '../tools/java/android.ts';
-import { GradleVersionResolver } from '../tools/java/gradle.ts';
-import { MavenVersionResolver } from '../tools/java/maven.ts';
+import type { Container } from 'inversify';
+import { ToolVersionResolverService } from '../services/tool-version-resolver.service.ts';
+import {
+  TOOL_VERSION_RESOLVER,
+  type ToolVersionResolver,
+} from '../services/tool-version-resolver.ts';
+import type { InstallToolType } from '../utils/index.ts';
+import { NugetVersionResolver } from './dotnet/nuget.ts';
+import { ResolverMap } from './index.ts';
+import { AndroidSdkCmdlineToolsVersionResolver } from './java/android.ts';
+import { GradleVersionResolver } from './java/gradle.ts';
+import { MavenVersionResolver } from './java/maven.ts';
 import {
   JavaJdkVersionResolver,
   JavaJreVersionResolver,
   JavaVersionResolver,
-} from '../tools/java/resolver.ts';
-import { MiseVersionResolver } from '../tools/mise.ts';
+} from './java/resolver.ts';
+import { MiseVersionResolver } from './mise.ts';
 import {
   NodeVersionResolver,
   YarnVersionResolver,
   createNpmVersionResolver,
-} from '../tools/node/resolver.ts';
-import { ComposerVersionResolver } from '../tools/php/composer.ts';
-import { PhpVersionResolver } from '../tools/php/index.ts';
-import { ConanVersionResolver } from '../tools/python/conan.ts';
-import { createPipVersionResolver } from '../tools/python/pip.ts';
-import { PoetryVersionResolver } from '../tools/python/poetry.ts';
-import { CocoapodsVersionResolver } from '../tools/ruby/cocoapods.ts';
-import { createGemVersionResolver } from '../tools/ruby/utils.ts';
-import type { InstallToolType } from '../utils/index.ts';
-import type { ToolVersionResolver } from './tool-version-resolver.ts';
+} from './node/resolver.ts';
+import { ComposerVersionResolver } from './php/composer.ts';
+import { PhpVersionResolver } from './php/index.ts';
+import { ConanVersionResolver } from './python/conan.ts';
+import { createPipVersionResolver } from './python/pip.ts';
+import { PoetryVersionResolver } from './python/poetry.ts';
+import { CocoapodsVersionResolver } from './ruby/cocoapods.ts';
+import { createGemVersionResolver } from './ruby/utils.ts';
 
 export type VersionResolverClass = new () => ToolVersionResolver;
 
-/** All tool version resolvers, bound in the resolve container. */
+/** All tool version resolvers, see {@link bindVersionResolvers}. */
 export const versionResolvers: readonly VersionResolverClass[] = [
   AndroidSdkCmdlineToolsVersionResolver,
   CocoapodsVersionResolver,
@@ -44,6 +49,17 @@ export const versionResolvers: readonly VersionResolverClass[] = [
   PoetryVersionResolver,
   YarnVersionResolver,
 ];
+
+/**
+ * Binds the {@link ToolVersionResolverService} and all tool version resolvers
+ * in a container.
+ */
+export function bindVersionResolvers(container: Container): void {
+  container.bind(ToolVersionResolverService).toSelf();
+  for (const resolver of versionResolvers) {
+    container.bind(TOOL_VERSION_RESOLVER).to(resolver);
+  }
+}
 
 /**
  * Creates the generic version resolver of a tool installed with

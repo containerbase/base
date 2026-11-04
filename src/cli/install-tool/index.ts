@@ -5,6 +5,8 @@ import {
   IpcClient,
   LinkToolService,
   PathService,
+  TOOL_VERSION_RESOLVER,
+  ToolVersionResolverService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -81,6 +83,10 @@ import { SwiftInstallService } from '../tools/swift.ts';
 import { TerraformInstallService } from '../tools/terraform.ts';
 import { TofuInstallService } from '../tools/tofu.ts';
 import { VendirInstallService } from '../tools/vendir.ts';
+import {
+  bindVersionResolvers,
+  createGenericVersionResolver,
+} from '../tools/version-resolvers.ts';
 import { WallyInstallService } from '../tools/wally.ts';
 import {
   type DistroCode,
@@ -97,12 +103,6 @@ import {
   INSTALL_TOOL_TOKEN,
   InstallToolService,
 } from './install-tool.service.ts';
-import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
-import { TOOL_VERSION_RESOLVER } from './tool-version-resolver.ts';
-import {
-  createGenericVersionResolver,
-  versionResolvers,
-} from './version-resolvers.ts';
 
 /**
  * Creates a container with all install services, including a generic one for
@@ -206,13 +206,7 @@ function prepareResolveContainer(): Container {
   logger.trace('preparing resolve container');
   const container = createContainer();
 
-  // core services
-  container.bind(ToolVersionResolverService).toSelf();
-
-  // tool version resolver
-  for (const resolver of versionResolvers) {
-    container.bind(TOOL_VERSION_RESOLVER).to(resolver);
-  }
+  bindVersionResolvers(container);
 
   logger.trace('preparing container done');
   return container;

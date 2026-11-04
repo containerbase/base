@@ -5,13 +5,13 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import { VersionService } from '../../services/index.ts';
 import {
   ToolVersionResolver,
   isPartialVersion,
   newestVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
-import { VersionService } from '../../services/index.ts';
+} from '../../services/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
 import { ResolverMap, getToolType } from '../index.ts';
 import { RubyGemJson, RubyGemVersionsJson } from './schema.ts';

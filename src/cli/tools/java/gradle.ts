@@ -7,7 +7,7 @@ import {
   isPartialVersion,
   newestVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import { logger, semverCoerce } from '../../utils/index.ts';
 import { GradleReleases, GradleVersionData } from './schema.ts';
 

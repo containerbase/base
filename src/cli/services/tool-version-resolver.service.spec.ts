@@ -2,13 +2,13 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { arch } from 'node:os';
 import { type Container, injectFromHierarchy, injectable } from 'inversify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { getDistro, logger } from '../utils/index.ts';
 import {
   EnvService,
   HttpService,
   ToolVersionsService,
   createContainer,
-} from '../services/index.ts';
-import { getDistro, logger } from '../utils/index.ts';
+} from './index.ts';
 import { ToolVersionResolverService } from './tool-version-resolver.service.ts';
 import {
   TOOL_VERSION_RESOLVER,
@@ -177,7 +177,7 @@ function serve(
     .reply(status, Array.isArray(body) ? toolFile(tool, body, minCb) : body);
 }
 
-describe('cli/install-tool/tool-version-resolver.service', () => {
+describe('cli/services/tool-version-resolver.service', () => {
   let child!: Container;
   let svc!: ToolVersionResolverService;
 
