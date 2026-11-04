@@ -130,7 +130,7 @@ RUN set -ex; cd a; \
 #--------------------------------------
 FROM build AS test-aube
 
-# renovate: datasource=github-releases packageName=jdx/aube
+# renovate: datasource=github-releases packageName=aubepkg/aube
 RUN install-tool aube 1.41.0
 
 RUN set -ex; cd aube; \

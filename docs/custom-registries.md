@@ -85,15 +85,15 @@ https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.g
 
 ## `aube`
 
-Aube releases are downloaded from:
+Aube releases are downloaded from the urls of the [tool-versions](https://github.com/containerbase/tool-versions) data, which point to:
 
-- `https://github.com/jdx/aube/releases`
+- `https://github.com/aubepkg/aube/releases`
 
 Samples:
 
 ```txt
-https://github.com/jdx/aube/releases/download/v1.41.0/aube-v1.41.0-aarch64-unknown-linux-gnu.tar.gz
-https://github.com/jdx/aube/releases/download/v1.41.0/aube-v1.41.0-x86_64-unknown-linux-gnu.tar.gz
+https://github.com/aubepkg/aube/releases/download/v1.41.0/aube-v1.41.0-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/aubepkg/aube/releases/download/v1.41.0/aube-v1.41.0-x86_64-unknown-linux-gnu.tar.gz
 ```
 
 ## `bazelisk`

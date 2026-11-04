@@ -73,7 +73,7 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 #--------------------------------------
 FROM test-node AS test-aube
 
-# renovate: datasource=github-releases packageName=jdx/aube
+# renovate: datasource=github-releases packageName=aubepkg/aube
 RUN install-tool aube 1.41.0
 
 COPY --chown=12021:0 test/node/test/aube /tmp/aube
