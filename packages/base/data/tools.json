@@ -3,6 +3,7 @@
     "android-sdk-cmdline-tools": { "parent": "java", "minVersion": "1" },
     "apko": { "minVersion": "0.1.1" },
     "apm": { "minVersion": "0.4.0" },
+    "aube": { "minVersion": "1.0.0" },
     "bazelisk": { "minVersion": "0.0.1" },
     "bower": { "type": "npm", "parent": "node", "deprecated": true },
     "buf": { "minVersion": "0.1.0" },

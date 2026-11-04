@@ -149,6 +149,7 @@ describe('packages/base', () => {
       ['android-sdk-cmdline-tools', '1'],
       ['apko', '0.1.1'],
       ['apm', '0.4.0'],
+      ['aube', '1.0.0'],
       ['bazelisk', '0.0.1'],
       ['buf', '0.1.0'],
       ['buildx', '0.2.0'],
