@@ -277,6 +277,14 @@
       "enabled": false
     },
     {
+      "description": "Keep the gradle 8 test stage on its major, it tests gradle 8 on java 21",
+      "matchDepNames": ["gradle"],
+      "matchFileNames": ["test/java/Dockerfile"],
+      "matchCurrentVersion": "/^8\\./",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "description": "Keep the old dotnet LTS test stage on its major, only the newest LTS gets major updates",
       "matchDepNames": ["dotnet"],
       "matchFileNames": ["test/dotnet/Dockerfile"],
