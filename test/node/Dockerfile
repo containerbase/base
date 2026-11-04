@@ -126,6 +126,25 @@ RUN set -ex; cd a; \
   pnpm i
 
 #--------------------------------------
+# test: aube
+#--------------------------------------
+FROM build AS test-aube
+
+# renovate: datasource=github-releases packageName=aubepkg/aube
+RUN install-tool aube 1.41.0
+
+RUN set -ex; cd aube; \
+  aube install; \
+  test -f node_modules/is-number/index.js; \
+  test -f postinstall-ran
+
+RUN set -ex; cd aube; \
+  rm -rf node_modules postinstall-ran; \
+  aube install --ignore-scripts; \
+  test -f node_modules/is-number/index.js; \
+  test ! -e postinstall-ran
+
+#--------------------------------------
 # test: node 24
 #--------------------------------------
 
@@ -930,7 +949,7 @@ USER root
 ARG VP_SETUP_NODE_VERSION=24.22.1
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=1.4.0
+ARG VP_VERSION=1.5.0
 RUN install-tool vp "${VP_VERSION}"
 
 COPY test/node/vp/sync-versions.mjs /test/vp/
@@ -951,6 +970,7 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
+COPY --from=test-aube /.dummy /.dummy
 COPY --from=teste /.dummy /.dummy
 COPY --from=testf /.dummy /.dummy
 COPY --from=testg /.dummy /.dummy

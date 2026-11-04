@@ -9,8 +9,9 @@ You can find the default urls in the tool sections below.
 The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables must match.
 Theses variables are case sensitive.
 The numbers will be processed in numerical order and can have gaps.
-Each `URL_REPLACE_*_FROM` replaces its first occurrence anywhere in the url.
-The next major only replaces it at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
+Each `URL_REPLACE_*_FROM` replaces the url only when it starts with it, applied to the result of the replacements before.
+With `CONTAINERBASE_CDN` set, its rewrite runs first, so match the cdn url, see [containerbase CDN](./cdn.md).
+Use the full url prefix with `http://` or `https://`, a `URL_REPLACE_*_FROM` without one, like a bare host, prints a warning.
 
 ```Dockerfile
 FROM containerbase/base
@@ -81,6 +82,19 @@ https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-x86_64.tar.
 https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-x86_64.tar.gz.sha256
 https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.gz
 https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.gz.sha256
+```
+
+## `aube`
+
+Aube releases are downloaded from the urls of the [tool-versions](https://github.com/containerbase/tool-versions) data, which point to:
+
+- `https://github.com/aubepkg/aube/releases`
+
+Samples:
+
+```txt
+https://github.com/aubepkg/aube/releases/download/v1.41.0/aube-v1.41.0-aarch64-unknown-linux-gnu.tar.gz
+https://github.com/aubepkg/aube/releases/download/v1.41.0/aube-v1.41.0-x86_64-unknown-linux-gnu.tar.gz
 ```
 
 ## `bazelisk`

@@ -383,4 +383,19 @@ describe('cli/services/env.service', () => {
       'https://registry.npmjs.org',
     );
   });
+
+  test('replaceUrl warns once about a replacement without scheme', () => {
+    env.URL_REPLACE_0_FROM = 'download.docker.com';
+    env.URL_REPLACE_0_TO = 'mirror.example.test';
+
+    expect(svc.replaceUrl('https://download.docker.com/file.txt', false)).toBe(
+      'https://download.docker.com/file.txt',
+    );
+    expect(svc.replaceUrl('download.docker.com/file.txt', false)).toBe(
+      'mirror.example.test/file.txt',
+    );
+    expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+      'URL replacement URL_REPLACE_0_FROM=download.docker.com has no http:// or https://, it only replaces urls starting with it',
+    );
+  });
 });
