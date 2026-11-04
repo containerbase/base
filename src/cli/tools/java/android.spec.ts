@@ -1,12 +1,16 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { CompressionService, LinkToolService } from '../../services/index.ts';
+import {
+  CompressionService,
+  HttpService,
+  LinkToolService,
+} from '../../services/index.ts';
 import {
   AndroidSdkCmdlineToolsInstallService,
   AndroidSdkCmdlineToolsVersionResolver,
 } from './android.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -70,12 +74,45 @@ describe('cli/tools/java/android', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the repository lists the package
+    mockToolFiles();
     // the repository is fetched once per run and cached in the module, so
     // whichever test runs first serves it and the rest reuse the cache
     scope(baseUrl)
       .get('/android/repository/repository2-3.xml')
       .optionally()
       .reply(200, repository);
+  });
+
+  test('install: downloads the tool-versions file without the repository', async () => {
+    const filename = 'commandlinetools-linux-16111833_latest.zip';
+    const url = `${baseUrl}/android/repository/${filename}`;
+    // one file for all archs, with a sha1 like the repository lists
+    mockToolFiles([
+      {
+        name: filename,
+        url,
+        checksum: `sha1:${checksum(zip, 'sha1')}`,
+      },
+    ]);
+    scope(baseUrl).get(`/android/repository/${filename}`).reply(200, zip);
+    const download = vi.spyOn(HttpService.prototype, 'download');
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(
+      AndroidSdkCmdlineToolsInstallService,
+    );
+
+    await expect(svc.install('23')).resolves.toBeUndefined();
+
+    // the repository xml isn't downloaded
+    expect(download).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ url }),
+    );
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.versionedToolPath('android-sdk-cmdline-tools', '23'),
+      strip: 1,
+    });
   });
 
   test('install', async () => {

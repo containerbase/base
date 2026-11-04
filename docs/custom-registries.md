@@ -464,6 +464,7 @@ Java releases are downloaded from:
 - `https://github.com/adoptium/temurin<major>-binaries/releases`
 
 Each major version has its own GitHub repository.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download url and checksum come from the Adoptium API.
 
 Samples:
 
@@ -482,6 +483,7 @@ https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7
 - `https://dl.google.com/android/repository/`
 
 The `repository2-3.xml` file is used to determine the checksum and find latest release of the `cmdline-tools`.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download is verified against the checksum of that file.
 
 Samples:
 
