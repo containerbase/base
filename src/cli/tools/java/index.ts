@@ -158,34 +158,19 @@ export class JavaInstallService extends BaseInstallService {
   ];
 
   /**
-   * Downloads the adoptium jdk or jre, verified against its checksum, into the
-   * versioned tool path, adds the revoked intermediate CAs to its blocked list
-   * and replaces its cacerts with the shared ones.
+   * Downloads the Temurin jdk or jre from the tool-versions data, or the one
+   * the adoptium API lists, verified against its checksum, into the versioned
+   * tool path, adds the revoked intermediate CAs to its blocked list and
+   * replaces its cacerts with the shared ones. The data of `java` lists the
+   * jdk, like `java-jdk`.
    *
-   * @throws when adoptium has no package for the version
+   * @throws when neither has a package for the version
    */
   override async install(version: string): Promise<void> {
-    const type = this.name === 'java-jre' ? 'jre' : 'jdk';
-
-    const pkg = await resolveJavaDownloadUrl(
-      this.http,
-      type,
-      this.envSvc.arch,
-      version,
-    );
-
-    if (!pkg) {
-      throw new Error(
-        `Could not resolve download url for java ${version} and type ${type}`,
-      );
-    }
-
-    const file = await this.http.download({
-      url: pkg.link,
-      checksumType: 'sha256',
-      expectedChecksum: pkg.checksum,
-      fileName: pkg.name,
-    });
+    // TODO: drop the adoptium fallback in the next major (#7962)
+    const file =
+      (await this.downloadToolFile(version)) ??
+      (await this.downloadAdoptium(version));
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -205,6 +190,36 @@ export class JavaInstallService extends BaseInstallService {
     await addBlockedCerts(path.dirname(cacerts), v.major);
     await fs.rm(cacerts);
     await fs.symlink(path.join(this.pathSvc.sslPath, 'cacerts'), cacerts);
+  }
+
+  /**
+   * Downloads the jdk or jre the adoptium API lists for the version, verified
+   * against its checksum.
+   *
+   * @throws when adoptium has no package for the version
+   */
+  private async downloadAdoptium(version: string): Promise<string> {
+    const type = this.name === 'java-jre' ? 'jre' : 'jdk';
+
+    const pkg = await resolveJavaDownloadUrl(
+      this.http,
+      type,
+      this.envSvc.arch,
+      version,
+    );
+
+    if (!pkg) {
+      throw new Error(
+        `Could not resolve download url for java ${version} and type ${type}`,
+      );
+    }
+
+    return await this.http.download({
+      url: pkg.link,
+      checksumType: 'sha256',
+      expectedChecksum: pkg.checksum,
+      fileName: pkg.name,
+    });
   }
 
   /** Whether the shared cacerts exist, which prepare creates. */

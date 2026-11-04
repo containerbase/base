@@ -18,7 +18,7 @@ import {
 } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -59,9 +59,49 @@ describe('cli/tools/java/index', () => {
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
     execaMock.mockResolvedValue({ failed: false });
+    // no tool-versions data, the adoptium API lists the package
+    mockToolFiles();
   });
 
   describe('JavaInstallService', () => {
+    test.each([
+      // a version per row, as the download cache is keyed by the url
+      { Svc: JavaInstallService, type: 'jdk', patch: '5' },
+      { Svc: JavaJdkInstallService, type: 'jdk', patch: '6' },
+      { Svc: JavaJreInstallService, type: 'jre', patch: '7' },
+    ])(
+      'install: downloads the $type from the tool-versions data of $Svc.name',
+      async ({ Svc, type, patch }) => {
+        const version = `21.0.${patch}+11`;
+        const name = `OpenJDK21U-${type}_x64_linux_hotspot_21.0.${patch}_11.tar.gz`;
+        const files = mockToolFiles([
+          toolFile(`${cdnUrl}/${name}`, tarball, 'amd64'),
+          toolFile(`${cdnUrl}/arm64-${name}`, tarball, 'arm64'),
+        ]);
+        // no interceptor for the adoptium API
+        scope(cdnUrl).get(`/${name}`).reply(200, tarball);
+        const extract = vi
+          .spyOn(CompressionService.prototype, 'extract')
+          .mockImplementation(async ({ cwd }) => {
+            await fs.mkdir(path.join(cwd, 'lib/security'), {
+              recursive: true,
+            });
+            await fs.writeFile(path.join(cwd, 'lib/security/cacerts'), 'certs');
+          });
+        const { svc, pathSvc } = await toolContext(Svc);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        // the data of `java` lists the jdk, like `java-jdk`
+        expect(files).toHaveBeenCalledWith(svc.name, version);
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(name),
+          cwd: pathSvc.versionedToolPath(svc.name, version),
+          strip: 1,
+        });
+      },
+    );
+
     test('install links the shared cert store', async () => {
       const { svc, pathSvc } = await toolContext(JavaInstallService);
       const pkg = javaPackage('OpenJDK21U-jdk_x64_linux_hotspot.tar.gz');

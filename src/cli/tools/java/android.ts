@@ -24,13 +24,32 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
   override readonly parent = 'java';
 
   /**
+   * Downloads the linux cmdline-tools package from the tool-versions data, or
+   * the one listed in the android sdk repository, verified against its
+   * checksum, and extracts it into the versioned tool path.
+   *
+   * @throws when neither has a linux package for the version
+   */
+  override async install(version: string): Promise<void> {
+    // TODO: drop the repository fallback in the next major (#7962)
+    const file =
+      (await this.downloadToolFile(version)) ??
+      (await this.downloadFromRepo(version));
+
+    await this.pathSvc.ensureToolPath(this.name);
+
+    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
+
+    await this.compress.extract({ file, cwd: path, strip: 1 });
+  }
+
+  /**
    * Downloads the linux cmdline-tools package listed in the android sdk
-   * repository, verified against its checksum, and extracts it into the
-   * versioned tool path.
+   * repository, verified against its checksum.
    *
    * @throws when the repository has no linux package for the version
    */
-  override async install(version: string): Promise<void> {
+  private async downloadFromRepo(version: string): Promise<string> {
     const repo = await fetchRepo(this.http);
 
     const pkg = repo.packages.find(
@@ -50,17 +69,11 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
       );
     }
 
-    const file = await this.http.download({
+    return await this.http.download({
       url: `https://dl.google.com/android/repository/${pkgFile.url}`,
       checksumType: pkgFile.checksumType,
       expectedChecksum: pkgFile.checksum,
     });
-
-    await this.pathSvc.ensureToolPath(this.name);
-
-    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-
-    await this.compress.extract({ file, cwd: path, strip: 1 });
   }
 
   /**
