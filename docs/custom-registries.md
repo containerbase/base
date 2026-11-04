@@ -10,6 +10,7 @@ The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables 
 Theses variables are case sensitive.
 The numbers will be processed in numerical order and can have gaps.
 Each `URL_REPLACE_*_FROM` replaces the url only when it starts with it, applied to the result of the replacements before.
+With `CONTAINERBASE_CDN` set, its rewrite runs first, so match the cdn url, see [containerbase CDN](./cdn.md).
 Use the full url prefix with `http://` or `https://`, a `URL_REPLACE_*_FROM` without one, like a bare host, prints a warning.
 
 ```Dockerfile
