@@ -83,7 +83,7 @@ FROM build AS testc
 
 USER 12021
 
-# renovate: datasource=docker
+# last dart 2.x release, stays on it
 RUN install-tool dart 2.19.6
 
 RUN set -ex; \
