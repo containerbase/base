@@ -178,31 +178,33 @@ describe('cli/tools/node/index', () => {
         };
       }
 
-      test('install: downloads the listed prebuild when both are listed', async () => {
-        const version = '24.10.0';
-        vi.spyOn(
-          ToolVersionsService.prototype,
-          'getVersionFiles',
-        ).mockResolvedValue(versionFiles(version, true));
-        // no checksum files and no release checks
-        scope(ghUrl)
-          .get(`${prebuild}/${version}/node-${version}-x86_64.tar.xz`)
-          .reply(200, tarball);
-        const extract = vi.spyOn(CompressionService.prototype, 'extract');
-        const { svc, pathSvc } = await toolContext(NodeInstallService);
+      test.each(['24.10.0', '27.0.0-alpha.0.0.0'])(
+        'install: downloads the listed prebuild of %s when both are listed',
+        async (version) => {
+          vi.spyOn(
+            ToolVersionsService.prototype,
+            'getVersionFiles',
+          ).mockResolvedValue(versionFiles(version, true));
+          // no checksum files and no release checks
+          scope(ghUrl)
+            .get(`${prebuild}/${version}/node-${version}-x86_64.tar.xz`)
+            .reply(200, tarball);
+          const extract = vi.spyOn(CompressionService.prototype, 'extract');
+          const { svc, pathSvc } = await toolContext(NodeInstallService);
 
-        await expect(svc.install(version)).resolves.toBeUndefined();
+          await expect(svc.install(version)).resolves.toBeUndefined();
 
-        expect(extract).toHaveBeenCalledExactlyOnceWith({
-          file: expect.stringContaining(`node-${version}-x86_64.tar.xz`),
-          cwd: pathSvc.versionedToolPath('node', version),
-          strip: 1,
-        });
-        expect(logger.debug).not.toHaveBeenCalledWith(
-          expect.anything(),
-          'no tool-versions file for the host',
-        );
-      });
+          expect(extract).toHaveBeenCalledExactlyOnceWith({
+            file: expect.stringContaining(`node-${version}-x86_64.tar.xz`),
+            cwd: pathSvc.versionedToolPath('node', version),
+            strip: 1,
+          });
+          expect(logger.debug).not.toHaveBeenCalledWith(
+            expect.anything(),
+            'no tool-versions file for the host',
+          );
+        },
+      );
 
       test('install: downloads the prebuild release without a listed prebuild', async () => {
         const version = '24.10.1';
