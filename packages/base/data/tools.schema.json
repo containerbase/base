@@ -35,7 +35,7 @@
             "type": "object",
             "propertyNames": {
               "type": "string",
-              "enum": ["jammy", "noble", "resolute"],
+              "enum": ["noble", "resolute"],
               "description": "an Ubuntu release supported by containerbase, by codename"
             },
             "additionalProperties": { "type": "string" },

@@ -5,7 +5,7 @@ import { fileContent, getDistro } from '../../utils/index.ts';
 import { PrebuildInstallService } from '../utils/prebuild.ts';
 
 /** The ubuntu releases ruby can be installed on. */
-const supportedDistros = ['jammy', 'noble', 'resolute'];
+const supportedDistros = ['noble', 'resolute'];
 
 /** The user home entries redirected into the containerbase cache. */
 const linkedDirs = ['.gem', '.cocoapods', 'Library'];
@@ -26,7 +26,7 @@ export class RubyPrepareService extends BasePrepareService {
     const { versionCode } = await getDistro();
     if (!supportedDistros.includes(versionCode)) {
       throw new Error(
-        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'noble' or 'resolute'.`,
       );
     }
 

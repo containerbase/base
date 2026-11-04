@@ -14,7 +14,7 @@ const ERLANG_VERSION_REGEX =
   /^(?<major>0|[1-9][0-9]*)(?:\.(?<minor>0|[1-9][0-9]*))?(?:\.(?<patch>0|[1-9][0-9]*))?(?:\.(?<build>0|[1-9][0-9]*))?(?:\+[0-9]+)?(?:[a-z-].*)?$/;
 
 /** The ubuntu releases erlang can be installed on. */
-const supportedDistros = ['jammy', 'noble', 'resolute'];
+const supportedDistros = ['noble', 'resolute'];
 
 @injectable()
 @injectFromHierarchy()
@@ -51,7 +51,7 @@ export class ErlangInstallService extends PrebuildInstallService {
     const { versionCode } = await getDistro();
     if (!supportedDistros.includes(versionCode)) {
       throw new Error(
-        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'noble' or 'resolute'.`,
       );
     }
     await super.install(version);

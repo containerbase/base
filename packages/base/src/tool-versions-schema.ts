@@ -33,7 +33,7 @@ export const ToolFile = z.object({
    * readers ignore files of an arch they don't know
    */
   arch: z.string().min(1).exactOptional(),
-  /** the distro of a distro specific file, like `jammy` */
+  /** the distro of a distro specific file, like `noble` */
   distro: z.string().min(1).exactOptional(),
 });
 

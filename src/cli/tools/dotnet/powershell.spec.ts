@@ -44,14 +44,17 @@ describe('cli/tools/dotnet/powershell', () => {
 
   describe('PowershellPrepareService', () => {
     test.each([
-      { code: 'jammy', pkgs: ['libicu70', 'libssl3'] },
-      { code: 'noble', pkgs: ['libicu74', 'libssl3t64'] },
-      { code: 'resolute', pkgs: ['libbrotli1', 'libicu78', 'libssl3t64'] },
-    ])('prepare on $code', async ({ code, pkgs }) => {
+      { code: 'noble', id: '24.04', pkgs: ['libicu74', 'libssl3t64'] },
+      {
+        code: 'resolute',
+        id: '26.04',
+        pkgs: ['libbrotli1', 'libicu78', 'libssl3t64'],
+      },
+    ])('prepare on $code', async ({ code, id, pkgs }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '24.04',
+        versionId: id,
       });
       const { svc } = await toolContext(PowershellPrepareService);
 
@@ -67,13 +70,13 @@ describe('cli/tools/dotnet/powershell', () => {
     test('prepare: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(PowershellPrepareService);
 
       await expect(svc.prepare()).rejects.toThrow(
-        "Tool 'powershell' not supported on: focal!",
+        "Tool 'powershell' not supported on: jammy!",
       );
     });
   });

@@ -76,7 +76,7 @@ Per version on `main`, `binary-builder`:
 ## 2. CLI
 
 - install service as in [Kind 2](./new-tool.md#kind-2-an-upstream-prebuilt-binary), from `https://github.com/containerbase/<tool>-prebuild/releases/download/<version>/<archive>`, verified with `<archive>.sha512`
-- distro specific: extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), it uses the `jammy` build on newer Ubuntu
+- distro specific: extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), it uses the `jammy` build on every supported Ubuntu release
 - `latest`: extend `PrebuildVersionResolver`
 - test images: `# renovate: datasource=github-releases packageName=containerbase/<tool>-prebuild`; the org preset delays prebuild updates by 2h for the `aarch64` build
 

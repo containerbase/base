@@ -44,22 +44,20 @@ describe('cli/tools/swift', () => {
   describe('SwiftPrepareService', () => {
     test.each([
       {
-        code: 'jammy',
-        pkgs: ['libgcc-9-dev', 'libpython3.8', 'libstdc++-9-dev'],
-      },
-      {
         code: 'noble',
+        id: '24.04',
         pkgs: ['libgcc-9-dev', 'libncurses6', 'libpython3.8'],
       },
       {
         code: 'resolute',
+        id: '26.04',
         pkgs: ['libgcc-11-dev', 'libncurses6', 'libpython3.14'],
       },
-    ])('prepare on $code', async ({ code, pkgs }) => {
+    ])('prepare on $code', async ({ code, id, pkgs }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '24.04',
+        versionId: id,
       });
       const { svc, child, pathSvc } = await toolContext(SwiftPrepareService);
       const envSvc = await child.getAsync(EnvService);
@@ -79,13 +77,13 @@ describe('cli/tools/swift', () => {
     test('prepare: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(SwiftPrepareService);
 
       await expect(svc.prepare()).rejects.toThrow(
-        "Tool 'swift' not supported on: focal!",
+        "Tool 'swift' not supported on: jammy!",
       );
     });
 
@@ -110,15 +108,8 @@ describe('cli/tools/swift', () => {
   describe('SwiftInstallService', () => {
     test.each([
       {
-        hostArch: 'x64',
-        versionId: '22.04',
-        version: '5.9.2',
-        platform: 'ubuntu22.04',
-        releaseVersion: '5.9.2',
-      },
-      {
         hostArch: 'arm64',
-        versionId: '22.04',
+        versionId: '24.04',
         version: '5.9.2',
         platform: 'ubuntu22.04-aarch64',
         releaseVersion: '5.9.2',
@@ -160,30 +151,30 @@ describe('cli/tools/swift', () => {
       },
       {
         hostArch: 'x64',
-        versionId: '25.10',
-        version: '5.9.2',
-        platform: 'ubuntu25.10',
-        releaseVersion: '5.9.2',
+        versionId: '26.04',
+        version: '6.4.0',
+        platform: 'ubuntu26.04',
+        releaseVersion: '6.4.0',
       },
       {
         hostArch: 'x64',
-        versionId: '22.04',
+        versionId: '24.04',
         version: '5.7.0',
         platform: 'ubuntu22.04',
         releaseVersion: '5.7',
       },
       {
         hostArch: 'x64',
-        versionId: '22.04',
+        versionId: '24.04',
         version: '6.3.0',
-        platform: 'ubuntu22.04',
+        platform: 'ubuntu24.04',
         releaseVersion: '6.3',
       },
       {
         hostArch: 'x64',
-        versionId: '22.04',
+        versionId: '24.04',
         version: '6.4.0',
-        platform: 'ubuntu22.04',
+        platform: 'ubuntu24.04',
         releaseVersion: '6.4.0',
       },
     ] as const)(

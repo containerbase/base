@@ -6,23 +6,6 @@ import { getDistro, parse } from '../utils/index.ts';
 
 /** The distro specific dependencies. */
 const distroPackages: Record<string, string[] | undefined> = {
-  jammy: [
-    'binutils',
-    'gnupg2',
-    'libc6-dev',
-    'libcurl4-openssl-dev',
-    'libedit2',
-    'libgcc-9-dev',
-    'libpython3.8',
-    'libsqlite3-0',
-    'libstdc++-9-dev',
-    'libxml2-dev',
-    'libz3-dev',
-    'pkg-config',
-    'tzdata',
-    'unzip',
-    'zlib1g-dev',
-  ],
   noble: [
     'binutils',
     'gnupg2',
@@ -95,8 +78,8 @@ export class SwiftInstallService extends BaseInstallService {
   override readonly name = 'swift';
 
   /**
-   * The first release with Ubuntu 22.04 builds, which jammy uses and noble
-   * before the 24.04 builds of 5.10.1.
+   * The first release with Ubuntu 22.04 builds, which noble uses before the
+   * 24.04 builds of 5.10.1.
    */
   override readonly minVersion = '5.7';
 

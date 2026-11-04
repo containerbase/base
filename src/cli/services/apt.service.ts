@@ -77,7 +77,7 @@ export class AptService {
     const packages = distroPackages[versionCode];
     if (!packages) {
       throw new Error(
-        `Tool '${tool}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+        `Tool '${tool}' not supported on: ${versionCode}! Please use ubuntu 'noble' or 'resolute'.`,
       );
     }
 
