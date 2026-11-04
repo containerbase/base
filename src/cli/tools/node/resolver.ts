@@ -4,7 +4,7 @@ import {
   ToolVersionResolver,
   isPartialVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import {
   logger,
   semverMaxSatisfying,

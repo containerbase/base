@@ -1,6 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
 import { describe, expect, test } from 'vitest';
-import { partialVersionHelp } from '../../install-tool/tool-version-resolver.ts';
+import { partialVersionHelp } from '../../services/tool-version-resolver.ts';
 import { ConanVersionResolver } from './conan.ts';
 import {
   PipVersionResolver,

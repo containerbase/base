@@ -4,13 +4,13 @@ import { XMLParser } from '@nodable/flexible-xml-parser';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
+import type { HttpService } from '../../services/http.service.ts';
 import {
   ToolVersionResolver,
   isPartialVersion,
   newestVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
-import type { HttpService } from '../../services/http.service.ts';
+} from '../../services/tool-version-resolver.ts';
 import { semverCoerce } from '../../utils/index.ts';
 import { AndroidSdkRepo } from './schema.ts';
 

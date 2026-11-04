@@ -9,14 +9,15 @@ import {
 import { isReleaseVersion } from '../../../packages/base/src/release-version.ts';
 import { DistroCode } from '../../../packages/base/src/schema.ts';
 import type { ToolVersions } from '../../../packages/base/src/tool-versions-types.ts';
-import { EnvService, ToolVersionsService } from '../services/index.ts';
 import { getDistro, logger } from '../utils/index.ts';
+import { EnvService } from './env.service.ts';
 import {
   type DataField,
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
 } from './tool-version-resolver.ts';
+import { ToolVersionsService } from './tool-versions.service.ts';
 
 /**
  * The architecture and the distro codename the tool is installed on, and the

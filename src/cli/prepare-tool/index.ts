@@ -25,6 +25,7 @@ import { PythonPrepareService } from '../tools/python/index.ts';
 import { RubyPrepareService } from '../tools/ruby/index.ts';
 import { RustPrepareService } from '../tools/rust.ts';
 import { SwiftPrepareService } from '../tools/swift.ts';
+import { bindVersionResolvers } from '../tools/version-resolvers.ts';
 import { logger } from '../utils/index.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
 import {
@@ -42,6 +43,7 @@ async function prepareContainer(): Promise<Container> {
 
   // core services
   container.bind(PrepareToolService).toSelf();
+  bindVersionResolvers(container);
 
   // modern tool services
   container.bind(PREPARE_TOOL_TOKEN).to(CabalPrepareService);

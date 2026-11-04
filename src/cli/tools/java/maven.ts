@@ -9,7 +9,7 @@ import {
   isPartialVersion,
   newestVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import { isValid, logger } from '../../utils/index.ts';
 import { MavenMetadata } from './schema.ts';
 

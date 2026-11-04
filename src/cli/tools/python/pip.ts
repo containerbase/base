@@ -4,7 +4,7 @@ import {
   ToolVersionResolver,
   isPartialVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
 import { ResolverMap, getToolType } from '../index.ts';
 import { PypiJson } from './schema.ts';

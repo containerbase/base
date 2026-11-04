@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { describe, expect, test } from 'vitest';
-import { ToolVersionResolver } from './tool-version-resolver.ts';
+import { ToolVersionResolver } from '../services/tool-version-resolver.ts';
 import {
   createGenericVersionResolver,
   getVersionHelp,
@@ -18,7 +18,7 @@ class NoteLessVersionResolver extends ToolVersionResolver {
   }
 }
 
-describe('cli/install-tool/version-resolvers', () => {
+describe('cli/tools/version-resolvers', () => {
   test('getVersionHelp', () => {
     expect(getVersionHelp()).toBe(codeBlock`
       Some tools accept partial versions:

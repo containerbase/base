@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { getVersionHelp } from '../install-tool/version-resolvers.ts';
 import { PathService, createContainer } from '../services/index.ts';
+import { getVersionHelp } from '../tools/version-resolvers.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
 import { registerCommands } from './index.ts';
