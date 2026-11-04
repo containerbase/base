@@ -13,7 +13,6 @@ import { EnvService, ToolVersionsService } from '../services/index.ts';
 import { getDistro, logger } from '../utils/index.ts';
 import {
   type DataField,
-  type DataFilter,
   TOOL_VERSION_RESOLVER,
   type ToolVersionResolver,
   isPartialVersion,
@@ -133,8 +132,6 @@ function blockedWarning(
  * files are all yanked or a gem gone from rubygems, so only deprecated matches
  * are no match, unless `deprecatedFallback` picks them then; an existing
  * release is kept, also a deprecated one.
- * @param accept - limits the releases further, see
- * {@link ToolVersionResolver.dataFilter}
  * @param deprecatedFallback - whether only deprecated matches pick the newest
  * of them, the deprecated `latest` dist-tag of an npm tool first, for a tool
  * without its own resolver, which has no other lookup
@@ -147,7 +144,6 @@ function pick(
   data: ToolVersions,
   version: string | undefined,
   host: Host,
-  accept?: DataFilter,
   deprecatedFallback = false,
 ): Picked {
   const { versions: installable, needed } = filterByMinCb(data, host.cb);
@@ -166,12 +162,9 @@ function pick(
    * @param deprecated - whether deprecated releases are picked too
    */
   const find = (
-    available: typeof data.versions,
+    candidates: typeof data.versions,
     deprecated = false,
   ): string | undefined => {
-    const candidates = accept
-      ? available.filter((v) => accept(v.version))
-      : available;
     const releases = candidates.filter((v) => !v.prerelease);
     // every tool skips its deprecated releases, like an npm deprecated one, a
     // PyPI release whose files are all yanked or a gem gone from rubygems
@@ -362,8 +355,7 @@ export class ToolVersionResolverService {
    * {@link ToolVersionResolver.dataField} resolves a missing, empty or
    * `latest` version and a partial version from the data first, when the
    * embedded data has a file for the tool, so an arbitrary package makes no
-   * request for data which doesn't exist, limited by its
-   * {@link ToolVersionResolver.dataFilter}. It only gets them when the data
+   * request for data which doesn't exist. It only gets them when the data
    * can't answer, and gets any other version. The version it resolves for an
    * exact one, like the java build `11.0.24+8` for `11.0.24`, is checked
    * against the `minCb` ranges of the embedded data, which only warns, see
@@ -387,12 +379,10 @@ export class ToolVersionResolverService {
       (latest || isPartialVersion(version)) &&
       (await this.toolVersions.getVersions(tool))
     ) {
-      const requested = latest ? undefined : version;
       const resolved = await this.resolveFromData(
         tool,
         latest && version !== 'latest' ? undefined : version,
         resolver.dataField,
-        await resolver.dataFilter(requested),
       );
       if (resolved !== undefined) {
         return resolved;
@@ -438,8 +428,6 @@ export class ToolVersionResolverService {
    * the resolver asks its own source; no match is only logged at debug level
    * then, matching releases which all need a newer containerbase with a
    * warning, and the resolver answers like before
-   * @param accept - the limits of the resolver of the tool on the releases,
-   * see {@link ToolVersionResolver.dataFilter}
    * @returns an exact version as given, else the resolved release, or
    * `undefined` when the data has no match or the tool has no data
    */
@@ -447,7 +435,6 @@ export class ToolVersionResolverService {
     tool: string,
     version: string | undefined,
     required?: DataField,
-    accept?: DataFilter,
   ): Promise<string | undefined> {
     const given = version !== undefined && version !== 'latest';
     if (given && !isPartialVersion(version)) {
@@ -468,7 +455,7 @@ export class ToolVersionResolverService {
       const listed = await this.toolVersions.getVersions(tool);
       if (
         usable(listed) &&
-        pick(tool, listed, version, host, accept).version === version
+        pick(tool, listed, version, host).version === version
       ) {
         logger.debug(
           { tool, version, resolved: version },
@@ -496,7 +483,7 @@ export class ToolVersionResolverService {
       version: resolved,
       deprecated,
       blocked,
-    } = pick(tool, data, version, host, accept, !required);
+    } = pick(tool, data, version, host, !required);
     // the embedded data may be outdated when the online data was looked up or
     // is turned off, not when it is current
     const outdated = source === 'fallback' || source === 'offline';

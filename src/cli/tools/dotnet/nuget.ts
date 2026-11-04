@@ -77,15 +77,19 @@ export class NugetVersionResolver extends ToolVersionResolver {
 
   override readonly versionHelp = partialVersionHelp;
 
+  /** The releases of the tool-versions data, the lookup is the fallback. */
+  override readonly dataField = 'versions';
+
   /**
-   * Resolves a version from dist.nuget.org.
+   * Resolves a version from dist.nuget.org, when the tool-versions data can't
+   * answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the newest released and
    *   blessed version.
    * - A major (`6`) or major.minor (`6.11`) version which is no existing
    *   version resolves to the newest matching released and blessed one, in
    *   any feed order. An existing version, like `6.1`, is kept, and so is the
-   *   version when `tools.json` can't be loaded.
+   *   version with a warning when `tools.json` can't be loaded.
    * - Any other version, like a full `X.Y.Z`, is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -101,7 +105,9 @@ export class NugetVersionResolver extends ToolVersionResolver {
       try {
         meta = await this.getReleases();
       } catch (err) {
-        logger.debug(
+        // the tool-versions data had no match either
+        // TODO: fail in the next major (#7962)
+        logger.warn(
           { err, version },
           'nuget lookup failed, keeping the version',
         );

@@ -117,7 +117,14 @@ export class AndroidSdkCmdlineToolsVersionResolver extends ToolVersionResolver {
   override readonly versionHelp = partialVersionHelp;
 
   /**
-   * Resolves a version from the android sdk repository.
+   * The releases of the tool-versions data, the repository is the fallback,
+   * also for a release written with zero segments, like `13.0` for `13`.
+   */
+  override readonly dataField = 'versions';
+
+  /**
+   * Resolves a version from the android sdk repository, when the
+   * tool-versions data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the `cmdline-tools;latest`
    *   package.
