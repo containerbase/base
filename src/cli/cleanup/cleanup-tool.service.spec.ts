@@ -105,8 +105,8 @@ describe('cli/cleanup/cleanup-tool.service', () => {
     ver = await container.getAsync(VersionService);
     // every test starts without installed or linked tools
     await ver.removeInstalled({});
-    const state = await (await container.getAsync(DataService)).load('state');
-    await state.removeAsync({}, { multi: true });
+    const db = await (await container.getAsync(DataService)).db();
+    db.exec('DELETE FROM main.state');
   });
 
   /** Records an installed version. */
