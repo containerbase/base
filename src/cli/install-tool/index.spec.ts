@@ -513,7 +513,7 @@ describe('cli/install-tool/index', () => {
           expected: '24.2.0',
         },
         // composer is mocked here, php covers the prebuild resolver
-        ...['conan', 'mise', 'php'].map((tool) => ({
+        ...['cocoapods', 'conan', 'mise', 'php'].map((tool) => ({
           tool,
           type: undefined,
           extra: {},

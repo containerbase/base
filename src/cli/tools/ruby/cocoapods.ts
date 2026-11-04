@@ -72,4 +72,7 @@ export class CocoapodsInstallService extends RubyBaseInstallService {
 @injectFromHierarchy()
 export class CocoapodsVersionResolver extends RubyGemVersionResolver {
   override readonly tool: string = 'cocoapods';
+
+  /** The releases of the tool-versions data, rubygems.org is the fallback. */
+  override readonly dataField = 'versions';
 }

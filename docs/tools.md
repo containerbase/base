@@ -135,7 +135,7 @@ Some tools accept partial versions and install a matching release:
   Other major or major.minor versions resolve to the newest matching release even when RubyGems would read them as `X.Y.0`, eg. `bundler 2.0` installs the newest `2.0.x`, not `2.0.0`; pin the full version for an exact one.
   The lookup goes to rubygems.org, through the CDN and URL replacements like other lookups, and a configured gem registry is only used for the install, so a gem from a private registry needs a full version, and a partial version fails when rubygems.org can't be reached.
   Without a version, or with `latest`, the latest release is installed.
-  With `install-tool`, for `bundler` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from rubygems.org.
+  With `install-tool`, for `bundler` and `cocoapods` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from rubygems.org.
   The data flags a version which is gone from rubygems.org as deprecated, `latest` and major or major.minor versions skip those, a deprecated version is only installed when the full version is given.
 - `gradle`: A major (`8`) or major.minor (`9.0`) version installs the newest matching stable release, prereleases, milestones, snapshots, nightlies and broken releases are skipped.
   A version which exists as a release, like `8.10` or `6.9`, is kept as given, and so is the version when the release list can't be loaded.
@@ -176,7 +176,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
-  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget` and `cocoapods`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
+  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven` and `nuget`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
   For example `java`, `node`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` use it when the embedded data has no match.
   These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
