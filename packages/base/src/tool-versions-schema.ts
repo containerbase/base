@@ -16,10 +16,18 @@ export const ToolFile = z.object({
   name: z.string().min(1),
   /** the https download url */
   url: z.url({ protocol: /^https$/ }),
-  /** `<algorithm>:<lowercase hex>` */
+  /**
+   * `<algorithm>:<lowercase hex>`, published with `sha1`, `sha256` or
+   * `sha512`. The digests of the sha algorithms readers verify (`sha1`,
+   * `sha224`, `sha256`, `sha384`, `sha512`) must have their exact length.
+   * Lenient for other algorithms, so a new one doesn't reject the whole file:
+   * readers skip a file with an algorithm they don't know.
+   */
   checksum: z
     .string()
-    .regex(/^(sha1:[0-9a-f]{40}|sha256:[0-9a-f]{64}|sha512:[0-9a-f]{128})$/),
+    .regex(
+      /^(?:sha1:[0-9a-f]{40}|sha224:[0-9a-f]{56}|sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96}|sha512:[0-9a-f]{128}|(?!sha(?:1|224|256|384|512):)[a-z0-9-]+:[0-9a-f]+)$/,
+    ),
   /**
    * the containerbase arch, like `amd64`, omitted for arch-independent files;
    * readers ignore files of an arch they don't know
@@ -43,6 +51,11 @@ export const ToolVersion = z.object({
   version: z.string().min(1),
   prerelease: z.literal(true).exactOptional(),
   lts: z.literal(true).exactOptional(),
+  /**
+   * the registry deprecates the version: npm deprecated it, all its PyPI files
+   * are yanked, or the gem is gone from rubygems
+   */
+  deprecated: z.literal(true).exactOptional(),
   /** when the version was released, in UTC */
   releaseTimestamp: z.iso.datetime().exactOptional(),
   /**
@@ -56,6 +69,16 @@ export const ToolVersion = z.object({
    * present when the registry has one
    */
   constraints: z.record(z.string().min(1), z.string().min(1)).exactOptional(),
+  /**
+   * sorted, the archs which have a file of this version, only in the
+   * `<tool>.json` files and only for versions with arch specific files
+   */
+  archs: z.array(z.string().min(1)).min(1).exactOptional(),
+  /**
+   * sorted, the distro codenames which have a file of this version, only in
+   * the `<tool>.json` files and only for versions with distro specific files
+   */
+  distros: z.array(z.string().min(1)).min(1).exactOptional(),
 });
 
 /**
@@ -75,6 +98,13 @@ export const ToolVersions = z.object({
   sourceUrl: z.url({ protocol: /^https$/ }).exactOptional(),
   /** the homepage of the tool, omitted when unset */
   homepage: z.url({ protocol: /^https$/ }).exactOptional(),
+  /** the tool has LTS release streams, like `node` and `java` */
+  lts: z.literal(true).exactOptional(),
+  /**
+   * the version of the npm `latest` dist-tag, only for npm tools and only when
+   * it is listed in `versions`
+   */
+  latest: z.string().min(1).exactOptional(),
   /**
    * the oldest version containerbase supports, on the `defaultDistro` of the
    * root index, in the versioning of the tool. Older versions aren't listed.
@@ -88,6 +118,23 @@ export const ToolVersions = z.object({
    */
   distroMinVersion: z
     .record(z.string().min(1), z.string().min(1))
+    .exactOptional(),
+  /**
+   * the oldest containerbase version, like `14.51.0`, which can install a
+   * version. A range applies to its `version` and every version above it in
+   * `versions`. Omitted for tools without a limit. Lenient, so a slip of the
+   * writer doesn't reject the file: a `cb` which isn't valid semver is never
+   * met by a reader.
+   */
+  minCb: z
+    .array(
+      z.object({
+        /** the version where the range starts, a version of `versions` */
+        version: z.string().min(1),
+        /** the oldest containerbase version, in semver */
+        cb: z.string(),
+      }),
+    )
     .exactOptional(),
   updatedAt: z.iso.datetime(),
   /** newest first */
@@ -162,4 +209,17 @@ export const FormatIndex = z.object({
       removalDate: z.iso.date().exactOptional(),
     }),
   ),
+});
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export const ReleaseInfo = z.object({
+  $schema: SchemaUrl,
+  /** the version of the release, like `1.7.22` */
+  version: z.string().min(1),
+  /** when the build of the data started, in UTC */
+  buildTime: z.iso.datetime(),
 });

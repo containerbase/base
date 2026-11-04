@@ -9,7 +9,7 @@ import {
 import { ElixirInstallService, ElixirPrepareService } from './elixir.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/erlang/elixir', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -66,6 +68,9 @@ describe('cli/tools/erlang/elixir', () => {
       { version: '1.17.3', file: 'elixir-otp-25.zip', checksummed: true },
       { version: '1.19.0', file: 'elixir-otp-26.zip', checksummed: true },
       { version: '1.20.4', file: 'elixir-otp-27.zip', checksummed: true },
+      // a prerelease has the files of its minor
+      { version: '1.20.0-rc.1', file: 'elixir-otp-27.zip', checksummed: true },
+      { version: '1.14.0-rc.1', file: 'elixir-otp-23.zip', checksummed: true },
     ])(
       'install $version downloads $file',
       async ({ version, file, checksummed }) => {
@@ -87,6 +92,29 @@ describe('cli/tools/erlang/elixir', () => {
           file: expect.stringContaining(file),
           cwd: pathSvc.versionedToolPath('elixir', version),
         });
+      },
+    );
+
+    test.each([
+      { version: '1.13.5', file: 'Precompiled.zip' },
+      { version: '1.18.4', file: 'elixir-otp-25.zip' },
+    ])(
+      'install: downloads the $version tool-versions file without the .sha256sum',
+      async ({ version, file }) => {
+        const path = `${releaseUrl}/v${version}/${file}`;
+        // one file for all archs, the data has a checksum for the releases
+        // before 1.14.0 too
+        mockToolFiles([toolFile(`${baseUrl}${path}`, archive)]);
+        // there is no interceptor for the `.sha256sum`
+        scope(baseUrl).get(path).reply(200, archive);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(ElixirInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ file: expect.stringContaining(file) }),
+        );
       },
     );
 

@@ -8,7 +8,7 @@ env:
   FILE: base
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
-  CONTAINERBASE_VERSION: ${{ github.sha }}
+  CONTAINERBASE_VERSION: 0.0.0-PLACEHOLDER+${{ github.sha }}
   APT_HTTP_PROXY: http://host.docker.internal:8000
   HUSKY: 0
 
@@ -23,10 +23,14 @@ jobs:
     outputs:
       uid: ${{ steps.init.outputs.uid }}
       skip-build: ${{ steps.changes.outputs.skip-build }}
+      lang-matrix: ${{ steps.matrix.outputs.lang-matrix }}
+      run-lang: ${{ steps.matrix.outputs.run-lang }}
+      run-distro: ${{ steps.matrix.outputs.run-distro }}
+      run-base-arm64: ${{ steps.matrix.outputs.run-base-arm64 }}
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         with:
           save-cache: true
 
@@ -61,8 +65,7 @@ jobs:
             -e '^\.gitignore$' \
             -e '^LICENSE$' \
             -e '^\.oxlintrc\.json$' \
-            -e '^\.prettierrc\.json$' \
-            -e '^\.prettierignore$' \
+            -e '^\.oxfmtrc\.json$' \
             -e '^\.markdownlint-cli2\.jsonc$' \
             -e '^\.github/zizmor\.yml$' \
             -e '^tools/(audit-sarif|lint-docs|lint-versions)\.ts$' \
@@ -76,8 +79,67 @@ jobs:
             echo "skip-build=true" >> "${GITHUB_OUTPUT}"
           fi
 
+      # the `lang` matrix has an entry for each `test/<lang>/Dockerfile`
+      # (x86_64) and `test/<lang>/Dockerfile.arm64` (aarch64). Pull requests
+      # and merge queue groups which only change test Dockerfiles, like most
+      # `test(deps)` updates, only run the docker tests of those files; any
+      # other change runs all of them
+      - name: ⚙️ Compute docker test matrix
+        id: matrix
+        run: |
+          changed="${RUNNER_TEMP}/changed-files"
+          docker_only=false
+          if [[ -s "${changed}" ]] && ! grep -qvE '^test/([^/]+/Dockerfile(\.arm64)?|Dockerfile\.(base|distro))$' "${changed}"; then
+            docker_only=true
+          fi
+
+          # whether a test Dockerfile is part of this run
+          function selected () {
+            [[ "${docker_only}" != "true" ]] || grep -qxF "${1}" "${changed}"
+          }
+
+          x86_64='{"name":"x86_64","os":"ubuntu-26.04","tag":"amd64"}'
+          aarch64='{"name":"aarch64","os":"ubuntu-26.04-arm","tag":"arm64"}'
+          entries=()
+          for dir in test/*/; do
+            lang=$(basename "${dir}")
+            # used by the `base` job
+            if [[ "${lang}" == "readonly" ]]; then
+              continue
+            fi
+            if [[ -f "${dir}Dockerfile" ]] && selected "${dir}Dockerfile"; then
+              entries+=("{\"lang\":\"${lang}\",\"arch\":${x86_64}}")
+            fi
+            if [[ -f "${dir}Dockerfile.arm64" ]] && selected "${dir}Dockerfile.arm64"; then
+              entries+=("{\"lang\":\"${lang}\",\"arch\":${aarch64}}")
+            fi
+          done
+
+          run_lang=false
+          if [[ ${#entries[@]} -gt 0 ]]; then
+            run_lang=true
+          fi
+          run_distro=false
+          if selected test/Dockerfile.distro; then
+            run_distro=true
+          fi
+          run_base_arm64=false
+          if selected test/Dockerfile.base; then
+            run_base_arm64=true
+          fi
+
+          matrix="{\"include\":[$(IFS=,; echo "${entries[*]}")]}"
+          echo "docker only: ${docker_only}, distro: ${run_distro}, base-arm64: ${run_base_arm64}"
+          echo "lang matrix: ${matrix}"
+          {
+            echo "lang-matrix=${matrix}"
+            echo "run-lang=${run_lang}"
+            echo "run-distro=${run_distro}"
+            echo "run-base-arm64=${run_base_arm64}"
+          } >> "${GITHUB_OUTPUT}"
+
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -90,12 +152,12 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
 
       - name: lint
         run: |
           pnpm oxlint --format github
-          pnpm prettier
+          pnpm oxfmt
           pnpm lint:docs
           pnpm lint:markdown
           pnpm lint:types
@@ -119,7 +181,7 @@ jobs:
           check_all_files_with_shebangs: 'true'
 
       - name: Install the workflow linters
-        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
         with:
           install_args: jactionlint shellcheck zizmor
 
@@ -134,7 +196,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   bats:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     # skipped for docs or dev container only pull requests, like the build
     if: needs.setup.outputs.skip-build != 'true'
@@ -142,7 +204,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
 
       - name: Install ubuntu dependencies
         run: |
@@ -156,7 +218,7 @@ jobs:
         run: pnpm test:bats
 
   vitest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     timeout-minutes: 15
     permissions:
@@ -164,7 +226,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
 
       # the schema tests validate the embedded tool-versions data, so a
       # breaking change of its format fails here
@@ -188,7 +250,7 @@ jobs:
           use_oidc: true
 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: setup
     # skipped for docs or dev container only pull requests, so `base`,
     # `distro`, `base-arm64` and `lang` are skipped too
@@ -197,7 +259,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
 
       - name: build
         run: pnpm build
@@ -224,15 +286,15 @@ jobs:
       matrix:
         arch:
           - name: x86_64
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             tag: amd64
           - name: aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-26.04-arm
             tag: arm64
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -240,7 +302,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Init
         run: |
@@ -258,10 +321,12 @@ jobs:
         run: test/readonly/test.sh
 
   distro:
-    runs-on: ubuntu-24.04
-    # docker tests are skipped for draft pull requests
-    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-26.04
+    # docker tests are skipped for draft pull requests, and when only other
+    # test Dockerfiles changed
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-distro == 'true'
     needs:
+      - setup
       - bats
       - lint
       - vitest
@@ -282,7 +347,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -290,7 +355,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
@@ -314,9 +380,10 @@ jobs:
 
   # test old distros on arm64
   base-arm64:
-    runs-on: ubuntu-24.04-arm
-    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-26.04-arm
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-base-arm64 == 'true'
     needs:
+      - setup
       - bats
       - lint
       - vitest
@@ -336,7 +403,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -344,7 +411,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️  Init
         run: |
@@ -358,7 +426,7 @@ jobs:
   lang:
     runs-on: ${{ matrix.arch.os }}
     name: ${{ matrix.lang }} (${{ matrix.arch.name }})
-    if: github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true && needs.setup.outputs.run-lang == 'true'
     needs:
       - setup
       - base
@@ -372,48 +440,16 @@ jobs:
     strategy:
       max-parallel: 10
       fail-fast: false
-      matrix:
-        lang:
-          - dart
-          - dotnet
-          - erlang
-          - flutter
-          - flux
-          - golang
-          - haskell
-          - java
-          - jb
-          - helm
-          - nix
-          - node
-          - php
-          - powershell
-          - python
-          - ruby
-          - rust
-          - swift
-          - latest
-        arch:
-          - name: x86_64
-            os: ubuntu-24.04
-            tag: amd64
-          - name: aarch64
-            os: ubuntu-24.04-arm
-            tag: arm64
-        # include:
-        #   # no ubuntu arm64 support for haskell
-        #   - lang: haskell
-        #     arch:
-        #       name: x86_64
-        #       os: ubuntu-24.04
-        #       tag: amd64
+      # computed by `setup` from the test Dockerfiles, a test without
+      # `Dockerfile.arm64` only runs on x86_64
+      matrix: ${{ fromJSON(needs.setup.outputs.lang-matrix) }}
 
     env:
       TAG: ${{ matrix.lang }}
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -421,7 +457,8 @@ jobs:
           apt-proxy: true
 
       - name: Check system
-        uses: ./.github/actions/check
+        # the setup action checks out the repository
+        uses: ./.github/actions/check # jactionlint ignore=local-action-checkout
 
       - name: ⚙️ Init
         run: |

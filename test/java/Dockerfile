@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # Used for tests
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -59,11 +59,18 @@ RUN set -ex; \
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java 25.0.4+101.0.LTS
+RUN install-tool java 25.0.5+8.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
   true
+
+# the revoked intermediates are appended to the blocked list of the jdk
+RUN set -ex; \
+  blocked=/opt/containerbase/tools/java/25.0.5+8.0.LTS/lib/security/blocked.certs; \
+  head -n 1 "${blocked}" | grep -qx 'Algorithm=SHA-256'; \
+  grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
+  grep -qx 84112972B8E59D14560AE7E7119654474AAD119990CF3722BFC1E3B91615E1FD "${blocked}"
 
 
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
@@ -98,15 +105,15 @@ RUN set -ex; \
 RUN gradle --version
 
 #--------------------------------------
-# test: Java 21 LTS + Gradle 9
+# test: Java 25 LTS + Gradle 9
 #--------------------------------------
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.12+101.0.LTS
+RUN install-tool java-jre 25.0.5+8.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 9.8.1
+RUN install-tool gradle 9.8.2
 
 USER 12021
 
@@ -130,6 +137,12 @@ FROM build AS test-gradle-c
 
 # need to stay old
 RUN install-tool java 8.0.342+7
+
+# java 8 keeps its blocked list as blacklisted.certs under jre
+RUN set -ex; \
+  blocked=/opt/containerbase/tools/java/8.0.342+7/jre/lib/security/blacklisted.certs; \
+  grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
+  [ ! -e /opt/containerbase/tools/java/8.0.342+7/jre/lib/security/blocked.certs ]
 
 # disable renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 7.6.1
@@ -156,8 +169,9 @@ RUN prepare-tool java gradle
 # test openshift userid missmatch
 USER 1001
 
+# old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version depName=java packageName=java?os=linux&architecture=x64
-ARG JAVA_JDK_VERSION=17.0.20+101
+ARG JAVA_JDK_VERSION=17.0.21+9
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -173,8 +187,9 @@ RUN gradle --version | grep "${JAVA_VERSION}"
 #--------------------------------------
 FROM base AS test-gradle-e
 
+# old LTS, gradle 8 doesn't run on java 25, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.12+101.0.LTS
+RUN install-tool java-jre 21.0.13+9.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 8.14.6
@@ -228,7 +243,7 @@ WORKDIR /
 RUN install-tool scala v2.13.18
 
 # renovate: datasource=github-releases packageName=sbt/sbt
-RUN install-tool sbt v2.0.11
+RUN install-tool sbt v2.0.12
 
 RUN install-tool gradle 8.8-rc-2
 

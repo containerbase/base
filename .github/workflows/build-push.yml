@@ -1,6 +1,7 @@
 name: build-push
 
-on:
+# see below why there is no workflow concurrency
+on: # jactionlint ignore=concurrency-limits
   push:
     # other branches are built by their pull request
     branches:
@@ -20,7 +21,7 @@ env:
   FILE: base
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
-  CONTAINERBASE_VERSION: ${{ github.sha }}
+  CONTAINERBASE_VERSION: 0.0.0-PLACEHOLDER+${{ github.sha }}
   APT_HTTP_PROXY: http://host.docker.internal:8000
 
 jobs:
@@ -70,7 +71,7 @@ jobs:
     needs: [build]
     # release only from pushes to `main` and `maint/**`, the merge queue only builds
     if: github.event_name == 'push'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
 
     concurrency:
@@ -82,6 +83,9 @@ jobs:
       contents: write
       packages: write
       id-token: write
+      # attest the released images
+      attestations: write
+      artifact-metadata: write
       # semantic-release comments on the released issues and pull requests
       issues: write
       pull-requests: write
@@ -108,7 +112,7 @@ jobs:
           echo "CACHE_WEEK=$(date +%U)" >> "${GITHUB_ENV}"
 
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
         with:
           checkout: false
           apt-proxy: true
@@ -120,8 +124,28 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: semantic-release
+        id: release
         run: pnpm semantic-release --dry-run "${DRY_RUN}" --ci "${CI_MODE}"
         env:
           CI_MODE: ${{ env.DRY_RUN != 'true' }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEBUG: semantic-release:github
+
+      # a failed attestation shows as an error but doesn't fail the release
+      - name: Attest the Docker Hub image
+        if: steps.release.outputs.digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: docker.io/${{ env.OWNER }}/${{ env.FILE }}
+          subject-digest: ${{ steps.release.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest the GHCR image
+        if: steps.release.outputs.digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/${{ env.OWNER }}/${{ env.FILE }}
+          subject-digest: ${{ steps.release.outputs.digest }}
+          push-to-registry: true

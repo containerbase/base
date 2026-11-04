@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { ApkoInstallService } from './apko.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/apko', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -49,6 +51,29 @@ describe('cli/tools/apko', () => {
       cwd: join(pathSvc.versionedToolPath('apko', version), 'bin'),
       strip: 1,
     });
+  });
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const releaseUrl = '/chainguard-dev/apko/releases/download/v0.31.0';
+    const filename = 'apko_0.31.0_linux_amd64.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/apko_0.31.0_linux_arm64.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `checksums.txt`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(ApkoInstallService);
+
+    await expect(svc.install('0.31.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
   });
 
   test('link', async () => {

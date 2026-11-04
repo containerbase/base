@@ -22,8 +22,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -48,7 +48,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 4.0.7
+RUN install-tool ruby 4.0.9
 
 #--------------------------------------
 # test: global bundler

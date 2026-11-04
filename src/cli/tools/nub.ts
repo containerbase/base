@@ -6,6 +6,7 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 @injectFromHierarchy()
 export class NubInstallService extends BaseInstallService {
   readonly name = 'nub';
+  override readonly minVersion = '0.0.34';
 
   /** The architecture name used by the nub release assets. */
   private get ghArch(): string {
@@ -17,19 +18,17 @@ export class NubInstallService extends BaseInstallService {
     }
   }
 
-  /** Downloads and extracts the nub release, verified against its SHA-256 checksum. */
+  /**
+   * Downloads and extracts the nub release. The file and its checksum come
+   * from the tool-versions data, without data it is verified against its
+   * `.sha256`.
+   */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/nubjs/nub/releases/download/v${version}/`;
     const filename = `nub-linux-${this.ghArch}.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha256`);
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256');
 
     await this.pathSvc.ensureToolPath(this.name);
     const path = await this.pathSvc.createVersionedToolPath(this.name, version);

@@ -23,8 +23,8 @@
 # The url cache is disabled by default and will only be activated when CONTAINERBASE_CACHE_DIR is set.
 # The fodler cache is disabled by default and will only be activated when CONTAINERBASE_CACHE_DIR and CONTAINERBASE_CACHE_FOLDERS is set.
 #
-# The cache supports a cleanup function if there is not enough disk space.
-# The function will always work on the checksum folder, not the individual files inside the folders.
+# When the disk is too full, `containerbase-cli` removes the oldest files from the cache after
+# each install, see `CacheService.evict`.
 
 
 # will attempt to download the file at the given url and stores it in the cache.
@@ -169,51 +169,6 @@ function verify_checksum () {
     return 1
   fi
   return 0
-}
-
-# will try to clean up the oldest file in the cache until the cache is empty
-# or unless the threshold is reached
-# When given true as first argument, will only delete a single file
-# If CONTAINERBASE_MAX_ALLOCATED_DISK is not set then the cache will be cleaned
-function cleanup_cache () {
-  local single_file=${1:false}
-
-  if [ -z "${CONTAINERBASE_CACHE_DIR}" ] || [ ! -d "${CONTAINERBASE_CACHE_DIR}" ]; then
-    # BUILD_CACHE_DIR is not set or doesn't exist
-    return
-  fi
-
-  local max_fill_level=${CONTAINERBASE_MAX_ALLOCATED_DISK:-100}
-
-  local fill_level
-  local oldest
-  fill_level=$(get_cache_fill_level)
-  oldest=$(get_oldest_file)
-
-  while [ "${fill_level}" -ge "${max_fill_level}" ] && [ -n "${oldest}" ]; do
-    # fill level is greater then threshold and there is a file
-    echo "Cache: ${fill_level}% - Cleaning up: ${oldest}"
-    rm "${oldest}"
-
-    if [ "${single_file}" = "true" ]; then
-      return
-    fi
-
-    fill_level=$(get_cache_fill_level)
-    oldest=$(get_oldest_file)
-  done
-}
-
-# Will get the oldest file in the cache and returns the path to it
-function get_oldest_file () {
-  check CONTAINERBASE_CACHE_DIR true
-  find "${CONTAINERBASE_CACHE_DIR}" -type f -printf '%T+ %p\n' | sort | head -n 1 | awk '{ print $2 }'
-}
-
-# Get the current fill level for the cache dir in percent
-function get_cache_fill_level () {
-  check CONTAINERBASE_CACHE_DIR true
-  df --output=pcent "${CONTAINERBASE_CACHE_DIR}" | tr -dc '0-9'
 }
 
 # Will calculate the checksum for the given string

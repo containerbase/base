@@ -15,23 +15,21 @@ export class KubectlInstallService extends BaseInstallService {
   override readonly minVersion = '1.13.11';
 
   /**
-   * Downloads the kubectl binary from dl.k8s.io, verified against its
-   * `.sha256`, into the versioned `bin` folder.
+   * Downloads the kubectl binary from dl.k8s.io into the versioned `bin`
+   * folder. The file and its checksum come from the tool-versions data,
+   * without data it is verified against its `.sha256`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://dl.k8s.io/release/v${version}/bin/linux/${this.envSvc.arch}/`;
     const filename = this.name;
 
-    const expectedChecksum = await this.getChecksum(
-      `${baseUrl}${filename}.sha256`,
+    // the binary has the same name for all archs and versions
+    const file = await this.downloadChecksumSidecar(
+      version,
+      `${baseUrl}${filename}`,
+      '.sha256',
+      { name: `${filename}-v${version}-${this.envSvc.arch}` },
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      fileName: `${filename}-v${version}-${this.envSvc.arch}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

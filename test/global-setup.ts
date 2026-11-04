@@ -13,6 +13,13 @@ vi.mock('pino', () => ({
   levels: { values: {} },
 }));
 
+// the waits between the attempts of a request, see `HttpService`
+vi.mock('node:timers/promises', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:timers/promises')>()),
+  // resolves at once with the value, like the real one after the delay
+  setTimeout: vi.fn((_ms?: number, value?: unknown) => Promise.resolve(value)),
+}));
+
 let rootDir!: string;
 let cacheDir!: string;
 

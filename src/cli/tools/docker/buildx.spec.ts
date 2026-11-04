@@ -6,7 +6,7 @@ import { LinkToolService, PathService } from '../../services/index.ts';
 import { BuildxInstallService } from './buildx.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/docker/buildx', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the binary is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -71,6 +73,34 @@ describe('cli/tools/docker/buildx', () => {
       ),
     ).toBe(binary);
   });
+
+  test.each(['0.6.2', '0.19.0'])(
+    'install: downloads the %s tool-versions file without the list',
+    async (version) => {
+      const releaseUrl = `/docker/buildx/releases/download/v${version}`;
+      const filename = `buildx-v${version}.linux-amd64`;
+      mockToolFiles([
+        toolFile(
+          `${baseUrl}${releaseUrl}/buildx-v${version}.linux-arm64`,
+          'arm',
+          'arm64',
+        ),
+        toolFile(`${baseUrl}${releaseUrl}/${filename}`, binary, 'amd64'),
+      ]);
+      // there is no interceptor for the `checksums.txt`, the data has a
+      // checksum for the releases before 0.7.0 too
+      scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, binary);
+      const { svc, pathSvc } = await toolContext(BuildxInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      const bin = join(
+        pathSvc.versionedToolPath('buildx', version),
+        'bin/buildx',
+      );
+      expect(await fs.readFile(bin, 'utf8')).toBe(binary);
+    },
+  );
 
   test('link', async () => {
     const { svc, child } = await toolContext(BuildxInstallService);

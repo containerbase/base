@@ -1,7 +1,6 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { type Distro, fileContent, getDistro } from '../../utils/index.ts';
 import { PipVersionResolver } from './pip.ts';
 import { PipBaseInstallService } from './utils.ts';
@@ -9,9 +8,6 @@ import { PipBaseInstallService } from './utils.ts';
 @injectable()
 @injectFromHierarchy()
 export class ConanPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name: string = 'conan';
 
   /**
@@ -56,12 +52,18 @@ export class ConanPrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class ConanInstallService extends PipBaseInstallService {
   override readonly name: string = 'conan';
+
+  /** The package cache, the profiles in `.conan2/profiles` are kept. */
+  override readonly cacheDirs = ['.conan2/p'];
 }
 
 @injectable()
 @injectFromHierarchy()
 export class ConanVersionResolver extends PipVersionResolver {
   override tool = 'conan';
+
+  /** The releases of the tool-versions data, pypi is the fallback. */
+  override readonly dataField = 'versions';
 }
 
 /** The conan name of the architecture. */

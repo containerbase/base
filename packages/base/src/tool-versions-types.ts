@@ -18,7 +18,10 @@ export interface ToolFile {
    */
   url: string;
   /**
-   * `<algorithm>:<lowercase hex>`
+   * `<algorithm>:<lowercase hex>`, published with `sha1`, `sha256` or
+   * `sha512`. The digests of the sha algorithms readers verify (`sha1`,
+   * `sha224`, `sha256`, `sha384`, `sha512`) have their exact length. Readers
+   * skip a file with an algorithm they don't know.
    */
   checksum: string;
   /**
@@ -47,6 +50,11 @@ export interface ToolVersion {
   prerelease?: true;
   lts?: true;
   /**
+   * The registry deprecates the version: npm deprecated it, all its PyPI files
+   * are yanked, or the gem is gone from rubygems.
+   */
+  deprecated?: true;
+  /**
    * When the version was released, in UTC.
    */
   releaseTimestamp?: string;
@@ -61,6 +69,16 @@ export interface ToolVersion {
    * present when the registry has one.
    */
   constraints?: Record<string, string>;
+  /**
+   * Sorted, the archs which have a file of this version, only in the
+   * `<tool>.json` files and only for versions with arch specific files.
+   */
+  archs?: string[];
+  /**
+   * Sorted, the distro codenames which have a file of this version, only in
+   * the `<tool>.json` files and only for versions with distro specific files.
+   */
+  distros?: string[];
 }
 
 /**
@@ -85,6 +103,15 @@ export interface ToolVersions {
    */
   homepage?: string;
   /**
+   * The tool has LTS release streams, like `node` and `java`.
+   */
+  lts?: true;
+  /**
+   * The version of the npm `latest` dist-tag, only for npm tools and only when
+   * it is listed in `versions`.
+   */
+  latest?: string;
+  /**
    * The oldest version containerbase supports, on the `defaultDistro` of the
    * root index, in the versioning of the tool. Older versions aren't listed.
    * Omitted for tools without a limit.
@@ -96,6 +123,23 @@ export interface ToolVersions {
    * don't break readers.
    */
   distroMinVersion?: Record<string, string>;
+  /**
+   * The oldest containerbase version, like `14.51.0`, which can install a
+   * version. A range applies to its `version` and every version above it in
+   * `versions`. Omitted for tools without a limit. Lenient, so a slip of the
+   * writer doesn't reject the file: a `cb` which isn't valid semver is never
+   * met by a reader.
+   */
+  minCb?: {
+    /**
+     * The version where the range starts, a version of `versions`.
+     */
+    version: string;
+    /**
+     * The oldest containerbase version, in semver.
+     */
+    cb: string;
+  }[];
   updatedAt: string;
   /**
    * Newest first.
@@ -197,4 +241,24 @@ export interface FormatIndex {
      */
     removalDate?: string;
   }[];
+}
+
+/**
+ * The content of the root `release.json` file: the release the data belongs to
+ * and when it was built, so a reader with embedded data can tell whether the
+ * online data is newer without fetching it.
+ */
+export interface ReleaseInfo {
+  /**
+   * The url of the json schema of the file, which identifies its format.
+   */
+  $schema?: string;
+  /**
+   * The version of the release, like `1.7.22`.
+   */
+  version: string;
+  /**
+   * When the build of the data started, in UTC.
+   */
+  buildTime: string;
 }

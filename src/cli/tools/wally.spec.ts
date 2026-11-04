@@ -6,7 +6,7 @@ import { getDistro, logger } from '../utils/index.ts';
 import { WallyInstallService } from './wally.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -34,6 +34,8 @@ describe('cli/tools/wally', () => {
       versionCode: 'jammy',
       versionId: '22.04',
     });
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -81,8 +83,48 @@ describe('cli/tools/wally', () => {
       await expect(svc.install(version)).resolves.toBeUndefined();
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Using jammy prebuild for wally on ${code}`,
+        `Using jammy file for wally on ${code}`,
       );
+    },
+  );
+
+  test.each([
+    { code: 'jammy', lookups: 1 },
+    { code: 'noble', lookups: 2 },
+  ])(
+    'install: downloads the jammy tool-versions file on $code without the .sha512',
+    async ({ code, lookups }) => {
+      vi.mocked(getDistro).mockResolvedValue({
+        name: 'Ubuntu',
+        versionCode: code,
+        versionId: '24.04',
+      });
+      const version = `0.5.0-${code}`;
+      const releaseUrl = `/containerbase/wally-prebuild/releases/download/${version}`;
+      const filename = `wally-${version}-jammy-x86_64.tar.xz`;
+      // only jammy prebuilds are published
+      const files = mockToolFiles(
+        (['arm64', 'amd64'] as const).map((toolArch) => ({
+          ...toolFile(
+            `${baseUrl}${releaseUrl}/wally-${version}-jammy-${toolArch === 'amd64' ? 'x86_64' : 'aarch64'}.tar.xz`,
+            toolArch === 'amd64' ? tarball : 'arm',
+            toolArch,
+          ),
+          distro: 'jammy',
+        })),
+      );
+      // there is no interceptor for the `.sha512`
+      scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc, pathSvc } = await toolContext(WallyInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(files).toHaveBeenCalledTimes(lookups);
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining(filename),
+        cwd: pathSvc.toolPath('wally'),
+      });
     },
   );
 

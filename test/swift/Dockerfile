@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS build
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool swift 6.4.1
+RUN install-tool swift 6.4.2
 
 #--------------------------------------
 # testa: swift latest

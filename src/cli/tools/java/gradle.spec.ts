@@ -4,7 +4,7 @@ import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { GradleInstallService, GradleVersionResolver } from './gradle.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -18,6 +18,8 @@ describe('cli/tools/java/gradle', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the zip is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -36,6 +38,24 @@ describe('cli/tools/java/gradle', () => {
     expect(extract).toHaveBeenCalledExactlyOnceWith({
       file: expect.stringContaining(filename),
       cwd: pathSvc.versionedToolPath('gradle', '8.10.2'),
+      strip: 1,
+    });
+  });
+
+  test('install: downloads the tool-versions file without the .sha256', async () => {
+    const filename = 'gradle-8.11-bin.zip';
+    // one file for all archs
+    mockToolFiles([toolFile(`${baseUrl}/distributions/${filename}`, zip)]);
+    // there is no interceptor for the `.sha256`
+    scope(baseUrl).get(`/distributions/${filename}`).reply(200, zip);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(GradleInstallService);
+
+    await expect(svc.install('8.11')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.versionedToolPath('gradle', '8.11'),
       strip: 1,
     });
   });
@@ -164,11 +184,11 @@ describe('cli/tools/java/gradle', () => {
       });
 
       test.each([
-        // an invalid body is retried
-        { name: 'invalid json', body: 'not json', times: 3 },
-        { name: 'an unexpected document', body: { versions: [] }, times: 1 },
-      ])('keeps a partial version for $name', async ({ body, times }) => {
-        scope(baseUrl).get('/versions/all').times(times).reply(200, body);
+        // an invalid body is not tried again
+        { name: 'invalid json', body: 'not json' },
+        { name: 'an unexpected document', body: { versions: [] } },
+      ])('keeps a partial version for $name', async ({ body }) => {
+        scope(baseUrl).get('/versions/all').once().reply(200, body);
         const { svc } = await toolContext(GradleVersionResolver);
 
         expect(await svc.resolve('8')).toBe('8');

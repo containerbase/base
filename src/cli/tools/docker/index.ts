@@ -60,11 +60,19 @@ export class DockerInstallService extends BaseInstallService {
 
   /**
    * Downloads the static docker build and extracts only the `docker` cli into
-   * the versioned `bin` folder. No checksums are verified.
+   * the versioned `bin` folder. docker publishes no checksums for it, the
+   * archive is verified against the checksum of the tool-versions data, else
+   * unverified.
    */
   override async install(version: string): Promise<void> {
-    const url = `https://download.docker.com/linux/static/stable/${this.arch}/docker-${version}.tgz`;
-    const file = await this.http.download({ url });
+    const arch = this.arch;
+    const url = `https://download.docker.com/linux/static/stable/${arch}/docker-${version}.tgz`;
+    // the file is named the same for all archs, the data adds the arch
+    const file = await this.downloadWithoutChecksum(
+      version,
+      url,
+      `docker-${version}-${arch}.tgz`,
+    );
 
     const path = await this.pathSvc.createVersionedToolPath(
       this.name,

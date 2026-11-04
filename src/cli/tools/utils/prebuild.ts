@@ -2,8 +2,11 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
-import { getDistro, logger } from '../../utils/index.ts';
+import {
+  ToolVersionResolver,
+  partialVersionHelp,
+} from '../../install-tool/tool-version-resolver.ts';
+import { getDistro } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -24,31 +27,50 @@ export abstract class PrebuildInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the distro specific containerbase prebuild, verified against
-   * its `.sha512`, and extracts it into the tool path.
-   * Newer ubuntu releases use the jammy prebuild.
+   * Downloads the distro specific containerbase prebuild and extracts it into
+   * the tool path. The file and its checksum come from the tool-versions
+   * data, the one of the host distro first. Newer ubuntu releases fall back to
+   * the jammy prebuild, without data it is verified against its `.sha512`.
    */
   override async install(version: string): Promise<void> {
-    const name = this.name;
-    const distro = await getDistro();
-    let code = distro.versionCode;
-
-    if (code === 'noble' || code === 'resolute') {
-      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
-      code = 'jammy';
-    }
-    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-    // every jammy prebuild has a checksum
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha512',
-      expectedChecksum,
-    });
+    const file = await this.download(version);
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 
     await this.compress.extract({ file, cwd: path });
+  }
+
+  /**
+   * Downloads the prebuild of the host distro from the tool-versions data,
+   * else the jammy one on newer ubuntu releases, from the data or from its
+   * GitHub release.
+   */
+  private async download(version: string): Promise<string> {
+    const host = (await getDistro()).versionCode;
+    const code = host === 'noble' || host === 'resolute' ? 'jammy' : host;
+    return (
+      (await this.downloadDistroToolFile(version, host, code)) ??
+      (await this.downloadPrebuild(version, code))
+    );
+  }
+
+  /**
+   * Downloads the prebuild of the distro from its GitHub release, verified
+   * against its `.sha512`.
+   */
+  private async downloadPrebuild(
+    version: string,
+    code: string,
+  ): Promise<string> {
+    const name = this.name;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+    // every jammy prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    return await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
   }
 
   /** Links the tool binary into the global bin folder. */
@@ -66,7 +88,17 @@ export abstract class PrebuildInstallService extends BaseInstallService {
 @injectable()
 @injectFromHierarchy()
 export abstract class PrebuildVersionResolver extends ToolVersionResolver {
-  /** Resolves a missing version or `latest` to the latest prebuild. */
+  /** The releases of the tool-versions data, the latest prebuild is the fallback. */
+  override readonly dataField = 'versions';
+
+  /** Partial versions are resolved from the tool-versions data. */
+  override readonly versionHelp = partialVersionHelp;
+
+  /**
+   * Resolves a missing version or `latest` to the latest prebuild, when the
+   * tool-versions data can't answer, see {@link dataField}. Any other version
+   * is kept.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return await this.latestVersion();
@@ -76,7 +108,7 @@ export abstract class PrebuildVersionResolver extends ToolVersionResolver {
 
   /** The version of the latest prebuild release. */
   protected async latestVersion(): Promise<string> {
-    return await this.http.get(
+    return await this.get(
       `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
     );
   }

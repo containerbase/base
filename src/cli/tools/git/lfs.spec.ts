@@ -10,7 +10,7 @@ import {
 import { GitLfsInstallService } from './lfs.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -31,6 +31,8 @@ describe('cli/tools/git/lfs', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -72,6 +74,39 @@ describe('cli/tools/git/lfs', () => {
       ).toBe(binary);
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const version = '3.10.0';
+    const filename = `git-lfs-linux-amd64-v${version}.tar.gz`;
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/v${version}/git-lfs-linux-arm64-v${version}.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(
+        `${baseUrl}${releaseUrl}/v${version}/${filename}`,
+        archive,
+        'amd64',
+      ),
+    ]);
+    // there is no interceptor for the `sha256sums.asc`
+    scope(baseUrl)
+      .get(`${releaseUrl}/v${version}/${filename}`)
+      .reply(200, archive);
+    const extract = vi
+      .spyOn(CompressionService.prototype, 'extract')
+      .mockImplementationOnce(({ cwd }) =>
+        fs.writeFile(join(cwd, 'git-lfs'), binary),
+      );
+    const { svc } = await toolContext(GitLfsInstallService);
+
+    await expect(svc.install(version)).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
+  });
 
   test('install: removes the temp folder when extraction fails', async () => {
     const version = '3.9.0';

@@ -18,7 +18,7 @@ export abstract class BasePrepareService {
   @inject(EnvService)
   protected readonly envSvc!: EnvService;
   @inject(AptService)
-  private readonly _aptSvc!: AptService;
+  protected readonly aptSvc!: AptService;
 
   abstract readonly name: string;
 
@@ -57,7 +57,7 @@ export abstract class BasePrepareService {
     distroPackages: Record<string, string[] | undefined>,
     ...common: string[]
   ): Promise<void> {
-    await this._aptSvc.installDistroPackages(
+    await this.aptSvc.installDistroPackages(
       this.name,
       distroPackages,
       ...common,

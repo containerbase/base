@@ -1,16 +1,31 @@
-import { readFile } from 'node:fs/promises';
-import { describe, expect, expectTypeOf, test } from 'vitest';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import type { Logger as PinoLogger } from 'pino';
+import semverLt from 'semver/functions/lt.js';
+import { describe, expect, expectTypeOf, test, vi } from 'vitest';
 import type { z } from 'zod';
 import { tools } from '../../packages/base/src/data.ts';
 import * as main from '../../packages/base/src/index.ts';
 import {
+  containerbaseVersionFile,
   defaultDistro,
+  getUrlReplacements,
+  isCompatibleVersion,
+  isContainerbase,
   isToolVersionsFormat,
+  packageVersion,
+  replaceUrl,
+  replaceUrlPrefix,
   toolNames,
   toolVersionsFormat,
   toolVersionsFormatPath,
+  toolVersionsPath,
+  validateContainerbaseVersion,
 } from '../../packages/base/src/index.ts';
+import type { Logger } from '../../packages/base/src/logger.ts';
 import {
+  Arch,
   DistroCode,
   type InstallToolType,
   ToolMetadata,
@@ -20,6 +35,7 @@ import * as schemas from '../../packages/base/src/tool-versions-schema.ts';
 import type * as tvTypes from '../../packages/base/src/tool-versions-types.ts';
 import type * as types from '../../packages/base/src/types.ts';
 import * as zodEntry from '../../packages/base/src/zod.ts';
+import { toolVersionsDir } from '../../tools/tool-versions.ts';
 
 const checksum = `sha256:${'a'.repeat(64)}`;
 const integrity = `sha256-${'A'.repeat(43)}=`;
@@ -88,6 +104,14 @@ describe('packages/base', () => {
     >().toEqualTypeOf<types.DistroCode>();
   });
 
+  test('Arch matches the zod free type', () => {
+    expectTypeOf<z.infer<typeof Arch>>().toEqualTypeOf<types.Arch>();
+  });
+
+  test('Arch accepts the containerbase archs', () => {
+    expect(Arch.options).toEqual(['amd64', 'arm64']);
+  });
+
   test('ToolMetadata accepts a minimum version per Ubuntu release', () => {
     expect(
       ToolMetadata.safeParse({ distroMinVersion: { resolute: '8.1.31' } })
@@ -122,13 +146,22 @@ describe('packages/base', () => {
         minVersion ? [[name, minVersion]] : [],
       ),
     ).toEqual([
+      ['android-sdk-cmdline-tools', '1'],
+      ['apko', '0.1.1'],
+      ['apm', '0.4.0'],
+      ['bazelisk', '0.0.1'],
+      ['buf', '0.1.0'],
+      ['buildx', '0.2.0'],
       ['bun', '0.5.3'],
       ['cabal', '3.4.1.0'],
+      ['composer', '1.0.0'],
       ['dart', '2.0.0'],
       ['deno', '2.0.1'],
+      ['devbox', '0.0.6'],
       ['docker', '20.10.0'],
       ['docker-compose', '2.0.1'],
       ['dotnet', '6.0.100'],
+      ['elixir', '1.4.3'],
       ['erlang', '24.2.0.0'],
       ['flutter', '1.22.6'],
       ['flux', '0.6.0'],
@@ -137,27 +170,41 @@ describe('packages/base', () => {
       ['git', '2.48.0'],
       ['git-lfs', '2.6.0'],
       ['gleam', '0.23.0'],
+      ['golang', '1.9.0'],
+      ['gradle', '1.0'],
       ['helm', '3.1.0'],
+      ['helmfile', '0.145.0'],
       ['java', '8.0.302+8'],
       ['java-jdk', '8.0.302+8'],
       ['java-jre', '8.0.302+8'],
+      ['jb', '0.2.0'],
       ['jq', '1.7.1'],
       ['kubectl', '1.13.11'],
       ['kustomize', '3.3.0'],
+      ['maven', '3.0.4'],
       ['mise', '2024.1.0'],
+      ['mono', '6.14.1'],
       ['nix', '2.10.3'],
+      ['node', '8.7.0'],
+      ['nub', '0.0.34'],
+      ['nuget', '3.4.4'],
       ['php', '7.4.0'],
       ['pixi', '0.39.2'],
       ['powershell', '7.2.0'],
       ['protoc', '3.0.0'],
       ['python', '2.7.18'],
       ['ruby', '2.7.7'],
+      ['rust', '1.7.0'],
       ['sbt', '0.13.17'],
+      ['scala', '2.11.2'],
       ['skopeo', '1.14.0'],
       ['sops', '3.8.0'],
       ['swift', '5.7'],
+      ['terraform', '0.1.0'],
       ['tofu', '1.6.3'],
+      ['vendir', '0.4.0'],
       ['vp', '0.3.1'],
+      ['wally', '0.3.0'],
     ]);
   });
 
@@ -202,6 +249,9 @@ describe('packages/base', () => {
     expectTypeOf<
       z.infer<typeof schemas.FormatIndex>
     >().toEqualTypeOf<tvTypes.FormatIndex>();
+    expectTypeOf<
+      z.infer<typeof schemas.ReleaseInfo>
+    >().toEqualTypeOf<tvTypes.ReleaseInfo>();
   });
 
   test('ToolVersions parses a <tool>.json file', () => {
@@ -233,6 +283,96 @@ describe('packages/base', () => {
   ])('ToolVersion rejects $name in the constraints', ({ constraints }) => {
     expect(
       schemas.ToolVersion.safeParse({ version: '1.0.0', constraints }).success,
+    ).toBe(false);
+  });
+
+  test('ToolVersion keeps the archs and distros', () => {
+    const version = {
+      version: '1.0.0',
+      archs: ['amd64', 'arm64'],
+      distros: ['jammy', 'noble'],
+    };
+
+    expect(schemas.ToolVersion.parse(version)).toEqual(version);
+  });
+
+  test('ToolVersions keeps the lts flag and the latest version', () => {
+    const file = {
+      tool: 'tool',
+      lts: true,
+      latest: '1.0.0',
+      updatedAt,
+      versions: [{ version: '1.0.0' }, { version: '0.9.0', deprecated: true }],
+    } as const;
+
+    expect(schemas.ToolVersions.parse(file)).toEqual(file);
+  });
+
+  test.each([
+    { name: 'a false lts flag', value: { lts: false } },
+    { name: 'an empty latest version', value: { latest: '' } },
+    {
+      name: 'a false deprecated flag',
+      value: { versions: [{ version: '1.0.0', deprecated: false }] },
+    },
+  ])('ToolVersions rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersions.safeParse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        ...value,
+      }).success,
+    ).toBe(false);
+  });
+
+  test('ToolVersions keeps the minCb ranges', () => {
+    const minCb = [{ version: '0.9.0', cb: '14.51.0' }];
+    const file = {
+      tool: 'tool',
+      updatedAt,
+      versions: [{ version: '1.0.0' }, { version: '0.9.0' }],
+    };
+
+    expect(schemas.ToolVersions.parse({ ...file, minCb }).minCb).toEqual(minCb);
+  });
+
+  test.each([
+    { name: 'no ranges', minCb: [] },
+    { name: 'an empty cb', minCb: [{ version: '1.0.0', cb: '' }] },
+  ])('ToolVersions accepts $name in the minCb', ({ minCb }) => {
+    expect(
+      schemas.ToolVersions.parse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        minCb,
+      }).minCb,
+    ).toEqual(minCb);
+  });
+
+  test.each([
+    { name: 'an empty version', minCb: [{ version: '', cb: '14.51.0' }] },
+    { name: 'a range without cb', minCb: [{ version: '1.0.0' }] },
+  ])('ToolVersions rejects $name in the minCb', ({ minCb }) => {
+    expect(
+      schemas.ToolVersions.safeParse({
+        tool: 'tool',
+        updatedAt,
+        versions: [],
+        minCb,
+      }).success,
+    ).toBe(false);
+  });
+
+  test.each([
+    { name: 'empty archs', value: { archs: [] } },
+    { name: 'an empty arch', value: { archs: [''] } },
+    { name: 'empty distros', value: { distros: [] } },
+    { name: 'an empty distro', value: { distros: [''] } },
+  ])('ToolVersion rejects $name', ({ value }) => {
+    expect(
+      schemas.ToolVersion.safeParse({ version: '1.0.0', ...value }).success,
     ).toBe(false);
   });
 
@@ -291,6 +431,27 @@ describe('packages/base', () => {
     ).toBe(true);
   });
 
+  test('ReleaseInfo parses the root release file', () => {
+    expect(
+      schemas.ReleaseInfo.parse({
+        $schema:
+          'https://containerbase.github.io/tool-versions/release.schema.json',
+        version: '1.7.22',
+        buildTime: '2026-10-28T03:00:00.000Z',
+        added: true,
+      }),
+    ).toEqual({
+      $schema:
+        'https://containerbase.github.io/tool-versions/release.schema.json',
+      version: '1.7.22',
+      buildTime: '2026-10-28T03:00:00.000Z',
+    });
+    expect(
+      schemas.ReleaseInfo.safeParse({ version: '1.7.22', buildTime: 'today' })
+        .success,
+    ).toBe(false);
+  });
+
   test('unknown keys and archs still parse', () => {
     const parsed = schemas.ToolVersions.parse({
       tool: 'tool',
@@ -310,8 +471,36 @@ describe('packages/base', () => {
 
   test.each([
     {
-      name: 'a bad checksum',
+      name: 'a checksum without algorithm',
+      value: { ...file, checksum: 'abc' },
+    },
+    {
+      name: 'an uppercase checksum',
+      value: { ...file, checksum: 'SHA256:ABC' },
+    },
+    {
+      name: 'a checksum which is no hex',
+      value: { ...file, checksum: 'sha256:xyz' },
+    },
+    {
+      name: 'a short sha1 digest',
+      value: { ...file, checksum: `sha1:${'a'.repeat(39)}` },
+    },
+    {
+      name: 'a short sha256 digest',
       value: { ...file, checksum: 'sha256:abc' },
+    },
+    {
+      name: 'a long sha512 digest',
+      value: { ...file, checksum: `sha512:${'a'.repeat(129)}` },
+    },
+    {
+      name: 'a short sha224 digest',
+      value: { ...file, checksum: `sha224:${'a'.repeat(55)}` },
+    },
+    {
+      name: 'a long sha384 digest',
+      value: { ...file, checksum: `sha384:${'a'.repeat(97)}` },
     },
     {
       name: 'an http url',
@@ -319,6 +508,26 @@ describe('packages/base', () => {
     },
   ])('ToolFile rejects $name', ({ value }) => {
     expect(schemas.ToolFile.safeParse(value).success).toBe(false);
+  });
+
+  test('ToolFile accepts an unknown checksum algorithm', () => {
+    // readers skip such a file instead of rejecting the whole version
+    expect(
+      schemas.ToolFile.safeParse({ ...file, checksum: 'blake3-256:abc123' })
+        .success,
+    ).toBe(true);
+  });
+
+  test.each([
+    { algorithm: 'sha224', length: 56 },
+    { algorithm: 'sha384', length: 96 },
+  ])('ToolFile accepts a $algorithm digest', ({ algorithm, length }) => {
+    expect(
+      schemas.ToolFile.safeParse({
+        ...file,
+        checksum: `${algorithm}:${'a'.repeat(length)}`,
+      }).success,
+    ).toBe(true);
   });
 
   test('the format is version 1 in the v1 folder', () => {
@@ -401,6 +610,392 @@ describe('packages/base', () => {
     }
   });
 
+  test('toolVersionsPath is where the build embeds the data', () => {
+    expect(`dist/docker${toolVersionsPath}`).toBe(toolVersionsDir);
+  });
+
+  test.each([
+    { name: 'set', env: { CONTAINERBASE: '1' }, expected: true },
+    { name: 'empty', env: { CONTAINERBASE: '' }, expected: false },
+    { name: 'missing', env: {}, expected: false },
+  ])(
+    'isContainerbase is $expected when CONTAINERBASE is $name',
+    ({ env, expected }) => {
+      expect(isContainerbase(env)).toBe(expected);
+    },
+  );
+
+  test('isContainerbase checks process.env by default', () => {
+    vi.stubEnv('CONTAINERBASE', '1');
+    expect(isContainerbase()).toBe(true);
+    vi.stubEnv('CONTAINERBASE', undefined);
+    expect(isContainerbase()).toBe(false);
+    vi.unstubAllEnvs();
+  });
+
+  test.each([
+    { image: '14.2.0', version: '14.2.0', expected: true },
+    { image: '14.2.1', version: '14.2.0', expected: true },
+    { image: '14.3.0', version: '14.2.5', expected: true },
+    { image: '14.2.0\n', version: '14.2.0', expected: true },
+    { image: '14.1.9', version: '14.2.0', expected: false },
+    { image: '14.2.0', version: '14.2.1', expected: false },
+    { image: '15.0.0', version: '14.2.0', expected: false },
+    { image: '13.9.0', version: '14.2.0', expected: false },
+    { image: 'latest', version: '14.2.0', expected: false },
+    { image: '14.2.0', version: 'invalid', expected: false },
+  ])(
+    'isCompatibleVersion of image $image with $version is $expected',
+    ({ image, version, expected }) => {
+      expect(isCompatibleVersion(image, version)).toBe(expected);
+    },
+  );
+
+  describe('filterByMinCb', () => {
+    const data: tvTypes.ToolVersions = {
+      tool: 'example',
+      updatedAt,
+      minCb: [
+        { version: '2.0.0', cb: '14.51.0' },
+        { version: '1.5.0', cb: '14.60.0' },
+      ],
+      versions: [
+        { version: '3.0.0' },
+        { version: '2.1.0-rc.1', prerelease: true },
+        { version: '2.0.0' },
+        { version: '1.5.0' },
+        { version: '1.0.0' },
+      ],
+    };
+    const all = data.versions.map((v) => v.version);
+
+    test.each([
+      { cb: '14.60.0', versions: all, needed: [] },
+      { cb: '14.55.0', versions: all.slice(4), needed: ['14.60.0'] },
+      { cb: '14.50.0', versions: all.slice(4), needed: ['14.51.0', '14.60.0'] },
+      { cb: '0.0.0-PLACEHOLDER', versions: all, needed: [] },
+      { cb: '0.0.0-PLACEHOLDER+abc123', versions: all, needed: [] },
+    ])(
+      'filters by the containerbase version $cb',
+      ({ cb, versions, needed }) => {
+        const result = main.filterByMinCb(data, cb);
+
+        expect(result.versions.map((v) => v.version)).toEqual(versions);
+        expect(result.needed).toEqual(needed);
+      },
+    );
+
+    test('ignores a range whose version is not listed and keeps data without ranges', () => {
+      const unlisted = {
+        ...data,
+        minCb: [{ version: '9.9.9', cb: '99.0.0' }],
+      };
+
+      expect(main.filterByMinCb(unlisted, '14.0.0')).toEqual({
+        versions: data.versions,
+        needed: [],
+      });
+      expect(
+        main.filterByMinCb(
+          { tool: 'example', updatedAt, versions: data.versions },
+          '14.0.0',
+        ),
+      ).toEqual({ versions: data.versions, needed: [] });
+    });
+
+    test('never meets a cb which is not valid semver', () => {
+      const invalid = {
+        ...data,
+        minCb: [{ version: '1.5.0', cb: 'latest' }],
+      };
+
+      expect(main.filterByMinCb(invalid, '99.0.0')).toEqual({
+        versions: data.versions.slice(4),
+        needed: ['latest'],
+      });
+    });
+  });
+
+  describe('configure', () => {
+    test('sets the logger and resets it to the silent default', () => {
+      const debug = vi.fn();
+      const logger = {
+        trace: vi.fn(),
+        debug,
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      };
+
+      const silent = main.getLogger();
+      expect(() => silent.warn({ tool: 'node' }, 'silent')).not.toThrow();
+      expect(main.isConfigured()).toBe(false);
+
+      main.configure({ logger });
+      expect(main.isConfigured()).toBe(true);
+      main.getLogger().debug({ tool: 'node' }, 'message');
+      expect(debug).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'node' },
+        'message',
+      );
+
+      main.configure();
+      expect(main.getLogger()).toBe(silent);
+      expect(main.isConfigured()).toBe(false);
+
+      // an explicitly passed silent logger still counts as configured
+      main.configure({ logger: silent });
+      expect(main.isConfigured()).toBe(true);
+      main.configure();
+    });
+
+    test('shares the logger with another copy of the package', async () => {
+      const logger = {
+        trace: vi.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      };
+      vi.resetModules();
+      const copy = await import('../../packages/base/src/logger.ts');
+      expect(copy.configure).not.toBe(main.configure);
+      expect(copy.isConfigured()).toBe(false);
+
+      main.configure({ logger });
+      expect(copy.isConfigured()).toBe(true);
+      expect(copy.getLogger()).toBe(logger);
+
+      copy.configure();
+      expect(main.isConfigured()).toBe(false);
+      expect(() => main.getLogger().warn('silent')).not.toThrow();
+    });
+
+    test('accepts a pino and a Renovate logger', () => {
+      expectTypeOf<PinoLogger>().toExtend<Logger>();
+      // the log methods of lib/logger/types.ts in Renovate
+      interface RenovateLogger {
+        trace(msg: string): void;
+        trace(meta: Record<string, any>, msg?: string): void;
+        debug(msg: string): void;
+        debug(meta: Record<string, any>, msg?: string): void;
+        info(msg: string): void;
+        info(meta: Record<string, any>, msg?: string): void;
+        warn(msg: string): void;
+        warn(meta: Record<string, any>, msg?: string): void;
+        error(msg: string): void;
+        error(meta: Record<string, any>, msg?: string): void;
+      }
+      expectTypeOf<RenovateLogger>().toExtend<Logger>();
+    });
+  });
+
+  describe('minCbByVersion', () => {
+    const data: tvTypes.ToolVersions = {
+      tool: 'example',
+      updatedAt,
+      versions: [
+        { version: '3.0.0' },
+        { version: '2.1.0-rc.1', prerelease: true },
+        { version: '2.0.0' },
+        { version: '1.5.0' },
+        { version: '1.0.0' },
+      ],
+    };
+
+    test('lists the versions a single range covers', () => {
+      const single = { ...data, minCb: [{ version: '2.0.0', cb: '14.51.0' }] };
+
+      expect(main.minCbByVersion(single)).toEqual(
+        new Map([
+          ['3.0.0', '14.51.0'],
+          ['2.1.0-rc.1', '14.51.0'],
+          ['2.0.0', '14.51.0'],
+        ]),
+      );
+    });
+
+    test('counts prereleases for the position', () => {
+      const prerelease = {
+        ...data,
+        minCb: [{ version: '2.1.0-rc.1', cb: '14.51.0' }],
+      };
+
+      expect(main.minCbByVersion(prerelease)).toEqual(
+        new Map([
+          ['3.0.0', '14.51.0'],
+          ['2.1.0-rc.1', '14.51.0'],
+        ]),
+      );
+    });
+
+    test('uses the highest cb of overlapping ranges', () => {
+      const overlapping = {
+        ...data,
+        minCb: [
+          { version: '1.5.0', cb: '14.60.0' },
+          { version: '2.0.0', cb: '14.51.0' },
+          { version: '2.1.0-rc.1', cb: '14.70.0' },
+        ],
+      };
+
+      expect(main.minCbByVersion(overlapping)).toEqual(
+        new Map([
+          ['3.0.0', '14.70.0'],
+          ['2.1.0-rc.1', '14.70.0'],
+          ['2.0.0', '14.60.0'],
+          ['1.5.0', '14.60.0'],
+        ]),
+      );
+    });
+
+    test('ignores a range whose version is not listed', () => {
+      const unlisted = {
+        ...data,
+        minCb: [{ version: '9.9.9', cb: '99.0.0' }],
+      };
+
+      expect(main.minCbByVersion(unlisted)).toEqual(new Map());
+    });
+
+    test('lets a cb which is not valid semver win', () => {
+      const invalid = {
+        ...data,
+        minCb: [
+          { version: '1.5.0', cb: '14.60.0' },
+          { version: '2.0.0', cb: 'latest' },
+          { version: '2.1.0-rc.1', cb: 'next' },
+          { version: '3.0.0', cb: '99.0.0' },
+        ],
+      };
+
+      expect(main.minCbByVersion(invalid)).toEqual(
+        new Map([
+          ['3.0.0', 'latest'],
+          ['2.1.0-rc.1', 'latest'],
+          ['2.0.0', 'latest'],
+          ['1.5.0', '14.60.0'],
+        ]),
+      );
+    });
+
+    test('returns an empty map without ranges', () => {
+      expect(main.minCbByVersion(data)).toEqual(new Map());
+    });
+
+    test.each(['14.40.0', '14.51.0', '14.55.0', '14.60.0', '15.0.0'])(
+      'matches filterByMinCb for the containerbase version %s',
+      (cb) => {
+        const ranged = {
+          ...data,
+          minCb: [
+            { version: '2.0.0', cb: '14.51.0' },
+            { version: '1.5.0', cb: '14.60.0' },
+          ],
+        };
+        const needs = main.minCbByVersion(ranged);
+        const dropped = ranged.versions
+          .map((v) => v.version)
+          .filter(
+            (v) =>
+              !main
+                .filterByMinCb(ranged, cb)
+                .versions.some((r) => r.version === v),
+          );
+        const unmet = ranged.versions
+          .map((v) => v.version)
+          .filter((v) => {
+            const needed = needs.get(v);
+            return needed !== undefined && semverLt(cb, needed);
+          });
+
+        expect(unmet).toEqual(dropped);
+      },
+    );
+  });
+
+  test('isReleaseVersion tells releases from development builds', () => {
+    expect(main.isReleaseVersion('14.51.0')).toBe(true);
+    expect(main.isReleaseVersion('0.0.0-PLACEHOLDER')).toBe(false);
+    expect(main.isReleaseVersion('0.0.0-PLACEHOLDER+abc123')).toBe(false);
+    expect(main.isReleaseVersion('latest')).toBe(false);
+  });
+
+  test('packageVersion is the version of the package', async () => {
+    const pkg = JSON.parse(
+      await readFile(
+        new URL('../../packages/base/package.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { version: string };
+
+    expect(packageVersion).toBe(pkg.version);
+  });
+
+  test('validateContainerbaseVersion reads the image version', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+    const file = join(dir, 'version');
+    try {
+      // the package of the repository has the placeholder version 0.0.0
+      await writeFile(file, '0.1.0\n');
+      await expect(validateContainerbaseVersion(file)).resolves.toBe('0.1.0');
+
+      await writeFile(file, '1.0.0\n');
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        'The containerbase image version 1.0.0 is not compatible with @containerbase/base 0.0.0-semantic-release',
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test.each([
+    '0.0.0-PLACEHOLDER+a8c820972f2d16ce9fd7eeae9bcfbfc5b9e6f616',
+    '0.0.0-PLACEHOLDER',
+  ])(
+    'validateContainerbaseVersion skips the development image version %s',
+    async (version) => {
+      const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+      const file = join(dir, 'version');
+      try {
+        await writeFile(file, `${version}\n`);
+        await expect(validateContainerbaseVersion(file)).resolves.toBe(version);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  test('validateContainerbaseVersion throws for an empty or missing version file', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'containerbase-version-'));
+    const file = join(dir, 'version');
+    try {
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        `The containerbase image version file ${file} is missing`,
+      );
+      // other read errors name the file and keep the reason
+      await expect(validateContainerbaseVersion(dir)).rejects.toThrow(
+        `The containerbase image version file ${dir} can't be read: EISDIR`,
+      );
+
+      await writeFile(file, '\n');
+      await expect(validateContainerbaseVersion(file)).rejects.toThrow(
+        `The containerbase image version file ${file} is empty`,
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('containerbaseVersionFile is where the build writes the version', async () => {
+    const build = await readFile(
+      new URL('../../tools/build.js', import.meta.url),
+      'utf8',
+    );
+
+    expect(build).toContain(`'dist/docker${containerbaseVersionFile}'`);
+  });
+
   test('FileIntegrity rejects a bad integrity', () => {
     expect(schemas.FileIntegrity.safeParse(integrity).success).toBe(true);
     expect(schemas.FileIntegrity.safeParse('sha256-abc').success).toBe(false);
@@ -410,5 +1005,138 @@ describe('packages/base', () => {
         versions: { '1.0.0': 'md5-abc' },
       }).success,
     ).toBe(false);
+  });
+
+  test('getUrlReplacements reads the replacements in numerical order', () => {
+    expect(
+      getUrlReplacements({
+        URL_REPLACE_10_FROM: 'https://example.com/10',
+        URL_REPLACE_10_TO: 'https://example.test/10',
+        URL_REPLACE_2_FROM: 'https://example.com/2',
+        URL_REPLACE_2_TO: 'https://example.test/2',
+        URL_REPLACE_3_FROM: 'https://example.com/3',
+        URL_REPLACE_4_FROM: 'https://example.com/4',
+        URL_REPLACE_4_TO: '',
+        URL_REPLACE_X_FROM: 'https://example.com/x',
+        URL_REPLACE_X_TO: 'https://example.test/x',
+      }),
+    ).toEqual({
+      replacements: [
+        ['https://example.com/2', 'https://example.test/2'],
+        ['https://example.com/10', 'https://example.test/10'],
+      ],
+      invalid: ['URL_REPLACE_3_FROM', 'URL_REPLACE_4_FROM'],
+    });
+  });
+
+  test('getUrlReplacements reads process.env by default', () => {
+    vi.stubEnv('URL_REPLACE_0_FROM', 'https://example.com');
+    vi.stubEnv('URL_REPLACE_0_TO', 'https://example.test');
+    expect(getUrlReplacements().replacements).toEqual([
+      ['https://example.com', 'https://example.test'],
+    ]);
+    vi.unstubAllEnvs();
+  });
+
+  test('replaceUrl applies the cdn first, then the replacements in order', () => {
+    const replacements: [string, string][] = [
+      ['https://example.com', 'https://example.test'],
+      [
+        'https://cdn.example.com/registry.npmjs.org',
+        'https://npm.example.test',
+      ],
+    ];
+
+    expect(replaceUrl('https://example.com/file.txt', replacements)).toBe(
+      'https://example.test/file.txt',
+    );
+    expect(replaceUrl('https://example.org/file.txt', replacements)).toBe(
+      'https://example.org/file.txt',
+    );
+    expect(
+      replaceUrl(
+        'https://example.test/file.txt',
+        [],
+        'https://cdn.example.com/',
+      ),
+    ).toBe('https://cdn.example.com/example.test/file.txt');
+    expect(
+      replaceUrl(
+        'https://registry.npmjs.org',
+        replacements,
+        'https://cdn.example.com',
+      ),
+    ).toBe('https://npm.example.test');
+    expect(replaceUrl('https://registry.npmjs.org', replacements, '')).toBe(
+      'https://registry.npmjs.org',
+    );
+  });
+
+  describe('replaceUrlPrefix', () => {
+    interface Rule {
+      from: string;
+      to: string;
+      public?: boolean;
+    }
+    const npm: Rule = {
+      from: 'https://registry.npmjs.org/',
+      to: 'https://npm.example.test/',
+    };
+    const mirror: Rule = {
+      from: 'https://npm.example.test/',
+      to: 'https://mirror.example.test/npm/',
+      public: true,
+    };
+
+    test('keeps a url without a matching prefix', () => {
+      expect(replaceUrlPrefix('https://example.com/file.txt', [npm])).toEqual({
+        url: 'https://example.com/file.txt',
+        applied: [],
+      });
+    });
+
+    test('keeps the url without rules', () => {
+      expect(replaceUrlPrefix('https://registry.npmjs.org/foo', [])).toEqual({
+        url: 'https://registry.npmjs.org/foo',
+        applied: [],
+      });
+    });
+
+    test('replaces a prefix', () => {
+      expect(replaceUrlPrefix('https://registry.npmjs.org/foo', [npm])).toEqual(
+        {
+          url: 'https://npm.example.test/foo',
+          applied: [npm],
+        },
+      );
+    });
+
+    test('chains the rules in order and keeps their extra fields', () => {
+      const result = replaceUrlPrefix('https://registry.npmjs.org/foo', [
+        npm,
+        mirror,
+      ]);
+      expect(result).toEqual({
+        url: 'https://mirror.example.test/npm/foo',
+        applied: [npm, mirror],
+      });
+      expect(result.applied[1]).toBe(mirror);
+      expectTypeOf(result.applied).toEqualTypeOf<Rule[]>();
+    });
+
+    test('applies a rule only to the result of the previous ones', () => {
+      expect(
+        replaceUrlPrefix('https://registry.npmjs.org/foo', [mirror, npm]),
+      ).toEqual({
+        url: 'https://npm.example.test/foo',
+        applied: [npm],
+      });
+    });
+
+    test('ignores a match outside the start of the url', () => {
+      const url =
+        'https://example.com/redirect?u=https://registry.npmjs.org/foo';
+      expect(replaceUrlPrefix(url, [npm])).toEqual({ url, applied: [] });
+    });
   });
 });

@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { DevboxInstallService } from './devbox.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/devbox', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -52,6 +54,29 @@ describe('cli/tools/devbox', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const releaseUrl = '/jetify-com/devbox/releases/download/0.14.0';
+    const filename = 'devbox_0.14.0_linux_amd64.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/devbox_0.14.0_linux_arm64.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `checksums.txt`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(DevboxInstallService);
+
+    await expect(svc.install('0.14.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(DevboxInstallService);

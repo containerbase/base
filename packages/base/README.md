@@ -33,7 +33,7 @@ The raw data and its json schema are also exported, for consumers which don't us
 import tools from '@containerbase/base/tools.json' with { type: 'json' };
 ```
 
-The zod schemas live behind a separate entry point, so the default export stays dependency free:
+The zod schemas live behind a separate entry point, so the default export only depends on `semver`:
 
 ```ts
 import { SupportedTools, ToolName } from '@containerbase/base/zod';
@@ -48,7 +48,7 @@ defaultDistro; // 'noble'
 ```
 
 The format of the published [tool-versions](https://github.com/containerbase/tool-versions/blob/main/docs/format.md) data is exported too, so its readers share one definition.
-The zod schemas (`ToolVersions`, `VersionFiles`, `VersionIntegrity`, `ToolIndex`, `FormatIndex` and their parts) live behind the `zod` entry point, the zod free types behind the main one:
+The zod schemas (`ToolVersions`, `VersionFiles`, `VersionIntegrity`, `ToolIndex`, `FormatIndex`, `ReleaseInfo` and their parts) live behind the `zod` entry point, the zod free types behind the main one:
 
 ```ts
 import { ToolVersions } from '@containerbase/base/zod';
@@ -74,7 +74,116 @@ isToolVersionsFormat(
 ); // false
 ```
 
+The containerbase image embeds the tool-versions data, a reader running in the image can use it when the site can't be reached:
+
+```ts
+import {
+  isContainerbase,
+  toolVersionsFormatPath,
+  toolVersionsPath,
+} from '@containerbase/base';
+
+if (isContainerbase()) {
+  // eg. '/usr/local/containerbase/tool-versions/v1/node.json'
+  const file = `${toolVersionsPath}/${toolVersionsFormatPath}/node.json`;
+}
+```
+
+`isContainerbase()` checks the `CONTAINERBASE` variable the image sets, pass another environment to check that one instead of `process.env`.
+
+`validateContainerbaseVersion()` reads the version of the image from `/usr/local/containerbase/version` (`containerbaseVersionFile`) and throws when the image doesn't support everything this package describes: it needs the same major version as this package and the same or a newer minor or patch version.
+Development images, whose version is a git sha or `0.0.0-…`, aren't checked; a missing or empty version file throws.
+Call it on startup when `isContainerbase()` is true; `isCompatibleVersion(imageVersion)` does the comparison without reading the file, and `packageVersion` is the version it compares with:
+
+```ts
+import {
+  isContainerbase,
+  validateContainerbaseVersion,
+} from '@containerbase/base';
+
+if (isContainerbase()) {
+  await validateContainerbaseVersion(); // eg. '14.2.0', or throws
+}
+```
+
+Containerbase replaces the urls it downloads from with the `CONTAINERBASE_CDN` and `URL_REPLACE_<n>_FROM` / `URL_REPLACE_<n>_TO` variables, see [custom registries](https://github.com/containerbase/base/blob/main/docs/custom-registries.md).
+A reader can replace its urls the same way, so a mirror configured for containerbase works for it too:
+
+```ts
+import { getUrlReplacements, replaceUrl } from '@containerbase/base';
+
+const { replacements, invalid } = getUrlReplacements(); // reads `process.env`
+// `invalid` lists the `URL_REPLACE_<n>_FROM` variables without a value or `_TO` counterpart
+replaceUrl(
+  'https://containerbase.github.io/tool-versions/v1/node.json',
+  replacements,
+  process.env.CONTAINERBASE_CDN,
+);
+```
+
+`replaceUrl` replaces the first occurrence of a `from` anywhere in the url; the next major only matches at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
+`replaceUrlPrefix(url, rules)` already does: the rules apply in order, each to the result of the previous ones, and only when the url starts with its `from`.
+It has no cdn step and returns the replaced url with the rules that matched, other fields of the rules are kept.
+End `from` and `to` with a `/`, like `https://example.com/`, so a rule only matches that host: `https://example.com` also matches `https://example.com.test/`.
+
+```ts
+import { replaceUrlPrefix } from '@containerbase/base';
+
+const { url, applied } = replaceUrlPrefix('https://registry.npmjs.org/foo', [
+  { from: 'https://registry.npmjs.org/', to: 'https://npm.example.test/' },
+]);
+// url: 'https://npm.example.test/foo', applied: [the rule]
+```
+
+A tool's data may list `minCb` ranges, the oldest containerbase version which can install a version and every version above it.
+`filterByMinCb(data, cbVersion)` returns the `versions` the given containerbase version can install, in the order of the data, and the `cb` values of the unmet ranges as `needed`.
+A `cbVersion` which isn't a release, like `0.0.0-PLACEHOLDER` (see `isReleaseVersion(version)`), skips the filter:
+
+```ts
+import { filterByMinCb, packageVersion } from '@containerbase/base';
+import type { ToolVersions } from '@containerbase/base';
+
+declare const data: ToolVersions; // the content of eg. `node.json`
+
+const { versions, needed } = filterByMinCb(data, packageVersion);
+```
+
+`minCbByVersion(data)` returns the containerbase version each covered tool version needs as a `Map` by version, the newest `cb` of the ranges covering it.
+A `cb` which isn't valid semver wins over valid ones, as it is never met.
+Versions no range covers aren't listed:
+
+```ts
+import { minCbByVersion } from '@containerbase/base';
+
+const needs = minCbByVersion(data); // eg. `needs.get('2.0.0')` is `'14.51.0'`
+```
+
 The schemas ignore unknown keys and accept any arch name, so additive changes of the format don't break a reader; readers ignore files of an arch they don't know.
+
+The package logs nothing by default.
+`configure({ logger })` sets the logger its functions log to, eg. a pino or Renovate logger, and `configure()` turns logging off again:
+
+```ts
+import { configure } from '@containerbase/base';
+import { logger } from './logger.ts';
+
+configure({ logger });
+```
+
+`getLogger()` returns the configured logger, so a package building on `@containerbase/base` can log to the same one.
+All installed copies of the package share the logger, also when they have different versions, so such a package logs to it even when it uses another copy.
+`isConfigured()` tells whether a logger was set, so that package can configure a fallback when nobody did:
+
+```ts
+import { configure, getLogger, isConfigured } from '@containerbase/base';
+import { fallbackLogger } from './logger.ts';
+
+if (!isConfigured()) {
+  configure({ logger: fallbackLogger });
+}
+
+getLogger().debug({ tool: 'node' }, 'resolving');
+```
 
 ## Contents
 

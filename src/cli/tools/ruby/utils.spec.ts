@@ -365,5 +365,19 @@ describe('cli/tools/ruby/utils', () => {
       expect(svc.tool).toBe('cocoapods');
       expect(await svc.resolve('latest')).toBe('1.16.2');
     });
+
+    test.each([
+      // a typed gem tool reads the tool-versions data first
+      { tool: 'bundler', dataField: 'versions' },
+      // any other gem always asks rubygems.org
+      { tool: 'rake', dataField: undefined },
+    ])(
+      'createGemVersionResolver reads the data for $tool: $dataField',
+      async ({ tool, dataField }) => {
+        const { svc } = await toolContext(createGemVersionResolver(tool));
+
+        expect(svc.dataField).toBe(dataField);
+      },
+    );
   });
 });

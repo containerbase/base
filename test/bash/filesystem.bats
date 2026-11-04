@@ -138,6 +138,19 @@ teardown() {
   assert [ "$(stat --format '%a' "${var_dir}/tool.prep.d")" -eq 755 ]
 }
 
+@test "setup directories always uses the default tmp dir" {
+  local TEST_ROOT_USER=0 # root
+  local CONTAINERBASE_TMP_DIR="${TEST_ROOT_DIR}/var-cache"
+
+  run setup_directories
+  assert_success
+
+  assert [ -d "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
+  assert [ ! -L "${CONTAINERBASE_DEFAULT_TMP_DIR}" ]
+  assert [ ! -e "${CONTAINERBASE_TMP_DIR}" ]
+  assert [ "$(readlink "${USER_HOME}/.cache")" = "${CONTAINERBASE_DEFAULT_TMP_DIR}/cache/.cache" ]
+}
+
 @test "creates a folder with correct permissions" {
   local install_dir=$(get_install_dir)
 

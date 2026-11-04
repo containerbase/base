@@ -16,8 +16,9 @@ export class TofuInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the tofu archive from GitHub, verified against the release's
-   * `SHA256SUMS`, and extracts it into the versioned `bin` folder.
+   * Downloads the tofu archive from GitHub and extracts it into the versioned
+   * `bin` folder. The file and its checksum come from the tool-versions data,
+   * without data it is verified against the release's `SHA256SUMS`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -27,18 +28,13 @@ export class TofuInstallService extends BaseInstallService {
     const baseUrl = `https://github.com/opentofu/opentofu/releases/download/v${version}/`;
 
     const filename = `tofu_${version}_linux_${this.ghArch}.tar.gz`;
-    const url = `${baseUrl}${filename}`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}tofu_${version}_SHA256SUMS`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      `tofu_${version}_SHA256SUMS`,
     );
-
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

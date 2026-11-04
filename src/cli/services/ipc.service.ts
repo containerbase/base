@@ -44,7 +44,7 @@ export class IpcServer {
       throw new Error('ipc server already started');
     }
     serverRunning = true;
-    ipc.serve(`${this.pathSvc.tmpDir}/ipc.sock`);
+    ipc.serve(this.pathSvc.ipcSocketPath);
 
     /* v8 ignore start -- needs a real socket failure to reach */
     ipc.server.on('error', (err: Error) => {
@@ -101,7 +101,7 @@ export class IpcClient {
 
   /** Whether an ipc server socket exists in the temp folder. */
   async hasServer(): Promise<boolean> {
-    return await pathExists(`${this.pathSvc.tmpDir}/ipc.sock`, 'socket');
+    return await pathExists(this.pathSvc.ipcSocketPath, 'socket');
   }
 
   /**
@@ -115,7 +115,7 @@ export class IpcClient {
     }
     clientRunning = true;
     let tries = 1;
-    ipc.connectTo(id, `${this.pathSvc.tmpDir}/ipc.sock`);
+    ipc.connectTo(id, this.pathSvc.ipcSocketPath);
     const c = ipc.of[id]!;
     const p = new Promise<void>((resolve, reject) => {
       c.on('connect', () => {

@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { GhcInstallService, GhcPrepareService } from './ghc.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/haskell/ghc', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -52,6 +54,30 @@ describe('cli/tools/haskell/ghc', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const filename = 'ghc-9.8.4-x86_64-deb10-linux.tar.xz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}/~ghc/9.8.4/ghc-9.8.4-aarch64-deb10-linux.tar.xz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}/~ghc/9.8.4/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `SHA256SUMS`
+    scope(baseUrl).get(`/~ghc/9.8.4/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(GhcInstallService);
+
+    await expect(svc.install('9.8.4')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.versionedToolPath('ghc', '9.8.4'),
+      strip: 1,
+    });
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(GhcInstallService);

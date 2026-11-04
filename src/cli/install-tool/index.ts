@@ -1,6 +1,7 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
 import type { ShellWrapperConfig } from '../services/index.ts';
 import {
+  DataService,
   IpcClient,
   LinkToolService,
   PathService,
@@ -108,7 +109,7 @@ import {
  * every v2 shell tool. The generic ones are bound last, so a modern service
  * wins over a custom v2 shell tool with the same name.
  */
-async function prepareInstallContainer(): Promise<Container> {
+export async function prepareInstallContainer(): Promise<Container> {
   logger.trace('preparing install container');
   const container = createContainer();
 
@@ -454,12 +455,17 @@ export async function linkTool(
 
 /**
  * Resolves the version to install, eg. `latest` to a concrete version. For a
- * `gem`, `npm` or `pip` type, a generic resolver is registered first.
+ * `gem`, `npm` or `pip` type, a generic resolver is registered after the tool
+ * resolvers, so a tool's own resolver wins.
+ * @param data - whether the resolvers may read the tool-versions data first:
+ * true for `install-tool`, false for `install-gem`, `install-npm` and
+ * `install-pip`, which always ask their registry
  */
 export async function resolveVersion(
   tool: string,
   version: string | undefined,
   type?: InstallToolType,
+  data = true,
 ): Promise<string | undefined> {
   const container = prepareResolveContainer();
 
@@ -469,7 +475,7 @@ export async function resolveVersion(
       .to(createGenericVersionResolver(type, tool));
   }
   const svc = await container.getAsync(ToolVersionResolverService);
-  return svc.resolve(tool, version);
+  return svc.resolve(tool, version, data);
 }
 
 interface UninstallToolConfig {
@@ -493,8 +499,27 @@ export async function uninstallTool({
   dryRun = false,
   recursive = false,
 }: UninstallToolConfig): Promise<number | void> {
+  const container = await prepareUninstallContainer(dryRun);
+  const svc = await container.getAsync(InstallToolService);
+  return svc.uninstall(tool, version, dryRun, recursive);
+}
+
+/**
+ * Creates the install container with a generic install service for every
+ * installed `gem`, `npm` or `pip` package, so they can be uninstalled. A dry
+ * run opens the databases read-only, so they are never written.
+ *
+ * @throws when the containerbase folders are not writable, except for a dry
+ * run
+ */
+export async function prepareUninstallContainer(
+  dryRun: boolean,
+): Promise<Container> {
   const container = await prepareInstallContainer();
-  if (!dryRun) {
+  if (dryRun) {
+    // only reads, so the databases are never written
+    (await container.getAsync(DataService)).readOnly();
+  } else {
     await (await container.getAsync(PathService)).ensureWritable();
   }
   const verSvc = await container.getAsync(VersionService);
@@ -529,7 +554,5 @@ export async function uninstallTool({
       }
     }
   }
-
-  const svc = await container.getAsync(InstallToolService);
-  return svc.uninstall(tool, version, dryRun, recursive);
+  return container;
 }

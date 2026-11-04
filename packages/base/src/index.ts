@@ -2,6 +2,7 @@ import { tools } from './data.ts';
 import type { DistroCode } from './types.ts';
 
 export type {
+  Arch,
   DistroCode,
   InstallToolType,
   ToolMetadata,
@@ -11,6 +12,7 @@ export type {
   FileIntegrity,
   FileReference,
   FormatIndex,
+  ReleaseInfo,
   ToolFile,
   ToolIndex,
   ToolVersion,
@@ -20,10 +22,33 @@ export type {
 } from './tool-versions-types.ts';
 
 export {
+  containerbaseVersionFile,
+  isCompatibleVersion,
+  isContainerbase,
+  packageVersion,
+  toolVersionsPath,
+  validateContainerbaseVersion,
+} from './containerbase.ts';
+
+export type { ConfigureOptions, LogFn, Logger } from './logger.ts';
+export { configure, getLogger, isConfigured } from './logger.ts';
+
+export { filterByMinCb, minCbByVersion } from './min-cb.ts';
+export { isReleaseVersion } from './release-version.ts';
+
+export {
   isToolVersionsFormat,
   toolVersionsFormat,
   toolVersionsFormatPath,
 } from './tool-versions-format.ts';
+
+export type {
+  UrlPrefixResult,
+  UrlPrefixRule,
+  UrlReplacement,
+  UrlReplacements,
+} from './url.ts';
+export { getUrlReplacements, replaceUrl, replaceUrlPrefix } from './url.ts';
 
 export { tools };
 

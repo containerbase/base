@@ -6,7 +6,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { BunInstallService } from './bun.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -38,6 +38,8 @@ describe('cli/tools/bun', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -90,6 +92,40 @@ describe('cli/tools/bun', () => {
         cwd: join(pathSvc.versionedToolPath('bun', version), 'bin'),
         strip: 1,
       });
+    },
+  );
+
+  test.each([
+    { cpuInfo: 'flags: avx2 sse', ghArch: 'x64', version: '1.3.0' },
+    { cpuInfo: 'flags: sse', ghArch: 'x64-baseline', version: '1.3.1' },
+  ])(
+    'install: downloads the $ghArch tool-versions file without the list',
+    async ({ cpuInfo, ghArch, version }) => {
+      mockCpuInfo(cpuInfo);
+      const releaseUrl = `${baseUrl}/oven-sh/bun/releases/download/bun-v${version}`;
+      const filename = `bun-linux-${ghArch}.zip`;
+      // the release order, the baseline build first
+      mockToolFiles(
+        ['aarch64', 'x64-baseline', 'x64'].map((name) =>
+          toolFile(
+            `${releaseUrl}/bun-linux-${name}.zip`,
+            name === ghArch ? zip : name,
+            name === 'aarch64' ? 'arm64' : 'amd64',
+          ),
+        ),
+      );
+      // there is no interceptor for the `SHASUMS256.txt`
+      scope(baseUrl)
+        .get(`/oven-sh/bun/releases/download/bun-v${version}/${filename}`)
+        .reply(200, zip);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc } = await toolContext(BunInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ file: expect.stringContaining(filename) }),
+      );
     },
   );
 

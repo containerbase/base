@@ -28,6 +28,7 @@ RUN touch /.dummy
 
 ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_CDN_PIP
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
@@ -41,7 +42,7 @@ FROM base AS build
 
 # Python
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.8
+RUN install-tool python 3.14.10
 
 #--------------------------------------
 # build-rootless
@@ -53,7 +54,7 @@ RUN prepare-tool python conan
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.8
+RUN install-tool python 3.14.10
 
 #--------------------------------------
 # build: pipenv
@@ -61,9 +62,9 @@ RUN install-tool python 3.14.8
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.9.1
+RUN install-tool pipenv 2026.10.4
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.9.1
+RUN install-tool pipenv 2026.10.4
 
 USER 12021
 
@@ -107,7 +108,7 @@ FROM build-rootless AS test-poetry-a
 
 # try install again, sould skip
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.8
+RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
@@ -204,10 +205,10 @@ RUN install-tool python 3.10.17
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.8
+RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.9.1
+RUN install-tool pipenv 2026.10.4
 
 RUN set -ex; \
   cd pipenv-b; \
@@ -223,7 +224,7 @@ RUN prepare-tool conan
 USER 12021
 
 # renovate: datasource=pypi
-RUN install-tool conan 2.33.0
+RUN install-tool conan 2.34.0
 
 RUN set -ex; \
     cd b-conan; \

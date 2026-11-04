@@ -9,6 +9,8 @@ You can find the default urls in the tool sections below.
 The number of `URL_REPLACE_*_FROM` and `URL_REPLACE_*_TO` environment variables must match.
 Theses variables are case sensitive.
 The numbers will be processed in numerical order and can have gaps.
+Each `URL_REPLACE_*_FROM` replaces its first occurrence anywhere in the url.
+The next major only replaces it at the start of the url, see [#8160](https://github.com/containerbase/base/issues/8160).
 
 ```Dockerfile
 FROM containerbase/base
@@ -29,6 +31,28 @@ RUN install-tool dart 2.18.0
 ## GitHub (github.com)
 
 GitHub releases are redirecting from `https://github.com/<org>/<repo>/releases/download/<version>/<file>` to `https://objects.githubusercontent.com/<some-url>` which seems to be an Amazon S3 bucket.
+
+## Tool versions data (containerbase.github.io)
+
+The image ships the tool versions data, which lists the files and checksums of the tool versions.
+For a version without embedded data, it's fetched from:
+
+- `<https://containerbase.github.io/tool-versions/v1/>`
+
+Samples:
+
+```txt
+https://containerbase.github.io/tool-versions/v1/mise.json
+https://containerbase.github.io/tool-versions/v1/mise.integrity.json
+https://containerbase.github.io/tool-versions/v1/mise/2026.2.13.json
+```
+
+The tools then download the listed files from the urls shown in their sections below, without their checksum files.
+Installing an exact version which isn't in the embedded data looks it up online first, before the tool's own download, so a blocked host costs the request timeout.
+
+Resolving a missing version, `latest` or a major or major.minor version of a tool from the data reads `<tool>.json` online too, when the embedded data is older than the max age (24 hours by default, set by `CONTAINERBASE_RESOLVER_MAX_AGE`), was built in the future because the clock of the container is behind, or has no `release.json`, with the embedded data as fallback, see [tool-versions data](./tools.md#tool-versions-data).
+A tool-versions request gives up after at most 30 s.
+Set `CONTAINERBASE_RESOLVER_OFFLINE=true` to never read the online data, a version which isn't in the embedded data is then downloaded from the source of its installer.
 
 ## `apko`
 
@@ -198,7 +222,6 @@ https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.1
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-x86_x64.tar.xz
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz.sha512
 https://github.com/containerbase/mono-prebuild/releases/download/6.14.1/mono-6.14.1-jammy-aarch64.tar.xz
-https://github.com/containerbase/mono-prebuild/releases/latest/download/version
 ```
 
 #### `nuget`
@@ -311,27 +334,12 @@ https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_checksums.txt
 
 ## `git`
 
-Git releases are downloaded from:
+Git is downloaded from:
 
-- `https://github.com/containerbase/git-prebuild/releases`
+- `https://ppa.launchpadcontent.net/git-core/ppa/ubuntu`
 
-The last url is used to find the latest version, if no version or no exact `X.Y.Z` version was provided.
-
-Samples:
-
-```txt
-https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-x86_64.tar.xz.sha512
-https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-x86_64.tar.xz
-https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-aarch64.tar.xz.sha512
-https://github.com/containerbase/git-prebuild/releases/download/2.56.0/git-2.56.0-jammy-aarch64.tar.xz
-https://github.com/containerbase/git-prebuild/releases/latest/download/version
-```
-
-The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
-An exact `X.Y.Z` version from `2.48.0` on is downloaded as is, a release without a prebuild fails the download.
-Any other version, like a partial `2.50`, a version before `2.48.0` or a vendor version like `2.43.0-1ubuntu1`, falls back to the newest prebuild with a warning.
-The runtime libraries git needs are installed via `apt` package manager, see [custom base image](./custom-base-image.md#git) for the compatibility packages.
-Images prepared by an older containerbase keep the git-core PPA apt source it added, they get the runtime libraries on the next `install-tool git`.
+Git is installed via `apt` package manager.
+The `URL_REPLACE_*` variables don't apply to this apt source.
 
 ### `git-lfs`
 
@@ -556,11 +564,19 @@ https://downloads.lightbend.com/scala/2.10.4/scala-2.10.4.tgz
 jsonnet-bundler releases are downloaded from:
 
 - `https://github.com/jsonnet-bundler/jsonnet-bundler/releases`
+- `https://github.com/containerbase/jb-prebuild/releases`
+
+The first url is used for semver versions like `0.5.1`, the second for four part versions like `0.6.0.1`.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the prebuild download is verified against its `.sha512` file, so a mirror needs to provide both files.
 
 Samples:
 
 ```txt
 https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.5.1/jb-linux-amd64
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-x86_64.tar.xz.sha512
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-x86_64.tar.xz
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-aarch64.tar.xz.sha512
+https://github.com/containerbase/jb-prebuild/releases/download/0.6.0.1/jb-0.6.0.1-aarch64.tar.xz
 ```
 
 ## `jq`
@@ -588,7 +604,8 @@ Kustomize releases are downloaded from:
 Samples:
 
 ```txt
-https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
+https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
+https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.3.0/checksums.txt
 ```
 
 ## `mise`
@@ -700,6 +717,7 @@ Samples:
 ```txt
 https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz.sha512
 https://github.com/containerbase/php-prebuild/releases/download/8.3.2/php-8.3.2-jammy-x86_x64.tar.xz
+https://github.com/containerbase/php-prebuild/releases/latest/download/version
 ```
 
 ### `composer`
@@ -782,7 +800,7 @@ https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4
 https://github.com/containerbase/ruby-prebuild/releases/download/3.4.11/ruby-3.4.11-jammy-aarch64.tar.xz
 ```
 
-The download is always verified against the `.sha512` checksum, so a mirror needs to provide both files.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download is verified against its `.sha512` file, so a mirror needs to provide both files.
 
 ### `gem` tools
 

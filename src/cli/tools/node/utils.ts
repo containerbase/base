@@ -302,12 +302,6 @@ async function readPackageJson(path: string): Promise<PackageJson> {
   return JSON.parse(data);
 }
 
-/** Creates the `.npm` folder in the containerbase cache. */
-export async function prepareNpmCache(pathSvc: PathService): Promise<void> {
-  const path = join(pathSvc.cachePath, '.npm');
-  await pathSvc.createDir(path);
-}
-
 /** Creates an empty `.npmrc` in the containerbase cache, unless there is one. */
 export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
   const path = join(pathSvc.cachePath, '.npmrc');
@@ -317,8 +311,8 @@ export async function prepareNpmrc(pathSvc: PathService): Promise<void> {
 }
 
 /**
- * Links the user's `.npm` folder and `.npmrc` to the cache, keeping any
- * existing link.
+ * Links the user's `.npm` and `.yarn` folders and `.npmrc` to the cache,
+ * keeping any existing link.
  */
 export async function prepareSymlinks(
   envSvc: EnvService,
@@ -331,5 +325,9 @@ export async function prepareSymlinks(
   await pathSvc.createSymlink(
     join(pathSvc.cachePath, '.npmrc'),
     join(envSvc.userHome, '.npmrc'),
+  );
+  await pathSvc.createSymlink(
+    join(pathSvc.cachePath, '.yarn'),
+    join(envSvc.userHome, '.yarn'),
   );
 }

@@ -6,7 +6,7 @@ import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { CabalInstallService, CabalPrepareService } from './cabal.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/haskell/cabal', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -71,6 +73,31 @@ describe('cli/tools/haskell/cabal', () => {
       .get(`${releaseUrl}/${filename}`)
       .reply(200, tarball);
     const extract = vi.spyOn(CompressionService.prototype, 'extract');
+
+    await expect(svc.install(version)).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: join(pathSvc.versionedToolPath('cabal', version), 'bin'),
+    });
+  });
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const version = '3.18.2.0';
+    const releaseUrl = `/~cabal/cabal-install-${version}`;
+    const filename = `cabal-install-${version}-x86_64-linux-unknown.tar.xz`;
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/cabal-install-${version}-aarch64-linux-unknown.tar.xz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `SHA256SUMS`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(CabalInstallService);
 
     await expect(svc.install(version)).resolves.toBeUndefined();
 

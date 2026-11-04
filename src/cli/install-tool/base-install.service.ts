@@ -1,5 +1,11 @@
 import fs from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
+import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
+import {
+  type HttpChecksumType,
+  HttpChecksumTypes,
+  urlFileName,
+} from '../services/http.service.ts';
 import {
   CompressionService,
   EnvService,
@@ -7,6 +13,7 @@ import {
   LinkToolService,
   PathService,
   type ShellWrapperConfig,
+  ToolVersionsService,
 } from '../services/index.ts';
 import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
 import {
@@ -14,7 +21,9 @@ import {
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
+  getDistro,
   isValid,
+  logger,
   spawn,
 } from '../utils/index.ts';
 
@@ -31,6 +40,8 @@ export abstract class BaseInstallService {
 
   @inject(LinkToolService)
   private readonly _link!: LinkToolService;
+  @inject(ToolVersionsService)
+  private readonly _toolVersions!: ToolVersionsService;
 
   /**
    * Optional tool alias used to refer to this tool as parent.
@@ -52,14 +63,22 @@ export abstract class BaseInstallService {
 
   /**
    * Some tools can only be installed as root, so they are only available at
-   * image build time. Eg. git, which writes the system wide `/etc/gitconfig`.
+   * image build time. Eg. git is installed via apt.
    */
   readonly needsRoot: boolean = false;
 
   /**
-   * Some tools can't be uninstalled, eg. git, which other tools depend on.
+   * Tools which are not installed into a versioned tool path can't be
+   * uninstalled, eg. git is installed system wide via apt.
    */
   readonly canUninstall: boolean = true;
+
+  /**
+   * The cache folders of the tool, relative to `PathService.cachePath`, eg.
+   * `.cargo/registry`, which `cleanup cache` removes. Only folders holding
+   * data the tool downloads again, never config files.
+   */
+  readonly cacheDirs: readonly string[] = [];
 
   /**
    * The package manager installing the tool, published as `type` in the base
@@ -183,6 +202,115 @@ export abstract class BaseInstallService {
   }
 
   /**
+   * Downloads a file of a release folder: the file named `filename` of the
+   * tool-versions data, see {@link downloadToolFile}, else the file of the
+   * folder, verified against its sha256 in a checksum list of the same folder,
+   * see {@link findChecksum}.
+   *
+   * @param baseUrl - the url of the folder, with a trailing slash
+   * @param filename - the file to download, also its name in the data
+   * @param list - the file name of the checksum list, like `SHA256SUMS`
+   * @throws when the list has no checksum for `filename` or the download fails
+   */
+  protected async downloadChecksumListed(
+    version: string,
+    baseUrl: string,
+    filename: string,
+    list: string,
+  ): Promise<string> {
+    const file = await this.downloadNamedToolFile(version, filename);
+    if (file) {
+      return file;
+    }
+    const expectedChecksum = await this.findChecksum(
+      `${baseUrl}${list}`,
+      filename,
+    );
+    return await this.http.download({
+      url: `${baseUrl}${filename}`,
+      checksumType: 'sha256',
+      expectedChecksum,
+    });
+  }
+
+  /**
+   * Downloads a file: the file named like it of the tool-versions data, see
+   * {@link downloadToolFile}, else the file, verified against the checksum in
+   * its sidecar file, eg. `tool.tar.gz.sha256`, see {@link getChecksum}.
+   *
+   * @param url - the url of the file
+   * @param sidecar - the suffix of the sidecar file, like `.sha256`
+   * @param options.checksumType - the algorithm of the checksum
+   * @param options.name - the name of the file in the data, also the name of
+   * the downloaded file when it's a plain file name, by default the decoded
+   * last url segment
+   * @throws when the sidecar has no checksum or the download fails
+   */
+  protected async downloadChecksumSidecar(
+    version: string,
+    url: string,
+    sidecar: string,
+    {
+      checksumType = 'sha256',
+      name,
+    }: { checksumType?: HttpChecksumType; name?: string } = {},
+  ): Promise<string> {
+    const file = await this.downloadNamedToolFile(
+      version,
+      name ?? urlFileName(url),
+    );
+    if (file) {
+      return file;
+    }
+    const expectedChecksum = await this.getChecksum(`${url}${sidecar}`);
+    return await this.http.download({
+      url,
+      checksumType,
+      expectedChecksum,
+      fileName: name,
+    });
+  }
+
+  /**
+   * Downloads a file of a release without an upstream checksum: the file
+   * named `name` of the tool-versions data, by default the last url segment,
+   * which has a checksum computed by the data, see {@link downloadToolFile},
+   * else the file unverified.
+   *
+   * @param url - the url of the file
+   * @param name - the name of the file in the data, also the name of the
+   * downloaded file when it's a plain file name, by default the decoded last
+   * url segment
+   * @throws when the download fails
+   */
+  protected async downloadWithoutChecksum(
+    version: string,
+    url: string,
+    name?: string,
+  ): Promise<string> {
+    return (
+      (await this.downloadNamedToolFile(version, name ?? urlFileName(url))) ??
+      (await this.http.download({ url, fileName: name }))
+    );
+  }
+
+  /**
+   * Downloads the file named `name` of a version for the host from the
+   * tool-versions data, see {@link downloadToolFile}. A tool can list several
+   * files per host, eg. a musl and a glibc build.
+   */
+  protected async downloadNamedToolFile(
+    version: string,
+    name: string,
+  ): Promise<string | undefined> {
+    return await this.downloadToolFile(
+      version,
+      undefined,
+      (f) => f.name === name,
+    );
+  }
+
+  /**
    * Downloads a checksum file and returns its text without a leading BOM.
    * Files starting with a UTF-16LE BOM, like the PowerShell `hashes.sha256`,
    * are decoded as UTF-16LE, all others as UTF-8.
@@ -194,6 +322,158 @@ export abstract class BaseInstallService {
         ? buf.toString('utf16le')
         : buf.toString('utf8');
     return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  }
+
+  /**
+   * Downloads the file of a version for the host from the tool-versions data,
+   * verified against its checksum, see {@link findToolFile} and
+   * {@link downloadListedFile}. A missing file is logged, unless there is no
+   * data at all.
+   *
+   * @param distro - the distro codename to pick the file for, by default the
+   * host's
+   * @param filter - only picks from the files it accepts, for tools with
+   * several kinds of files per host, by default all
+   * @returns the downloaded file, or `undefined` when there is no data or no
+   * file for the host with a supported checksum, so the installer can use its
+   * own download logic
+   * @throws when the download fails
+   */
+  protected async downloadToolFile(
+    version: string,
+    distro?: string,
+    filter?: (file: ToolFile) => boolean,
+  ): Promise<string | undefined> {
+    const found = await this.findToolFile(version, distro, filter);
+    if (!found) {
+      return undefined;
+    }
+    if (!found.file) {
+      logger.debug(
+        {
+          tool: this.name,
+          version,
+          arch: this.envSvc.arch,
+          distro: found.distro,
+        },
+        'no tool-versions file for the host',
+      );
+      return undefined;
+    }
+    return await this.downloadListedFile(found.file);
+  }
+
+  /**
+   * Picks the file of a version for the host from the tool-versions data,
+   * without downloading it or logging a miss. Never downloads without
+   * verification: the files of the host with an algorithm the http service
+   * doesn't know are skipped with a warning before the pick, so a more
+   * specific one can't hide a usable file.
+   *
+   * @param distro - the distro codename to pick the file for, by default the
+   * host's
+   * @param filter - only picks from the files it accepts, by default all
+   * @returns `undefined` when there is no data, else the file, if any, and
+   * the distro codename it was picked for
+   */
+  protected async findToolFile(
+    version: string,
+    distro?: string,
+    filter: (file: ToolFile) => boolean = () => true,
+  ): Promise<{ file: ToolFile | undefined; distro: string } | undefined> {
+    const data = await this._toolVersions.getVersionFiles(this.name, version);
+    if (!data) {
+      return undefined;
+    }
+    const code = distro ?? (await getDistro()).versionCode;
+    const usable = data.files
+      .filter((f) => filter(f) && fitsHost(f, this.envSvc.arch, code))
+      .filter((f) => {
+        if (parseChecksum(f.checksum)) {
+          return true;
+        }
+        logger.warn(
+          { tool: this.name, version, checksum: f.checksum },
+          'unsupported tool-versions file checksum',
+        );
+        return false;
+      });
+    return {
+      file: selectToolFile(usable, this.envSvc.arch, code),
+      distro: code,
+    };
+  }
+
+  /**
+   * Downloads a file picked by {@link findToolFile}, verified against its
+   * checksum, as a file of its name. The cache folder is keyed by the url, so
+   * it only shares the cache file with the installer's own download when that
+   * uses the same url and file name. A name which isn't a plain file name is
+   * ignored by the http service, see `HttpService.download`. Url replacements
+   * and the cache apply.
+   *
+   * @throws when the download fails
+   */
+  protected async downloadListedFile(file: ToolFile): Promise<string> {
+    // `findToolFile` only picks files with a supported checksum
+    const { type, value } = parseChecksum(file.checksum)!;
+    return await this.http.download({
+      url: file.url,
+      checksumType: type,
+      expectedChecksum: value,
+      fileName: file.name,
+    });
+  }
+
+  /**
+   * Downloads the file of a version for the host distro from the tool-versions
+   * data like {@link downloadToolFile}, else the one for `fallback`, eg. the
+   * distro whose prebuild a newer ubuntu release uses. The data is cached, so
+   * the second lookup is cheap. Using the fallback is logged, the caller's own
+   * download for it then follows when there is no file for it either.
+   *
+   * @param host - the codename of the host distro
+   * @param fallback - the codename to try when the host has no file, only
+   * tried when it differs from `host`
+   * @returns the downloaded file, or `undefined` when neither has a file
+   * @throws when the download fails
+   */
+  protected async downloadDistroToolFile(
+    version: string,
+    host: string,
+    fallback: string,
+  ): Promise<string | undefined> {
+    const file = await this.downloadToolFile(version, host);
+    if (file || fallback === host) {
+      return file;
+    }
+    logger.debug(`Using ${fallback} file for ${this.name} on ${host}`);
+    return await this.downloadToolFile(version, fallback);
+  }
+
+  /**
+   * Downloads a file when its sidecar file exists, verified against the
+   * checksum in it, see {@link getChecksum}. For releases which may lack the
+   * file, so the installer can fall back to another source. It doesn't use
+   * the tool-versions data, combine it with {@link downloadNamedToolFile}.
+   *
+   * @param url - the url of the file
+   * @param sidecar - the suffix of the sidecar file, like `.sha512`
+   * @param checksumType - the algorithm of the checksum
+   * @returns `undefined` when there is no sidecar file
+   * @throws when the sidecar has no checksum or the download fails
+   */
+  protected async downloadOptionalChecksumSidecar(
+    url: string,
+    sidecar: string,
+    checksumType: HttpChecksumType,
+  ): Promise<string | undefined> {
+    const checksumUrl = `${url}${sidecar}`;
+    if (!(await this.http.exists(checksumUrl))) {
+      return undefined;
+    }
+    const expectedChecksum = await this.getChecksum(checksumUrl);
+    return await this.http.download({ url, checksumType, expectedChecksum });
   }
 
   /** Creates a shell wrapper in the global bin folder for a tool binary. */
@@ -219,4 +499,53 @@ export abstract class BaseInstallService {
   ): Promise<SpawnResult> {
     return spawn(command, args, { cwd: this.envSvc.tmpDir, ...options });
   }
+}
+
+/**
+ * Splits a `<algorithm>:<hex>` checksum of the tool-versions data.
+ * @returns `undefined` for an algorithm the http service can't verify
+ */
+function parseChecksum(
+  checksum: string,
+): { type: HttpChecksumType; value: string } | undefined {
+  const [algorithm, value] = checksum.split(':');
+  const type = HttpChecksumTypes.find((t) => t === algorithm);
+  return type && value ? { type, value } : undefined;
+}
+
+/**
+ * Whether a file fits a host: of its arch or for any arch, and of its distro
+ * or for any distro.
+ */
+function fitsHost(file: ToolFile, arch: string, distro: string): boolean {
+  return (
+    (!file.arch || file.arch === arch) &&
+    (!file.distro || file.distro === distro)
+  );
+}
+
+/**
+ * Picks the file for a host from the files of a version: one of the arch or
+ * for any arch, and of the distro or for any distro. An arch or distro
+ * specific file is preferred over a generic one, the first one wins a tie.
+ * @returns `undefined` when no file fits the host
+ */
+export function selectToolFile(
+  files: readonly ToolFile[],
+  arch: string,
+  distro: string,
+): ToolFile | undefined {
+  let best: ToolFile | undefined;
+  let bestScore = -1;
+  for (const file of files) {
+    if (!fitsHost(file, arch, distro)) {
+      continue;
+    }
+    const score = (file.arch ? 1 : 0) + (file.distro ? 1 : 0);
+    if (score > bestScore) {
+      best = file;
+      bestScore = score;
+    }
+  }
+  return best;
 }

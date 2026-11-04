@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { getDistro, parse } from '../../utils/index.ts';
 import { PrebuildInstallService } from '../utils/prebuild.ts';
 import { pipIndexEnv } from './utils.ts';
@@ -13,9 +12,6 @@ const supportedDistros = ['jammy', 'noble', 'resolute'];
 @injectable()
 @injectFromHierarchy()
 export class PythonPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'python';
 
   /**

@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -44,7 +44,7 @@ WORKDIR /test
 FROM base AS testa
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.27.2
+RUN install-tool golang 1.27.3
 
 USER 12021
 
@@ -108,7 +108,7 @@ RUN [[ -d /tmp/containerbase ]] || (echo "/tmp/containerbase should exist"; exit
 RUN rm -rf /tmp/*;
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.27.2
+RUN install-tool golang 1.27.3
 
 
 RUN set -ex; cd a; go get -d ./...; cat go.sum; go mod tidy; cat go.sum

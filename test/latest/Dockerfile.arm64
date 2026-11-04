@@ -42,7 +42,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-bazelisk
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.29.0
+RUN install-tool bazelisk v1.30.0
 
 #--------------------------------------
 # Image: bun
@@ -50,7 +50,7 @@ RUN install-tool bazelisk v1.29.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.3
+RUN install-tool bun 1.4.4
 
 #--------------------------------------
 # Image: nub
@@ -58,7 +58,7 @@ RUN install-tool bun 1.4.3
 FROM base AS test-nub
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.6
+RUN install-tool nub 0.9.7
 
 #--------------------------------------
 # Image: deno
@@ -66,7 +66,7 @@ RUN install-tool nub 0.9.6
 FROM base AS test-deno
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.7
+RUN install-tool deno 2.9.8
 
 #--------------------------------------
 # Image: apko
@@ -74,7 +74,7 @@ RUN install-tool deno 2.9.7
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.11
+RUN install-tool apko 1.4.15
 
 #--------------------------------------
 # Image: apm
@@ -82,7 +82,7 @@ RUN install-tool apko 1.4.11
 FROM base AS test-apm
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.33.0
+RUN install-tool apm 0.35.0
 
 #--------------------------------------
 # Image: devbox
@@ -90,7 +90,7 @@ RUN install-tool apm 0.33.0
 FROM base AS test-devbox
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.4
+RUN install-tool devbox 0.19.0
 
 #--------------------------------------
 # Image: gh
@@ -98,7 +98,7 @@ RUN install-tool devbox 0.18.4
 FROM base AS test-gh
 
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.102.0
+RUN install-tool gh v2.103.3
 
 #--------------------------------------
 # Image: gleam
@@ -117,10 +117,10 @@ FROM base AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.38.0
+RUN install-tool buildx v0.38.2
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.6.0
+RUN install-tool docker-compose v5.7.0
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \
@@ -132,41 +132,16 @@ RUN set -ex; \
 #--------------------------------------
 FROM base AS test-git
 
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
-
-USER 12021
-
-RUN set -ex; \
-  [ "$(command -v git)" = /usr/local/bin/git ]; \
-  readlink -f /usr/local/bin/git | grep '^/opt/containerbase/tools/git/2\.56\.0/bin/git$'; \
-  git --exec-path | grep '^/opt/containerbase/tools/git/2\.56\.0/libexec/git-core$'; \
-  env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version | grep '^git version 2\.56\.0$'; \
-  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
-  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
-  git -C /tmp/git-prebuild log -1 --oneline; \
-  rm -rf /tmp/git-prebuild; \
-  true
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: git-lfs
 #--------------------------------------
 FROM test-git AS test-git-lfs
 
-USER root
-
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.0
-
-USER 12021
-
-RUN set -ex; \
-  git lfs version | grep '^git-lfs/3\.8\.0 '; \
-  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
-  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
-  git -C /tmp/git-prebuild lfs ls-files; \
-  rm -rf /tmp/git-prebuild; \
-  true
+RUN install-tool git-lfs v3.8.1
 
 #--------------------------------------
 # Image: helmfile
@@ -174,7 +149,7 @@ RUN set -ex; \
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.1
+RUN install-tool helmfile v1.8.2
 
 #--------------------------------------
 # Image: jq
@@ -215,7 +190,7 @@ RUN nuget search nuget.commandline -Take 1
 FROM base AS test-terraform
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.6
+RUN install-tool terraform 1.17.1
 
 #--------------------------------------
 # Image: tofu
@@ -223,7 +198,7 @@ RUN install-tool terraform 1.16.6
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.1
+RUN install-tool tofu 1.13.2
 
 #--------------------------------------
 # Image: vendir
@@ -231,7 +206,7 @@ RUN install-tool tofu 1.13.1
 FROM base AS test-vendir
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.2
+RUN install-tool vendir v0.46.3
 
 #--------------------------------------
 # Image: others
@@ -239,13 +214,13 @@ RUN install-tool vendir v0.46.2
 FROM base AS test-others
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.74.0
+RUN install-tool buf v1.75.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.1
+RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.10.10
+RUN install-tool mise 2026.11.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -260,7 +235,7 @@ RUN install-tool wally 0.3.2
 RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.82.0
+RUN install-tool pixi v0.84.0
 
 #--------------------------------------
 # Image: v1 and v2 shell tools of custom images

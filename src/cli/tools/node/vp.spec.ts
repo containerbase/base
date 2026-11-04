@@ -6,7 +6,7 @@ import { CompressionService, LinkToolService } from '../../services/index.ts';
 import { VpInstallService } from './vp.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/node/vp', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -55,6 +57,29 @@ describe('cli/tools/node/vp', () => {
       file: expect.stringContaining(filename),
       cwd: join(pathSvc.versionedToolPath('vp', version), 'bin'),
     });
+  });
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const releaseUrl = '/voidzero-dev/vite-plus/releases/download/v1.1.0';
+    const filename = 'vp-x86_64-unknown-linux-gnu.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/vp-aarch64-unknown-linux-gnu.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, archive, 'amd64'),
+    ]);
+    // there is no interceptor for the `vp-checksums.txt`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, archive);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(VpInstallService);
+
+    await expect(svc.install('1.1.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
   });
 
   test('rejects versions before the checksum file was published', async () => {

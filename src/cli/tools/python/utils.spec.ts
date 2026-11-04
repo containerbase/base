@@ -8,12 +8,13 @@ import {
 } from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
+  EnvService,
   LinkToolService,
   PathService,
   VersionService,
 } from '../../services/index.ts';
 import { logger } from '../../utils/index.ts';
-import { PipBaseInstallService } from './utils.ts';
+import { PipBaseInstallService, pipIndexEnv } from './utils.ts';
 import { testContainer } from '~test/di.ts';
 import { ensurePaths } from '~test/path.ts';
 
@@ -124,19 +125,34 @@ describe('cli/tools/python/utils', () => {
     );
   });
 
-  test.each([
-    { cdnPip: 'true', index: 'https://cdn.example.com/pypi.org/simple/' },
-    { cdnPip: undefined, index: undefined },
+  test.each<{
+    cdn: string;
+    cdnPip: string | undefined;
+    env: NodeJS.ProcessEnv;
+  }>([
+    {
+      cdn: 'https://cdn.example.com/',
+      cdnPip: 'true',
+      env: { PIP_INDEX_URL: 'https://cdn.example.com/pypi.org/simple/' },
+    },
+    {
+      cdn: 'http://cdn.example.com:8099',
+      cdnPip: 'true',
+      env: {
+        PIP_INDEX_URL: 'http://cdn.example.com:8099/pypi.org/simple/',
+        PIP_TRUSTED_HOST: 'cdn.example.com:8099',
+      },
+    },
+    { cdn: 'https://cdn.example.com/', cdnPip: undefined, env: {} },
   ])(
-    'install: with a cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
-    async ({ cdnPip, index }) => {
-      vi.stubEnv('CONTAINERBASE_CDN', 'https://cdn.example.com/');
+    'install: with cdn $cdn and CONTAINERBASE_CDN_PIP=$cdnPip',
+    async ({ cdn, cdnPip, env }) => {
+      vi.stubEnv('CONTAINERBASE_CDN', cdn);
       vi.stubEnv('CONTAINERBASE_CDN_PIP', cdnPip);
       const svc = await child.getAsync(HashinInstallService);
 
       await expect(svc.install('1.0.2')).resolves.toBeUndefined();
 
-      const env = index ? { PIP_INDEX_URL: index } : {};
       expect(execaMock).toHaveBeenCalledTimes(2);
       expect(execaMock).toHaveBeenNthCalledWith(
         1,
@@ -174,6 +190,58 @@ describe('cli/tools/python/utils', () => {
       expect.any(Array),
       expect.objectContaining({ env }),
     );
+  });
+
+  test.each<{
+    name: string;
+    cdn?: string;
+    replace?: string;
+    trusted?: string;
+    env: NodeJS.ProcessEnv;
+  }>([
+    {
+      name: 'appends the cdn to the trusted hosts',
+      cdn: 'http://cdn.example.com:8099/',
+      trusted: 'other.example.com',
+      env: {
+        PIP_INDEX_URL: 'http://cdn.example.com:8099/pypi.org/simple/',
+        PIP_TRUSTED_HOST: 'other.example.com cdn.example.com:8099',
+      },
+    },
+    {
+      name: 'keeps an already trusted cdn',
+      cdn: 'http://cdn.example.com:8099/',
+      trusted: ' cdn.example.com:8099  other.example.com ',
+      env: {
+        PIP_INDEX_URL: 'http://cdn.example.com:8099/pypi.org/simple/',
+        PIP_TRUSTED_HOST: 'cdn.example.com:8099 other.example.com',
+      },
+    },
+    {
+      name: 'trusts an uppercase http index',
+      replace: 'HTTP://Pypi.Example.com/simple/',
+      env: {
+        PIP_INDEX_URL: 'HTTP://Pypi.Example.com/simple/',
+        PIP_TRUSTED_HOST: 'pypi.example.com',
+      },
+    },
+    {
+      name: 'ignores an index that is no url',
+      replace: 'pypi-mirror',
+      env: { PIP_INDEX_URL: 'pypi-mirror' },
+    },
+  ])('pipIndexEnv: $name', async ({ cdn, replace, trusted, env }) => {
+    if (cdn) {
+      vi.stubEnv('CONTAINERBASE_CDN', cdn);
+      vi.stubEnv('CONTAINERBASE_CDN_PIP', 'true');
+    }
+    if (replace) {
+      vi.stubEnv('URL_REPLACE_0_FROM', 'https://pypi.org/simple/');
+      vi.stubEnv('URL_REPLACE_0_TO', replace);
+    }
+    vi.stubEnv('PIP_TRUSTED_HOST', trusted);
+
+    expect(pipIndexEnv(await child.getAsync(EnvService))).toEqual(env);
   });
 
   test('install: reuses an existing tool path', async () => {

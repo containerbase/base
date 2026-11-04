@@ -106,7 +106,8 @@ export class SwiftInstallService extends BaseInstallService {
   /**
    * Downloads the swift archive from download.swift.org and extracts it into
    * the versioned tool path. Swift only publishes a PGP `.sig` file, not a
-   * checksum, so this downloads without verifying one.
+   * checksum, the archive is verified against the checksum of the
+   * tool-versions data, else unverified.
    */
   override async install(version: string): Promise<void> {
     const distro = await getDistro();
@@ -115,10 +116,8 @@ export class SwiftInstallService extends BaseInstallService {
     const hasNobleBuild =
       major > 5 ||
       (major === 5 && (minor > 10 || (minor === 10 && patch >= 1)));
-    const versionId =
-      distro.versionId === '24.04' && !hasNobleBuild
-        ? '22.04'
-        : distro.versionId;
+    const useJammyBuild = distro.versionId === '24.04' && !hasNobleBuild;
+    const versionId = useJammyBuild ? '22.04' : distro.versionId;
     const arch = this.envSvc.arch === 'arm64' ? '-aarch64' : '';
     const platform = `ubuntu${versionId}${arch}`;
 
@@ -128,9 +127,16 @@ export class SwiftInstallService extends BaseInstallService {
     const release = `swift-${releaseVersion}-RELEASE`;
     const webDir = `https://download.swift.org/swift-${releaseVersion}-release/${platform.replace(/\./g, '')}`;
 
-    const file = await this.http.download({
-      url: `${webDir}/${release}/${release}-${platform}.tar.gz`,
-    });
+    const filename = `${release}-${platform}.tar.gz`;
+    // the data has the releases under their swift.org names and lists the
+    // 22.04 build for jammy
+    const file =
+      (await this.downloadToolFile(
+        releaseVersion,
+        useJammyBuild ? 'jammy' : distro.versionCode,
+        (f) => f.name === filename,
+      )) ??
+      (await this.http.download({ url: `${webDir}/${release}/${filename}` }));
 
     await this.pathSvc.ensureToolPath(this.name);
 

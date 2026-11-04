@@ -8,6 +8,12 @@ import { RubyBaseInstallService, RubyGemVersionResolver } from './utils.ts';
 export class CocoapodsInstallService extends RubyBaseInstallService {
   override readonly name: string = 'cocoapods';
 
+  /**
+   * The pods cocoapods downloaded, also on linux below `~/Library`. The spec
+   * repos in `.cocoapods/repos` are kept, they can be private ones.
+   */
+  override readonly cacheDirs = ['Library/Caches/CocoaPods'];
+
   /** Checks that `pod --version` runs, also as root. */
   override async test(_version: string): Promise<void> {
     await this._spawn('pod', ['--version', '--allow-root']);

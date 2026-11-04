@@ -6,7 +6,6 @@ import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
 import { fileContent, parse } from '../../utils/index.ts';
 import {
   NodeBaseInstallService,
-  prepareNpmCache,
   prepareNpmrc,
   prepareSymlinks,
 } from './utils.ts';
@@ -16,18 +15,25 @@ import {
 export class NodePrepareService extends BasePrepareService {
   override name = 'node';
 
-  /** Initializes the cache and links the user's npm folders to it. */
+  /**
+   * Installs `libatomic1`, which the official node 26.13.0+ binaries need,
+   * then initializes the cache and links the user's npm and yarn folders to it.
+   */
   override async prepare(): Promise<void> {
+    // https://github.com/nodejs/node/issues/60790
+    await this.aptSvc.install('libatomic1');
     await this.initialize();
     await prepareSymlinks(this.envSvc, this.pathSvc);
   }
 
   /**
-   * Creates the npm cache and `.npmrc`, and exports the node env with update
-   * notices and funding messages turned off and the openssl ca store used.
+   * Creates the npm and yarn caches and `.npmrc`, and exports the node env
+   * with update notices and funding messages turned off and the openssl ca
+   * store used.
    */
   override async initialize(): Promise<void> {
-    await prepareNpmCache(this.pathSvc);
+    await this.pathSvc.ensureCacheDir('.npm');
+    await this.pathSvc.ensureCacheDir('.yarn');
     await prepareNpmrc(this.pathSvc);
 
     if (!(await this.pathSvc.toolEnvExists(this.name))) {
@@ -54,6 +60,21 @@ export class NodePrepareService extends BasePrepareService {
 @injectFromHierarchy()
 export class NodeInstallService extends NodeBaseInstallService {
   readonly name = 'node';
+  override readonly minVersion = '8.7.0';
+
+  /**
+   * The npm package cache, the packages `npx` downloaded, the pnpm store,
+   * `~/.local` links to the cache, and the global caches of yarn 2 to 5
+   * (`berry`) and yarn 6 (`zpm`). The yarn classic cache is in `~/.cache`,
+   * which is cleaned anyway.
+   */
+  override readonly cacheDirs = [
+    '.local/share/pnpm/store',
+    '.npm/_cacache',
+    '.npm/_npx',
+    '.yarn/berry/cache',
+    '.yarn/zpm/cache',
+  ];
 
   /** The architecture name used by the nodejs.org archives. */
   private get nodeArch(): string {
@@ -80,31 +101,7 @@ export class NodeInstallService extends NodeBaseInstallService {
    * verified against its checksum. Node below 15 gets the latest node-gyp.
    */
   override async install(version: string): Promise<void> {
-    const name = this.name;
-    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${this.ghArch}.tar.xz`;
-    const checksumFileUrl = `${url}.sha512`;
-    let file: string;
-
-    if (await this.http.exists(checksumFileUrl)) {
-      const expectedChecksum = await this.getChecksum(checksumFileUrl);
-      file = await this.http.download({
-        url,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-    } else {
-      // fallback to nodejs.org
-      const filename = `${name}-v${version}-linux-${this.nodeArch}.tar.xz`;
-      const expectedChecksum = await this.findChecksum(
-        `https://nodejs.org/dist/v${version}/SHASUMS256.txt`,
-        filename,
-      );
-      file = await this.http.download({
-        url: `https://nodejs.org/dist/v${version}/${filename}`,
-        checksumType: 'sha256',
-        expectedChecksum,
-      });
-    }
+    const file = await this.download(version);
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -125,6 +122,70 @@ export class NodeInstallService extends NodeBaseInstallService {
         force: true,
       });
     }
+  }
+
+  /** The file name of the containerbase node prebuild for the host arch. */
+  private prebuildName(version: string): string {
+    return `${this.name}-${version}-${this.ghArch}.tar.xz`;
+  }
+
+  /** The file name of the nodejs.org archive for the host arch. */
+  private archiveName(version: string): string {
+    return `${this.name}-v${version}-linux-${this.nodeArch}.tar.xz`;
+  }
+
+  /**
+   * Downloads the node prebuild or archive, the prebuild first:
+   *
+   * 1. the prebuild listed in the tool-versions data
+   * 2. without a usable listed prebuild, the prebuild release when it has a
+   *    `.sha512`
+   * 3. the nodejs.org archive listed in the tool-versions data
+   * 4. the nodejs.org archive, verified against its `SHASUMS256.txt`
+   *
+   * A listed prebuild with a checksum algorithm the http service can't verify
+   * isn't usable. The data is cached, so the second lookup is cheap.
+   */
+  private async download(version: string): Promise<string> {
+    const prebuildName = this.prebuildName(version);
+    const archiveName = this.archiveName(version);
+    const prebuild = await this.findToolFile(
+      version,
+      undefined,
+      (f) => f.name === prebuildName,
+    );
+    const prebuildUrl = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${prebuildName}`;
+    return (
+      (prebuild?.file
+        ? await this.downloadListedFile(prebuild.file)
+        : await this.downloadOptionalChecksumSidecar(
+            prebuildUrl,
+            '.sha512',
+            'sha512',
+          )) ??
+      (await this.downloadToolFile(
+        version,
+        undefined,
+        (f) => f.name === archiveName,
+      )) ??
+      (await this.downloadArchive(version))
+    );
+  }
+
+  /**
+   * Downloads the nodejs.org archive, verified against its `SHASUMS256.txt`.
+   */
+  private async downloadArchive(version: string): Promise<string> {
+    const filename = this.archiveName(version);
+    const expectedChecksum = await this.findChecksum(
+      `https://nodejs.org/dist/v${version}/SHASUMS256.txt`,
+      filename,
+    );
+    return await this.http.download({
+      url: `https://nodejs.org/dist/v${version}/${filename}`,
+      checksumType: 'sha256',
+      expectedChecksum,
+    });
   }
 
   /** Links the binaries, see `postInstall`. */

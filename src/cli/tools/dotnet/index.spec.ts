@@ -12,7 +12,7 @@ import { getDistro } from '../../utils/index.ts';
 import { DotnetInstallService, DotnetPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -46,6 +46,8 @@ describe('cli/tools/dotnet/index', () => {
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
+    // no tool-versions data, the sdk is downloaded unverified
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -85,6 +87,31 @@ describe('cli/tools/dotnet/index', () => {
         );
       },
     );
+
+    test('install: verifies the tool-versions file with its sha512', async () => {
+      const path = (rid: string): string =>
+        `/dotnet/Sdk/8.0.200/dotnet-sdk-8.0.200-${rid}.tar.gz`;
+      // the data has the sha512 of the release metadata
+      mockToolFiles(
+        (['linux-arm64', 'linux-x64'] as const).map((rid) => ({
+          name: `dotnet-sdk-8.0.200-${rid}.tar.gz`,
+          url: `${baseUrl}${path(rid)}`,
+          checksum: `sha512:${checksum(rid === 'linux-x64' ? 'dotnet archive' : 'arm', 'sha512')}`,
+          arch: rid === 'linux-x64' ? 'amd64' : 'arm64',
+        })),
+      );
+      scope(baseUrl).get(path('linux-x64')).reply(200, 'dotnet archive');
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc, pathSvc } = await toolContext(DotnetInstallService);
+
+      await expect(svc.install('8.0.200')).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining('dotnet-sdk-8.0.200-linux-x64.tar.gz'),
+        cwd: pathSvc.toolPath('dotnet'),
+        strip: 1,
+      });
+    });
 
     test('install: skips the nuget source listing before v3.1', async () => {
       const { svc, pathSvc } = await toolContext(DotnetInstallService);

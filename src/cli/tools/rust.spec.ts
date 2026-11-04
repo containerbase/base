@@ -10,7 +10,7 @@ import {
 import { RustInstallService, RustPrepareService } from './rust.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -29,6 +29,8 @@ describe('cli/tools/rust', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -128,6 +130,60 @@ describe('cli/tools/rust', () => {
           ],
           expect.any(Object),
         );
+      },
+    );
+
+    test.each([
+      { version: '1.98.0', dir: '', name: 'rust-1.98.0' },
+      {
+        version: 'nightly-2026-10-20',
+        dir: '2026-10-20/',
+        name: 'rust-nightly',
+      },
+    ])(
+      'install: downloads the $version tool-versions file without the .sha256',
+      async ({ version, dir, name }) => {
+        const path = (target: string): string =>
+          `/dist/${dir}${name}-${target}-unknown-linux-gnu.tar.xz`;
+        mockToolFiles([
+          toolFile(`${baseUrl}${path('aarch64')}`, 'arm', 'arm64'),
+          toolFile(`${baseUrl}${path('x86_64')}`, archive, 'amd64'),
+        ]);
+        // there is no interceptor for the `.sha256`
+        scope(baseUrl).get(path('x86_64')).reply(200, archive);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc } = await toolContext(RustInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(`${name}-x86_64-unknown-linux-gnu`),
+          cwd: expect.any(String),
+          strip: 1,
+        });
+      },
+    );
+
+    // the other arch than the install tests above, so nothing is cached
+    test.each([
+      { version: 'beta', hostArch: 'arm64', target: 'aarch64' },
+      { version: 'nightly', hostArch: 'x64', target: 'x86_64' },
+    ] as const)(
+      'install: looks up no tool-versions data for $version',
+      async ({ version, hostArch, target }) => {
+        vi.mocked(arch).mockReturnValue(hostArch);
+        const file = `/dist/rust-${version}-${target}-unknown-linux-gnu.tar.xz`;
+        const files = mockToolFiles([]);
+        scope(baseUrl)
+          .get(`${file}.sha256`)
+          .reply(200, `${checksum('rust channel')}  rust.tar.xz\n`)
+          .get(file)
+          .reply(200, 'rust channel');
+        const { svc } = await toolContext(RustInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(files).not.toHaveBeenCalled();
       },
     );
 

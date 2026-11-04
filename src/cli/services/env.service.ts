@@ -1,24 +1,30 @@
 import { arch } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { env, geteuid } from 'node:process';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { bindingScopeValues, injectable } from 'inversify';
-import { type Arch, logger } from '../utils/index.ts';
+import {
+  type UrlReplacement,
+  getUrlReplacements,
+  replaceUrl,
+} from '../../../packages/base/src/url.ts';
+import {
+  type Arch,
+  hasUnitlessPart,
+  isInside,
+  logger,
+  toMs,
+  warnOnce,
+} from '../utils/index.ts';
 
-export type Replacements = [string, string][];
-
-const compare = (() => {
-  const collator = new Intl.Collator('en', {
-    sensitivity: 'base',
-    numeric: true,
-  });
-  return (a: string, b: string) => collator.compare(a, b);
-})();
+/** The default max age of the embedded tool-versions data, 24 hours. */
+const defaultMaxAge = 24 * 60 * 60 * 1000;
 
 @injectable(bindingScopeValues.Singleton)
 export class EnvService {
   readonly arch: Arch;
   private uid: number;
-  private replacements: Replacements | undefined;
+  private replacements: UrlReplacement[] | undefined;
   private ignoredTools: Set<string> | undefined;
 
   /**
@@ -50,6 +56,57 @@ export class EnvService {
   /** The download cache folder from `CONTAINERBASE_CACHE_DIR`. */
   get cacheDir(): string | null {
     return env.CONTAINERBASE_CACHE_DIR ?? null;
+  }
+
+  /**
+   * The fill level in percent of the file system holding the download cache,
+   * from which on the oldest cached files are removed, from
+   * `CONTAINERBASE_MAX_ALLOCATED_DISK`. Defaults to `100` when unset or not an
+   * integer.
+   */
+  get maxAllocatedDisk(): number {
+    const value = Number.parseInt(
+      env.CONTAINERBASE_MAX_ALLOCATED_DISK ?? '',
+      10,
+    );
+    return Number.isNaN(value) ? 100 : value;
+  }
+
+  /**
+   * The containerbase temp folder from `CONTAINERBASE_TMP_DIR`, defaults to
+   * `/tmp/containerbase` when unset or empty. Trailing slashes are dropped.
+   * A path that is not absolute and normalized, or that is `/tmp` or below it,
+   * is ignored with a warning.
+   *
+   * The checked value is written back to `CONTAINERBASE_TMP_DIR`, so child
+   * processes, eg. the v2 shell tools, use it and an invalid value is only
+   * reported once.
+   */
+  get containerbaseTmpDir(): string {
+    const defaultDir = this.defaultContainerbaseTmpDir;
+    const value = env.CONTAINERBASE_TMP_DIR;
+    let dir = defaultDir;
+    if (isNonEmptyString(value)) {
+      const trimmed = value.replace(/\/+$/, '');
+      if (
+        trimmed === defaultDir ||
+        (resolve(trimmed) === trimmed && !isInside(this.tmpDir, trimmed))
+      ) {
+        dir = trimmed;
+      } else {
+        logger.warn(
+          { dir: value },
+          'Ignoring invalid CONTAINERBASE_TMP_DIR, using the default',
+        );
+      }
+    }
+    env.CONTAINERBASE_TMP_DIR = dir;
+    return dir;
+  }
+
+  /** The default containerbase temp folder, `/tmp/containerbase`. */
+  get defaultContainerbaseTmpDir(): string {
+    return join(this.tmpDir, 'containerbase');
   }
 
   /** The home folder of the current user, from `HOME`. */
@@ -98,14 +155,74 @@ export class EnvService {
     return parseInt(env.USER_ID ?? '12021', 10);
   }
 
+  /** The primary group id of the containerbase user, from `PRIMARY_GROUP_ID`. */
+  get primaryGroupId(): number {
+    return parseInt(env.PRIMARY_GROUP_ID ?? '0', 10);
+  }
+
   /** The mode for created folders and binaries, group writable unless root. */
   get umask(): number {
     return this.isRoot ? 0o755 : 0o775;
   }
 
-  /** The containerbase version, `dev` for local builds. */
+  /**
+   * The containerbase version: the release version, `0.0.0-PLACEHOLDER` for
+   * development builds, CI builds add the commit sha as build metadata.
+   */
   get version(): string {
-    return globalThis.CONTAINERBASE_VERSION ?? 'dev';
+    return globalThis.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
+  }
+
+  /**
+   * Whether the online tool-versions data is never fetched, set by
+   * `CONTAINERBASE_RESOLVER_OFFLINE=true`, in any case. Any other value but
+   * `false` or an empty one is logged as a warning, once, and doesn't turn it
+   * off.
+   */
+  get resolverOffline(): boolean {
+    const value = env.CONTAINERBASE_RESOLVER_OFFLINE ?? '';
+    const lower = value.toLowerCase();
+    if (lower === 'true') {
+      return true;
+    }
+    if (lower !== '' && lower !== 'false') {
+      warnOnce('Invalid CONTAINERBASE_RESOLVER_OFFLINE, use true or false', {
+        value,
+      });
+    }
+    return false;
+  }
+
+  /**
+   * The age in milliseconds up to which the embedded tool-versions data is
+   * used without looking up the online data, from
+   * `CONTAINERBASE_RESOLVER_MAX_AGE`, like `24h`, `2 days` or `1 day 2h`, a
+   * month counts as 30 days. Defaults to 24 hours when unset, an invalid
+   * value or one with a negative part is logged as a warning and uses the
+   * default. A part without a unit, like `24` or the `30` of `1h30`, is
+   * milliseconds, like for Renovate, which is logged as a warning too. Each
+   * warning is logged once.
+   */
+  get resolverMaxAge(): number {
+    const value = env.CONTAINERBASE_RESOLVER_MAX_AGE;
+    if (!isNonEmptyString(value)) {
+      return defaultMaxAge;
+    }
+    const age = toMs(value);
+    if (age === null) {
+      warnOnce(
+        'Invalid CONTAINERBASE_RESOLVER_MAX_AGE, using the default of 24 hours',
+        { value },
+      );
+      return defaultMaxAge;
+    }
+    if (hasUnitlessPart(value)) {
+      warnOnce(
+        'CONTAINERBASE_RESOLVER_MAX_AGE has a number without a unit, it is read as milliseconds',
+        { value },
+      );
+    }
+    return age;
   }
 
   /** Whether tool tests are skipped, set by `SKIP_VERSION`. */
@@ -117,25 +234,17 @@ export class EnvService {
    * The url replacements from the `URL_REPLACE_<n>_FROM` and
    * `URL_REPLACE_<n>_TO` environment variables, in numerical order.
    */
-  get urlReplacements(): [string, string][] {
+  get urlReplacements(): UrlReplacement[] {
     if (this.replacements) {
       return this.replacements;
     }
 
-    const replacements: [string, string][] = [];
-    const fromRe = /^URL_REPLACE_\d+_FROM$/;
-
-    for (const from of Object.keys(env)
-      .filter((key) => fromRe.test(key))
-      .sort(compare)) {
+    const { replacements, invalid } = getUrlReplacements(env);
+    for (const from of invalid) {
       const to = from.replace(/_FROM$/, '_TO');
-      if (env[from] && env[to]) {
-        replacements.push([env[from], env[to]]);
-      } else {
-        logger.warn(
-          `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
-        );
-      }
+      logger.warn(
+        `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
+      );
     }
 
     return (this.replacements = replacements);
@@ -157,17 +266,11 @@ export class EnvService {
    * @returns the replaced url
    */
   public replaceUrl(src: string, cdn = true): string {
-    let tgt = src;
-
-    if (env.CONTAINERBASE_CDN && cdn) {
-      tgt = src.replace(/^https:\//, env.CONTAINERBASE_CDN.replace(/\/$/, ''));
-    }
-
-    const replacements = this.urlReplacements;
-
-    for (const [from, to] of replacements) {
-      tgt = tgt.replace(from, to);
-    }
+    const tgt = replaceUrl(
+      src,
+      this.urlReplacements,
+      cdn ? env.CONTAINERBASE_CDN : undefined,
+    );
     if (tgt !== src) {
       logger.debug({ src, tgt }, 'url replaced');
     }

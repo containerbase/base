@@ -35,8 +35,9 @@ export class CabalInstallService extends BaseInstallService {
   /**
    * Downloads the cabal-install archive from downloads.haskell.org, the
    * generic `linux-unknown` build since v3.18 and the static `linux-deb10`
-   * one before, verified against the release's `SHA256SUMS`, and extracts it
-   * into the versioned `bin` folder.
+   * one before, and extracts it into the versioned `bin` folder. The file and
+   * its checksum come from the tool-versions data, without data it is
+   * verified against the release's `SHA256SUMS`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://downloads.haskell.org/~cabal/cabal-install-${version}/`;
@@ -47,16 +48,12 @@ export class CabalInstallService extends BaseInstallService {
       : 'linux-deb10';
     const filename = `cabal-install-${version}-${this.arch}-${os}.tar.xz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}SHA256SUMS`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'SHA256SUMS',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

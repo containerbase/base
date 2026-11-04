@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { KustomizeInstallService } from './kustomize.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/kustomize', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -36,7 +38,7 @@ describe('cli/tools/kustomize', () => {
       vi.mocked(arch).mockReturnValue(hostArch);
       const { svc, pathSvc } = await toolContext(KustomizeInstallService);
       const filename = `kustomize_v${version}_linux_${toolArch}.tar.gz`;
-      const releaseUrl = `/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${version}`;
+      const releaseUrl = `/kubernetes-sigs/kustomize/releases/download/kustomize/v${version}`;
       scope(baseUrl)
         .get(`${releaseUrl}/checksums.txt`)
         .reply(200, `${checksum(tarball)} ${filename}\n`)
@@ -52,6 +54,30 @@ describe('cli/tools/kustomize', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the list', async () => {
+    const releaseUrl =
+      '/kubernetes-sigs/kustomize/releases/download/kustomize/v5.5.0';
+    const filename = 'kustomize_v5.5.0_linux_amd64.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/kustomize_v5.5.0_linux_arm64.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `checksums.txt`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(KustomizeInstallService);
+
+    await expect(svc.install('5.5.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(KustomizeInstallService);

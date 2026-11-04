@@ -14,6 +14,11 @@ export type ToolType = 'gem' | 'npm' | 'pip' | 'dotnet';
 export type DistroCode = 'jammy' | 'noble' | 'resolute';
 
 /**
+ * The CPU architectures containerbase supports.
+ */
+export type Arch = 'amd64' | 'arm64';
+
+/**
  * What containerbase knows about a supported tool.
  */
 export interface ToolMetadata {

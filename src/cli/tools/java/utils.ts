@@ -1,5 +1,9 @@
 import path from 'node:path';
-import type { HttpService, PathService } from '../../services';
+import {
+  type HttpService,
+  type PathService,
+  lookupOptions,
+} from '../../services/index.ts';
 import {
   type Arch,
   fileContent,
@@ -13,7 +17,9 @@ import {
 } from './schema.ts';
 
 /**
- * Resolves the newest adoptium ga version for the image type and architecture.
+ * Resolves the newest adoptium ga version for the image type and architecture,
+ * a lookup with the {@link lookupOptions}, shared by the java resolvers and
+ * the java prepare.
  * @param http - the http service
  * @param type - the image type
  * @param arch - the architecture
@@ -37,6 +43,7 @@ export async function resolveLatestJavaVersion(
   // adoptium answers 404 when no release matches
   const body = await http.getJsonOrUndefined(
     `${base_url}?architecture=${arch === 'amd64' ? 'x64' : 'aarch64'}&image_type=${type}&${api_args}&${filter}`,
+    lookupOptions,
   );
 
   if (!body) {

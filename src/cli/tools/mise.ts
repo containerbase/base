@@ -2,7 +2,10 @@ import { join } from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../install-tool/tool-version-resolver.ts';
+import {
+  ToolVersionResolver,
+  partialVersionHelp,
+} from '../install-tool/tool-version-resolver.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -23,9 +26,10 @@ export class MiseInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the mise archive from GitHub, verified against the release's
-   * `SHASUMS256.txt`, and extracts only the `mise` binary into the versioned
-   * tool path.
+   * Downloads the mise archive from GitHub and extracts only the `mise` binary
+   * into the versioned tool path. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * `SHASUMS256.txt`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -36,16 +40,12 @@ export class MiseInstallService extends BaseInstallService {
 
     const filename = `mise-v${version}-linux-${this.arch}.tar.xz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}SHASUMS256.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'SHASUMS256.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -75,10 +75,20 @@ export class MiseInstallService extends BaseInstallService {
 export class MiseVersionResolver extends ToolVersionResolver {
   readonly tool = 'mise';
 
-  /** Resolves a missing version or `latest` from mise.jdx.dev. */
+  /** The releases of the tool-versions data, mise.jdx.dev is the fallback. */
+  override readonly dataField = 'versions';
+
+  /** Partial versions are resolved from the tool-versions data. */
+  override readonly versionHelp = partialVersionHelp;
+
+  /**
+   * Resolves a missing version or `latest` from mise.jdx.dev, when the
+   * tool-versions data can't answer, see {@link dataField}. Any other version
+   * is kept.
+   */
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return (await this.http.get('https://mise.jdx.dev/VERSION')).trim();
+      return (await this.get('https://mise.jdx.dev/VERSION')).trim();
     }
     return version;
   }

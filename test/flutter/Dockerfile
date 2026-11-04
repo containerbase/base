@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: base
@@ -67,7 +67,7 @@ FROM build AS testb
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.7
+RUN install-tool flutter 3.47.9
 
 RUN set -ex; \
     cd d; \
@@ -84,7 +84,7 @@ RUN chown -R 1001 .
 USER 1001
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.7
+RUN install-tool flutter 3.47.9
 
 RUN set -ex; \
     cd d; \

@@ -16,20 +16,22 @@ import { logger } from '../../utils/index.ts';
 @injectFromHierarchy()
 export class NugetInstallService extends BaseInstallService {
   readonly name = 'nuget';
+  override readonly minVersion = '3.4.4';
   override parent = 'mono';
 
   /**
    * Downloads `nuget.exe` into the versioned `bin` folder with a wrapper that
-   * runs it with mono. No checksums are verified.
+   * runs it with mono. nuget publishes no checksums, the file is verified
+   * against the checksum of the tool-versions data, else unverified.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://dist.nuget.org/win-x86-commandline/v${version}/`;
     const filename = `${this.name}.exe`;
 
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      fileName: `${filename}-v${version}`,
-    });
+    const file = await this.downloadWithoutChecksum(
+      version,
+      `${baseUrl}${filename}`,
+    );
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -129,7 +131,7 @@ export class NugetVersionResolver extends ToolVersionResolver {
   /** Loads the list of nuget.exe releases from dist.nuget.org, newest first. */
   private async getReleases(): Promise<z.infer<typeof NugetVersion>[]> {
     return NugetTools.parse(
-      await this.http.getJson('https://dist.nuget.org/tools.json'),
+      await this.getJson('https://dist.nuget.org/tools.json'),
     )['nuget.exe'];
   }
 }

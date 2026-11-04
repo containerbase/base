@@ -2,9 +2,9 @@
   "*.sh": "shellcheck",
   "*.bats": "shellcheck",
   ".husky/*": "shellcheck",
-  "*.md": ["markdownlint-cli2 --fix", "prettier --write"],
+  "*.md": ["markdownlint-cli2 --fix", "oxfmt --no-error-on-unmatched-pattern"],
   "src/usr/local/bin/*": "shellcheck",
   "src/usr/local/containerbase/bin/*": "shellcheck",
-  "*.{js,ts,cjs,mjs}": ["oxlint --fix", "prettier --write"],
-  "!*.{cjs,js,mjs,md,ts}": "prettier --ignore-unknown --write"
+  "*.{js,ts,cjs,mjs}": ["oxlint --fix", "oxfmt"],
+  "!*.{cjs,js,mjs,md,ts}": "oxfmt --no-error-on-unmatched-pattern"
 }

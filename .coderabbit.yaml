@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# use the central containerbase/coderabbit config for everything not set here
+inheritance: true
+reviews:
+  auto_review:
+    # too many pushes per PR, request a review with `@coderabbitai review`
+    enabled: false

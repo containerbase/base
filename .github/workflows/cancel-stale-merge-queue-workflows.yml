@@ -1,12 +1,11 @@
 name: Cancel stale merge queue workflows
-on:
+# each run handles its own destroyed merge group, so runs must not cancel each other
+on: # jactionlint ignore=concurrency-limits
   merge_group:
     types:
       - destroyed
 
-permissions:
-  actions: write
-  contents: read
+permissions: {}
 
 jobs:
   cancel-workflows:
@@ -14,6 +13,8 @@ jobs:
 
     runs-on: ubuntu-slim
     timeout-minutes: 5
+    permissions:
+      actions: write
 
     # a merged group finishes its runs, the others are outdated
     if: github.event.reason != 'merged'

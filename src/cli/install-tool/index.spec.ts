@@ -1,8 +1,17 @@
 import fs from 'node:fs/promises';
-import { beforeAll, describe, expect, test, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import {
   IpcServer,
   PathService,
+  ToolVersionsService,
   VersionService,
   createContainer,
 } from '../services/index.ts';
@@ -25,6 +34,7 @@ import {
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
+import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
@@ -195,7 +205,7 @@ describe('cli/install-tool/index', () => {
 
       expect(tools).toEqual(
         expect.arrayContaining([
-          { name: 'apko' },
+          { name: 'apko', minVersion: '0.1.1' },
           { name: 'git', root: true, minVersion: '2.48.0' },
           { name: 'nix', minVersion: '2.10.3' },
           {
@@ -205,7 +215,7 @@ describe('cli/install-tool/index', () => {
           },
           { name: 'vp', parent: 'node', minVersion: '0.3.1' },
           { name: 'git-lfs', parent: 'git', minVersion: '2.6.0' },
-          { name: 'maven', parent: 'java' },
+          { name: 'maven', parent: 'java', minVersion: '3.0.4' },
           { name: 'kas', type: 'pip', parent: 'python' },
           { name: 'bower', type: 'npm', parent: 'node', deprecated: true },
           { name: 'cocoapods', type: 'gem', parent: 'ruby' },
@@ -240,6 +250,358 @@ describe('cli/install-tool/index', () => {
     ])('works: $type', async ({ type, svc }) => {
       vi.spyOn(svc.prototype, 'resolve').mockResolvedValue('1.0.0');
       expect(await resolveVersion('dummy', '1.0.0', type)).toBe('1.0.0');
+    });
+
+    test.each(['flux', 'pnpm', 'npm', 'yarn'])(
+      'resolves install-npm %s with the registry, not the tool-versions data',
+      async (tool) => {
+        // the data has a file with the name of the package
+        await fs.mkdir(rootPath('usr/local/containerbase/tool-versions/v1'), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          rootPath(`usr/local/containerbase/tool-versions/v1/${tool}.json`),
+          JSON.stringify({
+            tool,
+            updatedAt: '2026-10-16T00:00:00Z',
+            type: 'npm',
+            latest: '9.9.9',
+            versions: [{ version: '9.9.9' }],
+          }),
+        );
+        const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+        const data = vi.spyOn(
+          ToolVersionsService.prototype,
+          'getResolveVersions',
+        );
+        // the yarn resolver of install-tool is used for `yarn` too
+        vi.spyOn(NpmVersionResolver.prototype, 'resolve').mockResolvedValue(
+          '1.2.3',
+        );
+
+        // install-npm turns the data off
+        expect(await resolveVersion(tool, 'latest', 'npm', false)).toBe(
+          '1.2.3',
+        );
+
+        expect(embedded).not.toHaveBeenCalled();
+        expect(data).not.toHaveBeenCalled();
+      },
+    );
+
+    test.each([
+      { tool: 'php', version: '8.3', type: 'npm' as const },
+      { tool: 'php', version: '8.3.10', type: 'npm' as const },
+      { tool: 'mise', version: '2026.10', type: 'pip' as const },
+      { tool: 'mise', version: '2026.10.21', type: 'pip' as const },
+    ])(
+      'keeps install-$type $tool $version without the tool-versions data',
+      async ({ tool, version, type }) => {
+        // the resolver of install-tool answers, it keeps any version but
+        // `latest`
+        const embedded = vi.spyOn(ToolVersionsService.prototype, 'getVersions');
+
+        expect(await resolveVersion(tool, version, type, false)).toBe(version);
+
+        expect(embedded).not.toHaveBeenCalled();
+      },
+    );
+
+    describe('typed gem and pip tools', () => {
+      /** The embedded data, set before each test as the root dir comes from the test setup. */
+      let dataDir!: string;
+
+      /**
+       * Embeds the data of a tool.
+       * @param versions - the releases, newest first
+       * @param minCb - the minimum containerbase version ranges, if any
+       */
+      async function embed(
+        tool: string,
+        versions: { version: string; deprecated?: true }[],
+        minCb?: { version: string; cb: string }[],
+      ): Promise<void> {
+        await fs.writeFile(
+          `${dataDir}/v1/${tool}.json`,
+          JSON.stringify({
+            tool,
+            updatedAt: '2026-10-16T00:00:00Z',
+            ...(minCb && { minCb }),
+            versions,
+          }),
+        );
+      }
+
+      /**
+       * Mocks the registry lookup of a gem or pip tool.
+       * @param partial - whether a partial version is looked up, else `latest`
+       * @param release - the release the registry has
+       */
+      function registry(
+        tool: string,
+        type: 'gem' | 'pip',
+        partial: boolean,
+        release: string,
+      ): void {
+        if (type === 'pip') {
+          scope('https://pypi.org')
+            .get(`/pypi/${tool}/json`)
+            .reply(200, {
+              info: { version: release },
+              releases: {
+                [release]: [{ packagetype: 'sdist', yanked: false }],
+              },
+            });
+        } else if (partial) {
+          scope('https://rubygems.org')
+            .get(`/api/v1/versions/${tool}.json`)
+            .reply(200, [{ number: release, prerelease: false }]);
+        } else {
+          scope('https://rubygems.org')
+            .get(`/api/v1/gems/${tool}.json`)
+            .reply(200, { version: release });
+        }
+      }
+
+      /** Releases with deprecated ones, like yanked or removed upstream. */
+      const releases = [
+        { version: '2.6.0', deprecated: true as const },
+        { version: '2.5.1' },
+        { version: '2.5.0' },
+        { version: '2.4.1', deprecated: true as const },
+        { version: '2.4.0' },
+      ];
+
+      beforeEach(async () => {
+        dataDir = rootPath('usr/local/containerbase/tool-versions');
+        await fs.rm(`${dataDir}/v1`, { recursive: true, force: true });
+        await fs.mkdir(`${dataDir}/v1`, { recursive: true });
+        // the embedded data is current, so the online data isn't read
+        await fs.writeFile(
+          `${dataDir}/release.json`,
+          JSON.stringify({
+            version: '1.8.0',
+            buildTime: new Date(Date.now() - 60_000).toISOString(),
+          }),
+        );
+        vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
+      });
+
+      afterEach(async () => {
+        vi.unstubAllGlobals();
+        await fs.rm(`${dataDir}/release.json`, { force: true });
+        await fs.rm(`${dataDir}/v1`, { recursive: true, force: true });
+      });
+
+      describe.each([
+        { tool: 'bundler', type: 'gem' as const },
+        { tool: 'uv', type: 'pip' as const },
+      ])('$tool', ({ tool, type }) => {
+        test.each([
+          // the newest release which isn't deprecated
+          { version: undefined, expected: '2.5.1' },
+          { version: 'latest', expected: '2.5.1' },
+          { version: '2.4', expected: '2.4.0' },
+          // an existing release is kept, also a deprecated one
+          { version: '2.4.1', expected: '2.4.1' },
+        ])(
+          'resolves $version to $expected from the data',
+          async ({ version, expected }) => {
+            await embed(tool, releases);
+
+            // no interceptor, a request would fail the test
+            expect(await resolveVersion(tool, version, type)).toBe(expected);
+          },
+        );
+
+        test('asks the registry when only deprecated releases match', async () => {
+          await embed(tool, releases);
+          registry(tool, type, true, '2.6.2');
+
+          expect(await resolveVersion(tool, '2.6', type)).toBe('2.6.2');
+        });
+
+        test('asks the registry without data', async () => {
+          registry(tool, type, false, '3.0.0');
+
+          expect(await resolveVersion(tool, 'latest', type)).toBe('3.0.0');
+        });
+
+        test('warns and keeps an exact version which needs a newer containerbase', async () => {
+          await embed(tool, releases, [{ version: '2.5.0', cb: '15.0.0' }]);
+
+          expect(await resolveVersion(tool, '2.5.0', type)).toBe('2.5.0');
+
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            `${tool} 2.5.0 needs containerbase 15.0.0 or newer, running 14.51.0, 2.5.0 is used as is`,
+          );
+        });
+
+        test('warns and asks the registry when every match needs a newer containerbase', async () => {
+          await embed(tool, releases, [{ version: '2.5.0', cb: '15.0.0' }]);
+          registry(tool, type, true, '2.5.1');
+
+          expect(await resolveVersion(tool, '2.5', type)).toBe('2.5.1');
+
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            `${tool} 2.5.1 needs containerbase 15.0.0 or newer, running 14.51.0, the own lookup of the tool is used`,
+          );
+        });
+
+        test('never reads the data for install-gem and install-pip', async () => {
+          await embed(tool, releases);
+          const embedded = vi.spyOn(
+            ToolVersionsService.prototype,
+            'getVersions',
+          );
+          const online = vi.spyOn(
+            ToolVersionsService.prototype,
+            'getResolveVersions',
+          );
+          registry(tool, type, false, '2.6.0');
+
+          expect(await resolveVersion(tool, 'latest', type, false)).toBe(
+            '2.6.0',
+          );
+
+          expect(embedded).not.toHaveBeenCalled();
+          expect(online).not.toHaveBeenCalled();
+        });
+      });
+
+      /** LTS releases, newest first, like for node and java. */
+      const ltsReleases = [
+        { version: '25.0.0' },
+        { version: '24.2.0', lts: true as const },
+        { version: '22.1.0', lts: true as const },
+      ];
+
+      test.each([
+        {
+          tool: 'pnpm',
+          type: 'npm' as const,
+          extra: { type: 'npm', latest: '2.5.1' },
+          versions: releases,
+          expected: '2.5.1',
+        },
+        {
+          tool: 'bundler',
+          type: 'gem' as const,
+          extra: {},
+          versions: releases,
+          expected: '2.5.1',
+        },
+        {
+          tool: 'uv',
+          type: 'pip' as const,
+          extra: {},
+          versions: releases,
+          expected: '2.5.1',
+        },
+        {
+          tool: 'yarn',
+          type: undefined,
+          extra: { type: 'npm', latest: '2.5.1' },
+          versions: releases,
+          expected: '2.5.1',
+        },
+        {
+          tool: 'node',
+          type: undefined,
+          extra: { lts: true },
+          versions: ltsReleases,
+          expected: '24.2.0',
+        },
+        // composer is mocked here, php covers the prebuild resolver
+        ...['conan', 'mise', 'php'].map((tool) => ({
+          tool,
+          type: undefined,
+          extra: {},
+          versions: releases,
+          expected: '2.5.1',
+        })),
+        {
+          tool: 'java',
+          type: undefined,
+          extra: { lts: true },
+          versions: ltsReleases,
+          expected: '24.2.0',
+        },
+      ])(
+        'uses the embedded data of $tool with a warning when the online data is not available',
+        async ({ tool, type, extra, versions, expected }) => {
+          // outdated embedded data, so the online data is looked up
+          await fs.rm(`${dataDir}/release.json`);
+          await fs.writeFile(
+            `${dataDir}/v1/${tool}.json`,
+            JSON.stringify({
+              tool,
+              updatedAt: '2026-10-16T00:00:00Z',
+              ...extra,
+              versions,
+            }),
+          );
+          scope('https://containerbase.github.io')
+            .get(`/tool-versions/v1/${tool}.json`)
+            .reply(404);
+
+          // no own lookup interceptor, a request would fail the test
+          expect(await resolveVersion(tool, 'latest', type)).toBe(expected);
+
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            { tool, version: 'latest', resolved: expected },
+            'online data not available (embedded, possibly outdated tool-versions data)',
+          );
+        },
+      );
+
+      describe('poetry', () => {
+        const mirror = {
+          info: {
+            version: '0.6.1',
+            requires_dist: ['poetry>=1.2.1,<2.0.0'],
+          },
+          releases: {},
+        };
+
+        test('limits latest from the data to the releases the mirror plugin supports', async () => {
+          await embed('poetry', [
+            { version: '2.0.0' },
+            { version: '1.8.4', deprecated: true },
+            { version: '1.8.3' },
+          ]);
+          scope('https://pypi.org')
+            .get('/pypi/poetry-plugin-pypi-mirror/json')
+            .reply(200, mirror);
+
+          expect(await resolveVersion('poetry', 'latest', 'pip')).toBe('1.8.3');
+        });
+
+        test('asks pypi when the data has no release the mirror plugin supports', async () => {
+          await embed('poetry', [{ version: '2.0.0' }]);
+          scope('https://pypi.org')
+            // the data filter and the pypi lookup share one plugin request
+            .get('/pypi/poetry-plugin-pypi-mirror/json')
+            .reply(200, mirror)
+            .get('/pypi/poetry/json')
+            .reply(200, {
+              info: { version: '2.0.0' },
+              releases: {
+                '1.8.5': [{ packagetype: 'sdist', yanked: false }],
+                '2.0.0': [{ packagetype: 'sdist', yanked: false }],
+              },
+            });
+
+          expect(await resolveVersion('poetry', 'latest', 'pip')).toBe('1.8.5');
+        });
+
+        test('resolves a partial version from the data without the mirror plugin', async () => {
+          await embed('poetry', [{ version: '2.0.0' }, { version: '1.8.3' }]);
+
+          // no interceptor, a request would fail the test
+          expect(await resolveVersion('poetry', '2', 'pip')).toBe('2.0.0');
+        });
+      });
     });
   });
 

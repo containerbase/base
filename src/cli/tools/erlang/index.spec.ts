@@ -11,7 +11,7 @@ import { getDistro } from '../../utils/index.ts';
 import { ErlangInstallService, ErlangPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -53,6 +53,8 @@ describe('cli/tools/erlang/index', () => {
       versionCode: 'jammy',
       versionId: '22.04',
     });
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -183,6 +185,48 @@ describe('cli/tools/erlang/index', () => {
         cwd: pathSvc.toolPath('erlang'),
       });
     });
+
+    test.each([
+      { code: 'jammy', versionId: '22.04', lookups: 1 },
+      { code: 'resolute', versionId: '26.04', lookups: 2 },
+    ])(
+      'install: downloads the jammy tool-versions file on $code without the .sha512',
+      async ({ code, versionId, lookups }) => {
+        vi.mocked(getDistro).mockResolvedValue({
+          name: 'Ubuntu',
+          versionCode: code,
+          versionId,
+        });
+        const version = `29.1.0.${lookups}`;
+        // only jammy prebuilds are published
+        const files = mockToolFiles(
+          (['aarch64', 'x86_64'] as const).map((ghArch) => ({
+            ...toolFile(
+              `${githubUrl}${prebuildPath(version, 'jammy', ghArch)}`,
+              ghArch === 'x86_64' ? archive : 'arm',
+              ghArch === 'x86_64' ? 'amd64' : 'arm64',
+            ),
+            distro: 'jammy',
+          })),
+        );
+        // there is no interceptor for the `.sha512`
+        scope(githubUrl)
+          .get(prebuildPath(version, 'jammy', 'x86_64'))
+          .reply(200, archive);
+        const extract = vi.spyOn(CompressionService.prototype, 'extract');
+        const { svc, pathSvc } = await toolContext(ErlangInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(files).toHaveBeenCalledTimes(lookups);
+        expect(extract).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(
+            `erlang-${version}-jammy-x86_64.tar.xz`,
+          ),
+          cwd: pathSvc.toolPath('erlang'),
+        });
+      },
+    );
 
     test('install: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({

@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { HelmInstallService } from './helm.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/helm', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -52,6 +54,24 @@ describe('cli/tools/helm', () => {
       });
     },
   );
+
+  test('install: downloads the tool-versions file without the .sha256sum', async () => {
+    const filename = 'helm-v3.17.0-linux-amd64.tar.gz';
+    mockToolFiles([
+      toolFile(`${baseUrl}/helm-v3.17.0-linux-arm64.tar.gz`, 'arm', 'arm64'),
+      toolFile(`${baseUrl}/${filename}`, tarball, 'amd64'),
+    ]);
+    // there is no interceptor for the `.sha256sum`
+    scope(baseUrl).get(`/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(HelmInstallService);
+
+    await expect(svc.install('3.17.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
+  });
 
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(HelmInstallService);

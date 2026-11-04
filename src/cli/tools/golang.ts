@@ -1,17 +1,13 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { z } from 'zod';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../services/index.ts';
 import { parse } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class GolangPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'golang';
 
   /**
@@ -58,6 +54,13 @@ const GoDevReleases = z.array(GoDevRelease);
 @injectFromHierarchy()
 export class GolangInstallService extends BaseInstallService {
   override readonly name = 'golang';
+  override readonly minVersion = '1.9.0';
+
+  /**
+   * The module cache, the build cache is in `~/.cache/go-build`, which is
+   * cleaned anyway.
+   */
+  override readonly cacheDirs = ['go/pkg/mod'];
 
   /** The architecture name used by the containerbase prebuild. */
   private get prebuildArch(): string {
@@ -65,22 +68,23 @@ export class GolangInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the containerbase prebuild, verified against its `.sha512`,
-   * and extracts it into the tool path. Not all releases are copied to the
+   * Downloads the containerbase prebuild and extracts it into the tool path.
+   * The file and its checksum come from the tool-versions data, without data
+   * it is verified against its `.sha512`. Not all releases are copied to the
    * prebuild repo yet, eg. a version just released upstream, so this falls
    * back to the official build when there is no prebuild.
    */
   override async install(version: string): Promise<void> {
-    const base = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-${this.prebuildArch}.tar.xz`;
+    const filename = `${this.name}-${version}-${this.prebuildArch}.tar.xz`;
+    const file =
+      (await this.downloadNamedToolFile(version, filename)) ??
+      (await this.downloadOptionalChecksumSidecar(
+        `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${filename}`,
+        '.sha512',
+        'sha512',
+      ));
 
-    if (await this.http.exists(`${base}.sha512`)) {
-      const expectedChecksum = await this.getChecksum(`${base}.sha512`);
-      const file = await this.http.download({
-        url: base,
-        checksumType: 'sha512',
-        expectedChecksum,
-      });
-
+    if (file) {
       const path = await this.pathSvc.ensureToolPath(this.name);
       // the archive already contains the version folder itself
       await this.compress.extract({ file, cwd: path });

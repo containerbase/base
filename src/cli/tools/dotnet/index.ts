@@ -1,16 +1,12 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { getDistro, parse, pathExists } from '../../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class DotnetPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   readonly name = 'dotnet';
 
   /**
@@ -94,6 +90,16 @@ export class DotnetInstallService extends BaseInstallService {
    */
   override readonly minVersion = '6.0.100';
 
+  /**
+   * The global packages folder and the nuget http caches, the nuget config in
+   * `.nuget/NuGet` is kept.
+   */
+  override readonly cacheDirs = [
+    '.local/share/NuGet/http-cache',
+    '.local/share/NuGet/v3-cache',
+    '.nuget/packages',
+  ];
+
   /** The architecture name used by the dotnet sdk archives. */
   private get arch(): string {
     switch (this.envSvc.arch) {
@@ -113,7 +119,9 @@ export class DotnetInstallService extends BaseInstallService {
   /**
    * Downloads the dotnet sdk and extracts it into the shared tool path, then
    * runs the first time setup and creates the nuget config, also for the user
-   * when running as root. No checksums are verified.
+   * when running as root. The sdk is verified against the sha512 of the
+   * release metadata from the tool-versions data, without data it is
+   * unverified.
    */
   override async install(version: string): Promise<void> {
     const toolPath = this.pathSvc.toolPath(this.name);
@@ -121,7 +129,7 @@ export class DotnetInstallService extends BaseInstallService {
     // https://github.com/dotnet/core/issues/9671
     // https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
     const url = `https://builds.dotnet.microsoft.com/dotnet/Sdk/${version}/dotnet-sdk-${version}-linux-${this.arch}.tar.gz`;
-    const file = await this.http.download({ url });
+    const file = await this.downloadWithoutChecksum(version, url);
 
     await this.compress.extract({
       file,

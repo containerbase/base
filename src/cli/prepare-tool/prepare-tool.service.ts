@@ -19,7 +19,8 @@ export class PrepareToolService {
 
   /**
    * Prepares the given tools, or every tool for `all`, and marks them as
-   * prepared. Must run as root.
+   * prepared. Must run as root. Links a configured `CONTAINERBASE_TMP_DIR`
+   * first, as tools write to the cache while preparing.
    *
    * @returns an exit code when the tools could not be prepared
    * @throws when the containerbase folders are not writable
@@ -39,6 +40,7 @@ export class PrepareToolService {
       return 1;
     }
     await this.pathSvc.ensureWritable(this.pathSvc.varPath);
+    await this.pathSvc.ensureTmpLink();
     try {
       if (tools.length === 1 && tools[0] === 'all') {
         for (const tool of this.toolSvcs) {

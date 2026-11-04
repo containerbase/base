@@ -8,6 +8,7 @@ import {
   LinkToolService,
   PathService,
 } from '../../services/index.ts';
+import { blockedCerts } from './blocked-certs.ts';
 import {
   JavaInstallService,
   JavaJdkInstallService,
@@ -74,6 +75,10 @@ describe('cli/tools/java/index', () => {
         .mockImplementation(async ({ cwd }) => {
           await fs.mkdir(path.join(cwd, 'lib/security'), { recursive: true });
           await fs.writeFile(path.join(cwd, 'lib/security/cacerts'), 'certs');
+          await fs.writeFile(
+            path.join(cwd, 'lib/security/blocked.certs'),
+            'Algorithm=SHA-256\n',
+          );
         });
 
       await expect(svc.install('21.0.4+7')).resolves.toBeUndefined();
@@ -83,6 +88,9 @@ describe('cli/tools/java/index', () => {
       expect(await fs.readlink(path.join(cwd, 'lib/security/cacerts'))).toBe(
         path.join(pathSvc.sslPath, 'cacerts'),
       );
+      expect(
+        await fs.readFile(path.join(cwd, 'lib/security/blocked.certs'), 'utf8'),
+      ).toBe(`Algorithm=SHA-256\n${blockedCerts.join('\n')}\n`);
     });
 
     test('install: java 8 jdk keeps the cert store under jre', async () => {
@@ -102,6 +110,10 @@ describe('cli/tools/java/index', () => {
             path.join(cwd, 'jre/lib/security/cacerts'),
             'certs',
           );
+          await fs.writeFile(
+            path.join(cwd, 'jre/lib/security/blacklisted.certs'),
+            'Algorithm=SHA-256\n',
+          );
         },
       );
 
@@ -111,6 +123,12 @@ describe('cli/tools/java/index', () => {
       expect(
         await fs.readlink(path.join(cwd, 'jre/lib/security/cacerts')),
       ).toBe(path.join(pathSvc.sslPath, 'cacerts'));
+      expect(
+        await fs.readFile(
+          path.join(cwd, 'jre/lib/security/blacklisted.certs'),
+          'utf8',
+        ),
+      ).toBe(`Algorithm=SHA-256\n${blockedCerts.join('\n')}\n`);
     });
 
     test('install: java 8 jre keeps the default cert store location', async () => {

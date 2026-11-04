@@ -6,7 +6,7 @@ import { LinkToolService } from '../services/index.ts';
 import { KubectlInstallService } from './kubectl.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/kubectl', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the binary is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -54,6 +56,33 @@ describe('cli/tools/kubectl', () => {
       expect((await fs.stat(file)).mode & 0o777).toBe(0o775);
     },
   );
+
+  test('install: downloads the tool-versions file without the .sha256', async () => {
+    // the data names the files like the release download, not like the url
+    mockToolFiles(
+      (['amd64', 'arm64'] as const).map((toolArch) => ({
+        ...toolFile(
+          `${baseUrl}/release/v1.32.0/bin/linux/${toolArch}/kubectl`,
+          toolArch === 'amd64' ? binary : 'arm',
+          toolArch,
+        ),
+        name: `kubectl-v1.32.0-${toolArch}`,
+      })),
+    );
+    // there is no interceptor for the `.sha256`
+    scope(baseUrl)
+      .get('/release/v1.32.0/bin/linux/amd64/kubectl')
+      .reply(200, binary);
+    const { svc, pathSvc } = await toolContext(KubectlInstallService);
+
+    await expect(svc.install('1.32.0')).resolves.toBeUndefined();
+
+    const file = join(
+      pathSvc.versionedToolPath('kubectl', '1.32.0'),
+      'bin/kubectl',
+    );
+    expect(await fs.readFile(file, 'utf8')).toBe(binary);
+  });
 
   test('install: rejects an empty checksum', async () => {
     const { svc } = await toolContext(KubectlInstallService);

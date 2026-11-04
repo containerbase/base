@@ -13,12 +13,16 @@ on:
       - '**/*.md'
       - 'docs/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   devcontainer-test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: github.event.pull_request.draft != true
     timeout-minutes: 20
     steps:

@@ -12,23 +12,20 @@ export class SopsInstallService extends BaseInstallService {
   override readonly minVersion = '3.8.0';
 
   /**
-   * Downloads the sops binary from GitHub, verified against the release's
-   * checksums file, into the versioned `bin` folder.
+   * Downloads the sops binary from GitHub into the versioned `bin` folder. The
+   * file and its checksum come from the tool-versions data, without data it
+   * is verified against the release's checksums file.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/getsops/${this.name}/releases/download/v${version}/`;
     const filename = `${this.name}-v${version}.linux.${this.envSvc.arch}`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}${this.name}-v${version}.checksums.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      `${this.name}-v${version}.checksums.txt`,
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

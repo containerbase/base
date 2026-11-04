@@ -23,90 +23,13 @@ ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_CDN_GEM
 ARG CONTAINERBASE_CDN_NPM
+ARG CONTAINERBASE_CDN_PIP
 ARG CONTAINERBASE_LOG_LEVEL
 
 RUN install-containerbase
 
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
-
-RUN set -ex; \
-  [ "$(command -v git)" = /usr/local/bin/git ]; \
-  for bin in git git-receive-pack git-shell git-upload-archive git-upload-pack scalar; do \
-    readlink -f "/usr/local/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.56\.0/bin/'; \
-    [ -x "/usr/local/bin/${bin}" ]; \
-    readlink -f "/usr/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.56\.0/bin/'; \
-  done; \
-  git --version | grep '^git version 2\.56\.0$'; \
-  /usr/bin/git --version | grep '^git version 2\.56\.0$'; \
-  perl -v; \
-  git --exec-path | grep '^/opt/containerbase/tools/git/2\.56\.0/libexec/git-core$'; \
-  su ubuntu -s /bin/sh -c 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version' | grep '^git version 2\.56\.0$'; \
-  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
-  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
-  rm -rf /tmp/git-prebuild; \
-  true
-
-#--------------------------------------
-# Image: test-git-min
-#--------------------------------------
-FROM base AS test-git-min
-
-RUN touch /.dummy
-
-# versions before the first prebuild fall back to the newest one
-RUN set -ex; \
-  install-tool git 2.40.0 > /git-fallback.log 2>&1 || { cat /git-fallback.log; exit 1; }; \
-  cat /git-fallback.log; \
-  grep -F 'No git 2.40.0 prebuild, installing the newest git ' /git-fallback.log; \
-  newest="$(sed -n 's/.*No git 2\.40\.0 prebuild, installing the newest git \([0-9.]*\) instead.*/\1/p' /git-fallback.log)"; \
-  [ -n "${newest}" ]; \
-  [ ! -e /opt/containerbase/tools/git/2.40.0 ]; \
-  git --version | grep -Fx "git version ${newest}"; \
-  readlink -f /usr/local/bin/git | grep -Fx "/opt/containerbase/tools/git/${newest}/bin/git"; \
-  rm /git-fallback.log; \
-  true
-
-# the oldest supported git, keep it in sync with `minVersion` in
-# `src/cli/tools/git/index.ts`, no renovate updates
-RUN install-tool git 2.48.0
-
-RUN set -ex; \
-  [ "$(command -v git)" = /usr/local/bin/git ]; \
-  for bin in git git-receive-pack git-shell git-upload-archive git-upload-pack scalar; do \
-    readlink -f "/usr/local/bin/${bin}" | grep '^/opt/containerbase/tools/git/2\.48\.0/bin/'; \
-    [ -x "/usr/local/bin/${bin}" ]; \
-  done; \
-  git --version | grep '^git version 2\.48\.0$'; \
-  /usr/bin/git --version | grep '^git version 2\.48\.0$'; \
-  git --exec-path | grep '^/opt/containerbase/tools/git/2\.48\.0/libexec/git-core$'; \
-  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
-  git init -q /tmp/git-min; \
-  git -C /tmp/git-min status; \
-  git ls-remote https://github.com/containerbase/git-prebuild.git HEAD; \
-  rm -rf /tmp/git-min; \
-  true
-
-#--------------------------------------
-# Image: test-git-apt
-#--------------------------------------
-FROM base AS test-git-apt
-
-RUN touch /.dummy
-
-# apt packages depending on git use the prebuild instead of ubuntu's git
-RUN set -ex; \
-  version="$(git --version | sed -n 's/^git version //p')"; \
-  [ -n "${version}" ]; \
-  dpkg -s containerbase-git | grep -Fx "Version: ${version}"; \
-  install-apt git-lfs tig; \
-  if dpkg -s git; then exit 1; fi; \
-  [ "$(command -v git)" = /usr/local/bin/git ]; \
-  readlink -f /usr/bin/git | grep -Fx "/opt/containerbase/tools/git/${version}/bin/git"; \
-  git --version | grep -Fx "git version ${version}"; \
-  git lfs version; \
-  tig --version; \
-  true
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 #--------------------------------------
 # Image: build
@@ -125,72 +48,67 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.29.0
+RUN install-tool bazelisk v1.30.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.74.0
+RUN install-tool buf v1.75.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.3
+RUN install-tool bun 1.4.4
 
 # renovate: datasource=docker
-RUN install-tool dart 3.13.5
+RUN install-tool dart 3.13.7
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.7
+RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.4
+RUN install-tool devbox 0.19.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.402
+RUN install-tool dotnet 10.0.403
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
-RUN install-tool flutter 3.47.7
+RUN install-tool flutter 3.47.9
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.6
+RUN install-tool flux v2.10.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.0
-
-RUN set -ex; \
-  git lfs version | grep '^git-lfs/3\.8\.0 '; \
-  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
-  true
+RUN install-tool git-lfs v3.8.1
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
 
 # renovate: datasource=github-releases packageName=containerbase/golang-prebuild
-RUN install-tool golang 1.27.2
+RUN install-tool golang 1.27.3
 
 # renovate: datasource=github-releases packageName=helm/helm
 RUN install-tool helm v4.3.1
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.1
+RUN install-tool helmfile v1.8.2
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.1
+RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=kubernetes-sigs/kustomize
 RUN install-tool kustomize 5.8.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.10.10
+RUN install-tool mise 2026.11.0
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.82.0
+RUN install-tool pixi v0.84.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.7
+RUN install-tool powershell v7.6.9
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool rust 1.99.0
+RUN install-tool rust 1.99.1
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -200,7 +118,7 @@ RUN install-tool sops v3.13.3
 
 # not yet supported on resolute https://github.com/swiftlang/swift-docker/issues/524
 # renovate: datasource=docker depName=swift
-ARG SWIFT_VERSION=6.4.1
+ARG SWIFT_VERSION=6.4.2
 RUN set -ex; \
   if [ "$(. /etc/os-release && echo "${VERSION_CODENAME}")" = "resolute" ]; then \
     echo "Skipping Swift installation on resolute."; \
@@ -210,16 +128,16 @@ RUN set -ex; \
   true
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.6
+RUN install-tool terraform 1.17.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.1
+RUN install-tool tofu 1.13.2
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.2
+RUN install-tool vendir v0.46.3
 
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
@@ -236,10 +154,10 @@ FROM build AS test-docker
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.38.0
+RUN install-tool buildx v0.38.2
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.6.0
+RUN install-tool docker-compose v5.7.0
 
 #--------------------------------------
 # Image: test-erlang
@@ -249,7 +167,7 @@ FROM build AS test-erlang
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
 RUN install-tool erlang 28.5.0.8
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
-RUN install-tool elixir 1.20.4
+RUN install-tool elixir 1.20.5
 
 #--------------------------------------
 # Image: test-haskell
@@ -267,9 +185,9 @@ RUN install-tool ghc 9.14.1
 FROM build AS test-java
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java 25.0.4+101.0.LTS
+RUN install-tool java 25.0.5+8.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 9.8.1
+RUN install-tool gradle 9.8.2
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
 RUN install-tool maven 3.10.0
 
@@ -296,14 +214,14 @@ RUN install-tool nuget 7.9.0
 FROM build AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.0
+RUN install-tool node 24.22.2
 # renovate: datasource=npm
-RUN install-tool pnpm 12.12.1
+RUN install-tool pnpm 12.17.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.1
 
 # renovate: datasource=github-releases packageName=voidzero-dev/vite-plus
-RUN install-tool vp 1.2.0
+RUN install-tool vp 1.5.0
 
 #--------------------------------------
 # Image: test-php
@@ -311,7 +229,7 @@ RUN install-tool vp 1.2.0
 FROM build AS test-php
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.11
+RUN install-tool php 8.5.12
 # renovate: datasource=github-releases packageName=containerbase/composer-prebuild
 RUN install-tool composer 2.10.3
 
@@ -321,26 +239,26 @@ RUN install-tool composer 2.10.3
 FROM build AS test-python
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.8
+RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.3.27
+RUN install-tool checkov 3.4.0
 # renovate: datasource=pypi
-RUN install-tool conan 2.33.0
+RUN install-tool conan 2.34.0
 # renovate: datasource=pypi
-RUN install-tool copier 9.19.0
+RUN install-tool copier 9.19.1
 # renovate: datasource=pypi
 RUN install-tool hashin 1.0.5
 # renovate: datasource=pypi
 RUN install-tool kas 5.5
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.9.1
+RUN install-tool pipenv 2026.10.4
 # renovate: datasource=pypi
-RUN install-tool pdm 2.29.2
+RUN install-tool pdm 2.29.5
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
-RUN install-tool uv 0.13.1
+RUN install-tool uv 0.13.7
 
 #--------------------------------------
 # Image: test-ruby
@@ -348,7 +266,7 @@ RUN install-tool uv 0.13.1
 FROM build AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 4.0.7
+RUN install-tool ruby 4.0.9
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool bundler 4.0.23
 # renovate: datasource=rubygems versioning=ruby
@@ -362,8 +280,6 @@ FROM base
 COPY --from=test /.dummy /.dummy
 COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-erlang /.dummy /.dummy
-COPY --from=test-git-apt /.dummy /.dummy
-COPY --from=test-git-min /.dummy /.dummy
 COPY --from=test-haskell /.dummy /.dummy
 COPY --from=test-java /.dummy /.dummy
 COPY --from=test-mono /.dummy /.dummy

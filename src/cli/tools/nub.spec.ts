@@ -5,7 +5,7 @@ import { CompressionService, LinkToolService } from '../services/index.ts';
 import { NubInstallService } from './nub.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -24,6 +24,8 @@ describe('cli/tools/nub', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the archive is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -48,6 +50,29 @@ describe('cli/tools/nub', () => {
       file: expect.stringContaining(filename),
       cwd: pathSvc.versionedToolPath('nub', version),
     });
+  });
+
+  test('install: downloads the tool-versions file without the .sha256', async () => {
+    const releaseUrl = '/nubjs/nub/releases/download/v0.10.0';
+    const filename = 'nub-linux-x64.tar.gz';
+    mockToolFiles([
+      toolFile(
+        `${baseUrl}${releaseUrl}/nub-linux-arm64.tar.gz`,
+        'arm',
+        'arm64',
+      ),
+      toolFile(`${baseUrl}${releaseUrl}/${filename}`, archive, 'amd64'),
+    ]);
+    // there is no interceptor for the `.sha256`
+    scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, archive);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc } = await toolContext(NubInstallService);
+
+    await expect(svc.install('0.10.0')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
+    );
   });
 
   test('link', async () => {

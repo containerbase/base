@@ -11,7 +11,7 @@ import {
 import { FlutterInstallService, FlutterPrepareService } from './flutter.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -30,6 +30,8 @@ describe('cli/tools/flutter', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -50,6 +52,31 @@ describe('cli/tools/flutter', () => {
       const extract = vi.spyOn(CompressionService.prototype, 'extract');
 
       await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(extract).toHaveBeenCalledExactlyOnceWith({
+        file: expect.stringContaining(filename),
+        cwd: pathSvc.toolPath('flutter'),
+      });
+    });
+
+    test('install: downloads the tool-versions file without the .sha512', async () => {
+      const releaseUrl =
+        '/containerbase/flutter-prebuild/releases/download/3.27.0';
+      const filename = 'flutter-3.27.0-x86_64.tar.xz';
+      mockToolFiles([
+        toolFile(
+          `${baseUrl}${releaseUrl}/flutter-3.27.0-aarch64.tar.xz`,
+          'arm',
+          'arm64',
+        ),
+        toolFile(`${baseUrl}${releaseUrl}/${filename}`, tarball, 'amd64'),
+      ]);
+      // there is no interceptor for the `.sha512`
+      scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+      const extract = vi.spyOn(CompressionService.prototype, 'extract');
+      const { svc, pathSvc } = await toolContext(FlutterInstallService);
+
+      await expect(svc.install('3.27.0')).resolves.toBeUndefined();
 
       expect(extract).toHaveBeenCalledExactlyOnceWith({
         file: expect.stringContaining(filename),

@@ -22,9 +22,10 @@ export class BunInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the bun archive from GitHub, verified against the release's
-   * `SHASUMS256.txt`, and extracts it into the versioned `bin` folder. On x64
-   * without AVX2 the baseline build is used.
+   * Downloads the bun archive from GitHub and extracts it into the versioned
+   * `bin` folder. On x64 without AVX2 the baseline build is used. The file and
+   * its checksum come from the tool-versions data, without data it is
+   * verified against the release's `SHASUMS256.txt`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/oven-sh/bun/releases/download/bun-v${version}/`;
@@ -43,16 +44,12 @@ export class BunInstallService extends BaseInstallService {
 
     const filename = `bun-linux-${ghArch}.zip`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}SHASUMS256.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'SHASUMS256.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 

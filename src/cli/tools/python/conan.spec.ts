@@ -134,6 +134,8 @@ describe('cli/tools/python/conan', () => {
         .reply(200, { info: { version: '2.9.2' }, releases: {} });
       const { svc } = await toolContext(ConanVersionResolver);
 
+      // the tool-versions data is read first, pypi is the fallback
+      expect(svc.dataField).toBe('versions');
       expect(await svc.resolve('latest')).toBe('2.9.2');
     });
 

@@ -42,7 +42,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-node
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.0
+RUN install-tool node 24.22.2
 
 
 #--------------------------------------
@@ -51,7 +51,7 @@ RUN install-tool node 24.22.0
 FROM test-node AS test-pnpm
 
 # renovate: datasource=npm
-RUN install-tool pnpm 12.12.1
+RUN install-tool pnpm 12.17.0
 
 #--------------------------------------
 # Image: yarn
@@ -97,7 +97,7 @@ RUN set -ex; cd /tmp/aube; \
 FROM test-node AS test-renovate
 
 # renovate: datasource=npm
-RUN install-tool renovate 44.151.2
+RUN install-tool renovate 44.181.8
 
 # ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # # renovate: datasource=npm
@@ -108,8 +108,12 @@ RUN install-tool renovate 44.151.2
 #--------------------------------------
 FROM test-node AS test-vp
 
+# pin the node vp's setup downloads, it uses the latest lts otherwise
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+ARG VP_SETUP_NODE_VERSION=24.22.1
+
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=1.2.0
+ARG VP_VERSION=1.5.0
 RUN install-tool vp "${VP_VERSION}"
 
 COPY test/node/vp/sync-versions.mjs /test/vp/

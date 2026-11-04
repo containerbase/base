@@ -42,7 +42,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-ruby
 
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
-RUN install-tool ruby 4.0.7
+RUN install-tool ruby 4.0.9
 
 #--------------------------------------
 # Image: bundler
@@ -58,8 +58,8 @@ RUN install-tool bundler 4.0.23
 FROM test-ruby AS test-cocoapods
 
 # cocoapods need git, but don't install yet
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.17.0

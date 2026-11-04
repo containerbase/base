@@ -46,6 +46,8 @@ function create_versioned_tool_path () {
 
 # Will set up the general folder structure for the whole containerbase installation
 function setup_directories () {
+  # always the default tmp folder, `containerbase-cli` switches to a configured one
+  local CONTAINERBASE_TMP_DIR="${CONTAINERBASE_DEFAULT_TMP_DIR}"
   local install_dir
   local cache_path
   install_dir=$(get_install_dir)

@@ -6,7 +6,7 @@ import { logger } from '../../utils/index.ts';
 import { MavenInstallService, MavenVersionResolver } from './maven.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -21,7 +21,28 @@ describe('cli/tools/java/maven', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the prebuild is verified against its checksum file
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
+  });
+
+  test('install: downloads the tool-versions prebuild without the .sha512', async () => {
+    const filename = 'maven-3.9.10.tar.xz';
+    const releaseUrl = `/containerbase/maven-prebuild/releases/download/3.9.10`;
+    // one file for all archs
+    mockToolFiles([toolFile(`${ghUrl}${releaseUrl}/${filename}`, tarball)]);
+    // there is no interceptor for the `.sha512`
+    scope(ghUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(MavenInstallService);
+
+    await expect(svc.install('3.9.10')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.toolPath('maven'),
+      strip: undefined,
+    });
   });
 
   test('install: from the containerbase prebuild', async () => {
@@ -137,10 +158,9 @@ describe('cli/tools/java/maven', () => {
 
     await expect(svc.install('3.8.8')).resolves.toBeUndefined();
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      `using sha1 checksum for ${filename}`,
+    expect(extract).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ file: expect.stringContaining(filename) }),
     );
-    expect(extract).toHaveBeenCalledOnce();
   });
 
   test('install: throws on an empty checksum file', async () => {

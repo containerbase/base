@@ -1,18 +1,13 @@
 import { join } from 'node:path';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
-import { getDistro, logger } from '../../utils/index.ts';
+import { getDistro } from '../../utils/index.ts';
+import { PrebuildVersionResolver } from '../utils/prebuild.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class PhpPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'php';
 
   /**
@@ -78,32 +73,41 @@ export class PhpInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the distro specific containerbase php prebuild, verified
-   * against its `.sha512`, and extracts it into the tool path. Noble uses the
-   * jammy prebuild.
+   * Downloads the distro specific containerbase php prebuild and extracts it
+   * into the tool path. The file and its checksum come from the tool-versions
+   * data, the one of the host distro first. Noble falls back to the jammy
+   * prebuild, without data it is verified against its `.sha512`.
    */
   override async install(version: string): Promise<void> {
-    const name = this.name;
-    const distro = await getDistro();
-    let code = distro.versionCode;
-
-    if (code === 'noble') {
-      logger.debug(`Using jammy prebuild for ${name} on ${code}`);
-      code = 'jammy';
-    }
-    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
-
-    // every jammy and resolute prebuild has a checksum
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha512',
-      expectedChecksum,
-    });
+    const host = (await getDistro()).versionCode;
+    const code = host === 'noble' ? 'jammy' : host;
+    const file =
+      (await this.downloadDistroToolFile(version, host, code)) ??
+      (await this.downloadPrebuild(version, code));
 
     const path = await this.pathSvc.ensureToolPath(this.name);
 
     await this.compress.extract({ file, cwd: path });
+  }
+
+  /**
+   * Downloads the php prebuild of the distro from its GitHub release, verified
+   * against its `.sha512`.
+   */
+  private async downloadPrebuild(
+    version: string,
+    code: string,
+  ): Promise<string> {
+    const name = this.name;
+    const url = `https://github.com/containerbase/${name}-prebuild/releases/download/${version}/${name}-${version}-${code}-${this.ghArch}.tar.xz`;
+
+    // every jammy and resolute prebuild has a checksum
+    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
+    return await this.http.download({
+      url,
+      checksumType: 'sha512',
+      expectedChecksum,
+    });
   }
 
   /** Links the binaries, see `postInstall`. */
@@ -125,16 +129,6 @@ export class PhpInstallService extends BaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
-export class PhpVersionResolver extends ToolVersionResolver {
+export class PhpVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'php';
-
-  /** Resolves a missing version or `latest` to the latest php prebuild. */
-  async resolve(version: string | undefined): Promise<string | undefined> {
-    if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
-      return await this.http.get(
-        `https://github.com/containerbase/${this.tool}-prebuild/releases/latest/download/version`,
-      );
-    }
-    return version;
-  }
 }

@@ -55,24 +55,24 @@ export class PowershellInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the powershell archive from GitHub, verified against the
-   * release's `hashes.sha256` since v7.2.0, and extracts it into the
-   * versioned tool path.
+   * Downloads the powershell archive from GitHub and extracts it into the
+   * versioned tool path. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * `hashes.sha256` since v7.2.0.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/PowerShell/PowerShell/releases/download/v${version}/`;
     const filename = `${this.name}-${version}-linux-${this.ghArch}.tar.gz`;
 
     // powershell only publishes a `hashes.sha256` checksum file since v7.2.0.
-    const expectedChecksum = semverGte(version, '7.2.0')
-      ? await this.findChecksum(`${baseUrl}hashes.sha256`, filename)
-      : undefined;
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = semverGte(version, '7.2.0')
+      ? await this.downloadChecksumListed(
+          version,
+          baseUrl,
+          filename,
+          'hashes.sha256',
+        )
+      : await this.downloadWithoutChecksum(version, `${baseUrl}${filename}`);
 
     await this.pathSvc.ensureToolPath(this.name);
 

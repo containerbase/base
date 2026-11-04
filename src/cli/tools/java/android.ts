@@ -20,6 +20,7 @@ const repoUrl = 'https://dl.google.com/android/repository/repository2-3.xml';
 @injectFromHierarchy()
 export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
   readonly name = 'android-sdk-cmdline-tools';
+  override readonly minVersion = '1';
   override readonly parent = 'java';
 
   /**

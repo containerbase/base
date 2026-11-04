@@ -78,6 +78,7 @@
         "docker-compose",
         "dotnet",
         "flutter",
+        "flux",
         "gh",
         "git",
         "git-lfs",
@@ -107,6 +108,7 @@
         "sbt",
         "sops",
         "swift",
+        "terraform",
         "tofu",
         "uv",
         "vendir",
@@ -138,6 +140,7 @@
         "docker-compose",
         "dotnet",
         "flutter",
+        "flux",
         "gh",
         "git",
         "git-lfs",
@@ -167,6 +170,7 @@
         "sbt",
         "sops",
         "swift",
+        "terraform",
         "tofu",
         "uv",
         "vendir",
@@ -184,11 +188,11 @@
       "minimumReleaseAge": "5 days"
     },
     {
-      "description": "Update the embedded tool-versions data weekly with a fix release",
+      "description": "Update the embedded tool-versions data daily with a fix release, so each day has a release with fresh offline data",
       "matchDepNames": ["tool-versions"],
-      "extends": ["schedule:weekly"],
+      "extends": ["schedule:daily"],
       "semanticCommitType": "fix",
-      "minimumReleaseAge": "1 day"
+      "prPriority": 10
     },
     {
       "description": "Handle the tag prefix of jq releases",
@@ -265,6 +269,22 @@
       "matchDepNames": ["java", "java-jdk", "java-jre"],
       "matchFileNames": ["test/**"],
       "groupName": "java"
+    },
+    {
+      "description": "Keep the old java LTS test stages on their major, only the newest LTS gets major updates",
+      "matchDepNames": ["java", "java-jdk", "java-jre"],
+      "matchFileNames": ["test/java/Dockerfile"],
+      "matchCurrentVersion": "/^(17|21)\\./",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Keep the old dotnet LTS test stage on its major, only the newest LTS gets major updates",
+      "matchDepNames": ["dotnet"],
+      "matchFileNames": ["test/dotnet/Dockerfile"],
+      "matchCurrentVersion": "/^8\\./",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ],
   "customManagers": [

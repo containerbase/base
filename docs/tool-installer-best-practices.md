@@ -18,23 +18,45 @@ Raising the minimum supported version is a separate, breaking change, not part o
 
 Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 
-Verify every download against an upstream checksum.
-`BaseInstallService` has two shared helpers for this, both of which throw when the checksum is missing:
+Download from the [tool-versions](https://github.com/containerbase/tool-versions) data first, when it lists the tool.
+It has the files and checksums of the versions, so no checksum file is downloaded:
+
+- `this.downloadChecksumListed(version, baseUrl, filename, list)` - for a checksum list file in the release folder.
+  It downloads the file named `filename` of the data, else `filename` of the folder, verified against the checksum `list`.
+  Make sure `filename` is the file name the data lists for the host, a tool can have several files per arch.
+- `this.downloadChecksumSidecar(version, url, sidecar, { checksumType?, name? })` - for a `.sha256`-style sidecar file, like `${url}.sha256`.
+  It downloads the file of the data named like the last url segment, else the file, verified against its sidecar.
+  Pass `name` when the data names the file differently, it's also the name of the downloaded file.
+- `this.downloadWithoutChecksum(version, url, name?)` - for releases without an upstream checksum, like bazelisk or older docker-compose releases.
+  The data has a computed checksum for them when the tool's entry in the tool-versions `src/tools.ts` sets `checksum: { compute: true }` or `computeMissing`, like docker's, or when its datasource computes it, like nuget's; without data the file is downloaded unverified.
+  The data can also have an upstream checksum the installer doesn't read itself, like dotnet's sha512 from its release metadata.
+  Pass `name` when the data names the file differently, like docker.
+- `this.downloadNamedToolFile(version, name)` - the data file named `name`, for installers with their own fallback, like golang and maven.
+  It returns `undefined` without that file for the host.
+- `this.downloadDistroToolFile(version, host, fallback)` - the data file of the host distro, else the one of `fallback`, like jammy for newer ubuntu releases.
+  The containerbase prebuilds with distro builds extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), which does this and falls back to the jammy prebuild and its `.sha512`.
+- `this.downloadToolFile(version, distro?, filter?)` - for other upstream layouts.
+  It returns `undefined` without a data file for the host, so the installer can fall back to its own download.
+
+Verify every other download against an upstream checksum.
+`BaseInstallService` has shared helpers for this, which throw when the checksum is missing:
 
 - `this.findChecksum(url, filename)` - for a checksum list file, one `<checksum>  <filename>` line per file.
   It strips a leading `./` or `*` from the listed name before comparing, and decodes UTF-16 files, like PowerShell's `hashes.sha256`, correctly.
 - `this.getChecksum(url)` - for a single `.sha256`-style sidecar file, ignoring any filename after the checksum.
+- `this.downloadOptionalChecksumSidecar(url, sidecar, checksumType)` - downloads a file verified against its sidecar, for releases which may lack it, like the maven and golang prebuilds.
+  It returns `undefined` without the sidecar file and doesn't use the tool-versions data, combine it with `this.downloadNamedToolFile`.
 
 When upstream only started publishing checksums, or switched archive formats, from some version on, pick the right one by version with `semverGte` rather than probing URLs.
 For four-part versions, like cabal's `3.18.1.0`, coerce first with `semverCoerce`.
-Leave `expectedChecksum` unset for older releases that have no upstream checksum, so nothing that worked before breaks.
-This is an explicit compatibility exception: `this.http.download` skips integrity validation in that case, so name the cutoff in a comment, and use another trusted integrity check if upstream offers one:
+Download older releases that have no upstream checksum with `this.downloadWithoutChecksum`, so nothing that worked before breaks.
+This is an explicit compatibility exception: without data it skips integrity validation, so name the cutoff in a comment, and use another trusted integrity check if upstream offers one:
 
 ```ts
 // sbt only publishes a `.sha256` checksum file since v1.3.5.
-const expectedChecksum = semverGte(version, '1.3.5')
-  ? await this.getChecksum(`${url}.sha256`)
-  : undefined;
+const file = semverGte(version, '1.3.5')
+  ? await this.downloadChecksumSidecar(version, url, '.sha256')
+  : await this.downloadWithoutChecksum(version, url);
 ```
 
 Real examples worth reading:
@@ -65,6 +87,16 @@ override async prepare(): Promise<void> {
   );
 }
 ```
+
+Declare the folders in the cache which only hold data the tool downloads again, like a package cache, in `cacheDirs` on the install service, relative to the cache path.
+[`containerbase-cli cleanup cache`](./tools.md#cleanup-cache-command) removes them, so never list config files or folders holding them, and list a sub folder where needed:
+
+```ts
+override readonly cacheDirs = ['.cargo/git', '.cargo/registry'];
+```
+
+Caches in the containerbase user's `~/.cache`, the `.cache` folder in the cache path, need no entry, its contents are always removed.
+Root's `/root/.cache` isn't touched.
 
 See [`src/cli/services/path.service.ts`](../src/cli/services/path.service.ts) for the full set of path helpers before reaching for `node:fs` directly.
 

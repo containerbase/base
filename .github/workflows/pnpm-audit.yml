@@ -14,6 +14,10 @@ on:
       - pnpm-lock.yaml
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
@@ -25,7 +29,7 @@ jobs:
       security-events: write
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@67555b4b6a55b314657264b90d6d01116a4e7b2b # v5.1.1
+        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
 
       # `pnpm audit` exits non zero when it finds advisories, the converter
       # fails instead when the report is missing
@@ -35,7 +39,7 @@ jobs:
       - name: Convert to SARIF
         run: node tools/audit-sarif.ts "${RUNNER_TEMP}/pnpm-audit.json" pnpm-audit.sarif
 
-      - uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+      - uses: github/codeql-action/upload-sarif@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
         with:
           sarif_file: pnpm-audit.sarif
           category: pnpm-audit

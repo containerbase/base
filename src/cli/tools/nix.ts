@@ -26,18 +26,15 @@ export class NixInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the containerbase nix prebuild, verified against its `.sha512`,
-   * and extracts it into the tool path.
+   * Downloads the containerbase nix prebuild and extracts it into the tool
+   * path. The file and its checksum come from the tool-versions data, without
+   * data it is verified against its `.sha512`.
    */
   override async install(version: string): Promise<void> {
     const url = `https://github.com/containerbase/${this.name}-prebuild/releases/download/${version}/${this.name}-${version}-${this.ghArch}.tar.xz`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-
-    const file = await this.http.download({
-      url,
+    const file = await this.downloadChecksumSidecar(version, url, '.sha512', {
       checksumType: 'sha512',
-      expectedChecksum,
     });
 
     const path = await this.pathSvc.ensureToolPath(this.name);

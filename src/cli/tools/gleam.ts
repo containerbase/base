@@ -22,8 +22,9 @@ export class GleamInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the gleam archive from GitHub, verified against its `.sha512`,
-   * and extracts it into the versioned tool path.
+   * Downloads the gleam archive from GitHub and extracts it into the versioned
+   * tool path. The file and its checksum come from the tool-versions data,
+   * without data it is verified against its `.sha512`.
    */
   override async install(version: string): Promise<void> {
     /**
@@ -35,12 +36,8 @@ export class GleamInstallService extends BaseInstallService {
     const filename = `gleam-v${version}-${this.ghArch}-unknown-linux-musl.tar.gz`;
     const url = `${baseUrl}${filename}`;
 
-    const expectedChecksum = await this.getChecksum(`${url}.sha512`);
-
-    const file = await this.http.download({
-      url,
+    const file = await this.downloadChecksumSidecar(version, url, '.sha512', {
       checksumType: 'sha512',
-      expectedChecksum,
     });
 
     await this.pathSvc.ensureToolPath(this.name);

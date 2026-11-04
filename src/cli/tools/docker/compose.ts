@@ -26,26 +26,23 @@ export class DockerComposeInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the compose binary from GitHub into the versioned `bin` folder,
-   * verified against the release's `checksums.txt` from v2.5.0.
+   * Downloads the compose binary from GitHub into the versioned `bin` folder.
+   * The file and its checksum come from the tool-versions data, without data
+   * it is verified against the release's `checksums.txt` from v2.5.0.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/docker/compose/releases/download/v${version}/`;
     const filename = `${this.name}-linux-${this.ghArch}`;
 
-    let expectedChecksum: string | undefined;
-    if (semverGte(version, '2.5.0')) {
-      expectedChecksum = await this.findChecksum(
-        `${baseUrl}checksums.txt`,
-        filename,
-      );
-    }
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    // releases before 2.5.0 have no checksums
+    const file = semverGte(version, '2.5.0')
+      ? await this.downloadChecksumListed(
+          version,
+          baseUrl,
+          filename,
+          'checksums.txt',
+        )
+      : await this.downloadWithoutChecksum(version, `${baseUrl}${filename}`);
 
     await this.pathSvc.ensureToolPath(this.name);
 

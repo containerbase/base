@@ -6,7 +6,7 @@ import { LinkToolService, PathService } from '../../services/index.ts';
 import { DockerComposeInstallService } from './compose.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { checksum, toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -25,6 +25,8 @@ describe('cli/tools/docker/compose', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
+    // no tool-versions data, the binary is verified against the release list
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -74,6 +76,34 @@ describe('cli/tools/docker/compose', () => {
       ),
     ).toBe(binary);
   });
+
+  test.each(['2.4.0', '2.30.0'])(
+    'install: downloads the %s tool-versions file without the list',
+    async (version) => {
+      const releaseUrl = `/docker/compose/releases/download/v${version}`;
+      const filename = 'docker-compose-linux-x86_64';
+      mockToolFiles([
+        toolFile(
+          `${baseUrl}${releaseUrl}/docker-compose-linux-aarch64`,
+          'arm',
+          'arm64',
+        ),
+        toolFile(`${baseUrl}${releaseUrl}/${filename}`, binary, 'amd64'),
+      ]);
+      // there is no interceptor for the `checksums.txt`, the data has a
+      // checksum for the releases before 2.5.0 too
+      scope(baseUrl).get(`${releaseUrl}/${filename}`).reply(200, binary);
+      const { svc, pathSvc } = await toolContext(DockerComposeInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      const bin = join(
+        pathSvc.versionedToolPath('docker-compose', version),
+        'bin/docker-compose',
+      );
+      expect(await fs.readFile(bin, 'utf8')).toBe(binary);
+    },
+  );
 
   test('link', async () => {
     const { svc, child } = await toolContext(DockerComposeInstallService);

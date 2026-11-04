@@ -1,7 +1,6 @@
 import { join } from 'node:path';
-import { inject, injectFromHierarchy, injectable } from 'inversify';
+import { injectFromHierarchy, injectable } from 'inversify';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { AptService } from '../../services/index.ts';
 import { fileContent, getDistro } from '../../utils/index.ts';
 import { PrebuildInstallService } from '../utils/prebuild.ts';
 
@@ -9,14 +8,11 @@ import { PrebuildInstallService } from '../utils/prebuild.ts';
 const supportedDistros = ['jammy', 'noble', 'resolute'];
 
 /** The user home entries redirected into the containerbase cache. */
-const cacheDirs = ['.gem', '.cocoapods', 'Library'];
+const linkedDirs = ['.gem', '.cocoapods', 'Library'];
 
 @injectable()
 @injectFromHierarchy()
 export class RubyPrepareService extends BasePrepareService {
-  @inject(AptService)
-  private readonly aptSvc!: AptService;
-
   override readonly name = 'ruby';
 
   /**
@@ -38,7 +34,7 @@ export class RubyPrepareService extends BasePrepareService {
 
     await this.initialize();
 
-    for (const entry of ['.gemrc', ...cacheDirs]) {
+    for (const entry of ['.gemrc', ...linkedDirs]) {
       await this.pathSvc.createSymlink(
         join(this.pathSvc.cachePath, entry),
         join(this.envSvc.userHome, entry),
@@ -68,7 +64,7 @@ export class RubyPrepareService extends BasePrepareService {
       `,
     );
 
-    for (const dir of cacheDirs) {
+    for (const dir of linkedDirs) {
       await this.pathSvc.createDir(join(this.pathSvc.cachePath, dir));
     }
   }

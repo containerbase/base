@@ -32,6 +32,7 @@ ARG APT_HTTP_PROXY
 ARG CONTAINERBASE_CDN
 ARG CONTAINERBASE_CDN_GEM
 ARG CONTAINERBASE_CDN_NPM
+ARG CONTAINERBASE_CDN_PIP
 ARG CONTAINERBASE_DEBUG
 ARG CONTAINERBASE_LOG_LEVEL
 
@@ -69,17 +70,17 @@ FROM base AS testa
 RUN install-apt nginx
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.0
+RUN install-tool node 24.22.2
 
 # renovate: datasource=github-releases packageName=containerbase/php-prebuild
-RUN install-tool php 8.5.11
+RUN install-tool php 8.5.12
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.7
+RUN install-tool powershell v7.6.9
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
-ARG PYTHON_VERSION=3.14.8
+ARG PYTHON_VERSION=3.14.10
 RUN install-tool python
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/python") -eq ${USER_ID} ]
 
@@ -168,7 +169,7 @@ SHELL ["/bin/sh", "-c"]
 RUN set -ex; id | grep "uid=${USER_ID}(${USER_NAME}) gid=${PRIMARY_GROUP_ID}(${USER_NAME}) groups=${USER_ID}(${USER_NAME}),0(root)"
 
 # renovate: datasource=docker packageName=hashicorp/terraform versioning=docker
-RUN install-tool terraform 1.16.6
+RUN install-tool terraform 1.17.1
 
 WORKDIR /tmp
 RUN mkdir $HOME/.tf-cache && TF_PLUGIN_CACHE_DIR=$HOME/.tf-cache terraform init
@@ -181,8 +182,8 @@ FROM base AS testc
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
-# renovate: datasource=github-releases packageName=containerbase/git-prebuild
-RUN install-tool git 2.56.0
+# renovate: datasource=github-tags packageName=git/git
+RUN install-tool git v2.56.0
 
 USER 12021
 
@@ -191,16 +192,16 @@ RUN set -ex; id; id | grep "uid=${USER_ID}(${USER_NAME}) gid=0(root) groups=0(ro
 ARG IGNORED_TOOLS=powershell,node
 
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.9.6
+RUN install-tool flux v2.10.0
 
 # renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.0
+RUN install-tool git-lfs v3.8.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.7
+RUN install-tool powershell v7.6.9
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.0
+RUN install-tool node 24.22.2
 
 # renovate: datasource=github-releases packageName=moby/moby
 RUN install-tool docker v28.5.2
@@ -223,33 +224,33 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.29.0
+RUN install-tool bazelisk v1.30.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
-RUN install-tool buf v1.74.0
+RUN install-tool buf v1.75.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.3
+RUN install-tool bun 1.4.4
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.6
+RUN install-tool nub 0.9.7
 
 # renovate: datasource=github-releases packageName=denoland/deno
-RUN install-tool deno 2.9.7
+RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.11
+RUN install-tool apko 1.4.15
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.33.0
+RUN install-tool apm 0.35.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.18.4
+RUN install-tool devbox 0.19.0
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
-ENV GH_DASH_EXTENSION_VERSION=v4.26.1
+ENV GH_DASH_EXTENSION_VERSION=v4.26.2
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.102.0
+RUN install-tool gh v2.103.3
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
@@ -262,10 +263,10 @@ RUN jq --version
 RUN echo '{"a":1}' | jq -e '.a == 1'
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.1
+RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.10.10
+RUN install-tool mise 2026.11.0
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -274,16 +275,16 @@ RUN install-tool skopeo 1.24.1
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.1
+RUN install-tool tofu 1.13.2
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases depName=vendir packageName=vmware-tanzu/carvel-vendir
-ARG VENDIR_VERSION=v0.46.2
+ARG VENDIR_VERSION=v0.46.3
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.1
+ARG HELMFILE_VERSION=v1.8.2
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.8.3
@@ -368,10 +369,10 @@ USER 12021
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.38.0
+RUN install-tool buildx v0.38.2
 
 # renovate: datasource=github-releases packageName=docker/compose
-RUN install-tool docker-compose v5.6.0
+RUN install-tool docker-compose v5.7.0
 
 RUN set -ex; \
   docker buildx version | grep github.com/docker/buildx; \
@@ -401,30 +402,6 @@ RUN install-tool mono 6.14.1
 RUN install-tool nuget 7.9.0
 
 RUN nuget search nuget.commandline -Take 1
-
-#--------------------------------------
-# test: git and git-lfs
-#--------------------------------------
-FROM base AS test-git
-
-# git comes with the base image
-# renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.0
-
-USER 12021
-
-RUN set -ex; \
-  [ "$(command -v git)" = /usr/local/bin/git ]; \
-  readlink -f /usr/local/bin/git | grep '^/opt/containerbase/tools/git/[0-9.]*/bin/git$'; \
-  git --exec-path | grep '^/opt/containerbase/tools/git/[0-9.]*/libexec/git-core$'; \
-  env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp git --version; \
-  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
-  git lfs version | grep '^git-lfs/3\.8\.0 '; \
-  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
-  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
-  git -C /tmp/git-prebuild lfs ls-files; \
-  rm -rf /tmp/git-prebuild; \
-  true
 
 #--------------------------------------
 # test: v1 and v2 shell tools of custom images
@@ -471,5 +448,4 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
-COPY --link --from=test-git /.dummy /.dummy
 COPY --link --from=test-legacy /.dummy /.dummy

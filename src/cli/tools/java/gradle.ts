@@ -15,24 +15,20 @@ import { GradleReleases, GradleVersionData } from './schema.ts';
 @injectFromHierarchy()
 export class GradleInstallService extends BaseInstallService {
   readonly name = 'gradle';
+  override readonly minVersion = '1.0';
   override readonly parent = 'java';
 
   /**
-   * Downloads the gradle distribution, verified against its `.sha256`, and
-   * extracts it into the versioned tool path.
+   * Downloads the gradle distribution and extracts it into the versioned tool
+   * path. The file and its checksum come from the tool-versions data, without
+   * data it is verified against its `.sha256`.
    */
   override async install(version: string): Promise<void> {
     const name = this.name;
     const filename = `${name}-${version}-bin.zip`;
     const url = `https://services.gradle.org/distributions/${filename}`;
-    const checksumFileUrl = `${url}.sha256`;
 
-    const expectedChecksum = await this.getChecksum(checksumFileUrl);
-    const file = await this.http.download({
-      url,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
+    const file = await this.downloadChecksumSidecar(version, url, '.sha256');
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -80,14 +76,14 @@ export class GradleVersionResolver extends ToolVersionResolver {
   async resolve(version: string | undefined): Promise<string | undefined> {
     if (!isNonEmptyStringAndNotWhitespace(version) || version === 'latest') {
       return GradleVersionData.parse(
-        await this.http.getJson('https://services.gradle.org/versions/current'),
+        await this.getJson('https://services.gradle.org/versions/current'),
       )?.version;
     }
     if (isPartialVersion(version)) {
       let releases: { all: string[]; stable: string[] };
       try {
         releases = GradleReleases.parse(
-          await this.http.getJson('https://services.gradle.org/versions/all'),
+          await this.getJson('https://services.gradle.org/versions/all'),
         );
       } catch (err) {
         // keep the version like before partial versions were resolved: an

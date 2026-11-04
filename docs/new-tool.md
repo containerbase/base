@@ -102,24 +102,21 @@ export class BufInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the buf archive from GitHub, verified against the release's
-   * `sha256.txt`, and extracts only the `buf` binary into the versioned tool
-   * path.
+   * Downloads the buf archive from GitHub and extracts only the `buf` binary
+   * into the versioned tool path. The file and its checksum come from the
+   * tool-versions data, without data it is verified against the release's
+   * `sha256.txt`.
    */
   override async install(version: string): Promise<void> {
     const baseUrl = `https://github.com/bufbuild/buf/releases/download/v${version}/`;
     const filename = `buf-Linux-${this.ghArch}.tar.gz`;
 
-    const expectedChecksum = await this.findChecksum(
-      `${baseUrl}sha256.txt`,
+    const file = await this.downloadChecksumListed(
+      version,
+      baseUrl,
       filename,
+      'sha256.txt',
     );
-
-    const file = await this.http.download({
-      url: `${baseUrl}${filename}`,
-      checksumType: 'sha256',
-      expectedChecksum,
-    });
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -163,6 +160,8 @@ Containerbase then removes the shell wrappers, the current-version marker and th
 
 That default is only correct if `install()` writes **everything** below `createVersionedToolPath()`.
 If your tool writes anywhere else - `$HOME`, a shared cache, or system packages - either override `uninstall()` to clean that up, or raise it on the Issue so we can agree what should happen.
+
+If the tool keeps a download cache in the containerbase cache, eg. a folder its prepare service links from `$HOME`, declare it in `cacheDirs`, so `containerbase-cli cleanup cache` removes it, see the [tool installer best practices](./tool-installer-best-practices.md#folders-ownership-and-links).
 
 Two more things worth knowing:
 
@@ -309,9 +308,9 @@ pnpm test:bats
 ```
 
 CI runs the test images from a matrix in [`.github/workflows/build.yml`](../.github/workflows/build.yml).
-The `lang` matrix entries map to directories under [`test/`](../test/), so a brand-new test directory also needs a matrix entry.
-Adding to an existing test image needs no workflow change.
-If you change a workflow, for example to add that matrix entry, run `mise install` once and check it with `jactionlint` and `zizmor`, like CI's `lint` job does.
+Its `setup` job computes the `lang` matrix from the test directories: each `test/<lang>/Dockerfile` runs on x86_64 and each `test/<lang>/Dockerfile.arm64` on aarch64, so a new test directory needs no workflow change.
+A pull request which only changes test Dockerfiles only runs the docker tests of those files.
+If you change a workflow, run `mise install` once and check it with `jactionlint` and `zizmor`, like CI's `lint` job does.
 
 ## Downstream: tool-versions and Renovate
 

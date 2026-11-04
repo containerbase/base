@@ -1,10 +1,14 @@
 import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { CompressionService, LinkToolService } from '../../services/index.ts';
+import {
+  CompressionService,
+  HttpService,
+  LinkToolService,
+} from '../../services/index.ts';
 import { ScalaInstallService } from './scala.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
-import { toolContext } from '~test/tool.ts';
+import { checksum, mockToolFiles, toolContext, toolFile } from '~test/tool.ts';
 
 const { execaMock } = vi.hoisted(() => ({ execaMock: vi.fn() }));
 vi.mock('execa', () => ({ execa: execaMock }));
@@ -15,6 +19,8 @@ describe('cli/tools/java/scala', () => {
   });
 
   beforeEach(() => {
+    // no tool-versions data, the archive is downloaded unverified
+    mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
   });
 
@@ -50,6 +56,28 @@ describe('cli/tools/java/scala', () => {
     });
   });
 
+  test('install: verifies the tool-versions file', async () => {
+    const path = '/scala/scala/releases/download/v2.13.19/scala-2.13.19.tgz';
+    // one file for all archs
+    mockToolFiles([toolFile(`https://github.com${path}`, 'scala archive')]);
+    scope('https://github.com').get(path).reply(200, 'scala archive');
+    const download = vi.spyOn(HttpService.prototype, 'download');
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(ScalaInstallService);
+
+    await expect(svc.install('2.13.19')).resolves.toBeUndefined();
+
+    // verified against the checksum of the data
+    expect(download).toHaveBeenCalledWith(
+      expect.objectContaining({ expectedChecksum: checksum('scala archive') }),
+    );
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining('scala-2.13.19.tgz'),
+      cwd: pathSvc.versionedToolPath('scala', '2.13.19'),
+      strip: 1,
+    });
+  });
+
   test('link', async () => {
     const { svc, pathSvc } = await toolContext(ScalaInstallService);
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
@@ -61,15 +89,14 @@ describe('cli/tools/java/scala', () => {
     });
   });
 
-  test('runs the tool test', async () => {
+  test.each([
+    { version: '2.12.21', args: ['-version'] },
+    { version: '3.10.0', args: ['--version'] },
+  ])('runs the tool test for Scala $version', async ({ version, args }) => {
     const { svc } = await toolContext(ScalaInstallService);
 
-    await expect(svc.test('2.13.16')).resolves.toBeUndefined();
+    await expect(svc.test(version)).resolves.toBeUndefined();
 
-    expect(execaMock).toHaveBeenCalledWith(
-      'scala',
-      ['--version'],
-      expect.any(Object),
-    );
+    expect(execaMock).toHaveBeenCalledWith('scala', args, expect.any(Object));
   });
 });
