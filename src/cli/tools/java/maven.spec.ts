@@ -45,6 +45,46 @@ describe('cli/tools/java/maven', () => {
     });
   });
 
+  test('install: picks the tool-versions prebuild by name next to the apache file', async () => {
+    const filename = 'maven-3.9.11.tar.xz';
+    const releaseUrl = `/containerbase/maven-prebuild/releases/download/3.9.11`;
+    const apacheUrl = `${repoUrl}/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.tar.gz`;
+    // the files are sorted by name, the apache file comes first
+    mockToolFiles([
+      toolFile(apacheUrl, tarball),
+      toolFile(`${ghUrl}${releaseUrl}/${filename}`, tarball),
+    ]);
+    scope(ghUrl).get(`${releaseUrl}/${filename}`).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(MavenInstallService);
+
+    await expect(svc.install('3.9.11')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.toolPath('maven'),
+      strip: undefined,
+    });
+  });
+
+  test('install: downloads the tool-versions apache file without a prebuild', async () => {
+    const filename = 'apache-maven-3.0.5-bin.tar.gz';
+    const path = `/maven2/org/apache/maven/apache-maven/3.0.5/${filename}`;
+    mockToolFiles([toolFile(`${repoUrl}${path}`, tarball)]);
+    // no interceptor for github or the checksum files
+    scope(repoUrl).get(path).reply(200, tarball);
+    const extract = vi.spyOn(CompressionService.prototype, 'extract');
+    const { svc, pathSvc } = await toolContext(MavenInstallService);
+
+    await expect(svc.install('3.0.5')).resolves.toBeUndefined();
+
+    expect(extract).toHaveBeenCalledExactlyOnceWith({
+      file: expect.stringContaining(filename),
+      cwd: pathSvc.versionedToolPath('maven', '3.0.5'),
+      strip: 1,
+    });
+  });
+
   test('install: from the containerbase prebuild', async () => {
     const { svc, pathSvc } = await toolContext(MavenInstallService);
     const filename = 'maven-3.9.9.tar.xz';
