@@ -85,7 +85,7 @@ https://github.com/microsoft/apm/releases/download/v0.24.0/apm-linux-arm64.tar.g
 
 ## `aube`
 
-Aube releases are downloaded from the urls of the [tool-versions](https://github.com/containerbase/tool-versions) data, which point to:
+Aube releases are downloaded from the urls of the [tool versions data](#tool-versions-data-containerbasegithubio), which point to:
 
 - `https://github.com/aubepkg/aube/releases`
 
