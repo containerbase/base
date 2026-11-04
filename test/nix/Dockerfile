@@ -91,6 +91,28 @@ RUN --mount=type=secret,id=GITHUB_TOKEN,uid=12021 \
 RUN set -ex; \
   ls -la $USER_HOME; \
   true
+
+# without preset dirs the store stays below the cache
+RUN set -ex; \
+  [ "$(nix --extra-experimental-features nix-command eval --raw --expr builtins.storeDir)" != /nix/store ]
+
+#--------------------------------------
+# test: nix with preset dirs
+#--------------------------------------
+FROM base AS testc
+
+RUN mkdir -p /nix && chown 12021:0 /nix
+
+ENV NIX_STORE_DIR=/nix/store NIX_STATE_DIR=/nix/var/nix NIX_LOG_DIR=/nix/var/log/nix
+
+USER 12021
+
+# renovate: datasource=github-releases packageName=containerbase/nix-prebuild
+RUN install-tool nix 2.35.2
+
+RUN set -ex; \
+  [ "$(nix --extra-experimental-features nix-command eval --raw --expr builtins.storeDir)" = /nix/store ]
+
 #--------------------------------------
 # final
 #--------------------------------------
@@ -98,3 +120,4 @@ FROM base
 
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
+COPY --from=testc /.dummy /.dummy
