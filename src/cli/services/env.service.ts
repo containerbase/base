@@ -239,11 +239,16 @@ export class EnvService {
       return this.replacements;
     }
 
-    const { replacements, invalid } = getUrlReplacements(env);
+    const { replacements, invalid, withoutScheme } = getUrlReplacements(env);
     for (const from of invalid) {
       const to = from.replace(/_FROM$/, '_TO');
       logger.warn(
         `Invalid URL replacement: ${from}=${env[from]} ${to}=${env[to]}`,
+      );
+    }
+    for (const from of withoutScheme) {
+      logger.warn(
+        `URL replacement ${from}=${env[from]} has no http:// or https://, it only replaces urls starting with it`,
       );
     }
 

@@ -1017,15 +1017,22 @@ describe('packages/base', () => {
         URL_REPLACE_3_FROM: 'https://example.com/3',
         URL_REPLACE_4_FROM: 'https://example.com/4',
         URL_REPLACE_4_TO: '',
+        URL_REPLACE_5_FROM: 'download.docker.com',
+        URL_REPLACE_5_TO: 'mirror.example.test',
+        URL_REPLACE_6_FROM: 'http://example.com/6',
+        URL_REPLACE_6_TO: 'http://example.test/6',
         URL_REPLACE_X_FROM: 'https://example.com/x',
         URL_REPLACE_X_TO: 'https://example.test/x',
       }),
     ).toEqual({
       replacements: [
         ['https://example.com/2', 'https://example.test/2'],
+        ['download.docker.com', 'mirror.example.test'],
+        ['http://example.com/6', 'http://example.test/6'],
         ['https://example.com/10', 'https://example.test/10'],
       ],
       invalid: ['URL_REPLACE_3_FROM', 'URL_REPLACE_4_FROM'],
+      withoutScheme: ['URL_REPLACE_5_FROM'],
     });
   });
 
@@ -1070,6 +1077,25 @@ describe('packages/base', () => {
     expect(replaceUrl('https://registry.npmjs.org', replacements, '')).toBe(
       'https://registry.npmjs.org',
     );
+  });
+
+  test('replaceUrl only replaces at the start of the url, chained in order', () => {
+    const replacements: [string, string][] = [
+      ['https://example.com/', 'https://example.test/'],
+      ['https://example.test/', 'https://mirror.example.test/'],
+      ['download.docker.com', 'mirror.example.test'],
+    ];
+
+    expect(replaceUrl('https://example.com/file.txt', replacements)).toBe(
+      'https://mirror.example.test/file.txt',
+    );
+    // a match in the middle of the url is kept
+    expect(
+      replaceUrl('https://example.org/?u=https://example.com/x', replacements),
+    ).toBe('https://example.org/?u=https://example.com/x');
+    expect(
+      replaceUrl('https://download.docker.com/linux/static', replacements),
+    ).toBe('https://download.docker.com/linux/static');
   });
 
   describe('replaceUrlPrefix', () => {
