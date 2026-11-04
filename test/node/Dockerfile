@@ -922,7 +922,7 @@ USER root
 ARG VP_SETUP_NODE_VERSION=24.22.1
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=1.4.0
+ARG VP_VERSION=1.5.0
 RUN install-tool vp "${VP_VERSION}"
 
 COPY test/node/vp/sync-versions.mjs /test/vp/
