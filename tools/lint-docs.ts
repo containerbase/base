@@ -1,5 +1,5 @@
 import { readFile, readdir } from 'node:fs/promises';
-import { DeprecatedTools, ResolverMap } from '../src/cli/tools/index.ts';
+import { ResolverMap } from '../src/cli/tools/index.ts';
 
 // checks that the "Known tools" lists of the package manager sections in
 // `docs/custom-registries.md` match the tools installed via those managers
@@ -30,7 +30,7 @@ async function read(file: string): Promise<string> {
 
 /** Lists the tools that are mapped to the given package manager. */
 function mappedTools(manager: Manager): string[] {
-  return Object.entries({ ...ResolverMap, ...DeprecatedTools })
+  return Object.entries(ResolverMap)
     .filter(([, type]) => type === manager)
     .map(([name]) => name);
 }
