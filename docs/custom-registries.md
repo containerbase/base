@@ -465,6 +465,7 @@ Java releases are downloaded from:
 
 Each major version has its own GitHub repository.
 Without [tool versions data](#tool-versions-data-containerbasegithubio) the download url and checksum come from the Adoptium API.
+`prepare-tool java` downloads the latest LTS jre, whose cacerts it copies, only from the tool versions data.
 
 Samples:
 
