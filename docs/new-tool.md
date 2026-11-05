@@ -62,7 +62,8 @@ Files to change:
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to **both** `matchDepNames` lists (the "Don't separate minor and patch updates in tests" rule and the "Automerge test selected minor updates in tests" rule).
-1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list.
+   `pnpm lint:tools` and `pnpm lint:schema` compare against the git index, so they fail until the regenerated files are staged.
 
 Note the arm64 test files use one image stage per tool, terminating in a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage - add both halves.
 
@@ -83,9 +84,11 @@ The data has to list the tool before the install service can be tested, in this 
 1. Open the containerbase pull request, as a draft until the data has the tool.
 1. In tool-versions, add the tool to [`src/tools.ts`](https://github.com/containerbase/tool-versions/blob/main/src/tools.ts): its source, metadata and file names, like `aube`.
    `@containerbase/base` doesn't know the tool yet, so add a `toolExceptions` entry naming the containerbase pull request.
-   An upstream host without a datasource there needs a new one, see its [`docs/sources.md`](https://github.com/containerbase/tool-versions/blob/main/docs/sources.md).
+   Versions from GitHub releases need no new datasource, even when the files are hosted elsewhere: a file function builds their urls and checksum urls, like `kubectl` and `helm`.
+   Only versions listed somewhere else, which no datasource there reads yet, need a new one, see its [`docs/sources.md`](https://github.com/containerbase/tool-versions/blob/main/docs/sources.md).
+1. Write the install service as below. Its spec mocks the data, so it doesn't wait for the release.
 1. Once tool-versions has released it, update the `tool-versions` dependency in the containerbase pull request, or wait for Renovate's update, so the embedded data has the tool.
-1. Write the install service as below.
+   The container tests need that data, there is no way to use unreleased data.
 1. After the containerbase release, the `@containerbase/base` update in tool-versions removes the `toolExceptions` entry.
 
 #### The install service
@@ -159,7 +162,8 @@ Things worth knowing:
 
 - Pick the file with `this.downloadNamedToolFile(version, name)` when the data lists several per arch, like aube's gnu and musl builds, else with `this.downloadToolFile(version)`.
   Both return `undefined` without a data file for the host: throw then, don't fall back to an upstream download.
-- Set `minVersion` to the oldest version of the data, which `pnpm tools` publishes in [`packages/base`](../packages/base/).
+- Set `minVersion` to the oldest release the install service supports, like the first stable release with Linux files for both architectures and a checksum.
+  `pnpm tools` publishes it in [`packages/base`](../packages/base/), and tool-versions leaves out older releases.
 - Follow the [tool installer best practices](./tool-installer-best-practices.md) for checksums, folders and shared helpers.
 - Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 - `checksumType` accepts `sha1`, `sha224`, `sha256`, `sha384` and `sha512`.
@@ -225,20 +229,24 @@ Resolvers are bound with `container.bind(TOOL_VERSION_RESOLVER).to(...)` in the 
    This is what lets users behind a proxy configure their replacements, for both architectures.
    Follow the shape of the [`aube`](./custom-registries.md#aube) section - a `## <tool>` heading, "downloaded from the urls of the [tool versions data](./custom-registries.md#tool-versions-data-containerbasegithubio), which point to:" with the release URLs, then a `txt` block of sample download URLs.
 
-1. Tests - add the tool to:
+1. Tests - a tool which only needs install checks goes into `test/latest`, like other simple tools; one which needs bigger tests, like projects or several versions, gets its own `test/<tool>` directory with a `Dockerfile` and a `Dockerfile.arm64` instead. For `test/latest`, add the tool to:
    - [`test/latest/Dockerfile`](../test/latest/Dockerfile), in one of the grouped stages (and update that stage's `# test: ...` comment)
    - [`test/latest/Dockerfile.arm64`](../test/latest/Dockerfile.arm64), as its own `FROM base AS test-<tool>` stage plus a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage
    - [`test/Dockerfile.distro`](../test/Dockerfile.distro) if the tool should be verified across Ubuntu releases
 
-   Each pinned version needs a Renovate comment:
+   Each pinned version needs a Renovate comment.
+   `install-tool` strips a leading `v`, so the version can be the tag of the release:
 
    ```dockerfile
    # renovate: datasource=github-releases packageName=bufbuild/buf
    RUN install-tool buf v1.72.0
    ```
 
+   Other tag prefixes, like `kustomize/v`, are set in the tool's entry in tool-versions, and the tests pin the plain version, like `install-tool kustomize 5.8.3`.
+
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to both `matchDepNames` lists.
-1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list.
+   `pnpm lint:tools` and `pnpm lint:schema` compare against the git index, so they fail until the regenerated files are staged.
 
 > [!NOTE]
 > You'll notice that we lean on integration tests with Docker instead of unit tests.
@@ -290,10 +298,12 @@ Maintainers find how to create the prebuild repository in [`new-prebuild-tool.md
 
 ## Testing your change
 
-Build the CLI before building any image:
+Install Node.js and pnpm with [mise](https://mise.jdx.dev), the scripts need a real `pnpm` on the `PATH`, corepack isn't used.
+Then build the CLI before building any image:
 
 ```sh
-pnpm install
+mise install
+pnpm install --frozen-lockfile
 pnpm build
 docker buildx bake
 ```
@@ -308,6 +318,13 @@ Or via the helper, which also builds first with `-b`:
 
 ```sh
 node tools/test.js -b latest
+```
+
+The `Dockerfile.arm64` tests build for `linux/arm64`, so an x86_64 host needs QEMU emulation first:
+
+```sh
+docker run --privileged --rm tonistiigi/binfmt --install arm64
+node tools/test.js -b -t test-aarch64 latest
 ```
 
 Ignore the remote cache for faster local iteration:
