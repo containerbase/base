@@ -49,7 +49,7 @@ FROM base AS testa
 
 # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
-RUN install-tool erlang 28.5.0.8
+RUN install-tool erlang 29.1.2.0
 
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
 RUN install-tool elixir 1.20.5
@@ -100,6 +100,24 @@ RUN set -ex; \
     mix deps.update --all;
 
 #--------------------------------------
+# test: erlang (v28,user,openshift)
+#--------------------------------------
+FROM build AS testd
+
+USER 1001
+
+# previous major, no major updates (see .github/renovate.json)
+# https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+RUN install-tool erlang 28.5.0.8
+
+RUN install-tool elixir 1.20.5
+
+RUN set -ex; \
+    cd a; \
+    mix deps.update --all;
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -107,3 +125,4 @@ FROM base
 COPY --from=testa /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=testc /.dummy /.dummy
+COPY --from=testd /.dummy /.dummy
