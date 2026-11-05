@@ -22,11 +22,11 @@ Everything is Linux-only and must work on both `amd64` and `arm64`.
 
 ## Which kind of tool are you adding?
 
-| Kind                                              | Work required                               | Who                        | Examples                                                                                                           |
-| ------------------------------------------------- | ------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| A `pip`, `npm` or `gem` package                   | One map entry plus tests                    | Contributor                | [`kas`](https://github.com/containerbase/base/pull/6525)                                                           |
-| Upstream ships a prebuilt Linux binary or archive | A new install service plus tests            | Contributor                | [`buf`](https://github.com/containerbase/base/pull/6379), [`apm`](https://github.com/containerbase/base/pull/7038) |
-| The tool has to be compiled from source           | A new `containerbase/*-prebuild` repository | Maintainer (**ask first**) | `php`, `python`, `ruby`, `node`                                                                                    |
+| Kind                                              | Work required                                                | Who                        | Examples                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------ | -------------------------- | --------------------------------------------------------- |
+| A `pip`, `npm` or `gem` package                   | One map entry plus tests                                     | Contributor                | [`kas`](https://github.com/containerbase/base/pull/6525)  |
+| Upstream ships a prebuilt Linux binary or archive | A tool-versions entry, then a new install service plus tests | Contributor                | [`aube`](https://github.com/containerbase/base/pull/7162) |
+| The tool has to be compiled from source           | A new `containerbase/*-prebuild` repository                  | Maintainer (**ask first**) | `php`, `python`, `ruby`, `node`                           |
 
 > [!IMPORTANT]
 > We prefer that you raise [a "new tool" Issue](https://github.com/containerbase/base/issues/new?template=new-tool.yml) rather than directly raising a Pull Request.
@@ -62,7 +62,8 @@ Files to change:
    ```
 
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to **both** `matchDepNames` lists (the "Don't separate minor and patch updates in tests" rule and the "Automerge test selected minor updates in tests" rule).
-1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list.
+   `pnpm lint:tools` and `pnpm lint:schema` compare against the git index, so they fail until the regenerated files are staged.
 
 Note the arm64 test files use one image stage per tool, terminating in a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage - add both halves.
 
@@ -72,14 +73,29 @@ Before starting, check that upstream meets these requirements:
 
 - self-contained Linux binaries or archives for **both** `amd64` and `arm64`
 - a stable, predictable download URL that contains the version
-- **published checksums** - Containerbase verifies every download. If a tool doesn't have upstream checksums published, this will block proceeding with adding the tool to Containerbase, so it's worth raising that upstream first.
+- **published checksums** - Containerbase verifies every download against the checksum of the [tool-versions](https://github.com/containerbase/tool-versions) data, which reads them from upstream. If a tool doesn't have upstream checksums published, this will block proceeding with adding the tool to Containerbase, so it's worth raising that upstream first.
 - a license that allows us to redistribute the binaries inside our images. The Issue template asks for the SPDX identifier of the tool _and_ of any prebuilt binaries, so it's worth checking early rather than discovering a blocker after the code is written.
+
+#### The tool-versions data first
+
+A new tool downloads its files only from the [tool-versions](https://github.com/containerbase/tool-versions) data, so the install service has no upstream download, checksum or version lookup of its own.
+The data has to list the tool before the install service can be tested, in this order:
+
+1. Open the containerbase pull request, as a draft until the data has the tool.
+1. In tool-versions, add the tool to [`src/tools.ts`](https://github.com/containerbase/tool-versions/blob/main/src/tools.ts): its source, metadata and file names, like `aube`.
+   `@containerbase/base` doesn't know the tool yet, so add a `toolExceptions` entry naming the containerbase pull request.
+   Versions from GitHub releases need no new datasource, even when the files are hosted elsewhere: a file function builds their urls and checksum urls, like `kubectl` and `helm`.
+   Only versions listed somewhere else, which no datasource there reads yet, need a new one, see its [`docs/sources.md`](https://github.com/containerbase/tool-versions/blob/main/docs/sources.md).
+1. Write the install service as below. Its spec mocks the data, so it doesn't wait for the release.
+1. Once tool-versions has released it, update the `tool-versions` dependency in the containerbase pull request, or wait for Renovate's update, so the embedded data has the tool.
+   The container tests need that data, there is no way to use unreleased data.
+1. After the containerbase release, the `@containerbase/base` update in tool-versions removes the `toolExceptions` entry.
 
 #### The install service
 
 Create `src/cli/tools/<tool>.ts` (or a subdirectory if the tool belongs to an existing language family, e.g. `src/cli/tools/java/`).
 
-For instance, [`src/cli/tools/buf.ts`](../src/cli/tools/buf.ts) is a good template:
+For instance, [`src/cli/tools/aube.ts`](../src/cli/tools/aube.ts) is a good template:
 
 ```ts
 import { join } from 'node:path';
@@ -88,10 +104,13 @@ import { BaseInstallService } from '../install-tool/base-install.service.ts';
 
 @injectable()
 @injectFromHierarchy()
-export class BufInstallService extends BaseInstallService {
-  readonly name = 'buf';
+export class AubeInstallService extends BaseInstallService {
+  readonly name = 'aube';
 
-  /** The architecture name used by the buf release assets. */
+  /** The tool-versions data starts at 1.0.0, earlier ones are prereleases. */
+  override readonly minVersion = '1.0.0';
+
+  /** The arch name of the release assets for the host. */
   private get ghArch(): string {
     switch (this.envSvc.arch) {
       case 'arm64':
@@ -102,40 +121,37 @@ export class BufInstallService extends BaseInstallService {
   }
 
   /**
-   * Downloads the buf archive from GitHub and extracts only the `buf` binary
-   * into the versioned tool path. The file and its checksum come from the
-   * tool-versions data, without data it is verified against the release's
-   * `sha256.txt`.
+   * Downloads the glibc build from the tool-versions data, verified against
+   * its checksum, and extracts it into the versioned `bin` folder.
+   * @throws when the data has no file for the version on this host
    */
   override async install(version: string): Promise<void> {
-    const baseUrl = `https://github.com/bufbuild/buf/releases/download/v${version}/`;
-    const filename = `buf-Linux-${this.ghArch}.tar.gz`;
+    const filename = `aube-v${version}-${this.ghArch}-unknown-linux-gnu.tar.gz`;
 
-    const file = await this.downloadChecksumListed(
-      version,
-      baseUrl,
-      filename,
-      'sha256.txt',
-    );
+    const file = await this.downloadNamedToolFile(version, filename);
+    if (!file) {
+      throw new Error(
+        `There is no tool-versions file for aube ${version} on this host`,
+      );
+    }
 
     await this.pathSvc.ensureToolPath(this.name);
 
-    const path = await this.pathSvc.createVersionedToolPath(this.name, version);
-    await this.compress.extract({
-      file,
-      cwd: path,
-      strip: 1,
-      files: ['buf/bin/buf'],
-    });
+    const path = await this.pathSvc.createVersionedToolPath(
+      this.name,
+      version,
+      'bin',
+    );
+    await this.compress.extract({ file, cwd: path });
   }
 
-  /** Links the `buf` binary into the global bin folder. */
+  /** Links the `aube` binaries into the global bin folder. */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
     await this.shellwrapper({ srcDir: src });
   }
 
-  /** Checks that `buf --version` runs. */
+  /** Checks that `aube --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
   }
@@ -144,6 +160,10 @@ export class BufInstallService extends BaseInstallService {
 
 Things worth knowing:
 
+- Pick the file with `this.downloadNamedToolFile(version, name)` when the data lists several per arch, like aube's gnu and musl builds, else with `this.downloadToolFile(version)`.
+  Both return `undefined` without a data file for the host: throw then, don't fall back to an upstream download.
+- Set `minVersion` to the oldest release the install service supports, like the first stable release with Linux files for both architectures and a checksum.
+  `pnpm tools` publishes it in [`packages/base`](../packages/base/), and tool-versions leaves out older releases.
 - Follow the [tool installer best practices](./tool-installer-best-practices.md) for checksums, folders and shared helpers.
 - Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 - `checksumType` accepts `sha1`, `sha224`, `sha256`, `sha384` and `sha512`.
@@ -170,7 +190,8 @@ Two more things worth knowing:
 
 #### Optional: a version resolver
 
-Add a `ToolVersionResolver` if `install-tool <tool>` with no version should install the latest release.
+A tool without a resolver resolves a missing, `latest` or partial version from the tool-versions data, so a new tool needs none.
+Existing tools have one if `install-tool <tool>` with no version should install the latest release without the data.
 
 For example, see `MiseVersionResolver` in [`src/cli/tools/mise.ts`](../src/cli/tools/mise.ts):
 
@@ -205,23 +226,27 @@ Resolvers are bound with `container.bind(TOOL_VERSION_RESOLVER).to(...)` in the 
    `NoInitTools` extends `NoPrepareTools`, so one entry covers both.
 
 1. [`docs/custom-registries.md`](./custom-registries.md) - add a section documenting every URL the tool downloads from, with samples.
-   This is what lets users behind a proxy configure their replacements, so list the checksum files and any version-lookup endpoints too, for both architectures.
-   Follow the shape of the existing sections - a `## <tool>` heading, the release URLs, then a `txt` block of sample download URLs.
+   This is what lets users behind a proxy configure their replacements, for both architectures.
+   Follow the shape of the [`aube`](./custom-registries.md#aube) section - a `## <tool>` heading, "downloaded from the urls of the [tool versions data](./custom-registries.md#tool-versions-data-containerbasegithubio), which point to:" with the release URLs, then a `txt` block of sample download URLs.
 
-1. Tests - add the tool to:
+1. Tests - a tool which only needs install checks goes into `test/latest`, like other simple tools; one which needs bigger tests, like projects or several versions, gets its own `test/<tool>` directory with a `Dockerfile` and a `Dockerfile.arm64` instead. For `test/latest`, add the tool to:
    - [`test/latest/Dockerfile`](../test/latest/Dockerfile), in one of the grouped stages (and update that stage's `# test: ...` comment)
    - [`test/latest/Dockerfile.arm64`](../test/latest/Dockerfile.arm64), as its own `FROM base AS test-<tool>` stage plus a `COPY --from=test-<tool> /.dummy /.dummy` line in the final stage
    - [`test/Dockerfile.distro`](../test/Dockerfile.distro) if the tool should be verified across Ubuntu releases
 
-   Each pinned version needs a Renovate comment:
+   Each pinned version needs a Renovate comment.
+   `install-tool` strips a leading `v`, so the version can be the tag of the release:
 
    ```dockerfile
    # renovate: datasource=github-releases packageName=bufbuild/buf
    RUN install-tool buf v1.72.0
    ```
 
+   Other tag prefixes, like `kustomize/v`, are set in the tool's entry in tool-versions, and the tests pin the plain version, like `install-tool kustomize 5.8.3`.
+
 1. [`.github/renovate.json`](../.github/renovate.json) - add the tool name to both `matchDepNames` lists.
-1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list. `pnpm lint:tools` fails if you forget.
+1. [`packages/base`](../packages/base/) - run `pnpm tools` and commit the regenerated files, so the new tool shows up in the published tool list.
+   `pnpm lint:tools` and `pnpm lint:schema` compare against the git index, so they fail until the regenerated files are staged.
 
 > [!NOTE]
 > You'll notice that we lean on integration tests with Docker instead of unit tests.
@@ -273,10 +298,12 @@ Maintainers find how to create the prebuild repository in [`new-prebuild-tool.md
 
 ## Testing your change
 
-Build the CLI before building any image:
+Install Node.js and pnpm with [mise](https://mise.jdx.dev), the scripts need a real `pnpm` on the `PATH`, corepack isn't used.
+Then build the CLI before building any image:
 
 ```sh
-pnpm install
+mise install
+pnpm install --frozen-lockfile
 pnpm build
 docker buildx bake
 ```
@@ -291,6 +318,13 @@ Or via the helper, which also builds first with `-b`:
 
 ```sh
 node tools/test.js -b latest
+```
+
+The `Dockerfile.arm64` tests build for `linux/arm64`, so an x86_64 host needs QEMU emulation first:
+
+```sh
+docker run --privileged --rm tonistiigi/binfmt --install arm64
+node tools/test.js -b -t test-aarch64 latest
 ```
 
 Ignore the remote cache for faster local iteration:
@@ -316,7 +350,7 @@ If you change a workflow, run `mise install` once and check it with `jactionlint
 
 [containerbase/tool-versions](https://github.com/containerbase/tool-versions) publishes the installable versions per tool (urls, checksums) on GitHub Pages.
 
-After the Containerbase release, in tool-versions:
+In tool-versions:
 
 - [`src/tools.ts`](https://github.com/containerbase/tool-versions/blob/main/src/tools.ts): datasource, package, versioning, `sourceUrl`, `homepage`; a file template with the install service's urls and checksums for non-release-asset downloads
 - tools with a `type` (`pip`, `npm`, `gem`, `dotnet`): source only, no files
@@ -326,9 +360,9 @@ The [`@containerbase/base`](https://www.npmjs.com/package/@containerbase/base) u
 
 Order:
 
-1. CLI change and release; the CLI falls back to the upstream lookup, never requires tool-versions
-1. tool-versions mapping, the next tool-versions release contains the tool
-1. Renovate's weekly update of the pinned tool-versions release embeds it in the next Containerbase image
+1. A new install service ([Kind 2](#the-tool-versions-data-first)): the tool-versions mapping with a `toolExceptions` entry first, then the CLI change with the updated tool-versions dependency and the release; the `@containerbase/base` update in tool-versions removes the exception.
+1. A `pip`, `npm` or `gem` tool: the CLI change and release first, then the tool-versions mapping.
+1. Renovate's weekly update of the pinned tool-versions release embeds new versions in the next Containerbase image.
 
 To use the tool in Renovate: [wait for Renovate's Docker image](https://docs.renovatebot.com/docker-build-process/#build-process-flow), then add it to [`allToolConfig` in `lib/util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/util/exec/containerbase.ts).
 
@@ -337,6 +371,7 @@ To use the tool in Renovate: [wait for Renovate's Docker image](https://docs.ren
 Anyone can open a PR for:
 
 - adding a `pip` / `npm` / `gem` tool to `ResolverMap`
+- adding a tool to the [tool-versions](https://github.com/containerbase/tool-versions) data
 - writing a new install service for a tool with upstream Linux release artifacts
 - version resolvers, prepare services
 - test image entries, Renovate config entries and docs
