@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { injectFromHierarchy, injectable } from 'inversify';
-import { ToolVersionResolver } from '../../install-tool/tool-version-resolver.ts';
+import { ToolVersionResolver } from '../../services/tool-version-resolver.ts';
 import { resolveLatestJavaVersion } from './utils.ts';
 
 const partialVersion = /^\d+(\.\d+){0,2}$/;

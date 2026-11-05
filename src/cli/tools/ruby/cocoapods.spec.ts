@@ -133,6 +133,8 @@ describe('cli/tools/ruby/cocoapods', () => {
         .reply(200, { version: '1.15.2' });
       const { svc } = await toolContext(CocoapodsVersionResolver);
 
+      // the tool-versions data is read first, rubygems.org is the fallback
+      expect(svc.dataField).toBe('versions');
       expect(await svc.resolve('latest')).toBe('1.15.2');
     });
 

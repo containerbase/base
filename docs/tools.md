@@ -124,8 +124,8 @@ Some tools accept partial versions and install a matching release:
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
   With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
-  The data flags a release whose files are all yanked as deprecated, `latest` and major or major.minor versions skip those, a deprecated release is only installed when the full version is given, and the `poetry-plugin-pypi-mirror` limit applies to the data too.
-  So a missing version or `latest` of `poetry` always asks pypi.org for that limit, also when the data has a match and with `CONTAINERBASE_RESOLVER_OFFLINE=true`.
+  The data flags a release whose files are all yanked as deprecated, `latest` and major or major.minor versions skip those, a deprecated release is only installed when the full version is given.
+  For `poetry` the data sets its `latest` within the `poetry-plugin-pypi-mirror` limit, pypi.org is only asked for that limit when the data can't answer.
 - `android-sdk-cmdline-tools`: A major (`14`) or major.minor (`14.1`) version installs the newest matching stable release, compared numerically.
   A version which exists as a release, like `13`, is kept; the repository lists versions without zero segments, so `13.0` installs the release listed as `13`.
   The lookup needs the android repository, which the install needs too, so it fails when the repository can't be loaded.
@@ -135,26 +135,27 @@ Some tools accept partial versions and install a matching release:
   Other major or major.minor versions resolve to the newest matching release even when RubyGems would read them as `X.Y.0`, eg. `bundler 2.0` installs the newest `2.0.x`, not `2.0.0`; pin the full version for an exact one.
   The lookup goes to rubygems.org, through the CDN and URL replacements like other lookups, and a configured gem registry is only used for the install, so a gem from a private registry needs a full version, and a partial version fails when rubygems.org can't be reached.
   Without a version, or with `latest`, the latest release is installed.
-  With `install-tool`, for `bundler` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from rubygems.org.
+  With `install-tool`, for `bundler` and `cocoapods` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from rubygems.org.
   The data flags a version which is gone from rubygems.org as deprecated, `latest` and major or major.minor versions skip those, a deprecated version is only installed when the full version is given.
 - `gradle`: A major (`8`) or major.minor (`9.0`) version installs the newest matching stable release, prereleases, milestones, snapshots, nightlies and broken releases are skipped.
-  A version which exists as a release, like `8.10` or `6.9`, is kept as given, and so is the version when the release list can't be loaded.
+  A version which exists as a release, like `8.10` or `6.9`, is kept as given, and so is the version with a warning when the release list can't be loaded.
   Other major.minor versions resolve to the newest matching release, eg. `9.0` installs the newest `9.0.x`; pin the full version for an exact one.
   The release list comes from `services.gradle.org/versions/all`, through the CDN and URL replacements like other lookups.
   Without a version, or with `latest`, the current release is installed.
 - `maven`: A major (`3`) or major.minor (`3.9`) version installs the newest matching stable release, prereleases like `4.0.0-rc-1` are skipped.
-  A version which exists as a release, like `3.0`, is kept, and so is the version when the release list can't be loaded.
+  A version which exists as a release, like `3.0`, is kept, and so is the version with a warning when the release list can't be loaded.
   Other major.minor versions resolve to the newest matching release, eg. `3.9` installs the newest `3.9.x`; pin the full version for an exact one.
   The release list comes from Maven Central's `maven-metadata.xml` on repo.maven.apache.org, through the CDN and URL replacements like other lookups.
   Without a version, or with `latest`, the newest containerbase maven prebuild is installed, which is not resolved against Maven Central.
 - `nuget`: A major (`6`) or major.minor (`6.11`) version installs the newest matching released and blessed release.
-  A version which exists in the nuget feed is kept, and so is the version when `tools.json` can't be loaded.
+  A version which exists in the nuget feed is kept, and so is the version with a warning when `tools.json` can't be loaded.
   Without a version, or with `latest`, the newest released and blessed release is installed.
+- `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`: A missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, the lookups above are the fallback.
 - `php`, `composer`, `mise`: A missing version, `latest` and a major (`8`) or major.minor (`8.3`) version are resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
   When the data has no match, a missing version or `latest` is looked up directly: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
 
 The tools above keep their own rules, except where noted.
-`java`, `node`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
+`java`, `node`, `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
 They use the embedded data with a warning when the online data can't be loaded, like the other tools, and only ask their own lookup when neither data has a match.
 So while the embedded data is older than the max age, `latest` and partial versions of these tools first ask the online tool-versions data, and where `containerbase.github.io` is silently dropped, that waits up to the 30 s timeout of the tool-versions data before the embedded data or their own source answers, which `CONTAINERBASE_RESOLVER_OFFLINE=true` avoids.
 When the data lists matching releases, but all of them need a newer containerbase, a warning is logged and the tool's own lookup is used, like before.
@@ -176,8 +177,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
-  Only the tool-versions data is offline then, every tool with its own resolver still uses its own lookup, like `gradle`, `maven`, `nuget` and `cocoapods`, and a missing version or `latest` of `poetry` still asks pypi.org for the `poetry-plugin-pypi-mirror` limit.
-  For example `java`, `node`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` use it when the embedded data has no match.
+  Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
   These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
   For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.

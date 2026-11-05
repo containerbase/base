@@ -1,6 +1,6 @@
 import { Cli } from 'clipanion';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
+import { partialVersionHelp } from '../services/tool-version-resolver.ts';
 import { MissingVersion } from '../utils/codes.ts';
 import { registerCommands } from './index.ts';
 import { InstallGemCommand, InstallGemShortCommand } from './install-gem.ts';

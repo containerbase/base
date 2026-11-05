@@ -45,7 +45,7 @@ export class CleanupPathCommand extends Command {
         );
       } else {
         logger.info(
-          `Cleanup succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Cleanup succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }

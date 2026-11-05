@@ -74,7 +74,7 @@ RUN install-tool deno 2.9.8
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.15
+RUN install-tool apko 1.4.16
 
 #--------------------------------------
 # Image: apm
@@ -198,7 +198,7 @@ RUN install-tool terraform 1.17.1
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.2
+RUN install-tool tofu 1.13.8
 
 #--------------------------------------
 # Image: vendir
@@ -220,7 +220,7 @@ RUN install-tool buf v1.75.0
 RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.0
+RUN install-tool mise 2026.11.2
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -235,7 +235,7 @@ RUN install-tool wally 0.3.2
 RUN install-tool protoc 36.2
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.84.0
+RUN install-tool pixi v0.84.1
 
 #--------------------------------------
 # Image: v1 and v2 shell tools of custom images

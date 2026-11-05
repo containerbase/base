@@ -96,13 +96,13 @@ RUN install-tool kubectl v1.37.2
 RUN install-tool kustomize 5.8.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.0
+RUN install-tool mise 2026.11.2
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.84.0
+RUN install-tool pixi v0.84.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.6.9
@@ -131,7 +131,7 @@ RUN set -ex; \
 RUN install-tool terraform 1.17.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.2
+RUN install-tool tofu 1.13.8
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -254,7 +254,7 @@ RUN install-tool kas 5.5
 # renovate: datasource=pypi
 RUN install-tool pipenv 2026.10.4
 # renovate: datasource=pypi
-RUN install-tool pdm 2.29.5
+RUN install-tool pdm 2.29.6
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi
@@ -268,7 +268,7 @@ FROM build AS test-ruby
 # renovate: datasource=github-releases packageName=containerbase/ruby-prebuild versioning=ruby
 RUN install-tool ruby 4.0.9
 # renovate: datasource=rubygems versioning=ruby
-RUN install-tool bundler 4.0.23
+RUN install-tool bundler 4.0.24
 # renovate: datasource=rubygems versioning=ruby
 RUN install-tool cocoapods 1.17.0
 

@@ -239,7 +239,7 @@ RUN install-tool nub 0.9.7
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.15
+RUN install-tool apko 1.4.16
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.35.0
@@ -266,7 +266,7 @@ RUN echo '{"a":1}' | jq -e '.a == 1'
 RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.0
+RUN install-tool mise 2026.11.2
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -275,7 +275,7 @@ RUN install-tool skopeo 1.24.1
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.2
+RUN install-tool tofu 1.13.8
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2

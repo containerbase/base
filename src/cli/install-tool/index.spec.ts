@@ -543,7 +543,16 @@ describe('cli/install-tool/index', () => {
           expected: '24.2.0',
         },
         // composer is mocked here, php covers the prebuild resolver
-        ...['conan', 'mise', 'php'].map((tool) => ({
+        ...[
+          'android-sdk-cmdline-tools',
+          'cocoapods',
+          'conan',
+          'gradle',
+          'maven',
+          'mise',
+          'nuget',
+          'php',
+        ].map((tool) => ({
           tool,
           type: undefined,
           extra: {},
@@ -594,23 +603,39 @@ describe('cli/install-tool/index', () => {
           releases: {},
         };
 
-        test('limits latest from the data to the releases the mirror plugin supports', async () => {
-          await embed('poetry', [
+        /**
+         * Embeds the poetry data with the tool-level `latest`, which the data
+         * sets within the poetry-plugin-pypi-mirror range.
+         */
+        async function embedLatest(
+          latest: string,
+          versions: { version: string; deprecated?: true }[],
+        ): Promise<void> {
+          await fs.writeFile(
+            `${dataDir}/v1/poetry.json`,
+            JSON.stringify({
+              tool: 'poetry',
+              updatedAt: '2026-10-16T00:00:00Z',
+              latest,
+              versions,
+            }),
+          );
+        }
+
+        test('resolves latest to the tool-level latest of the data', async () => {
+          await embedLatest('1.8.3', [
             { version: '2.0.0' },
             { version: '1.8.4', deprecated: true },
             { version: '1.8.3' },
           ]);
-          scope('https://pypi.org')
-            .get('/pypi/poetry-plugin-pypi-mirror/json')
-            .reply(200, mirror);
 
+          // no interceptor, a request would fail the test
           expect(await resolveVersion('poetry', 'latest', 'pip')).toBe('1.8.3');
         });
 
-        test('asks pypi when the data has no release the mirror plugin supports', async () => {
+        test('asks pypi with the mirror plugin range when the data has no tool-level latest', async () => {
           await embed('poetry', [{ version: '2.0.0' }]);
           scope('https://pypi.org')
-            // the data filter and the pypi lookup share one plugin request
             .get('/pypi/poetry-plugin-pypi-mirror/json')
             .reply(200, mirror)
             .get('/pypi/poetry/json')
@@ -626,7 +651,10 @@ describe('cli/install-tool/index', () => {
         });
 
         test('resolves a partial version from the data without the mirror plugin', async () => {
-          await embed('poetry', [{ version: '2.0.0' }, { version: '1.8.3' }]);
+          await embedLatest('1.8.3', [
+            { version: '2.0.0' },
+            { version: '1.8.3' },
+          ]);
 
           // no interceptor, a request would fail the test
           expect(await resolveVersion('poetry', '2', 'pip')).toBe('2.0.0');

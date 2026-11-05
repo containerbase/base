@@ -3,32 +3,39 @@ import path from 'node:path';
 import { inject, injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
-import { CompressionService, HttpService } from '../../services/index.ts';
+import {
+  CompressionService,
+  ToolFilesService,
+  ToolVersionResolverService,
+} from '../../services/index.ts';
 import { logger, parse } from '../../utils/index.ts';
 import { addBlockedCerts } from './blocked-certs.ts';
 import {
   createGradleSettings,
   createMavenSettings,
   resolveJavaDownloadUrl,
-  resolveLatestJavaVersion,
 } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class JavaPrepareService extends BasePrepareService {
-  @inject(HttpService)
-  private readonly httpSvc!: HttpService;
   @inject(CompressionService)
   private readonly compressionSvc!: CompressionService;
+  @inject(ToolFilesService)
+  private readonly toolFilesSvc!: ToolFilesService;
+  @inject(ToolVersionResolverService)
+  private readonly resolverSvc!: ToolVersionResolverService;
 
   readonly name: string = 'java';
 
   /**
    * Initializes the cache, links the maven, gradle and android folders to it,
    * keeping any existing link, and sets up the shared cacerts from the
-   * latest lts jre, once.
+   * latest lts jre, once. The version is resolved like `install-tool java-jre`
+   * resolves `latest`, its file only comes from the tool-versions data.
    *
-   * @throws when the latest jre can't be resolved
+   * @throws when no jre version resolves or the data has no file of it for
+   * the host
    */
   override async prepare(): Promise<void> {
     await this.initialize();
@@ -58,34 +65,21 @@ export class JavaPrepareService extends BasePrepareService {
       path.join(this.envSvc.userHome, '.android-sdk'),
     );
 
-    const version = await resolveLatestJavaVersion(
-      this.httpSvc,
-      'jre',
-      this.envSvc.arch,
-    );
+    // resolved from the tool-versions data first, the embedded data always has
+    // a jre, a slightly older cacerts is fine
+    const version = await this.resolverSvc.resolve('java-jre', undefined);
     if (!version) {
-      throw new Error('Could not resolve latest java version');
-    }
-
-    const pkg = await resolveJavaDownloadUrl(
-      this.httpSvc,
-      'jre',
-      this.envSvc.arch,
-      version,
-    );
-
-    if (!pkg) {
-      throw new Error(`Could not resolve download url for java ${version}`);
+      throw new Error('Could not resolve the latest java-jre version');
     }
 
     logger.debug(`downloading cacerts from ${version}`);
 
-    const jre = await this.httpSvc.download({
-      url: pkg.link,
-      checksumType: 'sha256',
-      expectedChecksum: pkg.checksum,
-      fileName: pkg.name,
-    });
+    const jre = await this.toolFilesSvc.downloadToolFile('java-jre', version);
+    if (!jre) {
+      throw new Error(
+        `Could not find a java-jre ${version} file in the tool-versions data`,
+      );
+    }
 
     const tmp = path.join(this.envSvc.tmpDir, 'java');
 
@@ -158,34 +152,19 @@ export class JavaInstallService extends BaseInstallService {
   ];
 
   /**
-   * Downloads the adoptium jdk or jre, verified against its checksum, into the
-   * versioned tool path, adds the revoked intermediate CAs to its blocked list
-   * and replaces its cacerts with the shared ones.
+   * Downloads the Temurin jdk or jre from the tool-versions data, or the one
+   * the adoptium API lists, verified against its checksum, into the versioned
+   * tool path, adds the revoked intermediate CAs to its blocked list and
+   * replaces its cacerts with the shared ones. The data of `java` lists the
+   * jdk, like `java-jdk`.
    *
-   * @throws when adoptium has no package for the version
+   * @throws when neither has a package for the version
    */
   override async install(version: string): Promise<void> {
-    const type = this.name === 'java-jre' ? 'jre' : 'jdk';
-
-    const pkg = await resolveJavaDownloadUrl(
-      this.http,
-      type,
-      this.envSvc.arch,
-      version,
-    );
-
-    if (!pkg) {
-      throw new Error(
-        `Could not resolve download url for java ${version} and type ${type}`,
-      );
-    }
-
-    const file = await this.http.download({
-      url: pkg.link,
-      checksumType: 'sha256',
-      expectedChecksum: pkg.checksum,
-      fileName: pkg.name,
-    });
+    // TODO: drop the adoptium fallback in the next major (#7962)
+    const file =
+      (await this.downloadToolFile(version)) ??
+      (await this.downloadAdoptium(version));
 
     await this.pathSvc.ensureToolPath(this.name);
 
@@ -205,6 +184,36 @@ export class JavaInstallService extends BaseInstallService {
     await addBlockedCerts(path.dirname(cacerts), v.major);
     await fs.rm(cacerts);
     await fs.symlink(path.join(this.pathSvc.sslPath, 'cacerts'), cacerts);
+  }
+
+  /**
+   * Downloads the jdk or jre the adoptium API lists for the version, verified
+   * against its checksum.
+   *
+   * @throws when adoptium has no package for the version
+   */
+  private async downloadAdoptium(version: string): Promise<string> {
+    const type = this.name === 'java-jre' ? 'jre' : 'jdk';
+
+    const pkg = await resolveJavaDownloadUrl(
+      this.http,
+      type,
+      this.envSvc.arch,
+      version,
+    );
+
+    if (!pkg) {
+      throw new Error(
+        `Could not resolve download url for java ${version} and type ${type}`,
+      );
+    }
+
+    return await this.http.download({
+      url: pkg.link,
+      checksumType: 'sha256',
+      expectedChecksum: pkg.checksum,
+      fileName: pkg.name,
+    });
   }
 
   /** Whether the shared cacerts exist, which prepare creates. */

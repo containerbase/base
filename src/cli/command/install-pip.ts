@@ -1,5 +1,5 @@
 import { Command } from 'clipanion';
-import { partialVersionHelp } from '../install-tool/tool-version-resolver.ts';
+import { partialVersionHelp } from '../services/tool-version-resolver.ts';
 import { InstallToolCommand } from './install-tool.ts';
 import { command } from './utils.ts';
 

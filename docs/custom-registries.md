@@ -464,6 +464,8 @@ Java releases are downloaded from:
 - `https://github.com/adoptium/temurin<major>-binaries/releases`
 
 Each major version has its own GitHub repository.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download url and checksum come from the Adoptium API.
+`prepare-tool java` downloads the latest LTS jre, whose cacerts it copies, only from the tool versions data.
 
 Samples:
 
@@ -482,6 +484,7 @@ https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7
 - `https://dl.google.com/android/repository/`
 
 The `repository2-3.xml` file is used to determine the checksum and find latest release of the `cmdline-tools`.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the download is verified against the checksum of that file.
 
 Samples:
 
@@ -515,7 +518,8 @@ Maven releases are downloaded from:
 - `https://github.com/containerbase/maven-prebuild/releases`
 - `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven`
 
-The first url is preferred and the second is used as fallback for older versions.
+The first url is preferred and the second is used for versions without a prebuild.
+Without [tool versions data](#tool-versions-data-containerbasegithubio) the downloads are verified against their `.sha512` file, or `.sha1` for old Apache releases, so a mirror needs to provide both files.
 
 Samples:
 

@@ -1,10 +1,6 @@
 import { injectFromHierarchy, injectable } from 'inversify';
 import { describe, expect, test, vi } from 'vitest';
-import {
-  HttpService,
-  lookupOptions,
-  lookupTimeout,
-} from '../services/index.ts';
+import { HttpService, lookupOptions, lookupTimeout } from './index.ts';
 import { ToolVersionResolver, newestVersion } from './tool-version-resolver.ts';
 import { scope } from '~test/http-mock.ts';
 import { toolContext } from '~test/tool.ts';
@@ -36,7 +32,7 @@ class LookupVersionResolver extends ToolVersionResolver {
   }
 }
 
-describe('cli/install-tool/tool-version-resolver', () => {
+describe('cli/services/tool-version-resolver', () => {
   describe('ToolVersionResolver', () => {
     test('get looks up with the lookup options', async () => {
       const spy = vi.spyOn(HttpService.prototype, 'get');

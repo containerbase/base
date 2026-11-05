@@ -1,6 +1,5 @@
-import { maxSatisfying, satisfies } from '@renovatebot/pep440';
+import { maxSatisfying } from '@renovatebot/pep440';
 import { injectFromHierarchy, injectable } from 'inversify';
-import type { DataFilter } from '../../install-tool/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
 import { PipVersionResolver } from './pip.ts';
 
@@ -9,30 +8,11 @@ import { PipVersionResolver } from './pip.ts';
 export class PoetryVersionResolver extends PipVersionResolver {
   override tool = 'poetry';
 
-  /** The releases of the data, like for the other typed pip tools. */
-  override readonly dataField = 'versions';
   /**
-   * The lookup of the poetry range of `poetry-plugin-pypi-mirror`, made once
-   * per instance, so {@link dataFilter} and {@link resolve} share it.
+   * The tool-level `latest` of the data, the newest release within the range
+   * of `poetry-plugin-pypi-mirror`; data without it uses pypi.
    */
-  private range: Promise<string> | undefined;
-
-  /**
-   * Limits a missing version or `latest` from the tool-versions data to the
-   * poetry releases `poetry-plugin-pypi-mirror` supports, like
-   * {@link resolve} does, a partial version isn't limited.
-   *
-   * @throws when the plugin has no poetry requirement
-   */
-  override async dataFilter(
-    version: string | undefined,
-  ): Promise<DataFilter | undefined> {
-    if (version !== undefined) {
-      return undefined;
-    }
-    const range = await this.mirrorRange();
-    return (v) => satisfies(v, range);
-  }
+  override readonly dataField = 'latest';
 
   /**
    * Resolves a missing version or `latest` to the newest poetry release
@@ -62,22 +42,12 @@ export class PoetryVersionResolver extends PipVersionResolver {
   }
 
   /**
-   * The poetry version range `poetry-plugin-pypi-mirror` supports, looked up
-   * once per instance, see {@link fetchMirrorRange}.
-   *
-   * @throws when the plugin has no poetry requirement
-   */
-  private mirrorRange(): Promise<string> {
-    return (this.range ??= this.fetchMirrorRange());
-  }
-
-  /**
    * Fetches the poetry version range `poetry-plugin-pypi-mirror` supports from
    * pypi.
    *
    * @throws when the plugin has no poetry requirement
    */
-  private async fetchMirrorRange(): Promise<string> {
+  private async mirrorRange(): Promise<string> {
     const mirrorMeta = await this.fetchMeta('poetry-plugin-pypi-mirror');
     logger.debug({ info: mirrorMeta.info }, 'poetry-plugin-pypi-mirror');
 

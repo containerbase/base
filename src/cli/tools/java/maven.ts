@@ -9,7 +9,7 @@ import {
   isPartialVersion,
   newestVersion,
   partialVersionHelp,
-} from '../../install-tool/tool-version-resolver.ts';
+} from '../../services/tool-version-resolver.ts';
 import { isValid, logger } from '../../utils/index.ts';
 import { MavenMetadata } from './schema.ts';
 
@@ -36,25 +36,30 @@ export class MavenInstallService extends BaseInstallService {
 
   /**
    * Installs the containerbase maven prebuild when there is one, else the
-   * apache distribution from repo.maven.apache.org. The prebuild and its
-   * checksum come from the tool-versions data first. Without data both are
-   * verified against their `.sha512`, or a `.sha1` for old apache releases.
+   * apache distribution. The tool-versions data lists both files of a
+   * version, so they are picked by name, the prebuild first. Without data
+   * the prebuild comes from its GitHub release and the apache distribution
+   * from repo.maven.apache.org, verified against their `.sha512`, or a
+   * `.sha1` for old apache releases.
    *
    * @throws when no checksum file is found
    */
   override async install(version: string): Promise<void> {
-    const filename = `${this.name}-${version}.tar.xz`;
-    const prebuild =
-      (await this.downloadNamedToolFile(version, filename)) ??
-      (await this.downloadPrebuild(version, filename));
-    const file = prebuild ?? (await this.downloadApache(version));
-
-    let path = await this.pathSvc.ensureToolPath(this.name);
-
-    if (!prebuild) {
-      // from repo.maven.apache.org
-      path = await this.pathSvc.createVersionedToolPath(this.name, version);
+    const prebuildFile = `${this.name}-${version}.tar.xz`;
+    const apacheFile = `apache-${this.name}-${version}-bin.tar.gz`;
+    let file = await this.downloadNamedToolFile(version, prebuildFile);
+    let prebuild = !!file;
+    file ??= await this.downloadNamedToolFile(version, apacheFile);
+    if (!file) {
+      file = await this.downloadPrebuild(version, prebuildFile);
+      prebuild = !!file;
     }
+    file ??= await this.downloadApache(version, apacheFile);
+
+    // the apache distribution has a top level folder, the prebuild not
+    const path = prebuild
+      ? await this.pathSvc.ensureToolPath(this.name)
+      : await this.pathSvc.createVersionedToolPath(this.name, version);
 
     await this.compress.extract({
       file,
@@ -92,11 +97,14 @@ export class MavenInstallService extends BaseInstallService {
    * Downloads the apache distribution from repo.maven.apache.org, verified
    * against its `.sha512`, or a `.sha1` for old releases.
    *
+   * @param filename - the name of the apache distribution file
    * @throws when no checksum file is found
    */
-  private async downloadApache(version: string): Promise<string> {
+  private async downloadApache(
+    version: string,
+    filename: string,
+  ): Promise<string> {
     logger.info(`using repo.maven.apache.org`);
-    const filename = `apache-${this.name}-${version}-bin.tar.gz`;
     const url = `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${version}/${filename}`;
     const file =
       (await this.downloadOptionalChecksumSidecar(url, '.sha512', 'sha512')) ??
@@ -135,15 +143,19 @@ export class MavenVersionResolver extends ToolVersionResolver {
 
   override readonly versionHelp = partialVersionHelp;
 
+  /** The releases of the tool-versions data, the lookup is the fallback. */
+  override readonly dataField = 'versions';
+
   /**
    * Resolves a version, the release list is read from repo.maven.apache.org
-   * through the configured CDN and URL replacements.
+   * through the configured CDN and URL replacements, when the tool-versions
+   * data can't answer, see {@link dataField}.
    *
    * - A missing version or `latest` resolves to the latest maven prebuild.
    * - A major (`3`) or major.minor (`3.9`) version which is no existing
    *   release resolves to the newest matching stable release, prereleases
    *   like `4.0.0-rc-1` are skipped. An existing release is kept. Without
-   *   access to the release list the version is kept too.
+   *   access to the release list the version is kept too, with a warning.
    * - Any other version is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -163,8 +175,9 @@ export class MavenVersionResolver extends ToolVersionResolver {
       } catch (err) {
         // keep the version: an `X.Y` release like `3.0` passes `validate` and
         // installs from the repo.maven.apache.org fallback, a bare major fails
-        // validation
-        logger.debug(
+        // validation; the tool-versions data had no match either
+        // TODO: fail in the next major (#7962)
+        logger.warn(
           { err, tool: this.tool, version },
           'maven metadata lookup or parsing failed, keeping the version',
         );

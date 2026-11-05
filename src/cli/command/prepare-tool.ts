@@ -42,7 +42,7 @@ export class PrepareToolCommand extends Command {
         );
       } else {
         logger.info(
-          `Prepare tools ${this.tools.join(', ')} succeded in ${prettyMilliseconds(Date.now() - start)}.`,
+          `Prepare tools ${this.tools.join(', ')} succeeded in ${prettyMilliseconds(Date.now() - start)}.`,
         );
       }
     }
