@@ -19,7 +19,8 @@ Raising the minimum supported version is a separate, breaking change, not part o
 Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 
 Download from the [tool-versions](https://github.com/containerbase/tool-versions) data first, when it lists the tool.
-It has the files and checksums of the versions, so no checksum file is downloaded:
+A new tool downloads only from the data and throws without a file, see [`new-tool.md`](./new-tool.md#the-tool-versions-data-first); the fallbacks below are for existing tools.
+The data has the files and checksums of the versions, so no checksum file is downloaded:
 
 - `this.downloadChecksumListed(version, baseUrl, filename, list)` - for a checksum list file in the release folder.
   It downloads the file named `filename` of the data, else `filename` of the folder, verified against the checksum `list`.
