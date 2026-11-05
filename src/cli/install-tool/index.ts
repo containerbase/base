@@ -53,6 +53,7 @@ import { SbtInstallService } from '../tools/java/sbt.ts';
 import { ScalaInstallService } from '../tools/java/scala.ts';
 import { JsonnetBundlerInstallService } from '../tools/jb.ts';
 import { JqInstallService } from '../tools/jq.ts';
+import { JuliaInstallService } from '../tools/julia.ts';
 import { KubectlInstallService } from '../tools/kubectl.ts';
 import { KustomizeInstallService } from '../tools/kustomize.ts';
 import { MiseInstallService } from '../tools/mise.ts';
@@ -154,6 +155,7 @@ export async function prepareInstallContainer(): Promise<Container> {
   container.bind(INSTALL_TOOL_TOKEN).to(JavaJdkInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(JqInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(JsonnetBundlerInstallService);
+  container.bind(INSTALL_TOOL_TOKEN).to(JuliaInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KubectlInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(KustomizeInstallService);
   container.bind(INSTALL_TOOL_TOKEN).to(MavenInstallService);
