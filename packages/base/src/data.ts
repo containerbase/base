@@ -47,6 +47,7 @@ export const tools = {
   'java-jre': { minVersion: '8.0.302+8' },
   jb: { minVersion: '0.2.0' },
   jq: { minVersion: '1.7.1' },
+  julia: { minVersion: '1.6.0' },
   kas: { type: 'pip', parent: 'python' },
   kubectl: { minVersion: '1.13.11' },
   kustomize: { minVersion: '3.3.0' },
