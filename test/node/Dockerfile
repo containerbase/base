@@ -246,6 +246,23 @@ RUN set -ex; \
   yarn --version | grep '^4\.';
 
 #--------------------------------------
+# test: node prerelease
+#--------------------------------------
+
+FROM base AS test-prerelease
+
+RUN prepare-tool node
+
+USER 12021
+
+# don't update!! an exact prerelease is installed as is
+RUN install-tool node 27.0.0-alpha.0.0.0
+
+RUN set -ex; \
+  node --version; \
+  test "$(node --version)" = "v27.0.0-alpha.0.0.0"
+
+#--------------------------------------
 # test: npm (install-tool npm)
 #--------------------------------------
 FROM build AS teste
@@ -991,3 +1008,4 @@ COPY --from=test-vp /.dummy /.dummy
 COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
 COPY --from=test-partial /.dummy /.dummy
+COPY --from=test-prerelease /.dummy /.dummy
