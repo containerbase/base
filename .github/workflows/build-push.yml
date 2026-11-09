@@ -112,7 +112,7 @@ jobs:
           echo "CACHE_WEEK=$(date +%U)" >> "${GITHUB_ENV}"
 
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@a9b528b503e3b9d8e08cabbd90c66cd7382af443 # v5.4.4
+        uses: containerbase/internal-tools/setup@11714601caf3fca48bb0c28845e41d2f8b44bae4 # v5.4.6
         with:
           checkout: false
           apt-proxy: true
