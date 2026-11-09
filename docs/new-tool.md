@@ -217,7 +217,7 @@ Resolvers are bound with `container.bind(TOOL_VERSION_RESOLVER).to(...)` in the 
 1. [`src/cli/install-tool/index.ts`](../src/cli/install-tool/index.ts) - import the class and bind it:
 
    ```ts
-   container.bind(INSTALL_TOOL_TOKEN).to(BufInstallService);
+   container.bind(INSTALL_TOOL_TOKEN).to(AubeInstallService);
    ```
 
    Both the import list and the bind list are alphabetical.
