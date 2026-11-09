@@ -97,7 +97,7 @@ RUN set -ex; cd /tmp/aube; \
 FROM test-node AS test-renovate
 
 # renovate: datasource=npm
-RUN install-tool renovate 44.181.8
+RUN install-tool renovate 44.222.5
 
 # ARG RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 # # renovate: datasource=npm
