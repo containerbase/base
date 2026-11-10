@@ -104,7 +104,8 @@ export class LinkToolService {
       content += `${body}\n`;
     }
 
-    content += src;
+    // keep argv0 so tools dispatching on it (e.g. mise shims) still work
+    content += `exec -a "$0" ${src}`;
     if (args) {
       content += ` ${args}`;
     }

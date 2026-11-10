@@ -92,7 +92,9 @@ describe('cli/services/link-tool.service', async () => {
 
     expect(await fs.readFile(`${bin}/wrapped`, 'utf8')).toBe('binary');
     expect((await fs.lstat(tgt)).isSymbolicLink()).toBe(false);
-    expect(await fs.readFile(tgt, 'utf8')).toContain('/bin/bash "$@"');
+    expect(await fs.readFile(tgt, 'utf8')).toContain(
+      'exec -a "$0" /bin/bash "$@"',
+    );
   });
 
   test('rm removes symlinks, also dangling ones', async () => {
