@@ -77,7 +77,7 @@ RUN install-tool php 8.5.12
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.9
+RUN install-tool powershell v7.6.10
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.14.10
@@ -198,7 +198,7 @@ RUN install-tool flux v2.10.0
 RUN install-tool git-lfs v3.8.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.9
+RUN install-tool powershell v7.6.10
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 26.13.0
