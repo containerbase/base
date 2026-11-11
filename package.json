@@ -40,7 +40,7 @@
     "tools": "tsx tools/tools.ts"
   },
   "dependencies": {
-    "@nodable/compact-builder": "2.0.0",
+    "@nodable/compact-builder": "2.0.1",
     "@nodable/flexible-xml-parser": "1.11.3",
     "@renovatebot/pep440": "5.0.1",
     "@seald-io/nedb": "4.1.2",
