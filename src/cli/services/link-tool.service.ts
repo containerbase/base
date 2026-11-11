@@ -22,6 +22,13 @@ export interface ShellWrapperConfig {
    * extra content to be added to the shell wrapper
    */
   body?: string | undefined;
+
+  /**
+   * Runs the tool via `exec -a "$0"`, so it sees the name it was invoked with
+   * (e.g. a mise shim symlink). Off by default, because tools like Python and
+   * Swift locate their install from argv0.
+   */
+  keepArgv0?: boolean | undefined;
 }
 
 @injectable(bindingScopeValues.Singleton)
@@ -55,7 +62,15 @@ export class LinkToolService {
    */
   async shellwrapper(
     tool: string,
-    { args, name, srcDir, exports, extraToolEnvs, body }: ShellWrapperConfig,
+    {
+      args,
+      name,
+      srcDir,
+      exports,
+      extraToolEnvs,
+      body,
+      keepArgv0,
+    }: ShellWrapperConfig,
   ): Promise<void> {
     this._links.push(name ?? tool);
     const tgt = join(this.pathSvc.binDir, name ?? tool);
@@ -104,8 +119,7 @@ export class LinkToolService {
       content += `${body}\n`;
     }
 
-    // keep argv0 so tools dispatching on it (e.g. mise shims) still work
-    content += `exec -a "$0" ${src}`;
+    content += keepArgv0 ? `exec -a "$0" ${src}` : src;
     if (args) {
       content += ` ${args}`;
     }
