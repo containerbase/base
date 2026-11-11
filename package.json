@@ -1,6 +1,5 @@
 {
   "name": "containerbase",
-  "version": "0.0.0-semantic-release",
   "private": true,
   "license": "MIT",
   "author": "Rhys Arkins <rhys@arkins.net>",
