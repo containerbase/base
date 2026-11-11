@@ -365,7 +365,7 @@ importers:
     dependencies:
       semver:
         specifier: ^7.8.5
-        version: 7.8.5
+        version: 7.8.6
     devDependencies:
       '@types/semver':
         specifier: 7.8.0
@@ -3320,11 +3320,6 @@ packages:
   semver-regex@4.0.5:
     resolution: {integrity: sha512-hunMQrEy1T6Jr2uEVjrAIqjwWcQTgOAcIM52C8MY1EZSD3DDNft04XzvYKPqjED65bNVVko0YI38nYeEHCX3yw==}
     engines: {node: '>=12'}
-
-  semver@7.8.5:
-    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
-    engines: {node: '>=10'}
-    hasBin: true
 
   semver@7.8.6:
     resolution: {integrity: sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==}
@@ -6726,8 +6721,6 @@ snapshots:
   semver-compare@1.0.0: {}
 
   semver-regex@4.0.5: {}
-
-  semver@7.8.5: {}
 
   semver@7.8.6: {}
 
