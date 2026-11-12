@@ -242,7 +242,7 @@ RUN install-tool deno 2.9.8
 RUN install-tool apko 1.4.18
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.35.0
+RUN install-tool apm 0.35.1
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
 RUN install-tool devbox 0.20.0
