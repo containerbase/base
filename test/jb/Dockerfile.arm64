@@ -37,7 +37,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 #--------------------------------------
 FROM base AS test-jb
 
-# renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
+# renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
 RUN install-tool jb v0.6.0
 
 #--------------------------------------
