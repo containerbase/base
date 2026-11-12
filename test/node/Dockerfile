@@ -156,7 +156,7 @@ USER 12021
 
 # old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.2
+RUN install-tool node 24.22.3
 
 RUN npm install -g yarn
 RUN set -ex; \
@@ -453,7 +453,7 @@ FROM base AS testl
 
 # node 25+ doesn't bundle corepack, old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.2
+RUN install-tool node 24.22.3
 
 USER 12021
 
