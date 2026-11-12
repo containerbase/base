@@ -253,8 +253,8 @@ importers:
         version: 4.6.7
     devDependencies:
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.24
-        version: 2.0.24
+        specifier: 2.0.25
+        version: 2.0.25
       '@containerbase/oxlint-plugin':
         specifier: 1.1.0
         version: 1.1.0(oxlint@1.92.0(oxlint-tsgolint@7.0.2006))
@@ -433,8 +433,8 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@containerbase/istanbul-reports-html@2.0.24':
-    resolution: {integrity: sha512-UfeTUcZgBM58EYdvMiH8rpVU4YFI++0C2NGb26l0C+Zm1DAeoxUxfIn9F9WXZYEA/RsiuMs3Q21hWq0Y6jl8LQ==}
+  '@containerbase/istanbul-reports-html@2.0.25':
+    resolution: {integrity: sha512-+1JX3OHlLA6vL+NkB0CJsRHIQSvjPHSkpIuahFBhWj5Ux/toPhU0DWSx6Lh6iRwORAvIR1pbktlWRykb9BltIg==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
   '@containerbase/oxlint-plugin@1.1.0':
@@ -3974,7 +3974,7 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@containerbase/istanbul-reports-html@2.0.24':
+  '@containerbase/istanbul-reports-html@2.0.25':
     dependencies:
       istanbul-reports: 3.2.0
 
