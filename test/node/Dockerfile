@@ -194,7 +194,7 @@ USER 12021
 
 # old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.23.4
+RUN install-tool node 22.23.5
 
 RUN npm install -g yarn
 RUN set -ex; \
