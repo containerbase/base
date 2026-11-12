@@ -48,7 +48,7 @@ RUN prepare-tool erlang elixir
 FROM base AS testa
 
 # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
-# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=semver-extended
 RUN install-tool erlang 29.1.2.0
 
 # renovate: datasource=github-releases packageName=elixir-lang/elixir
@@ -108,7 +108,7 @@ USER 1001
 
 # previous major, no major updates (see .github/renovate.json)
 # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
-# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=docker
+# renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=semver-extended
 RUN install-tool erlang 28.5.0.8
 
 RUN install-tool elixir 1.20.5

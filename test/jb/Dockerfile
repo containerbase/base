@@ -79,7 +79,7 @@ FROM base AS testc
 
 USER 12021
 
-# renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=loose
+# renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
 RUN install-tool jb 0.6.0.1
 
 RUN set -ex; \
