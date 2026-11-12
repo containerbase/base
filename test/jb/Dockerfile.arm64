@@ -38,7 +38,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 FROM base AS test-jb
 
 # renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
-RUN install-tool jb v0.6.0
+RUN install-tool jb 0.6.0.1
 
 #--------------------------------------
 # Image: final
