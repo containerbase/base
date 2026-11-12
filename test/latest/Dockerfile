@@ -77,7 +77,7 @@ RUN install-tool php 8.5.12
 RUN set -ex; [ $(stat --format '%u' "/usr/local/bin/php") -eq ${USER_ID} ]
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.9
+RUN install-tool powershell v7.6.10
 
 # renovate: datasource=github-releases depName=python packageName=containerbase/python-prebuild
 ARG PYTHON_VERSION=3.14.10
@@ -183,7 +183,7 @@ RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+RUN install-tool git v2.56.1
 
 USER 12021
 
@@ -198,7 +198,7 @@ RUN install-tool flux v2.10.0
 RUN install-tool git-lfs v3.8.1
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.9
+RUN install-tool powershell v7.6.10
 
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 26.13.0
@@ -233,19 +233,19 @@ RUN install-tool buf v1.75.0
 RUN install-tool bun 1.4.4
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.9.7
+RUN install-tool nub 0.10.0
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.4.16
+RUN install-tool apko 1.4.18
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.35.0
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.19.0
+RUN install-tool devbox 0.20.0
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.26.2
@@ -266,7 +266,7 @@ RUN echo '{"a":1}' | jq -e '.a == 1'
 RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.2
+RUN install-tool mise 2026.11.6
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.24.1
@@ -275,7 +275,7 @@ RUN install-tool skopeo 1.24.1
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.8
+RUN install-tool tofu 1.13.9
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2
@@ -284,7 +284,7 @@ RUN install-tool protoc 36.2
 ARG VENDIR_VERSION=v0.46.3
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.2
+ARG HELMFILE_VERSION=v1.8.3
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.8.3

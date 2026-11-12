@@ -29,7 +29,7 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+RUN install-tool git v2.56.1
 
 #--------------------------------------
 # Image: build
@@ -63,7 +63,7 @@ RUN install-tool dart 3.13.7
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.19.0
+RUN install-tool devbox 0.20.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 10.0.403
@@ -87,7 +87,7 @@ RUN install-tool golang 1.27.3
 RUN install-tool helm v4.3.1
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.2
+RUN install-tool helmfile v1.8.3
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
 RUN install-tool kubectl v1.37.2
@@ -96,16 +96,16 @@ RUN install-tool kubectl v1.37.2
 RUN install-tool kustomize 5.8.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.2
+RUN install-tool mise 2026.11.6
 
 # renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.84.1
+RUN install-tool pixi v0.84.2
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
-RUN install-tool powershell v7.6.9
+RUN install-tool powershell v7.6.10
 
 # renovate: datasource=docker versioning=docker
 RUN install-tool rust 1.99.1
@@ -131,7 +131,7 @@ RUN set -ex; \
 RUN install-tool terraform 1.17.1
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.8
+RUN install-tool tofu 1.13.9
 
 # renovate: datasource=github-releases packageName=jsonnet-bundler/jsonnet-bundler
 RUN install-tool jb v0.6.0
@@ -187,7 +187,7 @@ FROM build AS test-java
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
 RUN install-tool java 25.0.5+8.0.LTS
 # renovate: datasource=gradle-version packageName=gradle versioning=gradle
-RUN install-tool gradle 9.8.2
+RUN install-tool gradle 9.9.1
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
 RUN install-tool maven 3.10.0
 
@@ -216,12 +216,12 @@ FROM build AS test-node
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 26.13.0
 # renovate: datasource=npm
-RUN install-tool pnpm 12.17.0
+RUN install-tool pnpm 12.18.0
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.1
 
 # renovate: datasource=github-releases packageName=voidzero-dev/vite-plus
-RUN install-tool vp 1.5.0
+RUN install-tool vp 1.5.1
 
 #--------------------------------------
 # Image: test-php
@@ -242,7 +242,7 @@ FROM build AS test-python
 RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool checkov 3.4.0
+RUN install-tool checkov 3.4.3
 # renovate: datasource=pypi
 RUN install-tool conan 2.34.0
 # renovate: datasource=pypi
@@ -254,7 +254,7 @@ RUN install-tool kas 5.5
 # renovate: datasource=pypi
 RUN install-tool pipenv 2026.10.4
 # renovate: datasource=pypi
-RUN install-tool pdm 2.29.6
+RUN install-tool pdm 2.29.7
 # renovate: datasource=pypi
 RUN install-tool poetry 2.5.1
 # renovate: datasource=pypi

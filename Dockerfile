@@ -1,7 +1,7 @@
 #--------------------------------------
 # Image: base
 #--------------------------------------
-FROM ghcr.io/containerbase/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+FROM ghcr.io/containerbase/ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
 
 ARG APT_HTTP_PROXY
 
@@ -29,7 +29,7 @@ COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/conta
 RUN install-containerbase
 
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+RUN install-tool git v2.56.1
 
 
 LABEL org.opencontainers.image.version="${CONTAINERBASE_VERSION}"

@@ -23,7 +23,7 @@ const builder = new CompactBuilderFactory({
 
 const parser = new XMLParser({
   skip: { declaration: true, pi: true, nsPrefix: true },
-  OutputBuilder: builder as any, // https://github.com/nodable/flexible-xml-parser/issues/3
+  OutputBuilder: builder,
 });
 
 @injectable()

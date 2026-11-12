@@ -251,6 +251,17 @@ describe('cli/services/tool-version-resolver.service', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    test('uses the resolver when only a prerelease matches the partial version, without a warning', async () => {
+      serve('lts-data', 200, {
+        ...toolFile('lts-data', ['26.0.0-rc1', ...lts]),
+        lts: true,
+      });
+
+      expect(await svc.resolve('lts-data', '26')).toBe('9.9.9');
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     test('uses the resolver when the online data has no lts field', async () => {
       serve('lts-data', 200, lts);
 

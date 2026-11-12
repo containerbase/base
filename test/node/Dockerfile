@@ -113,7 +113,7 @@ RUN test "$(yarn --version)" = "${YARN_VERSION}"
 FROM build AS testc
 
 # renovate: datasource=npm
-RUN install-tool pnpm 12.17.0
+RUN install-tool pnpm 12.18.0
 
 RUN set -ex; \
   pnpm --version;
@@ -244,6 +244,23 @@ RUN install-tool yarn 4
 
 RUN set -ex; \
   yarn --version | grep '^4\.';
+
+#--------------------------------------
+# test: node prerelease
+#--------------------------------------
+
+FROM base AS test-prerelease
+
+RUN prepare-tool node
+
+USER 12021
+
+# don't update!! an exact prerelease is installed as is
+RUN install-tool node 27.0.0-alpha.0.0.0
+
+RUN set -ex; \
+  node --version; \
+  test "$(node --version)" = "v27.0.0-alpha.0.0.0"
 
 #--------------------------------------
 # test: npm (install-tool npm)
@@ -524,7 +541,7 @@ RUN install-tool corepack 0.36.0
 
 # test if corepack is overriding pnpm
 # renovate: datasource=npm
-RUN install-tool pnpm 12.17.0
+RUN install-tool pnpm 12.18.0
 
 # renovate: datasource=npm
 RUN install-tool corepack 0.36.0
@@ -614,7 +631,7 @@ RUN install-tool yarn
 RUN install-npm del-cli
 
 # renovate: datasource=npm depName=renovate
-ARG RENOVATE_VERSION=44.181.8
+ARG RENOVATE_VERSION=44.222.5
 RUN install-tool renovate
 
 RUN set -ex; \
@@ -858,7 +875,7 @@ FROM build AS test-cleanup
 RUN install-tool pnpm 10.34.7
 
 # renovate: datasource=npm depName=pnpm
-ARG PNPM_VERSION=12.17.0
+ARG PNPM_VERSION=12.18.0
 RUN install-tool pnpm "${PNPM_VERSION}"
 
 RUN set -ex; \
@@ -949,7 +966,7 @@ USER root
 ARG VP_SETUP_NODE_VERSION=24.22.1
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
-ARG VP_VERSION=1.5.0
+ARG VP_VERSION=1.5.1
 RUN install-tool vp "${VP_VERSION}"
 
 COPY test/node/vp/sync-versions.mjs /test/vp/
@@ -991,3 +1008,4 @@ COPY --from=test-vp /.dummy /.dummy
 COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy
 COPY --from=test-partial /.dummy /.dummy
+COPY --from=test-prerelease /.dummy /.dummy

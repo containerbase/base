@@ -1,6 +1,5 @@
 {
   "name": "containerbase",
-  "version": "0.0.0-semantic-release",
   "private": true,
   "license": "MIT",
   "author": "Rhys Arkins <rhys@arkins.net>",
@@ -40,8 +39,8 @@
     "tools": "tsx tools/tools.ts"
   },
   "dependencies": {
-    "@nodable/compact-builder": "2.0.0",
-    "@nodable/flexible-xml-parser": "1.11.3",
+    "@nodable/compact-builder": "2.0.1",
+    "@nodable/flexible-xml-parser": "1.11.4",
     "@renovatebot/pep440": "5.0.1",
     "@seald-io/nedb": "4.1.2",
     "@sindresorhus/is": "8.1.0",
@@ -60,11 +59,11 @@
     "pino-pretty": "13.2.0",
     "pretty-ms": "9.3.1",
     "reflect-metadata": "0.2.2",
-    "semver": "7.8.5",
+    "semver": "7.8.6",
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@containerbase/istanbul-reports-html": "2.0.23",
+    "@containerbase/istanbul-reports-html": "2.0.24",
     "@containerbase/oxlint-plugin": "1.1.0",
     "@containerbase/semantic-release-pnpm": "1.4.4",
     "@tsconfig/node24": "24.0.5",
@@ -79,7 +78,7 @@
     "@types/shelljs": "0.10.0",
     "@vitest/coverage-v8": "4.1.12",
     "@vitest/ui": "4.1.12",
-    "@yao-pkg/pkg": "6.24.0",
+    "@yao-pkg/pkg": "6.25.0",
     "bats": "1.13.0",
     "bats-assert": "2.2.4",
     "bats-support": "0.3.0",
@@ -90,16 +89,16 @@
     "markdownlint-cli2": "0.24.0",
     "nock": "14.0.17",
     "npm-run-all2": "9.0.4",
-    "oxfmt": "0.75.0",
-    "oxlint": "1.90.0",
-    "oxlint-tsgolint": "7.0.2005",
-    "rolldown": "1.2.16",
+    "oxfmt": "0.77.0",
+    "oxlint": "1.92.0",
+    "oxlint-tsgolint": "7.0.2006",
+    "rolldown": "1.3.1",
     "semantic-release": "25.0.9",
     "shelljs": "0.10.0",
     "tsx": "4.23.15",
     "type-fest": "5.10.0",
     "typescript": "6.0.3",
-    "vite": "8.3.5",
+    "vite": "8.3.6",
     "vitest": "4.1.12"
   },
   "peerDependencies": {
@@ -110,5 +109,5 @@
     "node": ">=24.15.0",
     "pnpm": "^12.0.0"
   },
-  "packageManager": "pnpm@12.17.0"
+  "packageManager": "pnpm@12.18.0"
 }

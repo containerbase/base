@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
         with:
           save-cache: true
 
@@ -152,7 +152,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
 
       - name: lint
         run: |
@@ -167,7 +167,7 @@ jobs:
 
       - name: shellcheck
         if: ${{ github.event_name != 'merge_group' }}
-        uses: reviewdog/action-shellcheck@d0b8d5fd7fad6afdb6e1b6ce1778892be4d1f427 # v1.34.1
+        uses: reviewdog/action-shellcheck@b4ffc0b2a69f857f82b74d1310cd3e62e932f9f7 # v1.35.0
         with:
           fail_level: any
           reporter: github-pr-annotations
@@ -181,7 +181,7 @@ jobs:
           check_all_files_with_shebangs: 'true'
 
       - name: Install the workflow linters
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: jactionlint shellcheck zizmor
 
@@ -204,7 +204,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
 
       - name: Install ubuntu dependencies
         run: |
@@ -226,7 +226,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
 
       # the schema tests validate the embedded tool-versions data, so a
       # breaking change of its format fails here
@@ -259,7 +259,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
 
       - name: build
         run: pnpm build
@@ -294,7 +294,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -347,7 +347,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -403,7 +403,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -449,7 +449,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@f2e4e1527cd8d69b27bab6320cd38c01a963960a # v5.4.1
+        uses: containerbase/internal-tools/setup@f7e8ff4a2721149f4f6a8d387a4b2279bb78364a # v5.4.8
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:

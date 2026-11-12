@@ -21,7 +21,7 @@ RUN install-containerbase
 
 # Used for tests
 # renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+RUN install-tool git v2.56.1
 
 #--------------------------------------
 # Image: base
@@ -113,7 +113,7 @@ FROM base AS test-gradle-b
 RUN install-tool java-jre 25.0.5+8.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
-RUN install-tool gradle 9.8.2
+RUN install-tool gradle 9.9.1
 
 USER 12021
 

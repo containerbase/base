@@ -477,6 +477,36 @@ describe('cli/install-tool/index', () => {
       ];
 
       test.each([
+        // an exact prerelease is kept
+        { version: '27.0.0-alpha.0.0.0', expected: '27.0.0-alpha.0.0.0' },
+        // the newest lts release, not the newer prerelease
+        { version: 'latest', expected: '24.2.0' },
+        { version: '26', expected: '26.1.0' },
+      ])(
+        'resolves node $version to $expected with a prerelease in the data',
+        async ({ version, expected }) => {
+          await fs.writeFile(
+            `${dataDir}/v1/node.json`,
+            JSON.stringify({
+              tool: 'node',
+              updatedAt: '2026-10-16T00:00:00Z',
+              lts: true,
+              versions: [
+                { version: '27.0.0-alpha.0.0.0', prerelease: true },
+                { version: '26.1.0' },
+                { version: '24.2.0', lts: true },
+              ],
+            }),
+          );
+
+          // no interceptor, a request would fail the test
+          expect(await resolveVersion('node', version)).toBe(expected);
+
+          expect(logger.warn).not.toHaveBeenCalled();
+        },
+      );
+
+      test.each([
         {
           tool: 'pnpm',
           type: 'npm' as const,
