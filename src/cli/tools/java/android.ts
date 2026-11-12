@@ -214,7 +214,7 @@ const parser = new XMLParser({
       'sdk::sdk-repository.remotePackage.uses-license',
     ],
   },
-  OutputBuilder: builder as any, // https://github.com/nodable/flexible-xml-parser/issues/3
+  OutputBuilder: builder,
 });
 
 let repo: Promise<AndroidSdkRepo> | undefined;
