@@ -369,7 +369,7 @@ USER 12021
 RUN install-tool docker v28.5.2
 
 # renovate: datasource=github-releases packageName=docker/buildx
-RUN install-tool buildx v0.38.2
+RUN install-tool buildx v0.39.0
 
 # renovate: datasource=github-releases packageName=docker/compose
 RUN install-tool docker-compose v5.7.1
