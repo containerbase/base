@@ -134,7 +134,7 @@ RUN install-tool terraform 1.17.1
 RUN install-tool tofu 1.13.9
 
 # renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
-RUN install-tool jb v0.6.0
+RUN install-tool jb 0.6.0.1
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
 RUN install-tool vendir v0.46.3
