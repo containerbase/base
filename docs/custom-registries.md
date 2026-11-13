@@ -600,6 +600,19 @@ https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-arm64
 https://github.com/jqlang/jq/releases/download/jq-1.8.2/sha256sum.txt
 ```
 
+## `julia`
+
+Julia releases are downloaded from the urls of the [tool versions data](#tool-versions-data-containerbasegithubio), which point to:
+
+- `https://julialang-s3.julialang.org/bin/linux/`
+
+Samples:
+
+```txt
+https://julialang-s3.julialang.org/bin/linux/aarch64/1.13/julia-1.13.3-linux-aarch64.tar.gz
+https://julialang-s3.julialang.org/bin/linux/x64/1.13/julia-1.13.3-linux-x86_64.tar.gz
+```
+
 ## `kustomize`
 
 Kustomize releases are downloaded from:

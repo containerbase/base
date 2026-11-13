@@ -18,6 +18,7 @@ import {
   JavaPrepareService,
 } from '../tools/java/index.ts';
 import { SbtPrepareService } from '../tools/java/sbt.ts';
+import { JuliaPrepareService } from '../tools/julia.ts';
 import { NodePrepareService } from '../tools/node/index.ts';
 import { PhpPrepareService } from '../tools/php/index.ts';
 import { ConanPrepareService } from '../tools/python/conan.ts';
@@ -60,6 +61,7 @@ async function prepareContainer(): Promise<Container> {
   container.bind(PREPARE_TOOL_TOKEN).to(JavaPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJrePrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(JavaJdkPrepareService);
+  container.bind(PREPARE_TOOL_TOKEN).to(JuliaPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(MonoPrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(NodePrepareService);
   container.bind(PREPARE_TOOL_TOKEN).to(PhpPrepareService);
