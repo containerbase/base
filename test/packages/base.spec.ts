@@ -180,6 +180,7 @@ describe('packages/base', () => {
       ['java-jre', '8.0.302+8'],
       ['jb', '0.2.0'],
       ['jq', '1.7.1'],
+      ['julia', '1.6.0'],
       ['kubectl', '1.13.11'],
       ['kustomize', '3.3.0'],
       ['maven', '3.0.4'],
