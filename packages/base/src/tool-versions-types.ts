@@ -65,8 +65,9 @@ export interface ToolVersion {
   files?: ToolFile[];
   /**
    * The runtime constraint of this version per parent tool, like
-   * `{ node: '>=20.17.0' }`, as the raw string in the registry's syntax, only
-   * present when the registry has one.
+   * `{ node: '>=20.17.0' }`: the raw string in the registry's syntax, or a
+   * range derived from the release, like elixir's `{ erlang: '>=24 <25' }`,
+   * only present when there is one.
    */
   constraints?: Record<string, string>;
   /**
