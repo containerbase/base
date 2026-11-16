@@ -80,7 +80,7 @@ FROM base AS testc
 USER 12021
 
 # renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
-RUN install-tool jb 0.6.0.1
+RUN install-tool jb 0.6.0.2
 
 RUN set -ex; \
   jb --version; \
