@@ -248,7 +248,7 @@ RUN install-tool apm 0.35.1
 RUN install-tool devbox 0.20.0
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
-ENV GH_DASH_EXTENSION_VERSION=v4.26.2
+ENV GH_DASH_EXTENSION_VERSION=v4.26.3
 # renovate: datasource=github-releases packageName=cli/cli
 RUN install-tool gh v2.104.0
 
