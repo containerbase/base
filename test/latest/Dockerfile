@@ -269,7 +269,7 @@ RUN install-tool kubectl v1.37.2
 RUN install-tool mise 2026.11.7
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
-RUN install-tool skopeo 1.24.1
+RUN install-tool skopeo 1.25.1
 
 # renovate: datasource=github-releases packageName=getsops/sops
 RUN install-tool sops v3.13.3
