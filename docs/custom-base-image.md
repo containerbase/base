@@ -146,12 +146,16 @@ USER $USER_NAME
 
 `install-tool git` installs git from the containerbase prebuild into `/usr/local/bin`, not from Ubuntu.
 It only installs the libraries the prebuild needs, not the packages Ubuntu's git pulled in, and links nothing into `/usr/bin`.
-If your image needs any of these packages, install them yourself, e.g. `install-apt perl git-man`.
+If your image needs any of these packages, like `perl` or `liberror-perl`, install them yourself, e.g. `install-apt perl`.
 
 It also installs an empty `containerbase-git` package, which provides `git` in the installed version to apt.
-So apt packages depending on git, like Ubuntu's `git-lfs` or `tig`, use the prebuild and don't pull in Ubuntu's git.
+So apt packages depending on git, like Ubuntu's `tig`, use the prebuild and don't pull in Ubuntu's git.
 Apt runs their maintainer scripts with a `PATH` without `/usr/local/bin`, so `install-tool git` appends it in `/etc/apt/apt.conf.d/containerbase-git`, after the system folders, so scripts calling `git` find the prebuild.
-An explicit `install-apt git` and git add-ons like `git-svn` still install Ubuntu's git, the containerbase git stays first on the `PATH`.
+The package conflicts with Ubuntu's git, so an Ubuntu git installed before is removed.
+
+Ubuntu's `git`, `git-man` and `git-lfs` packages are blocked with an apt pin in `/etc/apt/preferences.d/containerbase-git`, so `install-apt git` keeps the containerbase git instead of installing a second one, and `install-apt git-lfs` fails.
+Use `install-tool git-lfs` instead of Ubuntu's `git-lfs`.
+Ubuntu's git add-ons, like `git-svn`, `git-email`, `gitk`, `git-gui` and `git-all`, can't be installed either, they need the exact Ubuntu git version.
 
 ## Custom temp directory
 
