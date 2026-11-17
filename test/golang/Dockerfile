@@ -89,6 +89,12 @@ FROM base AS testc
 
 RUN prepare-tool golang
 
+# neither mercurial nor bzr is installed
+RUN set -ex; \
+  if command -v hg; then exit 1; fi; \
+  if command -v bzr; then exit 1; fi; \
+  true
+
 # emulate emtpy containerbase folders
 RUN set -ex; \
   ls -la /tmp/containerbase/cache; \
