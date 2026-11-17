@@ -58,10 +58,13 @@ export class MiseInstallService extends BaseInstallService {
     });
   }
 
-  /** Links the `mise` binary into the global bin folder. */
+  /**
+   * Links the `mise` binary into the global bin folder. The wrapper keeps
+   * argv0, so mise shims, which are symlinks to mise, dispatch correctly.
+   */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
-    await this.shellwrapper({ srcDir: src });
+    await this.shellwrapper({ srcDir: src, keepArgv0: true });
   }
 
   /** Checks that `mise version` runs. */

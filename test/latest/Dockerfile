@@ -268,6 +268,16 @@ RUN install-tool kubectl v1.37.2
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.11.9
 
+# renovate: datasource=github-releases depName=jq packageName=jqlang/jq
+ARG MISE_JQ_VERSION=1.8.2
+
+# the shim is a symlink to the mise wrapper, it must run jq and not mise
+RUN set -ex; \
+    mise use -g "jq@${MISE_JQ_VERSION}"; \
+    out="$("${MISE_DATA_DIR:-${HOME}/.local/share/mise}/shims/jq" --version)"; \
+    echo "${out}"; \
+    test "${out}" = "jq-${MISE_JQ_VERSION}"
+
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.25.2
 

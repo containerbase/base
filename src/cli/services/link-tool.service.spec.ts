@@ -95,6 +95,18 @@ describe('cli/services/link-tool.service', async () => {
     expect(await fs.readFile(tgt, 'utf8')).toContain('/bin/bash "$@"');
   });
 
+  test('shellwrapper keeps argv0 on request', async () => {
+    const tgt = rootPath('opt/containerbase/bin/wrapped');
+
+    await expect(
+      svc.shellwrapper('wrapped', { srcDir: '/bin/bash', keepArgv0: true }),
+    ).resolves.toBeUndefined();
+
+    expect(await fs.readFile(tgt, 'utf8')).toContain(
+      'exec -a "$0" /bin/bash "$@"',
+    );
+  });
+
   test('rm removes symlinks, also dangling ones', async () => {
     const tgt = rootPath('opt/containerbase/bin/dangling');
     await svc.symlink('dangling', { srcDir: '/not/existing' });

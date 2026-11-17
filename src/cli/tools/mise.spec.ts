@@ -101,6 +101,7 @@ describe('cli/tools/mise', () => {
 
     expect(spy).toHaveBeenCalledExactlyOnceWith('mise', {
       srcDir: join(pathSvc.versionedToolPath('mise', '2026.2.13'), 'bin'),
+      keepArgv0: true,
     });
   });
 
