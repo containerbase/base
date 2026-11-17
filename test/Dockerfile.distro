@@ -102,13 +102,52 @@ RUN set -ex; \
   version="$(git --version | sed -n 's/^git version //p')"; \
   [ -n "${version}" ]; \
   dpkg -s containerbase-git | grep -Fx "Version: ${version}"; \
-  install-apt git-lfs tig; \
+  install-apt tig; \
   if dpkg -s git; then exit 1; fi; \
   [ "$(command -v git)" = /usr/local/bin/git ]; \
   [ ! -e /usr/bin/git ]; \
   git --version | grep -Fx "git version ${version}"; \
-  git lfs version; \
   tig --version; \
+  true
+
+# ubuntu's git, its add-ons and git-lfs are blocked, `git` resolves to the
+# installed containerbase package
+RUN set -ex; \
+  grep -Fx 'Pin-Priority: -1' /etc/apt/preferences.d/containerbase-git; \
+  install-apt git; \
+  if install-apt git-svn; then exit 1; fi; \
+  if install-apt git-lfs; then exit 1; fi; \
+  if dpkg -s git; then exit 1; fi; \
+  if dpkg -s git-lfs; then exit 1; fi; \
+  [ ! -e /usr/bin/git ]; \
+  true
+
+#--------------------------------------
+# Image: test-git-replace
+#--------------------------------------
+FROM base AS test-git-replace
+
+RUN touch /.dummy
+
+# without the pin, ubuntu's git replaces the containerbase package
+RUN set -ex; \
+  rm /etc/apt/preferences.d/containerbase-git; \
+  install-apt git; \
+  dpkg -s git | grep -Fx 'Status: install ok installed'; \
+  [ -x /usr/bin/git ]; \
+  true
+
+# installing git again removes ubuntu's git, an older version, as the current
+# one is already installed, no renovate updates
+RUN install-tool git 2.56.0
+
+# a removed package keeps its config files, so check the status
+RUN set -ex; \
+  if dpkg -s git | grep -Fx 'Status: install ok installed'; then exit 1; fi; \
+  [ ! -e /usr/bin/git ]; \
+  dpkg -s containerbase-git | grep -Fx 'Version: 2.56.0'; \
+  grep -Fx 'Pin-Priority: -1' /etc/apt/preferences.d/containerbase-git; \
+  git --version | grep -Fx 'git version 2.56.0'; \
   true
 
 #--------------------------------------
@@ -368,6 +407,7 @@ COPY --from=test-docker /.dummy /.dummy
 COPY --from=test-erlang /.dummy /.dummy
 COPY --from=test-git-apt /.dummy /.dummy
 COPY --from=test-git-min /.dummy /.dummy
+COPY --from=test-git-replace /.dummy /.dummy
 COPY --from=test-haskell /.dummy /.dummy
 COPY --from=test-java /.dummy /.dummy
 COPY --from=test-mono /.dummy /.dummy

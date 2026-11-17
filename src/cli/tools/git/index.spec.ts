@@ -35,7 +35,12 @@ const tarball = 'git archive';
 describe('cli/tools/git/index', () => {
   beforeAll(async () => {
     // the apt config ships with the image
-    await ensurePaths(['tmp', 'opt/containerbase/bin', 'etc/apt/apt.conf.d']);
+    await ensurePaths([
+      'tmp',
+      'opt/containerbase/bin',
+      'etc/apt/apt.conf.d',
+      'etc/apt/preferences.d',
+    ]);
   });
 
   beforeEach(() => {
@@ -186,7 +191,7 @@ describe('cli/tools/git/index', () => {
       }
     });
 
-    test('allows all safe directories and provides git to apt', async () => {
+    test('allows all safe directories, blocks ubuntu git and provides git to apt', async () => {
       const { svc, pathSvc } = await toolContext(GitInstallService);
       let root = '';
       let control = '';
@@ -217,6 +222,8 @@ describe('cli/tools/git/index', () => {
         Architecture: all
         Maintainer: containerbase <https://github.com/containerbase/base>
         Provides: git (= 1:2.56.0)
+        Conflicts: git
+        Replaces: git
         Description: git installed by containerbase
          Provides the git package for the git containerbase installed.
       `);
@@ -227,9 +234,16 @@ describe('cli/tools/git/index', () => {
         expect.any(Object),
       );
       expect(execaMock).toHaveBeenCalledWith(
+        'apt-get',
+        ['-qq', 'install', '-y', '--allow-downgrades', `${root}.deb`],
+        expect.objectContaining({
+          env: { DEBIAN_FRONTEND: 'noninteractive' },
+        }),
+      );
+      expect(execaMock).not.toHaveBeenCalledWith(
         'dpkg',
-        ['--install', `${root}.deb`],
-        expect.any(Object),
+        expect.anything(),
+        expect.anything(),
       );
       // the build folder is removed again
       await expect(fs.stat(root)).rejects.toThrow();
@@ -240,6 +254,16 @@ describe('cli/tools/git/index', () => {
           'utf8',
         ),
       ).toBe('DPkg::Path "/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin";\n');
+      expect(
+        await fs.readFile(
+          rootPath('etc/apt/preferences.d/containerbase-git'),
+          'utf8',
+        ),
+      ).toBe(fileContent`
+        Package: git git-man git-lfs
+        Pin: version *
+        Pin-Priority: -1
+      `);
     });
 
     test('prints the version', async () => {
