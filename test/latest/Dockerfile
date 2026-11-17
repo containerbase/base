@@ -473,10 +473,27 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: versions below the minimum are rejected
+#--------------------------------------
+FROM base AS test-min-version
+
+RUN touch /.dummy
+
+# bun's minimum is 0.5.3, no renovate updates
+RUN set -ex; \
+  if install-tool bun 0.5.2 > /min-version.log 2>&1; then cat /min-version.log; exit 1; fi; \
+  cat /min-version.log; \
+  grep -F 'bun 0.5.2 is older than the minimum supported version 0.5.3' /min-version.log; \
+  [ ! -e /opt/containerbase/tools/bun/0.5.2 ]; \
+  rm /min-version.log; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
+COPY --link --from=test-min-version /.dummy /.dummy
 COPY --link --from=testa /.dummy /.dummy
 COPY --link --from=testb-gitpod /.dummy /.dummy
 COPY --link --from=testc /.dummy /.dummy

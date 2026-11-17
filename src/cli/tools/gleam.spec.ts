@@ -102,12 +102,11 @@ describe('cli/tools/gleam', () => {
     );
   });
 
-  test('validate rejects versions before v0.23.0', async () => {
+  test('validate accepts semver versions, the minimum is 0.23.0', async () => {
     const { svc } = await toolContext(GleamInstallService);
 
     expect(await svc.validate('0.34.1')).toBe(true);
-    expect(await svc.validate('0.23.0')).toBe(true);
-    expect(await svc.validate('0.22.1')).toBe(false);
     expect(await svc.validate('not-a-version')).toBe(false);
+    expect(await svc.hostMinVersion()).toBe('0.23.0');
   });
 });

@@ -22,6 +22,7 @@ import {
 import {
   cleanAptFiles,
   cleanTmpFiles,
+  isBelowVersion,
   isDockerBuild,
   logger,
 } from '../utils/index.ts';
@@ -57,7 +58,10 @@ export class InstallToolService {
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test. At image build time, the install updates the
+   * install, link and test. A version older than the tool's minimum on the
+   * host, see `BaseInstallService.hostMinVersion`, fails before the tool is
+   * prepared, initialized or downloaded.
+   * At image build time, the install updates the
    * snapshot, see `SnapshotService`: on success the version folder is moved
    * there and linked back, then on every exit except a dry run the files
    * outside of the version folders are updated. A failed install also
@@ -121,6 +125,16 @@ export class InstallToolService {
           // snapshot existed, is moved too
           moveFolder = true;
           return;
+        }
+
+        // before anything is prepared or downloaded for a rejected version
+        const minVersion = await toolSvc.hostMinVersion();
+        if (minVersion && isBelowVersion(version, minVersion)) {
+          logger.fatal(
+            { tool, version, minVersion },
+            `${tool} ${version} is older than the minimum supported version ${minVersion}`,
+          );
+          return 1;
         }
 
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {

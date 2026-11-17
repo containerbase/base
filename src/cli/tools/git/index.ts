@@ -159,14 +159,6 @@ export class GitInstallService extends PrebuildInstallService {
   }
 
   /**
-   * Only versions from the first prebuild on can be installed. The version
-   * resolver already replaces older ones with the newest prebuild.
-   */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, minVersion);
-  }
-
-  /**
    * Pins ubuntu's `git`, `git-man` and `git-lfs` packages to a negative
    * priority, so a direct `apt-get install git` keeps the provided git
    * instead of adding a second one, and `git-lfs` comes from

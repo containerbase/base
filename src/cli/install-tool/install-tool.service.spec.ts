@@ -61,6 +61,15 @@ class RootOnlyInstallService extends TestInstallService {
   override readonly needsRoot = true;
 }
 
+/** a tool with a minimum supported version */
+@injectable()
+@injectFromHierarchy()
+class MinVersionInstallService extends TestInstallService {
+  override readonly name = 'min-version';
+
+  override readonly minVersion = '2.0.0';
+}
+
 /** a tool which is installed system wide, like `git` */
 @injectable()
 @injectFromHierarchy()
@@ -77,6 +86,7 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(NoUninstallInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(MinVersionInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -152,6 +162,39 @@ describe('cli/install-tool/install-tool.service', () => {
         { tool: 'bun', version: 'not-a-version' },
         'tool version not supported',
       );
+    });
+
+    test.each(['1.9.9', '2.0.0-rc.1'])(
+      'rejects %s below the minimum',
+      async (version) => {
+        const toolInstall = vi.spyOn(
+          MinVersionInstallService.prototype,
+          'install',
+        );
+        // a tool which would be prepared and initialized first
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsPrepare',
+        ).mockReturnValue(true);
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsInitialize',
+        ).mockReturnValue(true);
+
+        expect(await install.install('min-version', version)).toBe(1);
+
+        expect(prepareTools).not.toHaveBeenCalled();
+        expect(initializeTools).not.toHaveBeenCalled();
+        expect(toolInstall).not.toHaveBeenCalled();
+        expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+          { tool: 'min-version', version, minVersion: '2.0.0' },
+          `min-version ${version} is older than the minimum supported version 2.0.0`,
+        );
+      },
+    );
+
+    test('installs the minimum', async () => {
+      expect(await install.install('min-version', '2.0.0')).toBeUndefined();
     });
 
     test('cleans up the tool on failure', async () => {
