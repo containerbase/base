@@ -65,8 +65,9 @@ export const ToolVersion = z.object({
   files: z.array(ToolFile).min(1).exactOptional(),
   /**
    * the runtime constraint of this version per parent tool, like
-   * `{ node: '>=20.17.0' }`, as the raw string in the registry's syntax, only
-   * present when the registry has one
+   * `{ node: '>=20.17.0' }`: the raw string in the registry's syntax, or a
+   * range derived from the release, like elixir's `{ erlang: '>=24 <25' }`,
+   * only present when there is one
    */
   constraints: z.record(z.string().min(1), z.string().min(1)).exactOptional(),
   /**
