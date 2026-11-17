@@ -3,6 +3,7 @@ import fs, {
   mkdir,
   readFile,
   readdir,
+  readlink,
   rm,
   stat,
   writeFile,
@@ -471,6 +472,80 @@ describe('cli/services/data.service', () => {
         'migrated nedb database',
       );
     }
+  });
+
+  test('migrates packages of an older version with their type', async () => {
+    const { binDir, toolsPath } = await child.getAsync(PathService);
+    await writeNedb();
+    await writeFile(
+      `${dataDir}/links.nedb`,
+      codeBlock`
+        {"name":"del","tool":{"name":"del-cli","version":"5.0.0"},"_id":"l1"}
+        {"name":"npx","tool":{"name":"node","version":"20.0.0"},"_id":"l2"}
+      `,
+    );
+    await writeFile(
+      `${dataDir}/types.nedb`,
+      codeBlock`
+        {"name":"pnpm","type":"npm","_id":"t1"}
+        {"name":"del-cli","type":"npm","_id":"t2"}
+      `,
+    );
+    await rm(toolsPath, { recursive: true, force: true });
+    await mkdir(`${toolsPath}/del-cli/5.0.0`, { recursive: true });
+    await mkdir(binDir, { recursive: true });
+    await writeFile(`${binDir}/del`, `${toolsPath}/del-cli/5.0.0/bin/del\n`);
+
+    const db = await svc.db();
+
+    expect(rows(db, 'types')).toEqual([
+      { name: 'pnpm', type: 'npm' },
+      { name: 'npm+del-cli', type: 'npm' },
+    ]);
+    expect(rows(db, 'links')).toEqual([
+      { name: 'del', tool_name: 'npm+del-cli', tool_version: '5.0.0' },
+      { name: 'npx', tool_name: 'node', tool_version: '20.0.0' },
+    ]);
+    // the real folder and the wrapper stay, the new name links to the folder
+    expect((await readdir(toolsPath)).sort()).toEqual([
+      'del-cli',
+      'npm+del-cli',
+    ]);
+    expect(await readlink(`${toolsPath}/npm+del-cli`)).toBe('del-cli');
+    expect(await readFile(`${binDir}/del`, 'utf8')).toBe(
+      `${toolsPath}/del-cli/5.0.0/bin/del\n`,
+    );
+  });
+
+  test('keeps the database unmigrated when a package folder can not be linked', async () => {
+    const { toolsPath } = await child.getAsync(PathService);
+    await writeNedb();
+    await writeFile(
+      `${dataDir}/types.nedb`,
+      `${JSON.stringify({ name: 'del-cli', type: 'npm', _id: 't1' })}\n`,
+    );
+    await rm(toolsPath, { recursive: true, force: true });
+    await mkdir(`${toolsPath}/del-cli/5.0.0`, { recursive: true });
+    vi.spyOn(fs, 'symlink').mockRejectedValueOnce(
+      Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }),
+    );
+
+    await expect(svc.db()).rejects.toThrow('EACCES: permission denied');
+
+    // nothing is committed, the old databases stay
+    expect((await readdir(dataDir)).sort()).toEqual([
+      'containerbase.db',
+      'links.nedb',
+      'state.nedb',
+      'types.nedb',
+      'versions.nedb',
+    ]);
+    expect(await readdir(toolsPath)).toEqual(['del-cli']);
+    const db = new DatabaseSync(dbFile, { readOnly: true });
+    expect(db.prepare('PRAGMA user_version').get()).toEqual({
+      user_version: 0,
+    });
+    db.close();
   });
 
   test('fails the migration when an old database can not be read', async () => {

@@ -3,7 +3,13 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import { isMissing, logger, pathExists } from '../utils/index.ts';
-import { hasNedb, insertStores, readNedbStores } from './nedb.ts';
+import {
+  hasNedb,
+  insertStores,
+  linkPackageFolders,
+  prefixPackages,
+  readNedbStores,
+} from './nedb.ts';
 import { PathService } from './path.service.ts';
 import { RestoreService } from './restore.service.ts';
 import {
@@ -373,10 +379,14 @@ export class DataService {
    * into it in one transaction, then deletes the nedb files. A file with
    * skipped malformed documents is kept, so they can still be recovered. Does
    * nothing when another process migrated the database while the files were
-   * read.
+   * read. Packages of `install-gem`, `install-npm` and `install-pip` get their
+   * type prefix, see `prefixPackages`, their new tool folder links to the old
+   * one before the transaction commits, see `linkPackageFolders`, so a failed
+   * link leaves the database unmigrated.
    */
   private async _migrate(db: DatabaseSync): Promise<void> {
     const stores = await readNedbStores(this.pathSvc.dataPath);
+    const renames = prefixPackages(stores);
 
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -387,6 +397,7 @@ export class DataService {
       }
       db.exec(schema);
       insertStores(db, stores);
+      await linkPackageFolders(this.pathSvc, renames);
       db.exec('COMMIT');
     } catch (err) {
       db.exec('ROLLBACK');

@@ -41,7 +41,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { ResolverMap, getToolType } from '../tools/index.ts';
+import { ResolverMap, getToolType, packageName } from '../tools/index.ts';
 import { AndroidSdkCmdlineToolsInstallService } from '../tools/java/android.ts';
 import { GradleInstallService } from '../tools/java/gradle.ts';
 import {
@@ -350,7 +350,8 @@ async function prepareInstallDir(dryRun: boolean): Promise<void> {
 /**
  * Installs a tool version. `/opt/containerbase` is restored from the
  * build-time snapshot first, see `prepareInstallDir`. For a `gem`, `npm` or
- * `pip` type, a generic install service is registered for the package.
+ * `pip` type, a generic install service is registered for the package, which
+ * installs the package without the type prefix of `tool`, see `packageKey`.
  */
 export async function installTool(
   tool: string,
@@ -360,6 +361,7 @@ export async function installTool(
 ): Promise<number | void> {
   await prepareInstallDir(dryRun);
   const container = await prepareInstallContainer();
+  const pkg = packageName(tool);
   if (type) {
     switch (type) {
       case 'gem': {
@@ -367,6 +369,11 @@ export async function installTool(
         @injectFromHierarchy()
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
+
+          /** The gem, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
 
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {
@@ -392,6 +399,11 @@ export async function installTool(
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
+          /** The npm package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
+
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
@@ -415,6 +427,11 @@ export async function installTool(
         @injectFromHierarchy()
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
+
+          /** The pip package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
 
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {

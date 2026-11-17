@@ -175,7 +175,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   /**
-   * Links every console script of the package, or else the tool name, into
+   * Links every console script of the package, or else the package name, into
    * the global bin folder, with the python env.
    */
   override async postInstall(version: string): Promise<void> {
@@ -209,17 +209,17 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
       }
     }
 
-    // fallback to the tool name
+    // fallback to the package name
     await this.shellwrapper({
       srcDir: src,
-      name: this.name,
+      name: this.tool(version),
       extraToolEnvs: ['python'],
     });
   }
 
   /** Checks that the tool, or `pip-compile` for pip-tools, runs with `--version`. */
-  override async test(_version: string): Promise<void> {
-    let name = this.name;
+  override async test(version: string): Promise<void> {
+    let name = this.tool(version);
     switch (name) {
       case 'pip-tools':
         name = 'pip-compile';
@@ -236,7 +236,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   /** Path of the virtualenv's python binary. */
   private getPython(version: string, pythonVersion: string): string {
     return path.join(
-      this.pathSvc.versionedToolPath(this.tool(version), version),
+      this.pathSvc.versionedToolPath(this.name, version),
       pythonVersion,
       'bin',
       'python',
@@ -262,7 +262,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     version: string,
     pythonVersion: string,
   ): string[] {
-    switch (this.name) {
+    switch (this.tool(version)) {
       case 'copier':
         // Some templates require the ability to use custom Jinja extensions.
         return ['copier-templates-extensions'];

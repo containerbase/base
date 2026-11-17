@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { execa } from 'execa';
 import {
   afterEach,
   beforeAll,
@@ -201,6 +202,31 @@ describe('cli/install-tool/index', () => {
         await installTool(`dummy-${type}`, '1.0.0', false, type),
       ).toBeUndefined();
     });
+
+    test.each([
+      { type: 'gem' as const, svc: RubyBaseInstallService },
+      { type: 'npm' as const, svc: NpmBaseInstallService },
+      { type: 'pip' as const, svc: PipBaseInstallService },
+    ])(
+      'installs a $type package by its name without the type',
+      async ({ type, svc }) => {
+        vi.spyOn(svc.prototype, 'install').mockResolvedValue();
+        vi.spyOn(svc.prototype, 'needsInitialize').mockReturnValue(false);
+        vi.spyOn(svc.prototype, 'validate').mockResolvedValue(true);
+        vi.spyOn(svc.prototype, 'postInstall').mockResolvedValue();
+
+        expect(
+          await installTool(`${type}+dummy-pkg`, '1.0.0', false, type),
+        ).toBeUndefined();
+
+        // the version check runs the package, not the recorded name
+        expect(execa).toHaveBeenCalledWith(
+          'dummy-pkg',
+          ['--version'],
+          expect.anything(),
+        );
+      },
+    );
 
     test('prefers a modern service over a v2 shell tool with the same name', async () => {
       const script = rootPath('usr/local/containerbase/tools/v2/ruby.sh');
