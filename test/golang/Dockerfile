@@ -89,6 +89,12 @@ FROM base AS testc
 
 RUN prepare-tool golang
 
+# mercurial only, go dropped Bazaar support
+RUN set -ex; \
+  hg --version; \
+  if command -v bzr; then exit 1; fi; \
+  true
+
 # emulate emtpy containerbase folders
 RUN set -ex; \
   ls -la /tmp/containerbase/cache; \
