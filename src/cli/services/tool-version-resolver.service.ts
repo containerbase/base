@@ -43,8 +43,9 @@ function hostDistros(data: ToolVersions, distro: string): string[] {
   }
   // oldest first; Ubuntu only, other distro families like Debian need their own
   // ordering and builds. An unknown distro, eg. an unreadable os-release, gets
-  // none, so only releases without a `distros` list match.
-  const ubuntu: readonly string[] = DistroCode.options;
+  // none, so only releases without a `distros` list match. jammy is no longer
+  // a supported host, but its prebuilds are still used on newer releases.
+  const ubuntu: readonly string[] = ['jammy', ...DistroCode.options];
   return ubuntu.slice(0, ubuntu.indexOf(distro) + 1);
 }
 
@@ -243,7 +244,7 @@ function pick(
  * swift `6.2`, a two-part version whose line the data doesn't list is kept
  * without a warning, as the data may not list a new release yet.
  */
-// TODO: remove in the next major, when the data is required (#7962)
+// TODO: remove in a following major, when the data is required (#7962)
 const twoPartReleaseTools = new Set(['protoc', 'swift']);
 
 /**
@@ -396,7 +397,7 @@ export class ToolVersionResolverService {
       if (data && resolver.dataField && !latest && !isPartialVersion(version)) {
         // the version the resolver answers is the one the data lists, eg. the
         // java build `11.0.24+8` for `11.0.24`, it is never undefined here
-        // TODO: fail in the next major instead of only warning (#7962)
+        // TODO: fail in a following major instead of only warning (#7962)
         await this.checkExact(tool, resolved!);
       }
       return resolved;
@@ -497,7 +498,7 @@ export class ToolVersionResolverService {
           'no match in the tool-versions data, using the resolver',
         );
       } else {
-        // TODO: fail in the next major instead of using the resolver (#7962)
+        // TODO: fail in a following major instead of using the resolver (#7962)
         warnData(
           blockedWarning(
             tool,
@@ -511,7 +512,7 @@ export class ToolVersionResolverService {
       }
       return undefined;
     }
-    // TODO: fail in the next major instead of using a deprecated release (#7962)
+    // TODO: fail in a following major instead of using a deprecated release (#7962)
     if (deprecated && blocked !== undefined) {
       // a newer release needs a newer containerbase
       warnData(
