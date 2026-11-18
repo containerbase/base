@@ -143,11 +143,11 @@ describe('cli/tools/docker/compose', () => {
     );
   });
 
-  test('validate rejects versions before v2.0.1', async () => {
+  test('validate accepts semver versions, the minimum is 2.0.1', async () => {
     const { svc } = await toolContext(DockerComposeInstallService);
 
     expect(await svc.validate('2.29.7')).toBe(true);
-    expect(await svc.validate('1.29.2')).toBe(false);
     expect(await svc.validate('not-a-version')).toBe(false);
+    expect(await svc.hostMinVersion()).toBe('2.0.1');
   });
 });

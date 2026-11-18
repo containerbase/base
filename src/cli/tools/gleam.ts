@@ -1,14 +1,17 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { semverGte } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class GleamInstallService extends BaseInstallService {
   readonly name = 'gleam';
 
-  /** Older releases use other asset names. */
+  /**
+   * Older releases use other asset names
+   * (`gleam-v<version>-linux-amd64.tar.gz`) which can't be downloaded, older
+   * installs fail.
+   */
   override readonly minVersion = '0.23.0';
 
   /** The architecture name used by the gleam release assets. */
@@ -60,13 +63,5 @@ export class GleamInstallService extends BaseInstallService {
   /** Checks that `gleam --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
-  }
-
-  /**
-   * Accepts semver versions from 0.23.0, older releases use other asset names
-   * (`gleam-v<version>-linux-amd64.tar.gz`) which can't be downloaded.
-   */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, '0.23.0');
   }
 }

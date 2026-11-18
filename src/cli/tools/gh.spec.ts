@@ -104,12 +104,11 @@ describe('cli/tools/gh', () => {
     );
   });
 
-  test('validate accepts versions from 2.0.0', async () => {
+  test('validate accepts semver versions, the minimum is 2.0.0', async () => {
     const { svc } = await toolContext(GhInstallService);
 
     expect(await svc.validate('2.62.0')).toBe(true);
-    expect(await svc.validate('3.0.0')).toBe(true);
-    expect(await svc.validate('1.14.0')).toBe(false);
     expect(await svc.validate('not-a-version')).toBe(false);
+    expect(await svc.hostMinVersion()).toBe('2.0.0');
   });
 });

@@ -1,17 +1,14 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { semverGte } from '../../utils/index.ts';
-
-// Vite+ only publishes the `vp-checksums.txt` file since v0.3.1.
-const checksumMinVersion = '0.3.1';
 
 @injectable()
 @injectFromHierarchy()
 export class VpInstallService extends BaseInstallService {
   readonly name = 'vp';
   override readonly parent = 'node';
-  override readonly minVersion = checksumMinVersion;
+  /** Vite+ only publishes the `vp-checksums.txt` file since v0.3.1. */
+  override readonly minVersion = '0.3.1';
 
   /** The target name used by the Vite+ release assets. */
   private get target(): string {
@@ -29,12 +26,6 @@ export class VpInstallService extends BaseInstallService {
    * release's `vp-checksums.txt`.
    */
   override async install(version: string): Promise<void> {
-    if (!semverGte(version, checksumMinVersion)) {
-      throw new Error(
-        `Vite+ releases before ${checksumMinVersion} have no checksum file and are not supported`,
-      );
-    }
-
     const baseUrl = `https://github.com/voidzero-dev/vite-plus/releases/download/v${version}/`;
     const filename = `vp-${this.target}-unknown-linux-gnu.tar.gz`;
 

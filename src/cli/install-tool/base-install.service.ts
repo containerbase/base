@@ -22,6 +22,7 @@ import {
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
+  getDistro,
   isValid,
   spawn,
 } from '../utils/index.ts';
@@ -107,6 +108,23 @@ export abstract class BaseInstallService {
    * published as `distroMinVersion` in the base package metadata.
    */
   readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
+
+  /**
+   * The oldest version supported on the host: the `distroMinVersion` of the
+   * host distro, else `minVersion`, `undefined` for a tool without a minimum.
+   * Installing an older version fails, see `InstallToolService.install`.
+   */
+  async hostMinVersion(): Promise<string | undefined> {
+    if (this.distroMinVersion) {
+      const floors: Partial<Record<string, string>> = this.distroMinVersion;
+      const { versionCode } = await getDistro();
+      const floor = floors[versionCode];
+      if (floor) {
+        return floor;
+      }
+    }
+    return this.minVersion;
+  }
 
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;

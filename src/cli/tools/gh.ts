@@ -1,14 +1,13 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { semverGte } from '../utils/index.ts';
 
 @injectable()
 @injectFromHierarchy()
 export class GhInstallService extends BaseInstallService {
   readonly name = 'gh';
 
-  /** The oldest version `validate` accepts. */
+  /** The oldest version, which ships the used assets, older installs fail. */
   override readonly minVersion = '2.0.0';
 
   /**
@@ -55,10 +54,5 @@ export class GhInstallService extends BaseInstallService {
   /** Checks that `gh --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
-  }
-
-  /** Accepts semver versions from 2.0.0, which ship the used assets. */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, '2.0.0');
   }
 }
