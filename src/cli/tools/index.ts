@@ -6,7 +6,6 @@ export const NoPrepareTools = [
   'apm',
   'aube',
   'bazelisk',
-  'bower',
   'buf',
   'buildx',
   'bun',
@@ -31,7 +30,6 @@ export const NoPrepareTools = [
   'jq',
   'kubectl',
   'kustomize',
-  'lerna',
   'maven',
   'mise',
   'nix',
@@ -85,15 +83,6 @@ export const ResolverMap: Record<string, InstallToolType> = {
   pipenv: 'pip',
   poetry: 'pip',
   uv: 'pip',
-};
-
-/**
- * This tools are deprecated and should not be used anymore via `install-tool`.
- * They are implicit mapped from `install-tool` to `install-<type>`.
- */
-export const DeprecatedTools: Record<string, InstallToolType> = {
-  bower: 'npm',
-  lerna: 'npm',
 };
 
 /**
