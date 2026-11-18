@@ -110,6 +110,10 @@ For example: `docker build --build-arg APT_HTTP_PROXY=https://apt.company.com . 
 
 You can export `APT_HTTP_PROXY` to your local env and our build tools will use your apt proxy for the `http` sources.
 
+## Upgrading
+
+Read the [upgrading](./docs/upgrading.md) docs for the breaking changes of each major release and what to do instead.
+
 ## Custom base image
 
 To use a custom base image with `containerbase/base` read the [custom-base-image](./docs/custom-base-image.md) docs.
