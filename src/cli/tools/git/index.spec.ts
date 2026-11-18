@@ -124,6 +124,13 @@ describe('cli/tools/git/index', () => {
       await expect(svc.link('2.55.0')).resolves.toBeUndefined();
     });
 
+    test('snapshot and removeSnapshot do nothing', async () => {
+      const { svc } = await toolContext(GitInstallService);
+
+      await expect(svc.snapshot('2.55.0')).resolves.toBeUndefined();
+      await expect(svc.removeSnapshot('2.55.0')).resolves.toBeUndefined();
+    });
+
     test('allows all safe directories', async () => {
       const { svc } = await toolContext(GitInstallService);
 

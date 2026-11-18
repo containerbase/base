@@ -45,6 +45,10 @@ describe('cli/services/path.service', () => {
     expect(pathSvc.tmpDir).toBe(rootPath('tmp/containerbase'));
   });
 
+  test('snapshotDir', () => {
+    expect(pathSvc.snapshotDir).toBe(rootPath('var/lib/containerbase/opt'));
+  });
+
   test('sslPath', () => {
     expect(pathSvc.sslPath).toBe(rootPath('opt/containerbase/ssl'));
   });
@@ -1384,19 +1388,36 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.createDir(dir)).toBeUndefined();
   });
 
-  test('createDir: throws when the path is no folder', async () => {
+  test('createDir: keeps a link to a folder', async () => {
     const dir = rootPath('env123/dir');
     const link = rootPath('env123/link');
-    const file = rootPath('env123/file');
     await pathSvc.createDir(dir);
     await fs.symlink(dir, link);
-    await writeFile(file, '');
 
-    await expect(pathSvc.createDir(link)).rejects.toThrow(
-      `Path exists and is not a directory: ${link}`,
-    );
+    expect(await pathSvc.createDir(link)).toBeUndefined();
+    expect(await pathSvc.createDir(join(link, 'sub'))).toBeUndefined();
+
+    expect(await fs.readlink(link)).toBe(dir);
+    expect(await pathExists(join(dir, 'sub'), 'dir')).toBe(true);
+  });
+
+  test('createDir: throws when the path is no folder', async () => {
+    const file = rootPath('env123/file');
+    const fileLink = rootPath('env123/file-link');
+    const dangling = rootPath('env123/dangling');
+    await pathSvc.createDir(rootPath('env123'));
+    await writeFile(file, '');
+    await fs.symlink(file, fileLink);
+    await fs.symlink(rootPath('env123/missing'), dangling);
+
     await expect(pathSvc.createDir(file)).rejects.toThrow(
       `Path exists and is not a directory: ${file}`,
+    );
+    await expect(pathSvc.createDir(fileLink)).rejects.toThrow(
+      `Path exists and is not a directory: ${fileLink}`,
+    );
+    await expect(pathSvc.createDir(dangling)).rejects.toThrow(
+      `Path exists and is not a directory: ${dangling}`,
     );
   });
 

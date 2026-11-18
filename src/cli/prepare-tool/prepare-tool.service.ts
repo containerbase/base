@@ -1,8 +1,13 @@
 import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
-import { EnvService, PathService } from '../services/index.ts';
+import { EnvService, PathService, SnapshotService } from '../services/index.ts';
 import { NoPrepareTools } from '../tools/index.ts';
-import { cleanAptFiles, cleanTmpFiles, logger } from '../utils/index.ts';
+import {
+  cleanAptFiles,
+  cleanTmpFiles,
+  isDockerBuild,
+  logger,
+} from '../utils/index.ts';
 import type { BasePrepareService } from './base-prepare.service';
 
 export const PREPARE_TOOL_TOKEN = Symbol('PREPARE_TOOL_TOKEN');
@@ -16,16 +21,26 @@ export class PrepareToolService {
   private readonly pathSvc!: PathService;
   @inject(EnvService)
   private readonly envSvc!: EnvService;
+  @inject(SnapshotService)
+  private readonly snapshotSvc!: SnapshotService;
 
   /**
    * Prepares the given tools, or every tool for `all`, and marks them as
    * prepared. Must run as root. Links a configured `CONTAINERBASE_TMP_DIR`
-   * first, as tools write to the cache while preparing.
+   * first, as tools write to the cache while preparing. At image build time
+   * the files the prepare wrote, eg. the tool `env.sh`, are copied into the
+   * snapshot, see `SnapshotService.snapshotFiles`, unless `snapshot` is
+   * `false`, eg. for a prepare during an install, which updates the snapshot
+   * itself.
    *
    * @returns an exit code when the tools could not be prepared
    * @throws when the containerbase folders are not writable
    */
-  async prepare(tools: string[], dryRun = false): Promise<number | void> {
+  async prepare(
+    tools: string[],
+    dryRun = false,
+    snapshot = true,
+  ): Promise<number | void> {
     const supportedTools = this.toolSvcs.map((t) => t.name).sort();
     logger.trace(
       { tools: supportedTools },
@@ -72,6 +87,24 @@ export class PrepareToolService {
           }
           await this.pathSvc.setPrepared(tool);
         }
+      }
+    } finally {
+      await this.finish(snapshot, dryRun);
+    }
+  }
+
+  /**
+   * Ends a prepare, also an aborted one, as tools prepared before may have
+   * written files: at image build time updates the snapshot, unless
+   * `snapshot` is `false`, then cleans the apt and temp files and the root
+   * caches, also when the snapshot fails.
+   *
+   * @throws when the snapshot fails
+   */
+  private async finish(snapshot: boolean, dryRun: boolean): Promise<void> {
+    try {
+      if (snapshot && (await isDockerBuild())) {
+        await this.snapshotSvc.snapshotFiles();
       }
     } finally {
       await cleanAptFiles(dryRun);

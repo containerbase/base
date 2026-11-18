@@ -129,6 +129,20 @@ describe('cli/tools/node/utils', () => {
       await expect(svc.install('1.0.1')).resolves.toBeUndefined();
     });
 
+    test('snapshot: links the node version folder', async () => {
+      execaMock.mockResolvedValue({ failed: false, all: 'ok' });
+      const svc = await child.getAsync(CorepackInstallService);
+      await svc.install('1.0.2');
+      const versionPath = pathSvc.versionedToolPath('corepack', '1.0.2');
+
+      await expect(svc.snapshot('1.0.2')).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(versionPath, nodeVersion))).toBe(
+        join(pathSvc.snapshotDir, 'tools/corepack/1.0.2', nodeVersion),
+      );
+      expect((await fs.lstat(versionPath)).isDirectory()).toBe(true);
+    });
+
     test('install: updates node-gyp for npm v6', async () => {
       execaMock.mockImplementation(async (_cmd, args: string[]) => {
         if (args[1] === 'npm@6.14.18') {
