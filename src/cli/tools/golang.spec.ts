@@ -53,8 +53,13 @@ describe('cli/tools/golang', () => {
 
       expect(execaMock).toHaveBeenCalledWith(
         'apt-get',
-        expect.arrayContaining(['bzr', 'mercurial']),
+        ['-qq', 'install', '-y', 'mercurial'],
         { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
+      expect(execaMock).not.toHaveBeenCalledWith(
+        'apt-get',
+        expect.arrayContaining(['bzr']),
+        expect.anything(),
       );
       const goPath = join(pathSvc.cachePath, 'go');
       expect(await fs.readlink(join(envSvc.userHome, 'go'))).toBe(goPath);

@@ -11,11 +11,12 @@ export class GolangPrepareService extends BasePrepareService {
   override readonly name = 'golang';
 
   /**
-   * Installs the apt packages go suggests for its vcs imports, then
-   * initializes the cache and links `~/go` to it.
+   * Installs mercurial for go's vcs imports, then initializes the cache and
+   * links `~/go` to it. Go 1.27 dropped Bazaar support, so `bzr` isn't
+   * installed.
    */
   override async prepare(): Promise<void> {
-    await this.aptSvc.install('bzr', 'mercurial');
+    await this.aptSvc.install('mercurial');
 
     await this.initialize();
 
