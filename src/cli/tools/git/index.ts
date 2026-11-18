@@ -25,6 +25,12 @@ const gitEpoch = '1:';
 const aptConfig = `etc/apt/apt.conf.d/${packageName}`;
 
 /**
+ * The apt preferences file which blocks ubuntu's git and git-lfs, relative to
+ * the root folder.
+ */
+const aptPin = `etc/apt/preferences.d/${packageName}`;
+
+/**
  * The oldest git minor that still gets security fixes and the first version
  * of the containerbase git prebuilds, published as the minimum version. It is
  * above the 2.33.0 renovate needs.
@@ -128,21 +134,22 @@ export class GitInstallService extends PrebuildInstallService {
 
   /**
    * Marks every repository as safe, whoever owns it, in the system wide
-   * `/etc/gitconfig`, and provides the installed git to apt and its
-   * maintainer scripts.
+   * `/etc/gitconfig`, blocks ubuntu's git and provides the installed git to
+   * apt and its maintainer scripts instead.
    */
   override async postInstall(version: string): Promise<void> {
     // flutter workaround
     await this._spawn(this.name, ['config', '--system', 'safe.directory', '*']);
     await this.addAptPath();
+    await this.blockUbuntuGit();
     await this.registerPackage(version);
   }
 
   /**
    * Appends `/usr/local/bin` to the `PATH` apt runs dpkg and the maintainer
    * scripts with, which is `/usr/sbin:/usr/bin:/sbin:/bin` by default, so
-   * scripts calling `git`, like the one of ubuntu's `git-lfs`, find the
-   * installed git. It comes last, so ubuntu's own binaries still win.
+   * maintainer scripts calling `git` find the installed git. It comes last,
+   * so ubuntu's own binaries still win.
    */
   private async addAptPath(): Promise<void> {
     await fs.writeFile(
@@ -160,8 +167,26 @@ export class GitInstallService extends PrebuildInstallService {
   }
 
   /**
+   * Pins ubuntu's `git`, `git-man` and `git-lfs` packages to a negative
+   * priority, so a direct `apt-get install git` keeps the provided git
+   * instead of adding a second one, and `git-lfs` comes from
+   * `install-tool git-lfs`.
+   */
+  private async blockUbuntuGit(): Promise<void> {
+    await fs.writeFile(
+      join(this.envSvc.rootDir, aptPin),
+      fileContent`
+        Package: git git-man git-lfs
+        Pin: version *
+        Pin-Priority: -1
+      `,
+    );
+  }
+
+  /**
    * Builds and installs an empty deb which provides the `git` package in the
-   * installed version, so apt packages depending on git use the prebuild.
+   * installed version, so apt packages depending on git use the prebuild. It
+   * conflicts with ubuntu's git, so apt removes one installed before.
    */
   private async registerPackage(version: string): Promise<void> {
     await this.pathSvc.withTempDir(`${packageName}-`, async (tmp) => {
@@ -179,6 +204,8 @@ export class GitInstallService extends PrebuildInstallService {
           Architecture: all
           Maintainer: containerbase <https://github.com/containerbase/base>
           Provides: git (= ${gitEpoch}${version})
+          Conflicts: git
+          Replaces: git
           Description: git installed by containerbase
            Provides the git package for the git containerbase installed.
         `,
@@ -190,7 +217,13 @@ export class GitInstallService extends PrebuildInstallService {
         root,
         deb,
       ]);
-      await this._spawn('dpkg', ['--install', deb]);
+      // apt, unlike dpkg, removes a conflicting ubuntu git, an older git
+      // version is a downgrade of the deb
+      await this._spawn(
+        'apt-get',
+        ['-qq', 'install', '-y', '--allow-downgrades', deb],
+        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+      );
     });
   }
 }
