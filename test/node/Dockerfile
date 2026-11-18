@@ -220,6 +220,15 @@ RUN set -ex; cd test/a; npm i
 RUN install-npm del-cli 8.0.1
 RUN del -d test/a/**
 
+# the package is recorded and installed with its type
+RUN set -ex; \
+  containerbase-cli list tools | grep -E '^npm\+del-cli +8\.0\.1'; \
+  [ -d /opt/containerbase/tools/npm+del-cli/8.0.1 ]; \
+  uninstall-npm del-cli 8.0.1; \
+  [ ! -e /opt/containerbase/tools/npm+del-cli/8.0.1 ]; \
+  if command -v del; then exit 1; fi; \
+  true
+
 #--------------------------------------
 # test: node partial version
 #--------------------------------------
@@ -657,7 +666,10 @@ RUN set -ex; \
   grep -q '^renovate ' /tmp/tools-before.txt; \
   containerbase-cli list tools --json --out /tmp/tools-before.json; \
   cat /tmp/tools-before.json; \
-  grep -q '"name":"del-cli"' /tmp/tools-before.json; \
+  grep -q '"name":"npm+del-cli"' /tmp/tools-before.json; \
+  grep -q '"name":"npm+@microsoft/rush"' /tmp/tools-before.json; \
+  [ -d /opt/containerbase/tools/npm+del-cli ]; \
+  [ -d /opt/containerbase/tools/npm+@microsoft__rush ]; \
   uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
@@ -980,6 +992,42 @@ RUN set -ex; \
 RUN node /test/vp/sync-versions.mjs "${VP_VERSION}"
 
 #--------------------------------------
+# test: migrate a package of containerbase v14
+#--------------------------------------
+# the last v14 release, which records packages in its nedb databases without
+# their type, no renovate updates
+FROM ghcr.io/containerbase/base:14.67.2 AS test-migrate
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_CDN_NPM
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+RUN install-tool node 24
+RUN install-npm del-cli 8.0.1
+
+ARG TARGETARCH
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
+
+# the first run migrates the databases, the folder stays and the new name
+# links to it, the v14 wrapper keeps working
+RUN set -ex; \
+  touch /.dummy; \
+  containerbase-cli list tools | grep -E '^npm\+del-cli +8\.0\.1'; \
+  [ -L /opt/containerbase/tools/npm+del-cli ]; \
+  [ -d /opt/containerbase/tools/del-cli/8.0.1 ]; \
+  del --version; \
+  [ -f /opt/containerbase/versions/npm+del-cli ]; \
+  uninstall-npm del-cli 8.0.1; \
+  [ ! -e /opt/containerbase/tools/npm+del-cli ]; \
+  [ ! -e /opt/containerbase/tools/del-cli ]; \
+  [ ! -e /opt/containerbase/versions/npm+del-cli ]; \
+  [ ! -e /usr/local/bin/del ]; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -1004,6 +1052,7 @@ COPY --from=testq /.dummy /.dummy
 COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-cleanup /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
+COPY --from=test-migrate /.dummy /.dummy
 
 COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy

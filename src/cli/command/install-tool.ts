@@ -2,7 +2,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { installTool, resolveVersion } from '../install-tool/index.ts';
-import { ResolverMap, getToolType } from '../tools/index.ts';
+import { ResolverMap, getToolType, packageKey } from '../tools/index.ts';
 import { getVersionHelp } from '../tools/version-resolvers.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
@@ -38,8 +38,9 @@ export class InstallToolCommand extends Command {
   /**
    * Resolves the version to install, from the argument, the `<TOOL>_VERSION`
    * environment variable or the latest release, then installs the tool.
-   * Fails first when the containerbase folders are not writable, except for a
-   * dry run.
+   * Packages of `install-gem`, `install-npm` and `install-pip` are installed
+   * as `<type>+<name>`, see `packageKey`. Fails first when the containerbase
+   * folders are not writable, except for a dry run.
    */
   override async execute(): Promise<number | void> {
     const start = Date.now();
@@ -51,7 +52,10 @@ export class InstallToolCommand extends Command {
 
     let version = this.version?.replace(/^v/, ''); // trim optional 'v' prefix
 
-    const type = getToolType(ResolverMap, this.name) ?? this.type;
+    // `install-gem`, `install-npm` and `install-pip` record their packages
+    // with the type, so they never use a tool of the same name
+    const type = this.type ?? getToolType(ResolverMap, this.name);
+    const tool = this.type ? packageKey(this.type, this.name) : this.name;
 
     if (!isNonEmptyStringAndNotWhitespace(version)) {
       version = getVersion(this.name)?.replace(/^v/, ''); // trim optional 'v' prefix
@@ -71,7 +75,7 @@ export class InstallToolCommand extends Command {
       // `install-npm` and `install-pip` set `this.type` and always ask their
       // registry
       version = await resolveVersion(
-        this.name,
+        tool,
         version,
         type,
         this.type === undefined,
@@ -86,7 +90,7 @@ export class InstallToolCommand extends Command {
       version = version.replace(/^v/, ''); // trim optional 'v' prefix
 
       logger.info(`Installing ${type ?? 'tool'} ${this.name}@${version}...`);
-      const res = await installTool(this.name, version, this.dryRun, type);
+      const res = await installTool(tool, version, this.dryRun, type);
       if (res) {
         error = true;
       }

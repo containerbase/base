@@ -10,7 +10,7 @@ import {
   semverMaxSatisfying,
   semverSatisfies,
 } from '../../utils/index.ts';
-import { ResolverMap, getToolType } from '../index.ts';
+import { ResolverMap, getToolType, packageName } from '../index.ts';
 import { yarnPackage } from './npm.ts';
 import {
   type NodeVersionMeta,
@@ -162,11 +162,12 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
   }
 
   /**
-   * The npm package to look the releases up in, by default the tool itself.
+   * The npm package to look the releases up in, by default the tool without a
+   * `npm+` prefix, see `packageName` of the tools.
    * @param _version - the requested version, `undefined` or `latest` if none
    */
   protected packageName(_version: string | undefined): string {
-    return this.tool;
+    return packageName(this.tool);
   }
 
   /** Loads the abbreviated metadata of an npm package from the registry. */

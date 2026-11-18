@@ -33,8 +33,9 @@ describe('cli/command/install-gem', () => {
     vi.stubEnv('RAKE_VERSION', '13.0.6');
     expect(await cli.run(['rake'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
+    // recorded with the type, the `RAKE_VERSION` env of the package name
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'rake',
+      'gem+rake',
       '13.0.6',
       false,
       'gem',
@@ -54,8 +55,9 @@ describe('cli/command/install-gem', () => {
     vi.stubEnv('RAKE_VERSION', '13.0.6');
     expect(await cli.run(['install', 'gem', 'rake'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(1);
+    // recorded with the type, the `RAKE_VERSION` env of the package name
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'rake',
+      'gem+rake',
       '13.0.6',
       false,
       'gem',

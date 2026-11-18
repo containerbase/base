@@ -2,8 +2,12 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { z } from 'zod';
-import { isMissing, isNotFound, logger } from '../utils/index.ts';
+import { tools } from '../../../packages/base/src/data.ts';
+import { packageKey } from '../tools/index.ts';
+import type { InstallToolType } from '../utils';
+import { isMissing, isNotFound, logger, tool2path } from '../utils/index.ts';
 import { parentColumns } from './parent.ts';
+import type { PathService } from './path.service.ts';
 import { Tool } from './version.schema.ts';
 
 /**
@@ -168,6 +172,99 @@ export async function readNedbStores(dataPath: string): Promise<NedbStore[]> {
     }
   }
   return stores;
+}
+
+/** The install types whose packages are recorded with the type, see `packageKey`. */
+const packageTypes = new Set<string>(['gem', 'npm', 'pip']);
+
+/** The columns of the former nedb stores which hold a tool name. */
+const toolColumns: Record<string, number[]> = {
+  links: [1],
+  state: [0, 1],
+  types: [0],
+  versions: [0],
+};
+
+/**
+ * Renames the packages older versions installed with `install-gem`,
+ * `install-npm` or `install-pip` in the documents of the former nedb
+ * databases from `<name>` to `<type>+<name>`, see `packageKey`. Every name
+ * `install-tool` supports keeps its name, `install-tool` installs it by it:
+ * the tools of the `ResolverMap` and every tool with an own install service,
+ * like `yarn` or `renovate`, which older versions installed for a package of
+ * the same name.
+ * @returns the renamed packages, old name to new name
+ */
+export function prefixPackages(stores: NedbStore[]): Map<string, string> {
+  const renames = new Map<string, string>();
+  for (const [name, type] of stores.find((s) => s.name === 'types')?.rows ??
+    []) {
+    if (
+      typeof name === 'string' &&
+      typeof type === 'string' &&
+      packageTypes.has(type) &&
+      !Object.hasOwn(tools, name)
+    ) {
+      renames.set(name, packageKey(type as InstallToolType, name));
+    }
+  }
+  for (const { name, rows } of stores) {
+    for (const row of rows) {
+      for (const column of toolColumns[name] ?? []) {
+        const value = row[column];
+        const to = typeof value === 'string' && renames.get(value);
+        if (to) {
+          row[column] = to;
+        }
+      }
+    }
+  }
+  return renames;
+}
+
+/**
+ * Links the new tool folder of every package `prefixPackages` renamed to its
+ * old one, `tools/<type>+<name>` to `<name>`. The real folder stays, as the
+ * installs hold absolute paths into it, like npm's `bin` link or the
+ * shebangs of a pip virtualenv, and so do the shell wrappers, which keep
+ * working unchanged. Packages without a folder are skipped. The file of the
+ * current version is renamed, nothing points at it. A link an interrupted
+ * earlier migration already created is kept.
+ *
+ * @throws when a link can't be created, eg. another file has its name, or a
+ * file can't be renamed
+ */
+export async function linkPackageFolders(
+  pathSvc: PathService,
+  renames: Map<string, string>,
+): Promise<void> {
+  for (const [from, to] of renames) {
+    const folder = tool2path(from);
+    await fs
+      .rename(
+        join(pathSvc.versionPath, folder),
+        join(pathSvc.versionPath, tool2path(to)),
+      )
+      .catch((err: unknown) => {
+        if (!isNotFound(err)) {
+          throw err;
+        }
+      });
+    if (await isMissing(join(pathSvc.toolsPath, folder))) {
+      continue;
+    }
+    const link = join(pathSvc.toolsPath, tool2path(to));
+    try {
+      await fs.symlink(folder, link);
+    } catch (err) {
+      if (
+        (err as NodeJS.ErrnoException).code !== 'EEXIST' ||
+        (await fs.readlink(link).catch(() => null)) !== folder
+      ) {
+        throw err;
+      }
+    }
+  }
 }
 
 /** Inserts the documents of the former nedb databases into their tables. */

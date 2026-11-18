@@ -123,8 +123,7 @@ Some tools accept partial versions and install a matching release:
   Without a version, or with `latest`, the `latest` release is installed, or the newest release which is not deprecated when the dist tag is deprecated, the deprecated dist tag only with a warning when every release is deprecated.
   With `install-tool`, for `yarn`, `corepack`, `npm` and `pnpm` the dist tag and the deprecated versions come from the [tool-versions data](#tool-versions-data) when it has them, else from the npm registry, eg. for `yarn` 6 and newer.
   The tool-versions data keeps the previous `latest` until a new release is older than its minimum release age of 1 hour, so it can lag behind npm for a short time.
-  Packages installed with [`install-npm`](#install-npm-command), [`install-gem`](#install-gem-command) or [`install-pip`](#install-pip-command) never read the tool-versions data, they use their registry.
-  A package name which matches a tool with its own resolver, like `install-npm php`, uses the resolver of that tool instead.
+  Packages installed with [`install-npm`](#install-npm-command), [`install-gem`](#install-gem-command) or [`install-pip`](#install-pip-command) never read the tool-versions data, they use their registry, also when the package is named like a tool.
 - `conan`, `poetry` and any package installed with [`install-pip`](#install-pip-command): A major (`2`) or major.minor (`2.1`) version installs the newest matching release, prereleases and yanked releases are skipped.
   A version which exists as a release, like `5.2`, is kept, even a yanked one, which pip installs when pinned.
   Without access to pypi.org, eg. for a package from a private index, the version is kept too.
@@ -220,7 +219,7 @@ Installs a gem package into the container.
 
 Note: requires ruby to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-gem yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` gem. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the gem is installed and listed as `gem+<name>`, eg. `gem+rake`, so a gem named like a tool, eg. `install-gem yarn`, installs the `yarn` gem, not the `yarn` tool. The version still comes from `<NAME>_VERSION`, eg. `RAKE_VERSION`. Gems installed by older versions are renamed once when the databases are migrated, their folder stays, `tools/gem+<name>` links to it.
 
 #### Usage <a name="Usage-install-gem"></a>
 
@@ -270,7 +269,7 @@ Installs a npm package into the container.
 
 Note: requires node to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-npm yarn` installs the latest `@yarnpkg/cli-dist`, not the latest `yarn` package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the package is installed and listed as `npm+<name>`, eg. `npm+del-cli`, so a package named like a tool, eg. `install-npm yarn`, installs the `yarn` package, not the `yarn` tool. The version still comes from `<NAME>_VERSION`, eg. `DEL_CLI_VERSION`. Packages installed by older versions are renamed once when the databases are migrated, their folder stays, `tools/npm+<name>` links to it.
 
 #### Usage <a name="Usage-install-npm"></a>
 
@@ -320,7 +319,7 @@ Installs a pip package into the container.
 
 Note: requires python to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-pip yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` pip package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the package is installed and listed as `pip+<name>`, eg. `pip+poetry`, so a package named like a tool, eg. `install-pip poetry`, installs the package with pip without the `poetry` tool's own lookup. The version still comes from `<NAME>_VERSION`, eg. `POETRY_VERSION`. Packages installed by older versions are renamed once when the databases are migrated, their folder stays, `tools/pip+<name>` links to it.
 
 #### Usage <a name="Usage-install-pip"></a>
 
