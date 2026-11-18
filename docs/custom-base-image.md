@@ -268,3 +268,7 @@ An unreadable `.restored` counts as empty.
 As root, the restore gives the created folders, the copied files and the copied tool folders to the user and the root group.
 When the current user can't write the volume, it fails before changing anything.
 `docker` plugin links in `/tmp/containerbase` aren't restored.
+
+On a volume, the build-time `node`, `ruby` and `python` folders still link to the snapshot.
+So a plain `npm install -g`, `gem install`, `bundle install` without a path or `pip install` into these runtimes writes into the snapshot: it fails with a read-only root file system, otherwise it lands in the container layer and is lost with the container.
+Use `install-tool`, `install-npm`, `install-gem` or `install-pip` instead, they install into their own folders on the volume.

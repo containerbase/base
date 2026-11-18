@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Runs containerbase with a read-only root file system and a tmpfs `/tmp`, like
-# `docker run --read-only`. Builds `test/readonly/Dockerfile` on top of
-# `containerbase/test` (built by `pnpm test:docker`).
+# `docker run --read-only`, also with a volume at `/opt/containerbase`. Builds
+# `test/readonly/Dockerfile` on top of `containerbase/test` (built by
+# `pnpm test:docker`).
 #
 # Usage: test.sh [docker build args] [-- docker run args]
 # eg. `test.sh --network host --build-arg BASE_IMAGE=<image> -- --network host`
@@ -77,6 +78,81 @@ for user in root 12021; do
     echo "the configured tmp dir should be used"
     exit 1
   fi
+done
+
+node_dir=/opt/containerbase/tools/node/24.22.1
+php_dir=/opt/containerbase/tools/php/8.5.12
+volume=containerbase-test-readonly
+
+# Removes the test volume, if it exists.
+function remove_volume() {
+  docker volume rm --force "${volume}" > /dev/null
+}
+trap remove_volume EXIT
+
+# Runs the test image like `run` with the test volume at `/opt/containerbase`,
+# `nocopy` keeps a new volume empty instead of docker filling it from the image.
+function run_volume() {
+  local nocopy=$1
+  shift
+  run --mount "type=volume,src=${volume},dst=/opt/containerbase${nocopy:+,volume-nocopy}" "$@"
+}
+
+# Runs `run_volume` and prints its combined output, also to stderr when it
+# fails, so a failure inside `$(…)` shows its output.
+function run_volume_output() {
+  local out
+  if ! out=$(run_volume "$@" 2>&1); then
+    echo "${out}" >&2
+    return 1
+  fi
+  echo "${out}"
+}
+
+# an empty volume as root, and a volume docker filled from the image as root
+# and as the user, which owns the image's `/opt/containerbase`
+for setup in "root nocopy" "root" "12021"; do
+  read -r user nocopy <<< "${setup}"
+  echo "--- volume: user ${user} ${nocopy:-filled by docker}"
+  remove_volume
+
+  # the first start restores the volume: build-time folders link to the
+  # snapshot, `php` writes into its folder, so it's copied
+  output=$(run_volume_output "${nocopy}" --user "${user}" "${image}" bash -c "
+    set -ex
+    test -f /opt/containerbase/.restored
+    test -L ${node_dir}
+    test -d ${php_dir} && test ! -L ${php_dir}
+    node --version && npm --version && php --version && flux --version
+    containerbase-cli list tools
+  ")
+  echo "${output}"
+  grep 'restoring /opt/containerbase' > /dev/null <<< "${output}"
+  grep '^node ' > /dev/null <<< "${output}"
+
+  # a runtime install goes onto the volume
+  run_volume "${nocopy}" --user "${user}" "${image}" install-tool flux 0.27.2
+
+  # a second start with the same volume needs no restore and keeps it
+  output=$(run_volume_output "${nocopy}" --user "${user}" "${image}" bash -c "
+    set -ex
+    test -d /opt/containerbase/tools/flux/0.27.2
+    flux --version
+  ")
+  echo "${output}"
+  grep '0\.27\.2' > /dev/null <<< "${output}"
+  if grep 'restoring /opt/containerbase' > /dev/null <<< "${output}"; then
+    echo "a restored volume should not be restored again"
+    exit 1
+  fi
+
+  # the runtime tool can be uninstalled again
+  run_volume "${nocopy}" --user "${user}" "${image}" bash -c "
+    set -ex
+    uninstall-tool flux 0.27.2
+    test ! -e /opt/containerbase/tools/flux/0.27.2
+    test -L ${node_dir}
+  "
 done
 
 echo "--- read-only tests passed"
