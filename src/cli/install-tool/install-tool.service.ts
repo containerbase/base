@@ -5,6 +5,10 @@ import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  type BuildListCurrent,
+  type BuildListEntry,
+  type BuildListInstall,
+  type BuildListLink,
   BuildListService,
   CacheService,
   EnvService,
@@ -34,6 +38,31 @@ import {
 } from './install-legacy-tool.service.ts';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
+
+/**
+ * The parent versions the list has for the version a link points at: only the
+ * parent of the `c` line when it is the current version of the tool, none for
+ * a tool without a parent. A link to a version which isn't current falls back
+ * to the parents on the `i` lines of that version.
+ */
+function listedParents(
+  entries: readonly BuildListEntry[],
+  currents: ReadonlyMap<string, BuildListCurrent>,
+  { tool, version }: BuildListLink,
+): string[] {
+  const current = currents.get(tool);
+  if (current?.version === version) {
+    return current.parent ? [current.parent.version] : [];
+  }
+  return entries.flatMap((entry) =>
+    entry.kind === 'i' &&
+    entry.tool === tool &&
+    entry.version === version &&
+    entry.parent
+      ? [entry.parent.version]
+      : [],
+  );
+}
 
 @injectable()
 export class InstallToolService {
@@ -461,6 +490,109 @@ export class InstallToolService {
       return NotSupported;
     }
     return await this.restore(toolSvc, version);
+  }
+
+  /**
+   * Sets up an empty or older `/opt/containerbase` from the build-time list of
+   * the image: the version records, the types of the packages, the current
+   * versions, the links with their shims and the legacy version files. The
+   * versions of the image win over the ones installed at runtime, as they are
+   * recorded last, and only the `c` lines make a version current. Nothing is
+   * removed, and no tool is installed, the shims install a version on its
+   * first call, see `ensure`. Only jq is restored at once, as the other tools
+   * and the shell utils need it early, git is installed by apt and never
+   * restored. The initialized markers in the temp folder are cleared, as they
+   * outlive the volume, so the init which follows runs every initialize step
+   * again. At last the list is copied to the volume, so the next init has
+   * nothing to do.
+   */
+  async setupVolume(): Promise<void> {
+    await this.pathSvc.ensureBasePaths();
+    await this.pathSvc.clearInitialized();
+
+    // the whole list first, so a link knows the current parent of its tool
+    // wherever the `c` line is
+    const entries = await this._list.read();
+    const currents = new Map<string, BuildListCurrent>();
+    for (const entry of entries) {
+      if (entry.kind === 'c') {
+        currents.set(entry.tool, entry);
+      }
+    }
+
+    for (const entry of entries) {
+      if (entry.kind === 'i') {
+        await this.replayInstall(entry);
+      } else if (entry.kind === 'c') {
+        await this.replayCurrent(entry);
+      } else {
+        await this.replayLink(entry, listedParents(entries, currents, entry));
+      }
+    }
+
+    const jqVersion = currents.get('jq')?.version;
+    const jqSvc = this.toolSvcs.find((t) => t.name === 'jq');
+    if (jqVersion && jqSvc && (await this.isMissing(jqSvc, jqVersion))) {
+      try {
+        await this.restore(jqSvc, jqVersion);
+      } catch (err) {
+        logger.warn(
+          { err, tool: 'jq' },
+          'cannot restore the tool, the shim retries',
+        );
+      }
+    }
+
+    await this._list.copyToVolume();
+  }
+
+  /** Records a listed install in the databases, and the type of a package. */
+  private async replayInstall(entry: BuildListInstall): Promise<void> {
+    const { tool, version, parent } = entry;
+    const record = { name: tool, version, ...(parent && { parent }) };
+    if (!(await this.versionSvc.isInstalled(record))) {
+      await this.versionSvc.addInstalled(record);
+    }
+    if (entry.type !== 'tool' && !this.toolSvcs.some((t) => t.name === tool)) {
+      // a package without an install service of its own
+      await this.versionSvc.setType(tool, entry.type);
+    }
+  }
+
+  /**
+   * Makes a listed version the current one of its tool and writes its legacy
+   * version file.
+   */
+  private async replayCurrent(entry: BuildListCurrent): Promise<void> {
+    const { alias, tool, version, parent } = entry;
+    await this.versionSvc.setCurrent({
+      name: alias,
+      tool: { name: tool, version },
+      ...(parent && { parent }),
+    });
+    await this.versionSvc.update(tool, version);
+  }
+
+  /**
+   * Records a listed link, writes the shim of the command and points it at
+   * the wrapper of its version for one of the listed parent versions, when
+   * that exists, or else removes the pointer, so the shim installs the
+   * version on its first call. Parent versions recorded on the volume are
+   * not used, as the image may list another one.
+   *
+   * @param parents - the parent versions the list has for the linked version
+   */
+  private async replayLink(
+    entry: BuildListLink,
+    parents: readonly string[],
+  ): Promise<void> {
+    const { command, tool, version } = entry;
+    const link = { name: tool, version };
+    await this.versionSvc.setLink({ name: command, tool: link });
+    await this._link.writeShim(command);
+    if (!(await this._link.restorePointer(command, link, parents))) {
+      await this._link.removeStalePointer(command, true);
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 import { Container, injectFromHierarchy, injectable } from 'inversify';
 import type { ShellWrapperConfig } from '../services/index.ts';
 import {
+  BuildListService,
   DataService,
   IpcClient,
   LinkToolService,
@@ -498,6 +499,26 @@ export async function uninstallTool({
   const container = await prepareUninstallContainer(dryRun);
   const svc = await container.getAsync(InstallToolService);
   return svc.uninstall(tool, version, dryRun, recursive);
+}
+
+/**
+ * Sets up `/opt/containerbase` from the build-time list of the image, when it
+ * differs from the copy on the volume, see `InstallToolService.setupVolume`.
+ * Without a difference, eg. in an image without a volume, it only reads two
+ * small files. A failure is only logged, as the shims install what is missing.
+ */
+export async function setupVolume(): Promise<void> {
+  try {
+    const list = await createContainer().getAsync(BuildListService);
+    if (!(await list.changed())) {
+      return;
+    }
+    logger.debug('setting up the volume from the build-time list');
+    const container = await prepareInstallContainer();
+    await (await container.getAsync(InstallToolService)).setupVolume();
+  } catch (err) {
+    logger.warn({ err }, 'cannot set up the volume');
+  }
 }
 
 /**

@@ -79,6 +79,35 @@ export class BuildListService {
   }
 
   /**
+   * Whether the image has a list which differs from the copy in
+   * `/opt/containerbase`, which is the case for a new or an older volume.
+   * An image without a list never differs.
+   */
+  async changed(): Promise<boolean> {
+    const image = await readText(this.pathSvc.toolInstPath);
+    return (
+      image !== '' &&
+      image !== (await readText(this.pathSvc.volumeToolInstPath))
+    );
+  }
+
+  /**
+   * Copies the list of the image to `/opt/containerbase`, so the volume knows
+   * its state. A failure is only logged, the next init tries again. The list
+   * in `/var/lib/containerbase` is never written.
+   */
+  async copyToVolume(): Promise<void> {
+    try {
+      await this.pathSvc.writeFile(
+        this.pathSvc.volumeToolInstPath,
+        await readText(this.pathSvc.toolInstPath),
+      );
+    } catch (err) {
+      logger.warn({ err }, 'cannot copy the build-time tool list');
+    }
+  }
+
+  /**
    * Records an install which is linked, so it replaces an earlier record of
    * the same version, the current version of the `alias` and the earlier links
    * of the commands it linked. A failure is only logged, the list never fails
@@ -187,6 +216,11 @@ async function readMissingAsEmpty(file: string): Promise<string> {
     }
     throw err;
   }
+}
+
+/** The text of a list file, empty when it can't be read. */
+function readText(file: string): Promise<string> {
+  return fs.readFile(file, 'utf8').catch(() => '');
 }
 
 /** One line of the list. */
