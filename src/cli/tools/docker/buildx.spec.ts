@@ -113,11 +113,15 @@ describe('cli/tools/docker/buildx', () => {
     await expect(svc.link('0.18.0')).resolves.toBeUndefined();
 
     expect(spy).toHaveBeenCalledExactlyOnceWith('buildx', { srcDir: src });
-    expect(await fs.readlink(plugin)).toBe(join(src, 'buildx'));
+    // the plugin runs the shim, which selects the version
+    const shim = join(pathSvc.binDir, 'buildx');
+    expect(await fs.readlink(plugin)).toBe(shim);
 
-    // an existing plugin link is replaced
+    // a link to a version binary is replaced
+    await fs.rm(plugin);
+    await fs.symlink(join(src, 'buildx'), plugin);
     await expect(svc.link('0.18.0')).resolves.toBeUndefined();
-    expect(await fs.readlink(plugin)).toBe(join(src, 'buildx'));
+    expect(await fs.readlink(plugin)).toBe(shim);
   });
 
   test('runs the tool test', async () => {

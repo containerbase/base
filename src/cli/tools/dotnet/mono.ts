@@ -13,10 +13,15 @@ export class MonoPrepareService extends BasePrepareService {
   /**
    * Initializes the cache, links `~/.mono` to it, keeping any existing link,
    * and sets up the mono cert store with a hook that syncs it on ca
-   * certificate updates.
+   * certificate updates, when the hook is missing.
    */
   override async prepare(): Promise<void> {
     // TODO: install mono dependencies if needed
+    const src = join(this.pathSvc.sslPath, 'mono');
+    const hook = join(
+      this.envSvc.rootDir,
+      'etc/ca-certificates/update.d/containerbase-mono-keystore',
+    );
     await this.initialize();
     const mono = join(this.envSvc.userHome, '.mono');
     await this.pathSvc.createSymlink(
@@ -24,16 +29,12 @@ export class MonoPrepareService extends BasePrepareService {
       mono,
     );
 
-    const src = join(this.pathSvc.sslPath, 'mono');
-    if (!(await pathExists(src))) {
-      await this.pathSvc.createDir(src);
+    // the initialize creates the cert store folder, so the hook decides
+    if (!(await pathExists(hook))) {
       // inspired by debian mono packages
       const certSync = join(this.pathSvc.binDir, 'cert-sync');
       await fs.writeFile(
-        join(
-          this.envSvc.rootDir,
-          'etc/ca-certificates/update.d/containerbase-mono-keystore',
-        ),
+        hook,
         fileContent`
           #!/bin/sh
 
@@ -62,12 +63,16 @@ export class MonoPrepareService extends BasePrepareService {
     await fs.symlink(src, tgt);
   }
 
-  /** Creates the `.mono` folder in the containerbase cache. */
+  /**
+   * Creates the `.mono` folder in the containerbase cache and the mono cert
+   * store folder, which an empty `/opt/containerbase` misses.
+   */
   override async initialize(): Promise<void> {
     const mono = join(this.pathSvc.cachePath, '.mono');
     if (!(await pathExists(mono))) {
       await this.pathSvc.createDir(mono);
     }
+    await this.pathSvc.createDir(join(this.pathSvc.sslPath, 'mono'));
   }
 }
 

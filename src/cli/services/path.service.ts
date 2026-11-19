@@ -251,6 +251,20 @@ export class PathService {
   }
 
   /**
+   * Path to `/opt/containerbase/env.d`, the env files of the shell tools.
+   */
+  get envDPath(): string {
+    return join(this.installDir, 'env.d');
+  }
+
+  /**
+   * Path to `/opt/containerbase/lib`, which `/usr/local/lib` links to.
+   */
+  get libPath(): string {
+    return join(this.installDir, 'lib');
+  }
+
+  /**
    * Path to `/opt/containerbase/links`, the pointers of the commands to their
    * wrappers, see `LinkToolService`.
    */
@@ -325,6 +339,24 @@ export class PathService {
   }
 
   /**
+   * Creates a folder like `createDir`, but accepts a symlink to a folder, eg.
+   * for `lib` and `env.d` of an image which links them elsewhere. Anything
+   * else which prevents the folder, eg. a file or a dangling link, is only
+   * warned about, so it can't fail a command which didn't fail before.
+   */
+  private async createLinkableDir(path: string): Promise<void> {
+    try {
+      // follows a symlink
+      const stats = await fs.stat(path).catch(() => null);
+      if (!stats?.isDirectory()) {
+        await this.createDir(path);
+      }
+    } catch (err) {
+      logger.warn({ err, path }, 'cannot create the folder');
+    }
+  }
+
+  /**
    * Creates a symlink at `path` pointing to `target`. An existing file,
    * folder or link at `path` is left as is.
    */
@@ -396,6 +428,8 @@ export class PathService {
     await this.createDir(this.versionPath);
     await this.createDir(this.binDir);
     await this.createDir(this.linksPath);
+    await this.createLinkableDir(this.libPath);
+    await this.createLinkableDir(this.envDPath);
     await this.createDir(this.sslPath);
     await this.createDir(this._toolInitPath);
     await this.createDir(join(this.cachePath, '.cache'));
