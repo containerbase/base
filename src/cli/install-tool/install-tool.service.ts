@@ -342,34 +342,44 @@ export class InstallToolService {
   /**
    * Links the version onto the path and records it as the current one, unless
    * it already is. Then runs the post-install step, records the created shell
-   * wrappers and runs the tool test, unless tests are skipped.
+   * wrappers and runs the tool test, unless tests are skipped. The link
+   * context tells the linking which version it links.
    */
   private async linkAndTest(
     toolSvc: BaseInstallService,
     version: string,
     parent: ToolState | null,
   ): Promise<void> {
-    const current: ToolState = {
-      name: toolSvc.alias,
-      tool: { name: toolSvc.name, version },
-      ...(parent && { parent: parent.tool }),
-    };
-    if (await this.versionSvc.isCurrent(current)) {
-      logger.debug({ tool: toolSvc.name }, 'tool already linked');
-    } else {
-      logger.debug({ tool: toolSvc.name }, 'link tool');
-      await toolSvc.link(version);
-      await this.versionSvc.setCurrent(current);
-    }
+    this._link.setContext({
+      tool: toolSvc.name,
+      version,
+      dir: toolSvc.versionDir(version, parent?.tool.version),
+    });
+    try {
+      const current: ToolState = {
+        name: toolSvc.alias,
+        tool: { name: toolSvc.name, version },
+        ...(parent && { parent: parent.tool }),
+      };
+      if (await this.versionSvc.isCurrent(current)) {
+        logger.debug({ tool: toolSvc.name }, 'tool already linked');
+      } else {
+        logger.debug({ tool: toolSvc.name }, 'link tool');
+        await toolSvc.link(version);
+        await this.versionSvc.setCurrent(current);
+      }
 
-    logger.debug({ tool: toolSvc.name }, 'post-install tool');
-    await toolSvc.postInstall(version);
+      logger.debug({ tool: toolSvc.name }, 'post-install tool');
+      await toolSvc.postInstall(version);
 
-    await this._storeLinks(toolSvc.name, version);
+      await this._storeLinks(toolSvc.name, version);
 
-    logger.debug({ tool: toolSvc.name }, 'test tool');
-    if (!this.envSvc.skipTests) {
-      await toolSvc.test(version);
+      logger.debug({ tool: toolSvc.name }, 'test tool');
+      if (!this.envSvc.skipTests) {
+        await toolSvc.test(version);
+      }
+    } finally {
+      this._link.resetContext();
     }
   }
 

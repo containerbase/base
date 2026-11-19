@@ -195,6 +195,14 @@ describe('cli/install-tool/base-install.service', () => {
     expect(await svc.isInstalled('1.0.0')).toBe(true);
   });
 
+  test('versionDir is the versioned tool path', () => {
+    const dir = pathSvc.versionedToolPath('dummy', '1.0.0');
+
+    expect(svc.versionDir('1.0.0')).toBe(dir);
+    // only a tool installed per parent version has the parent as sub folder
+    expect(svc.versionDir('1.0.0', '22.11.0')).toBe(dir);
+  });
+
   test('isInitialized', async () => {
     expect(await svc.isInitialized()).toBe(false);
 

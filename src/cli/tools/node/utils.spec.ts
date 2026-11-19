@@ -223,6 +223,14 @@ describe('cli/tools/node/utils', () => {
       expect(await svc.isInstalled('9.9.9')).toBe(true);
     });
 
+    test('versionDir has the parent version as sub folder', async () => {
+      const svc = await child.getAsync(CorepackInstallService);
+
+      expect(svc.versionDir('9.9.9', nodeVersion)).toBe(
+        join(pathSvc.versionedToolPath('corepack', '9.9.9'), nodeVersion),
+      );
+    });
+
     test('link: string bin', async () => {
       const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
       const svc = await child.getAsync(CorepackInstallService);

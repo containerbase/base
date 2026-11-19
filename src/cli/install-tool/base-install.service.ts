@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
 import type { ToolFile } from '../../../packages/base/src/tool-versions-types.ts';
 import {
@@ -97,8 +98,26 @@ export abstract class BaseInstallService {
    */
   readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
 
+  /**
+   * Whether the version is installed into a folder per parent tool version
+   * below the versioned tool path, eg. a npm package per node version.
+   */
+  readonly parentScoped: boolean = false;
+
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;
+
+  /**
+   * The folder the version is installed into: the versioned tool path, for a
+   * `parentScoped` tool with the parent version as sub folder.
+   *
+   * @param parentVersion - the version of the parent tool the version is
+   * installed for
+   */
+  versionDir(version: string, parentVersion?: string): string {
+    const dir = this.pathSvc.versionedToolPath(this.name, version);
+    return this.parentScoped && parentVersion ? join(dir, parentVersion) : dir;
+  }
 
   /**
    * @deprecated Unused

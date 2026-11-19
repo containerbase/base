@@ -26,6 +26,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
 
   override readonly parent = 'ruby';
   override readonly type = 'gem';
+  override readonly parentScoped = true;
 
   /**
    * Installs the gem with the current ruby into a folder per ruby version

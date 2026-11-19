@@ -85,7 +85,7 @@ export class IpcServer {
   /** Links the requested tool and reports the result back to the client. */
   private async _linkTool(data: LinkToolIpcMessage, client: any): Promise<any> {
     try {
-      await this._link.shellwrapper(data.tool, data.config);
+      await this._link.legacyShellwrapper(data.tool, data.config);
       ipc.server.emit(client, 'done', { success: true });
     } catch (error) {
       logger.error({ err: error }, 'ipc link-tool error');

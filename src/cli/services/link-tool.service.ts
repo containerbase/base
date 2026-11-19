@@ -31,6 +31,22 @@ export interface ShellWrapperConfig {
   keepArgv0?: boolean | undefined;
 }
 
+/**
+ * The tool version an install links, set by the install for the install
+ * services.
+ */
+export interface LinkContext {
+  /** The tool name. */
+  tool: string;
+  /** The tool version. */
+  version: string;
+  /**
+   * The folder of the version, including the parent version segment for
+   * tools installed per parent version, eg. `tools/renovate/39.0.0/22.11.0`.
+   */
+  dir: string;
+}
+
 @injectable(bindingScopeValues.Singleton)
 export class LinkToolService {
   @inject(PathService)
@@ -39,6 +55,7 @@ export class LinkToolService {
   protected readonly envSvc!: EnvService;
 
   private readonly _links: string[] = [];
+  private _context: LinkContext | null = null;
 
   /**
    * Get the list of links created during the last shellwrapper() call
@@ -48,19 +65,51 @@ export class LinkToolService {
   }
 
   /**
-   * Clear the list of links created during the last shellwrapper() call
+   * The tool version the running install links, `null` outside of an install
+   * or for the legacy shell tools.
    */
-  clear(): void {
-    this._links.length = 0;
+  get context(): LinkContext | null {
+    return this._context;
   }
 
   /**
-   * Writes the shell wrapper which puts a tool on the path. It loads the
-   * containerbase env, initializes the tool on first use, sources the tool envs
-   * and finally executes the tool. An existing wrapper or symlink is replaced,
-   * never written through.
+   * Clear the list of links created during the last shellwrapper() call and
+   * the link context.
    */
-  async shellwrapper(
+  clear(): void {
+    this._links.length = 0;
+    this._context = null;
+  }
+
+  /** Sets the tool version the following links belong to. */
+  setContext(context: LinkContext): void {
+    this._context = context;
+  }
+
+  /**
+   * Resets only the link context, so later links are written as legacy ones
+   * again. The recorded links are kept, see `clear`.
+   */
+  resetContext(): void {
+    this._context = null;
+  }
+
+  /**
+   * Writes the shell wrapper which puts a tool binary on the path, for the
+   * install services.
+   */
+  shellwrapper(tool: string, config: ShellWrapperConfig): Promise<void> {
+    return this.legacyShellwrapper(tool, config);
+  }
+
+  /**
+   * Writes the full shell wrapper into the global bin folder, for the v1 and
+   * v2 shell tools, the ipc server and `link-tool`. It loads the containerbase
+   * env, initializes the tool on first use, sources the tool envs and finally
+   * executes the tool. An existing wrapper or symlink is replaced, never
+   * written through.
+   */
+  async legacyShellwrapper(
     tool: string,
     {
       args,
