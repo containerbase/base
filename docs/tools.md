@@ -97,6 +97,16 @@ Installs a tool into the container.
   install-tool node 22
   ```
 
+#### Minimum versions <a name="Minimum-versions-install-tool"></a>
+
+Installing a version older than the tool's minimum supported version fails before anything is prepared or downloaded.
+The minimum is the `minVersion` of the tool, or its `distroMinVersion` for the host Ubuntu release, see the [`@containerbase/base` package](../packages/base/README.md).
+Versions are compared as semver when both are semver, so a prerelease of the minimum, like `3.1.0-rc.1` for helm's `3.1.0`, is rejected too.
+Other versions, like `1.0` or `24.2.0.0`, are compared segment by segment, there a prerelease of the minimum, like `5.7.0-dev` for swift's `5.7`, is not rejected.
+A partial version or `latest` resolved below the minimum fails the same way.
+`git` is an exception: a version below its minimum, a partial version without a match in the tool-versions data or any other version which isn't an exact `X.Y.Z` one, like a prerelease `2.57.0-rc0`, installs the newest prebuild instead, with a warning, see [tool-specific versions](#Versions-install-tool).
+Packages installed with `install-gem`, `install-npm` or `install-pip` have no minimum.
+
 #### Tool-specific versions <a name="Versions-install-tool"></a>
 
 Some tools accept partial versions and install a matching release:

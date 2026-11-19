@@ -147,7 +147,6 @@ describe('cli/tools/git/index', () => {
     test.each([
       { version: '2.48.0', valid: true },
       { version: '2.56.0', valid: true },
-      { version: '2.47.3', valid: false },
       { version: 'foo', valid: false },
     ])('validates $version: $valid', async ({ version, valid }) => {
       const { svc } = await toolContext(GitInstallService);

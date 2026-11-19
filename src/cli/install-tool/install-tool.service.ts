@@ -28,6 +28,7 @@ import {
 import {
   cleanAptFiles,
   cleanTmpFiles,
+  isBelowVersion,
   isDockerBuild,
   listEntries,
   logger,
@@ -96,11 +97,13 @@ export class InstallToolService {
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test. Before the install it installs the current parent
-   * version again when its files are missing, see `restoreMissingParent`.
-   * Afterwards the oldest files are evicted from the download cache when the
-   * disk is too full, see `CacheService.evict`. A failing eviction is only
-   * logged.
+   * install, link and test. A version older than the tool's minimum on the
+   * host, see `BaseInstallService.hostMinVersion`, fails before the tool is
+   * prepared, initialized or downloaded. Before the install it installs the
+   * current parent version again when its files are missing, see
+   * `restoreMissingParent`. Afterwards the oldest files are evicted from the
+   * download cache when the disk is too full, see `CacheService.evict`. A
+   * failing eviction is only logged.
    *
    * @returns an exit code when the tool could not be installed, which can also
    * be the one of the parent version which could not be installed again
@@ -154,6 +157,16 @@ export class InstallToolService {
           }
           logger.info({ tool, version }, 'tool version missing, installing');
           missing = true;
+        }
+
+        // before anything is prepared or downloaded for a rejected version
+        const minVersion = await toolSvc.hostMinVersion();
+        if (minVersion && isBelowVersion(version, minVersion)) {
+          logger.fatal(
+            { tool, version, minVersion },
+            `${tool} ${version} is older than the minimum supported version ${minVersion}`,
+          );
+          return 1;
         }
 
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {

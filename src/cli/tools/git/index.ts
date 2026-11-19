@@ -156,14 +156,6 @@ export class GitInstallService extends PrebuildInstallService {
   }
 
   /**
-   * Only versions from the first prebuild on can be installed. The version
-   * resolver already replaces older ones with the newest prebuild.
-   */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, minVersion);
-  }
-
-  /**
    * Builds and installs an empty deb which provides the `git` package in the
    * installed version, so apt packages depending on git use the prebuild.
    */

@@ -82,12 +82,10 @@ describe('cli/tools/node/vp', () => {
     );
   });
 
-  test('rejects versions before the checksum file was published', async () => {
+  test('has the minimum from the first checksum file', async () => {
     const { svc } = await toolContext(VpInstallService);
 
-    await expect(svc.install('0.3.0')).rejects.toThrow(
-      'Vite+ releases before 0.3.1 have no checksum file and are not supported',
-    );
+    expect(await svc.hostMinVersion()).toBe('0.3.1');
   });
 
   test('link', async () => {

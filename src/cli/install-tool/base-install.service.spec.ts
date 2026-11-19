@@ -152,6 +152,15 @@ class BunInstallService extends DummyInstallService {
   override readonly name = 'bun';
 }
 
+/** A tool with a minimum, and an own one on resolute, like `swift`. */
+@injectable()
+@injectFromHierarchy()
+class FloorInstallService extends DummyInstallService {
+  override readonly name = 'floor';
+  override readonly minVersion = '5.7';
+  override readonly distroMinVersion = { resolute: '6.4.0' };
+}
+
 describe('cli/install-tool/base-install.service', () => {
   let child!: Container;
   let pathSvc!: PathService;
@@ -178,6 +187,26 @@ describe('cli/install-tool/base-install.service', () => {
     child.bind(BunInstallService).toSelf();
     pathSvc = await child.getAsync(PathService);
     svc = await child.getAsync(DummyInstallService);
+  });
+
+  test.each([
+    { code: 'noble', min: '5.7' },
+    { code: 'resolute', min: '6.4.0' },
+  ])('hostMinVersion on $code is $min', async ({ code, min }) => {
+    vi.mocked(getDistro).mockResolvedValue({
+      name: 'Ubuntu',
+      versionCode: code,
+      versionId: '24.04',
+    });
+    child.bind(FloorInstallService).toSelf();
+    const floor = await child.getAsync(FloorInstallService);
+
+    expect(await floor.hostMinVersion()).toBe(min);
+  });
+
+  test('hostMinVersion is undefined without a minimum', async () => {
+    expect(await svc.hostMinVersion()).toBeUndefined();
+    expect(getDistro).not.toHaveBeenCalled();
   });
 
   test('name and alias', () => {
