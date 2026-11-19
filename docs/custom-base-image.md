@@ -46,8 +46,8 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -92,8 +92,8 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 20.9.0
 # renovate: datasource=npm versioning=npm
@@ -136,11 +136,23 @@ COPY --from=containerbase /usr/local/containerbase/ /usr/local/containerbase/
 RUN install-containerbase
 
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.0
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.0
 
 USER $USER_NAME
 ```
+
+## git
+
+`install-tool git` installs git from the containerbase prebuild into `/opt/containerbase/tools/git/<version>`, not from Ubuntu, `/usr/local/bin` only holds the [shims](./linking.md) of its commands.
+It only installs the libraries the prebuild needs, not the packages Ubuntu's git pulled in, and links nothing into `/usr/bin`.
+If your image needs any of these packages, like `perl` and `liberror-perl` for git's Perl scripts, install them yourself, e.g. `install-apt perl liberror-perl`.
+Ubuntu's `git-man` documents Ubuntu's git version, not the one of the prebuild.
+
+It also installs an empty `containerbase-git` package, which provides `git` in the installed version to apt.
+So apt packages depending on git, like Ubuntu's `git-lfs` or `tig`, use the prebuild and don't pull in Ubuntu's git.
+Apt runs their maintainer scripts with a `PATH` without `/usr/local/bin`, so `install-tool git` appends it in `/etc/apt/apt.conf.d/containerbase-git`, after the system folders, so scripts calling `git` find the prebuild.
+An explicit `install-apt git` and git add-ons like `git-svn` still install Ubuntu's git, the containerbase git stays first on the `PATH`.
 
 ## Custom temp directory
 
@@ -209,9 +221,9 @@ When they differ, which is the case for a new volume and after an image update, 
 
 - it creates the folders, the database records, the shims in `bin` and the current versions
 - the versions of the image win over the ones installed at runtime
-- it installs `jq` at once, as the shell utils need it, `git` comes with the image
+- it installs `jq` at once, as the shell utils need it, `git` comes back on its first call like the other tools, also as a non-root user
 - it copies the list to the volume, so the next start has nothing to do
-- it never removes anything: versions of an older image stay on the volume until you remove them with `uninstall-tool` or `containerbase-cli cleanup`
+- it never removes anything: versions of an older image stay on the volume until you remove them with `uninstall-tool` or `containerbase-cli cleanup`, git versions can't be removed that way and stay
 
 All other tools are installed on their first call, see [how tools are linked](./linking.md#containerbase-cli-ensure).
 The first call of each tool downloads it, so a volume needs network access and doesn't work in an air-gapped setup.

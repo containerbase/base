@@ -23,7 +23,7 @@ describe('cli/tools/version-resolvers', () => {
     expect(getVersionHelp()).toBe(codeBlock`
       Some tools accept partial versions:
 
-      - \`android-sdk-cmdline-tools\`, \`bundler\`, \`checkov\`, \`cocoapods\`, \`composer\`, \`conan\`, \`copier\`, \`gradle\`, \`hashin\`, \`kas\`, \`maven\`, \`mercurial\`, \`mise\`, \`node\`, \`nuget\`, \`pdm\`, \`php\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
+      - \`android-sdk-cmdline-tools\`, \`bundler\`, \`checkov\`, \`cocoapods\`, \`composer\`, \`conan\`, \`copier\`, \`git\`, \`gradle\`, \`hashin\`, \`kas\`, \`maven\`, \`mercurial\`, \`mise\`, \`node\`, \`nuget\`, \`pdm\`, \`php\`, \`pip-tools\`, \`pipenv\`, \`poetry\`, \`uv\`: A major or major.minor version installs the newest matching release.
       - \`corepack\`, \`npm\`, \`pnpm\`, \`yarn\`: A major or major.minor version installs the matching \`latest\` release, else the newest matching one.
       - \`java\`, \`java-jdk\`, \`java-jre\`: A major, major.minor or major.minor.patch version, like \`21\` or \`11.0\`, installs the newest matching release.
 

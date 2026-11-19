@@ -61,15 +61,23 @@ export abstract class BaseInstallService {
 
   /**
    * Some tools can only be installed as root, so they are only available at
-   * image build time. Eg. git is installed via apt.
+   * image build time. Eg. git, which writes the system wide `/etc/gitconfig`.
    */
   readonly needsRoot: boolean = false;
 
   /**
-   * Tools which are not installed into a versioned tool path can't be
-   * uninstalled, eg. git is installed system wide via apt.
+   * Some tools can't be uninstalled, eg. git, which other tools depend on.
    */
   readonly canUninstall: boolean = true;
+
+  /**
+   * Whether installing the files of a version again, see
+   * `InstallToolService.restore`, eg. by a shim on a volume, needs root. By
+   * default the same as `needsRoot`.
+   */
+  get restoreNeedsRoot(): boolean {
+    return this.needsRoot;
+  }
 
   /**
    * The cache folders of the tool, relative to `PathService.cachePath`, eg.

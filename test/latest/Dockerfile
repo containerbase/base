@@ -182,8 +182,8 @@ FROM base AS testc
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 USER 12021
 
@@ -417,6 +417,37 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: git and git-lfs
+#--------------------------------------
+FROM base AS test-git
+
+# renovate: datasource=github-releases depName=git packageName=containerbase/git-prebuild
+ARG GIT_VERSION=2.56.1
+RUN install-tool git "${GIT_VERSION}"
+
+# renovate: datasource=github-releases depName=git-lfs packageName=git-lfs/git-lfs
+ARG GIT_LFS_VERSION=v3.8.1
+RUN install-tool git-lfs "${GIT_LFS_VERSION}"
+
+USER 12021
+
+# git is a shim, its pointer links to the wrapper in the version folder
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  tool="/opt/containerbase/tools/git/${GIT_VERSION}"; \
+  readlink /opt/containerbase/links/git | grep -Fx "${tool}/.wrappers/git"; \
+  git --exec-path | grep -Fx "${tool}/libexec/git-core"; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git lfs version | grep -F "git-lfs/${GIT_LFS_VERSION#v} "; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
+
+#--------------------------------------
 # test: v1 and v2 shell tools of custom images
 #--------------------------------------
 FROM base AS test-legacy
@@ -461,4 +492,5 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-git /.dummy /.dummy
 COPY --link --from=test-legacy /.dummy /.dummy

@@ -153,9 +153,11 @@ Some tools accept partial versions and install a matching release:
 - `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`: A missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, the lookups above are the fallback.
 - `php`, `composer`, `mise`: A missing version, `latest` and a major (`8`) or major.minor (`8.3`) version are resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
   When the data has no match, a missing version or `latest` is looked up directly: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
+- `git`: A missing version, `latest` and a major (`2`) or major.minor (`2.50`) version are resolved from the tool-versions data like for the other tools below, eg. `git 2.50` installs the newest `2.50.x`.
+  When the data has no match, a missing version or `latest` installs the latest containerbase prebuild, an exact `X.Y.Z` version from `2.48.0` on is kept, and any other version, like a partial version without a match, a version before `2.48.0`, a prerelease like `2.57.0-rc0` or a vendor version like `2.43.0-1ubuntu1`, falls back to the newest prebuild with a warning.
 
 The tools above keep their own rules, except where noted.
-`java`, `node`, `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
+`java`, `node`, `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `git` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
 They use the embedded data with a warning when the online data can't be loaded, like the other tools, and only ask their own lookup when neither data has a match.
 So while the embedded data is older than the max age, `latest` and partial versions of these tools first ask the online tool-versions data, and where `containerbase.github.io` is silently dropped, that waits up to the 30 s timeout of the tool-versions data before the embedded data or their own source answers, which `CONTAINERBASE_RESOLVER_OFFLINE=true` avoids.
 When the data lists matching releases, but all of them need a newer containerbase, a warning is logged and the tool's own lookup is used, like before.
@@ -177,7 +179,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
-  Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
+  Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `git`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
   These lookups go away in a following major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
   For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.

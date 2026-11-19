@@ -45,6 +45,7 @@ for user in root 12021; do
   run --user "${user}" "${image}" node --version
   run --user "${user}" "${image}" npm --version
   run --user "${user}" "${image}" flux --version
+  run --user "${user}" "${image}" git --version
 
   # installing tools needs a writable `/opt/containerbase`, so it fails before
   # downloading anything, use a version that isn't installed yet
@@ -127,12 +128,21 @@ trap 'rm -f "${volume}.list"; volume_rm "${volume}"; volume_rm "${copy}"' EXIT
 
 echo "--- volume: empty /opt/containerbase"
 
-# jq is restored by the init, git comes with the image and all other tools are
-# restored by their first call, an image has no other state than its build-time list
+# jq is restored by the init, all other tools, also git, are restored by their
+# first call, an image has no other state than its build-time list
 # shellcheck disable=SC2016
 volume_run "${volume}" "${image}" bash -c '
   set -ex
   test -d /opt/containerbase/tools/jq
+  image_git=$(grep -m1 "^c git git " /var/lib/containerbase/tool.inst | cut -d " " -f 4)
+  # git is a shim like the other tools, its first call installs it as the user
+  grep -q "ensure git " /opt/containerbase/bin/git
+  test ! -e "/opt/containerbase/tools/git/${image_git}"
+  git --version | grep -Fx "git version ${image_git}"
+  test -d "/opt/containerbase/tools/git/${image_git}/bin"
+  test -f /opt/containerbase/links/git
+  git --version | grep -Fx "git version ${image_git}"
+  git --exec-path | grep -Fx "/opt/containerbase/tools/git/${image_git}/libexec/git-core"
   test -f /opt/containerbase/.tool.inst
   cmp /var/lib/containerbase/tool.inst /opt/containerbase/.tool.inst
   test -z "$(find /opt/containerbase/tools/node -mindepth 1 -type d)"
