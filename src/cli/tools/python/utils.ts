@@ -153,11 +153,43 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     }
   }
 
-  /** Whether the version is installed for the current python version. */
+  /**
+   * Whether the version is installed for the current python version: the
+   * `dist-info` of the canonical name and version exists, or else the
+   * virtualenv has a python and a `dist-info` of the package, as pip may
+   * normalize the version, eg. `1.0` to `1.0.0`, or the package name.
+   */
   override async isInstalled(version: string): Promise<boolean> {
     const pythonVersion = await this.getPythonVersion();
-    return await this.pathSvc.fileExists(
-      this.packageDistPath(version, pythonVersion),
+    if (
+      await this.pathSvc.fileExists(
+        this.packageDistPath(version, pythonVersion),
+      )
+    ) {
+      return true;
+    }
+
+    const prefix = path.join(
+      this.pathSvc.versionedToolPath(this.name, version),
+      pythonVersion,
+    );
+    if (!(await this.pathSvc.fileExists(path.join(prefix, 'bin', 'python')))) {
+      return false;
+    }
+    const normalize = (name: string): string =>
+      name.toLowerCase().replaceAll(/[-_.]+/g, '_');
+    const wanted = normalize(this.tool(version));
+    const site = path.join(
+      prefix,
+      'lib',
+      `python${major(pythonVersion)}.${minor(pythonVersion)}`,
+      'site-packages',
+    );
+    const entries = await fs.readdir(site).catch(() => []);
+    return entries.some(
+      (entry) =>
+        entry.endsWith('.dist-info') &&
+        normalize(entry.split('-')[0]!) === wanted,
     );
   }
 

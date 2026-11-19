@@ -120,7 +120,8 @@ export abstract class BaseInstallService {
   }
 
   /**
-   * @deprecated Unused
+   * Whether the version is on the disk, by default whether its versioned tool
+   * path exists. Tools which install elsewhere override it.
    */
   async isInstalled(version: string): Promise<boolean> {
     return !!(await this.pathSvc.findVersionedToolPath(this.name, version));
