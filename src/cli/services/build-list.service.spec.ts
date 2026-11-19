@@ -241,6 +241,55 @@ describe('cli/services/build-list.service', () => {
     ]);
   });
 
+  test('changed compares the list of the image with the copy', async () => {
+    // no list in the image
+    expect(await svc.changed()).toBe(false);
+    await fs.writeFile(pathSvc.volumeToolInstPath, 'i tool node 22.0.0\n');
+    expect(await svc.changed()).toBe(false);
+
+    // a new volume
+    await fs.writeFile(pathSvc.toolInstPath, 'i tool node 22.0.0\n');
+    await fs.rm(pathSvc.volumeToolInstPath);
+    expect(await svc.changed()).toBe(true);
+
+    // an older volume
+    await fs.writeFile(pathSvc.volumeToolInstPath, 'i tool node 20.0.0\n');
+    expect(await svc.changed()).toBe(true);
+
+    // the same list
+    await fs.writeFile(pathSvc.volumeToolInstPath, 'i tool node 22.0.0\n');
+    expect(await svc.changed()).toBe(false);
+  });
+
+  test('copyToVolume only writes the copy', async () => {
+    await fs.writeFile(pathSvc.toolInstPath, 'i tool node 22.0.0\n');
+    const write = vi.spyOn(fs, 'writeFile');
+
+    await svc.copyToVolume();
+
+    expect(await fs.readFile(pathSvc.volumeToolInstPath, 'utf8')).toBe(
+      'i tool node 22.0.0\n',
+    );
+    expect(write).toHaveBeenCalledExactlyOnceWith(
+      pathSvc.volumeToolInstPath,
+      'i tool node 22.0.0\n',
+    );
+    expect(await svc.changed()).toBe(false);
+  });
+
+  test('copyToVolume only warns when the copy cannot be written', async () => {
+    await fs.writeFile(pathSvc.toolInstPath, 'i tool node 22.0.0\n');
+    const err = new Error('EROFS');
+    vi.spyOn(fs, 'writeFile').mockRejectedValueOnce(err);
+
+    await expect(svc.copyToVolume()).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err },
+      'cannot copy the build-time tool list',
+    );
+  });
+
   describe('an unreadable list', () => {
     const err = Object.assign(new Error('EACCES'), { code: 'EACCES' });
 

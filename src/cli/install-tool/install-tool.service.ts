@@ -5,6 +5,10 @@ import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  type BuildListCurrent,
+  type BuildListEntry,
+  type BuildListInstall,
+  type BuildListLink,
   BuildListService,
   CacheService,
   EnvService,
@@ -37,6 +41,34 @@ import {
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
+/**
+ * The parent versions the list has for the version a link points at: only the
+ * parent of the `c` line when it is the current version of the tool, none for
+ * a tool without a parent. A link to a version which isn't current falls back
+ * to the parents on the `i` lines of that version, the newest first like
+ * `VersionService.findParentVersions`.
+ */
+function listedParents(
+  entries: readonly BuildListEntry[],
+  currents: ReadonlyMap<string, BuildListCurrent>,
+  { tool, version }: BuildListLink,
+): string[] {
+  const current = currents.get(tool);
+  if (current?.version === version) {
+    return current.parent ? [current.parent.version] : [];
+  }
+  return entries
+    .flatMap((entry) =>
+      entry.kind === 'i' &&
+      entry.tool === tool &&
+      entry.version === version &&
+      entry.parent
+        ? [entry.parent.version]
+        : [],
+    )
+    .toReversed();
+}
+
 @injectable()
 export class InstallToolService {
   @inject(V1ToolInstallService)
@@ -64,11 +96,14 @@ export class InstallToolService {
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test. Afterwards the oldest files are evicted from the
-   * download cache when the disk is too full, see `CacheService.evict`. A
-   * failing eviction is only logged.
+   * install, link and test. Before the install it installs the current parent
+   * version again when its files are missing, see `restoreMissingParent`.
+   * Afterwards the oldest files are evicted from the download cache when the
+   * disk is too full, see `CacheService.evict`. A failing eviction is only
+   * logged.
    *
-   * @returns an exit code when the tool could not be installed
+   * @returns an exit code when the tool could not be installed, which can also
+   * be the one of the parent version which could not be installed again
    */
   async install(
     tool: string,
@@ -147,6 +182,10 @@ export class InstallToolService {
           logger.info(`Dry run: install tool ${tool} ...`);
           return;
         } else {
+          const res = await this.restoreMissingParent(parent);
+          if (res) {
+            return res;
+          }
           logger.debug({ tool }, 'install tool');
           await toolSvc.install(version);
           if (!missing) {
@@ -187,6 +226,37 @@ export class InstallToolService {
       this.ipc.stop();
       await this.cleanAfterInstall(dryRun);
     }
+  }
+
+  /**
+   * Installs the current parent version of a tool again when its files are
+   * missing, eg. on a volume set up from the build-time list, as the tools of
+   * a child, like npm packages, call the parent by its path and not through
+   * its shim. The link state is cleared afterwards, as the restore sets its
+   * own.
+   *
+   * @returns an exit code when the parent can't be installed
+   */
+  private async restoreMissingParent(
+    parent: ToolState | null,
+  ): Promise<number | void> {
+    const parentSvc = parent
+      ? this.toolSvcs.find((t) => t.name === parent.tool.name)
+      : undefined;
+    if (
+      !parent ||
+      !parentSvc ||
+      !(await this.isMissing(parentSvc, parent.tool.version))
+    ) {
+      return;
+    }
+    logger.info(
+      { tool: parentSvc.name, version: parent.tool.version },
+      'parent tool version missing, installing',
+    );
+    const res = await this.restore(parentSvc, parent.tool.version);
+    this._link.clear();
+    return res;
   }
 
   /**
@@ -433,7 +503,9 @@ export class InstallToolService {
    * the pointer of the command is missing or dangling. It never changes which
    * version any command runs: it recreates the pointer when the per-version
    * wrapper exists, else it installs the version the command points at again,
-   * after its parent, and writes the per-version wrappers. After an install
+   * after its parent, and writes the per-version wrappers. When the version is
+   * the current one of a tool with a parent, only the wrapper for the parent of
+   * the current record counts, else any recorded parent does. After an install
    * it only evicts the download cache, it removes no apt, tmp or cache files,
    * as it runs inside the command which called the shim.
    *
@@ -454,23 +526,130 @@ export class InstallToolService {
     }
 
     const { name: tool, version } = link.tool;
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (
       await this._link.restorePointer(
         command,
         link.tool,
-        await this.versionSvc.findParentVersions(link.tool),
+        // a parent version of an older volume must not win over the current one
+        await this.versionSvc.findSelectedParents(
+          link.tool,
+          toolSvc?.alias ?? tool,
+        ),
       )
     ) {
       logger.debug({ command, tool, version }, 'pointer restored');
       return;
     }
 
-    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
     if (!toolSvc || toolSvc instanceof V2ToolInstallService) {
       logger.error({ command, tool }, 'tool cannot be installed again');
       return NotSupported;
     }
     return await this.restore(toolSvc, version);
+  }
+
+  /**
+   * Sets up an empty or older `/opt/containerbase` from the build-time list of
+   * the image: the version records, the types of the packages, the current
+   * versions, the links with their shims and the legacy version files. The
+   * versions of the image win over the ones installed at runtime, as they are
+   * recorded last, and only the `c` lines make a version current. Nothing is
+   * removed, and no tool is installed, the shims install a version on its
+   * first call, see `ensure`. Only jq is restored at once, as the other tools
+   * and the shell utils need it early, git is installed by apt and never
+   * restored. The initialized markers in the temp folder are cleared, as they
+   * outlive the volume, so the init which follows runs every initialize step
+   * again. At last the list is copied to the volume, so the next init has
+   * nothing to do.
+   */
+  async setupVolume(): Promise<void> {
+    await this.pathSvc.ensureBasePaths();
+    await this.pathSvc.clearInitialized();
+
+    // the whole list first, so a link knows the current parent of its tool
+    // wherever the `c` line is
+    const entries = await this._list.read();
+    const currents = new Map<string, BuildListCurrent>();
+    for (const entry of entries) {
+      if (entry.kind === 'c') {
+        currents.set(entry.tool, entry);
+      }
+    }
+
+    for (const entry of entries) {
+      if (entry.kind === 'i') {
+        await this.replayInstall(entry);
+      } else if (entry.kind === 'c') {
+        await this.replayCurrent(entry);
+      } else {
+        await this.replayLink(entry, listedParents(entries, currents, entry));
+      }
+    }
+
+    const jqVersion = currents.get('jq')?.version;
+    const jqSvc = this.toolSvcs.find((t) => t.name === 'jq');
+    if (jqVersion && jqSvc && (await this.isMissing(jqSvc, jqVersion))) {
+      try {
+        await this.restore(jqSvc, jqVersion);
+      } catch (err) {
+        logger.warn(
+          { err, tool: 'jq' },
+          'cannot restore the tool, the shim retries',
+        );
+      }
+    }
+
+    await this._list.copyToVolume();
+  }
+
+  /** Records a listed install in the databases, and the type of a package. */
+  private async replayInstall(entry: BuildListInstall): Promise<void> {
+    const { tool, version, parent } = entry;
+    const record = { name: tool, version, ...(parent && { parent }) };
+    if (!(await this.versionSvc.isInstalled(record))) {
+      await this.versionSvc.addInstalled(record);
+    }
+    if (entry.type !== 'tool' && !this.toolSvcs.some((t) => t.name === tool)) {
+      // a package without an install service of its own
+      await this.versionSvc.setType(tool, entry.type);
+    }
+  }
+
+  /**
+   * Makes a listed version the current one of its tool and writes its legacy
+   * version file.
+   */
+  private async replayCurrent(entry: BuildListCurrent): Promise<void> {
+    const { alias, tool, version, parent } = entry;
+    await this.versionSvc.setCurrent({
+      name: alias,
+      tool: { name: tool, version },
+      ...(parent && { parent }),
+    });
+    await this.versionSvc.update(tool, version);
+  }
+
+  /**
+   * Records a listed link, writes the shim of the command and points it at
+   * the wrapper of its version for one of the listed parent versions, when
+   * that exists, or else removes the pointer, so the shim installs the
+   * version on its first call. Parent versions recorded on the volume are
+   * not used, as the image may list another one.
+   *
+   * @param parents - the parent versions the list has for the linked version
+   */
+  private async replayLink(
+    entry: BuildListLink,
+    parents: readonly string[],
+  ): Promise<void> {
+    const { command, tool, version } = entry;
+    const link = { name: tool, version };
+    await this.versionSvc.setLink({ name: command, tool: link });
+    await this._link.writeShim(command);
+    if (!(await this._link.restorePointer(command, link, parents))) {
+      await this._link.removeStalePointer(command, true);
+    }
   }
 
   /**
@@ -506,16 +685,9 @@ export class InstallToolService {
         );
         return MissingParent;
       }
-      const parentSvc = this.toolSvcs.find((t) => t.name === parent!.tool.name);
-      if (parentSvc && (await this.isMissing(parentSvc, parent.tool.version))) {
-        logger.info(
-          { tool: parentSvc.name, version: parent.tool.version },
-          'parent tool version missing, installing',
-        );
-        const res = await this.restore(parentSvc, parent.tool.version);
-        if (res) {
-          return res;
-        }
+      const res = await this.restoreMissingParent(parent);
+      if (res) {
+        return res;
       }
     }
 

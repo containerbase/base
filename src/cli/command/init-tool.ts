@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
+import { setupVolume } from '../install-tool/index.ts';
 import { initializeTools } from '../prepare-tool/index.ts';
 import { logger } from '../utils/index.ts';
 import { command } from './utils.ts';
@@ -21,12 +22,19 @@ export class InitToolCommand extends Command {
 
   dryRun = Option.Boolean('-d,--dry-run', false);
 
-  /** Initializes the passed tools, or all prepared tools for `all`. */
+  /**
+   * Initializes the passed tools, or all prepared tools for `all`. For `all`
+   * it first sets up an empty or older `/opt/containerbase` from the
+   * build-time list of the image.
+   */
   async execute(): Promise<number | void> {
     const start = Date.now();
     let error = false;
     logger.info(`Initializing tools ${this.tools.join(', ')}...`);
     try {
+      if (!this.dryRun && this.tools.length === 1 && this.tools[0] === 'all') {
+        await setupVolume();
+      }
       return await initializeTools(this.tools, this.dryRun);
     } catch (err) {
       error = true;
