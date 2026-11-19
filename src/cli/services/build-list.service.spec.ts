@@ -241,6 +241,42 @@ describe('cli/services/build-list.service', () => {
     ]);
   });
 
+  test('renameTools renames the tools on every line', async () => {
+    const list = `${codeBlock`
+      i tool node 24.0.0
+      c node node 24.0.0
+      l node node 24.0.0
+      i npm del-cli 8.0.1 node 24.0.0
+      c del-cli del-cli 8.0.1 node 24.0.0
+      l del del-cli 8.0.1
+    `}\n`;
+    await fs.writeFile(pathSvc.toolInstPath, list);
+
+    await svc.renameTools(new Map([['del-cli', 'npm+del-cli']]));
+
+    const expected = `${codeBlock`
+      i tool node 24.0.0
+      c node node 24.0.0
+      l node node 24.0.0
+      i npm npm+del-cli 8.0.1 node 24.0.0
+      c npm+del-cli npm+del-cli 8.0.1 node 24.0.0
+      l del npm+del-cli 8.0.1
+    `}\n`;
+    expect(await fs.readFile(pathSvc.toolInstPath, 'utf8')).toBe(expected);
+    expect(await fs.readFile(pathSvc.volumeToolInstPath, 'utf8')).toBe(
+      expected,
+    );
+  });
+
+  test('renameTools writes no list without the tools', async () => {
+    const write = vi.spyOn(fs, 'writeFile');
+
+    await svc.renameTools(new Map([['del-cli', 'npm+del-cli']]));
+
+    expect(write).not.toHaveBeenCalled();
+    expect(await svc.read()).toEqual([]);
+  });
+
   test('changed compares the list of the image with the copy', async () => {
     // no list in the image
     expect(await svc.changed()).toBe(false);

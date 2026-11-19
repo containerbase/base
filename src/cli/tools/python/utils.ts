@@ -199,7 +199,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   }
 
   /**
-   * Links every console script of the package, or else the tool name, into
+   * Links every console script of the package, or else its binary name, into
    * the global bin folder, with the python env.
    */
   override async postInstall(version: string): Promise<void> {
@@ -236,30 +236,31 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     // fallback to the binary name
     await this.shellwrapper({
       srcDir: src,
-      name: this.binaryName(),
+      name: this.binaryName(version),
       extraToolEnvs: ['python'],
     });
   }
 
   /**
-   * The binary the tool is called by: its fallback wrapper and the
+   * The binary the package is called by: its fallback wrapper and the
    * `--version` check. `hg` for mercurial, `pip-compile` for pip-tools, else
-   * the tool name.
+   * the package name, without the type prefix of `install-pip`.
    */
-  private binaryName(): string {
-    switch (this.name) {
+  private binaryName(version: string): string {
+    const pkg = this.tool(version);
+    switch (pkg) {
       case 'mercurial':
         return 'hg';
       case 'pip-tools':
         return 'pip-compile';
       default:
-        return this.name;
+        return pkg;
     }
   }
 
-  /** Checks that the tool's binary runs with `--version`. */
-  override async test(_version: string): Promise<void> {
-    await this._spawn(this.binaryName(), ['--version']);
+  /** Checks that the package's binary runs with `--version`. */
+  override async test(version: string): Promise<void> {
+    await this._spawn(this.binaryName(version), ['--version']);
   }
 
   /** Accepts valid pep440 versions. */
@@ -270,7 +271,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
   /** Path of the virtualenv's python binary. */
   private getPython(version: string, pythonVersion: string): string {
     return path.join(
-      this.pathSvc.versionedToolPath(this.tool(version), version),
+      this.pathSvc.versionedToolPath(this.name, version),
       pythonVersion,
       'bin',
       'python',
@@ -296,7 +297,7 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
     version: string,
     pythonVersion: string,
   ): string[] {
-    switch (this.name) {
+    switch (this.tool(version)) {
       case 'copier':
         // Some templates require the ability to use custom Jinja extensions.
         return ['copier-templates-extensions'];

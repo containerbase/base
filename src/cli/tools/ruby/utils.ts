@@ -13,7 +13,7 @@ import {
   partialVersionHelp,
 } from '../../services/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
-import { ResolverMap, getToolType } from '../index.ts';
+import { ResolverMap, getToolType, packageName } from '../index.ts';
 import { RubyGemJson, RubyGemVersionsJson } from './schema.ts';
 
 const defaultRegistry = 'https://rubygems.org/';
@@ -27,6 +27,11 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
   override readonly parent = 'ruby';
   override readonly type = 'gem';
   override readonly parentScoped = true;
+
+  /** The gem to install, by default the tool name. */
+  protected tool(_version: string): string {
+    return this.name;
+  }
 
   /**
    * Installs the gem with the current ruby into a folder per ruby version
@@ -57,7 +62,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
       gem,
       [
         'install',
-        this.name,
+        this.tool(version),
         '--install-dir',
         prefix,
         '--bindir',
@@ -136,8 +141,8 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
   }
 
   /** Checks that the gem binary runs with `--version`. */
-  override async test(_version: string): Promise<void> {
-    await this._spawn(this.name, ['--version']);
+  override async test(version: string): Promise<void> {
+    await this._spawn(this.tool(version), ['--version']);
   }
 
   /**
@@ -186,7 +191,7 @@ export abstract class RubyBaseInstallService extends BaseInstallService {
       this.pathSvc.versionedToolPath(this.name, version),
       ruby,
       'specifications',
-      `${this.name}-${version}.gemspec`,
+      `${this.tool(version)}-${version}.gemspec`,
     );
   }
 }
@@ -197,7 +202,8 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
 
   /**
    * Resolves a version from rubygems.org, for a typed gem tool when the
-   * tool-versions data can't answer, see {@link dataField}. A configured gem
+   * tool-versions data can't answer, see {@link dataField}. The gem is the
+   * tool without a `gem+` prefix, see `packageName`. A configured gem
    * registry is not used for the lookup. Like other lookups, the request goes through the
    * configured CDN and URL replacements.
    *
@@ -211,11 +217,10 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
    * gem can't install it as given, or if it matches no release.
    */
   async resolve(version: string | undefined): Promise<string | undefined> {
+    const gem = packageName(this.tool);
     if (version === undefined || version === 'latest') {
       const meta = RubyGemJson.parse(
-        await this.getJson(
-          `https://rubygems.org/api/v1/gems/${this.tool}.json`,
-        ),
+        await this.getJson(`https://rubygems.org/api/v1/gems/${gem}.json`),
       );
       return meta.version;
     }
@@ -224,7 +229,7 @@ export abstract class RubyGemVersionResolver extends ToolVersionResolver {
       try {
         releases = RubyGemVersionsJson.parse(
           await this.getJson(
-            `https://rubygems.org/api/v1/versions/${this.tool}.json`,
+            `https://rubygems.org/api/v1/versions/${gem}.json`,
           ),
         );
       } catch (err) {

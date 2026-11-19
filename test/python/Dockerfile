@@ -261,10 +261,10 @@ RUN install-pip hashin
 
 # the version folders of a pip package and of its python are installed again on the next call
 RUN set -ex; \
-  rm -rf /opt/containerbase/tools/hashin/* /opt/containerbase/tools/python/*; \
+  rm -rf /opt/containerbase/tools/pip+hashin/* /opt/containerbase/tools/python/*; \
   [[ ! -e /opt/containerbase/links/hashin ]]; \
   hashin --version; \
-  [[ -n "$(ls /opt/containerbase/tools/hashin)" ]]; \
+  [[ -n "$(ls /opt/containerbase/tools/pip+hashin)" ]]; \
   [[ -n "$(ls /opt/containerbase/tools/python)" ]]; \
   python --version
 

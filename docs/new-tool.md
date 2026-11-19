@@ -43,7 +43,7 @@ Adding a tool of this type is straightforward, and does not require any addition
 
 Files to change:
 
-1. [`src/cli/tools/index.ts`](../src/cli/tools/index.ts) - add the tool to `ResolverMap` with its type, so `install-tool <name>` is mapped to `install-pip` / `install-npm` / `install-gem`:
+1. [`src/cli/tools/index.ts`](../src/cli/tools/index.ts) - add the tool to `ResolverMap` with its type, so `install-tool <name>` installs it with pip / npm / gem under its plain name, eg. `kas`. `install-pip kas` installs the same package as `pip+kas` instead, with its own install, see [`install-pip`](./tools.md#install-pip-command):
 
    ```ts
    export const ResolverMap: Record<string, InstallToolType | undefined> = {

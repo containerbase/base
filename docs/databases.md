@@ -16,6 +16,7 @@ On a read-only data folder such a journal can't be rolled back, so reading the d
 Installing tools on a read-only file system isn't supported.
 
 Without a database, the [databases of an older version](#migration-from-older-versions) are loaded into memory without migrating them, so an image built with an older containerbase version keeps working.
+Their packages keep the names without the [type prefix](#package-names) there, also in `containerbase-cli list tools`, as their folders can't be renamed or linked.
 Without any database an empty one is used, so no tools are found.
 
 ## Migration from older versions
@@ -31,6 +32,13 @@ A downgrade to an older containerbase version isn't possible after the migration
 
 The migration needs a writable data folder.
 On a read-only file system the old databases are only [read](#read-only-file-system), they are migrated on the first writable run, eg. when a tool is installed with the new containerbase version as part of the image build.
+
+## Package names
+
+Packages installed with `install-gem`, `install-npm` or `install-pip` are stored as `<type>+<name>`, eg. `npm+yarn`, so they never match a tool of the same name installed with `install-tool`.
+The [migration](#migration-from-older-versions) renames the packages of older versions the same way, except for names `install-tool` supports, which keep their name.
+The tool folder of a migrated package stays where it is, `/opt/containerbase/tools/<type>+<name>` is a link to the old `/opt/containerbase/tools/<name>`, as the installed files hold absolute paths into it.
+`uninstall-gem`, `uninstall-npm` and `uninstall-pip` only find the packages by these names, they fail for a tool installed with `install-tool`, eg. `pnpm`, which is uninstalled with `uninstall-tool <name>`.
 
 ## Concurrent cli calls
 

@@ -155,7 +155,7 @@ volume_run "${volume}" "${image}" bash -c '
   hashin --version
   test "$(cat /opt/containerbase/versions/node)" = "$(node --version | tr -d v)"
   containerbase-cli list tools | grep "^node "
-  containerbase-cli list tools | grep "^hashin "
+  containerbase-cli list tools | grep "^pip+hashin "
   # the version of the image is installed by its first call
   flux --version
   image_flux=$(grep -m1 "^i tool flux " /var/lib/containerbase/tool.inst | cut -d " " -f 4)

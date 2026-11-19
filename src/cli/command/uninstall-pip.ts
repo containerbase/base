@@ -8,8 +8,14 @@ export class UninstallPipCommand extends UninstallToolCommand {
   static override usage = Command.Usage({
     description: 'Uninstalls a pip package from the container.',
     examples: [
-      ['Uninstalls checkov v2.4.7', '$0 uninstall pip checkov 2.4.7'],
-      ['Uninstalls all checkov versions', '$0 uninstall pip checkov --all'],
+      [
+        'Uninstalls checkov v2.4.7 of `install-pip checkov`',
+        '$0 uninstall pip checkov 2.4.7',
+      ],
+      [
+        'Uninstalls all checkov versions of `install-pip checkov`',
+        '$0 uninstall pip checkov --all',
+      ],
     ],
   });
 
@@ -22,8 +28,14 @@ export class UninstallPipShortCommand extends UninstallPipCommand {
   static override usage = Command.Usage({
     description: 'Uninstalls a pip package from the container.',
     examples: [
-      ['Uninstalls checkov v2.4.7', '$0 checkov 2.4.7'],
-      ['Uninstalls all checkov versions', '$0 checkov --all'],
+      [
+        'Uninstalls checkov v2.4.7 of `install-pip checkov`',
+        '$0 checkov 2.4.7',
+      ],
+      [
+        'Uninstalls all checkov versions of `install-pip checkov`',
+        '$0 checkov --all',
+      ],
     ],
   });
 }

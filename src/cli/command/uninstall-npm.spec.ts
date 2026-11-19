@@ -27,7 +27,7 @@ describe('cli/command/uninstall-npm', () => {
     expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
       dryRun: false,
       recursive: false,
-      tool: 'del-cli',
+      tool: 'npm+del-cli',
       type: 'npm',
       version: '5.0.0',
     });

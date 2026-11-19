@@ -3,7 +3,14 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { bindingScopeValues, inject, injectable } from 'inversify';
 import { isMissing, logger } from '../utils/index.ts';
-import { hasNedb, insertStores, readNedbStores } from './nedb.ts';
+import { BuildListService } from './build-list.service.ts';
+import {
+  hasNedb,
+  insertStores,
+  linkPackageFolders,
+  prefixPackages,
+  readNedbStores,
+} from './nedb.ts';
 import { PathService } from './path.service.ts';
 
 /** The schema version the `schema` creates, stored in `user_version`. */
@@ -166,6 +173,8 @@ export class DataService {
 
   @inject(PathService)
   private readonly pathSvc!: PathService;
+  @inject(BuildListService)
+  private readonly buildList!: BuildListService;
 
   /** Returns the database, opening it on first use. */
   db(): Promise<DatabaseSync> {
@@ -269,7 +278,9 @@ export class DataService {
    * created yet, because another process is just creating it, counts as
    * missing. When another process finishes the migration while the old
    * databases are read, its database is used instead of the partly read
-   * ones.
+   * ones. The packages keep their names without the type prefix there, see
+   * `prefixPackages`, as their folders and version files can't be renamed or
+   * linked on a read-only file system.
    *
    * @throws when a database can't be checked or read, eg. missing
    * permissions, or was created by a newer containerbase version
@@ -304,10 +315,15 @@ export class DataService {
    * skipped malformed documents is kept, so they can still be recovered. Does
    * nothing when another process migrated the database while the files were
    * read. A failed rollback is only logged, the error of the migration is
-   * thrown.
+   * thrown. Packages of `install-gem`, `install-npm` and `install-pip` get
+   * their type prefix, see `prefixPackages`, their new tool folder links to
+   * the old one before the transaction commits, see `linkPackageFolders`, so
+   * a failed link leaves the database unmigrated. After the commit the
+   * build-time list gets the new names too, see `BuildListService.renameTools`.
    */
   private async _migrate(db: DatabaseSync): Promise<void> {
     const stores = await readNedbStores(this.pathSvc.dataPath);
+    const renames = prefixPackages(stores);
 
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -318,6 +334,7 @@ export class DataService {
       }
       db.exec(schema);
       insertStores(db, stores);
+      await linkPackageFolders(this.pathSvc, renames);
       db.exec('COMMIT');
     } catch (err) {
       if (db.isTransaction) {
@@ -332,6 +349,7 @@ export class DataService {
       }
       throw err;
     }
+    await this.buildList.renameTools(renames);
 
     for (const { name, file, rows, skipped } of stores) {
       logger.info(

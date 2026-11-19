@@ -27,7 +27,7 @@ describe('cli/command/uninstall-gem', () => {
     expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
       dryRun: false,
       recursive: false,
-      tool: 'rake',
+      tool: 'gem+rake',
       type: 'gem',
       version: '5.0.0',
     });

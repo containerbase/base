@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { execa } from 'execa';
 import {
   afterEach,
   beforeAll,
@@ -34,17 +35,22 @@ import {
   NotSupported,
 } from '../utils/codes.ts';
 import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
+import type { BaseInstallService } from './base-install.service.ts';
 import {
   ensureTool,
   installTool,
   linkTool,
   listSupportedTools,
+  prepareUninstallContainer,
   resolveVersion,
   setupVolume,
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
-import { InstallToolService } from './install-tool.service.ts';
+import {
+  INSTALL_TOOL_TOKEN,
+  InstallToolService,
+} from './install-tool.service.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -159,6 +165,31 @@ describe('cli/install-tool/index', () => {
       ).toBeUndefined();
     });
 
+    test.each([
+      { type: 'gem' as const, svc: RubyBaseInstallService },
+      { type: 'npm' as const, svc: NpmBaseInstallService },
+      { type: 'pip' as const, svc: PipBaseInstallService },
+    ])(
+      'installs a $type package by its name without the type',
+      async ({ type, svc }) => {
+        vi.spyOn(svc.prototype, 'install').mockResolvedValue();
+        vi.spyOn(svc.prototype, 'needsInitialize').mockReturnValue(false);
+        vi.spyOn(svc.prototype, 'validate').mockResolvedValue(true);
+        vi.spyOn(svc.prototype, 'postInstall').mockResolvedValue();
+
+        expect(
+          await installTool(`${type}+dummy-pkg`, '1.0.0', false, type),
+        ).toBeUndefined();
+
+        // the version check runs the package, not the recorded name
+        expect(execa).toHaveBeenCalledWith(
+          'dummy-pkg',
+          ['--version'],
+          expect.anything(),
+        );
+      },
+    );
+
     test('prefers a modern service over a v2 shell tool with the same name', async () => {
       const script = rootPath('usr/local/containerbase/tools/v2/ruby.sh');
       await fs.writeFile(script, '');
@@ -182,29 +213,35 @@ describe('cli/install-tool/index', () => {
       expect(v2).not.toHaveBeenCalled();
     });
 
-    test('rethrows a failing test for a known pip tool', async () => {
-      // unlike the `dummy-*` tools above, `poetry` is in the `ResolverMap`, so
-      // its `--version` flag is expected to work
-      vi.spyOn(PipBaseInstallService.prototype, 'install').mockResolvedValue();
-      vi.spyOn(
-        PipBaseInstallService.prototype,
-        'needsInitialize',
-      ).mockReturnValue(false);
-      vi.spyOn(PipBaseInstallService.prototype, 'validate').mockResolvedValue(
-        true,
-      );
-      vi.spyOn(
-        PipBaseInstallService.prototype,
-        'postInstall',
-      ).mockResolvedValue();
-      vi.spyOn(PipBaseInstallService.prototype, 'test').mockRejectedValue(
-        new Error('no --version flag'),
-      );
+    test.each([{ tool: 'poetry' }, { tool: 'pip+poetry' }])(
+      'rethrows a failing test for a known pip tool: $tool',
+      async ({ tool }) => {
+        // unlike the `dummy-*` tools above, `poetry` is in the `ResolverMap`, so
+        // its `--version` flag is expected to work, also with `install-pip`
+        vi.spyOn(
+          PipBaseInstallService.prototype,
+          'install',
+        ).mockResolvedValue();
+        vi.spyOn(
+          PipBaseInstallService.prototype,
+          'needsInitialize',
+        ).mockReturnValue(false);
+        vi.spyOn(PipBaseInstallService.prototype, 'validate').mockResolvedValue(
+          true,
+        );
+        vi.spyOn(
+          PipBaseInstallService.prototype,
+          'postInstall',
+        ).mockResolvedValue();
+        vi.spyOn(PipBaseInstallService.prototype, 'test').mockRejectedValue(
+          new Error('no --version flag'),
+        );
 
-      await expect(
-        installTool('poetry', '1.0.0', false, 'pip'),
-      ).rejects.toThrow('no --version flag');
-    });
+        await expect(installTool(tool, '1.0.0', false, 'pip')).rejects.toThrow(
+          'no --version flag',
+        );
+      },
+    );
   });
 
   describe('listSupportedTools', () => {
@@ -820,6 +857,33 @@ describe('cli/install-tool/index', () => {
 
       expect(spy).toHaveBeenCalledExactlyOnceWith('7.0.0');
     });
+
+    test.each([
+      { type: 'gem' as const },
+      { type: 'npm' as const },
+      { type: 'pip' as const },
+    ])(
+      'installs a $type package again by its name without the type',
+      async ({ type }) => {
+        const tool = `${type}+dummy-pkg`;
+        await (
+          await createContainer().getAsync(VersionService)
+        ).setType(tool, type);
+
+        const container = await prepareUninstallContainer(false);
+        const svc = (
+          await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN)
+        ).find((t) => t.name === tool);
+        await expect(svc?.test('1.0.0')).resolves.toBeUndefined();
+
+        // the version check runs the package, not the recorded name
+        expect(execa).toHaveBeenCalledWith(
+          'dummy-pkg',
+          ['--version'],
+          expect.anything(),
+        );
+      },
+    );
   });
 
   describe('uninstallTool', () => {
@@ -890,5 +954,52 @@ describe('cli/install-tool/index', () => {
         }),
       ).toBeUndefined();
     });
+
+    test('fails for a package installed as a tool', async () => {
+      const spy = vi.spyOn(InstallToolService.prototype, 'uninstall');
+
+      // `node` is installed as a tool, not as `npm+node`
+      expect(
+        await uninstallTool({
+          tool: 'npm+node',
+          version: '1.0.0',
+          type: 'npm',
+        }),
+      ).toBe(NotSupported);
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+        { tool: 'node' },
+        'node is installed as a tool, not as a package, use `uninstall-tool node`',
+      );
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      { tool: 'npm+dummy-pkg', installed: ['npm+dummy-pkg', 'dummy-pkg'] },
+      { tool: 'npm+other-pkg', installed: [] },
+    ])(
+      'uninstalls the package $tool without an error',
+      async ({ tool, installed }) => {
+        const verSvc = await createContainer().getAsync(VersionService);
+        for (const name of installed) {
+          await verSvc.addInstalled({ name, version: '1.0.0' });
+        }
+        const spy = vi
+          .spyOn(InstallToolService.prototype, 'uninstall')
+          .mockResolvedValue();
+
+        expect(
+          await uninstallTool({ tool, version: '1.0.0', type: 'npm' }),
+        ).toBeUndefined();
+
+        expect(logger.error).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledExactlyOnceWith(
+          tool,
+          '1.0.0',
+          false,
+          false,
+        );
+      },
+    );
   });
 });

@@ -37,20 +37,20 @@ describe('cli/command/install-npm', () => {
     expect(await cli.run(['del-cli'])).toBe(0);
     // install-npm never reads the tool-versions data
     expect(mocks.resolveVersion).toHaveBeenLastCalledWith(
-      'del-cli',
+      'npm+del-cli',
       '5.0.0',
       'npm',
       false,
     );
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'del-cli',
+      'npm+del-cli',
       '4.0.0',
       false,
       'npm',
     );
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'del-cli',
+      'npm+del-cli',
       '5.0.0',
       false,
       'npm',
@@ -74,13 +74,13 @@ describe('cli/command/install-npm', () => {
     expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'del-cli',
+      'npm+del-cli',
       '4.0.0',
       false,
       'npm',
     );
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'del-cli',
+      'npm+del-cli',
       '5.0.0',
       false,
       'npm',
@@ -89,5 +89,24 @@ describe('cli/command/install-npm', () => {
 
     mocks.installTool.mockRejectedValueOnce(new Error('test'));
     expect(await cli.run(['install', 'npm', 'del-cli'])).toBe(1);
+  });
+
+  test('installs a package named like a tool as the package', async () => {
+    const cli = new Cli({ binaryName: 'install-npm' });
+    registerCommands(cli, 'install-npm');
+
+    expect(await cli.run(['yarn', '1.22.22'])).toBe(0);
+    expect(mocks.resolveVersion).toHaveBeenLastCalledWith(
+      'npm+yarn',
+      '1.22.22',
+      'npm',
+      false,
+    );
+    expect(mocks.installTool).toHaveBeenCalledExactlyOnceWith(
+      'npm+yarn',
+      '1.22.22',
+      false,
+      'npm',
+    );
   });
 });

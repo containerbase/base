@@ -169,12 +169,36 @@ export class BuildListService {
   }
 
   /**
-   * Reads the list, changes it and writes it. A list which can't be read is
-   * kept as it is, as writing would replace it with a partial one. A failure
-   * is only logged.
+   * Renames tools on every line, eg. the packages the database migration gives
+   * their type prefix, see `prefixPackages`, also the alias of a `c` line. A
+   * list without any of the tools isn't written. A failure is only logged.
+   *
+   * @param renames - old tool name to new tool name
+   */
+  async renameTools(renames: ReadonlyMap<string, string>): Promise<void> {
+    await this.update((entries) =>
+      entries.some((entry) => renames.has(entry.tool))
+        ? entries.map((entry) => {
+            const tool = renames.get(entry.tool) ?? entry.tool;
+            return entry.kind === 'c'
+              ? {
+                  ...entry,
+                  tool,
+                  alias: renames.get(entry.alias) ?? entry.alias,
+                }
+              : { ...entry, tool };
+          })
+        : null,
+    );
+  }
+
+  /**
+   * Reads the list, changes it and writes it, unless the change returns
+   * `null`. A list which can't be read is kept as it is, as writing would
+   * replace it with a partial one. A failure is only logged.
    */
   private async update(
-    change: (entries: BuildListEntry[]) => BuildListEntry[],
+    change: (entries: BuildListEntry[]) => BuildListEntry[] | null,
   ): Promise<void> {
     let entries: BuildListEntry[];
     try {
@@ -183,7 +207,10 @@ export class BuildListService {
       logger.warn({ err }, 'cannot read the build-time tool list');
       return;
     }
-    await this.write(change(entries));
+    const changed = change(entries);
+    if (changed) {
+      await this.write(changed);
+    }
   }
 
   /**

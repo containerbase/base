@@ -36,6 +36,18 @@ class NpmInstallService extends NpmBaseInstallService {
   readonly name = 'npm';
 }
 
+/** The `npm` package installed with `install-npm`, under its type prefix. */
+@injectable()
+@injectFromHierarchy()
+class NpmPackageInstallService extends NpmBaseInstallService {
+  readonly name = 'npm+npm';
+
+  /** Installs the `npm` package. */
+  protected override tool(): string {
+    return 'npm';
+  }
+}
+
 /** A tool published under a scoped package name. */
 @injectable()
 @injectFromHierarchy()
@@ -50,19 +62,21 @@ class ScopedInstallService extends NpmBaseInstallService {
 
 /**
  * Write the `package.json` npm would have created for an installed package, so
- * `isInstalled` and `postInstall` can read it back.
+ * `isInstalled` and `postInstall` can read it back. The package name defaults
+ * to the tool name.
  */
 async function writePackageJson(
   pathSvc: PathService,
   tool: string,
   version: string,
   content: unknown,
+  pkg = tool,
 ): Promise<void> {
   const dir = join(
     pathSvc.versionedToolPath(tool, version),
     nodeVersion,
     'node_modules',
-    tool,
+    pkg,
   );
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(join(dir, 'package.json'), JSON.stringify(content));
@@ -95,6 +109,7 @@ describe('cli/tools/node/utils', () => {
     child = await testContainer();
     child.bind(CorepackInstallService).toSelf();
     child.bind(NpmInstallService).toSelf();
+    child.bind(NpmPackageInstallService).toSelf();
     child.bind(ScopedInstallService).toSelf();
     envSvc = await child.getAsync(EnvService);
     pathSvc = await child.getAsync(PathService);
@@ -142,6 +157,30 @@ describe('cli/tools/node/utils', () => {
       const svc = await child.getAsync(NpmInstallService);
 
       await expect(svc.install('6.14.18')).resolves.toBeUndefined();
+
+      expect(execaMock).toHaveBeenCalledWith(
+        expect.stringContaining('bin/npm'),
+        expect.arrayContaining(['install', 'node-gyp@latest']),
+        expect.objectContaining({ reject: false }),
+      );
+    });
+
+    test('install: updates node-gyp for npm v6 installed with install-npm', async () => {
+      execaMock.mockImplementation(async (_cmd, args: string[]) => {
+        if (args[1] === 'npm@6.14.16') {
+          await writePackageJson(
+            pathSvc,
+            'npm+npm',
+            '6.14.16',
+            { name: 'npm', version: '6.14.16' },
+            'npm',
+          );
+        }
+        return { failed: false, all: 'ok' };
+      });
+      const svc = await child.getAsync(NpmPackageInstallService);
+
+      await expect(svc.install('6.14.16')).resolves.toBeUndefined();
 
       expect(execaMock).toHaveBeenCalledWith(
         expect.stringContaining('bin/npm'),

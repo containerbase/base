@@ -90,7 +90,8 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
 
   /**
    * Installs the npm package with the current node's npm into a folder per
-   * node version below the versioned tool path.
+   * node version below the versioned tool path. The `npm` package, also
+   * installed with `install-npm`, gets the latest node-gyp before npm 7.
    *
    * @throws when the npm install fails
    */
@@ -139,7 +140,7 @@ export abstract class NpmBaseInstallService extends NodeBaseInstallService {
       }
 
       await fs.symlink(`${prefix}/node_modules/.bin`, `${prefix}/bin`);
-      if (this.name === 'npm') {
+      if (this.tool(version) === 'npm') {
         const pkg = await readPackageJson(
           this.packageJsonPath(version, nodeVersion),
         );

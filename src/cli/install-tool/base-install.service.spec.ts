@@ -152,6 +152,13 @@ class BunInstallService extends DummyInstallService {
   override readonly name = 'bun';
 }
 
+/** A package of `install-npm`, see `packageKey`. */
+@injectable()
+@injectFromHierarchy()
+class PackageInstallService extends DummyInstallService {
+  override readonly name = 'npm+old-pkg';
+}
+
 /** A tool with a minimum, and an own one on resolute, like `swift`. */
 @injectable()
 @injectFromHierarchy()
@@ -268,6 +275,66 @@ describe('cli/install-tool/base-install.service', () => {
     await expect(fs.stat(path)).rejects.toThrow();
     // uninstalling an unknown version is a no-op
     await expect(svc.uninstall('2.0.0')).resolves.toBeUndefined();
+  });
+
+  describe('uninstall of a package', () => {
+    let pkg!: PackageInstallService;
+    let toolsPath!: string;
+
+    beforeEach(async () => {
+      child.bind(PackageInstallService).toSelf();
+      pkg = await child.getAsync(PackageInstallService);
+      toolsPath = pathSvc.toolsPath;
+      await fs.rm(join(toolsPath, 'old-pkg'), { recursive: true, force: true });
+      await fs.rm(join(toolsPath, 'npm+old-pkg'), {
+        recursive: true,
+        force: true,
+      });
+    });
+
+    test('ignores a package without a folder', async () => {
+      await expect(pkg.uninstall('1.0.0')).resolves.toBeUndefined();
+
+      expect(
+        await fs.lstat(join(toolsPath, 'npm+old-pkg')).catch(() => null),
+      ).toBeNull();
+    });
+
+    test('keeps the folder of a package installed by this version', async () => {
+      await pathSvc.createVersionedToolPath('npm+old-pkg', '1.0.0');
+
+      await expect(pkg.uninstall('1.0.0')).resolves.toBeUndefined();
+
+      expect(await fs.readdir(join(toolsPath, 'npm+old-pkg'))).toEqual([]);
+    });
+
+    test('removes a migrated package through its link', async () => {
+      // an older version installed the package as `old-pkg`, the migration
+      // linked the new name to it
+      await fs.mkdir(join(toolsPath, 'old-pkg/1.0.0'), { recursive: true });
+      await fs.symlink('old-pkg', join(toolsPath, 'npm+old-pkg'));
+
+      // a reinstall writes through the link
+      const path = await pathSvc.createVersionedToolPath(
+        'npm+old-pkg',
+        '2.0.0',
+      );
+      expect(await fs.realpath(path)).toBe(
+        await fs.realpath(join(toolsPath, 'old-pkg/2.0.0')),
+      );
+
+      await expect(pkg.uninstall('1.0.0')).resolves.toBeUndefined();
+      // the link stays while a version is left
+      expect(await fs.readdir(join(toolsPath, 'old-pkg'))).toEqual(['2.0.0']);
+
+      await expect(pkg.uninstall('2.0.0')).resolves.toBeUndefined();
+      expect(
+        await fs.lstat(join(toolsPath, 'npm+old-pkg')).catch(() => null),
+      ).toBeNull();
+      expect(
+        await fs.lstat(join(toolsPath, 'old-pkg')).catch(() => null),
+      ).toBeNull();
+    });
   });
 
   test('validate', async () => {

@@ -15,7 +15,7 @@ import {
   type ShellWrapperConfig,
   ToolFilesService,
 } from '../services/index.ts';
-import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
+import { NoInitTools, NoPrepareTools, packageName } from '../tools/index.ts';
 import {
   type HostDistroCode,
   type SpawnOptions,
@@ -198,12 +198,28 @@ export abstract class BaseInstallService {
     return this.name;
   }
 
-  /** Removes the versioned tool path of the version. */
+  /**
+   * Removes the versioned tool path of the version. The tool path of a package
+   * migrated from an older version is a link to its old folder, see
+   * `linkPackageFolders`, both are removed with the last version.
+   */
   async uninstall(version: string): Promise<void> {
     await fs.rm(this.pathSvc.versionedToolPath(this.name, version), {
       recursive: true,
       force: true,
     });
+    const toolPath = this.pathSvc.toolPath(this.name);
+    if (
+      this.name === packageName(this.name) ||
+      !(await fs.lstat(toolPath).catch(() => null))?.isSymbolicLink()
+    ) {
+      return;
+    }
+    const folder = await fs.realpath(toolPath);
+    if ((await fs.readdir(folder)).length === 0) {
+      await fs.rmdir(folder);
+      await fs.rm(toolPath);
+    }
   }
 
   /** Whether the version can be installed, by default any semver version. */
