@@ -266,7 +266,7 @@ RUN echo '{"a":1}' | jq -e '.a == 1'
 RUN install-tool kubectl v1.37.2
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.9
+RUN install-tool mise 2026.11.10
 
 # renovate: datasource=github-releases depName=jq packageName=jqlang/jq
 ARG MISE_JQ_VERSION=1.8.2
