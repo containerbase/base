@@ -483,16 +483,14 @@ export class InstallToolService {
 
   /**
    * Whether a version recorded as installed is gone from the disk, eg. its
-   * folder was removed. Tools which can't be uninstalled, like git which apt
-   * installs, and the v2 shell tools are never missing, as their files don't
-   * have to be in the versioned tool path.
+   * folder was removed. The v2 shell tools are never missing, as their files
+   * don't have to be in the versioned tool path.
    */
   private async isMissing(
     toolSvc: BaseInstallService,
     version: string,
   ): Promise<boolean> {
     return (
-      toolSvc.canUninstall &&
       !(toolSvc instanceof V2ToolInstallService) &&
       !(await toolSvc.isInstalled(version))
     );
@@ -557,11 +555,10 @@ export class InstallToolService {
    * recorded last, and only the `c` lines make a version current. Nothing is
    * removed, and no tool is installed, the shims install a version on its
    * first call, see `ensure`. Only jq is restored at once, as the other tools
-   * and the shell utils need it early, git is installed by apt and never
-   * restored. The initialized markers in the temp folder are cleared, as they
-   * outlive the volume, so the init which follows runs every initialize step
-   * again. At last the list is copied to the volume, so the next init has
-   * nothing to do.
+   * and the shell utils need it early. The initialized markers in the temp
+   * folder are cleared, as they outlive the volume, so the init which follows
+   * runs every initialize step again. At last the list is copied to the
+   * volume, so the next init has nothing to do.
    */
   async setupVolume(): Promise<void> {
     await this.pathSvc.ensureBasePaths();
@@ -670,7 +667,7 @@ export class InstallToolService {
     version: string,
   ): Promise<number | void> {
     const tool = toolSvc.name;
-    if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+    if (toolSvc.restoreNeedsRoot && !this.envSvc.isRoot) {
       logger.fatal({ tool }, 'tool must be installed as root');
       return NotRoot;
     }

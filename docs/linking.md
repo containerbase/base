@@ -58,7 +58,8 @@ It never reads stdin and never writes to stdout, so the output of the command st
 A shim called from within `ensure`, eg. by an installer, runs as usual when its own pointer exists, and only fails fast with `127` when its pointer is missing too, instead of calling `ensure` again.
 
 `install-tool` installs a version which is recorded as installed again too, when its files are gone.
-This doesn't apply to tools which can't be uninstalled, like `git`, and to the v1 and v2 shell tools.
+This doesn't apply to the v1 and v2 shell tools.
+The shim of `git` installs its files again as the user too, as its system wide files stay in the image, `install-tool git` still needs root.
 
 ## Recovery
 

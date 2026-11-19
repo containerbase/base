@@ -41,6 +41,13 @@ class ErlangInstallService extends PrebuildInstallService {
 
 @injectable()
 @injectFromHierarchy()
+class NobleErlangInstallService extends PrebuildInstallService {
+  readonly name = 'erlang';
+  protected override readonly fallbackDistro = 'noble';
+}
+
+@injectable()
+@injectFromHierarchy()
 class ErlangVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'erlang';
 }
@@ -71,6 +78,7 @@ describe('cli/tools/utils/prebuild', () => {
     });
     child = await testContainer();
     child.bind(ErlangInstallService).toSelf();
+    child.bind(NobleErlangInstallService).toSelf();
     child.bind(ErlangVersionResolver).toSelf();
     pathSvc = await child.getAsync(PathService);
     // no tool-versions data, the prebuild is downloaded from its release
@@ -124,6 +132,46 @@ describe('cli/tools/utils/prebuild', () => {
         `Using jammy file for erlang on ${code}`,
       );
     });
+
+    test.each([
+      { code: 'noble', id: '24.04', log: false },
+      { code: 'resolute', id: '26.04', log: true },
+    ])(
+      'install: uses the overridden noble prebuild on $code',
+      async ({ code, id, log }) => {
+        vi.mocked(getDistro).mockResolvedValue({
+          name: 'Ubuntu',
+          versionCode: code,
+          versionId: id,
+        });
+        const version = `27.1.0-${code}`;
+        const path = releasePath(version, 'noble', 'x86_64');
+        scope(baseUrl)
+          .get(`${path}.sha512`)
+          .reply(200, checksum)
+          .get(path)
+          .reply(200, tarball);
+        const spy = vi.spyOn(CompressionService.prototype, 'extract');
+        const svc = await child.getAsync(NobleErlangInstallService);
+
+        await expect(svc.install(version)).resolves.toBeUndefined();
+
+        expect(spy).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(
+            `erlang-${version}-noble-x86_64.tar.xz`,
+          ),
+          cwd: pathSvc.toolPath('erlang'),
+        });
+        // the fallback lookup is skipped on the fallback distro itself
+        expect(
+          vi
+            .mocked(logger.debug)
+            .mock.calls.some(
+              ([msg]) => msg === `Using noble file for erlang on ${code}`,
+            ),
+        ).toBe(log);
+      },
+    );
 
     test('install: on arm64', async () => {
       vi.mocked(arch).mockReturnValue('arm64');

@@ -73,7 +73,7 @@ class RootOnlyInstallService extends TestInstallService {
   override readonly needsRoot = true;
 }
 
-/** a tool which is installed system wide, like `git` */
+/** a tool which can't be uninstalled, like `git` */
 @injectable()
 @injectFromHierarchy()
 class NoUninstallInstallService extends TestInstallService {
