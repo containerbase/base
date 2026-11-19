@@ -47,7 +47,7 @@ describe('cli/services/ipc.service', async () => {
       expect(await svc.hasServer()).toBe(true);
       await svc.start();
 
-      const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
+      const spy = vi.spyOn(LinkToolService.prototype, 'legacyShellwrapper');
       expect(await svc.linkTool('bun', { srcDir: '/bin/bash' })).toBe(0);
       expect(spy).toHaveBeenCalledExactlyOnceWith('bun', {
         srcDir: '/bin/bash',

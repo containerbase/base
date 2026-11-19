@@ -229,6 +229,42 @@ describe('cli/install-tool/install-tool.service', () => {
       );
     });
 
+    test('resets the link context after linking', async () => {
+      const link = await child.getAsync(LinkToolService);
+
+      expect(await install.install('bun', '1.2.1')).toBeUndefined();
+
+      expect(link.context).toBeNull();
+    });
+
+    test('resets the link context when linking fails', async () => {
+      const link = await child.getAsync(LinkToolService);
+      vi.spyOn(BunInstallService.prototype, 'test').mockRejectedValueOnce(
+        new Error('test failed'),
+      );
+
+      await expect(install.install('bun', '1.2.2')).rejects.toThrow(
+        'test failed',
+      );
+
+      expect(link.context).toBeNull();
+    });
+
+    test('sets the link context of the version', async () => {
+      const spy = vi.spyOn(LinkToolService.prototype, 'setContext');
+      vi.mocked(BunInstallService.prototype).versionDir.mockReturnValueOnce(
+        '/opt/containerbase/tools/bun/1.2.0',
+      );
+
+      expect(await install.install('bun', '1.2.0')).toBeUndefined();
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith({
+        tool: 'bun',
+        version: '1.2.0',
+        dir: '/opt/containerbase/tools/bun/1.2.0',
+      });
+    });
+
     test('aborts when the tool cannot be prepared', async () => {
       vi.mocked(BunInstallService.prototype).needsPrepare.mockReturnValueOnce(
         true,

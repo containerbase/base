@@ -125,6 +125,40 @@ describe('cli/services/link-tool.service', async () => {
     expect(await pathExists(tgt, 'dir')).toBe(true);
   });
 
+  test('legacyShellwrapper writes the wrapper into the bin folder', async () => {
+    await expect(
+      svc.legacyShellwrapper('legacy', { srcDir: '/bin/bash' }),
+    ).resolves.toBeUndefined();
+
+    expect(
+      await fs.readFile(rootPath('opt/containerbase/bin/legacy'), 'utf8'),
+    ).toContain('/bin/bash "$@"');
+  });
+
+  test('keeps the link context until cleared', () => {
+    svc.clear();
+    expect(svc.context).toBeNull();
+
+    const context = { tool: 'node', version: '22.0.0', dir: '/opt/node' };
+    svc.setContext(context);
+    expect(svc.context).toEqual(context);
+
+    svc.clear();
+    expect(svc.context).toBeNull();
+  });
+
+  test('resetContext keeps the recorded links', async () => {
+    svc.clear();
+    svc.setContext({ tool: 'node', version: '22.0.0', dir: '/opt/node' });
+    await svc.legacyShellwrapper('reset-tool', { srcDir: '/bin/bash' });
+
+    svc.resetContext();
+
+    expect(svc.context).toBeNull();
+    expect(svc.links).toEqual(['reset-tool']);
+    svc.clear();
+  });
+
   test('tracks the created links', async () => {
     svc.clear();
     await svc.shellwrapper('node', { srcDir: '/bin/bash' });

@@ -436,7 +436,7 @@ export async function linkTool(
     const pathSvc = await container.getAsync(PathService);
     await pathSvc.ensureWritableDirs(pathSvc.binDir);
     const ltSvc = await container.getAsync(LinkToolService);
-    await ltSvc.shellwrapper(tool, options);
+    await ltSvc.legacyShellwrapper(tool, options);
     return 0;
   }
 
