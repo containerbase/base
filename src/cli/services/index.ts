@@ -1,5 +1,13 @@
 import { type Bind, Container, ContainerModule } from 'inversify';
 import { AptService } from './apt.service.ts';
+import {
+  type BuildListCurrent,
+  type BuildListEntry,
+  type BuildListInstall,
+  type BuildListLink,
+  BuildListService,
+  type BuildListType,
+} from './build-list.service.ts';
 import { CacheService } from './cache.service.ts';
 import { CompressionService } from './compression.service.ts';
 import { DataService } from './data.service.ts';
@@ -35,6 +43,12 @@ export { type InstalledTool, InstalledTools };
 
 export {
   AptService,
+  type BuildListCurrent,
+  type BuildListEntry,
+  type BuildListInstall,
+  type BuildListLink,
+  type BuildListType,
+  BuildListService,
   CacheService,
   CompressionService,
   DataService,
@@ -63,6 +77,7 @@ export {
 /** Binds the core services, shared by every container. */
 function init<T extends { bind: Bind }>(options: T): void {
   options.bind(AptService).toSelf();
+  options.bind(BuildListService).toSelf();
   options.bind(CacheService).toSelf();
   options.bind(CompressionService).toSelf();
   options.bind(DataService).toSelf();

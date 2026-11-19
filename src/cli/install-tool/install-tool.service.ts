@@ -5,6 +5,7 @@ import { deleteAsync } from 'del';
 import { inject, injectable, multiInject, optional } from 'inversify';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  BuildListService,
   CacheService,
   EnvService,
   IpcServer,
@@ -41,6 +42,8 @@ export class InstallToolService {
   @multiInject(INSTALL_TOOL_TOKEN)
   @optional()
   private readonly toolSvcs: BaseInstallService[] = [];
+  @inject(BuildListService)
+  private readonly _list!: BuildListService;
   @inject(CacheService)
   private readonly cacheSvc!: CacheService;
   @inject(EnvService)
@@ -387,6 +390,10 @@ export class InstallToolService {
         }
 
         await this.versionSvc.removeLinks(vTool);
+
+        if (await this.isBuildTime()) {
+          await this._list.remove(tool, version);
+        }
       }
     } else {
       logger.fatal({ tool, version }, 'legacy tools cannot be uninstalled');
@@ -593,9 +600,51 @@ export class InstallToolService {
       if (!this.envSvc.skipTests) {
         await toolSvc.test(version);
       }
+
+      await this.recordBuildTimeInstall(toolSvc, version, parent);
     } finally {
       this._link.resetContext();
     }
+  }
+
+  /**
+   * Whether the install runs as root during an image build, so it is part of
+   * the image, see `BuildListService`.
+   */
+  private async isBuildTime(): Promise<boolean> {
+    return this.envSvc.isRoot && (await isDockerBuild());
+  }
+
+  /**
+   * Records an install of an image build in the build-time list, with the
+   * commands the version linked, as the current version of the tool. The v2
+   * shell tools can't be installed again by the shims, so they are not listed.
+   */
+  private async recordBuildTimeInstall(
+    toolSvc: BaseInstallService,
+    version: string,
+    parent: ToolState | null,
+  ): Promise<void> {
+    if (
+      toolSvc instanceof V2ToolInstallService ||
+      !(await this.isBuildTime())
+    ) {
+      return;
+    }
+    const links = await this.versionSvc.findLinks({
+      name: toolSvc.name,
+      version,
+    });
+    await this._list.record(
+      {
+        type: toolSvc.type && toolSvc.type !== 'dotnet' ? toolSvc.type : 'tool',
+        tool: toolSvc.name,
+        version,
+        ...(parent && { parent: parent.tool }),
+      },
+      links.map(({ name }) => name).toSorted(),
+      toolSvc.alias,
+    );
   }
 
   /**
