@@ -21,3 +21,10 @@ RUN install-tool node 26.13.1
 # tool without a prepare step
 # renovate: datasource=github-releases packageName=fluxcd/flux2
 RUN install-tool flux v2.10.0
+
+# tool whose version folder is gone, only its shim and the dangling pointer are left
+# don't update!!
+RUN install-tool helm v3.7.0
+RUN set -ex; \
+  rm -rf /opt/containerbase/tools/helm/*; \
+  [[ -L /opt/containerbase/links/helm && ! -e /opt/containerbase/links/helm ]]

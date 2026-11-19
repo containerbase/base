@@ -141,6 +141,56 @@ describe('cli/services/version.service', () => {
     ).toBe(false);
   });
 
+  test('link lookups', async () => {
+    expect(await svc.findLink('lookup-a')).toBeNull();
+
+    await svc.setLink({
+      name: 'lookup-a',
+      tool: { name: 'lookup', version: '1.0.0' },
+    });
+    await svc.setLink({
+      name: 'lookup-b',
+      tool: { name: 'lookup', version: '1.0.0' },
+    });
+
+    expect(await svc.findLink('lookup-a')).toMatchObject({
+      name: 'lookup-a',
+      tool: { name: 'lookup', version: '1.0.0' },
+    });
+    expect(
+      (await svc.findAllLinks()).filter(({ name }) =>
+        name.startsWith('lookup-'),
+      ),
+    ).toHaveLength(2);
+  });
+
+  test('findParentVersions lists the current parent first', async () => {
+    const tool = { name: 'parented', version: '1.0.0' };
+    await svc.setCurrent({
+      name: 'host',
+      tool: { name: 'host', version: '2.0.0' },
+    });
+    expect(await svc.findParentVersions(tool)).toEqual([]);
+
+    for (const version of ['1.0.0', '2.0.0', '3.0.0']) {
+      await svc.addInstalled({
+        ...tool,
+        parent: { name: 'host', version },
+      });
+    }
+    // a tool without a parent
+    await svc.addInstalled({ name: 'parented', version: '9.0.0' });
+
+    expect(await svc.findParentVersions(tool)).toEqual([
+      '2.0.0',
+      '1.0.0',
+      '3.0.0',
+    ]);
+    expect(
+      await svc.findParentVersions({ name: 'parented', version: '9.0.0' }),
+    ).toEqual([]);
+  });
+
   test('current', async () => {
     const versionFile = rootPath('opt/containerbase/versions/node');
 

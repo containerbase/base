@@ -447,7 +447,21 @@ export abstract class BaseInstallService {
     return await this.http.download({ url, checksumType, expectedChecksum });
   }
 
-  /** Creates a shell wrapper in the global bin folder for a tool binary. */
+  /**
+   * Whether `link` and `postInstall` restore the files of a version which is
+   * already linked, so they must only write the wrappers. Steps which change
+   * the system or the user, like registering a tool in a config, are skipped.
+   */
+  protected isRestoring(): boolean {
+    return this._link.context?.restore === true;
+  }
+
+  /**
+   * Creates a shell wrapper in the global bin folder for a tool binary.
+   *
+   * `link` and `postInstall` must not run a linked command by its name, as the
+   * pointer of the command is written after them, call the binary by its path.
+   */
   protected shellwrapper(options: ShellWrapperConfig): Promise<void> {
     return this._link.shellwrapper(this.name, options);
   }

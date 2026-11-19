@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { deleteAsync } from 'del';
@@ -14,6 +15,7 @@ import {
 import type { ToolState } from '../services/version.service';
 import {
   BlockingChild,
+  CommandNotFound,
   MissingParent,
   NotRoot,
   NotSupported,
@@ -178,50 +180,67 @@ export class InstallToolService {
       throw e;
     } finally {
       this.ipc.stop();
+      await this.cleanAfterInstall(dryRun);
+    }
+  }
+
+  /**
+   * Cleans up after an install: the apt files as root, on a docker build the
+   * tmp files and the caches, then the oldest files are evicted from the
+   * download cache, see `evictCache`.
+   */
+  private async cleanAfterInstall(dryRun: boolean): Promise<void> {
+    if (this.envSvc.isRoot) {
+      logger.debug('cleaning apt caches');
+      await cleanAptFiles(dryRun);
+    }
+
+    if (await isDockerBuild()) {
+      logger.debug('cleaning tmp files');
+      await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
+
       if (this.envSvc.isRoot) {
-        logger.debug('cleaning apt caches');
-        await cleanAptFiles(dryRun);
+        logger.debug('cleaning root caches');
+        await deleteAsync(
+          [
+            '/root/.{android,android-sdk,cache}',
+            '/root/.local/share/virtualenv',
+          ],
+          {
+            force: true,
+            dryRun,
+            dot: true,
+          },
+        );
+      } else {
+        logger.debug('cleaning user caches');
+        await deleteAsync(
+          [
+            path.join(this.pathSvc.cachePath, '.cache/**'),
+            path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
+          ],
+          {
+            force: true,
+            dryRun,
+            dot: true,
+          },
+        );
       }
+    }
 
-      if (await isDockerBuild()) {
-        logger.debug('cleaning tmp files');
-        await cleanTmpFiles(this.envSvc.tmpDir, dryRun);
+    await this.evictCache(dryRun);
+  }
 
-        if (this.envSvc.isRoot) {
-          logger.debug('cleaning root caches');
-          await deleteAsync(
-            [
-              '/root/.{android,android-sdk,cache}',
-              '/root/.local/share/virtualenv',
-            ],
-            {
-              force: true,
-              dryRun,
-              dot: true,
-            },
-          );
-        } else {
-          logger.debug('cleaning user caches');
-          await deleteAsync(
-            [
-              path.join(this.pathSvc.cachePath, '.cache/**'),
-              path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
-            ],
-            {
-              force: true,
-              dryRun,
-              dot: true,
-            },
-          );
-        }
-      }
-
-      try {
-        await this.cacheSvc.evict(dryRun);
-      } catch (err) {
-        // best effort, it must not change the result of the install
-        logger.warn({ err }, 'cannot evict the download cache');
-      }
+  /**
+   * Evicts the oldest files from the download cache when the disk is too
+   * full, see `CacheService.evict`. A failing eviction is only logged, as it
+   * must not change the result of the install.
+   */
+  private async evictCache(dryRun: boolean): Promise<void> {
+    try {
+      await this.cacheSvc.evict(dryRun);
+    } catch (err) {
+      logger.warn({ err }, 'cannot evict the download cache');
     }
   }
 
@@ -393,6 +412,145 @@ export class InstallToolService {
   }
 
   /**
+   * Makes a command of an installed tool run again, called by its shim when
+   * the pointer of the command is missing or dangling. It never changes which
+   * version any command runs: it recreates the pointer when the per-version
+   * wrapper exists, else it installs the version the command points at again,
+   * after its parent, and writes the per-version wrappers. After an install
+   * it only evicts the download cache, it removes no apt, tmp or cache files,
+   * as it runs inside the command which called the shim.
+   *
+   * @returns an exit code when the command can't be restored
+   * @throws when the install fails, the partial version folder is removed so
+   * the next call tries again
+   */
+  async ensure(command: string): Promise<number | void> {
+    await this.pathSvc.ensureBasePaths();
+
+    const link = await this.versionSvc.findLink(command);
+    if (!link) {
+      logger.error(
+        { command },
+        'command not installed, run install-tool <tool> <version>',
+      );
+      return CommandNotFound;
+    }
+
+    const { name: tool, version } = link.tool;
+    if (
+      await this._link.restorePointer(
+        command,
+        link.tool,
+        await this.versionSvc.findParentVersions(link.tool),
+      )
+    ) {
+      logger.debug({ command, tool, version }, 'pointer restored');
+      return;
+    }
+
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+    if (!toolSvc || toolSvc instanceof V2ToolInstallService) {
+      logger.error({ command, tool }, 'tool cannot be installed again');
+      return NotSupported;
+    }
+    return await this.restore(toolSvc, version);
+  }
+
+  /**
+   * Installs the version again, after the current parent version when its
+   * files are missing too, and writes only the per-version wrappers. The
+   * commands which point at the version are pointed at the new wrappers, as
+   * the parent folder may have changed. Shims, links store, current versions
+   * and the tool test are left alone, and so is the record for the parent
+   * version it was installed for. A tool with a parent is also recorded for
+   * the current parent version when that record is missing, so uninstalling
+   * that parent sees the child. The download cache is evicted after an
+   * install, also a failed one.
+   *
+   * @returns an exit code when the version can't be installed
+   */
+  private async restore(
+    toolSvc: BaseInstallService,
+    version: string,
+  ): Promise<number | void> {
+    const tool = toolSvc.name;
+    if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+      logger.fatal({ tool }, 'tool must be installed as root');
+      return NotRoot;
+    }
+
+    let parent: ToolState | null = null;
+    if (toolSvc.parent) {
+      parent = await this.versionSvc.getCurrent(toolSvc.parent);
+      if (!parent) {
+        logger.fatal(
+          { tool, parent: toolSvc.parent },
+          'parent tool not installed',
+        );
+        return MissingParent;
+      }
+      const parentSvc = this.toolSvcs.find((t) => t.name === parent!.tool.name);
+      if (parentSvc && (await this.isMissing(parentSvc, parent.tool.version))) {
+        logger.info(
+          { tool: parentSvc.name, version: parent.tool.version },
+          'parent tool version missing, installing',
+        );
+        const res = await this.restore(parentSvc, parent.tool.version);
+        if (res) {
+          return res;
+        }
+      }
+    }
+
+    const dir = toolSvc.versionDir(version, parent?.tool.version);
+    this._link.clear();
+    this._link.setContext({ tool, version, dir, restore: true });
+    let installed = false;
+    try {
+      if (!(await toolSvc.isInstalled(version))) {
+        if (toolSvc.needsInitialize() && !(await toolSvc.isInitialized())) {
+          logger.debug({ tool }, 'tool not initialized');
+          const res = await initializeTools([tool]);
+          if (res) {
+            return res;
+          }
+        }
+        logger.info({ tool, version }, 'tool version missing, installing');
+        installed = true;
+        await toolSvc.install(version);
+      }
+      await toolSvc.link(version);
+      await toolSvc.postInstall(version);
+
+      for (const { name } of await this.versionSvc.findLinks({
+        name: tool,
+        version,
+      })) {
+        await this._link.point(name);
+      }
+
+      // the files belong to the current parent, which may not be the one the
+      // version was recorded for, so its uninstall sees the child
+      if (parent) {
+        const record = { name: tool, version, parent: parent.tool };
+        if (!(await this.versionSvc.isInstalled(record))) {
+          await this.versionSvc.addInstalled(record);
+        }
+      }
+    } catch (err) {
+      if (installed) {
+        await fs.rm(dir, { recursive: true, force: true });
+      }
+      throw err;
+    } finally {
+      if (installed) {
+        // only the download cache, it runs inside the command of the user
+        await this.evictCache(false);
+      }
+    }
+  }
+
+  /**
    * Links the version onto the path and records it as the current one, unless
    * it already is, except with `force`. Then runs the post-install step,
    * records the created shell wrappers and runs the tool test, unless tests
@@ -442,7 +600,8 @@ export class InstallToolService {
 
   /**
    * Records which shell wrappers the last link step created, so they can be
-   * removed again when the version is uninstalled.
+   * removed again when the version is uninstalled, and points the commands at
+   * their wrappers. The pointers are written before the tool test runs.
    */
   private async _storeLinks(tool: string, version: string): Promise<void> {
     const links = this._link.links;
@@ -453,6 +612,7 @@ export class InstallToolService {
         name,
         tool: { name: tool, version },
       });
+      await this._link.point(name);
     }
   }
 }

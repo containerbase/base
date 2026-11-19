@@ -13,7 +13,7 @@ See [tools.md](./tools.md) for the full command reference.
 1. **initialize** - unless the tool is one of the `NoInitTools`
 1. **validate** - the version string must be acceptable to the install service
 1. **install** - download, verify the checksum, and extract into a versioned tool path
-1. **link** - put a shell wrapper on `PATH`
+1. **link** - put the commands of the tool on `PATH`, with a per-version wrapper and a static shim, see [how tools are linked](./linking.md)
 1. **test** - run something like `<tool> --version` to prove the install worked
 
 Every tool is an `@injectable()` class extending `BaseInstallService` ([`src/cli/install-tool/base-install.service.ts`](../src/cli/install-tool/base-install.service.ts)), living under [`src/cli/tools/`](../src/cli/tools/) and registered in [`src/cli/install-tool/index.ts`](../src/cli/install-tool/index.ts).
@@ -165,6 +165,12 @@ Things worth knowing:
 - Set `minVersion` to the oldest release the install service supports, like the first stable release with Linux files for both architectures and a checksum.
   `pnpm tools` publishes it in [`packages/base`](../packages/base/), and tool-versions leaves out older releases.
 - Follow the [tool installer best practices](./tool-installer-best-practices.md) for checksums, folders and shared helpers.
+- `this.shellwrapper` writes the wrapper into the folder of the version, so `install()` must put everything the tool needs below `createVersionedToolPath()`.
+  Containerbase installs a version again, when its folder is gone, so `isInstalled()` has to find the files: it checks the versioned tool path by default, override it when the tool installs elsewhere.
+- `link()` and `postInstall()` also run when a missing version is installed again, and then only write the per-version wrappers.
+  They must not run a linked command by its name, as its pointer is written after them: call the binary by its path, like `git-lfs install` and `mix local.hex` do, and put its folder in the `PATH` when it starts other tools through `env`.
+  Skip steps which change the system or the user, like registering a tool in a config, when `this.isRestoring()` is true.
+  Only call `this.shellwrapper`, not `this.symlink`, for commands that need the containerbase env.
 - Always download through `this.http.download` rather than fetching yourself - it applies the [url replacements](./custom-registries.md) and the [CDN](./cdn.md) resolution.
 - `checksumType` accepts `sha1`, `sha224`, `sha256`, `sha384` and `sha512`.
   If upstream ships a checksum per artifact, see [`src/cli/tools/apm.ts`](../src/cli/tools/apm.ts).
@@ -176,7 +182,7 @@ Things worth knowing:
 #### Uninstalling
 
 `uninstall-tool <tool> <version>` calls `BaseInstallService.uninstall()`, which by default removes the versioned tool path.
-Containerbase then removes the shell wrappers, the current-version marker and the version database entries for you.
+Containerbase then removes the shims and pointers of the commands which point at the version, the current-version marker and the version database entries for you.
 
 That default is only correct if `install()` writes **everything** below `createVersionedToolPath()`.
 If your tool writes anywhere else - `$HOME`, a shared cache, or system packages - either override `uninstall()` to clean that up, or raise it on the Issue so we can agree what should happen.

@@ -76,6 +76,8 @@ describe('cli/services/path.service', () => {
     expect(await pathExists(join(pathSvc.cachePath, '.yarn'), 'dir')).toBe(
       true,
     );
+    expect(pathSvc.linksPath).toBe(rootPath('opt/containerbase/links'));
+    expect(await pathExists(pathSvc.linksPath, 'dir')).toBe(true);
   });
 
   test('ensureBasePaths keeps a linked npm cache folder', async () => {
@@ -1135,6 +1137,14 @@ describe('cli/services/path.service', () => {
           code: 'EROFS',
           cause: expect.objectContaining({ code: 'EROFS' }),
         }),
+      );
+    });
+
+    test('throws when the links folder is read-only', async () => {
+      failAccess(pathSvc.linksPath, 'EROFS');
+
+      await expect(pathSvc.ensureWritable()).rejects.toThrow(
+        `EROFS: can't write to ${pathSvc.linksPath}, the file system is read-only.`,
       );
     });
 

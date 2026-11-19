@@ -251,6 +251,14 @@ export class PathService {
   }
 
   /**
+   * Path to `/opt/containerbase/links`, the pointers of the commands to their
+   * wrappers, see `LinkToolService`.
+   */
+  get linksPath(): string {
+    return join(this.installDir, 'links');
+  }
+
+  /**
    * Path to `/opt/containerbase/ssl`.
    */
   get sslPath(): string {
@@ -387,6 +395,7 @@ export class PathService {
     await this.createDir(this.toolsPath);
     await this.createDir(this.versionPath);
     await this.createDir(this.binDir);
+    await this.createDir(this.linksPath);
     await this.createDir(this.sslPath);
     await this.createDir(this._toolInitPath);
     await this.createDir(join(this.cachePath, '.cache'));
@@ -642,10 +651,10 @@ export class PathService {
   }
 
   /**
-   * Checks that the containerbase data, tools, bin and versions folders and
-   * the extra `paths` are writable, so a command fails before resolving or
-   * downloading anything. For a missing folder, which `ensureBasePaths`
-   * creates, its nearest existing parent is checked.
+   * Checks that the containerbase data, tools, bin, links and versions
+   * folders and the extra `paths` are writable, so a command fails before
+   * resolving or downloading anything. For a missing folder, which
+   * `ensureBasePaths` creates, its nearest existing parent is checked.
    *
    * @throws when a folder is on a read-only file system or the current user
    * can't write it
@@ -655,6 +664,7 @@ export class PathService {
       this.dataPath,
       this.toolsPath,
       this.binDir,
+      this.linksPath,
       this.versionPath,
       ...paths,
     );

@@ -1,5 +1,12 @@
+import { join } from 'node:path';
 import { Container, injectFromHierarchy, injectable } from 'inversify';
-import { PathService, createContainer } from '../services/index.ts';
+import {
+  DataService,
+  LinkToolService,
+  PathService,
+  VersionService,
+  createContainer,
+} from '../services/index.ts';
 import { DartPrepareService } from '../tools/dart/index.ts';
 import { DockerPrepareService } from '../tools/docker/index.ts';
 import { DotnetPrepareService } from '../tools/dotnet/index.ts';
@@ -27,7 +34,7 @@ import { RubyPrepareService } from '../tools/ruby/index.ts';
 import { RustPrepareService } from '../tools/rust.ts';
 import { SwiftPrepareService } from '../tools/swift.ts';
 import { bindVersionResolvers } from '../tools/version-resolvers.ts';
-import { logger } from '../utils/index.ts';
+import { logger, pathExists } from '../utils/index.ts';
 import { V2ToolPrepareService } from './prepare-legacy-tools.service.ts';
 import {
   PREPARE_TOOL_TOKEN,
@@ -100,8 +107,42 @@ export async function prepareTools(
 }
 
 /**
+ * Recreates the missing pointers of the commands from the links store, for
+ * the per-version wrappers which still exist. Nothing is installed. The
+ * databases are only read, so they are opened read-only. Failures, eg. a
+ * pointer which can't be written or a database which can't be read, are only
+ * logged, the shim of the command restores its pointer on its first call.
+ */
+async function restorePointers(container: Container): Promise<void> {
+  try {
+    (await container.getAsync(DataService)).readOnly();
+    const pathSvc = await container.getAsync(PathService);
+    const linkSvc = await container.getAsync(LinkToolService);
+    const versionSvc = await container.getAsync(VersionService);
+
+    for (const { name, tool } of await versionSvc.findAllLinks()) {
+      if (await pathExists(join(pathSvc.linksPath, name), 'file')) {
+        continue;
+      }
+      try {
+        await linkSvc.restorePointer(
+          name,
+          tool,
+          await versionSvc.findParentVersions(tool),
+        );
+      } catch (err) {
+        logger.warn({ err, command: name }, 'cannot restore the pointer');
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, 'cannot restore the pointers');
+  }
+}
+
+/**
  * Runs the initialize step of the passed tools, or of all prepared tools for
- * `all`.
+ * `all`. For `all` it also recreates the missing pointers of the commands, see
+ * `restorePointers`.
  */
 export async function initializeTools(
   tools: string[],
@@ -109,5 +150,9 @@ export async function initializeTools(
 ): Promise<number | void> {
   const container = await prepareContainer();
   const svc = await container.getAsync(PrepareToolService);
-  return svc.initialize(tools, dryRun);
+  const res = await svc.initialize(tools, dryRun);
+  if (!res && !dryRun && tools.length === 1 && tools[0] === 'all') {
+    await restorePointers(container);
+  }
+  return res;
 }

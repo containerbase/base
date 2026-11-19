@@ -3,6 +3,7 @@ import './cleanup-downloads.ts';
 import './cleanup-path.ts';
 import './cleanup-tool.ts';
 import './cleanup.ts';
+import './ensure.ts';
 import './file-download.ts';
 import './file-exists.ts';
 import './init-tool.ts';

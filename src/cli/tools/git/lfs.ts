@@ -51,17 +51,20 @@ export class GitLfsInstallService extends BaseInstallService {
 
   /**
    * Links the `git-lfs` binary into the global bin folder and registers its
-   * git filters, system wide when running as root.
+   * git filters, system wide when running as root. The filters are not
+   * registered again when the version is restored. The binary is called by
+   * its path, as its pointer doesn't exist yet.
    */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
 
     await this.shellwrapper({ srcDir: src });
-    await this._spawn('git', [
-      'lfs',
-      'install',
-      ...(this.envSvc.isRoot ? ['--system'] : []),
-    ]);
+    if (!this.isRestoring()) {
+      await this._spawn(join(src, this.name), [
+        'install',
+        ...(this.envSvc.isRoot ? ['--system'] : []),
+      ]);
+    }
   }
 
   /** Checks that `git lfs version` runs. */
