@@ -1,5 +1,12 @@
 import fs from 'node:fs/promises';
-import { type Container, injectFromHierarchy, injectable } from 'inversify';
+import { join } from 'node:path';
+import { deleteAsync } from 'del';
+import {
+  type Container,
+  inject,
+  injectFromHierarchy,
+  injectable,
+} from 'inversify';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
@@ -12,9 +19,12 @@ import {
 } from '../services/index.ts';
 import { BunInstallService } from '../tools/bun.ts';
 import { BlockingChild, NotRoot, NotSupported } from '../utils/codes.ts';
-import { isDockerBuild, logger } from '../utils/index.ts';
+import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
 import { BaseInstallService } from './base-install.service.ts';
-import { V1ToolInstallService } from './install-legacy-tool.service.ts';
+import {
+  V1ToolInstallService,
+  V2ToolInstallService,
+} from './install-legacy-tool.service.ts';
 import {
   INSTALL_TOOL_TOKEN,
   InstallToolService,
@@ -22,6 +32,7 @@ import {
 import { ensurePaths, rootPath } from '~test/path.ts';
 
 vi.mock('del');
+const actualDel = await vi.importActual<typeof import('del')>('del');
 vi.mock('execa');
 vi.mock('../tools/bun.ts');
 vi.mock('../tools/php/composer.ts');
@@ -63,11 +74,73 @@ class NoUninstallInstallService extends TestInstallService {
   override readonly canUninstall = false;
 }
 
+/** a v2 shell tool, which doesn't have to install into its versioned path */
+@injectable()
+@injectFromHierarchy()
+class ShellInstallService extends V2ToolInstallService {
+  readonly name = 'shell-tool';
+
+  /** Does nothing, for tests. */
+  override install(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /** Does nothing, for tests. */
+  override link(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /** Does nothing, for tests. */
+  override postInstall(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /** Does nothing, for tests. */
+  override test(_version: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /** Needs no prepare step, for tests. */
+  override needsPrepare(): boolean {
+    return false;
+  }
+
+  /** Needs no initialize step, for tests. */
+  override needsInitialize(): boolean {
+    return false;
+  }
+
+  /** Accepts any version, for tests. */
+  override validate(_version: string): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+}
+
+/** a tool installed into a folder per version of its parent `host` */
+@injectable()
+@injectFromHierarchy()
+class ScopedInstallService extends TestInstallService {
+  @inject(VersionService)
+  private readonly versionSvc!: VersionService;
+
+  override readonly name = 'scoped';
+  override readonly parent = 'host';
+  override readonly parentScoped = true;
+
+  /** Creates the folder for the current version of the parent. */
+  override async install(version: string): Promise<void> {
+    const host = (await this.versionSvc.getCurrent('host'))!;
+    await this.pathSvc.createDir(this.versionDir(version, host.tool.version));
+  }
+}
+
 describe('cli/install-tool/install-tool.service', () => {
   const parent = createContainer();
   parent.bind(InstallToolService).toSelf();
   parent.bind(V1ToolInstallService).toSelf();
+  parent.bind(INSTALL_TOOL_TOKEN).to(ScopedInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(BunInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(ShellInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(RootOnlyInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(NoUninstallInstallService);
 
@@ -156,6 +229,78 @@ describe('cli/install-tool/install-tool.service', () => {
       );
     });
 
+    test('a failed install for a parent version keeps the other parents', async () => {
+      const ver = await child.getAsync(VersionService);
+      const pathSvc = await child.getAsync(PathService);
+      const host = (version: string) => ({
+        name: 'host',
+        tool: { name: 'host', version },
+      });
+      // the cleanup removes the real folders
+      vi.mocked(deleteAsync).mockImplementation(actualDel.deleteAsync);
+      await ver.setCurrent(host('1.0.0'));
+      expect(await install.install('scoped', '1.0.0')).toBeUndefined();
+      await ver.setCurrent(host('2.0.0'));
+      vi.spyOn(
+        ScopedInstallService.prototype,
+        'install',
+      ).mockImplementationOnce(async function () {
+        await fs.mkdir(
+          join(pathSvc.versionedToolPath('scoped', '1.0.0'), '2.0.0'),
+          { recursive: true },
+        );
+        throw new Error('install failed');
+      });
+
+      await expect(install.install('scoped', '1.0.0')).rejects.toThrow(
+        'install failed',
+      );
+
+      const dir = pathSvc.versionedToolPath('scoped', '1.0.0');
+      expect(await pathExists(join(dir, '1.0.0'), 'dir')).toBe(true);
+      expect(await pathExists(join(dir, '2.0.0'), 'dir')).toBe(false);
+      expect(
+        await ver.isInstalled({
+          name: 'scoped',
+          version: '1.0.0',
+          parent: { name: 'host', version: '1.0.0' },
+        }),
+      ).toBe(true);
+      expect(
+        await ver.isInstalled({
+          name: 'scoped',
+          version: '1.0.0',
+          parent: { name: 'host', version: '2.0.0' },
+        }),
+      ).toBe(false);
+    });
+
+    test('the cleanup of a failed install stays inside the tool folder', async () => {
+      const ver = await child.getAsync(VersionService);
+      const pathSvc = await child.getAsync(PathService);
+      vi.mocked(deleteAsync).mockImplementation(actualDel.deleteAsync);
+      await ver.setCurrent({
+        name: 'host',
+        tool: { name: 'host', version: '3.0.0' },
+      });
+      // `tools/x` is next to the folder of the tool
+      const outside = join(pathSvc.toolsPath, 'x', '3.0.0', 'keep');
+      await fs.mkdir(join(pathSvc.toolsPath, 'x', '3.0.0'), {
+        recursive: true,
+      });
+      await fs.writeFile(outside, '');
+      vi.spyOn(ScopedInstallService.prototype, 'validate').mockResolvedValue(
+        true,
+      );
+      vi.spyOn(ScopedInstallService.prototype, 'install').mockRejectedValueOnce(
+        new Error('install failed'),
+      );
+
+      await expect(install.install('scoped', '../x')).rejects.toThrow();
+
+      expect(await pathExists(outside, 'file')).toBe(true);
+    });
+
     test('cleans the caches on a docker build', async () => {
       vi.mocked(isDockerBuild).mockResolvedValue(true);
 
@@ -219,7 +364,9 @@ describe('cli/install-tool/install-tool.service', () => {
     });
 
     test('does not relink an already linked tool', async () => {
+      const pathSvc = await child.getAsync(PathService);
       expect(await install.install('bun', '1.0.7')).toBeUndefined();
+      await pathSvc.createVersionedToolPath('bun', '1.0.7');
 
       expect(await install.install('bun', '1.0.7')).toBeUndefined();
 
@@ -249,6 +396,49 @@ describe('cli/install-tool/install-tool.service', () => {
 
       expect(link.context).toBeNull();
     });
+
+    test('installs a recorded version again when its files are missing', async () => {
+      const ver = await child.getAsync(VersionService);
+      expect(await install.install('bun', '1.3.0')).toBeUndefined();
+      const installSpy = vi.spyOn(BunInstallService.prototype, 'install');
+      const linkSpy = vi.spyOn(BunInstallService.prototype, 'link');
+
+      expect(await install.install('bun', '1.3.0')).toBeUndefined();
+
+      expect(logger.info).toHaveBeenCalledWith(
+        { tool: 'bun', version: '1.3.0' },
+        'tool version missing, installing',
+      );
+      expect(installSpy).toHaveBeenCalledExactlyOnceWith('1.3.0');
+      // the current version is linked too, its wrappers are gone with the files
+      expect(linkSpy).toHaveBeenCalledExactlyOnceWith('1.3.0');
+      // the version is still recorded once
+      expect(
+        (await ver.findInstalled('bun')).filter((v) => v.version === '1.3.0'),
+      ).toHaveLength(1);
+    });
+
+    test.each(['no-uninstall', 'shell-tool'])(
+      'keeps a recorded version of %s, which has no files to check',
+      async (tool) => {
+        const installSpy = vi.spyOn(
+          tool === 'shell-tool'
+            ? ShellInstallService.prototype
+            : NoUninstallInstallService.prototype,
+          'install',
+        );
+        expect(await install.install(tool, '2.0.0')).toBeUndefined();
+        installSpy.mockClear();
+
+        expect(await install.install(tool, '2.0.0')).toBeUndefined();
+
+        expect(logger.info).toHaveBeenCalledWith(
+          { tool },
+          'tool already installed',
+        );
+        expect(installSpy).not.toHaveBeenCalled();
+      },
+    );
 
     test('sets the link context of the version', async () => {
       const spy = vi.spyOn(LinkToolService.prototype, 'setContext');

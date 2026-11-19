@@ -25,7 +25,10 @@ import {
   logger,
 } from '../utils/index.ts';
 import type { BaseInstallService } from './base-install.service';
-import { V1ToolInstallService } from './install-legacy-tool.service.ts';
+import {
+  V1ToolInstallService,
+  V2ToolInstallService,
+} from './install-legacy-tool.service.ts';
 
 export const INSTALL_TOOL_TOKEN = Symbol('INSTALL_TOOL_TOKEN');
 
@@ -72,8 +75,9 @@ export class InstallToolService {
 
     await this.pathSvc.ensureBasePaths();
 
+    const toolSvc = this.toolSvcs.find((t) => t.name === tool);
+    let parent: ToolState | null = null;
     try {
-      const toolSvc = this.toolSvcs.find((t) => t.name === tool);
       await this.ipc.start();
       this._link.clear();
       if (toolSvc) {
@@ -81,8 +85,6 @@ export class InstallToolService {
           logger.fatal({ tool }, 'tool must be installed as root');
           return NotRoot;
         }
-
-        let parent: ToolState | null = null;
 
         if (toolSvc.parent) {
           parent = await this.versionSvc.getCurrent(toolSvc.parent);
@@ -94,6 +96,7 @@ export class InstallToolService {
             return MissingParent;
           }
         }
+        let missing = false;
         if (
           await this.versionSvc.isInstalled({
             name: tool,
@@ -101,10 +104,14 @@ export class InstallToolService {
             ...(parent && { parent: parent.tool }),
           })
         ) {
-          logger.info({ tool }, 'tool already installed');
-          await this.linkAndTest(toolSvc, version, parent);
-          await this.versionSvc.update(tool, version);
-          return;
+          if (!(await this.isMissing(toolSvc, version))) {
+            logger.info({ tool }, 'tool already installed');
+            await this.linkAndTest(toolSvc, version, parent);
+            await this.versionSvc.update(tool, version);
+            return;
+          }
+          logger.info({ tool, version }, 'tool version missing, installing');
+          missing = true;
         }
 
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {
@@ -135,12 +142,14 @@ export class InstallToolService {
         } else {
           logger.debug({ tool }, 'install tool');
           await toolSvc.install(version);
-          await this.versionSvc.addInstalled({
-            name: tool,
-            version,
-            ...(parent && { parent: parent.tool }),
-          });
-          await this.linkAndTest(toolSvc, version, parent);
+          if (!missing) {
+            await this.versionSvc.addInstalled({
+              name: tool,
+              version,
+              ...(parent && { parent: parent.tool }),
+            });
+          }
+          await this.linkAndTest(toolSvc, version, parent, missing);
         }
       } else {
         if (dryRun) {
@@ -164,8 +173,7 @@ export class InstallToolService {
       }
       await this.versionSvc.update(tool, version);
     } catch (e) {
-      await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
-      await this.versionSvc.removeInstalled({ name: tool, version });
+      await this.removeFailedInstall(tool, version, toolSvc, parent);
       // TODO check and fix broken links
       throw e;
     } finally {
@@ -215,6 +223,34 @@ export class InstallToolService {
         logger.warn({ err }, 'cannot evict the download cache');
       }
     }
+  }
+
+  /**
+   * Removes what a failed install left. A tool installed per parent version,
+   * eg. a npm package, only loses the folder and the record of the parent
+   * version it was installed for, the copies for other parent versions keep
+   * working. For other tools and the legacy tools the version is removed with
+   * all its records.
+   */
+  private async removeFailedInstall(
+    tool: string,
+    version: string,
+    toolSvc: BaseInstallService | undefined,
+    parent: ToolState | null,
+  ): Promise<void> {
+    if (toolSvc?.parentScoped && parent) {
+      await deleteAsync(path.join(version, parent.tool.version), {
+        cwd: this.pathSvc.toolPath(tool),
+      });
+      await this.versionSvc.removeInstalled({
+        name: tool,
+        version,
+        parent: parent.tool,
+      });
+      return;
+    }
+    await deleteAsync(version, { cwd: this.pathSvc.toolPath(tool) });
+    await this.versionSvc.removeInstalled({ name: tool, version });
   }
 
   /**
@@ -340,15 +376,36 @@ export class InstallToolService {
   }
 
   /**
+   * Whether a version recorded as installed is gone from the disk, eg. its
+   * folder was removed. Tools which can't be uninstalled, like git which apt
+   * installs, and the v2 shell tools are never missing, as their files don't
+   * have to be in the versioned tool path.
+   */
+  private async isMissing(
+    toolSvc: BaseInstallService,
+    version: string,
+  ): Promise<boolean> {
+    return (
+      toolSvc.canUninstall &&
+      !(toolSvc instanceof V2ToolInstallService) &&
+      !(await toolSvc.isInstalled(version))
+    );
+  }
+
+  /**
    * Links the version onto the path and records it as the current one, unless
-   * it already is. Then runs the post-install step, records the created shell
-   * wrappers and runs the tool test, unless tests are skipped. The link
-   * context tells the linking which version it links.
+   * it already is, except with `force`. Then runs the post-install step,
+   * records the created shell wrappers and runs the tool test, unless tests
+   * are skipped. The link context tells the linking which version it links.
+   *
+   * @param force - link also the current version, eg. after its files were
+   * installed again
    */
   private async linkAndTest(
     toolSvc: BaseInstallService,
     version: string,
     parent: ToolState | null,
+    force = false,
   ): Promise<void> {
     this._link.setContext({
       tool: toolSvc.name,
@@ -361,7 +418,7 @@ export class InstallToolService {
         tool: { name: toolSvc.name, version },
         ...(parent && { parent: parent.tool }),
       };
-      if (await this.versionSvc.isCurrent(current)) {
+      if (!force && (await this.versionSvc.isCurrent(current))) {
         logger.debug({ tool: toolSvc.name }, 'tool already linked');
       } else {
         logger.debug({ tool: toolSvc.name }, 'link tool');

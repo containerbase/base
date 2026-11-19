@@ -384,6 +384,33 @@ describe('cli/tools/python/utils', () => {
     expect(await svc.isInstalled('4.0.0')).toBe(true);
   });
 
+  test('isInstalled accepts a normalized name or version', async () => {
+    const svc = await child.getAsync(HashinInstallService);
+    const venv = path.join(
+      pathSvc.versionedToolPath('hashin', '4.1'),
+      pythonVersion,
+    );
+    const site = path.join(venv, 'lib/python3.13/site-packages');
+
+    // no virtualenv
+    expect(await svc.isInstalled('4.1')).toBe(false);
+
+    // a virtualenv without packages
+    await fs.mkdir(path.join(venv, 'bin'), { recursive: true });
+    await fs.writeFile(path.join(venv, 'bin/python'), '');
+    expect(await svc.isInstalled('4.1')).toBe(false);
+
+    // another package
+    await fs.mkdir(path.join(site, 'other-4.1.0.dist-info'), {
+      recursive: true,
+    });
+    expect(await svc.isInstalled('4.1')).toBe(false);
+
+    // the same package with another case and version spelling
+    await fs.mkdir(path.join(site, 'Hashin-4.1.0.dist-info'));
+    expect(await svc.isInstalled('4.1')).toBe(true);
+  });
+
   test('link: console scripts', async () => {
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
     const svc = await child.getAsync(PipToolsInstallService);
