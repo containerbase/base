@@ -980,6 +980,99 @@ RUN set -ex; \
 RUN node /test/vp/sync-versions.mjs "${VP_VERSION}"
 
 #--------------------------------------
+# test: shims
+#--------------------------------------
+FROM base AS test-shims
+
+RUN prepare-tool node
+
+USER 12021
+
+# old LTS, no major updates (see .github/renovate.json)
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.23.5
+
+# old LTS, no major updates (see .github/renovate.json)
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 24.22.3
+
+# renovate: datasource=npm
+RUN install-tool yarn 1.22.22
+
+# the commands are shims, which source the wrapper the pointer links to
+RUN set -ex; \
+  head -n1 /usr/local/bin/node | grep -q '^#!/bin/bash$'; \
+  grep -q 'ensure node ' /usr/local/bin/node; \
+  [[ "$(readlink /opt/containerbase/links/node)" == "/opt/containerbase/tools/node/$(cat /opt/containerbase/versions/node)/.wrappers/node" ]]; \
+  node --version | grep '^v24\.'
+
+# switching the version moves the pointers
+RUN install-tool node 22.23.5
+RUN set -ex; \
+  node --version | grep '^v22\.'; \
+  npm --version
+RUN install-tool node 24.22.3
+
+# a missing pointer is recreated without an install
+RUN set -ex; \
+  rm /opt/containerbase/links/npm; \
+  npm --version; \
+  [[ -L /opt/containerbase/links/npm ]]
+
+# deleted version folders, also of the parent, are installed again on the next call
+RUN set -ex; \
+  node24="$(cat /opt/containerbase/versions/node)"; \
+  rm -rf "/opt/containerbase/tools/node/${node24}" /opt/containerbase/tools/yarn/1.22.22; \
+  [[ ! -e /opt/containerbase/links/node ]]; \
+  out=$(yarn --version); \
+  [[ "${out}" == "1.22.22" ]]; \
+  [[ -d "/opt/containerbase/tools/node/${node24}" ]]; \
+  node --version | grep '^v24\.'; \
+  [[ "$(cat /opt/containerbase/versions/node)" == "${node24}" ]]
+
+# a failed install keeps the shim and the pointer, and the next call tries again
+RUN set -ex; \
+  node24="$(cat /opt/containerbase/versions/node)"; \
+  rm -rf "/opt/containerbase/tools/node/${node24}"; \
+  mkdir -p /tmp/no-cache; \
+  if CONTAINERBASE_CDN= CONTAINERBASE_CACHE_DIR=/tmp/no-cache URL_REPLACE_0_FROM=https:// URL_REPLACE_0_TO=http://127.0.0.1:9/ node --version; then \
+    echo "node should fail without a download"; \
+    exit 1; \
+  fi; \
+  [[ ! -e "/opt/containerbase/tools/node/${node24}" ]]; \
+  [[ -L /opt/containerbase/links/node ]]; \
+  grep -q 'ensure node ' /usr/local/bin/node; \
+  node --version | grep '^v24\.'
+
+# a nested shim without a pointer fails fast with 127 instead of calling ensure again
+RUN set -ex; \
+  CONTAINERBASE_ENSURE=1 node --version | grep '^v24\.'; \
+  rm /opt/containerbase/links/npm; \
+  rc=0; \
+  CONTAINERBASE_ENSURE=1 npm --version || rc=$?; \
+  [[ "${rc}" -eq 127 ]]; \
+  [[ ! -e /opt/containerbase/links/npm ]]; \
+  npm --version; \
+  [[ -L /opt/containerbase/links/npm ]]
+
+# a command without a links row can't be restored
+RUN set -ex; \
+  sed 's/node/nope/g' /usr/local/bin/node > /usr/local/bin/nope; \
+  chmod +x /usr/local/bin/nope; \
+  rc=0; \
+  nope || rc=$?; \
+  rm /usr/local/bin/nope; \
+  [[ "${rc}" -eq 127 ]]
+
+# a deleted links folder is restored by init, without downloads
+RUN set -ex; \
+  rm -rf /opt/containerbase/links; \
+  containerbase-cli init tool all; \
+  [[ -L /opt/containerbase/links/node ]]; \
+  [[ -L /opt/containerbase/links/yarn ]]; \
+  yarn --version | grep "^1.22.22$"
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -1004,6 +1097,7 @@ COPY --from=testq /.dummy /.dummy
 COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-cleanup /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
+COPY --from=test-shims /.dummy /.dummy
 
 COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy

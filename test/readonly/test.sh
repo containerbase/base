@@ -58,6 +58,20 @@ for user in root 12021; do
   # a dry run writes nothing, so it works on a read-only file system
   run --user "${user}" "${image}" install-tool --dry-run flux 0.27.2
 
+  # a dangling pointer, the version folder is gone, can't be installed again on
+  # a read-only file system, the call fails with the write error and not with
+  # `No such file or directory`
+  if output=$(run --user "${user}" "${image}" helm version 2>&1); then
+    echo "helm should fail with a missing version folder on a read-only file system"
+    exit 1
+  fi
+  echo "${output}"
+  grep "EROFS: can't write to" > /dev/null <<< "${output}"
+  if grep 'No such file or directory' > /dev/null <<< "${output}"; then
+    echo "the shim should not source the dangling pointer"
+    exit 1
+  fi
+
   # a configured tmp dir on the read-only root file system can't be created,
   # so the tools keep using a real `/tmp/containerbase` folder with a warning
   output=$(run --user "${user}" -e CONTAINERBASE_TMP_DIR="${tmp_dir}" "${image}" \

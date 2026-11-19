@@ -14,11 +14,13 @@ It's planned to eventually switch to [`node:sqlite`](https://nodejs.org/api/sqli
 ## `links`
 
 Stores information about linked tool versions.
-It stores which tool and version a shell wrapper was created from.
+It stores which tool and version a command was linked from.
+The pointer `/opt/containerbase/links/<name>` is written and removed together with the row, see [how tools are linked](./linking.md).
+A command keeps the version which linked it last, also when another version of the tool becomes the current one.
 
 **Meta:**
 
-- `name`: file name
+- `name`: command name, the file name in `/opt/containerbase/bin`
 - `tool`: the tool the file is linked to
   - `name`: tool name
   - `version`: tool version

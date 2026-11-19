@@ -104,6 +104,10 @@ pnpm test:docker --network host --allow-host-network -t test-x86_64 java
 
 To add support for a new tool read the [new-tool](./docs/new-tool.md) docs.
 
+## How tools are linked
+
+To learn how the commands of installed tools get on the `PATH` and how a missing tool version is installed again, read the [linking](./docs/linking.md) docs.
+
 ## Apt proxy
 
 You can configure an apt proxy for the build by setting an `APT_HTTP_PROXY` argument.

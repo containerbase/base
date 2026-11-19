@@ -141,6 +141,40 @@ export class VersionService {
     return this._links.findAsync({ tool });
   }
 
+  /** The tool version a shell wrapper name points at, `null` when unknown. */
+  findLink(name: string): Promise<Doc<ToolLink> | null> {
+    return this._links.findOneAsync({ name });
+  }
+
+  /** Every shell wrapper name with the tool version it points at. */
+  findAllLinks(): Promise<Doc<ToolLink>[]> {
+    return this._links.findAsync({});
+  }
+
+  /**
+   * The versions of the parent tools a tool version is installed for, the
+   * current parent version first. Tools which are not installed per parent
+   * version have none.
+   */
+  async findParentVersions({ name, version }: Tool): Promise<string[]> {
+    const versions: string[] = [];
+    for (const { parent } of await this._versions.findAsync({
+      name,
+      version,
+    })) {
+      if (!parent) {
+        continue;
+      }
+      const current = await this.getCurrent(parent.name);
+      if (current?.tool.version === parent.version) {
+        versions.unshift(parent.version);
+      } else {
+        versions.push(parent.version);
+      }
+    }
+    return versions;
+  }
+
   /**
    * Points a shell wrapper name at a tool version, replacing whatever it
    * pointed at before.

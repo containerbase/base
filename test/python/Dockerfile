@@ -250,6 +250,22 @@ RUN install-pip poetry
 RUN install-pip uv
 
 #--------------------------------------
+# test: shims
+#--------------------------------------
+FROM build-rootless AS test-shims
+
+RUN install-pip hashin
+
+# the version folders of a pip package and of its python are installed again on the next call
+RUN set -ex; \
+  rm -rf /opt/containerbase/tools/hashin/* /opt/containerbase/tools/python/*; \
+  [[ ! -e /opt/containerbase/links/hashin ]]; \
+  hashin --version; \
+  [[ -n "$(ls /opt/containerbase/tools/hashin)" ]]; \
+  [[ -n "$(ls /opt/containerbase/tools/python)" ]]; \
+  python --version
+
+#--------------------------------------
 # test: partial versions
 #--------------------------------------
 FROM build-rootless AS test-partial
@@ -290,4 +306,5 @@ COPY --from=test-pipenv-a /.dummy /.dummy
 COPY --from=test-pipenv-b /.dummy /.dummy
 COPY --from=testb /.dummy /.dummy
 COPY --from=test-other /.dummy /.dummy
+COPY --from=test-shims /.dummy /.dummy
 COPY --from=test-partial /.dummy /.dummy

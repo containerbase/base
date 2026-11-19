@@ -140,34 +140,56 @@ describe('cli/tools/erlang/elixir', () => {
 
       expect(spy).toHaveBeenCalledWith('elixir', { srcDir });
       expect(spy).toHaveBeenCalledWith('elixir', { name: 'mix', srcDir });
+      // the pointers of the commands don't exist yet, so mix is called by its path
+      const env = { PATH: `${srcDir}:${process.env.PATH}` };
       expect(execaMock).toHaveBeenCalledWith(
-        'mix',
+        join(srcDir, 'mix'),
         ['local.hex', '--force'],
-        expect.any(Object),
+        expect.objectContaining({ env }),
       );
       expect(execaMock).toHaveBeenCalledWith(
-        'mix',
+        join(srcDir, 'mix'),
         ['local.rebar', '--force'],
-        expect.any(Object),
+        expect.objectContaining({ env }),
       );
     });
 
     test('link: runs mix as the configured user when root', async () => {
       vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
-      const { svc } = await toolContext(ElixirInstallService);
+      const { svc, pathSvc } = await toolContext(ElixirInstallService);
+      const mix = join(
+        pathSvc.versionedToolPath('elixir', '1.18.3'),
+        'bin/mix',
+      );
+      const bin = join(pathSvc.versionedToolPath('elixir', '1.18.3'), 'bin');
 
       await expect(svc.link('1.18.3')).resolves.toBeUndefined();
 
       expect(execaMock).toHaveBeenCalledWith(
         'su',
-        ['-c', 'mix local.hex --force', 'ubuntu'],
+        ['-c', `PATH=${bin}:$PATH ${mix} local.hex --force`, 'ubuntu'],
         expect.any(Object),
       );
       expect(execaMock).toHaveBeenCalledWith(
         'su',
-        ['-c', 'mix local.rebar --force', 'ubuntu'],
+        ['-c', `PATH=${bin}:$PATH ${mix} local.rebar --force`, 'ubuntu'],
         expect.any(Object),
       );
+    });
+
+    test('link: does not run mix when restoring', async () => {
+      const { svc, child, pathSvc } = await toolContext(ElixirInstallService);
+      const link = await child.getAsync(LinkToolService);
+      link.setContext({
+        tool: 'elixir',
+        version: '1.18.3',
+        dir: pathSvc.versionedToolPath('elixir', '1.18.3'),
+        restore: true,
+      });
+
+      await expect(svc.link('1.18.3')).resolves.toBeUndefined();
+
+      expect(execaMock).not.toHaveBeenCalled();
     });
 
     test('runs the tool test', async () => {

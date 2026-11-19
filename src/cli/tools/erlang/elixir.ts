@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import { env as penv } from 'node:process';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
@@ -92,7 +93,8 @@ export class ElixirInstallService extends BaseInstallService {
 
   /**
    * Links the `elixir` and `mix` binaries into the global bin folder, then
-   * runs `mix local.hex` and `mix local.rebar`.
+   * runs `mix local.hex` and `mix local.rebar`, unless the version is
+   * restored.
    *
    * TODO: check rights of files and folder in ~/.mix and ~/.hex
    */
@@ -105,23 +107,31 @@ export class ElixirInstallService extends BaseInstallService {
     await this.shellwrapper({ srcDir });
     await this.shellwrapper({ name: 'mix', srcDir });
 
-    await this.runMix(['local.hex', '--force']);
-    await this.runMix(['local.rebar', '--force']);
+    if (!this.isRestoring()) {
+      await this.runMix(srcDir, ['local.hex', '--force']);
+      await this.runMix(srcDir, ['local.rebar', '--force']);
+    }
   }
 
   /**
    * Runs a `mix` subcommand, as the configured user via `su` when running as
-   * root, mirroring the shell tool's `su -c '<command>' "${USER_NAME}"`.
+   * root, mirroring the shell tool's `su -c '<command>' "${USER_NAME}"`. It
+   * calls `mix` by its path, as the pointers of the commands don't exist yet,
+   * and puts the folder first in the `PATH`, as `mix` starts `elixir` through
+   * `env`.
    */
-  private async runMix(args: string[]): Promise<void> {
+  private async runMix(srcDir: string, args: string[]): Promise<void> {
+    const mix = join(srcDir, 'mix');
     if (this.envSvc.isRoot) {
       await this._spawn('su', [
         '-c',
-        `mix ${args.join(' ')}`,
+        `PATH=${srcDir}:$PATH ${mix} ${args.join(' ')}`,
         this.envSvc.userName,
       ]);
     } else {
-      await this._spawn('mix', args);
+      await this._spawn(mix, args, {
+        env: { PATH: `${srcDir}:${penv.PATH}` },
+      });
     }
   }
 

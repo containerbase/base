@@ -501,6 +501,20 @@ export async function uninstallTool({
 }
 
 /**
+ * Makes a command of an installed tool run again, see
+ * `InstallToolService.ensure`. Generic install services are registered for
+ * every installed `gem`, `npm` or `pip` package.
+ *
+ * @throws when the containerbase folders are not writable or the install
+ * fails
+ */
+export async function ensureTool(command: string): Promise<number | void> {
+  const container = await prepareUninstallContainer(false);
+  const svc = await container.getAsync(InstallToolService);
+  return svc.ensure(command);
+}
+
+/**
  * Creates the install container with a generic install service for every
  * installed `gem`, `npm` or `pip` package, so they can be uninstalled. A dry
  * run opens the databases read-only, so they are never written.

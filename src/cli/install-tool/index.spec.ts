@@ -15,6 +15,7 @@ import {
   VersionService,
   createContainer,
 } from '../services/index.ts';
+import { BunInstallService } from '../tools/bun.ts';
 import { NpmVersionResolver } from '../tools/node/resolver.ts';
 import { NpmBaseInstallService } from '../tools/node/utils.ts';
 import { PipVersionResolver } from '../tools/python/pip.ts';
@@ -24,9 +25,15 @@ import {
   RubyBaseInstallService,
   RubyGemVersionResolver,
 } from '../tools/ruby/utils.ts';
-import { BlockingChild, MissingParent, NotSupported } from '../utils/codes.ts';
+import {
+  BlockingChild,
+  CommandNotFound,
+  MissingParent,
+  NotSupported,
+} from '../utils/codes.ts';
 import { isDockerBuild, logger, pathExists } from '../utils/index.ts';
 import {
+  ensureTool,
   installTool,
   linkTool,
   listSupportedTools,
@@ -60,6 +67,7 @@ describe('cli/install-tool/index', () => {
     await ensurePaths([
       'opt/containerbase/bin',
       'opt/containerbase/data',
+      'opt/containerbase/links',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
       'var/lib/containerbase/tool.prep.d',
@@ -690,7 +698,7 @@ describe('cli/install-tool/index', () => {
 
     test('checks only the bin folder', async () => {
       const pathSvc = await createContainer().getAsync(PathService);
-      failAccess(pathSvc.dataPath, 'EROFS');
+      failAccess(pathSvc.linksPath, 'EROFS');
 
       expect(await linkTool('node', { srcDir: '/bin/bash' })).toBe(0);
     });
@@ -721,6 +729,34 @@ describe('cli/install-tool/index', () => {
       expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
         false,
       );
+    });
+  });
+
+  describe('ensureTool', () => {
+    test('fails first when the folders are not writable', async () => {
+      const pathSvc = await createContainer().getAsync(PathService);
+      failAccess(pathSvc.linksPath, 'EROFS');
+
+      await expect(ensureTool('bun')).rejects.toThrow(
+        `EROFS: can't write to ${pathSvc.linksPath}, the file system is read-only.`,
+      );
+    });
+
+    test('fails for an unknown command', async () => {
+      expect(await ensureTool('not-a-command')).toBe(CommandNotFound);
+    });
+
+    test('installs the version of the command again', async () => {
+      const verSvc = await createContainer().getAsync(VersionService);
+      await verSvc.setLink({
+        name: 'bun-cmd',
+        tool: { name: 'bun', version: '7.0.0' },
+      });
+      const spy = vi.spyOn(BunInstallService.prototype, 'install');
+
+      expect(await ensureTool('bun-cmd')).toBeUndefined();
+
+      expect(spy).toHaveBeenCalledExactlyOnceWith('7.0.0');
     });
   });
 

@@ -155,19 +155,38 @@ describe('cli/tools/git/lfs', () => {
   });
 
   test.each([
-    { root: true, args: ['lfs', 'install', '--system'] },
-    { root: false, args: ['lfs', 'install'] },
+    { root: true, args: ['install', '--system'] },
+    { root: false, args: ['install'] },
   ])('link as root=$root', async ({ root, args }) => {
     vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(root);
     const { svc, pathSvc } = await toolContext(GitLfsInstallService);
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
+    const src = join(pathSvc.versionedToolPath('git-lfs', '3.8.0'), 'bin');
 
     await expect(svc.link('3.8.0')).resolves.toBeUndefined();
 
-    expect(spy).toHaveBeenCalledExactlyOnceWith('git-lfs', {
-      srcDir: join(pathSvc.versionedToolPath('git-lfs', '3.8.0'), 'bin'),
+    expect(spy).toHaveBeenCalledExactlyOnceWith('git-lfs', { srcDir: src });
+    // the pointer of the command doesn't exist yet, so it is called by its path
+    expect(execaMock).toHaveBeenCalledExactlyOnceWith(
+      join(src, 'git-lfs'),
+      args,
+      expect.any(Object),
+    );
+  });
+
+  test('link: does not register the filters when restoring', async () => {
+    const { svc, child, pathSvc } = await toolContext(GitLfsInstallService);
+    const link = await child.getAsync(LinkToolService);
+    link.setContext({
+      tool: 'git-lfs',
+      version: '3.8.0',
+      dir: pathSvc.versionedToolPath('git-lfs', '3.8.0'),
+      restore: true,
     });
-    expect(execaMock).toHaveBeenCalledWith('git', args, expect.any(Object));
+
+    await expect(svc.link('3.8.0')).resolves.toBeUndefined();
+
+    expect(execaMock).not.toHaveBeenCalled();
   });
 
   test('runs the tool test', async () => {

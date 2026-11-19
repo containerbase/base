@@ -4,6 +4,12 @@
 export const NotSupported = 2;
 
 /**
+ * The command is not installed, like the exit code of a shell for a missing
+ * command.
+ */
+export const CommandNotFound = 127;
+
+/**
  * A missing version is blocking installation.
  */
 export const MissingVersion = 15;
