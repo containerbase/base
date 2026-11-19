@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { pathExists, semverGte } from '../../utils/index.ts';
+import { semverGte } from '../../utils/index.ts';
+import { linkCliPlugin } from './utils.ts';
 
 const minVersion = '2.0.1';
 
@@ -57,8 +58,9 @@ export class DockerComposeInstallService extends BaseInstallService {
   }
 
   /**
-   * Links the `docker-compose` binary into the global bin folder and as
-   * docker cli plugin.
+   * Links the `docker-compose` binary into the global bin folder and links
+   * the docker cli plugin to its shim there, so the plugin runs the linked
+   * version.
    */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
@@ -66,14 +68,7 @@ export class DockerComposeInstallService extends BaseInstallService {
     // to track linked version
     await this.shellwrapper({ srcDir: src });
 
-    const tgt = join(
-      this.pathSvc.cachePath,
-      `.docker/cli-plugins/${this.name}`,
-    );
-    if (await pathExists(tgt)) {
-      await fs.rm(tgt);
-    }
-    await fs.symlink(join(src, this.name), tgt);
+    await linkCliPlugin(this.pathSvc, this.name, this.name);
   }
 
   /** Checks that `docker compose version` runs. */

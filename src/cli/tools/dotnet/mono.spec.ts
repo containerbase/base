@@ -158,6 +158,40 @@ describe('cli/tools/dotnet/mono', () => {
       );
     });
 
+    test('initialize creates the cert store folder', async () => {
+      const { svc, child } = await toolContext(MonoPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const store = join(pathSvc.sslPath, 'mono');
+      await fs.rm(store, { recursive: true, force: true });
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+      // a second run keeps it
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect((await fs.stat(store)).isDirectory()).toBe(true);
+    });
+
+    test('prepare installs the hook after an initialize', async () => {
+      const { svc, child } = await toolContext(MonoPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const envSvc = await child.getAsync(EnvService);
+      const store = join(pathSvc.sslPath, 'mono');
+      const hook = join(
+        envSvc.rootDir,
+        'etc/ca-certificates/update.d/containerbase-mono-keystore',
+      );
+      await fs.rm(store, { recursive: true, force: true });
+      await fs.rm(hook, { force: true });
+
+      await svc.initialize();
+      await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(await fs.readFile(hook, 'utf8')).toContain(
+        'Updating Mono key store',
+      );
+      expect((await fs.stat(store)).isDirectory()).toBe(true);
+    });
+
     test('prepare replaces an existing mono link', async () => {
       const { svc, child } = await toolContext(MonoPrepareService);
       const envSvc = await child.getAsync(EnvService);

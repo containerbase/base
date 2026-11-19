@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { pathExists, semverGte } from '../../utils/index.ts';
+import { semverGte } from '../../utils/index.ts';
+import { linkCliPlugin } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -44,8 +45,8 @@ export class BuildxInstallService extends BaseInstallService {
   }
 
   /**
-   * Links the `buildx` binary into the global bin folder and as docker cli
-   * plugin.
+   * Links the `buildx` binary into the global bin folder and links the docker
+   * cli plugin to its shim there, so the plugin runs the linked version.
    */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
@@ -53,14 +54,7 @@ export class BuildxInstallService extends BaseInstallService {
     // to track linked version
     await this.shellwrapper({ srcDir: src });
 
-    const tgt = join(
-      this.pathSvc.cachePath,
-      `.docker/cli-plugins/docker-${this.name}`,
-    );
-    if (await pathExists(tgt)) {
-      await fs.rm(tgt);
-    }
-    await fs.symlink(join(src, this.name), tgt);
+    await linkCliPlugin(this.pathSvc, `docker-${this.name}`, this.name);
   }
 
   /** Checks that `docker buildx version` runs. */

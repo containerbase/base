@@ -124,11 +124,15 @@ describe('cli/tools/docker/compose', () => {
     expect(spy).toHaveBeenCalledExactlyOnceWith('docker-compose', {
       srcDir: src,
     });
-    expect(await fs.readlink(plugin)).toBe(join(src, 'docker-compose'));
+    // the plugin runs the shim, which selects the version
+    const shim = join(pathSvc.binDir, 'docker-compose');
+    expect(await fs.readlink(plugin)).toBe(shim);
 
-    // an existing plugin link is replaced
+    // a link to a version binary is replaced
+    await fs.rm(plugin);
+    await fs.symlink(join(src, 'docker-compose'), plugin);
     await expect(svc.link('2.29.7')).resolves.toBeUndefined();
-    expect(await fs.readlink(plugin)).toBe(join(src, 'docker-compose'));
+    expect(await fs.readlink(plugin)).toBe(shim);
   });
 
   test('runs the tool test', async () => {
