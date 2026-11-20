@@ -31,7 +31,7 @@ export class AndroidSdkCmdlineToolsInstallService extends BaseInstallService {
    * @throws when neither has a linux package for the version
    */
   override async install(version: string): Promise<void> {
-    // TODO: drop the repository fallback in the next major (#7962)
+    // TODO: drop the repository fallback in a following major (#7962)
     const file =
       (await this.downloadToolFile(version)) ??
       (await this.downloadFromRepo(version));
