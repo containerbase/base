@@ -94,3 +94,105 @@ for user in root 12021; do
 done
 
 echo "--- read-only tests passed"
+
+# Runs the test image as the containerbase user with a read-only root file
+# system and a tmpfs `/tmp`, with `/opt/containerbase` mounted from a host
+# folder, passing the `docker run` args after the folder and then the
+# given arguments.
+function volume_run() {
+  local dir="$1"
+  shift
+  run --user 12021 -v "${dir}:/opt/containerbase" "$@"
+}
+
+# Creates an empty host folder the containerbase user can write.
+function volume_dir() {
+  local dir
+  dir=$(mktemp -d)
+  chmod 0777 "${dir}"
+  echo "${dir}"
+}
+
+# Removes a host folder, also the files the container wrote with another owner.
+# The folder itself is given back to the host user first, as a copy made as
+# root changes its owner too, and then `rmdir` fails in a sticky `/tmp`.
+function volume_rm() {
+  docker run --rm --user root -v "$1:/volume" --entrypoint bash "${image}" -c "rm -rf /volume/* /volume/.[!.]*; chown $(id -u):$(id -g) /volume"
+  rmdir "$1"
+}
+
+volume=$(volume_dir)
+copy=$(volume_dir)
+trap 'rm -f "${volume}.list"; volume_rm "${volume}"; volume_rm "${copy}"' EXIT
+
+echo "--- volume: empty /opt/containerbase"
+
+# jq is restored by the init, git comes with the image and all other tools are
+# restored by their first call, an image has no other state than its build-time list
+# shellcheck disable=SC2016
+volume_run "${volume}" "${image}" bash -c '
+  set -ex
+  test -d /opt/containerbase/tools/jq
+  test -f /opt/containerbase/.tool.inst
+  cmp /var/lib/containerbase/tool.inst /opt/containerbase/.tool.inst
+  test -z "$(find /opt/containerbase/tools/node -mindepth 1 -type d)"
+  node --version | grep -E "^v[0-9]+\."
+  test -n "$(find /opt/containerbase/tools/node -mindepth 1 -type d)"
+  git --version
+  jq --version
+  java -version
+  python --version
+  hashin --version
+  test "$(cat /opt/containerbase/versions/node)" = "$(node --version | tr -d v)"
+  containerbase-cli list tools | grep "^node "
+  containerbase-cli list tools | grep "^hashin "
+  # the version of the image is installed by its first call
+  flux --version
+  image_flux=$(grep -m1 "^i tool flux " /var/lib/containerbase/tool.inst | cut -d " " -f 4)
+  test -d "/opt/containerbase/tools/flux/${image_flux}"
+  # a version which is not in the list installs on the writable volume
+  test ! -e /opt/containerbase/tools/jq/1.7.1
+  install-tool jq 1.7.1
+  test -d /opt/containerbase/tools/jq/1.7.1
+  test "$(cat /opt/containerbase/versions/jq)" = 1.7.1
+'
+
+echo "--- volume: image update with another list"
+
+# a second list moves flux back, the volume keeps what it has and the image wins
+docker run --rm --user root --entrypoint cat "${image}" /var/lib/containerbase/tool.inst > "${volume}.list"
+printf 'i tool flux 0.27.2\nc flux flux 0.27.2\nl flux flux 0.27.2\n' >> "${volume}.list"
+# shellcheck disable=SC2016
+volume_run "${volume}" -v "${volume}.list:/var/lib/containerbase/tool.inst:ro" "${image}" bash -c '
+  set -ex
+  cmp /var/lib/containerbase/tool.inst /opt/containerbase/.tool.inst
+  flux --version | grep 0.27.2
+  # nothing is removed, the version of the image before is still there
+  test -n "$(find /opt/containerbase/tools/node -mindepth 1 -type d)"
+  # the version of the image before and the one of the new list
+  image_flux=$(grep -m1 "^i tool flux " /var/lib/containerbase/tool.inst | cut -d " " -f 4)
+  test -d "/opt/containerbase/tools/flux/${image_flux}"
+  test -d /opt/containerbase/tools/flux/0.27.2
+  test "$(cat /opt/containerbase/versions/flux)" = 0.27.2
+'
+
+echo "--- volume: copy of /opt/containerbase"
+
+# a copy of the folder of the image needs no init and no download, any
+# download fails as all urls point to a closed port
+docker run --rm --user root -v "${copy}:/volume" --entrypoint bash "${image}" -c 'cp -a /opt/containerbase/. /volume/'
+mtime=$(stat -c %Y "${copy}/.tool.inst")
+# shellcheck disable=SC2016
+volume_run "${copy}" -e CONTAINERBASE_CDN= -e URL_REPLACE_0_FROM=https:// \
+  -e URL_REPLACE_0_TO=http://127.0.0.1:9/ -e "LIST_MTIME=${mtime}" "${image}" bash -c '
+  set -ex
+  test "$(stat -c %Y /opt/containerbase/.tool.inst)" = "${LIST_MTIME}"
+  node --version
+  git --version
+  jq --version
+  java -version
+  hashin --version
+  flux --version
+'
+
+echo "--- volume tests passed"
