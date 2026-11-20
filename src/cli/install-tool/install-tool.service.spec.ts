@@ -10,6 +10,7 @@ import {
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  BuildListService,
   CacheService,
   EnvService,
   LinkToolService,
@@ -219,6 +220,22 @@ class StuckInstallService extends TestInstallService {
   override readonly parent = 'root-only';
 }
 
+/** a npm package, which is listed with its type */
+@injectable()
+@injectFromHierarchy()
+class NpmTypedInstallService extends TestInstallService {
+  override readonly name = 'npm-typed';
+  override readonly type = 'npm';
+}
+
+/** a dotnet tool, which is listed as a plain tool */
+@injectable()
+@injectFromHierarchy()
+class DotnetTypedInstallService extends TestInstallService {
+  override readonly name = 'dotnet-typed';
+  override readonly type = 'dotnet';
+}
+
 /** The pointer of a command. */
 function linkPath(name: string): string {
   return rootPath(`opt/containerbase/links/${name}`);
@@ -242,6 +259,8 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(INSTALL_TOOL_TOKEN).to(ChildInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(OrphanInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(StuckInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(NpmTypedInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(DotnetTypedInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -793,6 +812,109 @@ describe('cli/install-tool/install-tool.service', () => {
       // the commands of the other version stay
       expect(await pathExists(linkPath('multi4'), 'file')).toBe(true);
       expect(await pathExists(binPath('multi4'), 'file')).toBe(true);
+    });
+  });
+
+  describe('build-time list', () => {
+    /** Makes the install a root install of an image build. */
+    function buildTime(): void {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+    }
+
+    test('records the installs of an image build', async () => {
+      buildTime();
+      const record = vi
+        .spyOn(BuildListService.prototype, 'record')
+        .mockResolvedValue();
+
+      expect(await install.install('multi', '30.0.0')).toBeUndefined();
+      expect(await install.install('child', '6.0.0')).toBeUndefined();
+
+      expect(record).toHaveBeenNthCalledWith(
+        1,
+        { type: 'tool', tool: 'multi', version: '30.0.0' },
+        ['multi', 'multi30'],
+        'multi',
+      );
+      expect(record).toHaveBeenNthCalledWith(
+        2,
+        {
+          type: 'tool',
+          tool: 'child',
+          version: '6.0.0',
+          parent: { name: 'multi', version: '30.0.0' },
+        },
+        ['child'],
+        'child',
+      );
+    });
+
+    test('records the type of a package', async () => {
+      buildTime();
+      const record = vi
+        .spyOn(BuildListService.prototype, 'record')
+        .mockResolvedValue();
+
+      expect(await install.install('npm-typed', '1.0.0')).toBeUndefined();
+      expect(await install.install('dotnet-typed', '1.0.0')).toBeUndefined();
+
+      expect(record).toHaveBeenNthCalledWith(
+        1,
+        { type: 'npm', tool: 'npm-typed', version: '1.0.0' },
+        [],
+        'npm-typed',
+      );
+      expect(record).toHaveBeenNthCalledWith(
+        2,
+        { type: 'tool', tool: 'dotnet-typed', version: '1.0.0' },
+        [],
+        'dotnet-typed',
+      );
+    });
+
+    test('does not record the v2 shell tools', async () => {
+      buildTime();
+      const record = vi.spyOn(BuildListService.prototype, 'record');
+
+      expect(await install.install('shell-tool', '3.0.0')).toBeUndefined();
+
+      expect(record).not.toHaveBeenCalled();
+    });
+
+    test('does not record without a root install of an image build', async () => {
+      const record = vi.spyOn(BuildListService.prototype, 'record');
+
+      // not root
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      expect(await install.install('multi', '31.0.0')).toBeUndefined();
+      // not an image build
+      vi.mocked(isDockerBuild).mockResolvedValue(false);
+      vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+      expect(await install.install('multi', '31.1.0')).toBeUndefined();
+
+      expect(record).not.toHaveBeenCalled();
+    });
+
+    test('uninstall removes the version from the list', async () => {
+      expect(await install.install('multi', '32.0.0')).toBeUndefined();
+      buildTime();
+      const remove = vi
+        .spyOn(BuildListService.prototype, 'remove')
+        .mockResolvedValue();
+
+      expect(await install.uninstall('multi', '32.0.0')).toBeUndefined();
+
+      expect(remove).toHaveBeenCalledExactlyOnceWith('multi', '32.0.0');
+    });
+
+    test('uninstall keeps the list without a root build', async () => {
+      expect(await install.install('multi', '33.0.0')).toBeUndefined();
+      const remove = vi.spyOn(BuildListService.prototype, 'remove');
+
+      expect(await install.uninstall('multi', '33.0.0')).toBeUndefined();
+
+      expect(remove).not.toHaveBeenCalled();
     });
   });
 

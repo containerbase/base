@@ -273,6 +273,22 @@ export class PathService {
   }
 
   /**
+   * Path to `/var/lib/containerbase/tool.inst`, the tools installed into the
+   * image at build time, see `BuildListService`.
+   */
+  get toolInstPath(): string {
+    return join(this.varPath, 'tool.inst');
+  }
+
+  /**
+   * Path to `/opt/containerbase/.tool.inst`, the copy of the build-time list
+   * which belongs to the state of the folder.
+   */
+  get volumeToolInstPath(): string {
+    return join(this.installDir, '.tool.inst');
+  }
+
+  /**
    * Path to `/opt/containerbase/ssl`.
    */
   get sslPath(): string {
