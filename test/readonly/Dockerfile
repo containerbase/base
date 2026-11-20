@@ -20,7 +20,7 @@ RUN install-tool node 26.13.1
 
 # tool without a prepare step
 # renovate: datasource=github-releases packageName=fluxcd/flux2
-RUN install-tool flux v2.10.0
+RUN install-tool flux v2.10.1
 
 # tool whose version folder is gone, only its shim and the dangling pointer are left
 # don't update!!
