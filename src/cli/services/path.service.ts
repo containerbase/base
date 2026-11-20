@@ -251,6 +251,20 @@ export class PathService {
   }
 
   /**
+   * Path to `/opt/containerbase/env.d`, the env files of the shell tools.
+   */
+  get envDPath(): string {
+    return join(this.installDir, 'env.d');
+  }
+
+  /**
+   * Path to `/opt/containerbase/lib`, which `/usr/local/lib` links to.
+   */
+  get libPath(): string {
+    return join(this.installDir, 'lib');
+  }
+
+  /**
    * Path to `/opt/containerbase/links`, the pointers of the commands to their
    * wrappers, see `LinkToolService`.
    */
@@ -396,6 +410,8 @@ export class PathService {
     await this.createDir(this.versionPath);
     await this.createDir(this.binDir);
     await this.createDir(this.linksPath);
+    await this.createDir(this.libPath);
+    await this.createDir(this.envDPath);
     await this.createDir(this.sslPath);
     await this.createDir(this._toolInitPath);
     await this.createDir(join(this.cachePath, '.cache'));

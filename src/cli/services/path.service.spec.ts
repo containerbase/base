@@ -78,6 +78,10 @@ describe('cli/services/path.service', () => {
     );
     expect(pathSvc.linksPath).toBe(rootPath('opt/containerbase/links'));
     expect(await pathExists(pathSvc.linksPath, 'dir')).toBe(true);
+    expect(pathSvc.libPath).toBe(rootPath('opt/containerbase/lib'));
+    expect(await pathExists(pathSvc.libPath, 'dir')).toBe(true);
+    expect(pathSvc.envDPath).toBe(rootPath('opt/containerbase/env.d'));
+    expect(await pathExists(pathSvc.envDPath, 'dir')).toBe(true);
   });
 
   test('ensureBasePaths keeps a linked npm cache folder', async () => {
