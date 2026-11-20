@@ -1467,6 +1467,23 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.isInitialized('node')).toBe(true);
   });
 
+  test('clearInitialized: forgets every initialized tool', async () => {
+    await pathSvc.ensureBasePaths();
+    await pathSvc.setInitialized('node');
+    await pathSvc.setInitialized('java');
+
+    await pathSvc.clearInitialized();
+
+    expect(await pathSvc.isInitialized('node')).toBe(false);
+    expect(await pathSvc.isInitialized('java')).toBe(false);
+  });
+
+  test('clearInitialized: ignores a missing folder', async () => {
+    vi.spyOn(fs, 'readdir').mockRejectedValueOnce(new Error('ENOENT'));
+
+    await expect(pathSvc.clearInitialized()).resolves.toBeUndefined();
+  });
+
   test('toolPrepare', async () => {
     expect(pathSvc.toolPreparePath('node')).toBe(
       rootPath('var/lib/containerbase/tool.prep.d/node'),

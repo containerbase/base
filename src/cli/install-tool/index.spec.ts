@@ -9,6 +9,7 @@ import {
   vi,
 } from 'vitest';
 import {
+  BuildListService,
   IpcServer,
   PathService,
   ToolVersionsService,
@@ -38,9 +39,11 @@ import {
   linkTool,
   listSupportedTools,
   resolveVersion,
+  setupVolume,
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
+import { InstallToolService } from './install-tool.service.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -728,6 +731,43 @@ describe('cli/install-tool/index', () => {
       }
       expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
         false,
+      );
+    });
+  });
+
+  describe('setupVolume', () => {
+    test('does nothing when the volume has the list of the image', async () => {
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(false);
+      const spy = vi.spyOn(InstallToolService.prototype, 'setupVolume');
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('sets up the volume from a different list', async () => {
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(true);
+      const spy = vi
+        .spyOn(InstallToolService.prototype, 'setupVolume')
+        .mockResolvedValue();
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('only warns when the setup fails', async () => {
+      const err = new Error('failed');
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(true);
+      vi.spyOn(InstallToolService.prototype, 'setupVolume').mockRejectedValue(
+        err,
+      );
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'cannot set up the volume',
       );
     });
   });
