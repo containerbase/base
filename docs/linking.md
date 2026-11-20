@@ -67,5 +67,7 @@ This doesn't apply to tools which can't be uninstalled, like `git`, and to the v
   It downloads nothing, a command whose version folder is missing is installed again on its first call.
 - A command without a row in the `links` database can't be restored, install the tool again.
 
+A [volume at `/opt/containerbase`](./custom-base-image.md#volume-at-optcontainerbase) uses the same recovery: `init tool all` sets up the shims from the build-time list of the image, and each tool is installed again on its first call.
+
 A setup with a read-only root file system keeps working: the pointers are part of the image.
 A call of a command whose version is missing fails there, as the containerbase folders can't be written.

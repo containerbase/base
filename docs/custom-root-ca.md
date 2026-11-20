@@ -62,6 +62,8 @@ Don't mount your certificates over `/etc/ssl/certs`, this hides the default cert
 
 For Java you need to mount your own certificate store to `/opt/containerbase/ssl/cacerts`.
 
+A custom store which you copied to `/opt/containerbase/ssl/cacerts` at build time is lost when a [volume](./custom-base-image.md#volume-at-optcontainerbase) hides `/opt/containerbase`, mount it at runtime as shown here.
+
 ```bash
 docker run --rm -it \
   -v my-root-ca.crt:/my-root-ca.crt \
