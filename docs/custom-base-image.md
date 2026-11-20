@@ -193,3 +193,51 @@ RUN containerbase-cli init tool all
 
 When the rootfs isn't reset between jobs, the tool caches and configs (`.npm`, `.m2`, `.npmrc`, …) in that folder carry over to the next job.
 Reset the rootfs per job or clean the folder yourself.
+
+## Volume at `/opt/containerbase`
+
+You can mount a volume at `/opt/containerbase`, eg. to run a read-only root file system with a writable `/opt/containerbase`, or to keep tools between runs.
+The tools you installed at image build time as root are recorded in `/var/lib/containerbase/tool.inst`, a plain text list which is part of the image, and in a copy at `/opt/containerbase/.tool.inst`.
+The list is only written for BuildKit builds, as containerbase detects a build by its BuildKit mounts.
+An image built with kaniko, buildah or podman has no list, so its own tools are lost on an empty volume.
+
+### Empty volume
+
+An empty volume hides the tools of the image.
+The `docker-entrypoint.sh` runs `containerbase-cli init tool all`, which compares the list of the image with the copy on the volume.
+When they differ, which is the case for a new volume and after an image update, it sets up the volume from the list:
+
+- it creates the folders, the database records, the shims in `bin` and the current versions
+- the versions of the image win over the ones installed at runtime
+- it installs `jq` at once, as the shell utils need it, `git` comes with the image
+- it copies the list to the volume, so the next start has nothing to do
+- it never removes anything: versions of an older image stay on the volume until you remove them with `uninstall-tool` or `containerbase-cli cleanup`
+
+All other tools are installed on their first call, see [how tools are linked](./linking.md#containerbase-cli-ensure).
+The first call of each tool downloads it, so a volume needs network access and doesn't work in an air-gapped setup.
+Tools which are installed again download their dependencies again, eg. npm and pip packages, and elixir fetches hex and rebar.
+A tool you use by its path or by an environment variable, eg. `JAVA_HOME`, without calling its command first, is missing until its command or `install-tool` installed it.
+`docker buildx` and `docker compose` go through the shims of `buildx` and `docker-compose`, so the first call installs them.
+Docker commands which list the plugins, eg. `docker info` and `docker help`, run every plugin and so install buildx and compose too.
+
+Not part of the list, and so lost on a volume:
+
+- the v2 shell tools, as the shims can't install them again, install them again at runtime
+- files other software put into `/usr/local/bin` or `/usr/local/lib`, as these link to `/opt/containerbase/bin` and `/opt/containerbase/lib`, use `/usr/local/sbin` or `/usr/bin` instead
+- a custom Java `cacerts` copied to `/opt/containerbase/ssl/cacerts`, mount it at runtime instead, see [custom root CA certificates](./custom-root-ca.md#runtime-java-install)
+- the `env.d` files of custom v2 tools
+
+In a multi-stage build, copy `/opt/containerbase` and `/var/lib/containerbase` from the same stage.
+Copying only `/opt/containerbase` from a builder stage gives a list which differs from its `.tool.inst`, so the setup runs on every start and the current versions of the base image replace the ones of the builder.
+
+A custom entrypoint must run `containerbase-cli init tool all`.
+The `docker-entrypoint.sh` does it when `/tmp/containerbase` is missing, or when the volume has another list than the image.
+
+### Copy of the image folder
+
+A copy of `/opt/containerbase` of the image, eg. made with `cp -a` in an init container as root or as the containerbase user, is supported too.
+The copy has the list of the image, so the init has nothing to do and no tool is downloaded.
+
+### Disk instead of memory
+
+Back the volume with a disk, eg. a disk-backed `emptyDir`, not with memory: the tools need a few hundred megabytes up to some gigabytes.
