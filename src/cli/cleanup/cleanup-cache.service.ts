@@ -4,13 +4,7 @@ import { inject, injectable, multiInject, optional } from 'inversify';
 import type { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { INSTALL_TOOL_TOKEN } from '../install-tool/install-tool.service.ts';
 import { EnvService, PathService } from '../services/index.ts';
-import { logger, spawn } from '../utils/index.ts';
-
-/** The paths of the entries in a folder, none for a missing folder. */
-async function listEntries(dir: string): Promise<string[]> {
-  const entries = await fs.readdir(dir).catch(() => []);
-  return entries.map((entry) => join(dir, entry));
-}
+import { listEntries, logger, removePath } from '../utils/index.ts';
 
 /** Whether something exists at the path, also a dangling link. */
 async function exists(path: string): Promise<boolean> {
@@ -24,36 +18,16 @@ async function contains(path: string, folder: string): Promise<boolean> {
 }
 
 /**
- * Removes a file or folder. Folders which can't be removed because of their
- * permissions, eg. the read-only go module cache, are made writable first.
- * A link is never made writable, `chmod` would change its target.
- */
-async function remove(path: string): Promise<void> {
-  try {
-    await fs.rm(path, { recursive: true, force: true });
-  } catch (err) {
-    if (
-      (err as NodeJS.ErrnoException).code !== 'EACCES' ||
-      (await fs.lstat(path)).isSymbolicLink()
-    ) {
-      throw err;
-    }
-    await spawn('chmod', ['-R', 'u+w', path]);
-    await fs.rm(path, { recursive: true, force: true });
-  }
-}
-
-/**
  * Removes a cache folder. For a link only the contents of its target are
  * removed, so a redirect, eg. to a volume, is kept.
  */
 async function removeCacheDir(path: string): Promise<void> {
   if (!(await fs.lstat(path)).isSymbolicLink()) {
-    await remove(path);
+    await removePath(path);
     return;
   }
   for (const entry of await listEntries(path)) {
-    await remove(entry);
+    await removePath(entry);
   }
 }
 
@@ -123,7 +97,7 @@ export class CleanupCacheService {
       } else {
         logger.debug({ path }, 'remove cache');
         try {
-          await (roots.has(path) ? removeCacheDir(path) : remove(path));
+          await (roots.has(path) ? removeCacheDir(path) : removePath(path));
         } catch (err) {
           logger.warn({ path, err }, 'cannot remove cache');
           failed++;

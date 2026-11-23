@@ -24,7 +24,9 @@ import {
   cleanAptFiles,
   cleanTmpFiles,
   isDockerBuild,
+  listEntries,
   logger,
+  removePath,
 } from '../utils/index.ts';
 import type { BaseInstallService } from './base-install.service';
 import {
@@ -214,21 +216,28 @@ export class InstallToolService {
         );
       } else {
         logger.debug('cleaning user caches');
-        await deleteAsync(
-          [
-            path.join(this.pathSvc.cachePath, '.cache/**'),
-            path.join(this.pathSvc.cachePath, '.local/share/virtualenv'),
-          ],
-          {
-            force: true,
-            dryRun,
-            dot: true,
-          },
-        );
+        if (!dryRun) {
+          await this.cleanUserCaches();
+        }
       }
     }
 
     await this.evictCache(dryRun);
+  }
+
+  /**
+   * Removes the contents of the user `.cache` folder and the virtualenv cache.
+   * Read-only folders, eg. the virtualenv seed packages, are made writable
+   * first.
+   */
+  private async cleanUserCaches(): Promise<void> {
+    const { cachePath } = this.pathSvc;
+    for (const entry of [
+      ...(await listEntries(path.join(cachePath, '.cache'))),
+      path.join(cachePath, '.local/share/virtualenv'),
+    ]) {
+      await removePath(entry);
+    }
   }
 
   /**

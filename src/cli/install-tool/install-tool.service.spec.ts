@@ -410,6 +410,35 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(logger.debug).toHaveBeenCalledWith('cleaning user caches');
     });
 
+    test('removes read-only user caches on a docker build', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const { cachePath } = await child.getAsync(PathService);
+      const cacheDir = join(cachePath, '.cache');
+      const image = join(cacheDir, 'virtualenv/wheel/image');
+      await fs.mkdir(image, { recursive: true });
+      await fs.writeFile(join(image, 'file'), '');
+      await fs.chmod(image, 0o555);
+      const venv = join(cachePath, '.local/share/virtualenv');
+      await fs.mkdir(venv, { recursive: true });
+
+      expect(await install.install('bun', '1.0.6')).toBeUndefined();
+
+      expect(await fs.readdir(cacheDir)).toEqual([]);
+      expect(await pathExists(venv)).toBe(false);
+    });
+
+    test('keeps the user caches on a dry run', async () => {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      const { cachePath } = await child.getAsync(PathService);
+      const file = join(cachePath, '.cache/tool/file');
+      await fs.mkdir(join(file, '..'), { recursive: true });
+      await fs.writeFile(file, '');
+
+      expect(await install.install('bun', '1.0.7', true)).toBeUndefined();
+
+      expect(await pathExists(file, 'file')).toBe(true);
+    });
+
     test('cleans the root caches when running as root', async () => {
       vi.mocked(isDockerBuild).mockResolvedValue(true);
       vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
