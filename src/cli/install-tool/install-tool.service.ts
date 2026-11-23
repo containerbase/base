@@ -24,6 +24,7 @@ import {
   cleanAptFiles,
   cleanTmpFiles,
   isDockerBuild,
+  listEntries,
   logger,
   removePath,
 } from '../utils/index.ts';
@@ -231,10 +232,8 @@ export class InstallToolService {
    */
   private async cleanUserCaches(): Promise<void> {
     const { cachePath } = this.pathSvc;
-    const cacheDir = path.join(cachePath, '.cache');
-    const entries = await fs.readdir(cacheDir).catch(() => []);
     for (const entry of [
-      ...entries.map((name) => path.join(cacheDir, name)),
+      ...(await listEntries(path.join(cachePath, '.cache'))),
       path.join(cachePath, '.local/share/virtualenv'),
     ]) {
       await removePath(entry);

@@ -132,6 +132,12 @@ export function isInside(parent: string, child: string): boolean {
   return rel !== '..' && !rel.startsWith(`..${sep}`);
 }
 
+/** The paths of the entries in a folder, none for a missing folder. */
+export async function listEntries(dir: string): Promise<string[]> {
+  const entries = await fs.readdir(dir).catch(() => []);
+  return entries.map((entry) => join(dir, entry));
+}
+
 /**
  * Gives the owner write permission on a folder and every folder below it, so
  * their entries can be removed. Links are skipped, `chmod` would change their

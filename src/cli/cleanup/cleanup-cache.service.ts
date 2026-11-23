@@ -4,13 +4,7 @@ import { inject, injectable, multiInject, optional } from 'inversify';
 import type { BaseInstallService } from '../install-tool/base-install.service.ts';
 import { INSTALL_TOOL_TOKEN } from '../install-tool/install-tool.service.ts';
 import { EnvService, PathService } from '../services/index.ts';
-import { logger, removePath } from '../utils/index.ts';
-
-/** The paths of the entries in a folder, none for a missing folder. */
-async function listEntries(dir: string): Promise<string[]> {
-  const entries = await fs.readdir(dir).catch(() => []);
-  return entries.map((entry) => join(dir, entry));
-}
+import { listEntries, logger, removePath } from '../utils/index.ts';
 
 /** Whether something exists at the path, also a dangling link. */
 async function exists(path: string): Promise<boolean> {
