@@ -1,6 +1,6 @@
 import fs, { readFile, stat } from 'node:fs/promises';
 import os from 'node:os';
-import { isAbsolute, relative, sep } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import process from 'node:process';
 import { deleteAsync } from 'del';
 import { logger } from './logger.ts';
@@ -130,6 +130,45 @@ export function isInside(parent: string, child: string): boolean {
   }
   const rel = relative(parent, child);
   return rel !== '..' && !rel.startsWith(`..${sep}`);
+}
+
+/**
+ * Gives the owner write permission on a folder and every folder below it, so
+ * their entries can be removed. Links are skipped, `chmod` would change their
+ * target.
+ * @param dir - the folder
+ * @param mode - the current mode of the folder
+ */
+async function makeWritable(dir: string, mode: number): Promise<void> {
+  await fs.chmod(dir, (mode & 0o7777) | fs.constants.S_IWUSR);
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      const sub = join(dir, entry.name);
+      await makeWritable(sub, (await fs.lstat(sub)).mode);
+    }
+  }
+}
+
+/**
+ * Removes a file or folder. Folders which can't be removed because of their
+ * permissions, eg. the read-only go module cache or the virtualenv seed
+ * packages, are made writable first. A link is never made writable, `chmod`
+ * would change its target.
+ */
+export async function removePath(path: string): Promise<void> {
+  try {
+    await fs.rm(path, { recursive: true, force: true });
+  } catch (err) {
+    const stats = await fs.lstat(path);
+    if (
+      (err as NodeJS.ErrnoException).code !== 'EACCES' ||
+      !stats.isDirectory()
+    ) {
+      throw err;
+    }
+    await makeWritable(path, stats.mode);
+    await fs.rm(path, { recursive: true, force: true });
+  }
 }
 
 /** Removes the apt lists and logs left behind by package installs. */
