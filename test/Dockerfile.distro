@@ -98,7 +98,7 @@ RUN install-tool kustomize 5.8.3
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.11.11
 
-# renovate: datasource=datasource=github-releases packageName=containerbase/nix-prebuild
+# renovate: datasource=github-releases packageName=containerbase/nix-prebuild
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
