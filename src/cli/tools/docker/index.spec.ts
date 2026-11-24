@@ -9,6 +9,7 @@ import {
   LinkToolService,
   PathService,
 } from '../../services/index.ts';
+import { logger } from '../../utils/index.ts';
 import { DockerInstallService, DockerPrepareService } from './index.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths } from '~test/path.ts';
@@ -162,6 +163,53 @@ describe('cli/tools/docker/index', () => {
 
       // second run is a no-op, it would throw on existing symlinks otherwise
       await expect(svc.prepare()).resolves.toBeUndefined();
+    });
+
+    test('initialize links the global cli plugins folder', async () => {
+      const { svc, child } = await toolContext(DockerPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const envSvc = await child.getAsync(EnvService);
+      const global = join(envSvc.rootDir, 'usr/local/lib/docker');
+      await fs.rm(global, { recursive: true, force: true });
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(global, 'cli-plugins'))).toBe(
+        join(pathSvc.cachePath, '.docker', 'cli-plugins'),
+      );
+    });
+
+    test('initialize links the plugins of the commands which have a shim', async () => {
+      const { svc, child } = await toolContext(DockerPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const plugins = join(pathSvc.cachePath, '.docker', 'cli-plugins');
+      await fs.rm(plugins, { recursive: true, force: true });
+      await fs.mkdir(pathSvc.binDir, { recursive: true });
+      await fs.writeFile(join(pathSvc.binDir, 'buildx'), '#!/bin/bash\n');
+      await fs.rm(join(pathSvc.binDir, 'docker-compose'), { force: true });
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(join(plugins, 'docker-buildx'))).toBe(
+        join(pathSvc.binDir, 'buildx'),
+      );
+      // no shim, no plugin link
+      await expect(fs.lstat(join(plugins, 'docker-compose'))).rejects.toThrow();
+
+      await fs.rm(join(pathSvc.binDir, 'buildx'));
+    });
+
+    test('initialize only warns when the global folder cannot be created', async () => {
+      const { svc } = await toolContext(DockerPrepareService);
+      const err = new Error('EROFS');
+      vi.spyOn(fs, 'mkdir').mockRejectedValueOnce(err);
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'cannot link the docker cli plugins folder',
+      );
     });
   });
 });

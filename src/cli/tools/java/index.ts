@@ -38,11 +38,13 @@ export class JavaPrepareService extends BasePrepareService {
    * the host
    */
   override async prepare(): Promise<void> {
+    const cacerts = path.join(this.pathSvc.sslPath, 'cacerts');
+    // before the initialize, which links an existing cacerts of the image
+    const hasCacerts = await this.pathSvc.fileExists(cacerts);
+
     await this.initialize();
 
-    const cacerts = path.join(this.pathSvc.sslPath, 'cacerts');
-
-    if (await this.pathSvc.fileExists(cacerts)) {
+    if (hasCacerts) {
       // cert store already there
       return;
     }
@@ -91,7 +93,8 @@ export class JavaPrepareService extends BasePrepareService {
 
     await fs.cp(path.join(tmp, 'lib/security/cacerts'), varCerts);
 
-    await fs.symlink(varCerts, cacerts);
+    // the initialize may have linked the cacerts of the image already
+    await this.pathSvc.createSymlink(varCerts, cacerts);
 
     await this.pathSvc.exportEnv({ ANDROID_HOME: '~/.android-sdk' });
 
@@ -100,9 +103,19 @@ export class JavaPrepareService extends BasePrepareService {
 
   /**
    * Creates the maven and gradle settings and the android folders in the
-   * containerbase cache, and points `GRADLE_USER_HOME` there.
+   * containerbase cache, and points `GRADLE_USER_HOME` there. A missing
+   * shared `ssl/cacerts`, which the JREs link to and an empty
+   * `/opt/containerbase` misses, is linked to the cacerts of the image again.
    */
   override async initialize(): Promise<void> {
+    const varCerts = path.join(this.pathSvc.varPath, 'cacerts');
+    if (await this.pathSvc.fileExists(varCerts)) {
+      await this.pathSvc.createSymlink(
+        varCerts,
+        path.join(this.pathSvc.sslPath, 'cacerts'),
+      );
+    }
+
     await createMavenSettings(this.pathSvc);
     await createGradleSettings(this.pathSvc);
 
@@ -216,10 +229,19 @@ export class JavaInstallService extends BaseInstallService {
     });
   }
 
-  /** Whether the shared cacerts exist, which prepare creates. */
+  /**
+   * Whether the shared cacerts exist, which prepare creates. An empty
+   * `/opt/containerbase` has no link to them, but the cacerts of the image
+   * count, `initialize` links them.
+   */
   override async isPrepared(): Promise<boolean> {
-    return await this.pathSvc.fileExists(
-      path.join(this.pathSvc.sslPath, 'cacerts'),
+    return (
+      (await this.pathSvc.fileExists(
+        path.join(this.pathSvc.sslPath, 'cacerts'),
+      )) ||
+      (await this.pathSvc.fileExists(
+        path.join(this.pathSvc.varPath, 'cacerts'),
+      ))
     );
   }
 
