@@ -392,6 +392,8 @@ jobs:
           path: ${{ runner.temp }}/download-proxy/
           retention-days: 14
           if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
 
   # test old distros on arm64
   base-arm64:
@@ -522,6 +524,8 @@ jobs:
           path: ${{ runner.temp }}/download-proxy/
           retention-days: 14
           if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
 
   # Catch-all required check for the test matrix, `base` is listed too because
   # `lang` is skipped when it fails
