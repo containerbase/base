@@ -30,7 +30,7 @@ RUN install-tool git v2.56.1
 RUN install-tool jq 1.8.2
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 25.0.5+8.0.LTS
+RUN install-tool java-jre 25.0.5+100000002.0.LTS
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.14.10
