@@ -382,13 +382,14 @@ export class InstallToolService {
         await toolSvc.uninstall(version);
         const vTool = { name: tool, version };
         await this.versionSvc.removeInstalled(vTool);
+        // the current version is stored under the alias, eg. `java` for `java-jre`
         if (
           await this.versionSvc.isCurrent({
-            name: tool,
+            name: toolSvc.alias,
             tool: vTool,
           })
         ) {
-          await this.versionSvc.removeCurrent(tool);
+          await this.versionSvc.removeCurrent(toolSvc.alias);
         }
 
         for (const { name } of await this.versionSvc.findLinks(vTool)) {

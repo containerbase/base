@@ -198,6 +198,18 @@ class ChildInstallService extends TestInstallService {
   }
 }
 
+/** a tool linked under an alias, like `java-jre` as `java` */
+@injectable()
+@injectFromHierarchy()
+class AliasedInstallService extends TestInstallService {
+  override readonly name = 'aliased';
+
+  /** Linked as `alias`. */
+  override get alias(): string {
+    return 'alias';
+  }
+}
+
 /** a tool whose parent has no install service */
 @injectable()
 @injectFromHierarchy()
@@ -242,6 +254,7 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(INSTALL_TOOL_TOKEN).to(ChildInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(OrphanInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(StuckInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(AliasedInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -694,6 +707,21 @@ describe('cli/install-tool/install-tool.service', () => {
         false,
       );
       expect(await ver.getCurrent('bun')).toBeNull();
+    });
+
+    test('removes the current version of a tool with an alias', async () => {
+      expect(await install.install('aliased', '1.0.0')).toBeUndefined();
+      expect(await install.install('aliased', '2.0.0')).toBeUndefined();
+      const ver = await child.getAsync(VersionService);
+
+      // not the current version, so the current one stays
+      expect(await install.uninstall('aliased', '1.0.0')).toBeUndefined();
+      expect(await ver.getCurrent('alias')).toMatchObject({
+        tool: { name: 'aliased', version: '2.0.0' },
+      });
+
+      expect(await install.uninstall('aliased', '2.0.0')).toBeUndefined();
+      expect(await ver.getCurrent('alias')).toBeNull();
     });
 
     test('all versions', async () => {
