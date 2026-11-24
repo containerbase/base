@@ -45,6 +45,8 @@ jobs:
       # token, and fork code also runs in the merge queue, so `merge_group` and
       # pushes keep using the GHA cache. The `-<arch>` suffix is appended by the
       # jobs.
+      # A failed export (`ignore-error`), like an outage of the cache store, only
+      # makes the `lang` jobs rebuild the base image from the `main` cache.
       # containerbase/docker-build-cache deletes the `<uuid>-<arch>` tags after a
       # day, keep its cleanup in sync when changing the tag format.
       - name: ⚙️ Init
@@ -59,13 +61,13 @@ jobs:
             {
               echo "handoff-registry=true"
               echo "handoff-from=type=registry,ref=${ref}"
-              echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ref=${ref}"
+              echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ignore-error=true,ref=${ref}"
             } >> "${GITHUB_OUTPUT}"
           else
             {
               echo "handoff-registry=false"
               echo "handoff-from=type=gha,scope=${uid}"
-              echo "handoff-to=type=gha,mode=max,scope=${uid}"
+              echo "handoff-to=type=gha,mode=max,ignore-error=true,scope=${uid}"
             } >> "${GITHUB_OUTPUT}"
           fi
 
