@@ -36,7 +36,8 @@ runs:
         fi
         # readable and linkable for the runner user, the job is done with them
         sudo chmod -R a+rwX /var/cache/containerbase-cdn
-        sudo cat /var/log/containerbase-cdn/access.log > "${RUNNER_TEMP}/download-proxy-access.log"
+        sudo cp /var/log/containerbase-cdn/access.log "${RUNNER_TEMP}/download-proxy-access.log"
+        sudo chown "$(id -u):$(id -g)" "${RUNNER_TEMP}/download-proxy-access.log"
         python3 -I "${ACTION_PATH}/../download-proxy/prepare-save.py" \
           "${RUNNER_TEMP}/download-proxy-access.log" /var/cache/containerbase-cdn "${out}"
         echo "::endgroup::"
@@ -77,6 +78,8 @@ runs:
         name: download-proxy-cache-${{ inputs.scope }}
         path: ${{ steps.prepare.outputs.folder }}
         retention-days: 1
+        # a rerun of the job uploads it again
+        overwrite: true
         # the files are compressed downloads already
         compression-level: 0
         include-hidden-files: true
