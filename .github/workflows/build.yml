@@ -46,7 +46,8 @@ jobs:
         env:
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
-          uid="$(uuidgen)"
+          # `uuidgen` is missing on ubuntu-slim
+          uid="$(cat /proc/sys/kernel/random/uuid)"
           echo "uid=${uid}" >> "${GITHUB_OUTPUT}"
           if [[ -n "${HEAD_REPO}" && "${HEAD_REPO}" != "${GITHUB_REPOSITORY}" ]]; then
             echo "handoff-registry=false" >> "${GITHUB_OUTPUT}"
