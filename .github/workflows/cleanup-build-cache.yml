@@ -4,6 +4,8 @@ name: cleanup-build-cache
 # ghcr.io/<owner>/docker-build-cache, tagged `<uuid>-<arch>`. They are only
 # read by the `lang` jobs of the same run, so a day is plenty. Other tags in
 # the package are never touched.
+# Also deletes old untagged versions: caches whose tag was overwritten by a
+# newer push, nothing reads them anymore.
 on:
   schedule:
     - cron: '17 3 * * *'
@@ -31,21 +33,28 @@ jobs:
           ORG: ${{ github.repository_owner }}
           PACKAGE: docker-build-cache
           DRY_RUN: ${{ inputs.dry-run || 'false' }}
-          # in hours
+          # in hours, for the handoff tags
           MAX_AGE: 24
+          # in days, for untagged versions
+          MAX_UNTAGGED_AGE: 7
         run: |
           set -euo pipefail
           cutoff="$(date -u -d "-${MAX_AGE} hours" +%Y-%m-%dT%H:%M:%SZ)"
-          # versions whose tags are all handoff tags and which are older than
-          # the cutoff
+          untagged_cutoff="$(date -u -d "-${MAX_UNTAGGED_AGE} days" +%Y-%m-%dT%H:%M:%SZ)"
+          # handoff versions older than the cutoff, whose tags are all handoff
+          # tags, and untagged versions older than the untagged cutoff
           gh api --paginate "/orgs/${ORG}/packages/container/${PACKAGE}/versions?per_page=100" \
             --jq '.[]
-              | select(.updated_at < "'"${cutoff}"'")
-              | select((.metadata.container.tags | length) > 0)
-              | select(all(.metadata.container.tags[]; test("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-(amd64|arm64)$")))
-              | "\(.id) \(.metadata.container.tags | join(","))"' \
+              | .metadata.container.tags as $tags
+              | select(
+                  (($tags | length) > 0
+                    and .updated_at < "'"${cutoff}"'"
+                    and all($tags[]; test("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-(amd64|arm64)$")))
+                  or (($tags | length) == 0 and .updated_at < "'"${untagged_cutoff}"'")
+                )
+              | "\(.id) \(if ($tags | length) > 0 then ($tags | join(",")) else "<untagged>" end)"' \
             > versions.txt
-          echo "$(wc -l < versions.txt) versions older than ${cutoff}"
+          echo "$(wc -l < versions.txt) versions to delete (handoff tags before ${cutoff}, untagged before ${untagged_cutoff})"
           while read -r id tags; do
             echo "delete ${id} ${tags}"
             if [[ "${DRY_RUN}" != "true" ]]; then
