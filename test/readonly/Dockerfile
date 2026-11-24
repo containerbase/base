@@ -33,7 +33,7 @@ RUN install-tool jq 1.8.2
 RUN install-tool java-jre 25.0.5+8.0.LTS
 
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
-RUN install-tool python 3.14.10
+RUN install-tool python 3.15.2
 
 # renovate: datasource=pypi
 RUN install-pip hashin 1.0.5
