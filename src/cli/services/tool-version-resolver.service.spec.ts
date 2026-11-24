@@ -16,6 +16,7 @@ import {
 } from './tool-version-resolver.ts';
 import { scope } from '~test/http-mock.ts';
 import { rootPath } from '~test/path.ts';
+import { toolFile as listedFile, mockToolFiles } from '~test/tool.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -198,6 +199,8 @@ describe('cli/services/tool-version-resolver.service', () => {
       versionCode: 'jammy',
       versionId: '22.04',
     });
+    // no files of the versions unless a test mocks them
+    mockToolFiles();
 
     child = createContainer();
     child.bind(ToolVersionResolverService).toSelf();
@@ -1058,6 +1061,68 @@ describe('cli/services/tool-version-resolver.service', () => {
     ]);
 
     expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
+  });
+
+  /**
+   * Mocks the files of the versions, the `newest` one only has an arm64 file,
+   * the others an amd64 one.
+   * @returns the spy of the lookups
+   */
+  function mockFiles(newest: string): ReturnType<typeof mockToolFiles> {
+    return mockToolFiles().mockImplementation((tool, version) =>
+      Promise.resolve({
+        tool,
+        version,
+        files: [
+          listedFile(
+            `https://example.test/${tool}-${version}.tar.gz`,
+            version,
+            version === newest ? 'arm64' : 'amd64',
+          ),
+        ],
+      }),
+    );
+  }
+
+  test('skips a newest release whose files have none for the host arch', async () => {
+    // the data lists amd64 for 3.0.0, the files the install uses don't have it
+    serve('other', 200, [
+      { version: '3.0.0', archs: ['amd64', 'arm64'] },
+      { version: '2.0.0', archs: ['amd64', 'arm64'] },
+    ]);
+    const files = mockFiles('3.0.0');
+
+    expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+    expect(files).toHaveBeenCalledWith('other', '3.0.0');
+    expect(logger.debug).toHaveBeenCalledWith(
+      { tool: 'other', version: '3.0.0', arch: 'amd64' },
+      'no tool-versions file for the host arch, skipping the release',
+    );
+  });
+
+  test('skips a newest lts release whose files have none for the host arch', async () => {
+    // like java-jre, whose newest lts got its aarch64 build later
+    await embed('lts-data', ['0.0.1']);
+    serve('lts-data', 200, {
+      ...toolFile('lts-data', [
+        { version: '25.0.5+2', lts: true, archs: ['amd64', 'arm64'] },
+        { version: '25.0.5+1', lts: true, archs: ['amd64', 'arm64'] },
+      ]),
+      lts: true,
+    });
+    mockFiles('25.0.5+2');
+
+    expect(await svc.resolve('lts-data', undefined)).toBe('25.0.5+1');
+  });
+
+  test('keeps a partial version which is a release with a file for the host arch', async () => {
+    await embed('other', [
+      { version: '8.10', archs: ['amd64'] },
+      { version: '8.9', archs: ['amd64'] },
+    ]);
+    mockFiles('none');
+
+    expect(await svc.resolve('other', '8.10')).toBe('8.10');
   });
 
   test('picks a release for the arm64 host', async () => {

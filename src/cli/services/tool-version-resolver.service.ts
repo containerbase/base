@@ -456,7 +456,8 @@ export class ToolVersionResolverService {
       const listed = await this.toolVersions.getVersions(tool);
       if (
         usable(listed) &&
-        pick(tool, listed, version, host).version === version
+        (await this.pickInstallable(tool, listed, version, host)).version ===
+          version
       ) {
         logger.debug(
           { tool, version, resolved: version },
@@ -484,7 +485,7 @@ export class ToolVersionResolverService {
       version: resolved,
       deprecated,
       blocked,
-    } = pick(tool, data, version, host, !required);
+    } = await this.pickInstallable(tool, data, version, host, !required);
     // the embedded data may be outdated when the online data was looked up or
     // is turned off, not when it is current
     const outdated = source === 'fallback' || source === 'offline';
@@ -546,6 +547,60 @@ export class ToolVersionResolverService {
       );
     }
     return resolved;
+  }
+
+  /**
+   * Picks a release like {@link pick}, skipping the releases which can't be
+   * installed on the host because their files have none for the host arch,
+   * eg. when the online data lists an arch for a release whose embedded files
+   * don't have it yet, as upstream added the build later.
+   * @param deprecatedFallback - see {@link pick}
+   */
+  private async pickInstallable(
+    tool: string,
+    data: ToolVersions,
+    version: string | undefined,
+    host: Host,
+    deprecatedFallback = false,
+  ): Promise<Picked> {
+    let candidates = data;
+    for (;;) {
+      const picked = pick(tool, candidates, version, host, deprecatedFallback);
+      const resolved = picked.version;
+      if (
+        resolved === undefined ||
+        !(await this.lacksHostFile(tool, candidates, resolved, host.arch))
+      ) {
+        return picked;
+      }
+      logger.debug(
+        { tool, version: resolved, arch: host.arch },
+        'no tool-versions file for the host arch, skipping the release',
+      );
+      candidates = {
+        ...candidates,
+        versions: candidates.versions.filter((v) => v.version !== resolved),
+      };
+    }
+  }
+
+  /**
+   * Whether the files of a release have none for the arch. Only a release
+   * whose data lists `archs` has files per arch, others aren't looked up, so a
+   * tool without files makes no request.
+   */
+  private async lacksHostFile(
+    tool: string,
+    data: ToolVersions,
+    version: string,
+    arch: string,
+  ): Promise<boolean> {
+    if (!data.versions.find((v) => v.version === version)?.archs) {
+      return false;
+    }
+    // the same files the install downloads from, see ToolFilesService
+    const files = await this.toolVersions.getVersionFiles(tool, version);
+    return !!files && !files.files.some((f) => !f.arch || f.arch === arch);
   }
 
   /**
