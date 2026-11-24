@@ -22,6 +22,9 @@ jobs:
 
     outputs:
       uid: ${{ steps.init.outputs.uid }}
+      handoff-registry: ${{ steps.init.outputs.handoff-registry }}
+      handoff-from: ${{ steps.init.outputs.handoff-from }}
+      handoff-to: ${{ steps.init.outputs.handoff-to }}
       skip-build: ${{ steps.changes.outputs.skip-build }}
       lang-matrix: ${{ steps.matrix.outputs.lang-matrix }}
       run-lang: ${{ steps.matrix.outputs.run-lang }}
@@ -34,9 +37,27 @@ jobs:
         with:
           save-cache: true
 
+      # the `base` job hands its image cache to the `lang` jobs of the same run.
+      # It goes to ghcr.io, as the GHA cache is too small for one entry per run
+      # and arch. Fork pull requests can't push packages, so they keep using
+      # the GHA cache. The `-<arch>` suffix is appended by the jobs.
       - name: ⚙️ Init
         id: init
-        run: echo "uid=$(uuidgen)" >> "${GITHUB_OUTPUT}"
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          uid="$(uuidgen)"
+          echo "uid=${uid}" >> "${GITHUB_OUTPUT}"
+          if [[ -n "${HEAD_REPO}" && "${HEAD_REPO}" != "${GITHUB_REPOSITORY}" ]]; then
+            echo "handoff-registry=false" >> "${GITHUB_OUTPUT}"
+            echo "handoff-from=type=gha,scope=${uid}" >> "${GITHUB_OUTPUT}"
+            echo "handoff-to=type=gha,mode=max,scope=${uid}" >> "${GITHUB_OUTPUT}"
+          else
+            ref="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/docker-build-cache:${uid}"
+            echo "handoff-registry=true" >> "${GITHUB_OUTPUT}"
+            echo "handoff-from=type=registry,ref=${ref}" >> "${GITHUB_OUTPUT}"
+            echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ref=${ref}" >> "${GITHUB_OUTPUT}"
+          fi
 
       # pull requests and merge queue groups which only change files that feed
       # neither the images nor the bats tests skip the build and docker tests:
@@ -280,6 +301,10 @@ jobs:
     # one bake with up to 2 attempts of 10 minutes (21 minutes with the retry
     # wait), plus the setup and the other steps
     timeout-minutes: 35
+    permissions:
+      contents: read
+      # the handoff cache on ghcr.io, see `setup`
+      packages: write
 
     strategy:
       fail-fast: false
@@ -309,12 +334,19 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
 
+      # pushes the handoff cache for the `lang` jobs, see `setup`
+      - name: Login to ghcr.io
+        if: needs.setup.outputs.handoff-registry == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+
       - name: build base
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set build-docker.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set build-docker.cache-to=${{ needs.setup.outputs.handoff-to }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=${{ needs.setup.outputs.handoff-from }}-${{ matrix.arch.tag }}
             build-docker
 
       - name: test read-only file system
@@ -466,17 +498,17 @@ jobs:
           echo "BASE_IMAGE=containerbase/test" >> "${GITHUB_ENV}"
 
       - name: build base
-        # rebuilds the base image from the GHA cache the `base` job filled,
+        # rebuilds the base image from the handoff cache the `base` job filled,
         # loading it into the local image store as `containerbase/test` for
         # the test build below
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=${{ needs.setup.outputs.handoff-from }}-${{ matrix.arch.tag }}
             build-docker
 
       # only after the base image, so it builds with the same args as in the
-      # `base` job and is taken from the GHA cache
+      # `base` job and is taken from the handoff cache
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
 

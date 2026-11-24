@@ -1,0 +1,54 @@
+name: cleanup-build-cache
+
+# deletes the handoff caches the `base` jobs of `build.yml` push to
+# ghcr.io/<owner>/docker-build-cache, tagged `<uuid>-<arch>`. They are only
+# read by the `lang` jobs of the same run, so a day is plenty. Other tags in
+# the package are never touched.
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Only list the versions to delete'
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      # needs the admin role for this repository in the package settings
+      packages: write
+
+    steps:
+      - name: Delete old handoff caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORG: ${{ github.repository_owner }}
+          PACKAGE: docker-build-cache
+          DRY_RUN: ${{ inputs.dry-run || 'false' }}
+          # in hours
+          MAX_AGE: 24
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d "-${MAX_AGE} hours" +%Y-%m-%dT%H:%M:%SZ)"
+          # versions whose tags are all handoff tags and which are older than
+          # the cutoff
+          gh api --paginate "/orgs/${ORG}/packages/container/${PACKAGE}/versions?per_page=100" \
+            --jq '.[]
+              | select(.updated_at < "'"${cutoff}"'")
+              | select((.metadata.container.tags | length) > 0)
+              | select(all(.metadata.container.tags[]; test("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-(amd64|arm64)$")))
+              | "\(.id) \(.metadata.container.tags | join(","))"' \
+            > versions.txt
+          echo "$(wc -l < versions.txt) versions older than ${cutoff}"
+          while read -r id tags; do
+            echo "delete ${id} ${tags}"
+            if [[ "${DRY_RUN}" != "true" ]]; then
+              gh api -X DELETE "/orgs/${ORG}/packages/container/${PACKAGE}/versions/${id}" || echo "::warning::failed to delete ${id} ${tags}"
+            fi
+          done < versions.txt

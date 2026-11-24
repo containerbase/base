@@ -23,6 +23,8 @@ jobs:
     uses: ./.github/workflows/build.yml
     permissions:
       contents: read
+      # the handoff cache of the `base` job on ghcr.io
+      packages: write
       checks: write
       id-token: write
       security-events: write
