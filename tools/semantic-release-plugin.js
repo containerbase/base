@@ -9,7 +9,7 @@ import { hashFile } from './utils.js';
 /** @typedef {import('semantic-release').PublishContext} PublishContext */
 /** @typedef {import('semantic-release').SuccessContext} SuccessContext */
 
-/** Digest of the pushed images, set by `publish` and signed in `success`. */
+/** Digest of the pushed images, set by `prepare`, tagged in `publish` and signed in `success`. */
 let digest = '';
 
 /**
@@ -42,6 +42,41 @@ async function exec(file, args) {
   if (result.failed) {
     throw releaseError(result.shortMessage);
   }
+}
+
+/**
+ * Runs a command and returns its output, throws when it fails. Its errors go
+ * straight to the log.
+ * @param {string} file
+ * @param {string[]} args
+ */
+async function output(file, args) {
+  const result = await execa(file, args, {
+    reject: false,
+    stdin: 'ignore',
+    stderr: 'inherit',
+  });
+  if (result.failed) {
+    throw releaseError(result.shortMessage);
+  }
+  return result.stdout;
+}
+
+/**
+ * Groups image references by repository, a reference without a tag is the
+ * `latest` tag.
+ * @param {string[]} tags
+ * @returns {Map<string, string[]>}
+ */
+function groupTags(tags) {
+  /** @type {Map<string, string[]>} */
+  const repos = new Map();
+  for (const tag of tags) {
+    const name = tag.slice(tag.lastIndexOf('/') + 1);
+    const repo = name.includes(':') ? tag.slice(0, tag.lastIndexOf(':')) : tag;
+    repos.set(repo, [...(repos.get(repo) ?? []), tag]);
+  }
+  return repos;
 }
 
 /** Platforms of the release images. */
@@ -123,25 +158,12 @@ export async function prepare(_config, context) {
   await hashFile('./dist/cli/containerbase-cli-amd64', 'sha512');
   await hashFile('./dist/cli/containerbase-cli-arm64', 'sha512');
 
-  await exec('docker', ['buildx', 'bake', platforms, 'build']);
-}
-
-/**
- * Pushes the images, they are signed in `success` after all plugins published.
- * @param {unknown} _config
- * @param {PublishContext} context
- */
-export async function publish(_config, context) {
-  const { branch, logger, nextRelease } = context;
-  logger.log(
-    `Publish version: ${nextRelease.version} (${nextRelease.gitHead}, ${branch.channel ?? ''})`,
-  );
-  setReleaseEnv(context);
-
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
+  // pushes the images by digest only, `publish` tags them. A failed push
+  // fails the release before the git tag and the GitHub release exist.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'containerbase-bake-'));
   const metadataFile = path.join(tmp, 'metadata.json');
 
-  logger.log('Pushing docker images');
+  logger.log('Pushing docker images by digest');
   await exec('docker', [
     'buildx',
     'bake',
@@ -152,11 +174,68 @@ export async function publish(_config, context) {
   ]);
 
   const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
-  digest = meta?.push?.['containerimage.digest'];
+  digest = meta?.push?.['containerimage.digest'] ?? '';
 
   if (!digest) {
     logger.error(`Bake metadata:\n${JSON.stringify(meta, null, 2)}`);
     throw releaseError('Missing image digest in the bake metadata');
+  }
+  logger.log(`Pushed docker images: ${digest}`);
+}
+
+/**
+ * Points the release tags at the images `prepare` pushed, they are signed in
+ * `success` after all plugins published.
+ * @param {unknown} _config
+ * @param {PublishContext} context
+ */
+export async function publish(_config, context) {
+  const { branch, logger, nextRelease } = context;
+  logger.log(
+    `Publish version: ${nextRelease.version} (${nextRelease.gitHead}, ${branch.channel ?? ''})`,
+  );
+  setReleaseEnv(context);
+
+  if (!digest) {
+    throw releaseError('Missing image digest, `prepare` pushes the images');
+  }
+
+  const print = JSON.parse(
+    await output('docker', ['buildx', 'bake', '--print', 'release-tags']),
+  );
+  /** @type {string[] | undefined} */
+  const tags = print?.target?.['release-tags']?.tags;
+  if (!tags?.length) {
+    throw releaseError('Missing tags in the `release-tags` bake target');
+  }
+
+  // only writes the manifests, the images are in each registry already
+  for (const [repo, repoTags] of groupTags(tags)) {
+    logger.log(`Tagging ${repo}@${digest}: ${repoTags.join(', ')}`);
+    await exec('docker', [
+      'buildx',
+      'imagetools',
+      'create',
+      ...repoTags.flatMap((tag) => ['--tag', tag]),
+      `${repo}@${digest}`,
+    ]);
+  }
+
+  // each tag must point at the pushed images
+  for (const tag of tags) {
+    const tagDigest = (
+      await output('docker', [
+        'buildx',
+        'imagetools',
+        'inspect',
+        '--format',
+        '{{.Manifest.Digest}}',
+        tag,
+      ])
+    ).trim();
+    if (tagDigest !== digest) {
+      throw releaseError(`${tag} points at ${tagDigest}, expected ${digest}`);
+    }
   }
 
   // the workflow attests the images with this digest
