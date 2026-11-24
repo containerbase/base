@@ -990,14 +990,17 @@ USER 12021
 
 # old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.23.5
+ARG NODE22_VERSION=22.23.5
+RUN install-tool node "${NODE22_VERSION}"
 
 # old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.22.3
+ARG NODE24_VERSION=24.22.3
+RUN install-tool node "${NODE24_VERSION}"
 
-# renovate: datasource=npm
-RUN install-tool yarn 1.22.22
+# renovate: datasource=npm depName=yarn
+ARG YARN_VERSION=1.22.22
+RUN install-tool yarn "${YARN_VERSION}"
 
 # the commands are shims, which source the wrapper the pointer links to
 RUN set -ex; \
@@ -1007,11 +1010,11 @@ RUN set -ex; \
   node --version | grep '^v24\.'
 
 # switching the version moves the pointers
-RUN install-tool node 22.23.5
+RUN install-tool node "${NODE22_VERSION}"
 RUN set -ex; \
   node --version | grep '^v22\.'; \
   npm --version
-RUN install-tool node 24.22.3
+RUN install-tool node "${NODE24_VERSION}"
 
 # a missing pointer is recreated without an install
 RUN set -ex; \
@@ -1022,10 +1025,10 @@ RUN set -ex; \
 # deleted version folders, also of the parent, are installed again on the next call
 RUN set -ex; \
   node24="$(cat /opt/containerbase/versions/node)"; \
-  rm -rf "/opt/containerbase/tools/node/${node24}" /opt/containerbase/tools/yarn/1.22.22; \
+  rm -rf "/opt/containerbase/tools/node/${node24}" "/opt/containerbase/tools/yarn/${YARN_VERSION}"; \
   [[ ! -e /opt/containerbase/links/node ]]; \
   out=$(yarn --version); \
-  [[ "${out}" == "1.22.22" ]]; \
+  [[ "${out}" == "${YARN_VERSION}" ]]; \
   [[ -d "/opt/containerbase/tools/node/${node24}" ]]; \
   node --version | grep '^v24\.'; \
   [[ "$(cat /opt/containerbase/versions/node)" == "${node24}" ]]
@@ -1070,7 +1073,7 @@ RUN set -ex; \
   containerbase-cli init tool all; \
   [[ -L /opt/containerbase/links/node ]]; \
   [[ -L /opt/containerbase/links/yarn ]]; \
-  yarn --version | grep "^1.22.22$"
+  [[ "$(yarn --version)" == "${YARN_VERSION}" ]]
 
 #--------------------------------------
 # final
