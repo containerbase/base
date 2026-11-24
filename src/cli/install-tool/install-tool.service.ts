@@ -289,11 +289,9 @@ export class InstallToolService {
 
       if (this.envSvc.isRoot) {
         logger.debug('cleaning root caches');
+        // the android sdk is below the containerbase user home, also for root
         await deleteAsync(
-          [
-            '/root/.{android,android-sdk,cache}',
-            '/root/.local/share/virtualenv',
-          ],
+          ['/root/.{android,cache}', '/root/.local/share/virtualenv'],
           {
             force: true,
             dryRun,

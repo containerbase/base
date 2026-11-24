@@ -157,7 +157,7 @@ An explicit `install-apt git` and git add-ons like `git-svn` still install Ubunt
 ## Custom temp directory
 
 Containerbase keeps the tool init state and the tool caches in `/tmp/containerbase`.
-The home folders link into it, eg. `~/.npm` to `/tmp/containerbase/cache/.npm`.
+The folders in the containerbase user's home, `USER_HOME`, link into it, eg. `/home/ubuntu/.npm` to `/tmp/containerbase/cache/.npm`, also when `HOME` points elsewhere.
 The `docker-entrypoint.sh` initializes the prepared tools when that folder is missing, or when it is a symlink to a folder which isn't writable.
 
 You can move it with `CONTAINERBASE_TMP_DIR`, eg. to `/var/cache/containerbase`.

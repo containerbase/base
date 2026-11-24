@@ -322,7 +322,8 @@ RUN install-tool android-sdk-cmdline-tools
 
 USER 12021
 
-# Do no install as root, `/root/.{android,android-sdk}` folders will be removed on docker build
+# install as the user, `ANDROID_HOME` is the user's `.android-sdk`, also for root,
+# but root's `/root/.android` folder is removed on docker build
 RUN set -ex; \
   yes | sdkmanager --licenses; \
   sdkmanager "platforms;android-35"; \

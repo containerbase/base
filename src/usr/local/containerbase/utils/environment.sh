@@ -108,9 +108,13 @@ export CONTAINERBASE=1 USER_NAME="${USER_NAME}" USER_ID="${USER_ID}" PRIMARY_GRO
 
 env_dirs=("/usr/local" "/opt/containerbase" "\${USER_HOME}")
 
-# openshift override unknown user home
+# openshift and other unknown users get HOME=/, use the containerbase user home,
+# also for a HOME which isn't a writable and searchable folder
 if [ "\${EUID}" != 0 ]; then
-  export HOME="\${USER_HOME}"
+  if [ "\${HOME}" != "\${USER_HOME}" ] && { [ -z "\${HOME}" ] || [ "\${HOME}" = / ] || [ ! -d "\${HOME}" ] || [ ! -w "\${HOME}" ] || [ ! -x "\${HOME}" ]; }; then
+    HOME="\${USER_HOME}"
+  fi
+  export HOME
 fi
 
 for p in \${env_dirs[@]}; do

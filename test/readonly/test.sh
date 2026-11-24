@@ -96,6 +96,59 @@ done
 
 echo "--- read-only tests passed"
 
+echo "--- HOME"
+
+# an explicit, writable HOME is kept, also through the shim of git
+# shellcheck disable=SC2016
+run --user 12021 "${image}" bash -c '
+  set -ex
+  mkdir -p /tmp/home
+  HOME=/tmp/home git config --global user.name x
+  test -f /tmp/home/.gitconfig
+'
+
+# the android sdk of the java prepare stays in the containerbase user home,
+# also when the first sourcing of the env sees another HOME, and for root
+run --user 12021 "${image}" test -L /home/ubuntu/.android-sdk
+for user in 12021 root; do
+  # shellcheck disable=SC2016
+  run --user "${user}" -e HOME=/tmp "${image}" bash -c 'test "${HOME}" = /tmp && test "${ANDROID_HOME}" = /home/ubuntu/.android-sdk'
+done
+
+# an unknown user gets HOME=/ from docker, which is replaced by the
+# containerbase user home, the default user keeps its read-only home
+# shellcheck disable=SC2016
+run --user 123456 "${image}" bash -c 'test "${HOME}" = /home/ubuntu'
+# shellcheck disable=SC2016
+run --user 12021 "${image}" bash -c 'test "${HOME}" = /home/ubuntu'
+
+# without HOME in the env, bash fills it from passwd, the env exports it, also
+# for a wrapped tool
+output=$(run --user 12021 "${image}" env -u HOME bash -c 'printenv HOME')
+grep -Fx /home/ubuntu > /dev/null <<< "${output}"
+output=$(run --user 12021 "${image}" env -u HOME node -e 'console.log(process.env.HOME)')
+grep -Fx /home/ubuntu > /dev/null <<< "${output}"
+
+# an explicit HOME which is missing or not writable is replaced
+for home in /nonexistent /usr; do
+  # shellcheck disable=SC2016
+  run --user 12021 -e "HOME=${home}" "${image}" bash -c 'test "${HOME}" = /home/ubuntu'
+done
+
+# an explicit HOME which is a writable file or a folder without search
+# permission is replaced too, the env file is sourced again after creating them
+# shellcheck disable=SC2016
+run --user 12021 "${image}" bash -c '
+  set -ex
+  touch /tmp/home-file
+  mkdir -m 0600 /tmp/home-dir
+  for home in /tmp/home-file /tmp/home-dir; do
+    test "$(HOME=${home} bash -c ". /usr/local/etc/env && printf %s \"\${HOME}\"")" = /home/ubuntu
+  done
+'
+
+echo "--- HOME tests passed"
+
 # Runs the test image as the containerbase user with a read-only root file
 # system and a tmpfs `/tmp`, with `/opt/containerbase` mounted from a host
 # folder, passing the `docker run` args after the folder and then the
