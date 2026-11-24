@@ -260,6 +260,9 @@ RUN install-tool jq 1.8.2
 
 RUN jq --version
 
+# the first call marks jq as initialized, so the wrapper skips the init later
+RUN test -f /tmp/containerbase/tool.init.d/jq
+
 RUN echo '{"a":1}' | jq -e '.a == 1'
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes

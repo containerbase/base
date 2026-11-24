@@ -114,16 +114,22 @@ export class PrepareToolService {
         await this.pathSvc.setInitialized(tool.name);
       }
     } else {
-      const set = new Set(supportedTools);
-      for (const tool of tools
-        .filter((t) => set.has(t))
-        .map((t) => this.toolSvcs.find((s) => s.name === t)!)) {
-        const res = await this._initTool(tool, dryRun);
-        /* v8 ignore if -- `_initTool` does not report failures yet */
-        if (res) {
-          return res;
+      for (const name of tools) {
+        const tool = this.toolSvcs.find((s) => s.name === name);
+        if (tool) {
+          const res = await this._initTool(tool, dryRun);
+          /* v8 ignore if -- `_initTool` does not report failures yet */
+          if (res) {
+            return res;
+          }
+        } else {
+          logger.debug(
+            { tool: name },
+            'tool does not need to be initialized (no service)',
+          );
         }
-        await this.pathSvc.setInitialized(tool.name);
+        // also for tools without a service, so their wrappers skip the init
+        await this.pathSvc.setInitialized(name);
       }
     }
   }
