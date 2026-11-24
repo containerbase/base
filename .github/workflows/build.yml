@@ -411,6 +411,8 @@ jobs:
 
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
+        with:
+          scope: distro-${{ matrix.distro }}
 
       - name: ⚙️  Init
         run: |
@@ -420,6 +422,11 @@ jobs:
         uses: ./.github/actions/bake
         with:
           args: test-distro
+
+      - name: Save download proxy cache
+        uses: ./.github/actions/download-proxy-save
+        with:
+          scope: distro-${{ matrix.distro }}
 
       - name: Download proxy errors
         if: failure()
@@ -551,11 +558,18 @@ jobs:
       # `base` job and is taken from the handoff cache
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
+        with:
+          scope: ${{ matrix.lang }}-${{ matrix.arch.name }}
 
       - name: test distro
         uses: ./.github/actions/bake
         with:
           args: test-${{ matrix.arch.name }}
+
+      - name: Save download proxy cache
+        uses: ./.github/actions/download-proxy-save
+        with:
+          scope: ${{ matrix.lang }}-${{ matrix.arch.name }}
 
       - name: Download proxy errors
         if: failure()
