@@ -1,0 +1,75 @@
+name: download-proxy-cache
+
+# Pushes the download caches of the large container tests to ghcr.io, which
+# `build-push` uploads as artifacts on pushes to `main` (see the
+# `download-proxy-save` action). The jobs of `build-push` can't do it: they
+# also run fork code in the merge queue, so they don't get `packages: write`.
+# This workflow runs no code of the build, it only packs the files.
+on:
+  workflow_run: # zizmor: ignore[dangerous-triggers] only reads artifacts of `main` and runs no code of the triggering run
+    workflows:
+      - build-push
+    types:
+      - completed
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  # the newest caches replace the older ones anyway
+  cancel-in-progress: true
+
+jobs:
+  push:
+    if: github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      packages: write
+
+    steps:
+      - name: Download caches
+        id: download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          dir="${RUNNER_TEMP}/caches"
+          mkdir -p "${dir}"
+          echo "dir=${dir}" >> "${GITHUB_OUTPUT}"
+          names="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.expired | not) | .name | select(startswith("download-proxy-cache-"))')"
+          if [ -z "${names}" ]; then
+            echo "No download caches to push"
+            exit 0
+          fi
+          while read -r name; do
+            echo "Downloading ${name}"
+            gh run download "${RUN_ID}" --repo "${GITHUB_REPOSITORY}" --name "${name}" --dir "${dir}/${name}"
+          done <<< "${names}"
+
+      - name: Push caches
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DIR: ${{ steps.download.outputs.dir }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          caches=("${DIR}"/download-proxy-cache-*)
+          if [ "${#caches[@]}" -eq 0 ]; then
+            exit 0
+          fi
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          # zstd needs a builder with its own BuildKit
+          docker buildx create --use --driver docker-container > /dev/null
+          for cache in "${caches[@]}"; do
+            scope="${cache##*/download-proxy-cache-}"
+            image="ghcr.io/${OWNER,,}/docker-build-cache:download-proxy-${scope}"
+            echo "::group::Pushing ${image} ($(du -sh "${cache}" | cut -f1))"
+            printf 'FROM scratch\nCOPY . /\n' | docker buildx build \
+              --output "type=image,name=${image},push=true,oci-mediatypes=true,compression=zstd,compression-level=1" \
+              --file - "${cache}"
+            echo "::endgroup::"
+          done

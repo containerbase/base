@@ -77,6 +77,11 @@ fi
   else
     echo "Size on disk: no cache folder"
   fi
+  # the lookups, only kept for the job, see `cache_zone` in nginx.conf
+  if [ -d "${cache}-lookup" ]; then
+    echo ""
+    cache="${cache}-lookup" cache_size | awk "${human}"'{ printf "Lookups on disk: %s\n", human($1) }'
+  fi
 
   echo ""
   echo "### Download proxy hosts"
