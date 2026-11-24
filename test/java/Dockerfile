@@ -67,7 +67,7 @@ RUN set -ex; \
 
 # the revoked intermediates are appended to the blocked list of the jdk
 RUN set -ex; \
-  blocked=/opt/containerbase/tools/java/25.0.5+8.0.LTS/lib/security/blocked.certs; \
+  blocked=$(echo /opt/containerbase/tools/java/25.*/lib/security/blocked.certs); \
   head -n 1 "${blocked}" | grep -qx 'Algorithm=SHA-256'; \
   grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
   grep -qx 84112972B8E59D14560AE7E7119654474AAD119990CF3722BFC1E3B91615E1FD "${blocked}"
