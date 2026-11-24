@@ -3,7 +3,7 @@ import { codeBlock } from 'common-tags';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { ensurePaths, rootPath } from '../../../test/path.ts';
 import { createContainer } from '../services/index.ts';
-import { pathExists } from '../utils/index.ts';
+import { logger, pathExists } from '../utils/index.ts';
 import { LinkToolService } from './link-tool.service.ts';
 
 /**
@@ -420,6 +420,31 @@ describe('cli/services/link-tool.service', async () => {
 
         expect((await fs.lstat(`${bin}/locked-cmd`)).isSymbolicLink()).toBe(
           true,
+        );
+      },
+    );
+
+    test.each(['EROFS', 'EACCES'])(
+      'removeStalePointer warns about a pointer which cannot be removed on request: %s',
+      async (code) => {
+        const pointer = `${links}/warn-cmd`;
+        const err = Object.assign(new Error(code), { code });
+        const rm = fs.rm;
+        vi.spyOn(fs, 'rm').mockImplementation((path, options) =>
+          path === pointer ? Promise.reject(err) : rm(path, options),
+        );
+
+        await svc.removeStalePointer('warn-cmd');
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          { err, name: 'warn-cmd' },
+          'cannot remove the pointer',
+        );
+
+        await svc.removeStalePointer('warn-cmd', true);
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { err, name: 'warn-cmd' },
+          'cannot remove the pointer of the command, the old version stays linked',
         );
       },
     );

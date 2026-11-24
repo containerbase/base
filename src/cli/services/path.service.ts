@@ -839,6 +839,17 @@ export class PathService {
     await this.setOwner({ path });
   }
 
+  /**
+   * Forgets that any tool was initialized in this container, so the next init
+   * runs every initialize step again.
+   */
+  async clearInitialized(): Promise<void> {
+    const dir = this._toolInitPath;
+    for (const file of await fs.readdir(dir).catch(() => [])) {
+      await fs.rm(join(dir, file), { force: true });
+    }
+  }
+
   /** Marks the tool as prepared and adds it to the list of prepared tools. */
   async setPrepared(tool: string): Promise<void> {
     await fs.writeFile(this.toolPreparePath(tool), '');

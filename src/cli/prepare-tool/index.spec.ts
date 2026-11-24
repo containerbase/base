@@ -114,6 +114,59 @@ describe('cli/prepare-tool/index', () => {
       expect(await pathExists(join(links, 'ptr-legacy'))).toBe(false);
     });
 
+    describe('a child with a wrapper for an older parent', () => {
+      const child = { name: 'ptr-child', version: '2.0.0' };
+
+      /**
+       * Records the child for the parents 49.0.0, with a wrapper, and 50.0.0,
+       * which is the current one. The pointer of the command is missing.
+       */
+      async function setup(): Promise<string> {
+        const verSvc = await createContainer().getAsync(VersionService);
+        const dir = rootPath('opt/containerbase/tools/ptr-child/2.0.0');
+        const old = join(dir, '49.0.0/.wrappers');
+        await fs.mkdir(old, { recursive: true });
+        await fs.writeFile(join(old, 'ptr-child'), '');
+        for (const version of ['49.0.0', '50.0.0']) {
+          const record = { ...child, parent: { name: 'ptr', version } };
+          if (!(await verSvc.isInstalled(record))) {
+            await verSvc.addInstalled(record);
+          }
+        }
+        await verSvc.setLink({ name: 'ptr-child', tool: child });
+        await verSvc.setCurrent({
+          name: 'ptr-child',
+          tool: child,
+          parent: { name: 'ptr', version: '50.0.0' },
+        });
+        await ensurePaths('opt/containerbase/links');
+        const pointer = rootPath('opt/containerbase/links/ptr-child');
+        await fs.rm(pointer, { force: true });
+        return pointer;
+      }
+
+      test('init tool all does not point at the old parent', async () => {
+        const pointer = await setup();
+
+        expect(await initializeTools(['all'])).toBeUndefined();
+
+        expect(await pathExists(pointer)).toBe(false);
+      });
+
+      test('init tool all points at the wrapper of the current parent', async () => {
+        const pointer = await setup();
+        const wrappers = rootPath(
+          'opt/containerbase/tools/ptr-child/2.0.0/50.0.0/.wrappers',
+        );
+        await fs.mkdir(wrappers, { recursive: true });
+        await fs.writeFile(join(wrappers, 'ptr-child'), '');
+
+        expect(await initializeTools(['all'])).toBeUndefined();
+
+        expect(await fs.readlink(pointer)).toBe(join(wrappers, 'ptr-child'));
+      });
+    });
+
     test('init tool all only warns when a pointer cannot be written', async () => {
       await linkCommands('ptr-c');
       vi.spyOn(fs, 'symlink').mockRejectedValue(new Error('EROFS'));

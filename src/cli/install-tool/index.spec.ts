@@ -9,6 +9,8 @@ import {
   vi,
 } from 'vitest';
 import {
+  BuildListService,
+  DataService,
   IpcServer,
   PathService,
   ToolVersionsService,
@@ -38,9 +40,11 @@ import {
   linkTool,
   listSupportedTools,
   resolveVersion,
+  setupVolume,
   uninstallTool,
 } from './index.ts';
 import { V2ToolInstallService } from './install-legacy-tool.service.ts';
+import { InstallToolService } from './install-tool.service.ts';
 import { scope } from '~test/http-mock.ts';
 import { ensurePaths, rootPath } from '~test/path.ts';
 
@@ -68,6 +72,11 @@ describe('cli/install-tool/index', () => {
       'opt/containerbase/bin',
       'opt/containerbase/data',
       'opt/containerbase/links',
+      // the files of the recorded parent versions, so they aren't installed again
+      'opt/containerbase/tools/node/1.0.0',
+      'opt/containerbase/tools/node/1.0.1',
+      'opt/containerbase/tools/python/1.0.0',
+      'opt/containerbase/tools/ruby/1.0.0',
       'tmp/containerbase/tool.init.d',
       'usr/local/containerbase/tools/v2',
       'var/lib/containerbase/tool.prep.d',
@@ -728,6 +737,59 @@ describe('cli/install-tool/index', () => {
       }
       expect(await pathExists(rootPath('tmp/containerbase/ipc.sock'))).toBe(
         false,
+      );
+    });
+  });
+
+  describe('setupVolume', () => {
+    test('does nothing when the volume has the list of the image', async () => {
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(false);
+      const spy = vi.spyOn(InstallToolService.prototype, 'setupVolume');
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    test('sets up the volume from a different list', async () => {
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(true);
+      const spy = vi
+        .spyOn(InstallToolService.prototype, 'setupVolume')
+        .mockResolvedValue();
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    test('creates the base folders before the databases load', async () => {
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(true);
+      const ensure = vi.spyOn(PathService.prototype, 'ensureBasePaths');
+      const setup = vi
+        .spyOn(InstallToolService.prototype, 'setupVolume')
+        .mockResolvedValue();
+      const load = vi.spyOn(DataService.prototype, 'load');
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(ensure.mock.invocationCallOrder[0]).toBeLessThan(
+        load.mock.invocationCallOrder[0]!,
+      );
+      expect(setup).toHaveBeenCalledOnce();
+    });
+
+    test('only warns when the setup fails', async () => {
+      const err = new Error('failed');
+      vi.spyOn(BuildListService.prototype, 'changed').mockResolvedValue(true);
+      vi.spyOn(InstallToolService.prototype, 'setupVolume').mockRejectedValue(
+        err,
+      );
+
+      await expect(setupVolume()).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'cannot set up the volume',
       );
     });
   });

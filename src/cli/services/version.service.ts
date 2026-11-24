@@ -176,6 +176,27 @@ export class VersionService {
   }
 
   /**
+   * The parent versions whose wrapper may be the pointer of a command of the
+   * tool version. When it is the current version of the tool and its record
+   * has a parent, only that parent counts, so a parent version left by an
+   * older volume is never selected. Else, eg. without a current record, it
+   * is `findParentVersions`.
+   *
+   * @param alias - the name the tool is current as, the tool name by default
+   */
+  async findSelectedParents(tool: Tool, alias = tool.name): Promise<string[]> {
+    const current = await this.getCurrent(alias);
+    if (
+      current?.parent &&
+      current.tool.name === tool.name &&
+      current.tool.version === tool.version
+    ) {
+      return [current.parent.version];
+    }
+    return await this.findParentVersions(tool);
+  }
+
+  /**
    * Points a shell wrapper name at a tool version, replacing whatever it
    * pointed at before.
    */

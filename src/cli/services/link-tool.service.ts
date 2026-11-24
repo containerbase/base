@@ -242,12 +242,16 @@ export class LinkToolService {
   }
 
   /**
-   * Removes a pointer a legacy link replaces. A missing pointer is fine, and
+   * Removes a pointer a legacy link replaces, or which points at a version
+   * the command doesn't run any more. A missing pointer is fine, and
    * so is one in a folder which can't be written, eg. when only `bin` is
    * writable: the link then keeps its full wrapper, which wins over the
    * pointer, as `bin` isn't a shim any more.
+   *
+   * @param warn - log a pointer which can't be removed as a warning, as the
+   * old version stays linked, instead of at debug level
    */
-  private async removeStalePointer(name: string): Promise<void> {
+  async removeStalePointer(name: string, warn = false): Promise<void> {
     try {
       await fs.rm(this.pointerPath(name), { force: true });
     } catch (err) {
@@ -255,7 +259,14 @@ export class LinkToolService {
       if (code !== 'EROFS' && code !== 'EACCES') {
         throw err;
       }
-      logger.debug({ err, name }, 'cannot remove the pointer');
+      if (warn) {
+        logger.warn(
+          { err, name },
+          'cannot remove the pointer of the command, the old version stays linked',
+        );
+      } else {
+        logger.debug({ err, name }, 'cannot remove the pointer');
+      }
     }
   }
 
@@ -288,7 +299,7 @@ export class LinkToolService {
    * Writes the shim of the command into the global bin folder, replacing
    * whatever is there, unless it already is the shim.
    */
-  private async writeShim(name: string): Promise<void> {
+  async writeShim(name: string): Promise<void> {
     const tgt = join(this.pathSvc.binDir, name);
     const content = this.shim(name);
     if ((await readText(tgt)) === content) {

@@ -128,7 +128,7 @@ async function restorePointers(container: Container): Promise<void> {
         await linkSvc.restorePointer(
           name,
           tool,
-          await versionSvc.findParentVersions(tool),
+          await versionSvc.findSelectedParents(tool),
         );
       } catch (err) {
         logger.warn({ err, command: name }, 'cannot restore the pointer');
