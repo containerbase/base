@@ -23,8 +23,9 @@ jobs:
     uses: ./.github/workflows/build.yml
     permissions:
       contents: read
-      # the handoff cache of the `base` job on ghcr.io
+      # the handoff cache of the `base` job on ghcr.io, see `setup` in
+      # `build.yml`. Never grant this in `build-push.yml`: the merge queue
+      # also runs fork code.
       packages: write
       checks: write
       id-token: write
-      security-events: write
