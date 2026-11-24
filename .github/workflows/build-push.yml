@@ -65,7 +65,6 @@ jobs:
       contents: read
       checks: write
       id-token: write
-      security-events: write
 
   release:
     needs: [build]
