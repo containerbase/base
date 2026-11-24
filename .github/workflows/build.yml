@@ -378,6 +378,23 @@ jobs:
         if: always()
         run: .github/actions/download-proxy/stats.sh
 
+      - name: Collect download proxy logs
+        if: always()
+        run: .github/actions/download-proxy/collect.sh "${{ runner.temp }}/download-proxy"
+
+      # summed up over many runs, they show which downloads fail and how large
+      # the cache of each test is
+      - name: Upload download proxy logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: download-proxy-distro-${{ matrix.distro }}
+          path: ${{ runner.temp }}/download-proxy/
+          retention-days: 14
+          if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
+
   # test old distros on arm64
   base-arm64:
     runs-on: ubuntu-26.04-arm
@@ -492,6 +509,23 @@ jobs:
       - name: Download proxy cache stats
         if: always()
         run: .github/actions/download-proxy/stats.sh
+
+      - name: Collect download proxy logs
+        if: always()
+        run: .github/actions/download-proxy/collect.sh "${{ runner.temp }}/download-proxy"
+
+      # summed up over many runs, they show which downloads fail and how large
+      # the cache of each test is
+      - name: Upload download proxy logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: download-proxy-${{ matrix.lang }}-${{ matrix.arch.name }}
+          path: ${{ runner.temp }}/download-proxy/
+          retention-days: 14
+          if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
 
   # Catch-all required check for the test matrix, `base` is listed too because
   # `lang` is skipped when it fails
