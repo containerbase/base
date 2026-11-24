@@ -59,7 +59,7 @@ RUN set -ex; \
 RUN [ "$(find /tmp -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java 25.0.5+8.0.LTS
+RUN install-tool java 25.0.5+100000002.0.LTS
 
 RUN set -ex; \
   ls -la /tmp; \
@@ -67,7 +67,7 @@ RUN set -ex; \
 
 # the revoked intermediates are appended to the blocked list of the jdk
 RUN set -ex; \
-  blocked=/opt/containerbase/tools/java/25.0.5+8.0.LTS/lib/security/blocked.certs; \
+  blocked=$(echo /opt/containerbase/tools/java/*/lib/security/blocked.certs); \
   head -n 1 "${blocked}" | grep -qx 'Algorithm=SHA-256'; \
   grep -qx 42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493 "${blocked}"; \
   grep -qx 84112972B8E59D14560AE7E7119654474AAD119990CF3722BFC1E3B91615E1FD "${blocked}"
@@ -110,7 +110,7 @@ RUN gradle --version
 FROM base AS test-gradle-b
 
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 25.0.5+8.0.LTS
+RUN install-tool java-jre 25.0.5+100000002.0.LTS
 
 # renovate: datasource=gradle-version versioning=gradle
 RUN install-tool gradle 9.9.2
@@ -171,7 +171,7 @@ USER 1001
 
 # old LTS, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version depName=java packageName=java?os=linux&architecture=x64
-ARG JAVA_JDK_VERSION=17.0.21+9
+ARG JAVA_JDK_VERSION=17.0.21+100000002
 RUN install-tool java-jdk
 
 # test latest gradle
@@ -189,7 +189,7 @@ FROM base AS test-gradle-e
 
 # old LTS, gradle 8 doesn't run on java 25, no major updates (see .github/renovate.json)
 # renovate: datasource=java-version packageName=java-jre?os=linux&architecture=x64
-RUN install-tool java-jre 21.0.13+9.0.LTS
+RUN install-tool java-jre 21.0.13+100000002.0.LTS
 
 # gradle 8, no major updates (see .github/renovate.json)
 # renovate: datasource=gradle-version versioning=gradle
