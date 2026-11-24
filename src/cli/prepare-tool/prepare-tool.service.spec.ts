@@ -238,8 +238,14 @@ describe('cli/prepare-tool/prepare-tool.service', () => {
       );
     });
 
-    test('ignores unknown tools', async () => {
+    test('marks tools without a service as initialized', async () => {
       expect(await svc.initialize(['not-exist'])).toBeUndefined();
+
+      expect(await pathSvc.isInitialized('not-exist')).toBe(true);
+      expect(logger.debug).toHaveBeenCalledWith(
+        { tool: 'not-exist' },
+        'tool does not need to be initialized (no service)',
+      );
     });
 
     test('skips tools which never need initialization', async () => {
