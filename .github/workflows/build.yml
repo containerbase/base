@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 15
 
     outputs:
-      uid: ${{ steps.init.outputs.uid }}
       handoff-registry: ${{ steps.init.outputs.handoff-registry }}
       handoff-from: ${{ steps.init.outputs.handoff-from }}
       handoff-to: ${{ steps.init.outputs.handoff-to }}
@@ -41,6 +40,8 @@ jobs:
       # It goes to ghcr.io, as the GHA cache is too small for one entry per run
       # and arch. Fork pull requests can't push packages, so they keep using
       # the GHA cache. The `-<arch>` suffix is appended by the jobs.
+      # containerbase/docker-build-cache deletes the `<uuid>-<arch>` tags after a
+      # day, keep its `cleanup` workflow in sync when changing the tag format.
       - name: ⚙️ Init
         id: init
         env:
@@ -48,16 +49,19 @@ jobs:
         run: |
           # `uuidgen` is missing on ubuntu-slim
           uid="$(cat /proc/sys/kernel/random/uuid)"
-          echo "uid=${uid}" >> "${GITHUB_OUTPUT}"
           if [[ -n "${HEAD_REPO}" && "${HEAD_REPO}" != "${GITHUB_REPOSITORY}" ]]; then
-            echo "handoff-registry=false" >> "${GITHUB_OUTPUT}"
-            echo "handoff-from=type=gha,scope=${uid}" >> "${GITHUB_OUTPUT}"
-            echo "handoff-to=type=gha,mode=max,scope=${uid}" >> "${GITHUB_OUTPUT}"
+            {
+              echo "handoff-registry=false"
+              echo "handoff-from=type=gha,scope=${uid}"
+              echo "handoff-to=type=gha,mode=max,scope=${uid}"
+            } >> "${GITHUB_OUTPUT}"
           else
             ref="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/docker-build-cache:${uid}"
-            echo "handoff-registry=true" >> "${GITHUB_OUTPUT}"
-            echo "handoff-from=type=registry,ref=${ref}" >> "${GITHUB_OUTPUT}"
-            echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ref=${ref}" >> "${GITHUB_OUTPUT}"
+            {
+              echo "handoff-registry=true"
+              echo "handoff-from=type=registry,ref=${ref}"
+              echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ref=${ref}"
+            } >> "${GITHUB_OUTPUT}"
           fi
 
       # pull requests and merge queue groups which only change files that feed
