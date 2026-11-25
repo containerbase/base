@@ -69,10 +69,15 @@ jobs:
           for cache in "${caches[@]}"; do
             scope="${cache##*/download-proxy-cache-}"
             image="ghcr.io/${OWNER,,}/docker-build-cache:download-proxy-${scope}"
-            echo "::group::Pushing ${image} ($(du -sh "${cache}" | cut -f1))"
-            # always linux/amd64, `restore.sh` restores it for the aarch64 tests too
+            # the platform of the test, so its runner pulls the image natively.
+            # The image only holds files, so building it needs no emulation.
+            platform=linux/amd64
+            if [[ "${scope}" == *-aarch64 ]]; then
+              platform=linux/arm64
+            fi
+            echo "::group::Pushing ${image} for ${platform} ($(du -sh "${cache}" | cut -f1))"
             printf 'FROM scratch\nCOPY . /\n' | docker buildx build \
-              --platform linux/amd64 \
+              --platform "${platform}" \
               --output "type=image,name=${image},push=true,oci-mediatypes=true,compression=zstd,compression-level=1" \
               --file - "${cache}"
             echo "::endgroup::"
