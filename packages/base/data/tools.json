@@ -48,6 +48,7 @@
     "kustomize": { "minVersion": "3.3.0" },
     "lerna": { "type": "npm", "parent": "node", "deprecated": true },
     "maven": { "parent": "java", "minVersion": "3.0.4" },
+    "mercurial": { "type": "pip", "parent": "python" },
     "mise": { "minVersion": "2024.1.0" },
     "mono": { "minVersion": "6.14.1" },
     "nix": { "minVersion": "2.10.3" },

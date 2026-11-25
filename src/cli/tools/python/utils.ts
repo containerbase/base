@@ -233,23 +233,33 @@ export abstract class PipBaseInstallService extends PythonBaseInstallService {
       }
     }
 
-    // fallback to the tool name
+    // fallback to the binary name
     await this.shellwrapper({
       srcDir: src,
-      name: this.name,
+      name: this.binaryName(),
       extraToolEnvs: ['python'],
     });
   }
 
-  /** Checks that the tool, or `pip-compile` for pip-tools, runs with `--version`. */
-  override async test(_version: string): Promise<void> {
-    let name = this.name;
-    switch (name) {
+  /**
+   * The binary the tool is called by: its fallback wrapper and the
+   * `--version` check. `hg` for mercurial, `pip-compile` for pip-tools, else
+   * the tool name.
+   */
+  private binaryName(): string {
+    switch (this.name) {
+      case 'mercurial':
+        return 'hg';
       case 'pip-tools':
-        name = 'pip-compile';
-        break;
+        return 'pip-compile';
+      default:
+        return this.name;
     }
-    await this._spawn(name, ['--version']);
+  }
+
+  /** Checks that the tool's binary runs with `--version`. */
+  override async test(_version: string): Promise<void> {
+    await this._spawn(this.binaryName(), ['--version']);
   }
 
   /** Accepts valid pep440 versions. */
