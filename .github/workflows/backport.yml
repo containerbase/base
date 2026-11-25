@@ -1,0 +1,74 @@
+name: backport
+
+# Privileged half of `backport-request.yml`. It runs from the default branch and
+# never checks out or runs pull request code. The pull request number comes from
+# an untrusted artifact, so it is validated against the triggering run first.
+# Every event backports on its own (one run per label), so runs must not cancel
+# or replace each other.
+on: # jactionlint ignore=concurrency-limits
+  workflow_run: # zizmor: ignore[dangerous-triggers] no pull request code is checked out or run, and the artifact is validated
+    workflows:
+      - backport-request
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  backport:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      actions: read # download the artifact of the triggering run
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Download pull request number
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: pr-number
+          path: ${{ runner.temp }}/pr-number
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          # the head of a closed or labeled pull request run isn't the pull
+          # request's head commit, so match its head branch and repository
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        run: |
+          pr_number="$(cat "${RUNNER_TEMP}/pr-number/pr-number.txt")"
+          if ! [[ "${pr_number}" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid pull request number"
+            exit 1
+          fi
+          pr="$(gh pr view "${pr_number}" --repo "${REPO}" --json headRefName,headRepository,headRepositoryOwner,mergedAt,labels \
+            --jq '[.headRefName, "\(.headRepositoryOwner.login)/\(.headRepository.name)", (.mergedAt != null), ([.labels[].name | select(startswith("backport:"))] | length)] | @tsv')"
+          read -r pr_head_branch pr_head_repo pr_merged pr_backports <<< "${pr}"
+          if [[ "${pr_head_branch}" != "${HEAD_BRANCH}" || "${pr_head_repo}" != "${HEAD_REPO}" ]]; then
+            echo "::error::Pull request #${pr_number} doesn't match the triggering run"
+            exit 1
+          fi
+          if [[ "${pr_merged}" != "true" || "${pr_backports}" == "0" ]]; then
+            echo "::notice::Pull request #${pr_number} isn't merged or has no backport label, skipping"
+            exit 0
+          fi
+          echo "url=https://api.github.com/repos/${REPO}/pulls/${pr_number}" >> "${GITHUB_OUTPUT}"
+
+      - name: Backport
+        if: steps.pr.outputs.url
+        uses: kiegroup/git-backporting@17bab14ff4b362d044e12c18e491b4ef8e69a4b1 # v4.10.0
+        with:
+          target-branch-pattern: '^backport:(?<target>(.*))$'
+          strategy: ort
+          strategy-option: find-renames
+          cherry-pick-options: -x
+          auth: ${{ github.token }}
+          pull-request: ${{ steps.pr.outputs.url }}
+          auto-no-squash: true
+          enable-err-notification: true
