@@ -7,10 +7,6 @@ import { hashFile } from './utils.js';
 
 /** @typedef {import('semantic-release').PrepareContext} PrepareContext */
 /** @typedef {import('semantic-release').PublishContext} PublishContext */
-/** @typedef {import('semantic-release').SuccessContext} SuccessContext */
-
-/** Digest of the pushed images, set by `publish` and signed in `success`. */
-let digest = '';
 
 /**
  * Creates an error without stack trace, semantic-release logs plain errors
@@ -56,7 +52,7 @@ const signDelay = 10_000;
 /**
  * Signs an image, retrying failed attempts. When all attempts fail it reports
  * a GitHub Actions error annotation instead of failing the release.
- * @param {SuccessContext['logger']} logger
+ * @param {PublishContext['logger']} logger
  * @param {string} image
  */
 async function sign(logger, image) {
@@ -127,7 +123,8 @@ export async function prepare(_config, context) {
 }
 
 /**
- * Pushes the images, they are signed in `success` after all plugins published.
+ * Pushes and signs the images. It runs before the GitHub release, so a failed
+ * GitHub release still leaves signed images, which the workflow attests.
  * @param {unknown} _config
  * @param {PublishContext} context
  */
@@ -152,7 +149,7 @@ export async function publish(_config, context) {
   ]);
 
   const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
-  digest = meta?.push?.['containerimage.digest'];
+  const digest = meta?.push?.['containerimage.digest'];
 
   if (!digest) {
     logger.error(`Bake metadata:\n${JSON.stringify(meta, null, 2)}`);
@@ -163,19 +160,8 @@ export async function publish(_config, context) {
   if (process.env.GITHUB_OUTPUT) {
     await fs.appendFile(process.env.GITHUB_OUTPUT, `digest=${digest}\n`);
   }
-}
 
-/**
- * Signs the pushed images. A failed signing doesn't fail the release, it is
- * reported as a GitHub Actions error annotation instead.
- * @param {unknown} _config
- * @param {SuccessContext} context
- */
-export async function success(_config, { logger }) {
-  if (!digest) {
-    return;
-  }
-
+  // a failed signing doesn't fail the release, see `sign`
   for (const image of [
     `${process.env.OWNER}/${process.env.FILE}`,
     `ghcr.io/${process.env.OWNER}/${process.env.FILE}`,
