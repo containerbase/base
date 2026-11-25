@@ -18,8 +18,9 @@ mkdir -p "${restored}"
 
 if docker buildx imagetools inspect "${image}" > /dev/null 2>&1; then
   echo "Restoring ${image}"
-  # exports the files of the image, without loading it
-  if ! echo "FROM ${image}" | docker buildx build --quiet --output "type=local,dest=${restored}" - > /dev/null; then
+  # exports the files of the image, without loading it. The image only holds
+  # files and is pushed for linux/amd64, also for the aarch64 tests.
+  if ! echo "FROM --platform=linux/amd64 ${image}" | docker buildx build --quiet --output "type=local,dest=${restored}" - > /dev/null; then
     echo "::warning::Failed to restore ${image}, the download cache starts empty"
   fi
 fi
