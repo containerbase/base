@@ -88,7 +88,7 @@ const signAttempts = 3;
 /** Delay between signing attempts in milliseconds. */
 const signDelay = 10_000;
 
-/** Attempts of a registry request in `publish`, transient registry errors pass on a retry. */
+/** Attempts of a registry push or request, transient registry errors pass on a retry. */
 const registryAttempts = 3;
 
 /** Delay between registry attempts in milliseconds. */
@@ -98,7 +98,7 @@ const registryDelay = 10_000;
  * Runs `fn` until it doesn't throw, at most `registryAttempts` times, and
  * throws the last error.
  * @template T
- * @param {PublishContext['logger']} logger
+ * @param {PrepareContext['logger']} logger
  * @param {string} what
  * @param {() => Promise<T>} fn
  * @returns {Promise<T>}
@@ -193,14 +193,17 @@ export async function prepare(_config, context) {
   const metadataFile = path.join(tmp, 'metadata.json');
 
   logger.log('Pushing docker images by digest');
-  await exec('docker', [
-    'buildx',
-    'bake',
-    platforms,
-    '--metadata-file',
-    metadataFile,
-    'push',
-  ]);
+  // a retry rebuilds from the builder cache and only pushes what's missing
+  await withRetries(logger, 'Pushing docker images', () =>
+    exec('docker', [
+      'buildx',
+      'bake',
+      platforms,
+      '--metadata-file',
+      metadataFile,
+      'push',
+    ]),
+  );
 
   const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
   digest = meta?.push?.['containerimage.digest'] ?? '';
