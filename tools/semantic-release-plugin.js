@@ -88,6 +88,35 @@ const signAttempts = 3;
 /** Delay between signing attempts in milliseconds. */
 const signDelay = 10_000;
 
+/** Attempts of a registry request in `publish`, transient registry errors pass on a retry. */
+const registryAttempts = 3;
+
+/** Delay between registry attempts in milliseconds. */
+const registryDelay = 10_000;
+
+/**
+ * Runs `fn` until it doesn't throw, at most `registryAttempts` times, and
+ * throws the last error.
+ * @template T
+ * @param {PublishContext['logger']} logger
+ * @param {string} what
+ * @param {() => Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+async function withRetries(logger, what, fn) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= registryAttempts) {
+        throw err;
+      }
+      logger.log(`${what} failed, retrying in ${registryDelay / 1000}s`);
+      await setTimeout(registryDelay);
+    }
+  }
+}
+
 /**
  * Signs an image, retrying failed attempts. When all attempts fail it reports
  * a GitHub Actions error annotation instead of failing the release.
@@ -209,33 +238,38 @@ export async function publish(_config, context) {
     throw releaseError('Missing tags in the `release-tags` bake target');
   }
 
-  // only writes the manifests, the images are in each registry already
+  // only writes the manifests, the images are in each registry already, so a
+  // retry is safe
   for (const [repo, repoTags] of groupTags(tags)) {
     logger.log(`Tagging ${repo}@${digest}: ${repoTags.join(', ')}`);
-    await exec('docker', [
-      'buildx',
-      'imagetools',
-      'create',
-      ...repoTags.flatMap((tag) => ['--tag', tag]),
-      `${repo}@${digest}`,
-    ]);
+    await withRetries(logger, `Tagging ${repo}`, () =>
+      exec('docker', [
+        'buildx',
+        'imagetools',
+        'create',
+        ...repoTags.flatMap((tag) => ['--tag', tag]),
+        `${repo}@${digest}`,
+      ]),
+    );
   }
 
   // each tag must point at the pushed images
   for (const tag of tags) {
-    const tagDigest = (
-      await output('docker', [
-        'buildx',
-        'imagetools',
-        'inspect',
-        '--format',
-        '{{.Manifest.Digest}}',
-        tag,
-      ])
-    ).trim();
-    if (tagDigest !== digest) {
-      throw releaseError(`${tag} points at ${tagDigest}, expected ${digest}`);
-    }
+    await withRetries(logger, `Checking ${tag}`, async () => {
+      const tagDigest = (
+        await output('docker', [
+          'buildx',
+          'imagetools',
+          'inspect',
+          '--format',
+          '{{.Manifest.Digest}}',
+          tag,
+        ])
+      ).trim();
+      if (tagDigest !== digest) {
+        throw releaseError(`${tag} points at ${tagDigest}, expected ${digest}`);
+      }
+    });
   }
 
   // the workflow attests the images with this digest
