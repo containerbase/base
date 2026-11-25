@@ -75,7 +75,9 @@ jobs:
       # neither the images nor the bats tests skip the build and docker tests:
       # docs, the dev container (it has its own workflow), editor and repo
       # settings, and lint and vitest configs (those jobs still run); pushes
-      # always run everything, as they release
+      # always run everything, as they release. The paths are extended regular
+      # expressions in `.github/build-skip-paths`, one per line, so adding one
+      # doesn't change this workflow and needs no full run itself
       - name: ⚙️ Check for changes that don't need the build
         id: changes
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
@@ -84,29 +86,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
-          if grep -vE \
-            -e '\.md$' \
-            -e '^docs/' \
-            -e '^\.devcontainer/' \
-            -e '^\.github/workflows/devcontainer\.yml$' \
-            -e '^\.github/renovate\.json$' \
-            -e '^\.github/ISSUE_TEMPLATE/' \
-            -e '^\.vscode/' \
-            -e '^\.editorconfig$' \
-            -e '^\.husky/' \
-            -e '^\.lintstagedrc\.json$' \
-            -e '^\.gitignore$' \
-            -e '^LICENSE$' \
-            -e '^\.oxlintrc\.json$' \
-            -e '^\.oxfmtrc\.json$' \
-            -e '^\.markdownlint-cli2\.jsonc$' \
-            -e '^\.github/zizmor\.yml$' \
-            -e '^tools/(audit-sarif|lint-docs|lint-versions)\.ts$' \
-            -e '^\.github/workflows/(pnpm-audit|trivy)\.yml$' \
-            -e '^vitest\.config\.ts$' \
-            -e '^__mocks__/' \
-            -e '^codecov\.yml$' \
-            "${RUNNER_TEMP}/changed-files"; then
+          if grep -vE -f .github/build-skip-paths "${RUNNER_TEMP}/changed-files"; then
             echo "skip-build=false" >> "${GITHUB_OUTPUT}"
           else
             echo "skip-build=true" >> "${GITHUB_OUTPUT}"
