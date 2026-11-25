@@ -99,7 +99,7 @@ RUN install-tool yarn 3.8.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.1
 
-# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN_VERSION=6.0.0-rc.19
 
 RUN install-tool yarn "${YARN_VERSION}"
@@ -910,7 +910,7 @@ RUN set -ex; \
   yarn global add semver@7.3.2; \
   [[ "$(command -v semver)" == /usr/local/bin/semver ]]
 
-# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/cli-dist
 ARG YARN_VERSION=4.18.1
 RUN install-tool yarn "${YARN_VERSION}"
 
@@ -927,7 +927,7 @@ RUN set -ex; \
   [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/berry/cache)" ]]; \
   yarn --version | grep "^${YARN_VERSION}$"
 
-# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN6_VERSION=6.0.0-rc.19
 RUN install-tool yarn "${YARN6_VERSION}"
 
@@ -962,7 +962,7 @@ FROM build AS test-vp
 USER root
 
 # pin the node vp's setup downloads, it uses the latest lts otherwise
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG VP_SETUP_NODE_VERSION=24.22.1
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
@@ -989,12 +989,12 @@ RUN prepare-tool node
 USER 12021
 
 # old LTS, no major updates (see .github/renovate.json)
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG NODE22_VERSION=22.23.5
 RUN install-tool node "${NODE22_VERSION}"
 
 # old LTS, no major updates (see .github/renovate.json)
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG NODE24_VERSION=24.22.3
 RUN install-tool node "${NODE24_VERSION}"
 
