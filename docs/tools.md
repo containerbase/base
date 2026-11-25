@@ -123,7 +123,7 @@ Some tools accept partial versions and install a matching release:
   A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
-  With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
+  With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `mercurial`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
   The data flags a release whose files are all yanked as deprecated, `latest` and major or major.minor versions skip those, a deprecated release is only installed when the full version is given.
   For `poetry` the data sets its `latest` within the `poetry-plugin-pypi-mirror` limit, pypi.org is only asked for that limit when the data can't answer.
 - `android-sdk-cmdline-tools`: A major (`14`) or major.minor (`14.1`) version installs the newest matching stable release, compared numerically.

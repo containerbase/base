@@ -78,6 +78,7 @@ export const ResolverMap: Record<string, InstallToolType> = {
   corepack: 'npm',
   hashin: 'pip',
   kas: 'pip',
+  mercurial: 'pip',
   npm: 'npm',
   pnpm: 'npm',
   pdm: 'pip',

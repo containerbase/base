@@ -797,6 +797,7 @@ Known tools:
 - `copier`
 - `hashin`
 - `kas`
+- `mercurial`
 - `pdm`
 - `pip-tools`
 - `pipenv`

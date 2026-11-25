@@ -37,6 +37,12 @@ class HashinInstallService extends PipBaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
+class MercurialInstallService extends PipBaseInstallService {
+  readonly name = 'mercurial';
+}
+
+@injectable()
+@injectFromHierarchy()
 class PipToolsInstallService extends PipBaseInstallService {
   readonly name = 'pip-tools';
 }
@@ -93,6 +99,7 @@ describe('cli/tools/python/utils', () => {
     child = await testContainer();
     child.bind(CopierInstallService).toSelf();
     child.bind(HashinInstallService).toSelf();
+    child.bind(MercurialInstallService).toSelf();
     child.bind(PipToolsInstallService).toSelf();
     child.bind(PoetryInstallService).toSelf();
     pathSvc = await child.getAsync(PathService);
@@ -446,6 +453,19 @@ describe('cli/tools/python/utils', () => {
     });
   });
 
+  test('link: falls back to hg for mercurial', async () => {
+    const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
+    const svc = await child.getAsync(MercurialInstallService);
+
+    await expect(svc.link('7.2.4')).resolves.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith('mercurial', {
+      srcDir: expect.any(String),
+      name: 'hg',
+      extraToolEnvs: ['python'],
+    });
+  });
+
   test('link: falls back when there are no console scripts', async () => {
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
     const svc = await child.getAsync(HashinInstallService);
@@ -468,6 +488,7 @@ describe('cli/tools/python/utils', () => {
     expected: string;
   }>([
     { tool: 'hashin', svc: HashinInstallService, expected: 'hashin' },
+    { tool: 'mercurial', svc: MercurialInstallService, expected: 'hg' },
     { tool: 'pip-tools', svc: PipToolsInstallService, expected: 'pip-compile' },
   ])('test: $tool', async ({ svc, expected }) => {
     const install = await child.getAsync(svc);
