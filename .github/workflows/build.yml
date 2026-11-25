@@ -77,7 +77,8 @@ jobs:
       # settings, and lint and vitest configs (those jobs still run); pushes
       # always run everything, as they release. The paths are extended regular
       # expressions in `.github/build-skip-paths`, one per line, so adding one
-      # doesn't change this workflow and needs no full run itself
+      # doesn't change this workflow and needs no full run itself. They are read
+      # from the base commit, so a pull request can't skip its own build
       - name: ⚙️ Check for changes that don't need the build
         id: changes
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
@@ -86,11 +87,23 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
-          if grep -vE -f .github/build-skip-paths "${RUNNER_TEMP}/changed-files"; then
+          skip_paths="${RUNNER_TEMP}/build-skip-paths"
+          if ! git show "${BASE_SHA}:.github/build-skip-paths" > "${skip_paths}"; then
+            echo "::warning::The base has no .github/build-skip-paths, running the full build"
             echo "skip-build=false" >> "${GITHUB_OUTPUT}"
-          else
-            echo "skip-build=true" >> "${GITHUB_OUTPUT}"
+            exit 0
           fi
+          # 0: some file needs the build, 1: none does, else an invalid pattern
+          status=0
+          grep -vE -f "${skip_paths}" "${RUNNER_TEMP}/changed-files" || status=$?
+          case "${status}" in
+            0) echo "skip-build=false" >> "${GITHUB_OUTPUT}" ;;
+            1) echo "skip-build=true" >> "${GITHUB_OUTPUT}" ;;
+            *)
+              echo "::error::Invalid .github/build-skip-paths in the base"
+              exit 1
+              ;;
+          esac
 
       # the `lang` matrix has an entry for each `test/<lang>/Dockerfile`
       # (x86_64) and `test/<lang>/Dockerfile.arm64` (aarch64). Pull requests
