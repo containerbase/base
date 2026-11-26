@@ -24,7 +24,9 @@ runs:
       run: |
         echo "::group::Preparing download cache"
         set -e
-        out="${RUNNER_TEMP}/download-proxy-save"
+        # the folder `download-proxy` restores to: the GitHub Actions cache
+        # only restores a cache saved from the same path
+        out="${RUNNER_TEMP}/download-proxy-cache"
         rm -rf "${out}"
         mkdir -p "${out}"
         echo "folder=${out}" >> "${GITHUB_OUTPUT}"
