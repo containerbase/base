@@ -201,7 +201,7 @@ RUN set -ex; \
 FROM build-rootless AS test-pipenv-b
 
 # Do not update minor
-RUN install-tool python 3.10.17
+RUN install-tool python 3.11.6
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
