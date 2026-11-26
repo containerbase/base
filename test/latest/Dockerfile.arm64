@@ -227,7 +227,7 @@ RUN install-tool terraform 1.17.2
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.9
+RUN install-tool tofu 1.13.10
 
 #--------------------------------------
 # Image: vendir
