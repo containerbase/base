@@ -109,7 +109,7 @@ USER 1001
 # previous major, no major updates (see .github/renovate.json)
 # https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
 # renovate: datasource=github-releases packageName=containerbase/erlang-prebuild versioning=semver-extended
-RUN install-tool erlang 28.5.0.8
+RUN install-tool erlang 28.5.0.9
 
 RUN install-tool elixir 1.20.5
 
