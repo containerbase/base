@@ -9,7 +9,8 @@ const __require = createRequire(import.meta.url);
 
 shell.config.fatal = true;
 
-const nodeVersion = 24;
+// node version of the cli, keep in sync with `.node-version` and `mise.toml`
+const nodeVersion = '24.22.3';
 const version = process.env.CONTAINERBASE_VERSION ?? '0.0.0-PLACEHOLDER';
 
 shell.rm('-rf', 'dist/docker');
