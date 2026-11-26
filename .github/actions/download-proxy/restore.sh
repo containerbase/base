@@ -18,7 +18,8 @@ mkdir -p "${restored}"
 
 if docker buildx imagetools inspect "${image}" > /dev/null 2>&1; then
   echo "Restoring ${image}"
-  # exports the files of the image, without loading it
+  # exports the files of the image, without loading it. The image has the
+  # platform of the test, see `download-proxy-cache.yml`.
   if ! echo "FROM ${image}" | docker buildx build --quiet --output "type=local,dest=${restored}" - > /dev/null; then
     echo "::warning::Failed to restore ${image}, the download cache starts empty"
   fi
