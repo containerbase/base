@@ -75,9 +75,9 @@ FROM build AS poetry
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 USER 12021
 
@@ -111,7 +111,7 @@ FROM build-rootless AS test-poetry-a
 RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -157,7 +157,7 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 FROM build AS test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 USER 1001
 
@@ -165,7 +165,7 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 #--------------------------------------
 # test b: non-root
