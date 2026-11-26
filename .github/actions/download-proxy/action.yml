@@ -1,10 +1,38 @@
 name: 'Download proxy'
 description: 'Starts a caching proxy for tool downloads and uses it as CONTAINERBASE_CDN, also for npm, gem and pip installs'
 
+inputs:
+  scope:
+    description: >-
+      Name of the test, its downloads that never change are restored from the
+      GitHub Actions cache or ghcr.io and saved by `download-proxy-save`.
+      Empty starts with an empty cache.
+    default: ''
+
 runs:
   using: 'composite'
 
   steps:
+    # small tests, the large ones are on ghcr.io, see `download-proxy-save`
+    - name: Restore download cache
+      if: inputs.scope != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/download-proxy-cache
+        key: download-proxy-${{ inputs.scope }}-${{ github.run_id }}
+        restore-keys: download-proxy-${{ inputs.scope }}-
+
+    - name: Restore download cache from ghcr.io
+      if: inputs.scope != ''
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        IMAGE: ghcr.io/${{ github.repository_owner }}/docker-build-cache:download-proxy-${{ inputs.scope }}
+      run: |
+        echo "::group::Restoring download cache"
+        "${ACTION_PATH}/restore.sh" "${RUNNER_TEMP}/download-proxy-cache" "${IMAGE,,}"
+        echo "::endgroup::"
+
     - name: Start download proxy
       shell: bash
       env:
@@ -16,10 +44,13 @@ runs:
           sudo apt-get -qq update
           sudo apt-get -qq install -y nginx
         fi
-        sudo mkdir -p /etc/containerbase-cdn /var/cache/containerbase-cdn /var/log/containerbase-cdn
+        sudo mkdir -p /etc/containerbase-cdn /var/cache/containerbase-cdn /var/cache/containerbase-cdn-lookup /var/log/containerbase-cdn
         sudo cp "${ACTION_PATH}/nginx.conf" "${ACTION_PATH}/allowed-hosts.map" /etc/containerbase-cdn/
         sudo nginx -t -c /etc/containerbase-cdn/nginx.conf
         sudo nginx -c /etc/containerbase-cdn/nginx.conf
+        # nginx gives its cache folder to the worker user, the restored files
+        # need the same
+        sudo chown -R "$(sudo stat -c %u:%g /var/cache/containerbase-cdn)" /var/cache/containerbase-cdn
         {
           echo "CONTAINERBASE_CDN=http://host.docker.internal:8099"
           echo "CONTAINERBASE_CDN_NPM=true"

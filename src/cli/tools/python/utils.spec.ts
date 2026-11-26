@@ -37,8 +37,38 @@ class HashinInstallService extends PipBaseInstallService {
 
 @injectable()
 @injectFromHierarchy()
+class MercurialInstallService extends PipBaseInstallService {
+  readonly name = 'mercurial';
+}
+
+@injectable()
+@injectFromHierarchy()
 class PipToolsInstallService extends PipBaseInstallService {
   readonly name = 'pip-tools';
+}
+
+/** Like the generic service of `install-pip`, recorded with its type. */
+@injectable()
+@injectFromHierarchy()
+class TypedMercurialInstallService extends PipBaseInstallService {
+  readonly name = 'pip+mercurial';
+
+  /** The pip package, without the type prefix. */
+  protected override tool(_version: string): string {
+    return 'mercurial';
+  }
+}
+
+/** Like the generic service of `install-pip`, recorded with its type. */
+@injectable()
+@injectFromHierarchy()
+class TypedPipToolsInstallService extends PipBaseInstallService {
+  readonly name = 'pip+pip-tools';
+
+  /** The pip package, without the type prefix. */
+  protected override tool(_version: string): string {
+    return 'pip-tools';
+  }
 }
 
 @injectable()
@@ -93,8 +123,11 @@ describe('cli/tools/python/utils', () => {
     child = await testContainer();
     child.bind(CopierInstallService).toSelf();
     child.bind(HashinInstallService).toSelf();
+    child.bind(MercurialInstallService).toSelf();
     child.bind(PipToolsInstallService).toSelf();
     child.bind(PoetryInstallService).toSelf();
+    child.bind(TypedMercurialInstallService).toSelf();
+    child.bind(TypedPipToolsInstallService).toSelf();
     pathSvc = await child.getAsync(PathService);
     execaMock.mockResolvedValue({ failed: false, all: 'ok' });
   });
@@ -446,6 +479,36 @@ describe('cli/tools/python/utils', () => {
     });
   });
 
+  test('link: falls back to hg for mercurial', async () => {
+    const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
+    const svc = await child.getAsync(MercurialInstallService);
+
+    await expect(svc.link('7.2.4')).resolves.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith('mercurial', {
+      srcDir: expect.any(String),
+      name: 'hg',
+      extraToolEnvs: ['python'],
+    });
+  });
+
+  test('link: falls back to hg for a typed mercurial package', async () => {
+    const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
+    const svc = await child.getAsync(TypedMercurialInstallService);
+
+    await expect(svc.link('7.2.4')).resolves.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledExactlyOnceWith('pip+mercurial', {
+      srcDir: path.join(
+        pathSvc.versionedToolPath('pip+mercurial', '7.2.4'),
+        pythonVersion,
+        'bin',
+      ),
+      name: 'hg',
+      extraToolEnvs: ['python'],
+    });
+  });
+
   test('link: falls back when there are no console scripts', async () => {
     const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
     const svc = await child.getAsync(HashinInstallService);
@@ -468,7 +531,18 @@ describe('cli/tools/python/utils', () => {
     expected: string;
   }>([
     { tool: 'hashin', svc: HashinInstallService, expected: 'hashin' },
+    { tool: 'mercurial', svc: MercurialInstallService, expected: 'hg' },
     { tool: 'pip-tools', svc: PipToolsInstallService, expected: 'pip-compile' },
+    {
+      tool: 'pip+mercurial',
+      svc: TypedMercurialInstallService,
+      expected: 'hg',
+    },
+    {
+      tool: 'pip+pip-tools',
+      svc: TypedPipToolsInstallService,
+      expected: 'pip-compile',
+    },
   ])('test: $tool', async ({ svc, expected }) => {
     const install = await child.getAsync(svc);
 

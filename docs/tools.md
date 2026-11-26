@@ -97,6 +97,16 @@ Installs a tool into the container.
   install-tool node 22
   ```
 
+#### Minimum versions <a name="Minimum-versions-install-tool"></a>
+
+Installing a version older than the tool's minimum supported version fails before anything is prepared or downloaded.
+The minimum is the `minVersion` of the tool, or its `distroMinVersion` for the host Ubuntu release, see the [`@containerbase/base` package](../packages/base/README.md).
+Versions are compared as semver when both are semver, so a prerelease of the minimum, like `3.1.0-rc.1` for helm's `3.1.0`, is rejected too.
+Other versions, like `1.0` or `24.2.0.0`, are compared segment by segment, there a prerelease of the minimum, like `5.7.0-dev` for swift's `5.7`, is not rejected.
+A partial version or `latest` resolved below the minimum fails the same way.
+`git` is an exception: a version below its minimum, a partial version without a match in the tool-versions data or any other version which isn't an exact `X.Y.Z` one, like a prerelease `2.57.0-rc0`, installs the newest prebuild instead, with a warning, see [tool-specific versions](#Versions-install-tool).
+Packages installed with `install-gem`, `install-npm` or `install-pip` have no minimum.
+
 #### Tool-specific versions <a name="Versions-install-tool"></a>
 
 Some tools accept partial versions and install a matching release:
@@ -110,12 +120,11 @@ Some tools accept partial versions and install a matching release:
   Without a version, or with `latest`, the newest LTS is installed.
   These versions are resolved from the [tool-versions data](#tool-versions-data) like for the other tools below, with the newest release the data flags as LTS for `latest`, and from nodejs.org when the data has no LTS flags or no match.
 - `yarn`, `corepack`, `npm`, `pnpm` and any package installed with [`install-npm`](#install-npm-command): A major (`10`) or major.minor (`10.9`) version installs the `latest` dist tag if it matches and is not deprecated, otherwise the newest matching release which is not deprecated, prereleases are skipped.
-  When only deprecated versions match, the newest of them is installed with a warning, the next major fails then.
+  When only deprecated versions match, the newest of them is installed with a warning, a following major fails then.
   Without a version, or with `latest`, the `latest` release is installed, or the newest release which is not deprecated when the dist tag is deprecated, the deprecated dist tag only with a warning when every release is deprecated.
   With `install-tool`, for `yarn`, `corepack`, `npm` and `pnpm` the dist tag and the deprecated versions come from the [tool-versions data](#tool-versions-data) when it has them, else from the npm registry, eg. for `yarn` 6 and newer.
   The tool-versions data keeps the previous `latest` until a new release is older than its minimum release age of 1 hour, so it can lag behind npm for a short time.
-  Packages installed with [`install-npm`](#install-npm-command), [`install-gem`](#install-gem-command) or [`install-pip`](#install-pip-command) never read the tool-versions data, they use their registry.
-  A package name which matches a tool with its own resolver, like `install-npm php`, uses the resolver of that tool instead.
+  Packages installed with [`install-npm`](#install-npm-command), [`install-gem`](#install-gem-command) or [`install-pip`](#install-pip-command) never read the tool-versions data, they use their registry, also when the package is named like a tool.
 - `conan`, `poetry` and any package installed with [`install-pip`](#install-pip-command): A major (`2`) or major.minor (`2.1`) version installs the newest matching release, prereleases and yanked releases are skipped.
   A version which exists as a release, like `5.2`, is kept, even a yanked one, which pip installs when pinned.
   Without access to pypi.org, eg. for a package from a private index, the version is kept too.
@@ -123,7 +132,7 @@ Some tools accept partial versions and install a matching release:
   A major or major.minor version resolves to the newest matching release even when pip would read it as `X.Y.0`, eg. `poetry 1.8` installs the newest `1.8.x`, not `1.8.0`; pin the full version for an exact one.
   Without a version, or with `latest`, the latest release is installed.
   For `poetry` the latest release is the newest one supported by `poetry-plugin-pypi-mirror`, a partial version ignores that limit.
-  With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
+  With `install-tool`, for `checkov`, `conan`, `copier`, `hashin`, `kas`, `mercurial`, `pdm`, `pip-tools`, `pipenv`, `poetry` and `uv` a missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, else from pypi.org.
   The data flags a release whose files are all yanked as deprecated, `latest` and major or major.minor versions skip those, a deprecated release is only installed when the full version is given.
   For `poetry` the data sets its `latest` within the `poetry-plugin-pypi-mirror` limit, pypi.org is only asked for that limit when the data can't answer.
 - `android-sdk-cmdline-tools`: A major (`14`) or major.minor (`14.1`) version installs the newest matching stable release, compared numerically.
@@ -153,9 +162,11 @@ Some tools accept partial versions and install a matching release:
 - `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`: A missing version, `latest` and a major or major.minor version come from the [tool-versions data](#tool-versions-data) when it has a match, the lookups above are the fallback.
 - `php`, `composer`, `mise`: A missing version, `latest` and a major (`8`) or major.minor (`8.3`) version are resolved from the tool-versions data like for the other tools below, eg. `php 8.3` installs the newest `8.3.x` prebuild for the host distro.
   When the data has no match, a missing version or `latest` is looked up directly: the latest containerbase prebuild for `php` and `composer`, `mise.jdx.dev/VERSION` for `mise`.
+- `git`: A missing version, `latest` and a major (`2`) or major.minor (`2.50`) version are resolved from the tool-versions data like for the other tools below, eg. `git 2.50` installs the newest `2.50.x`.
+  When the data has no match, a missing version or `latest` installs the latest containerbase prebuild, an exact `X.Y.Z` version from `2.48.0` on is kept, and any other version, like a partial version without a match, a version before `2.48.0`, a prerelease like `2.57.0-rc0` or a vendor version like `2.43.0-1ubuntu1`, falls back to the newest prebuild with a warning.
 
 The tools above keep their own rules, except where noted.
-`java`, `node`, `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
+`java`, `node`, `android-sdk-cmdline-tools`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `git` and the npm, pip and gem tools of `install-tool` only read the tool-versions data when the image embeds data for the tool.
 They use the embedded data with a warning when the online data can't be loaded, like the other tools, and only ask their own lookup when neither data has a match.
 So while the embedded data is older than the max age, `latest` and partial versions of these tools first ask the online tool-versions data, and where `containerbase.github.io` is silently dropped, that waits up to the 30 s timeout of the tool-versions data before the embedded data or their own source answers, which `CONTAINERBASE_RESOLVER_OFFLINE=true` avoids.
 When the data lists matching releases, but all of them need a newer containerbase, a warning is logged and the tool's own lookup is used, like before.
@@ -177,15 +188,15 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   Any other value than `true`, `false` or an empty one is logged as a warning and keeps the online data.
   Warnings based on embedded data older than the max age say that it may be outdated.
   This also skips the online files of a version which the embedded data doesn't list, the tool is then downloaded from the source of its installer, see [custom registries](./custom-registries.md).
-  Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
-  These lookups go away in the next major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
+  Only the tool-versions data is offline then, the tools with their own lookup, `java`, `node`, `android-sdk-cmdline-tools`, `cocoapods`, `conan`, `gradle`, `maven`, `nuget`, `php`, `composer`, `mise`, `git`, `poetry` and the other npm, pip and gem tools of `install-tool`, use it when the embedded data has no match.
+  These lookups go away in a following major, when the fallbacks are removed, see [#7962](https://github.com/containerbase/base/issues/7962).
 - Without a version, or with `latest`, the newest release is installed, or the newest LTS release when the data flags LTS releases.
   For a tool installed with npm, like `yarn-slim` or `renovate`, it is the `latest` dist tag, also a prerelease, like npm installs it.
   When the dist tag is deprecated, isn't available for the host or needs a newer containerbase, it is the newest release which is, and isn't deprecated.
 - A major (`20`) or major.minor (`3.12`) version installs the newest matching release, a version which exists as a release, like `8.10`, is kept, also a deprecated one.
   For a tool installed with npm it is the `latest` dist tag when it matches and isn't deprecated, else the newest matching release which isn't deprecated.
 - Every tool skips the releases the data flags as deprecated for a missing version, `latest` and a major or major.minor version, like an npm deprecated version, a PyPI release whose files are all yanked or a gem gone from rubygems.org.
-  When only deprecated releases match, a tool with its own lookup, like the ones above, uses that lookup, and a tool without one, like `renovate` or `yarn-slim`, installs the newest of them, or the deprecated `latest` dist tag, with a warning, which fails in the next major.
+  When only deprecated releases match, a tool with its own lookup, like the ones above, uses that lookup, and a tool without one, like `renovate` or `yarn-slim`, installs the newest of them, or the deprecated `latest` dist tag, with a warning, which fails in a following major.
 - Only releases available for the host arch and distro, and installable by the running containerbase version (`minCb` of the data), are picked, prereleases are skipped, except the `latest` dist tag of a tool installed with npm for a missing version or `latest`.
   When no release matches, a warning names the reason: a matching release needs a newer containerbase, only prereleases match, the matching releases aren't available for the host arch and distro, or the data has no such release.
   A given version, also `latest`, is then used as is, so the install may fail later; without a version, no version is resolved and the install fails.
@@ -195,7 +206,7 @@ Any other tool resolves its version from the [tool-versions](https://github.com/
   A warning is logged when the data embedded in the image lists it and it needs a newer containerbase, the online data isn't read for it.
 
 A tool without tool-versions data keeps the version as given.
-The next major release fails the install instead of warning, see [#7962](https://github.com/containerbase/base/issues/7962).
+A following major release fails the install instead of warning, see [#7962](https://github.com/containerbase/base/issues/7962).
 
 <br>
 
@@ -211,7 +222,7 @@ Installs a gem package into the container.
 
 Note: requires ruby to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-gem yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` gem. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the gem is installed and listed as `gem+<name>`, eg. `gem+rake`, so a gem named like a tool, eg. `install-gem yarn`, installs the `yarn` gem, not the `yarn` tool. The version still comes from `<NAME>_VERSION`, eg. `RAKE_VERSION`. Gems installed by older versions are renamed once when the databases are migrated, also in the [build-time list](./custom-base-image.md#volume-at-optcontainerbase), their folder stays, `tools/gem+<name>` links to it.
 
 #### Usage <a name="Usage-install-gem"></a>
 
@@ -261,7 +272,7 @@ Installs a npm package into the container.
 
 Note: requires node to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-npm yarn` installs the latest `@yarnpkg/cli-dist`, not the latest `yarn` package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the package is installed and listed as `npm+<name>`, eg. `npm+del-cli`, so a package named like a tool, eg. `install-npm yarn`, installs the `yarn` package, not the `yarn` tool. The version still comes from `<NAME>_VERSION`, eg. `DEL_CLI_VERSION`. Packages installed by older versions are renamed once when the databases are migrated, also in the [build-time list](./custom-base-image.md#volume-at-optcontainerbase), their folder stays, `tools/npm+<name>` links to it.
 
 #### Usage <a name="Usage-install-npm"></a>
 
@@ -311,7 +322,7 @@ Installs a pip package into the container.
 
 Note: requires python to be installed.
 
-Note: a name `install-tool` supports uses that tool's own version lookup and installer, eg. `install-pip yarn` installs the latest `@yarnpkg/cli-dist` from npmjs, not a `yarn` pip package. This changes in the next major, see [#8121](https://github.com/containerbase/base/issues/8121).
+Note: the package is installed and listed as `pip+<name>`, eg. `pip+poetry`, so a package named like a tool, eg. `install-pip poetry`, installs the package with pip without the `poetry` tool's own lookup. The version still comes from `<NAME>_VERSION`, eg. `POETRY_VERSION`. Packages installed by older versions are renamed once when the databases are migrated, also in the [build-time list](./custom-base-image.md#volume-at-optcontainerbase), their folder stays, `tools/pip+<name>` links to it.
 
 #### Usage <a name="Usage-install-pip"></a>
 
@@ -435,6 +446,8 @@ Note: Tools that have child tools need to be uninstalled recursively using the `
 
 Uninstalls a gem package from the container.
 
+Note: the package is looked up as `gem+<name>`, the name [`install-gem`](#install-gem-command) records it with. A tool installed with `install-tool`, eg. `bundler`, isn't a package, the command fails for it with exit code 2, uninstall it with [`uninstall-tool <name>`](#uninstall-tool-command).
+
 #### Usage <a name="Usage-uninstall-gem"></a>
 
 `$ containerbase-cli uninstall gem [-d,--dry-run] [-r,--recursive] [-a,--all] <name> [version]`
@@ -463,6 +476,8 @@ Uninstalls a gem package from the container.
 #### Description <a name="Description-uninstall-npm"></a>
 
 Uninstalls a npm package from the container.
+
+Note: the package is looked up as `npm+<name>`, the name [`install-npm`](#install-npm-command) records it with. A tool installed with `install-tool`, eg. `pnpm`, isn't a package, the command fails for it with exit code 2, uninstall it with [`uninstall-tool <name>`](#uninstall-tool-command).
 
 #### Usage <a name="Usage-uninstall-npm"></a>
 
@@ -495,6 +510,8 @@ Uninstalls a npm package from the container.
 
 Uninstalls a pip package from the container.
 
+Note: the package is looked up as `pip+<name>`, the name [`install-pip`](#install-pip-command) records it with. A tool installed with `install-tool`, eg. `checkov`, isn't a package, the command fails for it with exit code 2, uninstall it with [`uninstall-tool <name>`](#uninstall-tool-command).
+
 #### Usage <a name="Usage-uninstall-pip"></a>
 
 `$ containerbase-cli uninstall pip [-d,--dry-run] [-r,--recursive] [-a,--all] <name> [version]`
@@ -503,13 +520,17 @@ Uninstalls a pip package from the container.
 
 #### Examples <a name="Examples-uninstall-pip"></a>
 
-- Uninstalls checkov v2.4.7
+- Uninstalls checkov v2.4.7 of `install-pip checkov`
   ```bash
   uninstall-pip checkov 2.4.7
   ```
-- Uninstalls all checkov versions
+- Uninstalls all checkov versions of `install-pip checkov`
   ```bash
   uninstall-pip checkov --all
+  ```
+- Uninstalls checkov v2.4.7 of `install-tool checkov`
+  ```bash
+  uninstall-tool checkov 2.4.7
   ```
 
 <br>

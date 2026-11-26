@@ -37,8 +37,6 @@ describe('cli/tools/golang', () => {
 
   beforeEach(() => {
     vi.mocked(arch).mockReturnValue('x64');
-    // CI configures an apt proxy, which `AptService` would write to `/etc`
-    vi.stubEnv('APT_HTTP_PROXY', undefined);
     // no tool-versions data, the prebuild is verified against its checksum file
     mockToolFiles();
     execaMock.mockResolvedValue({ failed: false });
@@ -51,10 +49,11 @@ describe('cli/tools/golang', () => {
 
       await expect(svc.prepare()).resolves.toBeUndefined();
 
-      expect(execaMock).toHaveBeenCalledWith(
+      // neither bzr nor mercurial
+      expect(execaMock).not.toHaveBeenCalledWith(
         'apt-get',
-        expect.arrayContaining(['bzr', 'mercurial']),
-        { env: { DEBIAN_FRONTEND: 'noninteractive' } },
+        expect.anything(),
+        expect.anything(),
       );
       const goPath = join(pathSvc.cachePath, 'go');
       expect(await fs.readlink(join(envSvc.userHome, 'go'))).toBe(goPath);

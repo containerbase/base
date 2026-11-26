@@ -41,7 +41,7 @@ import { CabalInstallService } from '../tools/haskell/cabal.ts';
 import { GhcInstallService } from '../tools/haskell/ghc.ts';
 import { HelmInstallService } from '../tools/helm.ts';
 import { HelmfileInstallService } from '../tools/helmfile.ts';
-import { DeprecatedTools, ResolverMap, getToolType } from '../tools/index.ts';
+import { ResolverMap, getToolType, packageName } from '../tools/index.ts';
 import { AndroidSdkCmdlineToolsInstallService } from '../tools/java/android.ts';
 import { GradleInstallService } from '../tools/java/gradle.ts';
 import {
@@ -90,8 +90,9 @@ import {
   createGenericVersionResolver,
 } from '../tools/version-resolvers.ts';
 import { WallyInstallService } from '../tools/wally.ts';
+import { NotSupported } from '../utils/codes.ts';
 import {
-  type DistroCode,
+  type HostDistroCode,
   type InstallToolType,
   type ToolType,
   logger,
@@ -257,7 +258,7 @@ export interface SupportedTool {
    * The oldest version supported on an Ubuntu release, for the releases whose
    * floor differs from `minVersion`, the floor on the default distro.
    */
-  distroMinVersion?: Partial<Record<DistroCode, string>>;
+  distroMinVersion?: Partial<Record<HostDistroCode, string>>;
 }
 
 /**
@@ -267,14 +268,12 @@ export interface SupportedTool {
 function addDynamicTools(
   tools: Map<string, SupportedTool>,
   map: Record<string, InstallToolType>,
-  deprecated?: true,
 ): void {
   for (const [name, type] of Object.entries(map)) {
     tools.set(name, {
       name,
       type,
       parent: dynamicParents[type],
-      ...(deprecated && { deprecated }),
     });
   }
 }
@@ -294,7 +293,6 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
 
   // the implicit mappings first, a tool with an install service overrides them
   addDynamicTools(tools, ResolverMap);
-  addDynamicTools(tools, DeprecatedTools, true);
 
   const toolSvcs =
     await container.getAllAsync<BaseInstallService>(INSTALL_TOOL_TOKEN);
@@ -319,7 +317,8 @@ export async function listSupportedTools(): Promise<SupportedTool[]> {
 
 /**
  * Installs a tool version. For a `gem`, `npm` or `pip` type, a generic
- * install service is registered for the package first.
+ * install service is registered for the package first, which installs the
+ * package without the type prefix of `tool`, see `packageKey`.
  */
 export async function installTool(
   tool: string,
@@ -328,6 +327,7 @@ export async function installTool(
   type?: InstallToolType,
 ): Promise<number | void> {
   const container = await prepareInstallContainer();
+  const pkg = packageName(tool);
   if (type) {
     const verSvc = await container.getAsync(VersionService);
     await verSvc.setType(tool, type);
@@ -337,6 +337,11 @@ export async function installTool(
         @injectFromHierarchy()
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
+
+          /** The gem, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
 
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {
@@ -362,6 +367,11 @@ export async function installTool(
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
 
+          /** The npm package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
+
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
@@ -386,6 +396,11 @@ export async function installTool(
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
 
+          /** The pip package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
+
           /** Packages need no prepare step. */
           override needsPrepare(): boolean {
             return false;
@@ -400,8 +415,8 @@ export async function installTool(
               // some pip packages may not have a `--version` flag
               await super.test(version);
             } catch (err) {
-              if (getToolType(ResolverMap, tool) === 'pip') {
-                // those tools are known and should work
+              if (getToolType(ResolverMap, pkg) === 'pip') {
+                // those tools are known and should work, also as a package
                 throw err;
               }
               logger.debug(err);
@@ -486,6 +501,9 @@ interface UninstallToolConfig {
 /**
  * Uninstalls a tool version, or all versions without one. Generic install
  * services are registered for every installed `gem`, `npm` or `pip` package.
+ * A package name, see `packageKey`, which isn't installed while the name
+ * without the type is installed as a tool, eg. by `install-tool pnpm`, fails
+ * with an error pointing to `uninstall-tool`.
  *
  * @throws when the containerbase folders are not writable, except for a dry
  * run
@@ -497,6 +515,20 @@ export async function uninstallTool({
   recursive = false,
 }: UninstallToolConfig): Promise<number | void> {
   const container = await prepareUninstallContainer(dryRun);
+  const name = packageName(tool);
+  if (name !== tool) {
+    const verSvc = await container.getAsync(VersionService);
+    if (
+      !(await verSvc.findInstalled(tool)).length &&
+      (await verSvc.findInstalled(name)).length
+    ) {
+      logger.error(
+        { tool: name },
+        `${name} is installed as a tool, not as a package, use \`uninstall-tool ${name}\``,
+      );
+      return NotSupported;
+    }
+  }
   const svc = await container.getAsync(InstallToolService);
   return svc.uninstall(tool, version, dryRun, recursive);
 }
@@ -515,8 +547,8 @@ export async function setupVolume(): Promise<void> {
       return;
     }
     logger.debug('setting up the volume from the build-time list');
-    // before the databases load, which would create `data` with the owner and
-    // mode of the running process
+    // the base folders of the empty volume first, with the owner and mode
+    // containerbase sets, before the databases load or the setup writes
     await (await base.getAsync(PathService)).ensureBasePaths();
     const container = await prepareInstallContainer();
     await (await container.getAsync(InstallToolService)).setupVolume();
@@ -541,8 +573,10 @@ export async function ensureTool(command: string): Promise<number | void> {
 
 /**
  * Creates the install container with a generic install service for every
- * installed `gem`, `npm` or `pip` package, so they can be uninstalled. A dry
- * run opens the databases read-only, so they are never written.
+ * installed `gem`, `npm` or `pip` package, so they can be uninstalled or
+ * installed again by `ensure`. Like for `installTool`, they install the
+ * package without the type prefix of the recorded name, see `packageKey`. A
+ * dry run opens the databases read-only, so they are never written.
  *
  * @throws when the containerbase folders are not writable, except for a dry
  * run
@@ -559,12 +593,18 @@ export async function prepareUninstallContainer(
   }
   const verSvc = await container.getAsync(VersionService);
   for (const { name: tool, type } of await verSvc.getTypes()) {
+    const pkg = packageName(tool);
     switch (type) {
       case 'gem': {
         @injectable()
         @injectFromHierarchy()
         class GenericInstallService extends RubyBaseInstallService {
           override readonly name: string = tool;
+
+          /** The gem, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
         }
         container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;
@@ -574,6 +614,11 @@ export async function prepareUninstallContainer(
         @injectFromHierarchy()
         class GenericInstallService extends NpmBaseInstallService {
           override readonly name: string = tool;
+
+          /** The npm package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
         }
         container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;
@@ -583,6 +628,11 @@ export async function prepareUninstallContainer(
         @injectFromHierarchy()
         class GenericInstallService extends PipBaseInstallService {
           override readonly name: string = tool;
+
+          /** The pip package, without the type prefix. */
+          protected override tool(_version: string): string {
+            return pkg;
+          }
         }
         container.bind(INSTALL_TOOL_TOKEN).to(GenericInstallService);
         break;

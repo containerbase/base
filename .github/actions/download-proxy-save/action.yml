@@ -1,0 +1,85 @@
+name: 'Save download proxy cache'
+description: >-
+  Saves the downloads of the download proxy that never change, which a test
+  used, for the next jobs: up to 300 MiB in the GitHub Actions cache, larger
+  ones as an artifact, which `download-proxy-cache.yml` pushes to ghcr.io.
+  Only on pushes to `main`, which pull requests can read from, and only when
+  the job downloaded new files.
+
+inputs:
+  scope:
+    description: 'Name of the test, the same as for `download-proxy`'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Prepare download cache
+      id: prepare
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        echo "::group::Preparing download cache"
+        set -e
+        out="${RUNNER_TEMP}/download-proxy-save"
+        rm -rf "${out}"
+        mkdir -p "${out}"
+        echo "folder=${out}" >> "${GITHUB_OUTPUT}"
+        # the proxy wasn't started, eg. the job failed before
+        if [ ! -f /var/log/containerbase-cdn/access.log ]; then
+          echo "bytes=0" >> "${GITHUB_OUTPUT}"
+          echo "new-bytes=0" >> "${GITHUB_OUTPUT}"
+          exit 0
+        fi
+        # readable and linkable for the runner user, the job is done with them
+        sudo chmod -R a+rwX /var/cache/containerbase-cdn
+        sudo cp /var/log/containerbase-cdn/access.log "${RUNNER_TEMP}/download-proxy-access.log"
+        sudo chown "$(id -u):$(id -g)" "${RUNNER_TEMP}/download-proxy-access.log"
+        python3 -I "${ACTION_PATH}/../download-proxy/prepare-save.py" \
+          "${RUNNER_TEMP}/download-proxy-access.log" /var/cache/containerbase-cdn "${out}"
+        echo "::endgroup::"
+
+    # nothing new: the restored cache is still complete
+    - name: Check download cache
+      id: check
+      if: steps.prepare.outputs.bytes != '' && steps.prepare.outputs.bytes != '0'
+      shell: bash
+      env:
+        BYTES: ${{ steps.prepare.outputs.bytes }}
+        NEW_BYTES: ${{ steps.prepare.outputs.new-bytes }}
+        # 50 MiB, 300 MiB
+        MIN_NEW_BYTES: 52428800
+        MAX_GHA_BYTES: 314572800
+      run: |
+        if ((NEW_BYTES < MIN_NEW_BYTES)); then
+          echo "Only ${NEW_BYTES} bytes downloaded, not saving the download cache"
+          echo "target=none" >> "${GITHUB_OUTPUT}"
+        elif ((BYTES <= MAX_GHA_BYTES)); then
+          echo "target=gha" >> "${GITHUB_OUTPUT}"
+        else
+          echo "target=ghcr" >> "${GITHUB_OUTPUT}"
+        fi
+
+    - name: Save download cache
+      if: steps.check.outputs.target == 'gha'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.prepare.outputs.folder }}
+        key: download-proxy-${{ inputs.scope }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+    # pushed to ghcr.io by `download-proxy-cache.yml`, which may write packages
+    - name: Upload download cache
+      if: steps.check.outputs.target == 'ghcr'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: download-proxy-cache-${{ inputs.scope }}
+        path: ${{ steps.prepare.outputs.folder }}
+        retention-days: 1
+        # a rerun of the job uploads it again
+        overwrite: true
+        # the files are compressed downloads already
+        compression-level: 0
+        include-hidden-files: true

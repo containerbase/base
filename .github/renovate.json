@@ -15,7 +15,7 @@
   ],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
-  "baseBranchPatterns": ["$default", "zzz/don-not-delete"],
+  "baseBranchPatterns": ["$default", "maint/14.x", "/^dummy$/"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
@@ -97,6 +97,7 @@
         "julia",
         "kas",
         "maven",
+        "mercurial",
         "mise",
         "mono",
         "nix",
@@ -171,6 +172,7 @@
         "julia",
         "kas",
         "maven",
+        "mercurial",
         "mise",
         "mono",
         "nix",
@@ -332,7 +334,7 @@
     {
       "description": "Keep the old node LTS test stages on their major, only the newest LTS gets major updates",
       "matchDepNames": ["node"],
-      "matchFileNames": ["test/node/Dockerfile"],
+      "matchFileNames": ["test/node/Dockerfile", "test/node/Dockerfile.arm64"],
       "matchCurrentVersion": "/^(22|24)\\./",
       "matchUpdateTypes": ["major"],
       "enabled": false

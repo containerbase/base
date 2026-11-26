@@ -55,9 +55,11 @@ fi
   read_log | awk "${human}"'
     {
       cache = ""; bytes = 0
+      # the fields after `cache=` hold request headers, which may contain
+      # anything
       for (i = 1; i <= NF; i++) {
         if ($i ~ /^host=/) bytes = $(i - 1)
-        if ($i ~ /^cache=/) cache = substr($i, 7)
+        if ($i ~ /^cache=/) { cache = substr($i, 7); break }
       }
       # nginx logs `-` for requests without a cache status
       if (cache == "" || cache == "-") cache = "none"
@@ -77,6 +79,11 @@ fi
   else
     echo "Size on disk: no cache folder"
   fi
+  # the lookups, only kept for the job, see `cache_zone` in nginx.conf
+  if [ -d "${cache}-lookup" ]; then
+    echo ""
+    cache="${cache}-lookup" cache_size | awk "${human}"'{ printf "Lookups on disk: %s\n", human($1) }'
+  fi
 
   echo ""
   echo "### Download proxy hosts"
@@ -93,7 +100,7 @@ fi
       for (i = 1; i <= NF; i++) {
         if ($i ~ /^host=/) { host = substr($i, 6); bytes = $(i - 1) }
         if ($i ~ /^final=/) final = substr($i, 7)
-        if ($i ~ /^cache=/) cache = substr($i, 7)
+        if ($i ~ /^cache=/) { cache = substr($i, 7); break }
       }
       # requests without a host, like a readiness check of `/`
       if (host == "") next

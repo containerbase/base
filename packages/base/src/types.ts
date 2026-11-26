@@ -9,9 +9,18 @@ export type InstallToolType = 'gem' | 'npm' | 'pip';
 export type ToolType = 'gem' | 'npm' | 'pip' | 'dotnet';
 
 /**
- * The Ubuntu releases containerbase supports, by codename.
+ * The Ubuntu releases containerbase artifacts are built for, by codename, like
+ * the distro of a tool-versions file or a prebuild archive. It keeps releases
+ * which are no longer supported as host, as newer releases still use their
+ * prebuilds, see {@link HostDistroCode}.
  */
 export type DistroCode = 'jammy' | 'noble' | 'resolute';
+
+/**
+ * The Ubuntu releases containerbase runs on, by codename, a subset of
+ * {@link DistroCode}.
+ */
+export type HostDistroCode = 'noble' | 'resolute';
 
 /**
  * The CPU architectures containerbase supports.
@@ -49,5 +58,5 @@ export interface ToolMetadata {
    * the releases whose floor differs from `minVersion`, the floor on the
    * default distro.
    */
-  distroMinVersion?: Partial<Record<DistroCode, string>>;
+  distroMinVersion?: Partial<Record<HostDistroCode, string>>;
 }

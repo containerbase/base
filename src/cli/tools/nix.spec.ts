@@ -123,12 +123,16 @@ describe('cli/tools/nix', () => {
   test.each([
     { version: '2.10.3', valid: true },
     { version: '2.35.2', valid: true },
-    { version: '2.10.2', valid: false },
-    { version: '1.11.0', valid: false },
     { version: 'latest', valid: false },
   ])('validates $version', async ({ version, valid }) => {
     const { svc } = await toolContext(NixInstallService);
 
     await expect(svc.validate(version)).resolves.toBe(valid);
+  });
+
+  test('has the minimum 2.10.3', async () => {
+    const { svc } = await toolContext(NixInstallService);
+
+    expect(await svc.hostMinVersion()).toBe('2.10.3');
   });
 });

@@ -80,7 +80,7 @@ export class ListToolsCommand extends Command {
     logger.debug('Listing tools...');
     try {
       const container = createContainer();
-      // only reads, so the databases are never written
+      // only reads, so it also works on a read-only file system
       (await container.getAsync(DataService)).readOnly();
       const versionSvc = await container.getAsync(VersionService);
       const tools = await versionSvc.listInstalled();

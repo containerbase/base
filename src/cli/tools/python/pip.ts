@@ -6,7 +6,7 @@ import {
   partialVersionHelp,
 } from '../../services/tool-version-resolver.ts';
 import { logger } from '../../utils/index.ts';
-import { ResolverMap, getToolType } from '../index.ts';
+import { ResolverMap, getToolType, packageName } from '../index.ts';
 import { PypiJson } from './schema.ts';
 
 @injectable()
@@ -62,11 +62,14 @@ export abstract class PipVersionResolver extends ToolVersionResolver {
     return version;
   }
 
-  /** Fetches the pypi json metadata of the package. */
+  /**
+   * Fetches the pypi json metadata of the package, the tool without a `pip+`
+   * prefix, see `packageName`.
+   */
   protected async fetchMeta(tool: string): Promise<PypiJson> {
     return PypiJson.parse(
       await this.getJson(
-        `https://pypi.org/pypi/${normalizePythonDepName(tool)}/json`,
+        `https://pypi.org/pypi/${normalizePythonDepName(packageName(tool))}/json`,
       ),
     );
   }

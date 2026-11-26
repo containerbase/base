@@ -1,19 +1,18 @@
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../install-tool/base-install.service.ts';
-import { semverGte } from '../utils/index.ts';
-
-/**
- * Nix 2.10.0 to 2.10.2 use an auto-chroot store although `NIX_STORE_DIR` and
- * `NIX_STATE_DIR` are set (NixOS/nix#6732), older versions are untested.
- */
-const minVersion = '2.10.3';
 
 @injectable()
 @injectFromHierarchy()
 export class NixInstallService extends BaseInstallService {
   readonly name = 'nix';
-  override readonly minVersion = minVersion;
+
+  /**
+   * Nix 2.10.0 to 2.10.2 use an auto-chroot store although `NIX_STORE_DIR`
+   * and `NIX_STATE_DIR` are set (NixOS/nix#6732), older versions are
+   * untested.
+   */
+  override readonly minVersion = '2.10.3';
 
   /** The architecture name used by the nix prebuilds. */
   private get ghArch(): string {
@@ -64,10 +63,5 @@ export class NixInstallService extends BaseInstallService {
   /** Checks that `nix --version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn(this.name, ['--version']);
-  }
-
-  /** Accepts semver versions from 2.10.3. */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, minVersion);
   }
 }

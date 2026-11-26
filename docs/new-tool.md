@@ -43,7 +43,7 @@ Adding a tool of this type is straightforward, and does not require any addition
 
 Files to change:
 
-1. [`src/cli/tools/index.ts`](../src/cli/tools/index.ts) - add the tool to `ResolverMap` with its type, so `install-tool <name>` is mapped to `install-pip` / `install-npm` / `install-gem`:
+1. [`src/cli/tools/index.ts`](../src/cli/tools/index.ts) - add the tool to `ResolverMap` with its type, so `install-tool <name>` installs it with pip / npm / gem under its plain name, eg. `kas`. `install-pip kas` installs the same package as `pip+kas` instead, with its own install, see [`install-pip`](./tools.md#install-pip-command):
 
    ```ts
    export const ResolverMap: Record<string, InstallToolType | undefined> = {
@@ -163,7 +163,7 @@ Things worth knowing:
 - Pick the file with `this.downloadNamedToolFile(version, name)` when the data lists several per arch, like aube's gnu and musl builds, else with `this.downloadToolFile(version)`.
   Both return `undefined` without a data file for the host: throw then, don't fall back to an upstream download.
 - Set `minVersion` to the oldest release the install service supports, like the first stable release with Linux files for both architectures and a checksum.
-  `pnpm tools` publishes it in [`packages/base`](../packages/base/), and tool-versions leaves out older releases.
+  `pnpm tools` publishes it in [`packages/base`](../packages/base/), tool-versions leaves out older releases, and installing an older version fails, so don't check it again in `validate`.
 - Follow the [tool installer best practices](./tool-installer-best-practices.md) for checksums, folders and shared helpers.
 - `this.shellwrapper` writes the wrapper into the folder of the version, so `install()` must put everything the tool needs below `createVersionedToolPath()`.
   Containerbase installs a version again, when its folder is gone, so `isInstalled()` has to find the files: it checks the versioned tool path by default, override it when the tool installs elsewhere.

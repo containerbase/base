@@ -73,7 +73,16 @@ class RootOnlyInstallService extends TestInstallService {
   override readonly needsRoot = true;
 }
 
-/** a tool which is installed system wide, like `git` */
+/** a tool with a minimum supported version */
+@injectable()
+@injectFromHierarchy()
+class MinVersionInstallService extends TestInstallService {
+  override readonly name = 'min-version';
+
+  override readonly minVersion = '2.0.0';
+}
+
+/** a tool which can't be uninstalled, like `git` */
 @injectable()
 @injectFromHierarchy()
 class NoUninstallInstallService extends TestInstallService {
@@ -250,12 +259,26 @@ class JqInstallService extends TestInstallService {
   }
 }
 
-/** `git`, which apt installs, so there is nothing to restore */
+/**
+ * `git`, which only needs root for the files outside of its version folder,
+ * so a restore runs as the user too
+ */
 @injectable()
 @injectFromHierarchy()
 class GitInstallService extends TestInstallService {
   override readonly name = 'git';
+  override readonly needsRoot = true;
   override readonly canUninstall = false;
+
+  /** Restores as the user. */
+  override get restoreNeedsRoot(): boolean {
+    return false;
+  }
+
+  /** Creates the versioned tool path. */
+  override async install(version: string): Promise<void> {
+    await this.pathSvc.createVersionedToolPath(this.name, version);
+  }
 }
 
 /** a npm package, which is listed with its type */
@@ -313,6 +336,7 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(INSTALL_TOOL_TOKEN).to(GitInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(NpmTypedInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(DotnetTypedInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(MinVersionInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -383,6 +407,39 @@ describe('cli/install-tool/install-tool.service', () => {
         { tool: 'bun', version: 'not-a-version' },
         'tool version not supported',
       );
+    });
+
+    test.each(['1.9.9', '2.0.0-rc.1'])(
+      'rejects %s below the minimum',
+      async (version) => {
+        const toolInstall = vi.spyOn(
+          MinVersionInstallService.prototype,
+          'install',
+        );
+        // a tool which would be prepared and initialized first
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsPrepare',
+        ).mockReturnValue(true);
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsInitialize',
+        ).mockReturnValue(true);
+
+        expect(await install.install('min-version', version)).toBe(1);
+
+        expect(prepareTools).not.toHaveBeenCalled();
+        expect(initializeTools).not.toHaveBeenCalled();
+        expect(toolInstall).not.toHaveBeenCalled();
+        expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+          { tool: 'min-version', version, minVersion: '2.0.0' },
+          `min-version ${version} is older than the minimum supported version 2.0.0`,
+        );
+      },
+    );
+
+    test('installs the minimum', async () => {
+      expect(await install.install('min-version', '2.0.0')).toBeUndefined();
     });
 
     test('cleans up the tool on failure', async () => {
@@ -676,27 +733,20 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(childSvc).not.toHaveBeenCalled();
     });
 
-    test.each(['no-uninstall', 'shell-tool'])(
-      'keeps a recorded version of %s, which has no files to check',
-      async (tool) => {
-        const installSpy = vi.spyOn(
-          tool === 'shell-tool'
-            ? ShellInstallService.prototype
-            : NoUninstallInstallService.prototype,
-          'install',
-        );
-        expect(await install.install(tool, '2.0.0')).toBeUndefined();
-        installSpy.mockClear();
+    test('keeps a recorded version of a v2 shell tool, which has no files to check', async () => {
+      const tool = 'shell-tool';
+      const installSpy = vi.spyOn(ShellInstallService.prototype, 'install');
+      expect(await install.install(tool, '2.0.0')).toBeUndefined();
+      installSpy.mockClear();
 
-        expect(await install.install(tool, '2.0.0')).toBeUndefined();
+      expect(await install.install(tool, '2.0.0')).toBeUndefined();
 
-        expect(logger.info).toHaveBeenCalledWith(
-          { tool },
-          'tool already installed',
-        );
-        expect(installSpy).not.toHaveBeenCalled();
-      },
-    );
+      expect(logger.info).toHaveBeenCalledWith(
+        { tool },
+        'tool already installed',
+      );
+      expect(installSpy).not.toHaveBeenCalled();
+    });
 
     test('sets the link context of the version', async () => {
       const spy = vi.spyOn(LinkToolService.prototype, 'setContext');
@@ -1338,12 +1388,13 @@ describe('cli/install-tool/install-tool.service', () => {
       ).toHaveLength(1);
     });
 
-    test('restores jq at once, and git has nothing to restore', async () => {
+    test('restores jq at once, git on its first call as the user', async () => {
       const jq = vi.spyOn(JqInstallService.prototype, 'install');
       const git = vi.spyOn(GitInstallService.prototype, 'install');
       listOf(
         { kind: 'i', type: 'tool', tool: 'git', version: '2.0.0' },
         { kind: 'c', alias: 'git', tool: 'git', version: '2.0.0' },
+        { kind: 'l', command: 'git', tool: 'git', version: '2.0.0' },
         { kind: 'i', type: 'tool', tool: 'jq', version: '1.0.0' },
         { kind: 'c', alias: 'jq', tool: 'jq', version: '1.0.0' },
         { kind: 'l', command: 'jq', tool: 'jq', version: '1.0.0' },
@@ -1354,6 +1405,11 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(jq).toHaveBeenCalledExactlyOnceWith('1.0.0');
       expect(git).not.toHaveBeenCalled();
       expect(await pathExists(linkPath('jq'), 'file')).toBe(true);
+
+      // the shim of git installs it, which needs no root
+      expect(await install.ensure('git')).toBeUndefined();
+
+      expect(git).toHaveBeenCalledExactlyOnceWith('2.0.0');
     });
 
     test('only warns when jq cannot be restored', async () => {

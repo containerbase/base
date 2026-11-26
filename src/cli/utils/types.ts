@@ -21,8 +21,11 @@ export type CliMode = (typeof cliModes)[number];
 
 export type Arch = 'arm64' | 'amd64';
 
-/** The Ubuntu releases containerbase supports. */
-export type DistroCode = 'jammy' | 'noble' | 'resolute';
+/**
+ * The Ubuntu releases containerbase runs on, see `HostDistroCode` of the base
+ * package. The artifact distros, like the one of a prebuild, can be older.
+ */
+export type HostDistroCode = 'noble' | 'resolute';
 
 export const installToolTypes = ['gem', 'npm', 'pip'] as const;
 

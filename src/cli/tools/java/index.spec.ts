@@ -278,9 +278,11 @@ describe('cli/tools/java/index', () => {
      * Creates the prepare service with the version resolvers bound, and
      * removes the cert store and the links of a previous prepare.
      */
-    async function prepareContext(
-      Svc: typeof JavaPrepareService,
-    ): Promise<{ svc: JavaPrepareService; pathSvc: PathService }> {
+    async function prepareContext(Svc: typeof JavaPrepareService): Promise<{
+      svc: JavaPrepareService;
+      pathSvc: PathService;
+      envSvc: EnvService;
+    }> {
       const child = await testContainer();
       bindVersionResolvers(child);
       child.bind(Svc).toSelf();
@@ -290,7 +292,7 @@ describe('cli/tools/java/index', () => {
       for (const dir of ['.m2', '.gradle', '.android', '.android-sdk']) {
         await fs.rm(path.join(envSvc.userHome, dir), { force: true });
       }
-      return { svc: await child.getAsync(Svc), pathSvc };
+      return { svc: await child.getAsync(Svc), pathSvc, envSvc };
     }
 
     /**
@@ -352,7 +354,9 @@ describe('cli/tools/java/index', () => {
     });
 
     test('prepare downloads the cert store from the tool-versions data', async () => {
-      const { svc, pathSvc } = await prepareContext(JavaJrePrepareService);
+      const { svc, pathSvc, envSvc } = await prepareContext(
+        JavaJrePrepareService,
+      );
       const name = 'OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.tar.gz';
       const data = mockJreData();
       const files = mockToolFiles([
@@ -379,6 +383,16 @@ describe('cli/tools/java/index', () => {
       });
       expect(await fs.readlink(path.join(pathSvc.sslPath, 'cacerts'))).toBe(
         path.join(pathSvc.varPath, 'cacerts'),
+      );
+      // the absolute sdk link of the containerbase user, not one in `~`, which
+      // resolves against another `HOME` the env keeps
+      const sdk = path.join(envSvc.userHome, '.android-sdk');
+      expect(path.isAbsolute(sdk)).toBe(true);
+      expect(await fs.readFile(pathSvc.envFile, 'utf8')).toContain(
+        `export ANDROID_HOME=\${ANDROID_HOME-${sdk}}\n`,
+      );
+      expect(await fs.readlink(sdk)).toBe(
+        path.join(pathSvc.cachePath, '.android-sdk'),
       );
 
       // the cert store is only set up once

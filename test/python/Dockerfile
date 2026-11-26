@@ -243,11 +243,14 @@ RUN install-pip checkov
 RUN install-pip copier
 RUN install-pip hashin
 RUN install-pip kas
+RUN install-pip mercurial
 RUN install-pip pdm
 RUN install-pip pip-tools
 RUN install-pip pipenv
 RUN install-pip poetry
 RUN install-pip uv
+
+RUN hg --version
 
 #--------------------------------------
 # test: shims
@@ -258,10 +261,10 @@ RUN install-pip hashin
 
 # the version folders of a pip package and of its python are installed again on the next call
 RUN set -ex; \
-  rm -rf /opt/containerbase/tools/hashin/* /opt/containerbase/tools/python/*; \
+  rm -rf /opt/containerbase/tools/pip+hashin/* /opt/containerbase/tools/python/*; \
   [[ ! -e /opt/containerbase/links/hashin ]]; \
   hashin --version; \
-  [[ -n "$(ls /opt/containerbase/tools/hashin)" ]]; \
+  [[ -n "$(ls /opt/containerbase/tools/pip+hashin)" ]]; \
   [[ -n "$(ls /opt/containerbase/tools/python)" ]]; \
   python --version
 

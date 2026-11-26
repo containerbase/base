@@ -33,6 +33,8 @@ export class JavaPrepareService extends BasePrepareService {
    * keeping any existing link, and sets up the shared cacerts from the
    * latest lts jre, once. The version is resolved like `install-tool java-jre`
    * resolves `latest`, its file only comes from the tool-versions data.
+   * `ANDROID_HOME` points to the android sdk link in the containerbase user
+   * home, also for another `HOME`.
    *
    * @throws when no jre version resolves or the data has no file of it for
    * the host
@@ -96,7 +98,11 @@ export class JavaPrepareService extends BasePrepareService {
     // the initialize may have linked the cacerts of the image already
     await this.pathSvc.createSymlink(varCerts, cacerts);
 
-    await this.pathSvc.exportEnv({ ANDROID_HOME: '~/.android-sdk' });
+    // the link only exists in the containerbase user home, not in another
+    // HOME the env keeps
+    await this.pathSvc.exportEnv({
+      ANDROID_HOME: path.join(this.envSvc.userHome, '.android-sdk'),
+    });
 
     // cleanup will be done by caller
   }
@@ -174,7 +180,7 @@ export class JavaInstallService extends BaseInstallService {
    * @throws when neither has a package for the version
    */
   override async install(version: string): Promise<void> {
-    // TODO: drop the adoptium fallback in the next major (#7962)
+    // TODO: drop the adoptium fallback in a following major (#7962)
     const file =
       (await this.downloadToolFile(version)) ??
       (await this.downloadAdoptium(version));

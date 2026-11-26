@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # Used for tests
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 #--------------------------------------
 # Image: base
@@ -322,7 +322,8 @@ RUN install-tool android-sdk-cmdline-tools
 
 USER 12021
 
-# Do no install as root, `/root/.{android,android-sdk}` folders will be removed on docker build
+# install as the user, `ANDROID_HOME` is the user's `.android-sdk`, also for root,
+# but root's `/root/.android` folder is removed on docker build
 RUN set -ex; \
   yes | sdkmanager --licenses; \
   sdkmanager "platforms;android-35"; \

@@ -7,7 +7,7 @@ import { PrebuildInstallService } from '../utils/prebuild.ts';
 import { pipIndexEnv } from './utils.ts';
 
 /** The ubuntu releases python can be installed on. */
-const supportedDistros = ['jammy', 'noble', 'resolute'];
+const supportedDistros = ['noble', 'resolute'];
 
 @injectable()
 @injectFromHierarchy()
@@ -25,7 +25,7 @@ export class PythonPrepareService extends BasePrepareService {
     const { versionCode } = await getDistro();
     if (!supportedDistros.includes(versionCode)) {
       throw new Error(
-        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'jammy', 'noble' or 'resolute'.`,
+        `Tool '${this.name}' not supported on: ${versionCode}! Please use ubuntu 'noble' or 'resolute'.`,
       );
     }
 

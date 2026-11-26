@@ -2,7 +2,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, Option } from 'clipanion';
 import prettyMilliseconds from 'pretty-ms';
 import { uninstallTool } from '../install-tool/index.ts';
-import { ResolverMap, getToolType } from '../tools/index.ts';
+import { ResolverMap, getToolType, packageKey } from '../tools/index.ts';
 import type { InstallToolType } from '../utils';
 import { MissingVersion } from '../utils/codes.ts';
 import { logger } from '../utils/index.ts';
@@ -42,7 +42,9 @@ export class UninstallToolCommand extends Command {
 
   /**
    * Uninstalls one version, or all versions with `--all`, and optionally the
-   * tools depending on it with `--recursive`.
+   * tools depending on it with `--recursive`. Packages of `uninstall-gem`,
+   * `uninstall-npm` and `uninstall-pip` are looked up as `<type>+<name>`, see
+   * `packageKey`.
    */
   override async execute(): Promise<number | void> {
     const start = Date.now();
@@ -55,7 +57,10 @@ export class UninstallToolCommand extends Command {
 
     let version = this.version;
 
-    const type = getToolType(ResolverMap, tool) ?? this.type;
+    // `uninstall-gem`, `uninstall-npm` and `uninstall-pip` only remove their
+    // own packages, see `packageKey`
+    const type = this.type ?? getToolType(ResolverMap, tool);
+    const key = this.type ? packageKey(this.type, tool) : tool;
 
     if (!isNonEmptyStringAndNotWhitespace(version) && !all) {
       logger.error(`No version found for ${tool}`);
@@ -70,7 +75,7 @@ export class UninstallToolCommand extends Command {
     );
     try {
       const res = await uninstallTool({
-        tool,
+        tool: key,
         version,
         dryRun,
         recursive,

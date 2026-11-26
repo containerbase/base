@@ -20,8 +20,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 #--------------------------------------
 # Image: base
@@ -88,6 +88,12 @@ RUN go env
 FROM base AS testc
 
 RUN prepare-tool golang
+
+# neither mercurial nor bzr is installed
+RUN set -ex; \
+  if command -v hg; then exit 1; fi; \
+  if command -v bzr; then exit 1; fi; \
+  true
 
 # emulate emtpy containerbase folders
 RUN set -ex; \

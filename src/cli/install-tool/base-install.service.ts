@@ -15,12 +15,13 @@ import {
   type ShellWrapperConfig,
   ToolFilesService,
 } from '../services/index.ts';
-import { NoInitTools, NoPrepareTools } from '../tools/index.ts';
+import { NoInitTools, NoPrepareTools, packageName } from '../tools/index.ts';
 import {
-  type DistroCode,
+  type HostDistroCode,
   type SpawnOptions,
   type SpawnResult,
   type ToolType,
+  getDistro,
   isValid,
   spawn,
 } from '../utils/index.ts';
@@ -61,15 +62,23 @@ export abstract class BaseInstallService {
 
   /**
    * Some tools can only be installed as root, so they are only available at
-   * image build time. Eg. git is installed via apt.
+   * image build time. Eg. git, which writes the system wide `/etc/gitconfig`.
    */
   readonly needsRoot: boolean = false;
 
   /**
-   * Tools which are not installed into a versioned tool path can't be
-   * uninstalled, eg. git is installed system wide via apt.
+   * Some tools can't be uninstalled, eg. git, which other tools depend on.
    */
   readonly canUninstall: boolean = true;
+
+  /**
+   * Whether installing the files of a version again, see
+   * `InstallToolService.restore`, eg. by a shim on a volume, needs root. By
+   * default the same as `needsRoot`.
+   */
+  get restoreNeedsRoot(): boolean {
+    return this.needsRoot;
+  }
 
   /**
    * The cache folders of the tool, relative to `PathService.cachePath`, eg.
@@ -96,13 +105,30 @@ export abstract class BaseInstallService {
    * floor differs from `minVersion`, the floor on the default distro,
    * published as `distroMinVersion` in the base package metadata.
    */
-  readonly distroMinVersion?: Partial<Record<DistroCode, string>>;
+  readonly distroMinVersion?: Partial<Record<HostDistroCode, string>>;
 
   /**
    * Whether the version is installed into a folder per parent tool version
    * below the versioned tool path, eg. a npm package per node version.
    */
   readonly parentScoped: boolean = false;
+
+  /**
+   * The oldest version supported on the host: the `distroMinVersion` of the
+   * host distro, else `minVersion`, `undefined` for a tool without a minimum.
+   * Installing an older version fails, see `InstallToolService.install`.
+   */
+  async hostMinVersion(): Promise<string | undefined> {
+    if (this.distroMinVersion) {
+      const floors: Partial<Record<string, string>> = this.distroMinVersion;
+      const { versionCode } = await getDistro();
+      const floor = floors[versionCode];
+      if (floor) {
+        return floor;
+      }
+    }
+    return this.minVersion;
+  }
 
   /** Downloads and installs the version into the versioned tool path. */
   abstract install(version: string): Promise<void>;
@@ -172,12 +198,28 @@ export abstract class BaseInstallService {
     return this.name;
   }
 
-  /** Removes the versioned tool path of the version. */
+  /**
+   * Removes the versioned tool path of the version. The tool path of a package
+   * migrated from an older version is a link to its old folder, see
+   * `linkPackageFolders`, both are removed with the last version.
+   */
   async uninstall(version: string): Promise<void> {
     await fs.rm(this.pathSvc.versionedToolPath(this.name, version), {
       recursive: true,
       force: true,
     });
+    const toolPath = this.pathSvc.toolPath(this.name);
+    if (
+      this.name === packageName(this.name) ||
+      !(await fs.lstat(toolPath).catch(() => null))?.isSymbolicLink()
+    ) {
+      return;
+    }
+    const folder = await fs.realpath(toolPath);
+    if ((await fs.readdir(folder)).length === 0) {
+      await fs.rmdir(folder);
+      await fs.rm(toolPath);
+    }
   }
 
   /** Whether the version can be installed, by default any semver version. */

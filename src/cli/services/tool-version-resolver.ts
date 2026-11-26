@@ -1,6 +1,7 @@
 import merge from 'deepmerge';
 import type { OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from 'got';
 import { inject, injectable } from 'inversify';
+import { compareSegments } from '../utils/versions.ts';
 import { EnvService } from './env.service.ts';
 import { HttpService, lookupOptions } from './http.service.ts';
 
@@ -24,28 +25,6 @@ export const partialVersionHelp =
  */
 export function isPartialVersion(version: string): boolean {
   return /^\d+(\.\d+)?$/.test(version);
-}
-
-/**
- * Compares two versions segment by segment, a missing segment counts as `0`,
- * so `4.9` equals `4.9.0`. Segments are compared numerically, a non-numeric
- * one is compared as text, with the digits in it compared as numbers.
- * @returns a negative number if `a` is older, a positive one if it is newer,
- * else `0`
- */
-function compareSegments(a: string, b: string): number {
-  const left = a.split('.');
-  const right = b.split('.');
-  const length = Math.max(left.length, right.length);
-  for (let i = 0; i < length; i++) {
-    const diff = (left[i] ?? '0').localeCompare(right[i] ?? '0', 'en', {
-      numeric: true,
-    });
-    if (diff !== 0) {
-      return diff;
-    }
-  }
-  return 0;
 }
 
 /**

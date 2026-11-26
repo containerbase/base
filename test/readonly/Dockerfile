@@ -23,8 +23,8 @@ RUN install-tool node 26.13.1
 RUN install-tool flux v2.10.1
 
 # tools the volume tests install again on first use, jq at once
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 # renovate: datasource=github-releases packageName=jqlang/jq
 RUN install-tool jq 1.8.2

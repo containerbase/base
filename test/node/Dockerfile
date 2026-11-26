@@ -99,7 +99,7 @@ RUN install-tool yarn 3.8.1
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
 RUN install-tool yarn 4.18.1
 
-# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN_VERSION=6.0.0-rc.19
 
 RUN install-tool yarn "${YARN_VERSION}"
@@ -216,9 +216,19 @@ RUN set -ex; \
 
 RUN set -ex; cd test/a; npm i
 
-# renovate: datasource=npm
-RUN install-npm del-cli 8.0.1
+# renovate: datasource=npm depName=del-cli
+ARG DEL_CLI_VERSION=8.0.1
+RUN install-npm del-cli "${DEL_CLI_VERSION}"
 RUN del -d test/a/**
+
+# the package is recorded and installed with its type
+RUN set -ex; \
+  containerbase-cli list tools | grep -E "^npm\+del-cli +${DEL_CLI_VERSION}( |$)"; \
+  [ -d "/opt/containerbase/tools/npm+del-cli/${DEL_CLI_VERSION}" ]; \
+  uninstall-npm del-cli "${DEL_CLI_VERSION}"; \
+  [ ! -e "/opt/containerbase/tools/npm+del-cli/${DEL_CLI_VERSION}" ]; \
+  if command -v del; then exit 1; fi; \
+  true
 
 #--------------------------------------
 # test: node partial version
@@ -657,7 +667,10 @@ RUN set -ex; \
   grep -q '^renovate ' /tmp/tools-before.txt; \
   containerbase-cli list tools --json --out /tmp/tools-before.json; \
   cat /tmp/tools-before.json; \
-  grep -q '"name":"del-cli"' /tmp/tools-before.json; \
+  grep -q '"name":"npm+del-cli"' /tmp/tools-before.json; \
+  grep -q '"name":"npm+@microsoft/rush"' /tmp/tools-before.json; \
+  [ -d /opt/containerbase/tools/npm+del-cli ]; \
+  [ -d /opt/containerbase/tools/npm+@microsoft__rush ]; \
   uninstall-tool node -a -r; \
   ls -la /usr/local/bin/;\
   if [ -n "$(ls -A /usr/local/bin/)" ]; then echo "tools not uninstalled" >&2; exit 1; fi;\
@@ -910,7 +923,7 @@ RUN set -ex; \
   yarn global add semver@7.3.2; \
   [[ "$(command -v semver)" == /usr/local/bin/semver ]]
 
-# renovate: datasource=npm packageName=@yarnpkg/cli-dist
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/cli-dist
 ARG YARN_VERSION=4.18.1
 RUN install-tool yarn "${YARN_VERSION}"
 
@@ -927,7 +940,7 @@ RUN set -ex; \
   [[ -n "$(ls -A /tmp/containerbase/cache/.yarn/berry/cache)" ]]; \
   yarn --version | grep "^${YARN_VERSION}$"
 
-# renovate: datasource=npm packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN6_VERSION=6.0.0-rc.19
 RUN install-tool yarn "${YARN6_VERSION}"
 
@@ -962,7 +975,7 @@ FROM build AS test-vp
 USER root
 
 # pin the node vp's setup downloads, it uses the latest lts otherwise
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG VP_SETUP_NODE_VERSION=24.22.1
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
@@ -989,12 +1002,12 @@ RUN prepare-tool node
 USER 12021
 
 # old LTS, no major updates (see .github/renovate.json)
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG NODE22_VERSION=22.23.5
 RUN install-tool node "${NODE22_VERSION}"
 
 # old LTS, no major updates (see .github/renovate.json)
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
 ARG NODE24_VERSION=24.22.3
 RUN install-tool node "${NODE24_VERSION}"
 
@@ -1076,6 +1089,43 @@ RUN set -ex; \
   [[ "$(yarn --version)" == "${YARN_VERSION}" ]]
 
 #--------------------------------------
+# test: migrate a package of containerbase v14
+#--------------------------------------
+# a v14 release, which records packages in its nedb databases without their
+# type, no renovate updates
+FROM ghcr.io/containerbase/base:14.67.2 AS test-migrate
+
+ARG APT_HTTP_PROXY
+ARG CONTAINERBASE_CDN
+ARG CONTAINERBASE_CDN_NPM
+ARG CONTAINERBASE_DEBUG
+ARG CONTAINERBASE_LOG_LEVEL
+
+# frozen like the base image, no renovate updates
+RUN install-tool node 24.22.3
+RUN install-npm del-cli 8.0.1
+
+ARG TARGETARCH
+COPY dist/docker/ /
+COPY dist/cli/containerbase-cli-${TARGETARCH} /usr/local/containerbase/bin/containerbase-cli
+
+# the first run migrates the databases, the folder stays and the new name
+# links to it, the v14 wrapper keeps working
+RUN set -ex; \
+  touch /.dummy; \
+  containerbase-cli list tools | grep -E '^npm\+del-cli +8\.0\.1'; \
+  [ -L /opt/containerbase/tools/npm+del-cli ]; \
+  [ -d /opt/containerbase/tools/del-cli/8.0.1 ]; \
+  del --version; \
+  [ -f /opt/containerbase/versions/npm+del-cli ]; \
+  uninstall-npm del-cli 8.0.1; \
+  [ ! -e /opt/containerbase/tools/npm+del-cli ]; \
+  [ ! -e /opt/containerbase/tools/del-cli ]; \
+  [ ! -e /opt/containerbase/versions/npm+del-cli ]; \
+  [ ! -e /usr/local/bin/del ]; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
@@ -1101,6 +1151,7 @@ COPY --from=test-tmp-dir /.dummy /.dummy
 COPY --from=test-cleanup /.dummy /.dummy
 COPY --from=test-vp /.dummy /.dummy
 COPY --from=test-shims /.dummy /.dummy
+COPY --from=test-migrate /.dummy /.dummy
 
 COPY --from=test-v24 /.dummy /.dummy
 COPY --from=test-v22 /.dummy /.dummy

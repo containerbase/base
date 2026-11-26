@@ -12,16 +12,20 @@ env:
   APT_HTTP_PROXY: http://host.docker.internal:8000
   HUSKY: 0
 
-permissions:
-  contents: read
+# no workflow `permissions`: every job sets its own, only `base` gets the
+# caller's ones, see there
 
 jobs:
   setup:
     runs-on: ubuntu-slim
     timeout-minutes: 15
+    permissions:
+      contents: read
 
     outputs:
-      uid: ${{ steps.init.outputs.uid }}
+      handoff-registry: ${{ steps.init.outputs.handoff-registry }}
+      handoff-from: ${{ steps.init.outputs.handoff-from }}
+      handoff-to: ${{ steps.init.outputs.handoff-to }}
       skip-build: ${{ steps.changes.outputs.skip-build }}
       lang-matrix: ${{ steps.matrix.outputs.lang-matrix }}
       run-lang: ${{ steps.matrix.outputs.run-lang }}
@@ -30,19 +34,51 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
         with:
           save-cache: true
 
+      # the `base` job hands its image cache to the `lang` jobs of the same run.
+      # Pull requests from this repository send it through ghcr.io, as the GHA
+      # cache is too small for one entry per run and arch. Only `build-pr.yml`
+      # grants `packages: write` for that: fork pull requests get a read-only
+      # token, and fork code also runs in the merge queue, so `merge_group` and
+      # pushes keep using the GHA cache. The `-<arch>` suffix is appended by the
+      # jobs.
+      # A failed export (`ignore-error`), like an outage of the cache store, only
+      # makes the `lang` jobs rebuild the base image from the `main` cache.
+      # containerbase/docker-build-cache deletes the `<uuid>-<arch>` tags after a
+      # day, keep its cleanup in sync when changing the tag format.
       - name: ⚙️ Init
         id: init
-        run: echo "uid=$(uuidgen)" >> "${GITHUB_OUTPUT}"
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          # `uuidgen` is missing on ubuntu-slim
+          uid="$(cat /proc/sys/kernel/random/uuid)"
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REPO}" == "${GITHUB_REPOSITORY}" ]]; then
+            ref="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/docker-build-cache:${uid}"
+            {
+              echo "handoff-registry=true"
+              echo "handoff-from=type=registry,ref=${ref}"
+              echo "handoff-to=type=registry,mode=max,image-manifest=true,oci-mediatypes=true,ignore-error=true,ref=${ref}"
+            } >> "${GITHUB_OUTPUT}"
+          else
+            {
+              echo "handoff-registry=false"
+              echo "handoff-from=type=gha,scope=${uid}"
+              echo "handoff-to=type=gha,mode=max,ignore-error=true,scope=${uid}"
+            } >> "${GITHUB_OUTPUT}"
+          fi
 
       # pull requests and merge queue groups which only change files that feed
       # neither the images nor the bats tests skip the build and docker tests:
       # docs, the dev container (it has its own workflow), editor and repo
       # settings, and lint and vitest configs (those jobs still run); pushes
-      # always run everything, as they release
+      # always run everything, as they release. The paths are extended regular
+      # expressions in `.github/build-skip-paths`, one per line, so adding one
+      # doesn't change this workflow and needs no full run itself. They are read
+      # from the base commit, so a pull request can't skip its own build
       - name: ⚙️ Check for changes that don't need the build
         id: changes
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
@@ -51,33 +87,23 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           git diff --no-renames --name-only "${BASE_SHA}" HEAD > "${RUNNER_TEMP}/changed-files"
-          if grep -vE \
-            -e '\.md$' \
-            -e '^docs/' \
-            -e '^\.devcontainer/' \
-            -e '^\.github/workflows/devcontainer\.yml$' \
-            -e '^\.github/renovate\.json$' \
-            -e '^\.github/ISSUE_TEMPLATE/' \
-            -e '^\.vscode/' \
-            -e '^\.editorconfig$' \
-            -e '^\.husky/' \
-            -e '^\.lintstagedrc\.json$' \
-            -e '^\.gitignore$' \
-            -e '^LICENSE$' \
-            -e '^\.oxlintrc\.json$' \
-            -e '^\.oxfmtrc\.json$' \
-            -e '^\.markdownlint-cli2\.jsonc$' \
-            -e '^\.github/zizmor\.yml$' \
-            -e '^tools/(audit-sarif|lint-docs|lint-versions)\.ts$' \
-            -e '^\.github/workflows/(pnpm-audit|trivy)\.yml$' \
-            -e '^vitest\.config\.ts$' \
-            -e '^__mocks__/' \
-            -e '^codecov\.yml$' \
-            "${RUNNER_TEMP}/changed-files"; then
+          skip_paths="${RUNNER_TEMP}/build-skip-paths"
+          if ! git show "${BASE_SHA}:.github/build-skip-paths" > "${skip_paths}"; then
+            echo "::warning::The base has no .github/build-skip-paths, running the full build"
             echo "skip-build=false" >> "${GITHUB_OUTPUT}"
-          else
-            echo "skip-build=true" >> "${GITHUB_OUTPUT}"
+            exit 0
           fi
+          # 0: some file needs the build, 1: none does, else an invalid pattern
+          status=0
+          grep -vE -f "${skip_paths}" "${RUNNER_TEMP}/changed-files" || status=$?
+          case "${status}" in
+            0) echo "skip-build=false" >> "${GITHUB_OUTPUT}" ;;
+            1) echo "skip-build=true" >> "${GITHUB_OUTPUT}" ;;
+            *)
+              echo "::error::Invalid .github/build-skip-paths in the base"
+              exit 1
+              ;;
+          esac
 
       # the `lang` matrix has an entry for each `test/<lang>/Dockerfile`
       # (x86_64) and `test/<lang>/Dockerfile.arm64` (aarch64). Pull requests
@@ -152,7 +178,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
 
       - name: lint
         run: |
@@ -201,10 +227,12 @@ jobs:
     # skipped for docs or dev container only pull requests, like the build
     if: needs.setup.outputs.skip-build != 'true'
     timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
 
       - name: Install ubuntu dependencies
         run: |
@@ -226,7 +254,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
 
       # the schema tests validate the embedded tool-versions data, so a
       # breaking change of its format fails here
@@ -256,10 +284,12 @@ jobs:
     # `distro`, `base-arm64` and `lang` are skipped too
     if: needs.setup.outputs.skip-build != 'true'
     timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
 
       - name: build
         run: pnpm build
@@ -271,7 +301,7 @@ jobs:
           path: |
             dist/
 
-  base:
+  base: # zizmor: ignore[excessive-permissions] gets the caller's permissions on purpose, see below
     runs-on: ${{ matrix.arch.os }}
     name: base (${{ matrix.arch.name }})
     needs:
@@ -280,6 +310,11 @@ jobs:
     # one bake with up to 2 attempts of 10 minutes (21 minutes with the retry
     # wait), plus the setup and the other steps
     timeout-minutes: 35
+    # no `permissions`, so it gets the caller's ones: `packages: write` for the
+    # handoff cache on ghcr.io is only granted by `build-pr.yml`, see `setup`.
+    # A job requesting it here would fail `build-push.yml`, which must not
+    # grant it. The other ones the callers grant (`checks`, `id-token`) are
+    # used by `lint` and `vitest`, keep the callers free of anything else.
 
     strategy:
       fail-fast: false
@@ -294,7 +329,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -309,12 +344,19 @@ jobs:
         run: |
           echo "OWNER=${OWNER,,}" >> "${GITHUB_ENV}"
 
+      # pushes the handoff cache for the `lang` jobs, see `setup`
+      - name: Login to ghcr.io
+        if: needs.setup.outputs.handoff-registry == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+
       - name: build base
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set build-docker.cache-to=type=gha,mode=max,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
-            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set build-docker.cache-to=${{ needs.setup.outputs.handoff-to }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=${{ needs.setup.outputs.handoff-from }}-${{ matrix.arch.tag }}
             build-docker
 
       - name: test read-only file system
@@ -333,12 +375,13 @@ jobs:
       - build
     # one bake with its retry, like `base`
     timeout-minutes: 35
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
       matrix:
         distro:
-          - jammy
           - noble
           - resolute
 
@@ -347,7 +390,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -360,6 +403,8 @@ jobs:
 
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
+        with:
+          scope: distro-${{ matrix.distro }}
 
       - name: ⚙️  Init
         run: |
@@ -370,6 +415,11 @@ jobs:
         with:
           args: test-distro
 
+      - name: Save download proxy cache
+        uses: ./.github/actions/download-proxy-save
+        with:
+          scope: distro-${{ matrix.distro }}
+
       - name: Download proxy errors
         if: failure()
         run: .github/actions/download-proxy/errors.sh
@@ -378,7 +428,24 @@ jobs:
         if: always()
         run: .github/actions/download-proxy/stats.sh
 
-  # test old distros on arm64
+      - name: Collect download proxy logs
+        if: always()
+        run: .github/actions/download-proxy/collect.sh "${{ runner.temp }}/download-proxy"
+
+      # summed up over many runs, they show which downloads fail and how large
+      # the cache of each test is
+      - name: Upload download proxy logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: download-proxy-distro-${{ matrix.distro }}
+          path: ${{ runner.temp }}/download-proxy/
+          retention-days: 14
+          if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
+
+  # test the other distros on arm64
   base-arm64:
     runs-on: ubuntu-26.04-arm
     if: github.event.pull_request.draft != true && needs.setup.outputs.run-base-arm64 == 'true'
@@ -390,12 +457,13 @@ jobs:
       - build
     # one bake with its retry, like `base`
     timeout-minutes: 35
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
       matrix:
         distro:
-          - jammy
           - resolute
 
     env:
@@ -403,7 +471,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -436,6 +504,8 @@ jobs:
     # two bakes (base from the cache, then the tests) with their retry, 42
     # minutes at most, plus the setup and the other steps
     timeout-minutes: 60
+    permissions:
+      contents: read
 
     strategy:
       max-parallel: 10
@@ -449,7 +519,7 @@ jobs:
 
     steps:
       - name: ⚙️ Setup
-        uses: containerbase/internal-tools/setup@fee63dbf779bca6bd95975e8a841b3ac027511d0 # v5.4.16
+        uses: containerbase/internal-tools/setup@c550d0fcc136e1558a3531f7f5348cca37304913 # v5.4.19
         # fails fast when preparing the apt proxy hangs
         timeout-minutes: 10
         with:
@@ -466,24 +536,31 @@ jobs:
           echo "BASE_IMAGE=containerbase/test" >> "${GITHUB_ENV}"
 
       - name: build base
-        # rebuilds the base image from the GHA cache the `base` job filled,
+        # rebuilds the base image from the handoff cache the `base` job filled,
         # loading it into the local image store as `containerbase/test` for
         # the test build below
         uses: ./.github/actions/bake
         with:
           args: >-
-            --set settings.cache-from+=type=gha,scope=${{ needs.setup.outputs.uid }}-${{ matrix.arch.tag }}
+            --set settings.cache-from+=${{ needs.setup.outputs.handoff-from }}-${{ matrix.arch.tag }}
             build-docker
 
       # only after the base image, so it builds with the same args as in the
-      # `base` job and is taken from the GHA cache
+      # `base` job and is taken from the handoff cache
       - name: ⚙️ Download proxy
         uses: ./.github/actions/download-proxy
+        with:
+          scope: ${{ matrix.lang }}-${{ matrix.arch.name }}
 
       - name: test distro
         uses: ./.github/actions/bake
         with:
           args: test-${{ matrix.arch.name }}
+
+      - name: Save download proxy cache
+        uses: ./.github/actions/download-proxy-save
+        with:
+          scope: ${{ matrix.lang }}-${{ matrix.arch.name }}
 
       - name: Download proxy errors
         if: failure()
@@ -492,6 +569,23 @@ jobs:
       - name: Download proxy cache stats
         if: always()
         run: .github/actions/download-proxy/stats.sh
+
+      - name: Collect download proxy logs
+        if: always()
+        run: .github/actions/download-proxy/collect.sh "${{ runner.temp }}/download-proxy"
+
+      # summed up over many runs, they show which downloads fail and how large
+      # the cache of each test is
+      - name: Upload download proxy logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: download-proxy-${{ matrix.lang }}-${{ matrix.arch.name }}
+          path: ${{ runner.temp }}/download-proxy/
+          retention-days: 14
+          if-no-files-found: ignore
+          # a rerun of the job uploads them again
+          overwrite: true
 
   # Catch-all required check for the test matrix, `base` is listed too because
   # `lang` is skipped when it fails
@@ -503,6 +597,8 @@ jobs:
       - lang
     runs-on: ubuntu-slim
     timeout-minutes: 1
+    permissions:
+      contents: read
     if: always()
     steps:
       - name: Fail for failed or cancelled tests

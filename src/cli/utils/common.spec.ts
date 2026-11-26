@@ -5,6 +5,7 @@ import {
   getDistro,
   isDockerBuild,
   isInside,
+  isMissing,
   parseBinaryName,
   pathExists,
   reset,
@@ -34,18 +35,19 @@ vi.mock('del');
 describe('cli/utils/common', () => {
   beforeEach(() => {
     reset();
-    fsMocks.readFile.mockResolvedValueOnce(`PRETTY_NAME="Ubuntu 22.04.2 LTS"
+    fsMocks.readFile.mockResolvedValueOnce(`PRETTY_NAME="Ubuntu 24.04.3 LTS"
 NAME="Ubuntu"
-VERSION_ID="22.04"
-VERSION="22.04.2 LTS (Jammy Jellyfish)"
-VERSION_CODENAME=jammy
+VERSION_ID="24.04"
+VERSION="24.04.3 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
 ID=ubuntu
 ID_LIKE=debian
 HOME_URL="https://www.ubuntu.com/"
 SUPPORT_URL="https://help.ubuntu.com/"
 BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
 PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-UBUNTU_CODENAME=jammy`);
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo`);
   });
 
   describe('validateSystem', () => {
@@ -67,13 +69,29 @@ UBUNTU_CODENAME=jammy`);
         encoding: 'utf-8',
       });
     });
+
+    test('rejects jammy', async () => {
+      procMocks.exit.mockImplementation(() => {
+        throw new Error();
+      });
+      osMocks.platform.mockReturnValue('linux');
+      osMocks.arch.mockReturnValue('x64');
+      reset();
+      fsMocks.readFile.mockReset();
+      fsMocks.readFile.mockResolvedValueOnce(`NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION_CODENAME=jammy`);
+
+      await expect(validateSystem()).rejects.toThrow();
+      expect(procMocks.exit).toHaveBeenCalledWith(1);
+    });
   });
 
   test('reads distro', async () => {
     expect(await getDistro()).toEqual({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     reset();
     expect(await getDistro()).toEqual({
@@ -98,6 +116,23 @@ UBUNTU_CODENAME=jammy`);
     fsMocks.stat.mockResolvedValueOnce({ isSymbolicLink: () => true });
     expect(await pathExists('/etc/os-release', 'symlink')).toBe(true);
     expect(await pathExists('/etc/os-release', 'symlink')).toBe(false);
+  });
+
+  test('isMissing', async () => {
+    fsMocks.stat.mockResolvedValueOnce({});
+    expect(await isMissing('/etc/os-release')).toBe(false);
+
+    fsMocks.stat.mockRejectedValueOnce(
+      Object.assign(new Error('ENOENT: no such file'), { code: 'ENOENT' }),
+    );
+    expect(await isMissing('/etc/os-release')).toBe(true);
+
+    fsMocks.stat.mockRejectedValueOnce(
+      Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }),
+    );
+    await expect(isMissing('/etc/os-release')).rejects.toThrow(
+      'EACCES: permission denied',
+    );
   });
 
   test('parseBinaryName', () => {

@@ -10,7 +10,7 @@ import {
   semverMaxSatisfying,
   semverSatisfies,
 } from '../../utils/index.ts';
-import { ResolverMap, getToolType } from '../index.ts';
+import { ResolverMap, getToolType, packageName } from '../index.ts';
 import { yarnPackage } from './npm.ts';
 import {
   type NodeVersionMeta,
@@ -93,7 +93,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
    *   dist tag if it matches and is not deprecated, otherwise to the newest
    *   matching release which is not deprecated. Prereleases are skipped. When
    *   only deprecated releases match, the newest of them is used with a
-   *   warning, the next major fails then.
+   *   warning, a following major fails then.
    * - Any other version, like a full `X.Y.Z`, is returned unchanged.
    *
    * @throws if a partial version matches no release.
@@ -112,7 +112,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
         '*',
       );
       if (!active) {
-        // TODO: fail in the next major (#7962)
+        // TODO: fail in a following major (#7962)
         logger.warn(
           { tool: this.tool, latest },
           'the latest dist tag is deprecated and no other release is, it is used anyway',
@@ -140,7 +140,7 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
       );
       const deprecated = release ? null : semverMaxSatisfying(all, version);
       if (deprecated) {
-        // TODO: fail in the next major (#7962)
+        // TODO: fail in a following major (#7962)
         logger.warn(
           { tool: this.tool, version, resolved: deprecated },
           'only deprecated releases match, the newest of them is used',
@@ -162,11 +162,12 @@ export abstract class NpmVersionResolver extends ToolVersionResolver {
   }
 
   /**
-   * The npm package to look the releases up in, by default the tool itself.
+   * The npm package to look the releases up in, by default the tool without a
+   * `npm+` prefix, see `packageName` of the tools.
    * @param _version - the requested version, `undefined` or `latest` if none
    */
   protected packageName(_version: string | undefined): string {
-    return this.tool;
+    return packageName(this.tool);
   }
 
   /** Loads the abbreviated metadata of an npm package from the registry. */

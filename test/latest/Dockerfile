@@ -182,8 +182,8 @@ FROM base AS testc
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 USER 12021
 
@@ -417,6 +417,37 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: git and git-lfs
+#--------------------------------------
+FROM base AS test-git
+
+# renovate: datasource=github-releases depName=git packageName=containerbase/git-prebuild
+ARG GIT_VERSION=2.56.1
+RUN install-tool git "${GIT_VERSION}"
+
+# renovate: datasource=github-releases depName=git-lfs packageName=git-lfs/git-lfs
+ARG GIT_LFS_VERSION=v3.8.1
+RUN install-tool git-lfs "${GIT_LFS_VERSION}"
+
+USER 12021
+
+# git is a shim, its pointer links to the wrapper in the version folder
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  tool="/opt/containerbase/tools/git/${GIT_VERSION}"; \
+  readlink /opt/containerbase/links/git | grep -Fx "${tool}/.wrappers/git"; \
+  git --exec-path | grep -Fx "${tool}/libexec/git-core"; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git lfs version | grep -F "git-lfs/${GIT_LFS_VERSION#v} "; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
+
+#--------------------------------------
 # test: v1 and v2 shell tools of custom images
 #--------------------------------------
 FROM base AS test-legacy
@@ -449,10 +480,27 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: versions below the minimum are rejected
+#--------------------------------------
+FROM base AS test-min-version
+
+RUN touch /.dummy
+
+# bun's minimum is 0.5.3, no renovate updates
+RUN set -ex; \
+  if install-tool bun 0.5.2 > /min-version.log 2>&1; then cat /min-version.log; exit 1; fi; \
+  cat /min-version.log; \
+  grep -F 'bun 0.5.2 is older than the minimum supported version 0.5.3' /min-version.log; \
+  [ ! -e /opt/containerbase/tools/bun/0.5.2 ]; \
+  rm /min-version.log; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
+COPY --link --from=test-min-version /.dummy /.dummy
 COPY --link --from=testa /.dummy /.dummy
 COPY --link --from=testb-gitpod /.dummy /.dummy
 COPY --link --from=testc /.dummy /.dummy
@@ -461,4 +509,5 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-git /.dummy /.dummy
 COPY --link --from=test-legacy /.dummy /.dummy

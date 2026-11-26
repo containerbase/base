@@ -7,9 +7,8 @@ import { hashFile } from './utils.js';
 
 /** @typedef {import('semantic-release').PrepareContext} PrepareContext */
 /** @typedef {import('semantic-release').PublishContext} PublishContext */
-/** @typedef {import('semantic-release').SuccessContext} SuccessContext */
 
-/** Digest of the pushed images, set by `prepare`, tagged in `publish` and signed in `success`. */
+/** Digest of the pushed images, set by `prepare`, tagged and signed in `publish`. */
 let digest = '';
 
 /**
@@ -120,7 +119,7 @@ async function withRetries(logger, what, fn) {
 /**
  * Signs an image, retrying failed attempts. When all attempts fail it reports
  * a GitHub Actions error annotation instead of failing the release.
- * @param {SuccessContext['logger']} logger
+ * @param {PublishContext['logger']} logger
  * @param {string} image
  */
 async function sign(logger, image) {
@@ -216,8 +215,9 @@ export async function prepare(_config, context) {
 }
 
 /**
- * Points the release tags at the images `prepare` pushed, they are signed in
- * `success` after all plugins published.
+ * Points the release tags at the images `prepare` pushed and signs them. It
+ * runs before the GitHub release, so a failed GitHub release still leaves
+ * tagged and signed images, which the workflow attests.
  * @param {unknown} _config
  * @param {PublishContext} context
  */
@@ -279,19 +279,8 @@ export async function publish(_config, context) {
   if (process.env.GITHUB_OUTPUT) {
     await fs.appendFile(process.env.GITHUB_OUTPUT, `digest=${digest}\n`);
   }
-}
 
-/**
- * Signs the pushed images. A failed signing doesn't fail the release, it is
- * reported as a GitHub Actions error annotation instead.
- * @param {unknown} _config
- * @param {SuccessContext} context
- */
-export async function success(_config, { logger }) {
-  if (!digest) {
-    return;
-  }
-
+  // a failed signing doesn't fail the release, see `sign`
   for (const image of [
     `${process.env.OWNER}/${process.env.FILE}`,
     `ghcr.io/${process.env.OWNER}/${process.env.FILE}`,

@@ -28,6 +28,7 @@ import {
 import {
   cleanAptFiles,
   cleanTmpFiles,
+  isBelowVersion,
   isDockerBuild,
   listEntries,
   logger,
@@ -96,11 +97,13 @@ export class InstallToolService {
 
   /**
    * Runs the install lifecycle of a tool: prepare, initialize, validate,
-   * install, link and test. Before the install it installs the current parent
-   * version again when its files are missing, see `restoreMissingParent`.
-   * Afterwards the oldest files are evicted from the download cache when the
-   * disk is too full, see `CacheService.evict`. A failing eviction is only
-   * logged.
+   * install, link and test. A version older than the tool's minimum on the
+   * host, see `BaseInstallService.hostMinVersion`, fails before the tool is
+   * prepared, initialized or downloaded. Before the install it installs the
+   * current parent version again when its files are missing, see
+   * `restoreMissingParent`. Afterwards the oldest files are evicted from the
+   * download cache when the disk is too full, see `CacheService.evict`. A
+   * failing eviction is only logged.
    *
    * @returns an exit code when the tool could not be installed, which can also
    * be the one of the parent version which could not be installed again
@@ -154,6 +157,16 @@ export class InstallToolService {
           }
           logger.info({ tool, version }, 'tool version missing, installing');
           missing = true;
+        }
+
+        // before anything is prepared or downloaded for a rejected version
+        const minVersion = await toolSvc.hostMinVersion();
+        if (minVersion && isBelowVersion(version, minVersion)) {
+          logger.fatal(
+            { tool, version, minVersion },
+            `${tool} ${version} is older than the minimum supported version ${minVersion}`,
+          );
+          return 1;
         }
 
         if (toolSvc.needsPrepare() && !(await toolSvc.isPrepared())) {
@@ -276,11 +289,9 @@ export class InstallToolService {
 
       if (this.envSvc.isRoot) {
         logger.debug('cleaning root caches');
+        // the android sdk is below the containerbase user home, also for root
         await deleteAsync(
-          [
-            '/root/.{android,android-sdk,cache}',
-            '/root/.local/share/virtualenv',
-          ],
+          ['/root/.{android,cache}', '/root/.local/share/virtualenv'],
           {
             force: true,
             dryRun,
@@ -483,16 +494,14 @@ export class InstallToolService {
 
   /**
    * Whether a version recorded as installed is gone from the disk, eg. its
-   * folder was removed. Tools which can't be uninstalled, like git which apt
-   * installs, and the v2 shell tools are never missing, as their files don't
-   * have to be in the versioned tool path.
+   * folder was removed. The v2 shell tools are never missing, as their files
+   * don't have to be in the versioned tool path.
    */
   private async isMissing(
     toolSvc: BaseInstallService,
     version: string,
   ): Promise<boolean> {
     return (
-      toolSvc.canUninstall &&
       !(toolSvc instanceof V2ToolInstallService) &&
       !(await toolSvc.isInstalled(version))
     );
@@ -557,11 +566,10 @@ export class InstallToolService {
    * recorded last, and only the `c` lines make a version current. Nothing is
    * removed, and no tool is installed, the shims install a version on its
    * first call, see `ensure`. Only jq is restored at once, as the other tools
-   * and the shell utils need it early, git is installed by apt and never
-   * restored. The initialized markers in the temp folder are cleared, as they
-   * outlive the volume, so the init which follows runs every initialize step
-   * again. At last the list is copied to the volume, so the next init has
-   * nothing to do.
+   * and the shell utils need it early. The initialized markers in the temp
+   * folder are cleared, as they outlive the volume, so the init which follows
+   * runs every initialize step again. At last the list is copied to the
+   * volume, so the next init has nothing to do.
    */
   async setupVolume(): Promise<void> {
     await this.pathSvc.ensureBasePaths();
@@ -670,7 +678,7 @@ export class InstallToolService {
     version: string,
   ): Promise<number | void> {
     const tool = toolSvc.name;
-    if (toolSvc.needsRoot && !this.envSvc.isRoot) {
+    if (toolSvc.restoreNeedsRoot && !this.envSvc.isRoot) {
       logger.fatal({ tool }, 'tool must be installed as root');
       return NotRoot;
     }
