@@ -266,7 +266,7 @@ RUN test -f /tmp/containerbase/tool.init.d/jq
 RUN echo '{"a":1}' | jq -e '.a == 1'
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.2
+RUN install-tool kubectl v1.37.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
 RUN install-tool mise 2026.11.11
