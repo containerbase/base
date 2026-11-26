@@ -250,6 +250,19 @@
       "semanticCommitType": "build"
     },
     {
+      "description": "Release node updates as a fix, it's the node version of the cli",
+      "matchDepNames": ["node"],
+      "matchFileNames": [".node-version", "mise.toml", "tools/build.js"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Release node majors of the cli as a feature",
+      "matchDepNames": ["node"],
+      "matchFileNames": [".node-version", "mise.toml", "tools/build.js"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "feat"
+    },
+    {
       "description": "Use `build` semantic commit scope for lockfile maintenance.",
       "matchUpdateTypes": ["lockFileMaintenance"],
       "semanticCommitType": "build"
@@ -360,6 +373,14 @@
       "packageNameTemplate": "containerbase/tool-versions",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Update the node version of the cli together with the other node versions",
+      "managerFilePatterns": ["tools/build.js"],
+      "matchStrings": ["nodeVersion = '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
     }
   ]
 }
