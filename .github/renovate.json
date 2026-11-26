@@ -250,10 +250,10 @@
       "semanticCommitType": "build"
     },
     {
-      "description": "Release node updates as a fix, it's the node version of the cli",
+      "description": "Use `build` semantic commit scope for the node version of the cli, it releases a patch",
       "matchDepNames": ["node"],
       "matchFileNames": [".node-version", "mise.toml", "tools/build.js"],
-      "semanticCommitType": "fix"
+      "semanticCommitType": "build"
     },
     {
       "description": "Release node majors of the cli as a feature",
