@@ -165,17 +165,24 @@ target "build-arm64" {
   dockerfile = "./test/${TAG}/Dockerfile.arm64"
 }
 
+# pushes the release images by digest only, without tags, so a release that
+# fails later leaves no tag behind. `publish` of the semantic-release plugin
+# points the tags of `release-tags` at the digest.
 target "push" {
   inherits = ["settings"]
-  output   = ["type=registry"]
+  output   = ["type=image,\"name=ghcr.io/${OWNER}/${FILE},${OWNER}/${FILE}\",push-by-digest=true,name-canonical=true,push=true"]
   cache-to = [
     notequal("", CHANNEL) ? "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE}-${CHANNEL},mode=max,image-manifest=true,ignore-error=true" : "type=registry,ref=ghcr.io/${OWNER}/cache:${FILE},mode=max,image-manifest=true,ignore-error=true",
   ]
-  tags     = [
+}
+
+# the tags of a release, never built, read with `docker buildx bake --print`
+target "release-tags" {
+  tags = [
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
     notequal("", CHANNEL) ? "ghcr.io/${OWNER}/${FILE}:${CHANNEL}" : "ghcr.io/${OWNER}/${FILE}",
 
-     "${OWNER}/${FILE}:${TAG}",
+    "${OWNER}/${FILE}:${TAG}",
     notequal("", CHANNEL) ? "${OWNER}/${FILE}:${CHANNEL}" : "${OWNER}/${FILE}",
   ]
 }

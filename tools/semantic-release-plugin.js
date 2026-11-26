@@ -8,6 +8,9 @@ import { hashFile } from './utils.js';
 /** @typedef {import('semantic-release').PrepareContext} PrepareContext */
 /** @typedef {import('semantic-release').PublishContext} PublishContext */
 
+/** Digest of the pushed images, set by `prepare`, tagged and signed in `publish`. */
+let digest = '';
+
 /**
  * Creates an error without stack trace, semantic-release logs plain errors
  * with their whole stack and the command output is already in the log.
@@ -40,6 +43,41 @@ async function exec(file, args) {
   }
 }
 
+/**
+ * Runs a command and returns its output, throws when it fails. Its errors go
+ * straight to the log.
+ * @param {string} file
+ * @param {string[]} args
+ */
+async function output(file, args) {
+  const result = await execa(file, args, {
+    reject: false,
+    stdin: 'ignore',
+    stderr: 'inherit',
+  });
+  if (result.failed) {
+    throw releaseError(result.shortMessage);
+  }
+  return result.stdout;
+}
+
+/**
+ * Groups image references by repository, a reference without a tag is the
+ * `latest` tag.
+ * @param {string[]} tags
+ * @returns {Map<string, string[]>}
+ */
+function groupTags(tags) {
+  /** @type {Map<string, string[]>} */
+  const repos = new Map();
+  for (const tag of tags) {
+    const name = tag.slice(tag.lastIndexOf('/') + 1);
+    const repo = name.includes(':') ? tag.slice(0, tag.lastIndexOf(':')) : tag;
+    repos.set(repo, [...(repos.get(repo) ?? []), tag]);
+  }
+  return repos;
+}
+
 /** Platforms of the release images. */
 const platforms = '--set=settings.platform=linux/amd64,linux/arm64';
 
@@ -48,6 +86,35 @@ const signAttempts = 3;
 
 /** Delay between signing attempts in milliseconds. */
 const signDelay = 10_000;
+
+/** Attempts of a registry push or request, transient registry errors pass on a retry. */
+const registryAttempts = 3;
+
+/** Delay between registry attempts in milliseconds. */
+const registryDelay = 10_000;
+
+/**
+ * Runs `fn` until it doesn't throw, at most `registryAttempts` times, and
+ * throws the last error.
+ * @template T
+ * @param {PrepareContext['logger']} logger
+ * @param {string} what
+ * @param {() => Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+async function withRetries(logger, what, fn) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= registryAttempts) {
+        throw err;
+      }
+      logger.log(`${what} failed, retrying in ${registryDelay / 1000}s`);
+      await setTimeout(registryDelay);
+    }
+  }
+}
 
 /**
  * Signs an image, retrying failed attempts. When all attempts fail it reports
@@ -119,12 +186,38 @@ export async function prepare(_config, context) {
   await hashFile('./dist/cli/containerbase-cli-amd64', 'sha512');
   await hashFile('./dist/cli/containerbase-cli-arm64', 'sha512');
 
-  await exec('docker', ['buildx', 'bake', platforms, 'build']);
+  // pushes the images by digest only, `publish` tags them. A failed push
+  // fails the release before the git tag and the GitHub release exist.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'containerbase-bake-'));
+  const metadataFile = path.join(tmp, 'metadata.json');
+
+  logger.log('Pushing docker images by digest');
+  // a retry rebuilds from the builder cache and only pushes what's missing
+  await withRetries(logger, 'Pushing docker images', () =>
+    exec('docker', [
+      'buildx',
+      'bake',
+      platforms,
+      '--metadata-file',
+      metadataFile,
+      'push',
+    ]),
+  );
+
+  const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
+  digest = meta?.push?.['containerimage.digest'] ?? '';
+
+  if (!digest) {
+    logger.error(`Bake metadata:\n${JSON.stringify(meta, null, 2)}`);
+    throw releaseError('Missing image digest in the bake metadata');
+  }
+  logger.log(`Pushed docker images: ${digest}`);
 }
 
 /**
- * Pushes and signs the images. It runs before the GitHub release, so a failed
- * GitHub release still leaves signed images, which the workflow attests.
+ * Points the release tags at the images `prepare` pushed and signs them. It
+ * runs before the GitHub release, so a failed GitHub release still leaves
+ * tagged and signed images, which the workflow attests.
  * @param {unknown} _config
  * @param {PublishContext} context
  */
@@ -135,25 +228,51 @@ export async function publish(_config, context) {
   );
   setReleaseEnv(context);
 
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
-  const metadataFile = path.join(tmp, 'metadata.json');
-
-  logger.log('Pushing docker images');
-  await exec('docker', [
-    'buildx',
-    'bake',
-    platforms,
-    '--metadata-file',
-    metadataFile,
-    'push',
-  ]);
-
-  const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
-  const digest = meta?.push?.['containerimage.digest'];
-
   if (!digest) {
-    logger.error(`Bake metadata:\n${JSON.stringify(meta, null, 2)}`);
-    throw releaseError('Missing image digest in the bake metadata');
+    throw releaseError('Missing image digest, `prepare` pushes the images');
+  }
+
+  const print = JSON.parse(
+    await output('docker', ['buildx', 'bake', '--print', 'release-tags']),
+  );
+  /** @type {string[] | undefined} */
+  const tags = print?.target?.['release-tags']?.tags;
+  if (!tags?.length) {
+    throw releaseError('Missing tags in the `release-tags` bake target');
+  }
+
+  // only writes the manifests, the images are in each registry already, so a
+  // retry is safe
+  for (const [repo, repoTags] of groupTags(tags)) {
+    logger.log(`Tagging ${repo}@${digest}: ${repoTags.join(', ')}`);
+    await withRetries(logger, `Tagging ${repo}`, () =>
+      exec('docker', [
+        'buildx',
+        'imagetools',
+        'create',
+        ...repoTags.flatMap((tag) => ['--tag', tag]),
+        `${repo}@${digest}`,
+      ]),
+    );
+  }
+
+  // each tag must point at the pushed images
+  for (const tag of tags) {
+    await withRetries(logger, `Checking ${tag}`, async () => {
+      const tagDigest = (
+        await output('docker', [
+          'buildx',
+          'imagetools',
+          'inspect',
+          '--format',
+          '{{.Manifest.Digest}}',
+          tag,
+        ])
+      ).trim();
+      if (tagDigest !== digest) {
+        throw releaseError(`${tag} points at ${tagDigest}, expected ${digest}`);
+      }
+    });
   }
 
   // the workflow attests the images with this digest
