@@ -224,7 +224,7 @@ USER 1001
 RUN install-tool maven 3.5.4
 
 # renovate: datasource=github-releases packageName=containerbase/maven-prebuild versioning=maven
-RUN install-tool maven 3.10.1
+RUN install-tool maven 3.10.2
 
 RUN set -ex; \
   mkdir -p /tmp/mvn && cd /tmp/mvn; \
