@@ -100,7 +100,7 @@ RUN install-tool yarn 3.8.1
 RUN install-tool yarn 4.18.1
 
 # renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
-ARG YARN_VERSION=6.0.0-rc.19
+ARG YARN_VERSION=6.0.0-rc.23
 
 RUN install-tool yarn "${YARN_VERSION}"
 
@@ -941,7 +941,7 @@ RUN set -ex; \
   yarn --version | grep "^${YARN_VERSION}$"
 
 # renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
-ARG YARN6_VERSION=6.0.0-rc.19
+ARG YARN6_VERSION=6.0.0-rc.23
 RUN install-tool yarn "${YARN6_VERSION}"
 
 # yarn 6 keeps its global cache in `~/.yarn/zpm/cache`
