@@ -16,7 +16,7 @@
 ^\.markdownlint-cli2\.jsonc$
 ^\.github/zizmor\.yml$
 ^tools/(audit-sarif|lint-docs|lint-versions)\.ts$
-^\.github/workflows/(auto-pr|backport|backport-request|pnpm-audit|trivy)\.yml$
+^\.github/workflows/(backport|backport-request|pnpm-audit|trivy)\.yml$
 ^vitest\.config\.ts$
 ^__mocks__/
 ^codecov\.yml$
