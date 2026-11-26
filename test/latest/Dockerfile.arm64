@@ -249,7 +249,7 @@ RUN install-tool buf v1.75.0
 RUN install-tool kubectl v1.37.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.11
+RUN install-tool mise 2026.11.14
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.25.2
