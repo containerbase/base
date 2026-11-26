@@ -976,7 +976,7 @@ USER root
 
 # pin the node vp's setup downloads, it uses the latest lts otherwise
 # renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
-ARG VP_SETUP_NODE_VERSION=24.22.1
+ARG VP_SETUP_NODE_VERSION=24.22.3
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
 ARG VP_VERSION=1.6.0
