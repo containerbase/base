@@ -44,7 +44,7 @@ RUN set -ex; ls -la $USER_HOME/; test -L $USER_HOME/.julia
 FROM base AS testa
 
 # renovate: datasource=github-releases packageName=JuliaLang/julia
-RUN install-tool julia v1.13.3
+RUN install-tool julia v1.13.4
 
 USER 12021
 

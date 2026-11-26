@@ -41,7 +41,7 @@ WORKDIR /test
 FROM base AS test-julia
 
 # renovate: datasource=github-releases packageName=JuliaLang/julia
-RUN install-tool julia v1.13.3
+RUN install-tool julia v1.13.4
 
 USER 12021
 
