@@ -217,7 +217,7 @@ RUN set -ex; \
 RUN install-tool terraform 1.17.2
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.9
+RUN install-tool tofu 1.13.10
 
 # renovate: datasource=github-releases packageName=containerbase/jb-prebuild versioning=semver-extended
 RUN install-tool jb 0.6.0.2
