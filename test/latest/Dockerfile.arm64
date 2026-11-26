@@ -58,7 +58,7 @@ RUN install-tool bun 1.4.5
 FROM base AS test-nub
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.11.1
+RUN install-tool nub 0.11.2
 
 #--------------------------------------
 # Image: deno
