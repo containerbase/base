@@ -57,7 +57,15 @@ jobs:
             echo "::notice::Pull request #${pr_number} isn't merged or has no backport label, skipping"
             exit 0
           fi
-          echo "url=https://api.github.com/repos/${REPO}/pulls/${pr_number}" >> "${GITHUB_OUTPUT}"
+          # git-backporting prefixes its default title with `[<target>]`, which
+          # breaks the semantic title check, so keep the original title and
+          # name the targets at the end like Renovate does, e.g. `fix: foo (maint/14.x)`
+          title="$(gh pr view "${pr_number}" --repo "${REPO}" --json title,labels \
+            --jq '"\(.title | sub(" \\(main\\)$"; "")) (\([.labels[].name | select(startswith("backport:")) | ltrimstr("backport:")] | join(", ")))"')"
+          {
+            echo "url=https://api.github.com/repos/${REPO}/pulls/${pr_number}"
+            echo "title=${title}"
+          } >> "${GITHUB_OUTPUT}"
 
       # pull requests created with `github.token` don't trigger workflows, so
       # the backport is created with an app token to run CI on it
@@ -83,5 +91,6 @@ jobs:
           cherry-pick-options: -x
           auth: ${{ steps.app-token.outputs.token }}
           pull-request: ${{ steps.pr.outputs.url }}
+          title: ${{ steps.pr.outputs.title }}
           auto-no-squash: true
           enable-err-notification: true
