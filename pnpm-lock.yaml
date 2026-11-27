@@ -307,8 +307,8 @@ importers:
         specifier: 4.1.12
         version: 4.1.12(vitest@4.1.12)
       '@yao-pkg/pkg':
-        specifier: 6.25.0
-        version: 6.25.0(bare-buffer@3.7.1)(supports-color@7.2.0)
+        specifier: 6.26.0
+        version: 6.26.0(bare-buffer@3.7.1)(supports-color@7.2.0)
       bats:
         specifier: 1.13.0
         version: 1.13.0
@@ -1433,12 +1433,12 @@ packages:
   '@vitest/utils@4.1.12':
     resolution: {integrity: sha512-Q3awXrwOfEV+qc3WmO5ONyE0yO7Q1gQ9/oyHxGLZ/pl7N3NO/ZztqQwKLuwMkV+CA1JYSIeO3gkHnRDIo4AVaA==}
 
-  '@yao-pkg/pkg-fetch@3.6.7':
-    resolution: {integrity: sha512-uEeU5druVgHffruTAXzW6nf0wHfREWlCq5LBtQ4hCdLBDbwTteuym5NrxREur3EgNcqFRenEi6Rivwo723PkHg==}
+  '@yao-pkg/pkg-fetch@3.6.8':
+    resolution: {integrity: sha512-eMJsm6Dc0+aVqCI5Br2qBLb1hJv/tQsYDfCmHkooHSaZRlc3qCd1Z3QNsCFf3IULYz9vduE0b5gn5+170YnRcQ==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.25.0':
-    resolution: {integrity: sha512-32lat6kncPb9YqNTkri4Lz6KEISpKs2jT925XZuU8bwlhA/PI1hJ/jO5yk2LjBPHf9vUmwdSMscxmOuu9XC0dA==}
+  '@yao-pkg/pkg@6.26.0':
+    resolution: {integrity: sha512-kPGb/C82bFH3yYJDVICLDtGf3bTxuaLiAosrzwcdO6NXVvb4IXtV954Z/y1Cdw+D7tntJesMbeBmfonkQcoFcg==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -4738,7 +4738,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.2.0
 
-  '@yao-pkg/pkg-fetch@3.6.7(bare-buffer@3.7.1)':
+  '@yao-pkg/pkg-fetch@3.6.8(bare-buffer@3.7.1)':
     dependencies:
       picocolors: 1.1.1
       progress: 2.0.3
@@ -4751,14 +4751,14 @@ snapshots:
       - bare-buffer
       - react-native-b4a
 
-  '@yao-pkg/pkg@6.25.0(bare-buffer@3.7.1)(supports-color@7.2.0)':
+  '@yao-pkg/pkg@6.26.0(bare-buffer@3.7.1)(supports-color@7.2.0)':
     dependencies:
       '@babel/generator': 7.29.13
       '@babel/parser': 7.29.13
       '@babel/traverse': 7.29.13(supports-color@7.2.0)
       '@babel/types': 7.29.11
       '@roberts_lando/vfs': 0.4.0
-      '@yao-pkg/pkg-fetch': 3.6.7(bare-buffer@3.7.1)
+      '@yao-pkg/pkg-fetch': 3.6.8(bare-buffer@3.7.1)
       esbuild: 0.28.2
       into-stream: 9.1.0
       multistream: 4.1.0
