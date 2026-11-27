@@ -284,6 +284,7 @@
       "matchUpdateTypes": ["replacement"],
       "branchTopic": "node-{{{replace '[.].*' '' newValue}}}.x",
       "additionalBranchPrefix": "major",
+      "commitMessageAction": "Update",
       "commitMessageTopic": "node.js",
       "commitMessageExtra": "to v{{{replace '[.].*' '' newValue}}}",
       "dependencyDashboardApproval": false
