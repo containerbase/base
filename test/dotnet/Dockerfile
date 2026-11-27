@@ -42,7 +42,7 @@ RUN prepare-tool dotnet
 FROM base AS build
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 11.0.100
+RUN install-tool dotnet 10.0.404
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN ls -la $USER_HOME/.nuget/NuGet
@@ -105,7 +105,7 @@ USER 12021
 
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 11.0.100
+RUN install-tool dotnet 10.0.404
 RUN set -ex; dotnet --version | grep 10.0.
 
 RUN set -ex; \
@@ -124,7 +124,7 @@ FROM build AS testd
 # only patch updates
 # renovate: datasource=dotnet packageName=dotnet-sdk
 RUN install-tool dotnet 11.0.100
-RUN set -ex; dotnet --version | grep 10.0.
+RUN set -ex; dotnet --version | grep 11.0.
 
 RUN set -ex; \
     dotnet restore --use-lock-file
