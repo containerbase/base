@@ -223,7 +223,7 @@ RUN install-tool tofu 1.13.10
 RUN install-tool jb 0.6.0.2
 
 # renovate: datasource=github-releases packageName=vmware-tanzu/carvel-vendir
-RUN install-tool vendir v0.46.3
+RUN install-tool vendir v0.47.0
 
 # renovate: datasource=github-releases packageName=containerbase/wally-prebuild
 RUN install-tool wally 0.3.2
