@@ -65,7 +65,7 @@
     "@containerbase/istanbul-reports-html": "2.0.26",
     "@containerbase/oxlint-plugin": "1.1.0",
     "@containerbase/semantic-release-pnpm": "1.4.4",
-    "@tsconfig/node26": "26.0.0",
+    "@tsconfig/node26": "26.0.2",
     "@tsconfig/strictest": "2.0.9",
     "@types/common-tags": "1.8.4",
     "@types/global-agent": "3.0.0",
