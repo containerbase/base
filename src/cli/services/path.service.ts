@@ -251,11 +251,41 @@ export class PathService {
   }
 
   /**
+   * Path to `/opt/containerbase/env.d`, the env files of the shell tools.
+   */
+  get envDPath(): string {
+    return join(this.installDir, 'env.d');
+  }
+
+  /**
+   * Path to `/opt/containerbase/lib`, which `/usr/local/lib` links to.
+   */
+  get libPath(): string {
+    return join(this.installDir, 'lib');
+  }
+
+  /**
    * Path to `/opt/containerbase/links`, the pointers of the commands to their
    * wrappers, see `LinkToolService`.
    */
   get linksPath(): string {
     return join(this.installDir, 'links');
+  }
+
+  /**
+   * Path to `/var/lib/containerbase/tool.inst`, the tools installed into the
+   * image at build time, see `BuildListService`.
+   */
+  get toolInstPath(): string {
+    return join(this.varPath, 'tool.inst');
+  }
+
+  /**
+   * Path to `/opt/containerbase/.tool.inst`, the copy of the build-time list
+   * which belongs to the state of the folder.
+   */
+  get volumeToolInstPath(): string {
+    return join(this.installDir, '.tool.inst');
   }
 
   /**
@@ -322,6 +352,24 @@ export class PathService {
     logger.debug({ path }, 'creating dir');
     await fs.mkdir(path);
     await this.setOwner({ path, mode });
+  }
+
+  /**
+   * Creates a folder like `createDir`, but accepts a symlink to a folder, eg.
+   * for `lib` and `env.d` of an image which links them elsewhere. Anything
+   * else which prevents the folder, eg. a file or a dangling link, is only
+   * warned about, so it can't fail a command which didn't fail before.
+   */
+  private async createLinkableDir(path: string): Promise<void> {
+    try {
+      // follows a symlink
+      const stats = await fs.stat(path).catch(() => null);
+      if (!stats?.isDirectory()) {
+        await this.createDir(path);
+      }
+    } catch (err) {
+      logger.warn({ err, path }, 'cannot create the folder');
+    }
   }
 
   /**
@@ -396,6 +444,8 @@ export class PathService {
     await this.createDir(this.versionPath);
     await this.createDir(this.binDir);
     await this.createDir(this.linksPath);
+    await this.createLinkableDir(this.libPath);
+    await this.createLinkableDir(this.envDPath);
     await this.createDir(this.sslPath);
     await this.createDir(this._toolInitPath);
     await this.createDir(join(this.cachePath, '.cache'));
@@ -787,6 +837,17 @@ export class PathService {
     const path = this.toolInitPath(tool);
     await fs.writeFile(path, '');
     await this.setOwner({ path });
+  }
+
+  /**
+   * Forgets that any tool was initialized in this container, so the next init
+   * runs every initialize step again.
+   */
+  async clearInitialized(): Promise<void> {
+    const dir = this._toolInitPath;
+    for (const file of await fs.readdir(dir).catch(() => [])) {
+      await fs.rm(join(dir, file), { force: true });
+    }
   }
 
   /** Marks the tool as prepared and adds it to the list of prepared tools. */

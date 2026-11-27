@@ -2,6 +2,8 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
+    "./tools/semantic-release-plugin.js",
+    "@containerbase/semantic-release-pnpm",
     [
       "@semantic-release/github",
       {
@@ -34,9 +36,7 @@
           }
         ]
       }
-    ],
-    "./tools/semantic-release-plugin.js",
-    "@containerbase/semantic-release-pnpm"
+    ]
   ],
   "analyzeCommits": {
     "releaseRules": [

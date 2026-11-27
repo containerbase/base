@@ -50,7 +50,7 @@ RUN install-tool bazelisk v1.30.0
 FROM base AS test-bun
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.4
+RUN install-tool bun 1.4.5
 
 #--------------------------------------
 # Image: nub
@@ -58,7 +58,7 @@ RUN install-tool bun 1.4.4
 FROM base AS test-nub
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.11.1
+RUN install-tool nub 0.11.2
 
 #--------------------------------------
 # Image: deno
@@ -74,7 +74,7 @@ RUN install-tool deno 2.9.8
 FROM base AS test-apko
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.5.2
+RUN install-tool apko 1.5.3
 
 #--------------------------------------
 # Image: apm
@@ -132,16 +132,45 @@ RUN set -ex; \
 #--------------------------------------
 FROM base AS test-git
 
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases depName=git packageName=containerbase/git-prebuild
+ARG GIT_VERSION=2.56.1
+RUN install-tool git "${GIT_VERSION}"
+
+USER 12021
+
+# git is a shim, its pointer links to the wrapper in the version folder
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  tool="/opt/containerbase/tools/git/${GIT_VERSION}"; \
+  readlink /opt/containerbase/links/git | grep -Fx "${tool}/.wrappers/git"; \
+  git --exec-path | grep -Fx "${tool}/libexec/git-core"; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild log -1 --oneline; \
+  rm -rf /tmp/git-prebuild; \
+  true
 
 #--------------------------------------
 # Image: git-lfs
 #--------------------------------------
 FROM test-git AS test-git-lfs
 
-# renovate: datasource=github-releases packageName=git-lfs/git-lfs
-RUN install-tool git-lfs v3.8.1
+USER root
+
+# renovate: datasource=github-releases depName=git-lfs packageName=git-lfs/git-lfs
+ARG GIT_LFS_VERSION=v3.8.1
+RUN install-tool git-lfs "${GIT_LFS_VERSION}"
+
+USER 12021
+
+RUN set -ex; \
+  git lfs version | grep -F "git-lfs/${GIT_LFS_VERSION#v} "; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
 
 #--------------------------------------
 # Image: helmfile
@@ -149,7 +178,7 @@ RUN install-tool git-lfs v3.8.1
 FROM base AS test-helmfile
 
 # renovate: datasource=github-releases packageName=helmfile/helmfile
-RUN install-tool helmfile v1.8.4
+RUN install-tool helmfile v1.8.5
 
 #--------------------------------------
 # Image: jq
@@ -198,7 +227,7 @@ RUN install-tool terraform 1.17.2
 FROM base AS test-tofu
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.9
+RUN install-tool tofu 1.13.10
 
 #--------------------------------------
 # Image: vendir
@@ -217,10 +246,10 @@ FROM base AS test-others
 RUN install-tool buf v1.75.0
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.2
+RUN install-tool kubectl v1.37.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.11
+RUN install-tool mise 2026.11.14
 
 # renovate: datasource=github-releases packageName=containerbase/skopeo-prebuild
 RUN install-tool skopeo 1.25.2

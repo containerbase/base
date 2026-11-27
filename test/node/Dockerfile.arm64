@@ -61,8 +61,8 @@ FROM test-node AS test-yarn
 # renovate: datasource=npm
 RUN install-tool yarn 1.22.22
 
-# renovate: datasource=npm packageName=@yarnpkg/yarn-aarch64-unknown-linux-musl
-ARG YARN_VERSION=6.0.0-rc.19
+# renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-aarch64-unknown-linux-musl
+ARG YARN_VERSION=6.0.0-rc.23
 
 RUN install-tool yarn "${YARN_VERSION}"
 
@@ -109,8 +109,8 @@ RUN install-tool renovate 44.222.5
 FROM test-node AS test-vp
 
 # pin the node vp's setup downloads, it uses the latest lts otherwise
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-ARG VP_SETUP_NODE_VERSION=24.22.1
+# renovate: datasource=github-releases depName=node packageName=containerbase/node-prebuild versioning=node
+ARG VP_SETUP_NODE_VERSION=24.22.3
 
 # renovate: datasource=github-releases depName=vp packageName=voidzero-dev/vite-plus
 ARG VP_VERSION=1.6.0

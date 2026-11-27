@@ -15,7 +15,7 @@
   ],
   "separateMultipleMajor": false,
   "separateMajorMinor": true,
-  "baseBranchPatterns": ["$default", "zzz/don-not-delete"],
+  "baseBranchPatterns": ["$default", "maint/14.x", "/^dummy$/"],
   "packageRules": [
     {
       "description": "Don't hold back any PRs for approval",
@@ -97,6 +97,7 @@
         "julia",
         "kas",
         "maven",
+        "mercurial",
         "mise",
         "mono",
         "nix",
@@ -171,6 +172,7 @@
         "julia",
         "kas",
         "maven",
+        "mercurial",
         "mise",
         "mono",
         "nix",
@@ -246,6 +248,37 @@
       "description": "Use `build` semantic commit scope for build deps",
       "matchDepNames": ["@yao-pkg/pkg"],
       "semanticCommitType": "build"
+    },
+    {
+      "description": "Use `build` semantic commit scope for the node version of the cli, it releases a patch",
+      "matchDepNames": ["node"],
+      "matchFileNames": [".node-version", "mise.toml", "tools/build.js"],
+      "semanticCommitType": "build"
+    },
+    {
+      "description": "Release node majors of the cli as a feature",
+      "matchDepNames": ["node"],
+      "matchFileNames": [".node-version", "mise.toml", "tools/build.js"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "feat"
+    },
+    {
+      "description": "Update the cli node major together with @types/node and the @tsconfig/node replacement, replacements ignore the group branch so all share one branch topic",
+      "matchDepNames": ["node", "@types/node", "@tsconfig/node*"],
+      "matchFileNames": [
+        ".node-version",
+        "mise.toml",
+        "tools/build.js",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "matchUpdateTypes": ["major", "replacement"],
+      "groupName": "node",
+      "groupSlug": "node-{{{replace '[.].*' '' newValue}}}.x",
+      "branchTopic": "node-{{{replace '[.].*' '' newValue}}}.x",
+      "additionalBranchPrefix": "major",
+      "separateMajorMinor": false,
+      "dependencyDashboardApproval": false
     },
     {
       "description": "Use `build` semantic commit scope for lockfile maintenance.",
@@ -332,7 +365,7 @@
     {
       "description": "Keep the old node LTS test stages on their major, only the newest LTS gets major updates",
       "matchDepNames": ["node"],
-      "matchFileNames": ["test/node/Dockerfile"],
+      "matchFileNames": ["test/node/Dockerfile", "test/node/Dockerfile.arm64"],
       "matchCurrentVersion": "/^(22|24)\\./",
       "matchUpdateTypes": ["major"],
       "enabled": false
@@ -358,6 +391,14 @@
       "packageNameTemplate": "containerbase/tool-versions",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Update the node version of the cli together with the other node versions",
+      "managerFilePatterns": ["tools/build.js"],
+      "matchStrings": ["nodeVersion = '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
     }
   ]
 }

@@ -25,9 +25,8 @@ export async function validateSystem(): Promise<void> {
     process.exit(1);
   }
   const d = await (distro ??= readDistro());
+  // the host distros, see `HostDistroCode`
   switch (d.versionCode) {
-    /* v8 ignore next -- hard to test */
-    case 'jammy':
     case 'noble':
     case 'resolute':
       break;
@@ -102,6 +101,27 @@ export async function pathExists(
     return !!fstat;
   } catch {
     return false;
+  }
+}
+
+/** Whether the error says the file does not exist. */
+export function isNotFound(err: unknown): boolean {
+  return (err as NodeJS.ErrnoException).code === 'ENOENT';
+}
+
+/**
+ * Whether the file does not exist. Other errors, like missing permissions,
+ * are thrown, so an unreadable file is not mistaken for a missing one.
+ */
+export async function isMissing(file: string): Promise<boolean> {
+  try {
+    await fs.stat(file);
+    return false;
+  } catch (err) {
+    if (isNotFound(err)) {
+      return true;
+    }
+    throw err;
   }
 }
 

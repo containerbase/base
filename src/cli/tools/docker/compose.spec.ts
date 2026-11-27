@@ -124,11 +124,15 @@ describe('cli/tools/docker/compose', () => {
     expect(spy).toHaveBeenCalledExactlyOnceWith('docker-compose', {
       srcDir: src,
     });
-    expect(await fs.readlink(plugin)).toBe(join(src, 'docker-compose'));
+    // the plugin runs the shim, which selects the version
+    const shim = join(pathSvc.binDir, 'docker-compose');
+    expect(await fs.readlink(plugin)).toBe(shim);
 
-    // an existing plugin link is replaced
+    // a link to a version binary is replaced
+    await fs.rm(plugin);
+    await fs.symlink(join(src, 'docker-compose'), plugin);
     await expect(svc.link('2.29.7')).resolves.toBeUndefined();
-    expect(await fs.readlink(plugin)).toBe(join(src, 'docker-compose'));
+    expect(await fs.readlink(plugin)).toBe(shim);
   });
 
   test('runs the tool test', async () => {
@@ -143,11 +147,11 @@ describe('cli/tools/docker/compose', () => {
     );
   });
 
-  test('validate rejects versions before v2.0.1', async () => {
+  test('validate accepts semver versions, the minimum is 2.0.1', async () => {
     const { svc } = await toolContext(DockerComposeInstallService);
 
     expect(await svc.validate('2.29.7')).toBe(true);
-    expect(await svc.validate('1.29.2')).toBe(false);
     expect(await svc.validate('not-a-version')).toBe(false);
+    expect(await svc.hostMinVersion()).toBe('2.0.1');
   });
 });

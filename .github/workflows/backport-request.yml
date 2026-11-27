@@ -1,0 +1,43 @@
+name: backport-request
+
+# Unprivileged half: runs for every merged pull request with a `backport:` label
+# (including forks) with no permissions and only records the pull request
+# number. The backport is created by `backport.yml`, which runs on
+# `workflow_run` in the base context. Every event requests its own backport
+# (one per label), so runs must not cancel or replace each other.
+on: # jactionlint ignore=concurrency-limits
+  pull_request:
+    types:
+      - closed
+      - labeled
+
+permissions: {}
+
+jobs:
+  save-pr-number:
+    if: >-
+      github.event.pull_request.merged
+      && (
+        (
+          github.event.action == 'closed'
+          && contains(join(github.event.pull_request.labels.*.name, ' '), 'backport:')
+        )
+        || (
+          github.event.action == 'labeled'
+          && startsWith(github.event.label.name, 'backport:')
+        )
+      )
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Save pull request number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "${PR_NUMBER}" > pr-number.txt
+
+      - name: Upload pull request number
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pr-number
+          path: pr-number.txt
+          retention-days: 1

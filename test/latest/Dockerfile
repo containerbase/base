@@ -182,8 +182,8 @@ FROM base AS testc
 RUN prepare-tool docker
 
 # TODO: move to prepare of git-lfs
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 USER 12021
 
@@ -230,16 +230,16 @@ RUN install-tool bazelisk v1.30.0
 RUN install-tool buf v1.75.0
 
 # renovate: datasource=npm
-RUN install-tool bun 1.4.4
+RUN install-tool bun 1.4.5
 
 # renovate: datasource=github-releases packageName=nubjs/nub
-RUN install-tool nub 0.11.1
+RUN install-tool nub 0.11.2
 
 # renovate: datasource=github-releases packageName=denoland/deno
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=chainguard-dev/apko
-RUN install-tool apko 1.5.2
+RUN install-tool apko 1.5.3
 
 # renovate: datasource=github-releases packageName=microsoft/apm
 RUN install-tool apm 0.36.1
@@ -260,13 +260,16 @@ RUN install-tool jq 1.8.2
 
 RUN jq --version
 
+# the first call marks jq as initialized, so the wrapper skips the init later
+RUN test -f /tmp/containerbase/tool.init.d/jq
+
 RUN echo '{"a":1}' | jq -e '.a == 1'
 
 # renovate: datasource=github-releases packageName=kubernetes/kubernetes
-RUN install-tool kubectl v1.37.2
+RUN install-tool kubectl v1.37.3
 
 # renovate: datasource=github-releases packageName=jdx/mise
-RUN install-tool mise 2026.11.11
+RUN install-tool mise 2026.11.14
 
 # renovate: datasource=github-releases depName=jq packageName=jqlang/jq
 ARG MISE_JQ_VERSION=1.8.2
@@ -285,7 +288,7 @@ RUN install-tool skopeo 1.25.2
 RUN install-tool sops v3.13.3
 
 # renovate: datasource=github-releases packageName=opentofu/opentofu
-RUN install-tool tofu 1.13.9
+RUN install-tool tofu 1.13.10
 
 # renovate: datasource=github-releases packageName=protocolbuffers/protobuf versioning=docker
 RUN install-tool protoc 36.2
@@ -294,7 +297,7 @@ RUN install-tool protoc 36.2
 ARG VENDIR_VERSION=v0.46.3
 
 # renovate: datasource=github-releases depName=helmfile packageName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.4
+ARG HELMFILE_VERSION=v1.8.5
 
 # renovate: datasource=github-releases depName=kustomize packageName=kubernetes-sigs/kustomize
 ARG KUSTOMIZE_VERSION=5.8.3
@@ -414,6 +417,37 @@ RUN install-tool nuget 7.9.0
 RUN nuget search nuget.commandline -Take 1
 
 #--------------------------------------
+# test: git and git-lfs
+#--------------------------------------
+FROM base AS test-git
+
+# renovate: datasource=github-releases depName=git packageName=containerbase/git-prebuild
+ARG GIT_VERSION=2.56.1
+RUN install-tool git "${GIT_VERSION}"
+
+# renovate: datasource=github-releases depName=git-lfs packageName=git-lfs/git-lfs
+ARG GIT_LFS_VERSION=v3.8.1
+RUN install-tool git-lfs "${GIT_LFS_VERSION}"
+
+USER 12021
+
+# git is a shim, its pointer links to the wrapper in the version folder
+RUN set -ex; \
+  [ "$(command -v git)" = /usr/local/bin/git ]; \
+  git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  tool="/opt/containerbase/tools/git/${GIT_VERSION}"; \
+  readlink /opt/containerbase/links/git | grep -Fx "${tool}/.wrappers/git"; \
+  git --exec-path | grep -Fx "${tool}/libexec/git-core"; \
+  env -i PATH=/usr/local/bin:/usr/bin:/bin git --version | grep -Fx "git version ${GIT_VERSION}"; \
+  git config --system --show-origin --get safe.directory | grep '^file:/etc/gitconfig[[:space:]]\*$'; \
+  git lfs version | grep -F "git-lfs/${GIT_LFS_VERSION#v} "; \
+  git config --system --get filter.lfs.process | grep -F 'git-lfs filter-process'; \
+  git clone --depth 1 https://github.com/containerbase/git-prebuild.git /tmp/git-prebuild; \
+  git -C /tmp/git-prebuild lfs ls-files; \
+  rm -rf /tmp/git-prebuild; \
+  true
+
+#--------------------------------------
 # test: v1 and v2 shell tools of custom images
 #--------------------------------------
 FROM base AS test-legacy
@@ -446,10 +480,27 @@ RUN set -ex; \
   true
 
 #--------------------------------------
+# test: versions below the minimum are rejected
+#--------------------------------------
+FROM base AS test-min-version
+
+RUN touch /.dummy
+
+# bun's minimum is 0.5.3, no renovate updates
+RUN set -ex; \
+  if install-tool bun 0.5.2 > /min-version.log 2>&1; then cat /min-version.log; exit 1; fi; \
+  cat /min-version.log; \
+  grep -F 'bun 0.5.2 is older than the minimum supported version 0.5.3' /min-version.log; \
+  [ ! -e /opt/containerbase/tools/bun/0.5.2 ]; \
+  rm /min-version.log; \
+  true
+
+#--------------------------------------
 # final
 #--------------------------------------
 FROM base
 
+COPY --link --from=test-min-version /.dummy /.dummy
 COPY --link --from=testa /.dummy /.dummy
 COPY --link --from=testb-gitpod /.dummy /.dummy
 COPY --link --from=testc /.dummy /.dummy
@@ -458,4 +509,5 @@ COPY --link --from=teste /.dummy /.dummy
 COPY --link --from=testf /.dummy /.dummy
 COPY --link --from=test-docker /.dummy /.dummy
 COPY --link --from=test-mono /.dummy /.dummy
+COPY --link --from=test-git /.dummy /.dummy
 COPY --link --from=test-legacy /.dummy /.dummy

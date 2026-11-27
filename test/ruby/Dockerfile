@@ -22,8 +22,8 @@ ARG CONTAINERBASE_LOG_LEVEL
 RUN install-containerbase
 
 # TODO: move to prepare for bundler and cocoapods
-# renovate: datasource=github-tags packageName=git/git
-RUN install-tool git v2.56.1
+# renovate: datasource=github-releases packageName=containerbase/git-prebuild
+RUN install-tool git 2.56.1
 
 #--------------------------------------
 # Image: base
@@ -78,7 +78,7 @@ FROM build AS test-bundler-c
 USER 12021
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=4.1.0
+ENV BUNDLER_VERSION=4.1.1
 RUN install-tool bundler
 
 RUN set -ex; \
@@ -104,7 +104,7 @@ true
 FROM build AS test-bundler-d
 
 # renovate: datasource=rubygems depName=bundler
-ENV BUNDLER_VERSION=4.1.0
+ENV BUNDLER_VERSION=4.1.1
 RUN install-tool bundler
 
 RUN set -ex; ls -la /usr/local/bin/; [ $(stat --format '%u' "/usr/local/bin/bundler") -eq 12021 ]

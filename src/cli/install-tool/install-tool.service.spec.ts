@@ -10,6 +10,8 @@ import {
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initializeTools, prepareTools } from '../prepare-tool/index.ts';
 import {
+  type BuildListEntry,
+  BuildListService,
   CacheService,
   EnvService,
   LinkToolService,
@@ -71,7 +73,16 @@ class RootOnlyInstallService extends TestInstallService {
   override readonly needsRoot = true;
 }
 
-/** a tool which is installed system wide, like `git` */
+/** a tool with a minimum supported version */
+@injectable()
+@injectFromHierarchy()
+class MinVersionInstallService extends TestInstallService {
+  override readonly name = 'min-version';
+
+  override readonly minVersion = '2.0.0';
+}
+
+/** a tool which can't be uninstalled, like `git` */
 @injectable()
 @injectFromHierarchy()
 class NoUninstallInstallService extends TestInstallService {
@@ -198,6 +209,18 @@ class ChildInstallService extends TestInstallService {
   }
 }
 
+/** a tool linked under an alias, like `java-jre` as `java` */
+@injectable()
+@injectFromHierarchy()
+class AliasedInstallService extends TestInstallService {
+  override readonly name = 'aliased';
+
+  /** Linked as `alias`. */
+  override get alias(): string {
+    return 'alias';
+  }
+}
+
 /** a tool whose parent has no install service */
 @injectable()
 @injectFromHierarchy()
@@ -217,6 +240,72 @@ class OrphanInstallService extends TestInstallService {
 class StuckInstallService extends TestInstallService {
   override readonly name = 'stuck';
   override readonly parent = 'root-only';
+}
+
+/** `jq`, which is restored at once when a volume is set up */
+@injectable()
+@injectFromHierarchy()
+class JqInstallService extends TestInstallService {
+  override readonly name = 'jq';
+
+  /** Creates the versioned tool path. */
+  override async install(version: string): Promise<void> {
+    await this.pathSvc.createVersionedToolPath(this.name, version);
+  }
+
+  /** Links `jq`. */
+  override async link(_version: string): Promise<void> {
+    await this.shellwrapper({ srcDir: '/bin/bash' });
+  }
+}
+
+/**
+ * `git`, which only needs root for the files outside of its version folder,
+ * so a restore runs as the user too
+ */
+@injectable()
+@injectFromHierarchy()
+class GitInstallService extends TestInstallService {
+  override readonly name = 'git';
+  override readonly needsRoot = true;
+  override readonly canUninstall = false;
+
+  /** Restores as the user. */
+  override get restoreNeedsRoot(): boolean {
+    return false;
+  }
+
+  /** Creates the versioned tool path. */
+  override async install(version: string): Promise<void> {
+    await this.pathSvc.createVersionedToolPath(this.name, version);
+  }
+}
+
+/** a npm package, which is listed with its type */
+@injectable()
+@injectFromHierarchy()
+class NpmTypedInstallService extends TestInstallService {
+  override readonly name = 'npm-typed';
+  override readonly type = 'npm';
+}
+
+/** a dotnet tool, which is listed as a plain tool */
+@injectable()
+@injectFromHierarchy()
+class DotnetTypedInstallService extends TestInstallService {
+  override readonly name = 'dotnet-typed';
+  override readonly type = 'dotnet';
+}
+
+/**
+ * The error code of looking up the path without following links, so a
+ * dangling link counts as existing.
+ */
+function lookup(path: string): Promise<string | undefined> {
+  return fs.lstat(path).then(
+    () => undefined,
+    (err: NodeJS.ErrnoException) => err.code,
+  );
 }
 
 /** The pointer of a command. */
@@ -242,6 +331,12 @@ describe('cli/install-tool/install-tool.service', () => {
   parent.bind(INSTALL_TOOL_TOKEN).to(ChildInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(OrphanInstallService);
   parent.bind(INSTALL_TOOL_TOKEN).to(StuckInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(AliasedInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(JqInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(GitInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(NpmTypedInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(DotnetTypedInstallService);
+  parent.bind(INSTALL_TOOL_TOKEN).to(MinVersionInstallService);
 
   let child: Container;
   let install: InstallToolService;
@@ -312,6 +407,39 @@ describe('cli/install-tool/install-tool.service', () => {
         { tool: 'bun', version: 'not-a-version' },
         'tool version not supported',
       );
+    });
+
+    test.each(['1.9.9', '2.0.0-rc.1'])(
+      'rejects %s below the minimum',
+      async (version) => {
+        const toolInstall = vi.spyOn(
+          MinVersionInstallService.prototype,
+          'install',
+        );
+        // a tool which would be prepared and initialized first
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsPrepare',
+        ).mockReturnValue(true);
+        vi.spyOn(
+          MinVersionInstallService.prototype,
+          'needsInitialize',
+        ).mockReturnValue(true);
+
+        expect(await install.install('min-version', version)).toBe(1);
+
+        expect(prepareTools).not.toHaveBeenCalled();
+        expect(initializeTools).not.toHaveBeenCalled();
+        expect(toolInstall).not.toHaveBeenCalled();
+        expect(logger.fatal).toHaveBeenCalledExactlyOnceWith(
+          { tool: 'min-version', version, minVersion: '2.0.0' },
+          `min-version ${version} is older than the minimum supported version 2.0.0`,
+        );
+      },
+    );
+
+    test('installs the minimum', async () => {
+      expect(await install.install('min-version', '2.0.0')).toBeUndefined();
     });
 
     test('cleans up the tool on failure', async () => {
@@ -547,27 +675,78 @@ describe('cli/install-tool/install-tool.service', () => {
       ).toHaveLength(1);
     });
 
-    test.each(['no-uninstall', 'shell-tool'])(
-      'keeps a recorded version of %s, which has no files to check',
-      async (tool) => {
-        const installSpy = vi.spyOn(
-          tool === 'shell-tool'
-            ? ShellInstallService.prototype
-            : NoUninstallInstallService.prototype,
-          'install',
-        );
-        expect(await install.install(tool, '2.0.0')).toBeUndefined();
-        installSpy.mockClear();
+    test('installs a parent version again first when its files are missing', async () => {
+      const pathSvc = await child.getAsync(PathService);
+      expect(await install.install('multi', '61.0.0')).toBeUndefined();
+      await fs.rm(pathSvc.versionedToolPath('multi', '61.0.0'), {
+        recursive: true,
+      });
+      const multi = vi.spyOn(MultiInstallService.prototype, 'install');
+      const childSvc = vi.spyOn(ChildInstallService.prototype, 'install');
 
-        expect(await install.install(tool, '2.0.0')).toBeUndefined();
+      expect(await install.install('child', '3.6.0')).toBeUndefined();
 
-        expect(logger.info).toHaveBeenCalledWith(
-          { tool },
-          'tool already installed',
-        );
-        expect(installSpy).not.toHaveBeenCalled();
-      },
-    );
+      expect(multi).toHaveBeenCalledExactlyOnceWith('61.0.0');
+      expect(multi.mock.invocationCallOrder[0]).toBeLessThan(
+        childSvc.mock.invocationCallOrder[0]!,
+      );
+      expect(
+        await pathExists(pathSvc.versionedToolPath('multi', '61.0.0')),
+      ).toBe(true);
+    });
+
+    test('the links of a parent which is installed again are not stored for the child', async () => {
+      const pathSvc = await child.getAsync(PathService);
+      const ver = await child.getAsync(VersionService);
+      const link = await child.getAsync(LinkToolService);
+      expect(await install.install('multi', '63.0.0')).toBeUndefined();
+      await fs.rm(pathSvc.versionedToolPath('multi', '63.0.0'), {
+        recursive: true,
+      });
+
+      expect(await install.install('child', '3.8.0')).toBeUndefined();
+
+      // without the clear after the restore, the commands of the parent are
+      // among the links stored for the child
+      expect(link.links).toEqual(['child']);
+      expect(await ver.findLink('multi')).toMatchObject({
+        tool: { name: 'multi', version: '63.0.0' },
+      });
+    });
+
+    test('stops when a missing parent version cannot be installed again', async () => {
+      const pathSvc = await child.getAsync(PathService);
+      expect(await install.install('multi', '62.0.0')).toBeUndefined();
+      await fs.rm(pathSvc.versionedToolPath('multi', '62.0.0'), {
+        recursive: true,
+      });
+      // only the parent needs its init, which fails
+      vi.spyOn(
+        ChildInstallService.prototype,
+        'isInitialized',
+      ).mockResolvedValue(true);
+      vi.mocked(initializeTools).mockResolvedValueOnce(1);
+      const childSvc = vi.spyOn(ChildInstallService.prototype, 'install');
+
+      expect(await install.install('child', '3.7.0')).toBe(1);
+
+      expect(childSvc).not.toHaveBeenCalled();
+    });
+
+    test('keeps a recorded version of a v2 shell tool, which has no files to check', async () => {
+      const tool = 'shell-tool';
+      const installSpy = vi.spyOn(ShellInstallService.prototype, 'install');
+      expect(await install.install(tool, '2.0.0')).toBeUndefined();
+      installSpy.mockClear();
+
+      expect(await install.install(tool, '2.0.0')).toBeUndefined();
+
+      expect(logger.info).toHaveBeenCalledWith(
+        { tool },
+        'tool already installed',
+      );
+      expect(installSpy).not.toHaveBeenCalled();
+    });
 
     test('sets the link context of the version', async () => {
       const spy = vi.spyOn(LinkToolService.prototype, 'setContext');
@@ -696,6 +875,21 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(await ver.getCurrent('bun')).toBeNull();
     });
 
+    test('removes the current version of a tool with an alias', async () => {
+      expect(await install.install('aliased', '1.0.0')).toBeUndefined();
+      expect(await install.install('aliased', '2.0.0')).toBeUndefined();
+      const ver = await child.getAsync(VersionService);
+
+      // not the current version, so the current one stays
+      expect(await install.uninstall('aliased', '1.0.0')).toBeUndefined();
+      expect(await ver.getCurrent('alias')).toMatchObject({
+        tool: { name: 'aliased', version: '2.0.0' },
+      });
+
+      expect(await install.uninstall('aliased', '2.0.0')).toBeUndefined();
+      expect(await ver.getCurrent('alias')).toBeNull();
+    });
+
     test('all versions', async () => {
       expect(await install.install('bun', '4.0.0')).toBeUndefined();
       expect(await install.install('bun', '4.1.0')).toBeUndefined();
@@ -822,6 +1016,434 @@ describe('cli/install-tool/install-tool.service', () => {
       // the commands of the other version stay
       expect(await pathExists(linkPath('multi4'), 'file')).toBe(true);
       expect(await pathExists(binPath('multi4'), 'file')).toBe(true);
+    });
+  });
+
+  describe('build-time list', () => {
+    /** Makes the install a root install of an image build. */
+    function buildTime(): void {
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+    }
+
+    test('records the installs of an image build', async () => {
+      buildTime();
+      const record = vi
+        .spyOn(BuildListService.prototype, 'record')
+        .mockResolvedValue();
+
+      expect(await install.install('multi', '30.0.0')).toBeUndefined();
+      expect(await install.install('child', '6.0.0')).toBeUndefined();
+
+      expect(record).toHaveBeenNthCalledWith(
+        1,
+        { type: 'tool', tool: 'multi', version: '30.0.0' },
+        ['multi', 'multi30'],
+        'multi',
+      );
+      expect(record).toHaveBeenNthCalledWith(
+        2,
+        {
+          type: 'tool',
+          tool: 'child',
+          version: '6.0.0',
+          parent: { name: 'multi', version: '30.0.0' },
+        },
+        ['child'],
+        'child',
+      );
+    });
+
+    test('records the type of a package', async () => {
+      buildTime();
+      const record = vi
+        .spyOn(BuildListService.prototype, 'record')
+        .mockResolvedValue();
+
+      expect(await install.install('npm-typed', '1.0.0')).toBeUndefined();
+      expect(await install.install('dotnet-typed', '1.0.0')).toBeUndefined();
+
+      expect(record).toHaveBeenNthCalledWith(
+        1,
+        { type: 'npm', tool: 'npm-typed', version: '1.0.0' },
+        [],
+        'npm-typed',
+      );
+      expect(record).toHaveBeenNthCalledWith(
+        2,
+        { type: 'tool', tool: 'dotnet-typed', version: '1.0.0' },
+        [],
+        'dotnet-typed',
+      );
+    });
+
+    test('does not record the v2 shell tools', async () => {
+      buildTime();
+      const record = vi.spyOn(BuildListService.prototype, 'record');
+
+      expect(await install.install('shell-tool', '3.0.0')).toBeUndefined();
+
+      expect(record).not.toHaveBeenCalled();
+    });
+
+    test('does not record without a root install of an image build', async () => {
+      const record = vi.spyOn(BuildListService.prototype, 'record');
+
+      // not root
+      vi.mocked(isDockerBuild).mockResolvedValue(true);
+      expect(await install.install('multi', '31.0.0')).toBeUndefined();
+      // not an image build
+      vi.mocked(isDockerBuild).mockResolvedValue(false);
+      vi.spyOn(EnvService.prototype, 'isRoot', 'get').mockReturnValue(true);
+      expect(await install.install('multi', '31.1.0')).toBeUndefined();
+
+      expect(record).not.toHaveBeenCalled();
+    });
+
+    test('uninstall removes the version from the list', async () => {
+      expect(await install.install('multi', '32.0.0')).toBeUndefined();
+      buildTime();
+      const remove = vi
+        .spyOn(BuildListService.prototype, 'remove')
+        .mockResolvedValue();
+
+      expect(await install.uninstall('multi', '32.0.0')).toBeUndefined();
+
+      expect(remove).toHaveBeenCalledExactlyOnceWith('multi', '32.0.0');
+    });
+
+    test('uninstall keeps the list without a root build', async () => {
+      expect(await install.install('multi', '33.0.0')).toBeUndefined();
+      const remove = vi.spyOn(BuildListService.prototype, 'remove');
+
+      expect(await install.uninstall('multi', '33.0.0')).toBeUndefined();
+
+      expect(remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setupVolume', () => {
+    const multi = (version: string): BuildListEntry[] => [
+      { kind: 'i', type: 'tool', tool: 'multi', version },
+      { kind: 'c', alias: 'multi', tool: 'multi', version },
+      { kind: 'l', command: 'multi', tool: 'multi', version },
+      {
+        kind: 'l',
+        command: `multi${version.split('.')[0]}`,
+        tool: 'multi',
+        version,
+      },
+    ];
+
+    /** Lets the list of the image have the entries. */
+    function listOf(...entries: BuildListEntry[]): void {
+      vi.spyOn(BuildListService.prototype, 'read').mockResolvedValue(entries);
+      vi.spyOn(BuildListService.prototype, 'copyToVolume').mockResolvedValue();
+    }
+
+    test('sets up the databases, shims and version files', async () => {
+      const ver = await child.getAsync(VersionService);
+      const pathSvc = await child.getAsync(PathService);
+      const wrapper = join(
+        pathSvc.versionedToolPath('multi', '40.0.0'),
+        '.wrappers/multi40',
+      );
+      await fs.mkdir(join(wrapper, '..'), { recursive: true });
+      await fs.writeFile(wrapper, '');
+      await fs.symlink('/stale', linkPath('multi'));
+      // a version installed at runtime, the image wins
+      await ver.setCurrent({
+        name: 'multi',
+        tool: { name: 'multi', version: '99.0.0' },
+      });
+      listOf(
+        ...multi('40.0.0'),
+        {
+          kind: 'i',
+          type: 'tool',
+          tool: 'child',
+          version: '7.0.0',
+          parent: { name: 'multi', version: '40.0.0' },
+        },
+        {
+          kind: 'c',
+          alias: 'child',
+          tool: 'child',
+          version: '7.0.0',
+          parent: { name: 'multi', version: '40.0.0' },
+        },
+        ...multi('41.0.0'),
+        { kind: 'i', type: 'npm', tool: 'dyn-pkg', version: '1.0.0' },
+        // a tool with an install service keeps its type
+        { kind: 'i', type: 'npm', tool: 'npm-typed', version: '1.0.0' },
+      );
+      const copy = vi.mocked(BuildListService.prototype.copyToVolume);
+
+      await install.setupVolume();
+
+      expect(await ver.getCurrent('multi')).toMatchObject({
+        tool: { name: 'multi', version: '41.0.0' },
+      });
+      expect(await ver.getCurrent('child')).toMatchObject({
+        tool: { name: 'child', version: '7.0.0' },
+        parent: { name: 'multi', version: '40.0.0' },
+      });
+      expect(await ver.findLink('multi')).toMatchObject({
+        tool: { name: 'multi', version: '41.0.0' },
+      });
+      expect(await ver.findLink('multi40')).toMatchObject({
+        tool: { name: 'multi', version: '40.0.0' },
+      });
+      // both versions are recorded, once, also for the parent
+      expect(await ver.isInstalled({ name: 'multi', version: '40.0.0' })).toBe(
+        true,
+      );
+      expect(
+        await ver.isInstalled({
+          name: 'child',
+          version: '7.0.0',
+          parent: { name: 'multi', version: '40.0.0' },
+        }),
+      ).toBe(true);
+      expect(await ver.getType('dyn-pkg')).toBe('npm');
+      expect(await ver.getType('npm-typed')).toBeUndefined();
+      expect(
+        await fs.readFile(rootPath('opt/containerbase/versions/multi'), 'utf8'),
+      ).toBe('41.0.0');
+      // the shims are written, a pointer of a version without a wrapper is
+      // removed, one with a wrapper is linked
+      expect(await fs.readFile(binPath('multi'), 'utf8')).toContain(
+        'ensure multi ',
+      );
+      expect(await lookup(linkPath('multi'))).toBe('ENOENT');
+      expect(await fs.readlink(linkPath('multi40'))).toBe(wrapper);
+      expect(copy).toHaveBeenCalledOnce();
+    });
+
+    test('only a current line makes a version current', async () => {
+      const ver = await child.getAsync(VersionService);
+      const jq = vi.spyOn(JqInstallService.prototype, 'install');
+      listOf(
+        { kind: 'i', type: 'npm', tool: 'dyn-uncurrent', version: '1.0.0' },
+        { kind: 'i', type: 'npm', tool: 'dyn-current', version: '1.0.0' },
+        { kind: 'i', type: 'npm', tool: 'dyn-current', version: '2.0.0' },
+        {
+          kind: 'c',
+          alias: 'dyn-current',
+          tool: 'dyn-current',
+          version: '1.0.0',
+        },
+        { kind: 'i', type: 'tool', tool: 'jq', version: '1.3.0' },
+      );
+
+      await install.setupVolume();
+
+      expect(await ver.getCurrent('dyn-uncurrent')).toBeNull();
+      expect(await ver.getCurrent('dyn-current')).toMatchObject({
+        tool: { name: 'dyn-current', version: '1.0.0' },
+      });
+      expect(
+        await ver.isInstalled({ name: 'dyn-uncurrent', version: '1.0.0' }),
+      ).toBe(true);
+      // a version without a current line is not restored
+      expect(jq).not.toHaveBeenCalled();
+    });
+
+    describe('the parent of a linked child tool', () => {
+      /** Writes the wrapper of the child for a parent version. */
+      async function wrapperFor(
+        version: string,
+        parent: string,
+      ): Promise<string> {
+        const pathSvc = await child.getAsync(PathService);
+        const wrapper = join(
+          pathSvc.versionedToolPath('child', version),
+          parent,
+          '.wrappers/child',
+        );
+        await fs.mkdir(join(wrapper, '..'), { recursive: true });
+        await fs.writeFile(wrapper, '');
+        return wrapper;
+      }
+
+      /** Lists the child for the parent 47.0.0, its link before its `c` line. */
+      function childList(version: string): BuildListEntry[] {
+        const parent = { name: 'multi', version: '47.0.0' };
+        return [
+          { kind: 'i', type: 'tool', tool: 'multi', version: '47.0.0' },
+          { kind: 'c', alias: 'multi', tool: 'multi', version: '47.0.0' },
+          { kind: 'i', type: 'tool', tool: 'child', version, parent },
+          { kind: 'l', command: 'child', tool: 'child', version },
+          { kind: 'c', alias: 'child', tool: 'child', version, parent },
+        ];
+      }
+
+      test('an old parent wrapper of the volume is not used', async () => {
+        const ver = await child.getAsync(VersionService);
+        // the volume has the child for an older parent, with its wrapper
+        const old = await wrapperFor('8.0.0', '46.0.0');
+        await ver.addInstalled({
+          name: 'child',
+          version: '8.0.0',
+          parent: { name: 'multi', version: '46.0.0' },
+        });
+        await fs.rm(linkPath('child'), { force: true });
+        await fs.symlink(old, linkPath('child'));
+        listOf(...childList('8.0.0'));
+
+        await install.setupVolume();
+
+        // the wrapper for the listed parent is missing, the shim installs it
+        expect(await lookup(linkPath('child'))).toBe('ENOENT');
+      });
+
+      test('the wrapper of the listed parent is used', async () => {
+        const ver = await child.getAsync(VersionService);
+        await wrapperFor('8.1.0', '46.0.0');
+        const listed = await wrapperFor('8.1.0', '47.0.0');
+        await ver.addInstalled({
+          name: 'child',
+          version: '8.1.0',
+          parent: { name: 'multi', version: '46.0.0' },
+        });
+        listOf(...childList('8.1.0'));
+
+        await install.setupVolume();
+
+        expect(await fs.readlink(linkPath('child'))).toBe(listed);
+      });
+    });
+
+    test('a link of a version which is not current uses its listed parents, the newest first', async () => {
+      const pathSvc = await child.getAsync(PathService);
+      const wrapper = async (parent: string): Promise<string> => {
+        const file = join(
+          pathSvc.versionedToolPath('child', '8.2.0'),
+          parent,
+          '.wrappers/child',
+        );
+        await fs.mkdir(join(file, '..'), { recursive: true });
+        await fs.writeFile(file, '');
+        return file;
+      };
+      await wrapper('46.0.0');
+      const listed = await wrapper('47.0.0');
+      const parent = { name: 'multi', version: '47.0.0' };
+      listOf(
+        {
+          kind: 'i',
+          type: 'tool',
+          tool: 'child',
+          version: '8.2.0',
+          parent: { name: 'multi', version: '46.0.0' },
+        },
+        { kind: 'i', type: 'tool', tool: 'child', version: '8.2.0', parent },
+        { kind: 'i', type: 'tool', tool: 'child', version: '8.3.0', parent },
+        { kind: 'c', alias: 'child', tool: 'child', version: '8.3.0', parent },
+        { kind: 'l', command: 'child', tool: 'child', version: '8.2.0' },
+      );
+
+      await install.setupVolume();
+
+      expect(await fs.readlink(linkPath('child'))).toBe(listed);
+    });
+
+    test('warns about a pointer it cannot remove', async () => {
+      const remove = vi.spyOn(LinkToolService.prototype, 'removeStalePointer');
+      // no wrapper of this version exists, so the pointer is removed
+      listOf(...multi('45.0.0'));
+
+      await install.setupVolume();
+
+      expect(remove).toHaveBeenCalledWith('multi', true);
+      expect(remove).toHaveBeenCalledWith('multi45', true);
+    });
+
+    test('clears the initialized markers', async () => {
+      const pathSvc = await child.getAsync(PathService);
+      await pathSvc.ensureBasePaths();
+      await pathSvc.setInitialized('node');
+      listOf(...multi('44.0.0'));
+
+      await install.setupVolume();
+
+      expect(await pathSvc.isInitialized('node')).toBe(false);
+    });
+
+    test('records a version once and installs nothing but jq', async () => {
+      const ver = await child.getAsync(VersionService);
+      listOf(...multi('42.0.0'));
+      const add = vi.spyOn(VersionService.prototype, 'addInstalled');
+      const installSpy = vi.spyOn(MultiInstallService.prototype, 'install');
+
+      await install.setupVolume();
+      await install.setupVolume();
+
+      expect(add).toHaveBeenCalledOnce();
+      expect(installSpy).not.toHaveBeenCalled();
+      expect(
+        (await ver.findInstalled('multi')).filter(
+          (v) => v.version === '42.0.0',
+        ),
+      ).toHaveLength(1);
+    });
+
+    test('restores jq at once, git on its first call as the user', async () => {
+      const jq = vi.spyOn(JqInstallService.prototype, 'install');
+      const git = vi.spyOn(GitInstallService.prototype, 'install');
+      listOf(
+        { kind: 'i', type: 'tool', tool: 'git', version: '2.0.0' },
+        { kind: 'c', alias: 'git', tool: 'git', version: '2.0.0' },
+        { kind: 'l', command: 'git', tool: 'git', version: '2.0.0' },
+        { kind: 'i', type: 'tool', tool: 'jq', version: '1.0.0' },
+        { kind: 'c', alias: 'jq', tool: 'jq', version: '1.0.0' },
+        { kind: 'l', command: 'jq', tool: 'jq', version: '1.0.0' },
+      );
+
+      await install.setupVolume();
+
+      expect(jq).toHaveBeenCalledExactlyOnceWith('1.0.0');
+      expect(git).not.toHaveBeenCalled();
+      expect(await pathExists(linkPath('jq'), 'file')).toBe(true);
+
+      // the shim of git installs it, which needs no root
+      expect(await install.ensure('git')).toBeUndefined();
+
+      expect(git).toHaveBeenCalledExactlyOnceWith('2.0.0');
+    });
+
+    test('only warns when jq cannot be restored', async () => {
+      const err = new Error('install failed');
+      vi.spyOn(JqInstallService.prototype, 'install').mockRejectedValueOnce(
+        err,
+      );
+      listOf(
+        { kind: 'i', type: 'tool', tool: 'jq', version: '1.1.0' },
+        { kind: 'c', alias: 'jq', tool: 'jq', version: '1.1.0' },
+      );
+
+      await expect(install.setupVolume()).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err, tool: 'jq' },
+        'cannot restore the tool, the shim retries',
+      );
+      // the list is copied anyway, the shim restores jq on its first call
+      expect(BuildListService.prototype.copyToVolume).toHaveBeenCalledOnce();
+    });
+
+    test('skips jq without an install service', async () => {
+      const bare = createContainer();
+      bare.bind(InstallToolService).toSelf();
+      bare.bind(V1ToolInstallService).toSelf();
+      listOf(
+        { kind: 'i', type: 'tool', tool: 'jq', version: '1.2.0' },
+        { kind: 'c', alias: 'jq', tool: 'jq', version: '1.2.0' },
+      );
+
+      await expect(
+        (await bare.getAsync(InstallToolService)).setupVolume(),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -1031,6 +1653,56 @@ describe('cli/install-tool/install-tool.service', () => {
       expect(await install.ensure('multi17')).toBeUndefined();
 
       expect(initializeTools).not.toHaveBeenCalled();
+    });
+
+    describe('a child tool with a wrapper for an older parent', () => {
+      /**
+       * Installs the child for the parent 50.0.0, which is current, and leaves
+       * a record and a wrapper for the older parent 49.0.0, like an older
+       * volume. The pointer of the command is removed.
+       */
+      async function setup(): Promise<{ old: string; selected: string }> {
+        const pathSvc = await child.getAsync(PathService);
+        const ver = await child.getAsync(VersionService);
+        expect(await install.install('multi', '50.0.0')).toBeUndefined();
+        expect(await install.install('child', '9.5.0')).toBeUndefined();
+        const dir = pathSvc.versionedToolPath('child', '9.5.0');
+        const old = join(dir, '49.0.0', '.wrappers/child');
+        await fs.mkdir(join(old, '..'), { recursive: true });
+        await fs.writeFile(old, '');
+        const record = {
+          name: 'child',
+          version: '9.5.0',
+          parent: { name: 'multi', version: '49.0.0' },
+        };
+        if (!(await ver.isInstalled(record))) {
+          await ver.addInstalled(record);
+        }
+        await fs.rm(linkPath('child'), { force: true });
+        return { old, selected: join(dir, '50.0.0', '.wrappers/child') };
+      }
+
+      test('installs the version when the wrapper of the current parent is missing', async () => {
+        const { old, selected } = await setup();
+        await fs.rm(join(selected, '../..'), { recursive: true });
+        const spy = vi.spyOn(ChildInstallService.prototype, 'install');
+
+        expect(await install.ensure('child')).toBeUndefined();
+
+        expect(spy).toHaveBeenCalledExactlyOnceWith('9.5.0');
+        expect(await fs.readlink(linkPath('child'))).toBe(selected);
+        expect(await fs.readlink(linkPath('child'))).not.toBe(old);
+      });
+
+      test('points at the wrapper of the current parent without an install', async () => {
+        const { selected } = await setup();
+        const spy = vi.spyOn(ChildInstallService.prototype, 'install');
+
+        expect(await install.ensure('child')).toBeUndefined();
+
+        expect(spy).not.toHaveBeenCalled();
+        expect(await fs.readlink(linkPath('child'))).toBe(selected);
+      });
     });
 
     test('installs the missing parent first', async () => {

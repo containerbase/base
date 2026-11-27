@@ -58,7 +58,8 @@ It never reads stdin and never writes to stdout, so the output of the command st
 A shim called from within `ensure`, eg. by an installer, runs as usual when its own pointer exists, and only fails fast with `127` when its pointer is missing too, instead of calling `ensure` again.
 
 `install-tool` installs a version which is recorded as installed again too, when its files are gone.
-This doesn't apply to tools which can't be uninstalled, like `git`, and to the v1 and v2 shell tools.
+This doesn't apply to the v1 and v2 shell tools.
+The shim of `git` installs its files again as the user too, as its system wide files stay in the image, `install-tool git` still needs root.
 
 ## Recovery
 
@@ -66,6 +67,8 @@ This doesn't apply to tools which can't be uninstalled, like `git`, and to the v
 - A deleted `/opt/containerbase/links` folder is recreated by `containerbase-cli init tool all`, which recreates the missing pointers for the wrappers which still exist.
   It downloads nothing, a command whose version folder is missing is installed again on its first call.
 - A command without a row in the `links` database can't be restored, install the tool again.
+
+A [volume at `/opt/containerbase`](./custom-base-image.md#volume-at-optcontainerbase) uses the same recovery: `init tool all` sets up the shims from the build-time list of the image, and each tool is installed again on its first call.
 
 A setup with a read-only root file system keeps working: the pointers are part of the image.
 A call of a command whose version is missing fails there, as the containerbase folders can't be written.

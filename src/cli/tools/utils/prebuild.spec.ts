@@ -41,6 +41,13 @@ class ErlangInstallService extends PrebuildInstallService {
 
 @injectable()
 @injectFromHierarchy()
+class NobleErlangInstallService extends PrebuildInstallService {
+  readonly name = 'erlang';
+  protected override readonly fallbackDistro = 'noble';
+}
+
+@injectable()
+@injectFromHierarchy()
 class ErlangVersionResolver extends PrebuildVersionResolver {
   readonly tool = 'erlang';
 }
@@ -66,11 +73,12 @@ describe('cli/tools/utils/prebuild', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     child = await testContainer();
     child.bind(ErlangInstallService).toSelf();
+    child.bind(NobleErlangInstallService).toSelf();
     child.bind(ErlangVersionResolver).toSelf();
     pathSvc = await child.getAsync(PathService);
     // no tool-versions data, the prebuild is downloaded from its release
@@ -100,28 +108,68 @@ describe('cli/tools/utils/prebuild', () => {
       });
     });
 
-    test.each([{ code: 'noble' }, { code: 'resolute' }])(
-      'install: uses the jammy prebuild on $code',
-      async ({ code }) => {
+    test.each([
+      { code: 'noble', id: '24.04' },
+      { code: 'resolute', id: '26.04' },
+    ])('install: uses the jammy prebuild on $code', async ({ code, id }) => {
+      vi.mocked(getDistro).mockResolvedValue({
+        name: 'Ubuntu',
+        versionCode: code,
+        versionId: id,
+      });
+      const version = `27.0.0-${code}`;
+      const path = releasePath(version, 'jammy', 'x86_64');
+      scope(baseUrl)
+        .get(`${path}.sha512`)
+        .reply(200, checksum)
+        .get(path)
+        .reply(200, tarball);
+      const svc = await child.getAsync(ErlangInstallService);
+
+      await expect(svc.install(version)).resolves.toBeUndefined();
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Using jammy file for erlang on ${code}`,
+      );
+    });
+
+    test.each([
+      { code: 'noble', id: '24.04', log: false },
+      { code: 'resolute', id: '26.04', log: true },
+    ])(
+      'install: uses the overridden noble prebuild on $code',
+      async ({ code, id, log }) => {
         vi.mocked(getDistro).mockResolvedValue({
           name: 'Ubuntu',
           versionCode: code,
-          versionId: '24.04',
+          versionId: id,
         });
-        const version = `27.0.0-${code}`;
-        const path = releasePath(version, 'jammy', 'x86_64');
+        const version = `27.1.0-${code}`;
+        const path = releasePath(version, 'noble', 'x86_64');
         scope(baseUrl)
           .get(`${path}.sha512`)
           .reply(200, checksum)
           .get(path)
           .reply(200, tarball);
-        const svc = await child.getAsync(ErlangInstallService);
+        const spy = vi.spyOn(CompressionService.prototype, 'extract');
+        const svc = await child.getAsync(NobleErlangInstallService);
 
         await expect(svc.install(version)).resolves.toBeUndefined();
 
-        expect(logger.debug).toHaveBeenCalledWith(
-          `Using jammy file for erlang on ${code}`,
-        );
+        expect(spy).toHaveBeenCalledExactlyOnceWith({
+          file: expect.stringContaining(
+            `erlang-${version}-noble-x86_64.tar.xz`,
+          ),
+          cwd: pathSvc.toolPath('erlang'),
+        });
+        // the fallback lookup is skipped on the fallback distro itself
+        expect(
+          vi
+            .mocked(logger.debug)
+            .mock.calls.some(
+              ([msg]) => msg === `Using noble file for erlang on ${code}`,
+            ),
+        ).toBe(log);
       },
     );
 
@@ -162,7 +210,6 @@ describe('cli/tools/utils/prebuild', () => {
       }
 
       test.each([
-        { code: 'jammy', distros: ['jammy'], file: 'jammy', lookups: 1 },
         {
           code: 'noble',
           distros: ['jammy', 'noble'],
@@ -208,10 +255,7 @@ describe('cli/tools/utils/prebuild', () => {
         },
       );
 
-      test.each([
-        { code: 'jammy', lookups: 1 },
-        { code: 'noble', lookups: 2 },
-      ])(
+      test.each([{ code: 'noble', lookups: 2 }])(
         'install: falls back to the release on $code without a file for the host',
         async ({ code, lookups }) => {
           vi.mocked(getDistro).mockResolvedValue({

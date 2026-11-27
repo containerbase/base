@@ -52,8 +52,8 @@ describe('cli/tools/ruby/index', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // CI configures an apt proxy, which `AptService` would write to `/etc`
     vi.stubEnv('APT_HTTP_PROXY', undefined);
@@ -66,11 +66,14 @@ describe('cli/tools/ruby/index', () => {
   });
 
   describe('RubyPrepareService', () => {
-    test.each(['jammy', 'noble', 'resolute'])('prepare on %s', async (code) => {
+    test.each([
+      { code: 'noble', id: '24.04' },
+      { code: 'resolute', id: '26.04' },
+    ])('prepare on $code', async ({ code, id }) => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
         versionCode: code,
-        versionId: '24.04',
+        versionId: id,
       });
       const { svc, child, pathSvc } = await toolContext(RubyPrepareService);
       const envSvc = await child.getAsync(EnvService);
@@ -95,13 +98,13 @@ describe('cli/tools/ruby/index', () => {
     test('prepare: throws on an unsupported distro', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'focal',
-        versionId: '20.04',
+        versionCode: 'jammy',
+        versionId: '22.04',
       });
       const { svc } = await toolContext(RubyPrepareService);
 
       await expect(svc.prepare()).rejects.toThrow(
-        "Tool 'ruby' not supported on: focal!",
+        "Tool 'ruby' not supported on: jammy!",
       );
     });
 
@@ -174,11 +177,11 @@ describe('cli/tools/ruby/index', () => {
       },
     );
 
-    test('install on noble uses the jammy prebuild', async () => {
+    test('install on resolute uses the jammy prebuild', async () => {
       vi.mocked(getDistro).mockResolvedValue({
         name: 'Ubuntu',
-        versionCode: 'noble',
-        versionId: '24.04',
+        versionCode: 'resolute',
+        versionId: '26.04',
       });
       const version = '3.3.0';
       const { svc, pathSvc } = await toolContext(RubyInstallService);

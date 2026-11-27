@@ -34,8 +34,9 @@ The data has the files and checksums of the versions, so no checksum file is dow
   Pass `name` when the data names the file differently, like docker.
 - `this.downloadNamedToolFile(version, name)` - the data file named `name`, for installers with their own fallback, like golang and maven.
   It returns `undefined` without that file for the host.
-- `this.downloadDistroToolFile(version, host, fallback)` - the data file of the host distro, else the one of `fallback`, like jammy for newer ubuntu releases.
-  The containerbase prebuilds with distro builds extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), which does this and falls back to the jammy prebuild and its `.sha512`.
+- `this.downloadDistroToolFile(version, host, fallback)` - the data file of the host distro, else the one of `fallback`, like jammy or noble for newer ubuntu releases.
+  The containerbase prebuilds with distro builds extend `PrebuildInstallService` ([`src/cli/tools/utils/prebuild.ts`](../src/cli/tools/utils/prebuild.ts)), which does this and falls back to the prebuild of its `fallbackDistro` and its `.sha512`.
+  `fallbackDistro` is `jammy` by default, a tool whose oldest build is newer overrides it, like git with `noble`.
 - `this.downloadToolFile(version, distro?, filter?)` - for other upstream layouts.
   It returns `undefined` without a data file for the host, so the installer can fall back to its own download.
 

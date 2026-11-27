@@ -37,6 +37,13 @@ elif [[ "${tmp_dir}" == /* && "${tmp_dir}" != *//* && "${tmp_dir}" != */./* && "
   fi
 fi
 
+# a volume at /opt/containerbase without the build-time tool list of the image, which is a new
+# volume or one of an older image, needs the init too, which sets it up
+if [[ "${run_init}" != true && -s /var/lib/containerbase/tool.inst ]] \
+  && ! cmp -s /var/lib/containerbase/tool.inst /opt/containerbase/.tool.inst; then
+  run_init=true
+fi
+
 if [[ "${run_init}" == true ]]; then
   # initialize all prepared tools, also checks and links a configured tmp dir
   containerbase-cli init tool all

@@ -62,9 +62,9 @@ RUN install-tool python 3.14.10
 FROM build AS pipenv
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.10.4
+RUN install-tool pipenv 2026.12.1
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.10.4
+RUN install-tool pipenv 2026.12.1
 
 USER 12021
 
@@ -75,9 +75,9 @@ FROM build AS poetry
 
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 USER 12021
 
@@ -111,7 +111,7 @@ FROM build-rootless AS test-poetry-a
 RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 
 SHELL [ "/bin/sh", "-c" ]
@@ -157,7 +157,7 @@ RUN set -ex; cd d-poetry && poetry update --lock --no-interaction pytest
 FROM build AS test-poetry-e
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 USER 1001
 
@@ -165,7 +165,7 @@ USER 1001
 RUN install-tool python 3.10.0
 
 # renovate: datasource=pypi
-RUN install-tool poetry 2.5.1
+RUN install-tool poetry 2.5.2
 
 #--------------------------------------
 # test b: non-root
@@ -201,14 +201,14 @@ RUN set -ex; \
 FROM build-rootless AS test-pipenv-b
 
 # Do not update minor
-RUN install-tool python 3.10.17
+RUN install-tool python 3.11.6
 
 # make as latest
 # renovate: datasource=github-releases packageName=containerbase/python-prebuild
 RUN install-tool python 3.14.10
 
 # renovate: datasource=pypi
-RUN install-tool pipenv 2026.10.4
+RUN install-tool pipenv 2026.12.1
 
 RUN set -ex; \
   cd pipenv-b; \
@@ -243,11 +243,14 @@ RUN install-pip checkov
 RUN install-pip copier
 RUN install-pip hashin
 RUN install-pip kas
+RUN install-pip mercurial
 RUN install-pip pdm
 RUN install-pip pip-tools
 RUN install-pip pipenv
 RUN install-pip poetry
 RUN install-pip uv
+
+RUN hg --version
 
 #--------------------------------------
 # test: shims
@@ -258,10 +261,10 @@ RUN install-pip hashin
 
 # the version folders of a pip package and of its python are installed again on the next call
 RUN set -ex; \
-  rm -rf /opt/containerbase/tools/hashin/* /opt/containerbase/tools/python/*; \
+  rm -rf /opt/containerbase/tools/pip+hashin/* /opt/containerbase/tools/python/*; \
   [[ ! -e /opt/containerbase/links/hashin ]]; \
   hashin --version; \
-  [[ -n "$(ls /opt/containerbase/tools/hashin)" ]]; \
+  [[ -n "$(ls /opt/containerbase/tools/pip+hashin)" ]]; \
   [[ -n "$(ls /opt/containerbase/tools/python)" ]]; \
   python --version
 

@@ -27,7 +27,7 @@ describe('cli/command/uninstall-pip', () => {
     expect(mocks.uninstallTool).toHaveBeenCalledExactlyOnceWith({
       dryRun: false,
       recursive: false,
-      tool: 'poetry',
+      tool: 'pip+poetry',
       type: 'pip',
       version: '5.0.0',
     });

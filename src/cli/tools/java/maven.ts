@@ -176,7 +176,7 @@ export class MavenVersionResolver extends ToolVersionResolver {
         // keep the version: an `X.Y` release like `3.0` passes `validate` and
         // installs from the repo.maven.apache.org fallback, a bare major fails
         // validation; the tool-versions data had no match either
-        // TODO: fail in the next major (#7962)
+        // TODO: fail in a following major (#7962)
         logger.warn(
           { err, tool: this.tool, version },
           'maven metadata lookup or parsing failed, keeping the version',

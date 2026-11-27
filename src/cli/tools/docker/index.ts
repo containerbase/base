@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
 import { BasePrepareService } from '../../prepare-tool/base-prepare.service.ts';
+import { logger, pathExists } from '../../utils/index.ts';
+import { cliPlugins, linkCliPlugin } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -29,11 +31,34 @@ export class DockerPrepareService extends BasePrepareService {
     );
   }
 
-  /** Creates the docker cli plugins folder in the containerbase cache. */
+  /**
+   * Creates the docker cli plugins folder in the containerbase cache, and the
+   * global cli plugins folder with its link to it, which an empty
+   * `/opt/containerbase` misses, as `/usr/local/lib` links there. An existing
+   * link is kept, and a folder which can't be written is only warned about.
+   * The buildx and compose plugin links, which live in the temp folder, are
+   * created again for the commands which have a shim.
+   */
   override async initialize(): Promise<void> {
-    await this.pathSvc.createDir(
-      join(this.pathSvc.cachePath, '.docker', 'cli-plugins'),
-    );
+    const plugins = join(this.pathSvc.cachePath, '.docker', 'cli-plugins');
+    await this.pathSvc.createDir(plugins);
+
+    for (const { plugin, command } of cliPlugins) {
+      if (await pathExists(join(this.pathSvc.binDir, command), 'file')) {
+        await linkCliPlugin(this.pathSvc, plugin, command);
+      }
+    }
+
+    const globalDocker = join(this.envSvc.rootDir, 'usr/local/lib/docker');
+    try {
+      await fs.mkdir(globalDocker, { recursive: true });
+      await this.pathSvc.createSymlink(
+        plugins,
+        join(globalDocker, 'cli-plugins'),
+      );
+    } catch (err) {
+      logger.warn({ err }, 'cannot link the docker cli plugins folder');
+    }
   }
 }
 

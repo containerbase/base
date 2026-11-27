@@ -103,7 +103,7 @@ body:
         If the tool is already available as a pre‑build image, point to it.
       placeholder: |
         ```dockerfile
-        FROM ubuntu:22.04 AS base
+        FROM ubuntu:24.04 AS base
         RUN apt-get update && apt-get install -y wget gnupg ca-certificates \
             && wget https://download.mono-project.com/repo/ubuntu-stable.gpg.key \
             && gpg --dearmor -o /usr/share/keyrings/mono-archive-keyring.gpg < ubuntu-stable.gpg.key

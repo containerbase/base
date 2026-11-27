@@ -6,7 +6,6 @@ export const NoPrepareTools = [
   'apm',
   'aube',
   'bazelisk',
-  'bower',
   'buf',
   'buildx',
   'bun',
@@ -31,7 +30,6 @@ export const NoPrepareTools = [
   'jq',
   'kubectl',
   'kustomize',
-  'lerna',
   'maven',
   'mise',
   'nix',
@@ -78,6 +76,7 @@ export const ResolverMap: Record<string, InstallToolType> = {
   corepack: 'npm',
   hashin: 'pip',
   kas: 'pip',
+  mercurial: 'pip',
   npm: 'npm',
   pnpm: 'npm',
   pdm: 'pip',
@@ -87,14 +86,29 @@ export const ResolverMap: Record<string, InstallToolType> = {
   uv: 'pip',
 };
 
+/** The type prefix of a recorded package name, see {@link packageKey}. */
+const typePrefix = /^(?:gem|npm|pip)\+/;
+
 /**
- * This tools are deprecated and should not be used anymore via `install-tool`.
- * They are implicit mapped from `install-tool` to `install-<type>`.
+ * The name a package installed with `install-gem`, `install-npm` or
+ * `install-pip` is recorded and installed under: its type and name, eg.
+ * `npm+yarn`, so it never matches a tool of the same name. `+` is safe in
+ * folder names and the `PATH`.
+ * @param type - the install type of the package
+ * @param name - the package name
  */
-export const DeprecatedTools: Record<string, InstallToolType> = {
-  bower: 'npm',
-  lerna: 'npm',
-};
+export function packageKey(type: InstallToolType, name: string): string {
+  return `${type}+${name}`;
+}
+
+/**
+ * The package name of a recorded name: the name without its type prefix, see
+ * {@link packageKey}, else the name itself, eg. for a tool of the
+ * {@link ResolverMap}.
+ */
+export function packageName(name: string): string {
+  return name.replace(typePrefix, '');
+}
 
 /**
  * Looks up the install type of a tool in the given map.

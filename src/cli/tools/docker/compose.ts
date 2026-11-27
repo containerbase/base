@@ -2,9 +2,8 @@ import fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { injectFromHierarchy, injectable } from 'inversify';
 import { BaseInstallService } from '../../install-tool/base-install.service.ts';
-import { pathExists, semverGte } from '../../utils/index.ts';
-
-const minVersion = '2.0.1';
+import { semverGte } from '../../utils/index.ts';
+import { linkCliPlugin } from './utils.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -12,8 +11,8 @@ export class DockerComposeInstallService extends BaseInstallService {
   readonly name = 'docker-compose';
   override readonly parent = 'docker';
 
-  /** The oldest version `validate` accepts. */
-  override readonly minVersion = minVersion;
+  /** The oldest supported version, older installs fail. */
+  override readonly minVersion = '2.0.1';
 
   /** The architecture name used by the compose release assets. */
   private get ghArch(): string {
@@ -57,8 +56,9 @@ export class DockerComposeInstallService extends BaseInstallService {
   }
 
   /**
-   * Links the `docker-compose` binary into the global bin folder and as
-   * docker cli plugin.
+   * Links the `docker-compose` binary into the global bin folder and links
+   * the docker cli plugin to its shim there, so the plugin runs the linked
+   * version.
    */
   override async link(version: string): Promise<void> {
     const src = join(this.pathSvc.versionedToolPath(this.name, version), 'bin');
@@ -66,23 +66,11 @@ export class DockerComposeInstallService extends BaseInstallService {
     // to track linked version
     await this.shellwrapper({ srcDir: src });
 
-    const tgt = join(
-      this.pathSvc.cachePath,
-      `.docker/cli-plugins/${this.name}`,
-    );
-    if (await pathExists(tgt)) {
-      await fs.rm(tgt);
-    }
-    await fs.symlink(join(src, this.name), tgt);
+    await linkCliPlugin(this.pathSvc, this.name, this.name);
   }
 
   /** Checks that `docker compose version` runs. */
   override async test(_version: string): Promise<void> {
     await this._spawn('docker', ['compose', 'version']);
-  }
-
-  /** Accepts semver versions from 2.0.1. */
-  override async validate(version: string): Promise<boolean> {
-    return (await super.validate(version)) && semverGte(version, minVersion);
   }
 }

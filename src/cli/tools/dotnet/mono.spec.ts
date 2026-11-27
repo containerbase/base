@@ -44,8 +44,8 @@ describe('cli/tools/dotnet/mono', () => {
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
     // no tool-versions data, the prebuild is downloaded from its release
     vi.spyOn(
@@ -156,6 +156,40 @@ describe('cli/tools/dotnet/mono', () => {
       expect(await fs.readlink(join(envSvc.rootDir, 'usr/share/.mono'))).toBe(
         join(pathSvc.sslPath, 'mono'),
       );
+    });
+
+    test('initialize creates the cert store folder', async () => {
+      const { svc, child } = await toolContext(MonoPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const store = join(pathSvc.sslPath, 'mono');
+      await fs.rm(store, { recursive: true, force: true });
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+      // a second run keeps it
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect((await fs.stat(store)).isDirectory()).toBe(true);
+    });
+
+    test('prepare installs the hook after an initialize', async () => {
+      const { svc, child } = await toolContext(MonoPrepareService);
+      const pathSvc = await child.getAsync(PathService);
+      const envSvc = await child.getAsync(EnvService);
+      const store = join(pathSvc.sslPath, 'mono');
+      const hook = join(
+        envSvc.rootDir,
+        'etc/ca-certificates/update.d/containerbase-mono-keystore',
+      );
+      await fs.rm(store, { recursive: true, force: true });
+      await fs.rm(hook, { force: true });
+
+      await svc.initialize();
+      await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(await fs.readFile(hook, 'utf8')).toContain(
+        'Updating Mono key store',
+      );
+      expect((await fs.stat(store)).isDirectory()).toBe(true);
     });
 
     test('prepare replaces an existing mono link', async () => {

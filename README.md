@@ -65,7 +65,7 @@ pnpm test:docker -b -t test-x86_64 java
 # run multiple tests with debug logging
 pnpm test:docker -D java node
 
-# rebuild the CLI and run the distro tests from `test/Dockerfile.distro` on jammy, noble and resolute
+# rebuild the CLI and run the distro tests from `test/Dockerfile.distro` on noble and resolute
 pnpm test:docker -b -t test-distro
 
 # run the base test from `test/Dockerfile.base` on noble only
@@ -76,9 +76,8 @@ Any positional argument is the name of a folder in [`test`](./test/) which conta
 If no test is given, all tests from the [`test`](./test/) folder are run.
 Unknown test names are only reported as an error when they are passed explicitly.
 
-With the `test-distro` or `test-base` target, the positional arguments are distro names instead: `jammy`, `noble` or `resolute`.
-If no distro is given, all three are run, like in CI.
-Ubuntu `jammy` is deprecated and will be removed in the next major release.
+With the `test-distro` or `test-base` target, the positional arguments are distro names instead: `noble` or `resolute`.
+If no distro is given, both are run, like in CI.
 
 The following options are supported:
 
@@ -114,6 +113,10 @@ You can configure an apt proxy for the build by setting an `APT_HTTP_PROXY` argu
 For example: `docker build --build-arg APT_HTTP_PROXY=https://apt.company.com . -t my/image`
 
 You can export `APT_HTTP_PROXY` to your local env and our build tools will use your apt proxy for the `http` sources.
+
+## Upgrading
+
+Read the [upgrading](./docs/upgrading.md) docs for the breaking changes of each major release and what to do instead.
 
 ## Custom base image
 

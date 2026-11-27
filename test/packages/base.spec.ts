@@ -27,6 +27,7 @@ import type { Logger } from '../../packages/base/src/logger.ts';
 import {
   Arch,
   DistroCode,
+  HostDistroCode,
   type InstallToolType,
   ToolMetadata,
   type ToolType,
@@ -54,8 +55,7 @@ const schema = 'https://example.com/v1/tool.schema.json';
 const updatedAt = '2026-10-16T00:00:00Z';
 
 /** The codenames of the Ubuntu versions the default image can be built from. */
-const ubuntuCodenames: Record<string, types.DistroCode> = {
-  '22.04': 'jammy',
+const ubuntuCodenames: Record<string, types.HostDistroCode> = {
   '24.04': 'noble',
   '26.04': 'resolute',
 };
@@ -104,6 +104,20 @@ describe('packages/base', () => {
     >().toEqualTypeOf<types.DistroCode>();
   });
 
+  test('HostDistroCode matches the zod free type', () => {
+    expectTypeOf<
+      z.infer<typeof HostDistroCode>
+    >().toEqualTypeOf<types.HostDistroCode>();
+  });
+
+  test('the artifact distros keep jammy, the host distros are a subset', () => {
+    // tool-versions validates the distro of its files, which keep jammy
+    // prebuilds newer releases still use
+    expect(DistroCode.options).toEqual(['jammy', 'noble', 'resolute']);
+    expect(HostDistroCode.options).toEqual(['noble', 'resolute']);
+    expectTypeOf<types.HostDistroCode>().toExtend<types.DistroCode>();
+  });
+
   test('Arch matches the zod free type', () => {
     expectTypeOf<z.infer<typeof Arch>>().toEqualTypeOf<types.Arch>();
   });
@@ -120,6 +134,10 @@ describe('packages/base', () => {
     expect(ToolMetadata.safeParse({ distroMinVersion: {} }).success).toBe(true);
     expect(
       ToolMetadata.safeParse({ distroMinVersion: { focal: '1.0.0' } }).success,
+    ).toBe(false);
+    // not a host anymore
+    expect(
+      ToolMetadata.safeParse({ distroMinVersion: { jammy: '1.0.0' } }).success,
     ).toBe(false);
     expect(
       ToolMetadata.safeParse({ distroMinVersion: { noble: 1 } }).success,

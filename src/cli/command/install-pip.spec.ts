@@ -37,13 +37,13 @@ describe('cli/command/install-pip', () => {
     expect(await cli.run(['poetry'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'poetry',
+      'pip+poetry',
       '4.0.0',
       false,
       'pip',
     );
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'poetry',
+      'pip+poetry',
       '5.0.0',
       false,
       'pip',
@@ -67,13 +67,13 @@ describe('cli/command/install-pip', () => {
     expect(await cli.run(['install', 'pip', 'poetry'])).toBe(0);
     expect(mocks.installTool).toHaveBeenCalledTimes(2);
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'poetry',
+      'pip+poetry',
       '4.0.0',
       false,
       'pip',
     );
     expect(mocks.installTool).toHaveBeenCalledWith(
-      'poetry',
+      'pip+poetry',
       '5.0.0',
       false,
       'pip',

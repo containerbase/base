@@ -16,6 +16,7 @@ import {
 } from './tool-version-resolver.ts';
 import { scope } from '~test/http-mock.ts';
 import { rootPath } from '~test/path.ts';
+import { toolFile as listedFile, mockToolFiles } from '~test/tool.ts';
 
 @injectable()
 @injectFromHierarchy()
@@ -191,13 +192,15 @@ describe('cli/services/tool-version-resolver.service', () => {
 
     // the host runs containerbase 14.51.0
     vi.stubGlobal('CONTAINERBASE_VERSION', '14.51.0');
-    // the host is amd64 on jammy
+    // the host is amd64 on noble
     vi.mocked(arch).mockReturnValue('x64');
     vi.mocked(getDistro).mockResolvedValue({
       name: 'Ubuntu',
-      versionCode: 'jammy',
-      versionId: '22.04',
+      versionCode: 'noble',
+      versionId: '24.04',
     });
+    // no files of the versions unless a test mocks them
+    mockToolFiles();
 
     child = createContainer();
     child.bind(ToolVersionResolverService).toSelf();
@@ -942,7 +945,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('swift', '6.3')).toBe('6.3');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No swift release matches 6.3 for amd64 on jammy, 6.3 is used as is',
+      'No swift release matches 6.3 for amd64 on noble, 6.3 is used as is',
     );
   });
 
@@ -955,7 +958,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('swift', '6.2')).toBe('6.2');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No swift release matches 6.2 for amd64 on jammy, 6.2 is used as is',
+      'No swift release matches 6.2 for amd64 on noble, 6.2 is used as is',
     );
   });
 
@@ -1001,7 +1004,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', '21')).toBe('21');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches 21 for amd64 on jammy, 21 is used as is',
+      'No other release matches 21 for amd64 on noble, 21 is used as is',
     );
   });
 
@@ -1060,6 +1063,68 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', 'latest')).toBe('2.0.0');
   });
 
+  /**
+   * Mocks the files of the versions, the `newest` one only has an arm64 file,
+   * the others an amd64 one.
+   * @returns the spy of the lookups
+   */
+  function mockFiles(newest: string): ReturnType<typeof mockToolFiles> {
+    return mockToolFiles().mockImplementation((tool, version) =>
+      Promise.resolve({
+        tool,
+        version,
+        files: [
+          listedFile(
+            `https://example.test/${tool}-${version}.tar.gz`,
+            version,
+            version === newest ? 'arm64' : 'amd64',
+          ),
+        ],
+      }),
+    );
+  }
+
+  test('skips a newest release whose files have none for the host arch', async () => {
+    // the data lists amd64 for 3.0.0, the files the install uses don't have it
+    serve('other', 200, [
+      { version: '3.0.0', archs: ['amd64', 'arm64'] },
+      { version: '2.0.0', archs: ['amd64', 'arm64'] },
+    ]);
+    const files = mockFiles('3.0.0');
+
+    expect(await svc.resolve('other', undefined)).toBe('2.0.0');
+    expect(files).toHaveBeenCalledWith('other', '3.0.0');
+    expect(logger.debug).toHaveBeenCalledWith(
+      { tool: 'other', version: '3.0.0', arch: 'amd64' },
+      'no tool-versions file for the host arch, skipping the release',
+    );
+  });
+
+  test('skips a newest lts release whose files have none for the host arch', async () => {
+    // like java-jre, whose newest lts got its aarch64 build later
+    await embed('lts-data', ['0.0.1']);
+    serve('lts-data', 200, {
+      ...toolFile('lts-data', [
+        { version: '25.0.5+2', lts: true, archs: ['amd64', 'arm64'] },
+        { version: '25.0.5+1', lts: true, archs: ['amd64', 'arm64'] },
+      ]),
+      lts: true,
+    });
+    mockFiles('25.0.5+2');
+
+    expect(await svc.resolve('lts-data', undefined)).toBe('25.0.5+1');
+  });
+
+  test('keeps a partial version which is a release with a file for the host arch', async () => {
+    await embed('other', [
+      { version: '8.10', archs: ['amd64'] },
+      { version: '8.9', archs: ['amd64'] },
+    ]);
+    mockFiles('none');
+
+    expect(await svc.resolve('other', '8.10')).toBe('8.10');
+  });
+
   test('picks a release for the arm64 host', async () => {
     vi.mocked(arch).mockReturnValue('arm64');
     child = createContainer();
@@ -1078,8 +1143,8 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test('skips a release which is only available for another distro', async () => {
     serve('other', 200, [
-      { version: '3.0.0', distros: ['noble', 'resolute'] },
-      { version: '2.0.0', distros: ['jammy', 'noble'] },
+      { version: '3.0.0', distros: ['resolute'] },
+      { version: '2.0.0', distros: ['noble', 'resolute'] },
       '1.0.0',
     ]);
 
@@ -1124,13 +1189,13 @@ describe('cli/services/tool-version-resolver.service', () => {
   test('skips the builds of a newer distro on an older host', async () => {
     serve('other', 200, [
       { version: '3.0.0', distros: ['resolute'] },
-      { version: '2.0.0', distros: ['noble'] },
+      { version: '2.0.0', distros: ['resolute'] },
     ]);
 
     expect(await svc.resolve('other', 'latest')).toBe('latest');
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches latest for amd64 on jammy, latest is used as is',
+      'No other release matches latest for amd64 on noble, latest is used as is',
     );
   });
 
@@ -1182,7 +1247,7 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test('skips an lts release which is not available for the host', async () => {
     serve('other', 200, [
-      { version: '24.1.0', lts: true, distros: ['noble'] },
+      { version: '24.1.0', lts: true, distros: ['resolute'] },
       { version: '22.1.0', lts: true },
       '25.0.0',
     ]);
@@ -1192,7 +1257,7 @@ describe('cli/services/tool-version-resolver.service', () => {
 
   test.each([
     { name: 'arch', limit: { archs: ['arm64'] } },
-    { name: 'distro', limit: { distros: ['noble'] } },
+    { name: 'distro', limit: { distros: ['resolute'] } },
   ])(
     'keeps latest when no lts release is available for the host $name',
     async ({ limit }) => {
@@ -1205,7 +1270,7 @@ describe('cli/services/tool-version-resolver.service', () => {
       expect(await svc.resolve('other', 'latest')).toBe('latest');
 
       expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-        'No other release matches latest for amd64 on jammy, latest is used as is',
+        'No other release matches latest for amd64 on noble, latest is used as is',
       );
     },
   );
@@ -1213,7 +1278,7 @@ describe('cli/services/tool-version-resolver.service', () => {
   test('resolves a partial version to a release available for the host', async () => {
     serve('other', 200, [
       { version: '3.12.5', archs: ['arm64'] },
-      { version: '3.12.4', distros: ['noble'] },
+      { version: '3.12.4', distros: ['resolute'] },
       '3.12.3',
       '3.11.9',
     ]);
@@ -1234,7 +1299,7 @@ describe('cli/services/tool-version-resolver.service', () => {
     expect(await svc.resolve('other', undefined)).toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-      'No other release matches latest for amd64 on jammy, no version is resolved',
+      'No other release matches latest for amd64 on noble, no version is resolved',
     );
   });
 

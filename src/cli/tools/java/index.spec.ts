@@ -232,6 +232,18 @@ describe('cli/tools/java/index', () => {
       await fs.rm(cacerts, { force: true });
     });
 
+    test('isPrepared counts the cacerts of the image', async () => {
+      const { svc, pathSvc } = await toolContext(JavaInstallService);
+      const varCerts = path.join(pathSvc.varPath, 'cacerts');
+      await fs.rm(path.join(pathSvc.sslPath, 'cacerts'), { force: true });
+      await fs.mkdir(pathSvc.varPath, { recursive: true });
+      await fs.writeFile(varCerts, 'certs');
+
+      expect(await svc.isPrepared()).toBe(true);
+
+      await fs.rm(varCerts);
+    });
+
     test('link and alias', async () => {
       const { svc, pathSvc } = await toolContext(JavaJdkInstallService);
       const spy = vi.spyOn(LinkToolService.prototype, 'shellwrapper');
@@ -266,9 +278,11 @@ describe('cli/tools/java/index', () => {
      * Creates the prepare service with the version resolvers bound, and
      * removes the cert store and the links of a previous prepare.
      */
-    async function prepareContext(
-      Svc: typeof JavaPrepareService,
-    ): Promise<{ svc: JavaPrepareService; pathSvc: PathService }> {
+    async function prepareContext(Svc: typeof JavaPrepareService): Promise<{
+      svc: JavaPrepareService;
+      pathSvc: PathService;
+      envSvc: EnvService;
+    }> {
       const child = await testContainer();
       bindVersionResolvers(child);
       child.bind(Svc).toSelf();
@@ -278,7 +292,7 @@ describe('cli/tools/java/index', () => {
       for (const dir of ['.m2', '.gradle', '.android', '.android-sdk']) {
         await fs.rm(path.join(envSvc.userHome, dir), { force: true });
       }
-      return { svc: await child.getAsync(Svc), pathSvc };
+      return { svc: await child.getAsync(Svc), pathSvc, envSvc };
     }
 
     /**
@@ -322,8 +336,27 @@ describe('cli/tools/java/index', () => {
       await expect(svc.initialize()).resolves.toBeUndefined();
     });
 
+    test('initialize links a missing shared cacerts to the one of the image', async () => {
+      const { svc, pathSvc } = await prepareContext(JavaPrepareService);
+      const varCerts = path.join(pathSvc.varPath, 'cacerts');
+      await fs.mkdir(pathSvc.varPath, { recursive: true });
+      await fs.writeFile(varCerts, 'certs');
+
+      await expect(svc.initialize()).resolves.toBeUndefined();
+      // an existing link is kept
+      await expect(svc.initialize()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(path.join(pathSvc.sslPath, 'cacerts'))).toBe(
+        varCerts,
+      );
+      await fs.rm(path.join(pathSvc.sslPath, 'cacerts'));
+      await fs.rm(varCerts);
+    });
+
     test('prepare downloads the cert store from the tool-versions data', async () => {
-      const { svc, pathSvc } = await prepareContext(JavaJrePrepareService);
+      const { svc, pathSvc, envSvc } = await prepareContext(
+        JavaJrePrepareService,
+      );
       const name = 'OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.tar.gz';
       const data = mockJreData();
       const files = mockToolFiles([
@@ -351,10 +384,47 @@ describe('cli/tools/java/index', () => {
       expect(await fs.readlink(path.join(pathSvc.sslPath, 'cacerts'))).toBe(
         path.join(pathSvc.varPath, 'cacerts'),
       );
+      // the absolute sdk link of the containerbase user, not one in `~`, which
+      // resolves against another `HOME` the env keeps
+      const sdk = path.join(envSvc.userHome, '.android-sdk');
+      expect(path.isAbsolute(sdk)).toBe(true);
+      expect(await fs.readFile(pathSvc.envFile, 'utf8')).toContain(
+        `export ANDROID_HOME=\${ANDROID_HOME-${sdk}}\n`,
+      );
+      expect(await fs.readlink(sdk)).toBe(
+        path.join(pathSvc.cachePath, '.android-sdk'),
+      );
 
       // the cert store is only set up once
       await expect(svc.prepare()).resolves.toBeUndefined();
       expect(extract).toHaveBeenCalledOnce();
+    });
+
+    test('prepare keeps the shared cacerts link of the initialize', async () => {
+      const { svc, pathSvc } = await prepareContext(JavaJrePrepareService);
+      const name = 'OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.tar.gz';
+      const varCerts = path.join(pathSvc.varPath, 'cacerts');
+      await fs.mkdir(pathSvc.varPath, { recursive: true });
+      await fs.writeFile(varCerts, 'old certs');
+      mockJreData();
+      mockToolFiles([
+        toolFile(`${cdnUrl}/${name}`, tarball, 'amd64'),
+        toolFile(`${cdnUrl}/arm64-${name}`, tarball, 'arm64'),
+      ]);
+      vi.spyOn(CompressionService.prototype, 'extract').mockImplementation(
+        async ({ cwd }) => {
+          await fs.mkdir(path.join(cwd, 'lib/security'), { recursive: true });
+          await fs.writeFile(path.join(cwd, 'lib/security/cacerts'), 'certs');
+        },
+      );
+
+      // the image has a cert store, the volume has no link to it yet
+      await expect(svc.prepare()).resolves.toBeUndefined();
+
+      expect(await fs.readlink(path.join(pathSvc.sslPath, 'cacerts'))).toBe(
+        varCerts,
+      );
+      await fs.rm(varCerts);
     });
 
     test('prepare: throws without a jre version', async () => {

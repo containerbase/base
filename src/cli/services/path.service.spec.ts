@@ -78,6 +78,45 @@ describe('cli/services/path.service', () => {
     );
     expect(pathSvc.linksPath).toBe(rootPath('opt/containerbase/links'));
     expect(await pathExists(pathSvc.linksPath, 'dir')).toBe(true);
+    expect(pathSvc.libPath).toBe(rootPath('opt/containerbase/lib'));
+    expect(await pathExists(pathSvc.libPath, 'dir')).toBe(true);
+    expect(pathSvc.envDPath).toBe(rootPath('opt/containerbase/env.d'));
+    expect(await pathExists(pathSvc.envDPath, 'dir')).toBe(true);
+  });
+
+  test('ensureBasePaths keeps lib linked to a folder', async () => {
+    await pathSvc.ensureBasePaths();
+    await ensurePaths('var/lib-volume');
+    await fs.rm(pathSvc.libPath, { recursive: true, force: true });
+    await fs.symlink(rootPath('var/lib-volume'), pathSvc.libPath);
+
+    try {
+      await expect(pathSvc.ensureBasePaths()).resolves.toBeUndefined();
+      expect(await fs.readlink(pathSvc.libPath)).toBe(
+        rootPath('var/lib-volume'),
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      await fs.rm(pathSvc.libPath);
+      await pathSvc.ensureBasePaths();
+    }
+  });
+
+  test('ensureBasePaths only warns about an env.d which is no folder', async () => {
+    await pathSvc.ensureBasePaths();
+    await fs.rm(pathSvc.envDPath, { recursive: true, force: true });
+    await fs.symlink(rootPath('var/missing-env-d'), pathSvc.envDPath);
+
+    try {
+      await expect(pathSvc.ensureBasePaths()).resolves.toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err: expect.any(Error), path: pathSvc.envDPath },
+        'cannot create the folder',
+      );
+    } finally {
+      await fs.rm(pathSvc.envDPath);
+      await pathSvc.ensureBasePaths();
+    }
   });
 
   test('ensureBasePaths keeps a linked npm cache folder', async () => {
@@ -1461,6 +1500,23 @@ describe('cli/services/path.service', () => {
     expect(await pathSvc.isInitialized('node')).toBe(false);
     await pathSvc.setInitialized('node');
     expect(await pathSvc.isInitialized('node')).toBe(true);
+  });
+
+  test('clearInitialized: forgets every initialized tool', async () => {
+    await pathSvc.ensureBasePaths();
+    await pathSvc.setInitialized('node');
+    await pathSvc.setInitialized('java');
+
+    await pathSvc.clearInitialized();
+
+    expect(await pathSvc.isInitialized('node')).toBe(false);
+    expect(await pathSvc.isInitialized('java')).toBe(false);
+  });
+
+  test('clearInitialized: ignores a missing folder', async () => {
+    vi.spyOn(fs, 'readdir').mockRejectedValueOnce(new Error('ENOENT'));
+
+    await expect(pathSvc.clearInitialized()).resolves.toBeUndefined();
   });
 
   test('toolPrepare', async () => {

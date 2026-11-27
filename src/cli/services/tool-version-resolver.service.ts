@@ -43,7 +43,9 @@ function hostDistros(data: ToolVersions, distro: string): string[] {
   }
   // oldest first; Ubuntu only, other distro families like Debian need their own
   // ordering and builds. An unknown distro, eg. an unreadable os-release, gets
-  // none, so only releases without a `distros` list match.
+  // none, so only releases without a `distros` list match. The artifact
+  // distros also list jammy, no longer a supported host, but its prebuilds are
+  // still used on newer releases.
   const ubuntu: readonly string[] = DistroCode.options;
   return ubuntu.slice(0, ubuntu.indexOf(distro) + 1);
 }
@@ -243,7 +245,7 @@ function pick(
  * swift `6.2`, a two-part version whose line the data doesn't list is kept
  * without a warning, as the data may not list a new release yet.
  */
-// TODO: remove in the next major, when the data is required (#7962)
+// TODO: remove in a following major, when the data is required (#7962)
 const twoPartReleaseTools = new Set(['protoc', 'swift']);
 
 /**
@@ -396,7 +398,7 @@ export class ToolVersionResolverService {
       if (data && resolver.dataField && !latest && !isPartialVersion(version)) {
         // the version the resolver answers is the one the data lists, eg. the
         // java build `11.0.24+8` for `11.0.24`, it is never undefined here
-        // TODO: fail in the next major instead of only warning (#7962)
+        // TODO: fail in a following major instead of only warning (#7962)
         await this.checkExact(tool, resolved!);
       }
       return resolved;
@@ -456,7 +458,8 @@ export class ToolVersionResolverService {
       const listed = await this.toolVersions.getVersions(tool);
       if (
         usable(listed) &&
-        pick(tool, listed, version, host).version === version
+        (await this.pickInstallable(tool, listed, version, host)).version ===
+          version
       ) {
         logger.debug(
           { tool, version, resolved: version },
@@ -484,7 +487,7 @@ export class ToolVersionResolverService {
       version: resolved,
       deprecated,
       blocked,
-    } = pick(tool, data, version, host, !required);
+    } = await this.pickInstallable(tool, data, version, host, !required);
     // the embedded data may be outdated when the online data was looked up or
     // is turned off, not when it is current
     const outdated = source === 'fallback' || source === 'offline';
@@ -497,7 +500,7 @@ export class ToolVersionResolverService {
           'no match in the tool-versions data, using the resolver',
         );
       } else {
-        // TODO: fail in the next major instead of using the resolver (#7962)
+        // TODO: fail in a following major instead of using the resolver (#7962)
         warnData(
           blockedWarning(
             tool,
@@ -511,7 +514,7 @@ export class ToolVersionResolverService {
       }
       return undefined;
     }
-    // TODO: fail in the next major instead of using a deprecated release (#7962)
+    // TODO: fail in a following major instead of using a deprecated release (#7962)
     if (deprecated && blocked !== undefined) {
       // a newer release needs a newer containerbase
       warnData(
@@ -546,6 +549,60 @@ export class ToolVersionResolverService {
       );
     }
     return resolved;
+  }
+
+  /**
+   * Picks a release like {@link pick}, skipping the releases which can't be
+   * installed on the host because their files have none for the host arch,
+   * eg. when the online data lists an arch for a release whose embedded files
+   * don't have it yet, as upstream added the build later.
+   * @param deprecatedFallback - see {@link pick}
+   */
+  private async pickInstallable(
+    tool: string,
+    data: ToolVersions,
+    version: string | undefined,
+    host: Host,
+    deprecatedFallback = false,
+  ): Promise<Picked> {
+    let candidates = data;
+    for (;;) {
+      const picked = pick(tool, candidates, version, host, deprecatedFallback);
+      const resolved = picked.version;
+      if (
+        resolved === undefined ||
+        !(await this.lacksHostFile(tool, candidates, resolved, host.arch))
+      ) {
+        return picked;
+      }
+      logger.debug(
+        { tool, version: resolved, arch: host.arch },
+        'no tool-versions file for the host arch, skipping the release',
+      );
+      candidates = {
+        ...candidates,
+        versions: candidates.versions.filter((v) => v.version !== resolved),
+      };
+    }
+  }
+
+  /**
+   * Whether the files of a release have none for the arch. Only a release
+   * whose data lists `archs` has files per arch, others aren't looked up, so a
+   * tool without files makes no request.
+   */
+  private async lacksHostFile(
+    tool: string,
+    data: ToolVersions,
+    version: string,
+    arch: string,
+  ): Promise<boolean> {
+    if (!data.versions.find((v) => v.version === version)?.archs) {
+      return false;
+    }
+    // the same files the install downloads from, see ToolFilesService
+    const files = await this.toolVersions.getVersionFiles(tool, version);
+    return !!files && !files.files.some((f) => !f.arch || f.arch === arch);
   }
 
   /**
