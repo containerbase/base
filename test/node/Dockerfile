@@ -97,7 +97,7 @@ RUN install-tool yarn 2.4.2
 RUN install-tool yarn 3.8.1
 
 # renovate: datasource=npm packageName=@yarnpkg/cli-dist
-RUN install-tool yarn 4.18.1
+RUN install-tool yarn 4.19.0
 
 # renovate: datasource=npm depName=yarn packageName=@yarnpkg/yarn-x86_64-unknown-linux-musl
 ARG YARN_VERSION=6.0.0-rc.23
@@ -924,7 +924,7 @@ RUN set -ex; \
   [[ "$(command -v semver)" == /usr/local/bin/semver ]]
 
 # renovate: datasource=npm depName=yarn packageName=@yarnpkg/cli-dist
-ARG YARN_VERSION=4.18.1
+ARG YARN_VERSION=4.19.0
 RUN install-tool yarn "${YARN_VERSION}"
 
 # the yarn berry global cache is kept in the containerbase cache
