@@ -29,14 +29,15 @@ export interface FileOwnerConfig {
  */
 function writeError(
   err: NodeJS.ErrnoException,
+  code: string,
   path: string,
   reason: string,
 ): NodeJS.ErrnoException {
   return Object.assign(
-    new Error(`${err.code}: can't write to ${path}, ${reason}`, {
+    new Error(`${code}: can't write to ${path}, ${reason}`, {
       cause: err,
     }),
-    { code: err.code },
+    { code },
   );
 }
 
@@ -739,12 +740,14 @@ export class PathService {
         case 'EROFS':
           throw writeError(
             err,
+            'EROFS',
             path,
             'the file system is read-only. Install tools at image build time or mount the containerbase folders writable.',
           );
         case 'EACCES':
           throw writeError(
             err,
+            'EACCES',
             path,
             'the current user has no write permission. Run as root or as the user owning the folder.',
           );
