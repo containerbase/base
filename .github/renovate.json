@@ -263,21 +263,29 @@
       "semanticCommitType": "feat"
     },
     {
-      "description": "Update the cli node major together with @types/node and the @tsconfig/node replacement, replacements ignore the group branch so all share one branch topic",
-      "matchDepNames": ["node", "@types/node", "@tsconfig/node*"],
+      "description": "Update @types/node with the cli node major on its branch",
+      "matchDepNames": ["node", "@types/node"],
       "matchFileNames": [
         ".node-version",
         "mise.toml",
         "tools/build.js",
-        "package.json",
-        "tsconfig.json"
+        "package.json"
       ],
-      "matchUpdateTypes": ["major", "replacement"],
-      "groupName": "node",
-      "groupSlug": "node-{{{replace '[.].*' '' newValue}}}.x",
+      "matchUpdateTypes": ["major"],
+      "branchTopic": "node-{{{newMajor}}}.x",
+      "additionalBranchPrefix": "major",
+      "commitMessageTopic": "node.js",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "description": "Replace @tsconfig/node with the cli node major on its branch, replacements have no newMajor",
+      "matchDepNames": ["@tsconfig/node*"],
+      "matchFileNames": ["package.json", "tsconfig.json"],
+      "matchUpdateTypes": ["replacement"],
       "branchTopic": "node-{{{replace '[.].*' '' newValue}}}.x",
       "additionalBranchPrefix": "major",
-      "separateMajorMinor": false,
+      "commitMessageTopic": "node.js",
+      "commitMessageExtra": "to v{{{replace '[.].*' '' newValue}}}",
       "dependencyDashboardApproval": false
     },
     {
