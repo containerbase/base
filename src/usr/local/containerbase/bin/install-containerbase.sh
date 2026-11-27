@@ -76,6 +76,7 @@ apt_install \
   dumb-init \
   gnupg \
   libarchive-tools \
+  libatomic1 \
   openssh-client \
   rsync \
   unzip \
