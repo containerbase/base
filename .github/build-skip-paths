@@ -15,8 +15,8 @@
 ^\.oxfmtrc\.json$
 ^\.markdownlint-cli2\.jsonc$
 ^\.github/zizmor\.yml$
-^tools/(audit-sarif|lint-docs|lint-versions)\.ts$
-^\.github/workflows/(backport|backport-request|pnpm-audit|trivy)\.yml$
+^tools/(lint-docs|lint-versions)\.ts$
+^\.github/workflows/(backport|backport-request|trivy)\.yml$
 ^vitest\.config\.ts$
 ^__mocks__/
 ^codecov\.yml$

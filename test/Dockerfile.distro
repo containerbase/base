@@ -128,7 +128,7 @@ RUN prepare-tool all
 FROM build AS test
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.30.0
+RUN install-tool bazelisk v1.31.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
 RUN install-tool buf v1.75.0
@@ -143,10 +143,10 @@ RUN install-tool dart 3.14.1
 RUN install-tool deno 2.9.8
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.22.0
+RUN install-tool devbox 0.23.0
 
 # renovate: datasource=dotnet packageName=dotnet-sdk
-RUN install-tool dotnet 10.0.404
+RUN install-tool dotnet 11.0.100
 
 # renovate: datasource=github-releases packageName=containerbase/flutter-prebuild
 RUN install-tool flutter 3.50.1
@@ -188,7 +188,7 @@ RUN install-tool mise 2026.11.14
 RUN install-tool nix 2.24.10
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
-RUN install-tool pixi v0.84.2
+RUN install-tool pixi v0.85.0
 
 # renovate: datasource=github-releases packageName=PowerShell/PowerShell
 RUN install-tool powershell v7.7.0

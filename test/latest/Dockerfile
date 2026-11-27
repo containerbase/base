@@ -224,7 +224,7 @@ RUN set -ex; [ -d /usr/local/erlang ] && echo "works" || exit 1;
 FROM base AS teste
 
 # renovate: datasource=github-releases packageName=bazelbuild/bazelisk
-RUN install-tool bazelisk v1.30.0
+RUN install-tool bazelisk v1.31.0
 
 # renovate: datasource=github-releases packageName=bufbuild/buf
 RUN install-tool buf v1.75.0
@@ -242,15 +242,15 @@ RUN install-tool deno 2.9.8
 RUN install-tool apko 1.5.3
 
 # renovate: datasource=github-releases packageName=microsoft/apm
-RUN install-tool apm 0.36.1
+RUN install-tool apm 0.39.1
 
 # renovate: datasource=github-releases packageName=jetify-com/devbox
-RUN install-tool devbox 0.22.0
+RUN install-tool devbox 0.23.0
 
 # renovate: datasource=github-releases depName=gh-dash packageName=dlvhdr/gh-dash
 ENV GH_DASH_EXTENSION_VERSION=v4.26.3
 # renovate: datasource=github-releases packageName=cli/cli
-RUN install-tool gh v2.105.0
+RUN install-tool gh v2.106.0
 
 # renovate: datasource=github-releases packageName=gleam-lang/gleam
 RUN install-tool gleam 1.19.2
