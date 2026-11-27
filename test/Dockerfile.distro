@@ -185,7 +185,7 @@ RUN install-tool kustomize 5.8.3
 RUN install-tool mise 2026.11.14
 
 # renovate: datasource=github-releases packageName=containerbase/nix-prebuild
-RUN install-tool nix 2.24.10
+RUN install-tool nix 2.36.0
 
 # renovate: datasource=github-releases packageName=prefix-dev/pixi
 RUN install-tool pixi v0.84.2
