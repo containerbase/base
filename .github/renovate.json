@@ -263,6 +263,24 @@
       "semanticCommitType": "feat"
     },
     {
+      "description": "Update the cli node major together with @types/node and the @tsconfig/node replacement, replacements ignore the group branch so all share one branch topic",
+      "matchDepNames": ["node", "@types/node", "@tsconfig/node*"],
+      "matchFileNames": [
+        ".node-version",
+        "mise.toml",
+        "tools/build.js",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "matchUpdateTypes": ["major", "replacement"],
+      "groupName": "node",
+      "groupSlug": "node-{{{replace '[.].*' '' newValue}}}.x",
+      "branchTopic": "node-{{{replace '[.].*' '' newValue}}}.x",
+      "additionalBranchPrefix": "major",
+      "separateMajorMinor": false,
+      "dependencyDashboardApproval": false
+    },
+    {
       "description": "Use `build` semantic commit scope for lockfile maintenance.",
       "matchUpdateTypes": ["lockFileMaintenance"],
       "semanticCommitType": "build"
