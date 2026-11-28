@@ -9,7 +9,7 @@ const run = promisify(execFile);
 /**
  * The pinned release of containerbase/tool-versions, updated by Renovate.
  */
-const toolVersionsVersion = '1.16.4';
+const toolVersionsVersion = '1.16.5';
 
 /**
  * Where the tool-versions data lands in the image, relative to the repository.
